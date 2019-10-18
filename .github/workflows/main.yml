@@ -19,8 +19,14 @@ jobs:
     - uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '2.2.103' # SDK Version to use.
+    - name: Get Git Version
+      uses: docker://gittools/gitversion:5.0.2-beta1-27-linux-centos-7-netcoreapp2.2
+      with:
+        args: /github/workspace /nofetch /exec /bin/sh /execargs "-c \"echo $GitVersion_FullSemVer > /github/workspace/version.txt\""
     - run: dotnet build TreeLinq/TreeLinq.csproj
     - name: Make NuGet package
-      run: dotnet pack TreeLinq/TreeLinq.csproj
+      run: dotnet pack TreeLinq/TreeLinq.csproj -c Release -p:PackageVersion=${VERSION}
+      env:
+        VERSION: $(cat /github/workspace/version.txt)
     #- name: Make NuGet package
     #  run: dotnet push TreeLinq/TreeLinq.csproj -k "${{ secrets.GITHUB_TOKEN }}" -s "https://nuget.pkg.github.com/nloum/index.json"

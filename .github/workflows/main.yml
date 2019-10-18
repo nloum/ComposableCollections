@@ -21,4 +21,6 @@ jobs:
         dotnet-version: '2.2.103' # SDK Version to use.
     - run: dotnet build TreeLinq/TreeLinq.csproj
     - name: Make NuGet package
-      run: dotnet pack TreeLinq/TreeLinq.csproj -k "${{ secrets.GITHUB_TOKEN }}" -s "https://nuget.pkg.github.com/nloum/index.json"
+      run: dotnet pack TreeLinq/TreeLinq.csproj
+    #- name: Make NuGet package
+    #  run: dotnet push TreeLinq/TreeLinq.csproj -k "${{ secrets.GITHUB_TOKEN }}" -s "https://nuget.pkg.github.com/nloum/index.json"

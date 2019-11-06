@@ -16,8 +16,8 @@ namespace TreeLinq
 
 		public bool IsRoot => Count == 0;
 
-		public Path( TNodeName singleElement ) {
-			_wrapped = ImmutableList<TNodeName>.Empty.Add( singleElement );
+		public Path( params TNodeName[] wrapped ) {
+			_wrapped = ImmutableList<TNodeName>.Empty.AddRange( wrapped );
 		}
 
 		public Path( IEnumerable<TNodeName> wrapped ) {

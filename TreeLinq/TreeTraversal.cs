@@ -1,15 +1,35 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
 
 namespace TreeLinq
 {
 	public class TreeTraversal<TNodeName, TNode> : IComparable<TreeTraversal<TNodeName, TNode>>, IComparable
 		where TNodeName : IComparable {
-		public TreeTraversal( TreeTraversalType type, IEnumerable<TNodeName> path, TNode value ) {
+
+		public TreeTraversal( TreeTraversalType type, IEnumerable<TNodeName> path, TNode value ) : this( type, new Path<TNodeName>( path.ToImmutableList() ), value ) {
+		}
+
+		public TreeTraversal( TreeTraversalType type, IEnumerable<TNodeName> path ) : this(type, new Path<TNodeName>( path.ToImmutableList() ) ) {
+		}
+
+		public TreeTraversal( TreeTraversalType type, Path<TNodeName> path, TNode value ) {
+			if ( type != TreeTraversalType.Leaf ) {
+				throw new InvalidEnumArgumentException( "Branch tree traversals must not specify a value" );
+			}
 			Type = type;
 			Value = value;
-			Path = new Path<TNodeName>( path.ToImmutableList() );
+			Path = path;
+		}
+
+		public TreeTraversal( TreeTraversalType type, Path<TNodeName> path ) {
+			if ( type == TreeTraversalType.Leaf ) {
+				throw new InvalidEnumArgumentException( "Leaf tree traversals need to specify a value" );
+			}
+			Type = type;
+			Value = default;
+			Path = path;
 		}
 
 		public TreeTraversalType Type { get; }

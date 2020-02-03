@@ -25,7 +25,7 @@ jobs:
       shell: pwsh
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: ./Set-NuGetCredentials -ConfigFile ./nuget.config -Source github -Username nloum -Password $env:GITHUB_TOKEN
+      run: ./.github/workflow/Set-NuGetCredentials -ConfigFile ./nuget.config -Source github -Username nloum -Password $env:GITHUB_TOKEN
     - name: Publish NuGet package
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1

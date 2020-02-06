@@ -22,10 +22,14 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: ./.github/workflows/Set-NuGetCredentials -ConfigFile ./nuget.config -Source github -Username nloum -Password $env:GITHUB_TOKEN
+    - name: Build assemblies
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      run: dotnet build -p:HideWarningsAndErrors=true -p:EmitAssetsLogMessages=false --configuration Release
     - name: Build NuGet package
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      run: dotnet pack -p:HideWarningsAndErrors=true -p:EmitAssetsLogMessages=false --configuration Release
+      run: dotnet pack --configuration Release
     - name: Publish NuGet package
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1

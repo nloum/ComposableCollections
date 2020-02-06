@@ -25,7 +25,7 @@ jobs:
     - name: Build NuGet package
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      run: dotnet pack --configuration Release
+      run: dotnet pack -p:HideWarningsAndErrors=true -p:EmitAssetsLogMessages=false --configuration Release
     - name: Publish NuGet package
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1

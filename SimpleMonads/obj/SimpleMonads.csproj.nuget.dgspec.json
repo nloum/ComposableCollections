@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/SimpleMonads.csproj": {}
+    "/Users/family/src/GitHub/SimpleMonads/SimpleMonads/SimpleMonads.csproj": {}
   },
   "projects": {
-    "/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/SimpleMonads.csproj": {
-      "version": "1.0.0-alph1",
+    "/Users/family/src/GitHub/SimpleMonads/SimpleMonads/SimpleMonads.csproj": {
+      "version": "1.0.0-alpha1",
       "restore": {
-        "projectUniqueName": "/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/SimpleMonads.csproj",
+        "projectUniqueName": "/Users/family/src/GitHub/SimpleMonads/SimpleMonads/SimpleMonads.csproj",
         "projectName": "SimpleMonads",
-        "projectPath": "/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/SimpleMonads.csproj",
-        "packagesPath": "/Users/amreact/.nuget/packages/",
-        "outputPath": "/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/obj/",
+        "projectPath": "/Users/family/src/GitHub/SimpleMonads/SimpleMonads/SimpleMonads.csproj",
+        "packagesPath": "/Users/family/.nuget/packages/",
+        "outputPath": "/Users/family/src/GitHub/SimpleMonads/SimpleMonads/obj/",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "/Users/amreact/.config/NuGet/NuGet.Config"
+          "/Users/family/.config/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "netstandard1.4"
@@ -40,13 +40,10 @@
         "netstandard1.4": {
           "dependencies": {
             "NETStandard.Library": {
+              "suppressParent": "All",
               "target": "Package",
               "version": "[1.6.1, )",
               "autoReferenced": true
-            },
-            "NuGet.Build.Packaging": {
-              "target": "Package",
-              "version": "[0.2.5-dev.8, )"
             },
             "System.Collections.Immutable": {
               "target": "Package",

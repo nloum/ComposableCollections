@@ -3893,23 +3893,23 @@
     ]
   },
   "packageFolders": {
-    "/Users/amreact/.nuget/packages/": {},
+    "/Users/family/.nuget/packages/": {},
     "/usr/local/share/dotnet/sdk/NuGetFallbackFolder": {}
   },
   "project": {
-    "version": "1.0.0",
+    "version": "1.0.0-alpha1",
     "restore": {
-      "projectUniqueName": "/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/SimpleMonads.csproj",
+      "projectUniqueName": "/Users/family/src/GitHub/SimpleMonads/SimpleMonads/SimpleMonads.csproj",
       "projectName": "SimpleMonads",
-      "projectPath": "/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/SimpleMonads.csproj",
-      "packagesPath": "/Users/amreact/.nuget/packages/",
-      "outputPath": "/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/obj/",
+      "projectPath": "/Users/family/src/GitHub/SimpleMonads/SimpleMonads/SimpleMonads.csproj",
+      "packagesPath": "/Users/family/.nuget/packages/",
+      "outputPath": "/Users/family/src/GitHub/SimpleMonads/SimpleMonads/obj/",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "/Users/amreact/.config/NuGet/NuGet.Config"
+        "/Users/family/.config/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "netstandard1.4"
@@ -3932,6 +3932,7 @@
       "netstandard1.4": {
         "dependencies": {
           "NETStandard.Library": {
+            "suppressParent": "All",
             "target": "Package",
             "version": "[1.6.1, )",
             "autoReferenced": true

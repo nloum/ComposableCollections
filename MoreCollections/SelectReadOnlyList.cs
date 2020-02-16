@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace PowerCollections
+namespace MoreCollections
 {
     public class SelectReadOnlyList<TSource, TResult> : IReadOnlyList<TResult>
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PowerCollections
+namespace MoreCollections
 {
     /// <summary>
     /// Options for the Between extension methods

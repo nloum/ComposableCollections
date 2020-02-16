@@ -14,7 +14,7 @@ using System.Text;
 using System.Collections.ObjectModel;
 using System.Collections;
 
-namespace PowerCollections {
+namespace MoreCollections {
   public class MostRecentlyUsedDictionary<TKey, TValue> {
 
     // ************************************************************************

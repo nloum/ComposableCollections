@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Collections;
 
-namespace PowerCollections {
+namespace MoreCollections {
 
   /// <summary>
   /// This class provides the base restrictions for an immutable collection

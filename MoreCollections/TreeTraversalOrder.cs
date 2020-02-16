@@ -1,4 +1,4 @@
-namespace PowerCollections
+namespace MoreCollections
 {
     /// <summary>
     ///     Indicates the tree traversal order. Used by the tree traversal methods.

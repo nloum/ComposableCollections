@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using GenericNumbers.Relational;
 
-namespace PowerCollections
+namespace MoreCollections
 {
     internal class KeyValuePairImpl<TKey, TValue> : IKeyValuePair<TKey, TValue>, IComparable<IKeyValuePair<TKey, TValue>>
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using static GenericNumbers.NumbersUtility;
 
-namespace PowerCollections
+namespace MoreCollections
 {
     public static class Utility
     {

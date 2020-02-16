@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace PowerCollections
+namespace MoreCollections
 {
     public interface IMultidimensionalArray<out T> : IEnumerable<T>
     {

@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerCollections", "PowerCollections\PowerCollections.csproj", "{289CD0D8-D5E0-4AD0-AFC5-D4D2DA36BDC8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoreCollections", "MoreCollections\MoreCollections.csproj", "{289CD0D8-D5E0-4AD0-AFC5-D4D2DA36BDC8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerCollections.Tests", "PowerCollections.Tests\PowerCollections.Tests.csproj", "{1F765C32-B52F-42DE-9767-7BDBABA60AD5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoreCollections.Tests", "MoreCollections.Tests\MoreCollections.Tests.csproj", "{1F765C32-B52F-42DE-9767-7BDBABA60AD5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

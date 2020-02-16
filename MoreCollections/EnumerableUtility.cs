@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PowerCollections
+namespace MoreCollections
 {
     /// <summary>
     ///     This is where you'll find static properties and static non-extension-methods

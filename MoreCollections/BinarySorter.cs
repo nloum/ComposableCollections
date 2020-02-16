@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PowerCollections {
+namespace MoreCollections {
 
   /// <summary>
   /// This class is a helper for creating binary sorted lists

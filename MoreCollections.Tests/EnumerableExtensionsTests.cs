@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using FluentAssertions;
 using System.Collections.Generic;
-using PowerCollections;
+using MoreCollections;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Common.Collections.Tests

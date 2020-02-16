@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
 
-namespace PowerCollections {
+namespace MoreCollections {
   /// <summary>
   /// This class provides a functional immutable collection
   /// </summary>

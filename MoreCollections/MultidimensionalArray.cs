@@ -5,7 +5,7 @@ using System.Linq;
 
 using GenericNumbers.Relational;
 
-namespace PowerCollections
+namespace MoreCollections
 {
     public class MultidimensionalArray<T> : IMultidimensionalArray<T>, IComparable<IMultidimensionalArray<T>>
     {

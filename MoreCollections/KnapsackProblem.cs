@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PowerCollections
+namespace MoreCollections
 {
     /// <summary>
     /// Contains extension methods and utility classes for the knapsack problem.

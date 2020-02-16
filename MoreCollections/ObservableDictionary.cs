@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 
-using static PowerCollections.Utility;
+using static MoreCollections.Utility;
 
-namespace PowerCollections
+namespace MoreCollections
 {
     /// <summary>
     ///     This class provides a dictionary that can be bound to a WPF control.

@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PowerCollections {
+namespace MoreCollections {
   public class DoubleLinkListDictionaryNode<TKey,TValue> {
     public DoubleLinkListDictionaryNode<TKey, TValue> Next;
     public DoubleLinkListDictionaryNode<TKey, TValue> Previous;

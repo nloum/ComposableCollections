@@ -1,4 +1,4 @@
-﻿namespace PowerCollections
+﻿namespace MoreCollections
 {
     /// <summary>
     /// Same as the normal .NET KeyValuePair class, except for this class the type parameters vary covariantly.

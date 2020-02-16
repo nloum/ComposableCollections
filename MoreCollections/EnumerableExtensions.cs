@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using static GenericNumbers.NumbersUtility;
 
-namespace PowerCollections
+namespace MoreCollections
 {
     /// <summary>
     ///     This is where the extension methods for IEnumerable types go.

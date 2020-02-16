@@ -12,9 +12,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections;
-using static PowerCollections.Utility;
+using static MoreCollections.Utility;
 
-namespace PowerCollections {
+namespace MoreCollections {
   /// <summary>
   /// This class provides a sorted collection that can be bound to
   /// a WPF control.

@@ -1,32 +1,41 @@
-name: CI
+name: .NET Core
 
-on:
-  pull_request:
-    branches:
-    - master
-  push:
-    branches:
-    - master
-    - release/*
+on: [push]
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@master
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Fetch all history for all tags and branches
+      run: git fetch --prune --unshallow
     - uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '2.2.103' # SDK Version to use.
-    - name: Get Git Version
-      uses: docker://gittools/gitversion:5.0.2-beta1-27-linux-centos-7-netcoreapp2.2
-      with:
-        args: /github/workspace /nofetch /exec /bin/sh /execargs "-c \"echo $GitVersion_FullSemVer > /github/workspace/version.txt\""
-    - run: dotnet build TreeLinq/TreeLinq.csproj
-    - name: Make NuGet package
-      run: dotnet pack TreeLinq/TreeLinq.csproj -c Release -p:PackageVersion=${VERSION}
+        dotnet-version: '3.1.101' # SDK Version to use.
+    - name: Build NuGet package
       env:
-        VERSION: $(cat /github/workspace/version.txt)
-    #- name: Make NuGet package
-    #  run: dotnet push TreeLinq/TreeLinq.csproj -k "${{ secrets.GITHUB_TOKEN }}" -s "https://nuget.pkg.github.com/nloum/index.json"
+        DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      run: dotnet pack --configuration Release
+    - name: Publish NuGet package
+      run: dotnet nuget push TreeLinq/bin/Release/*.nupkg --api-key $NUGET_API_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: 1
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Fetch all history for all tags and branches
+      run: git fetch --prune --unshallow
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.101' # SDK Version to use.
+    - name: dotnet test
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      run: dotnet test --logger trx

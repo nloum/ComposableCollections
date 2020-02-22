@@ -1,6 +1,6 @@
 using System;
 
-namespace TreeLinq
+namespace TreeLinq.Exceptions
 {
 	public class NoSuchChildException : Exception {
 		public object Node { get; }

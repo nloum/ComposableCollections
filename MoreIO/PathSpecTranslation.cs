@@ -5,11 +5,11 @@ using System.Linq;
 
 namespace MoreIO
 {
-    public sealed class FileUriTranslation : IFileUriTranslation
+    public sealed class PathSpecTranslation : IPathSpecTranslation
     {
         public IIoService IoService { get; }
 
-        internal FileUriTranslation(PathSpec source, PathSpec destination, IIoService ioService)
+        internal PathSpecTranslation(PathSpec source, PathSpec destination, IIoService ioService)
         {
             Source = source;
             Destination = destination;
@@ -19,9 +19,9 @@ namespace MoreIO
         public PathSpec Source { get; private set; }
         public PathSpec Destination { get; private set; }
 
-        public IEnumerator<CalculatedFileUriTranslation> GetEnumerator()
+        public IEnumerator<CalculatedPathSpecTranslation> GetEnumerator()
         {
-            return Source.Children().Select(child => new CalculatedFileUriTranslation(child, Source, Destination, IoService)).GetEnumerator();
+            return Source.Children().Select(child => new CalculatedPathSpecTranslation(child, Source, Destination, IoService)).GetEnumerator();
         }
 
         public override string ToString()
@@ -39,7 +39,7 @@ namespace MoreIO
             return new Tuple<PathSpec, PathSpec>(Source, Destination);
         }
 
-        private bool Equals(FileUriTranslation other)
+        private bool Equals(PathSpecTranslation other)
         {
             return Equals(Source, other.Source) && Equals(Destination, other.Destination);
         }
@@ -48,7 +48,7 @@ namespace MoreIO
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj is FileUriTranslation && Equals((FileUriTranslation) obj);
+            return obj is PathSpecTranslation && Equals((PathSpecTranslation) obj);
         }
 
         public override int GetHashCode()
@@ -59,12 +59,12 @@ namespace MoreIO
             }
         }
 
-        public static bool operator ==(FileUriTranslation left, FileUriTranslation right)
+        public static bool operator ==(PathSpecTranslation left, PathSpecTranslation right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(FileUriTranslation left, FileUriTranslation right)
+        public static bool operator !=(PathSpecTranslation left, PathSpecTranslation right)
         {
             return !Equals(left, right);
         }

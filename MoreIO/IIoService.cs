@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reactive;
+using System.Text;
 using LiveLinq.Set;
 using SimpleMonads;
 
@@ -45,20 +46,20 @@ namespace MoreIO
         /// <returns></returns>
         IMaybe<PathSpec> WithExtension(PathSpec path, string differentExtension);
 
-        IFileUriTranslation Copy(IFileUriTranslation translation);
-        IFileUriTranslation CopyFile(IFileUriTranslation translation);
-        IFileUriTranslation CopyFolder(IFileUriTranslation translation);
-        IFileUriTranslation Move(IFileUriTranslation translation);
-        IFileUriTranslation MoveFile(IFileUriTranslation translation);
-        IFileUriTranslation MoveFolder(IFileUriTranslation translation);
+        IPathSpecTranslation Copy(IPathSpecTranslation translation);
+        IPathSpecTranslation CopyFile(IPathSpecTranslation translation);
+        IPathSpecTranslation CopyFolder(IPathSpecTranslation translation);
+        IPathSpecTranslation Move(IPathSpecTranslation translation);
+        IPathSpecTranslation MoveFile(IPathSpecTranslation translation);
+        IPathSpecTranslation MoveFolder(IPathSpecTranslation translation);
         bool ContainsFiles(PathSpec path);
         bool FolderContainsFiles(PathSpec path);
         IMaybe<PathSpec> GetCommonAncestry(PathSpec path1, PathSpec path2);
         IMaybe<Uri> GetCommonDescendants(PathSpec path1, PathSpec path2);
         IMaybe<Tuple<Uri, Uri>> GetNonCommonDescendants(PathSpec path1, PathSpec path2);
         IMaybe<Tuple<Uri, Uri>> GetNonCommonAncestry(PathSpec path1, PathSpec path2);
-        IFileUriTranslation Translate(PathSpec pathToBeCopied, PathSpec source, PathSpec destination);
-        IFileUriTranslation Translate(PathSpec source, PathSpec destination);
+        IPathSpecTranslation Translate(PathSpec pathToBeCopied, PathSpec source, PathSpec destination);
+        IPathSpecTranslation Translate(PathSpec source, PathSpec destination);
         Uri Child(Uri parent, Uri child);
         FileInfo AsFileInfo(PathSpec path);
         DirectoryInfo AsDirectoryInfo(PathSpec path);
@@ -167,5 +168,38 @@ namespace MoreIO
         bool IsAbsoluteUnixPath(string path);
         StringComparison ToStringComparison(PathFlags pathFlags);
         StringComparison ToStringComparison(PathFlags pathFlags, PathFlags otherPathFlags);
+
+        IMaybe<StreamWriter> CreateText(PathSpec pathSpec);
+
+        IEnumerable<string> ReadLines(PathSpec pathSpec, FileMode fileMode = FileMode.Open,
+            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
+            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            bool leaveOpen = false);
+
+        IMaybe<string> ReadText(PathSpec pathSpec, FileMode fileMode = FileMode.Open,
+            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
+            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
+            int bufferSize = 4096, bool leaveOpen = false);
+
+        void WriteText(PathSpec pathSpec, IEnumerable<string> lines,
+            FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write,
+            FileShare fileShare = FileShare.None,
+            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false);
+
+        void WriteText(PathSpec pathSpec, string text, FileMode fileMode = FileMode.Create,
+            FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
+            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false);
+
+        IEnumerable<string> ReadLines(Stream stream, Encoding encoding = null,
+            bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            bool leaveOpen = false);
+
+        IEnumerable<string> ReadLinesBackwards(Stream stream, Encoding encoding = null,
+            bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            bool leaveOpen = false);
+
+        string ReadText(Stream stream, Encoding encoding = null,
+            bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            bool leaveOpen = false);
     }
 }

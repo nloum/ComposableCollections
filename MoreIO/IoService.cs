@@ -190,7 +190,7 @@ namespace MoreIO
             return ToPathSpec(Path.ChangeExtension(path.ToString(), differentExtension));
         }
 
-        public IFileUriTranslation Copy(IFileUriTranslation translation)
+        public IPathSpecTranslation Copy(IPathSpecTranslation translation)
         {
             switch (translation.Source.GetPathType())
             {
@@ -208,7 +208,7 @@ namespace MoreIO
             return translation;
         }
 
-        public IFileUriTranslation CopyFile(IFileUriTranslation translation)
+        public IPathSpecTranslation CopyFile(IPathSpecTranslation translation)
         {
             if (translation.Source.GetPathType() != PathType.File)
                 throw new IOException(String.Format("An attempt was made to copy a file from \"{0}\" to \"{1}\" but the source path is not a file.",
@@ -221,7 +221,7 @@ namespace MoreIO
             return translation;
         }
 
-        public IFileUriTranslation CopyFolder(IFileUriTranslation translation)
+        public IPathSpecTranslation CopyFolder(IPathSpecTranslation translation)
         {
             if (translation.Source.GetPathType() != PathType.Folder)
                 throw new IOException(String.Format("An attempt was made to copy a folder from \"{0}\" to \"{1}\" but the source path is not a folder.",
@@ -230,7 +230,7 @@ namespace MoreIO
             return translation;
         }
 
-        public IFileUriTranslation Move(IFileUriTranslation translation)
+        public IPathSpecTranslation Move(IPathSpecTranslation translation)
         {
             switch (translation.Source.GetPathType())
             {
@@ -248,7 +248,7 @@ namespace MoreIO
             return translation;
         }
 
-        public IFileUriTranslation MoveFile(IFileUriTranslation translation)
+        public IPathSpecTranslation MoveFile(IPathSpecTranslation translation)
         {
             if (translation.Source.GetPathType() != PathType.File)
                 throw new IOException(String.Format("An attempt was made to move a file from \"{0}\" to \"{1}\" but the source path is not a file.",
@@ -264,7 +264,7 @@ namespace MoreIO
             return translation;
         }
         
-        public IFileUriTranslation MoveFolder(IFileUriTranslation translation)
+        public IPathSpecTranslation MoveFolder(IPathSpecTranslation translation)
         {
             if (translation.Source.GetPathType() != PathType.Folder)
                 throw new IOException(String.Format("An attempt was made to move a folder from \"{0}\" to \"{1}\" but the source path is not a folder.",
@@ -355,14 +355,14 @@ namespace MoreIO
             }
         }
 
-        public IFileUriTranslation Translate(PathSpec pathToBeCopied, PathSpec source, PathSpec destination)
+        public IPathSpecTranslation Translate(PathSpec pathToBeCopied, PathSpec source, PathSpec destination)
         {
-            return new CalculatedFileUriTranslation(pathToBeCopied, source, destination, this);
+            return new CalculatedPathSpecTranslation(pathToBeCopied, source, destination, this);
         }
 
-        public IFileUriTranslation Translate(PathSpec source, PathSpec destination)
+        public IPathSpecTranslation Translate(PathSpec source, PathSpec destination)
         {
-            return new FileUriTranslation(source, destination, this);
+            return new PathSpecTranslation(source, destination, this);
         }
 
         public Uri Child(Uri parent, Uri child)
@@ -1751,5 +1751,190 @@ namespace MoreIO
                 private readonly HashSet<PathSpec> _knownStorage = new HashSet<PathSpec>();
         
                 public IReadOnlySet<PathSpec> Storage { get; }
+                
+                
+                public IMaybe<StreamWriter> CreateText(PathSpec pathSpec)
+                        {
+                            try
+                            {
+                                return new Maybe<StreamWriter>(pathSpec.AsFileInfo().CreateText());
+                            }
+                            catch (UnauthorizedAccessException)
+                            {
+                                return Maybe<StreamWriter>.Nothing;
+                            }
+                            catch (IOException)
+                            {
+                                return Maybe<StreamWriter>.Nothing;
+                            }
+                            catch (SecurityException)
+                            {
+                                return Maybe<StreamWriter>.Nothing;
+                            }
+                        }
+                
+                        public IEnumerable<string> ReadLines(PathSpec pathSpec, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
+                            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
+                        {
+                            var maybeFileStream = pathSpec.Open(fileMode, fileAccess, fileShare);
+                            if (maybeFileStream.HasValue)
+                            {
+                                using (maybeFileStream.Value)
+                                {
+                                    return ReadLines(maybeFileStream.Value, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
+                                }
+                            }
+                            return EnumerableUtility.EmptyArray<string>();
+                        }
+                
+                        public IMaybe<string> ReadText(PathSpec pathSpec, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
+                            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
+                        {
+                            return pathSpec.Open(fileMode, fileAccess, fileShare).Select(
+                                fs =>
+                                {
+                                    using (fs)
+                                    {
+                                        return ReadText(fs, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
+                                    }
+                                });
+                        }
+                
+                        public void WriteText(PathSpec pathSpec, IEnumerable<string> lines, FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
+                            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
+                        {
+                            var maybeFileStream = pathSpec.Open(fileMode, fileAccess, fileShare);
+                            if (maybeFileStream.HasValue)
+                            {
+                                using (maybeFileStream.Value)
+                                {
+                                    WriteLines(maybeFileStream.Value, lines, encoding, bufferSize, leaveOpen);
+                                }
+                            }
+                        }
+                
+                        public void WriteText(PathSpec pathSpec, string text, FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
+                            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
+                        {
+                            var maybeFileStream = pathSpec.Open(fileMode, fileAccess, fileShare);
+                            if (maybeFileStream.HasValue)
+                            {
+                                using (maybeFileStream.Value)
+                                {
+                                    WriteText(maybeFileStream.Value, text, encoding, bufferSize, leaveOpen);
+                                }
+                            }
+                        }
+                
+                        public IEnumerable<string> ReadLines(Stream stream, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
+                        {
+                            if (encoding == null)
+                                encoding = Encoding.UTF8;
+                            using (var sr = new StreamReader(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen))
+                            {
+                                string line;
+                                while ((line = sr.ReadLine()) != null)
+                                {
+                                    yield return line;
+                                }
+                            }
+                        }
+                
+                        public IEnumerable<string> ReadLinesBackwards(Stream stream, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
+                        {
+                            if (encoding == null)
+                                encoding = Encoding.UTF8;
+                
+                            string content = string.Empty;
+                            // Seek file pointer to end
+                            stream.Seek(0, SeekOrigin.End);
+                
+                            byte[] buffer = new byte[bufferSize];
+                
+                            //loop now and read backwards
+                            while (stream.Position > 0)
+                            {
+                                buffer.Initialize();
+                
+                                int bytesRead;
+                
+                                if (stream.Position - bufferSize >= 0)
+                                {
+                                    stream.Seek(-bufferSize, SeekOrigin.Current);
+                                    bytesRead = stream.Read(buffer, 0, bufferSize);
+                                    stream.Seek(-bufferSize, SeekOrigin.Current);
+                                }
+                                else
+                                {
+                                    var finalBufferSize = stream.Position;
+                                    stream.Seek(0, SeekOrigin.Begin);
+                                    bytesRead = stream.Read(buffer, 0, (int)finalBufferSize);
+                                    stream.Seek(0, SeekOrigin.Begin);
+                                }
+                
+                                var strBuffer = encoding.GetString(buffer, 0, bytesRead);
+                
+                                // lines is equal to what we just read, with the leftover content from last iteration appended to it.
+                                var lines = (strBuffer + content).Split('\n');
+                
+                                // Loop through lines backwards, ignoring the first element, and yield each value
+                                for (var i = lines.Length - 1; i > 0; i--)
+                                {
+                                    yield return lines[i].Trim('\r');
+                                }
+                
+                                // Leftover content is part of a line defined on the line(s) that we'll read next iteration of while loop
+                                // so we must save leftover content for later
+                                content = lines[0];
+                            }
+                        }
+                
+                        public string ReadText(Stream stream, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
+                        {
+                            if (encoding == null)
+                                encoding = Encoding.UTF8;
+                            using (var sr = new StreamReader(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen))
+                            {
+                                return ReadText(sr);
+                            }
+                        }
+                
+                        private string ReadText(StreamReader streamReader)
+                        {
+                            return streamReader.ReadToEnd();
+                        }
+                
+                        public void WriteLines(Stream stream, IEnumerable<string> lines, Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
+                        {
+                            if (encoding == null)
+                                encoding = Encoding.UTF8;
+                            using (var sw = new StreamWriter(stream, encoding, bufferSize, leaveOpen))
+                            {
+                                WriteLines(sw, lines);
+                            }
+                        }
+                
+                        private void WriteLines(StreamWriter streamWriter, IEnumerable<string> lines)
+                        {
+                            foreach (var line in lines)
+                            {
+                                streamWriter.WriteLine(line);
+                            }
+                        }
+                
+                        public void WriteText(Stream stream, string text, Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
+                        {
+                            if (encoding == null)
+                                encoding = Encoding.UTF8;
+                            using (var sw = new StreamWriter(stream, encoding, bufferSize, leaveOpen))
+                            {
+                                WriteText(sw, text);
+                            }
+                        }
+                
+                        private void WriteText(StreamWriter streamWriter, string text)
+                        {
+                            streamWriter.Write(text);
+                        }
     }
 }

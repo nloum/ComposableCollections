@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Text;
 using LiveLinq.Set;
 using SimpleMonads;
 
@@ -91,32 +92,32 @@ namespace MoreIO
             return path.IoService.WithExtension(path, differentExtension);
         }
 
-        public static IFileUriTranslation Copy(this IFileUriTranslation translation)
+        public static IPathSpecTranslation Copy(this IPathSpecTranslation translation)
         {
             return translation.IoService.Copy(translation);
         }
 
-        public static IFileUriTranslation CopyFile(this IFileUriTranslation translation)
+        public static IPathSpecTranslation CopyFile(this IPathSpecTranslation translation)
         {
             return translation.IoService.CopyFile(translation);
         }
 
-        public static IFileUriTranslation CopyFolder(this IFileUriTranslation translation)
+        public static IPathSpecTranslation CopyFolder(this IPathSpecTranslation translation)
         {
             return translation.IoService.CopyFolder(translation);
         }
 
-        public static IFileUriTranslation Move(this IFileUriTranslation translation)
+        public static IPathSpecTranslation Move(this IPathSpecTranslation translation)
         {
             return translation.IoService.Move(translation);
         }
 
-        public static IFileUriTranslation MoveFile(this IFileUriTranslation translation)
+        public static IPathSpecTranslation MoveFile(this IPathSpecTranslation translation)
         {
             return translation.IoService.MoveFile(translation);
         }
 
-        public static IFileUriTranslation MoveFolder(this IFileUriTranslation translation)
+        public static IPathSpecTranslation MoveFolder(this IPathSpecTranslation translation)
         {
             return translation.IoService.MoveFolder(translation);
         }
@@ -151,12 +152,12 @@ namespace MoreIO
             return path1.IoService.GetNonCommonAncestry(path1, path2);
         }
 
-        public static IFileUriTranslation Translate(this PathSpec pathToBeCopied, PathSpec source, PathSpec destination)
+        public static IPathSpecTranslation Translate(this PathSpec pathToBeCopied, PathSpec source, PathSpec destination)
         {
             return pathToBeCopied.IoService.Translate(pathToBeCopied, source, destination);
         }
 
-        public static IFileUriTranslation Translate(this PathSpec source, PathSpec destination)
+        public static IPathSpecTranslation Translate(this PathSpec source, PathSpec destination)
         {
             return source.IoService.Translate(source, destination);
         }
@@ -565,5 +566,37 @@ namespace MoreIO
             var ioService = root.First().IoService;
             return ioService.Join(root, descendants);
         }
+        
+        public static IMaybe<StreamWriter> CreateText(this PathSpec pathSpec)
+        {
+            return pathSpec.IoService.CreateText(pathSpec);
+        }
+
+        public static IEnumerable<string> ReadLines(this PathSpec pathSpec, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
+            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
+        {
+            return pathSpec.IoService.ReadLines(pathSpec, fileMode, fileAccess, fileShare, encoding, detectEncodingFromByteOrderMarks,
+                bufferSize, leaveOpen);
+        }
+
+        public static IMaybe<string> ReadText(this PathSpec pathSpec, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
+            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
+        {
+            return pathSpec.IoService.ReadText(pathSpec, fileMode, fileAccess, fileShare, encoding,
+                detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
+        }
+
+        public static void WriteText(this PathSpec pathSpec, IEnumerable<string> lines, FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
+            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
+        {
+            pathSpec.IoService.WriteText(pathSpec, lines, fileMode, fileAccess, fileShare, encoding, bufferSize, leaveOpen);
+        }
+
+        public static void WriteText(this PathSpec pathSpec, string text, FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
+            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
+        {
+            pathSpec.IoService.WriteText(pathSpec, text, fileMode, fileAccess, fileShare, encoding, bufferSize, leaveOpen);
+        }
+
     }
 }

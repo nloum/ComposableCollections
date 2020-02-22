@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reactive;
 using System.Text;
+using LiveLinq.Dictionary;
 using LiveLinq.Set;
 using SimpleMonads;
 
@@ -10,6 +11,7 @@ namespace MoreIO
 {
     public interface IIoService
     {
+        IDictionaryChangesStrict<PathSpec, PathSpec> ToLiveLinq(PathSpec root, bool includeFileChanges = true);
         IEnumerable<PathSpec> GetChildren(PathSpec path, bool includeFolders = true, bool includeFiles = true);
         IEnumerable<PathSpec> GetFiles(PathSpec path);
         IEnumerable<PathSpec> GetFolders(PathSpec path);

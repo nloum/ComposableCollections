@@ -1,5 +1,11 @@
 ﻿using System;
-using SimpleMonads;
+using System.Collections.Immutable;
+using System.IO;
+using System.Linq;
+using System.Reactive.Linq;
+using LiveLinq.Core;
+using LiveLinq.Dictionary;
+using TreeLinq;
 
 namespace MoreIO.Examples
 {
@@ -7,25 +13,18 @@ namespace MoreIO.Examples
     {
         static void Main(string[] args)
         {
-            var ioService = new IoService();
-
-            var test1 = ioService.ToPath("test1").Value;
-
-            test1.CreateFolder()
-                .ClearFolder();
-
-            var text1 = test1.Descendant("test.txt").Value;
+            var service = new IoService();
+            var test1 = service.ToPath("test1").Value;
             
-            text1.WriteText("testing 1 2 3");
+            var changes = test1.ToLiveLinq();
 
-            var test2 = ioService.ToPath("test2").Value
-                .CreateFolder()
-                .ClearFolder();
+            changes.AsObservable().Subscribe(x =>
+            {
+                Console.WriteLine($"{x.Type}: {string.Join(", ", x.Items.Select(b => b.Key.Name))}");
+            });
 
-            var text2 = text1.Translate(test1, test2).Move();
-            
-            Console.WriteLine("Does the original file exist? " + text1.Exists());
-            Console.WriteLine("Does the new file exist? " + text2.Destination.Exists());
+            Console.WriteLine("Press any key to exit");
+            Console.ReadKey();
         }
     }
 }

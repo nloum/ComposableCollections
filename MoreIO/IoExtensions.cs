@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Text;
+using LiveLinq.Dictionary;
 using LiveLinq.Set;
 using SimpleMonads;
 
@@ -11,6 +12,12 @@ namespace MoreIO
 {
     public static class IoExtensions
     {
+        public static IDictionaryChangesStrict<PathSpec, PathSpec> ToLiveLinq(this PathSpec root,
+            bool includeFileChanges = true)
+        {
+            return root.IoService.ToLiveLinq(root, includeFileChanges);
+        }
+        
         public static IEnumerable<PathSpec> GetChildren(this PathSpec path, bool includeFolders = true, bool includeFiles = true)
         {
             return path.IoService.GetChildren(path, includeFolders, includeFiles);

@@ -12,7 +12,10 @@ using MoreCollections;
 using UtilityDisposables;
 using LiveLinq.Set;
 using System.Text.RegularExpressions;
+using LiveLinq.Core;
+using LiveLinq.Dictionary;
 using SimpleMonads;
+using TreeLinq;
 using static SimpleMonads.Utility;
 
 namespace MoreIO
@@ -20,9 +23,96 @@ namespace MoreIO
     public class IoService : IIoService
     {
         #region File and folder extension methods
+        
+        public IDictionaryChangesStrict<PathSpec, PathSpec> ToLiveLinq(PathSpec root, bool includeFileChanges = true)
+        {
+            var watcher = new FileSystemWatcher(root.ToString())
+            {
+                IncludeSubdirectories = true,
+                Filter = null,
+                EnableRaisingEvents = true,
+                NotifyFilter = NotifyFilters.LastWrite,
+            };
+
+            var creations = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+                    handler => watcher.Created += handler,
+                    handler => watcher.Created -= handler)
+                .Select(args =>
+                {
+                    var path = root.IoService.ToPath(args.EventArgs.FullPath).Value;
+                    return new DictionaryChangeStrict<PathSpec, PathSpec>(CollectionChangeType.Add,
+                        ImmutableDictionary<PathSpec, PathSpec>.Empty.Add(path, path));
+                });
+
+            var deletions = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+                    handler => watcher.Deleted += handler,
+                    handler => watcher.Deleted -= handler)
+                .Select(args =>
+                {
+                    var path = root.IoService.ToPath(args.EventArgs.FullPath).Value;
+                    return new DictionaryChangeStrict<PathSpec, PathSpec>(CollectionChangeType.Remove,
+                        ImmutableDictionary<PathSpec, PathSpec>.Empty.Add(path, path));
+                });
+
+            var changes = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+                    handler => watcher.Changed += handler,
+                    handler => watcher.Changed -= handler)
+                .Where(x => x.EventArgs.ChangeType == WatcherChangeTypes.Changed)
+                .GroupBy(x => x.EventArgs.FullPath)
+                .Select(x => x.Throttle(TimeSpan.FromSeconds(.2)))
+                .Merge()
+                .SelectMany(args =>
+                {
+                    var path = root.IoService.ToPath(args.EventArgs.FullPath).Value;
+                    return new[]
+                    {
+                        new DictionaryChangeStrict<PathSpec, PathSpec>(CollectionChangeType.Remove,
+                            ImmutableDictionary<PathSpec, PathSpec>.Empty.Add(path, path)),
+                        new DictionaryChangeStrict<PathSpec, PathSpec>(CollectionChangeType.Add,
+                            ImmutableDictionary<PathSpec, PathSpec>.Empty.Add(path, path))
+                    }.ToObservable();
+                });
+
+            var renames = Observable.FromEventPattern<RenamedEventHandler, RenamedEventArgs>(
+                    handler => watcher.Renamed += handler,
+                    handler => watcher.Renamed -= handler)
+                .SelectMany(args =>
+                {
+                    var oldPath = root.IoService.ToPath(args.EventArgs.OldFullPath).Value;
+                    var path = root.IoService.ToPath(args.EventArgs.FullPath).Value;
+                    return new[]
+                    {
+                        new DictionaryChangeStrict<PathSpec, PathSpec>(CollectionChangeType.Remove,
+                            ImmutableDictionary<PathSpec, PathSpec>.Empty.Add(oldPath, oldPath)),
+                        new DictionaryChangeStrict<PathSpec, PathSpec>(CollectionChangeType.Add,
+                            ImmutableDictionary<PathSpec, PathSpec>.Empty.Add(path, path))
+                    }.ToObservable();
+                });
+
+            var initialStateTree = root.TraverseTree(x => x, (PathSpec node, PathSpec name, out PathSpec child) =>
+            {
+                child = node.Descendant(name).Value;
+                return child.Exists();
+            });
+
+            var initialState = initialStateTree
+                .Where(tt => tt.Type != TreeTraversalType.ExitBranch && !tt.Path.IsRoot)
+                .Select(tt => tt.Path.Last)
+                .Select(path => new DictionaryChangeStrict<PathSpec, PathSpec>(CollectionChangeType.Add,
+                    ImmutableDictionary<PathSpec, PathSpec>.Empty.Add(path, path)))
+                .ToObservable();
+
+            var unified = initialState.Concat(creations.Merge(deletions).Merge(renames).Merge(changes));
+
+            return unified.ToLiveLinq();
+        }
 
         public IEnumerable<PathSpec> GetChildren(PathSpec path, bool includeFolders = true, bool includeFiles = true)
         {
+            if (!path.IsFolder())
+            {
+                return ImmutableArray<PathSpec>.Empty;
+            }
             if (includeFiles && includeFolders)
             {
                 return Directory.GetFileSystemEntries(path.AsDirectoryInfo().FullName).Select(x => ParsePathSpec(x));

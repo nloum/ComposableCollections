@@ -15,9 +15,6 @@ namespace TreeLinq
 		}
 
 		public TreeTraversal( TreeTraversalType type, Path<TNodeName> path, TNode value ) {
-			if ( type != TreeTraversalType.Leaf ) {
-				throw new InvalidEnumArgumentException( "Branch tree traversals must not specify a value" );
-			}
 			Type = type;
 			Value = value;
 			Path = path;

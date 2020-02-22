@@ -7,13 +7,16 @@ namespace MoreIO
 {
     public class CalculatedFileUriTranslation : IFileUriTranslation
     {
+        public IIoService IoService
+         { get; }
         private readonly FileUriTranslation _actualValues;
 
-        internal CalculatedFileUriTranslation(PathSpec pathSpec, PathSpec ancestorSource, PathSpec ancestorDestination)
+        internal CalculatedFileUriTranslation(PathSpec pathSpec, PathSpec ancestorSource, PathSpec ancestorDestination, IIoService ioService)
         {
             PathSpec = pathSpec;
             AncestorSource = ancestorSource;
             AncestorDestination = ancestorDestination;
+            IoService = ioService;
             _actualValues = Calculate();
         }
 
@@ -41,7 +44,7 @@ namespace MoreIO
         public IEnumerator<CalculatedFileUriTranslation> GetEnumerator()
         {
             return
-                Source.Children().Select(fileUri => new CalculatedFileUriTranslation(fileUri, Source, Destination)).GetEnumerator();
+                Source.Children().Select(fileUri => new CalculatedFileUriTranslation(fileUri, Source, Destination, IoService)).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -64,10 +67,10 @@ namespace MoreIO
                         "The path \"{2}\" cannot be copied to \"{1}\" because the path isn't under the source path: \"{0}\"",
                         AncestorSource, AncestorDestination, PathSpec));
             if (AncestorSource.Equals(PathSpec))
-                return new FileUriTranslation(AncestorSource, AncestorDestination);
+                return new FileUriTranslation(AncestorSource, AncestorDestination, IoService);
             var relativePath = PathSpec.RelativeTo(AncestorSource);
             PathSpec pathToBeCopiedDestination = AncestorDestination.Descendant(relativePath).Value;
-            return new FileUriTranslation(PathSpec, pathToBeCopiedDestination);
+            return new FileUriTranslation(PathSpec, pathToBeCopiedDestination, IoService);
         }
 
         protected bool Equals(CalculatedFileUriTranslation other)

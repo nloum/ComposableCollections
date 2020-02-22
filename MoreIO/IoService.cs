@@ -10,16 +10,17 @@ using System.Threading.Tasks;
 using MoreCollections;
 using UtilityDisposables;
 using LiveLinq.Set;
+using System.Text.RegularExpressions;
 using SimpleMonads;
 using static SimpleMonads.Utility;
 
 namespace MoreIO
 {
-    public static partial class PathExt
+    public class IoService : IIoService
     {
         #region File and folder extension methods
         
-        public static PathSpec CreateEmptyFile(this PathSpec path)
+        public PathSpec CreateEmptyFile(PathSpec path)
         {
             path.CreateFile().Dispose();
             if (path.GetPathType() != PathType.File)
@@ -27,7 +28,7 @@ namespace MoreIO
             return path;
         }
 
-        public static FileStream CreateFile(this PathSpec path)
+        public FileStream CreateFile(PathSpec path)
         {
             if (path.Parent().Value.GetPathType() != PathType.Folder)
                 path.Parent().Value.Create(PathType.Folder);
@@ -37,7 +38,7 @@ namespace MoreIO
             return result;
         }
 
-        public static PathSpec DeleteFile(this PathSpec path)
+        public PathSpec DeleteFile(PathSpec path)
         {
             if (path.GetPathType() == PathType.None)
                 return path;
@@ -56,19 +57,19 @@ namespace MoreIO
             return path;
         }
 
-        public static PathSpec Decrypt(this PathSpec path)
+        public PathSpec Decrypt(PathSpec path)
         {
             path.AsFileInfo().Decrypt();
             return path;
         }
 
-        public static PathSpec Encrypt(this PathSpec path)
+        public PathSpec Encrypt(PathSpec path)
         {
             path.AsFileInfo().Encrypt();
             return path;
         }
 
-        public static PathSpec Delete(this PathSpec path)
+        public PathSpec Delete(PathSpec path)
         {
             if (path.GetPathType() == PathType.File)
             {
@@ -81,7 +82,7 @@ namespace MoreIO
             return path;
         }
 
-        public static string SurroundWithDoubleQuotesIfNecessary(this string str)
+        public string SurroundWithDoubleQuotesIfNecessary(string str)
         {
             if (str.Contains(" "))
             {
@@ -93,30 +94,30 @@ namespace MoreIO
             return str;
         }
 
-        public static bool IsAncestorOf(this PathSpec path, PathSpec possibleDescendant)
+        public bool IsAncestorOf(PathSpec path, PathSpec possibleDescendant)
         {
             return IsDescendantOf(possibleDescendant, path);
         }
 
-        public static bool IsDescendantOf(this PathSpec path, PathSpec possibleAncestor)
+        public bool IsDescendantOf(PathSpec path, PathSpec possibleAncestor)
         {
             var possibleDescendantStr = Path.GetFullPath(path.ToString()).ToLower();
             var possibleAncestorStr = Path.GetFullPath(possibleAncestor.ToString()).ToLower();
             return possibleDescendantStr.StartsWith(possibleAncestorStr);
         }
 
-        public static IEnumerable<string> Split(this PathSpec path)
+        public IEnumerable<string> Split(PathSpec path)
         {
             return Ancestors(path, true).Select(pathName => Path.GetFileName(pathName.ToString())).Reverse();
         }
 
-        public static string LastPathComponent(this PathSpec path)
+        public string LastPathComponent(PathSpec path)
         {
             return path.ToString().Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Last(str => !String.IsNullOrEmpty(str));
         }
 
         /// <summary>
-        /// Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from). For example, the ancestors of the path C:\Users\myusername\Documents would be these, in this order:
+        /// Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from). For example, the ancestors of the path C:\Users\myusername\Documents would be these, in order:
         /// C:\Users\myusername
         /// C:\Users
         /// C:
@@ -124,7 +125,7 @@ namespace MoreIO
         /// <param name="path"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        public static IEnumerable<PathSpec> Ancestors(this PathSpec path, bool includeItself = false)
+        public IEnumerable<PathSpec> Ancestors(PathSpec path, bool includeItself = false)
         {
             if (includeItself)
                 yield return path;
@@ -141,12 +142,12 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<PathSpec> Descendant(this PathSpec path, params PathSpec[] paths)
+        public IMaybe<PathSpec> Descendant(PathSpec path, params PathSpec[] paths)
         {
             return path.Descendant(paths.Select(p => p.ToString()).ToArray());
         }
 
-        public static IMaybe<PathSpec> Descendant(this PathSpec path, params string[] paths)
+        public IMaybe<PathSpec> Descendant(PathSpec path, params string[] paths)
         {
             var pathStr = path.ToString();
             // Make sure that pathStr is treated as a directory.
@@ -156,7 +157,7 @@ namespace MoreIO
             return ToPathSpec(Path.Combine(pathStr, Path.Combine(paths)));
         }
 
-        public static IMaybe<PathSpec> Ancestor(this PathSpec path, int level)
+        public IMaybe<PathSpec> Ancestor(PathSpec path, int level)
         {
             IMaybe<PathSpec> maybePath = path.ToMaybe();
             for (int i = 0; i < level; i++)
@@ -168,7 +169,7 @@ namespace MoreIO
             return maybePath;
         }
 
-        public static bool HasExtension(this PathSpec path, string extension)
+        public bool HasExtension(PathSpec path, string extension)
         {
             var actualExtension = Path.GetExtension(path.ToString());
             if (actualExtension == extension)
@@ -184,12 +185,12 @@ namespace MoreIO
         /// <param name="path"></param>
         /// <param name="differentExtension">Must include the "." part of the extension (e.g., ".avi" not "avi")</param>
         /// <returns></returns>
-        public static IMaybe<PathSpec> WithExtension(this PathSpec path, string differentExtension)
+        public IMaybe<PathSpec> WithExtension(PathSpec path, string differentExtension)
         {
             return ToPathSpec(Path.ChangeExtension(path.ToString(), differentExtension));
         }
 
-        public static IFileUriTranslation Copy(this IFileUriTranslation translation)
+        public IFileUriTranslation Copy(IFileUriTranslation translation)
         {
             switch (translation.Source.GetPathType())
             {
@@ -207,7 +208,7 @@ namespace MoreIO
             return translation;
         }
 
-        public static IFileUriTranslation CopyFile(this IFileUriTranslation translation)
+        public IFileUriTranslation CopyFile(IFileUriTranslation translation)
         {
             if (translation.Source.GetPathType() != PathType.File)
                 throw new IOException(String.Format("An attempt was made to copy a file from \"{0}\" to \"{1}\" but the source path is not a file.",
@@ -220,7 +221,7 @@ namespace MoreIO
             return translation;
         }
 
-        public static IFileUriTranslation CopyFolder(this IFileUriTranslation translation)
+        public IFileUriTranslation CopyFolder(IFileUriTranslation translation)
         {
             if (translation.Source.GetPathType() != PathType.Folder)
                 throw new IOException(String.Format("An attempt was made to copy a folder from \"{0}\" to \"{1}\" but the source path is not a folder.",
@@ -229,7 +230,7 @@ namespace MoreIO
             return translation;
         }
 
-        public static IFileUriTranslation Move(this IFileUriTranslation translation)
+        public IFileUriTranslation Move(IFileUriTranslation translation)
         {
             switch (translation.Source.GetPathType())
             {
@@ -247,7 +248,7 @@ namespace MoreIO
             return translation;
         }
 
-        public static IFileUriTranslation MoveFile(this IFileUriTranslation translation)
+        public IFileUriTranslation MoveFile(IFileUriTranslation translation)
         {
             if (translation.Source.GetPathType() != PathType.File)
                 throw new IOException(String.Format("An attempt was made to move a file from \"{0}\" to \"{1}\" but the source path is not a file.",
@@ -263,7 +264,7 @@ namespace MoreIO
             return translation;
         }
         
-        public static IFileUriTranslation MoveFolder(this IFileUriTranslation translation)
+        public IFileUriTranslation MoveFolder(IFileUriTranslation translation)
         {
             if (translation.Source.GetPathType() != PathType.Folder)
                 throw new IOException(String.Format("An attempt was made to move a folder from \"{0}\" to \"{1}\" but the source path is not a folder.",
@@ -283,26 +284,26 @@ namespace MoreIO
             return translation;
         }
 
-        private static bool ContainsFiles(this PathSpec path)
+        public bool ContainsFiles(PathSpec path)
         {
             if (path.GetPathType() == PathType.File)
                 return true;
             return path.Children().All(child => child.ContainsFiles());
         }
 
-        public static bool FolderContainsFiles(this PathSpec path)
+        public bool FolderContainsFiles(PathSpec path)
         {
             if (path.GetPathType() == PathType.File)
                 return false;
             return path.ContainsFiles();
         }
 
-        public static IMaybe<PathSpec> GetCommonAncestry(this PathSpec path1, PathSpec path2)
+        public IMaybe<PathSpec> GetCommonAncestry(PathSpec path1, PathSpec path2)
         {
-            return path1.ToString().GetCommonBeginning(path2.ToString()).Trim('\\').ToPathSpec();
+            return ToPathSpec(path1.ToString().GetCommonBeginning(path2.ToString()).Trim('\\'));
         }
 
-        public static IMaybe<Uri> GetCommonDescendants(this PathSpec path1, PathSpec path2)
+        public IMaybe<Uri> GetCommonDescendants(PathSpec path1, PathSpec path2)
         {
             try
             {
@@ -318,7 +319,7 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<Tuple<Uri, Uri>> GetNonCommonDescendants(this PathSpec path1, PathSpec path2)
+        public IMaybe<Tuple<Uri, Uri>> GetNonCommonDescendants(PathSpec path1, PathSpec path2)
         {
             try
             {
@@ -336,7 +337,7 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<Tuple<Uri, Uri>> GetNonCommonAncestry(this PathSpec path1, PathSpec path2)
+        public IMaybe<Tuple<Uri, Uri>> GetNonCommonAncestry(PathSpec path1, PathSpec path2)
         {
             try
             {
@@ -354,17 +355,17 @@ namespace MoreIO
             }
         }
 
-        public static IFileUriTranslation Translate(this PathSpec pathToBeCopied, PathSpec source, PathSpec destination)
+        public IFileUriTranslation Translate(PathSpec pathToBeCopied, PathSpec source, PathSpec destination)
         {
-            return new CalculatedFileUriTranslation(pathToBeCopied, source, destination);
+            return new CalculatedFileUriTranslation(pathToBeCopied, source, destination, this);
         }
 
-        public static IFileUriTranslation Translate(this PathSpec source, PathSpec destination)
+        public IFileUriTranslation Translate(PathSpec source, PathSpec destination)
         {
-            return new FileUriTranslation(source, destination);
+            return new FileUriTranslation(source, destination, this);
         }
 
-        public static Uri Child(this Uri parent, Uri child)
+        public Uri Child(Uri parent, Uri child)
         {
             var parentLocalPath = parent.ToString();
             if (!parentLocalPath.EndsWith(Path.DirectorySeparatorChar.ToString())
@@ -373,7 +374,7 @@ namespace MoreIO
             return new Uri(parentLocalPath).MakeRelativeUri(child);
         }
 
-        public static readonly List<string> VideoFileExtensions = new List<string>
+        public readonly List<string> VideoFileExtensions = new List<string>
             {
                     "3gpp",
                     "3g2",
@@ -405,7 +406,7 @@ namespace MoreIO
                     "wvx"
                 };
 
-        public static readonly List<string> ImageFileExtensions = new List<string>
+        public readonly List<string> ImageFileExtensions = new List<string>
             {
                     "ani",
                     "b3d",
@@ -479,17 +480,17 @@ namespace MoreIO
                     "xpm"
                 };
 
-        public static FileInfo AsFileInfo(this PathSpec path)
+        public FileInfo AsFileInfo(PathSpec path)
         {
             return new FileInfo(path.ToString());
         }
 
-        public static DirectoryInfo AsDirectoryInfo(this PathSpec path)
+        public DirectoryInfo AsDirectoryInfo(PathSpec path)
         {
             return new DirectoryInfo(path.ToString());
         }
 
-        public static IMaybe<T> As<T>(this T pathName, PathType pathType)
+        public IMaybe<T> As<T>(T pathName, PathType pathType)
             where T : PathSpec
         {
             if (pathName.GetPathType() == pathType)
@@ -497,7 +498,7 @@ namespace MoreIO
             return Maybe<T>.Nothing;
         }
 
-        public static IMaybe<bool> IsReadOnly(this PathSpec path)
+        public IMaybe<bool> IsReadOnly(PathSpec path)
         {
             try
             {
@@ -517,7 +518,7 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<long> Length(this PathSpec path)
+        public IMaybe<long> Length(PathSpec path)
         {
             try
             {
@@ -529,7 +530,7 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<FileAttributes> Attributes(this PathSpec attributes)
+        public IMaybe<FileAttributes> Attributes(PathSpec attributes)
         {
             try
             {
@@ -549,7 +550,7 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<DateTime> CreationTime(this PathSpec attributes)
+        public IMaybe<DateTime> CreationTime(PathSpec attributes)
         {
             try
             {
@@ -569,7 +570,7 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<DateTime> LastAccessTime(this PathSpec attributes)
+        public IMaybe<DateTime> LastAccessTime(PathSpec attributes)
         {
             try
             {
@@ -589,7 +590,7 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<DateTime> LastWriteTime(this PathSpec attributes)
+        public IMaybe<DateTime> LastWriteTime(PathSpec attributes)
         {
             try
             {
@@ -609,7 +610,7 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<string> FullName(this PathSpec attributes)
+        public IMaybe<string> FullName(PathSpec attributes)
         {
             try
             {
@@ -626,11 +627,11 @@ namespace MoreIO
         }
 
         /// <summary>
-        /// Includes the period character ".". For example, this function would return ".exe" if the file pointed to a file named was "test.exe".
+        /// Includes the period character ".". For example, function would return ".exe" if the file pointed to a file named was "test.exe".
         /// </summary>
         /// <param name="pathName"></param>
         /// <returns></returns>
-        public static IMaybe<string> Extension(this string pathName)
+        public IMaybe<string> Extension(string pathName)
         {
             var result = Path.GetExtension(pathName);
             if (String.IsNullOrEmpty(result))
@@ -638,7 +639,7 @@ namespace MoreIO
             return new Maybe<string>(result);
         }
 
-        public static bool IsImageUri(Uri uri)
+        public bool IsImageUri(Uri uri)
         {
             if (uri == null)
                 return false;
@@ -649,7 +650,7 @@ namespace MoreIO
             return ImageFileExtensions.Any(curExtension => extension == curExtension);
         }
 
-        public static bool IsVideoUri(Uri uri)
+        public bool IsVideoUri(Uri uri)
         {
             if (uri == null)
                 return false;
@@ -660,7 +661,7 @@ namespace MoreIO
             return VideoFileExtensions.Any(curExtension => extension == curExtension);
         }
 
-        public static string StripQuotes(this string str)
+        public string StripQuotes(string str)
         {
             if (str.StartsWith("\"") && str.EndsWith("\""))
                 return str.Substring(1, str.Length - 2);
@@ -670,7 +671,7 @@ namespace MoreIO
         }
 
 
-        public static PathSpec Root(this PathSpec path)
+        public PathSpec Root(PathSpec path)
         {
             var ancestor = path;
             IMaybe<PathSpec> cachedParent;
@@ -681,7 +682,7 @@ namespace MoreIO
             return ancestor;
         }
 
-        public static void RenameTo(this PathSpec source, PathSpec target)
+        public void RenameTo(PathSpec source, PathSpec target)
         {
             switch (source.GetPathType())
             {
@@ -694,12 +695,12 @@ namespace MoreIO
             }
         }
 
-        public static bool Exists(this PathSpec path)
+        public bool Exists(PathSpec path)
         {
             return path.GetPathType() != PathType.None;
         }
 
-        public static PathType GetPathType(this PathSpec path)
+        public PathType GetPathType(PathSpec path)
         {
             var str = path.ToString();
             if (File.Exists(str))
@@ -709,20 +710,20 @@ namespace MoreIO
             return PathType.None;
         }
 
-        public static PathSpec DeleteFolder(this PathSpec path, bool recursive = false)
+        public PathSpec DeleteFolder(PathSpec path, bool recursive = false)
         {
             Directory.Delete(path.ToString(), recursive);
 
             return path;
         }
 
-        public static bool MayCreateFile(this FileMode fileMode)
+        public bool MayCreateFile(FileMode fileMode)
         {
             return fileMode.HasFlag(FileMode.Append) || fileMode.HasFlag(FileMode.Create) ||
                    fileMode.HasFlag(FileMode.CreateNew) || fileMode.HasFlag(FileMode.OpenOrCreate);
         }
         
-        public static void Create(this PathSpec path, PathType pathType)
+        public void Create(PathSpec path, PathType pathType)
         {
             switch (pathType)
             {
@@ -737,11 +738,11 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<FileStream> Open(this PathSpec path, FileMode fileMode)
+        public IMaybe<FileStream> Open(PathSpec path, FileMode fileMode)
         {
             try
             {
-                if (fileMode.MayCreateFile())
+                if (MayCreateFile(fileMode))
                     path.Parent().IfHasValue(parent => parent.Create(PathType.Folder));
                 return new Maybe<FileStream>(path.AsFileInfo().Open(fileMode));
             }
@@ -755,12 +756,12 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<FileStream> Open(this PathSpec path, FileMode fileMode,
+        public IMaybe<FileStream> Open(PathSpec path, FileMode fileMode,
                                                               FileAccess fileAccess)
         {
             try
             {
-                if (fileMode.MayCreateFile())
+                if (MayCreateFile(fileMode))
                     path.Parent().IfHasValue(parent => parent.Create(PathType.Folder));
                 return new Maybe<FileStream>(path.AsFileInfo().Open(fileMode, fileAccess));
             }
@@ -774,12 +775,12 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<FileStream> Open(this PathSpec path, FileMode fileMode,
+        public IMaybe<FileStream> Open(PathSpec path, FileMode fileMode,
                                                               FileAccess fileAccess, FileShare fileShare)
         {
             try
             {
-                if (fileMode.MayCreateFile())
+                if (MayCreateFile(fileMode))
                     path.Parent().IfHasValue(parent => parent.Create(PathType.Folder));
                 return new Maybe<FileStream>(path.AsFileInfo().Open(fileMode, fileAccess, fileShare));
             }
@@ -793,7 +794,7 @@ namespace MoreIO
             }
         }
 
-        public static PathSpec CreateFolder(this PathSpec path)
+        public PathSpec CreateFolder(PathSpec path)
         {
             try
             {
@@ -812,66 +813,66 @@ namespace MoreIO
             return path;
         }
 
-        public static void WriteAllText(this PathSpec path, string text)
+        public void WriteAllText(PathSpec path, string text)
         {
             File.WriteAllText(path.ToString(), text);
         }
 
-        public static void WriteAllLines(this PathSpec path, IEnumerable<string> lines)
+        public void WriteAllLines(PathSpec path, IEnumerable<string> lines)
         {
             File.WriteAllLines(path.ToString(), lines);
         }
 
-        public static void WriteAllLines(this PathSpec path, byte[] bytes)
+        public void WriteAllLines(PathSpec path, byte[] bytes)
         {
             File.WriteAllBytes(path.ToString(), bytes);
         }
 
-        public static IEnumerable<string> ReadLines(this PathSpec path)
+        public IEnumerable<string> ReadLines(PathSpec path)
         {
             return File.ReadLines(path.ToString());
         }
 
-        public static string ReadAllText(this PathSpec path)
+        public string ReadAllText(PathSpec path)
         {
             return File.ReadAllText(path.ToString());
         }
 
         #endregion
 
-        public static PathSpec ToAbsolute(this PathSpec path)
+        public PathSpec ToAbsolute(PathSpec path)
         {
             if (path.IsRelative())
-                return PathUtility.CurrentDirectory.Join(path).Value;
+                return CurrentDirectory.Join(path).Value;
             return path;
         }
 
-        public static IReadOnlySet<PathSpec> Children(this PathSpec path)
+        public IReadOnlySet<PathSpec> Children(PathSpec path)
         {
             return path.Children("*");
         }
 
-        public static IReadOnlySet<PathSpec> Children(this PathSpec path, string pattern)
+        public IReadOnlySet<PathSpec> Children(PathSpec path, string pattern)
         {
-            return new PathSpecDescendants(path, pattern, false);
+            return new PathSpecDescendants(path, pattern, false, this);
         }
 
-        public static IReadOnlySet<PathSpec> Descendants(this PathSpec path)
+        public IReadOnlySet<PathSpec> Descendants(PathSpec path)
         {
             return path.Descendants("*");
         }
 
-        public static IReadOnlySet<PathSpec> Descendants(this PathSpec path, string pattern)
+        public IReadOnlySet<PathSpec> Descendants(PathSpec path, string pattern)
         {
-            return new PathSpecDescendants(path, pattern, true);
+            return new PathSpecDescendants(path, pattern, true, this);
         }
 
-        public static IObservable<Unit> ObserveChanges(this PathSpec path)
+        public IObservable<Unit> ObserveChanges(PathSpec path)
         {
             return path.ObserveChanges(NotifyFilters.Attributes | NotifyFilters.CreationTime | NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.Security | NotifyFilters.Size);
         }
 
-        public static IObservable<Unit> ObserveChanges(this PathSpec path, NotifyFilters filters)
+        public IObservable<Unit> ObserveChanges(PathSpec path, NotifyFilters filters)
         {
             var parent = path.Parent();
             if (!parent.HasValue) return Observable.Never<Unit>();
@@ -901,38 +902,14 @@ namespace MoreIO
 
         #region FileSystemWatcher extension methods
 
-        public static IObservable<PathType> ObservePathType(this PathSpec path)
+        public IObservable<PathType> ObservePathType(PathSpec path)
         {
             var parent = path.Parent();
             if (!parent.HasValue) return Observable.Return(path.GetPathType());
             return parent.Value.Children(path.Name).ToLiveLinq().AsObservable().Select(_ => path.GetPathType()).DistinctUntilChanged();
         }
 
-        public static IObservable<bool> ObserveIsSymlink(this PathSpec path)
-        {
-            var pathType = path.ObservePathType();
-            return pathType.Select(_ => path.IsSymlink());
-        }
-
-        public static IObservable<bool> ObserveIsJunctionPoint(this PathSpec path)
-        {
-            var pathType = path.ObservePathType();
-            return pathType.Select(_ => path.IsJunctionPoint());
-        }
-
-        public static IObservable<IMaybe<PathSpec>> ObserveSymlinkTarget(this PathSpec path)
-        {
-            var pathType = path.ObservePathType();
-            return pathType.Select(_ => path.GetSymlinkTarget());
-        }
-
-        public static IObservable<IMaybe<PathSpec>> ObserveJunctionPointTarget(this PathSpec path)
-        {
-            var pathType = path.ObservePathType();
-            return pathType.Select(_ => path.GetJunctionPointTarget());
-        }
-
-        public static IObservable<PathSpec> Renamings(this PathSpec path)
+        public IObservable<PathSpec> Renamings(PathSpec path)
         {
             var parent = path.Parent();
             if (!parent.HasValue) return Observable.Return(path);
@@ -953,7 +930,7 @@ namespace MoreIO
 
                         RenamedEventHandler handler = (_, args) =>
                         {
-                            tcs.SetResult(new PathSpec(path.Flags, path.DirectorySeparator, args.FullPath));
+                            tcs.SetResult(new PathSpec(path.Flags, path.DirectorySeparator, this, args.FullPath));
                         };
 
                         watcher.EnableRaisingEvents = true;
@@ -974,7 +951,7 @@ namespace MoreIO
 
         #region Internal extension methods
 
-        internal static IMaybe<IEnumerable<T>> AllOrNothing<T>(this IEnumerable<IMaybe<T>> source)
+        internal static IMaybe<IEnumerable<T>> AllOrNothing<T>(IEnumerable<IMaybe<T>> source)
         {
             var source2 = source.ToList();
             if (source2.Any(opt => !opt.HasValue))
@@ -982,21 +959,21 @@ namespace MoreIO
             return Something(source2.Select(opt => opt.Value));
         }
 
-        internal static IMaybe<T> Flatten<T>(this IMaybe<IMaybe<T>> opt)
+        internal static IMaybe<T> Flatten<T>(IMaybe<IMaybe<T>> opt)
         {
             if (!opt.HasValue)
                 return Nothing<T>();
             return opt.Value;
         }
 
-        internal static StringComparison ToStringComparison(this PathFlags pathFlags)
+        public StringComparison ToStringComparison(PathFlags pathFlags)
         {
             if (pathFlags.HasFlag(PathFlags.CaseSensitive))
                 return StringComparison.Ordinal;
             return StringComparison.OrdinalIgnoreCase;
         }
 
-        internal static StringComparison ToStringComparison(this PathFlags pathFlags, PathFlags otherPathFlags)
+        public StringComparison ToStringComparison(PathFlags pathFlags, PathFlags otherPathFlags)
         {
             if (pathFlags.HasFlag(PathFlags.CaseSensitive) && otherPathFlags.HasFlag(PathFlags.CaseSensitive))
                 return StringComparison.Ordinal;
@@ -1007,7 +984,7 @@ namespace MoreIO
 
         #region PathSpec extension methods
 
-        public static PathSpec RelativeTo(this PathSpec path, PathSpec relativeTo)
+        public PathSpec RelativeTo(PathSpec path, PathSpec relativeTo)
         {
             var pathStr = path.Simplify().ToString();
             var relativeToStr = relativeTo.Simplify().ToString();
@@ -1031,18 +1008,18 @@ namespace MoreIO
 
             sb.Append(restOfRelativePath);
 
-            return sb.ToString().ToPathSpec().Value;
+            return ToPathSpec(sb.ToString()).Value;
 
             //if (pathStr.StartsWith(relativeToStr))
             //{
             //    var result = pathStr.Substring(relativeToStr.Length);
             //    if (result.StartsWith(path.DirectorySeparator))
-            //        return result.Substring(path.DirectorySeparator.Length).ToPathSpec().Value;
+            //        return ToPathSpec(result.Substring(path.DirectorySeparator.Length)).Value;
             //}
             //throw new NotImplementedException();
         }
 
-        public static IMaybe<PathSpec> CommonWith(this PathSpec path, PathSpec that)
+        public IMaybe<PathSpec> CommonWith(PathSpec path, PathSpec that)
         {
             var path1Str = path.ToString();
             var path2Str = that.ToString();
@@ -1062,15 +1039,15 @@ namespace MoreIO
 
             if (i == 0)
                 return Nothing<PathSpec>();
-            return path1Str.Substring(0, i).ToPathSpec();
+            return ToPathSpec(path1Str.Substring(0, i));
         }
 
-        public static bool CanBeSimplified(this PathSpec path)
+        public bool CanBeSimplified(PathSpec path)
         {
             return path.Components.SkipWhile(str => str == "..").Any(str => str == "..");
         }
 
-        public static PathSpec Simplify(this PathSpec path)
+        public PathSpec Simplify(PathSpec path)
         {
             var result = new List<string>();
             var numberOfComponentsToSkip = 0;
@@ -1105,25 +1082,25 @@ namespace MoreIO
             var str = sb.ToString();
             if (str.Length == 0)
                 str = ".";
-            return str.ToPathSpec(path.Flags).Value;
+            return ToPathSpec(str, path.Flags).Value;
         }
 
-        public static IMaybe<PathSpec> Parent(this PathSpec path)
+        public IMaybe<PathSpec> Parent(PathSpec path)
 	    {
-            return path.Components.Subset(0, -2).Select(str => PathUtility.TryParsePathSpec(str, path.Flags)).Join();
+            return path.Components.Subset(0, -2).Select(str => TryParsePathSpec(str, path.Flags)).Join();
 	    }
 
-        public static bool IsAbsolute(this PathSpec path)
+        public bool IsAbsolute(PathSpec path)
         {
-            return path.Components.ComponentsAreAbsolute();
+            return ComponentsAreAbsolute(path.Components);
         }
 
-        public static bool IsRelative(this PathSpec path)
+        public bool IsRelative(PathSpec path)
         {
-            return path.Components.ComponentsAreRelative();
+            return ComponentsAreRelative(path.Components);
         }
 
-        internal static bool ComponentsAreAbsolute(this IReadOnlyList<string> path)
+        internal bool ComponentsAreAbsolute(IReadOnlyList<string> path)
         {
             if (path[0] == "/")
                 return true;
@@ -1132,9 +1109,9 @@ namespace MoreIO
             return false;
         }
 
-        internal static bool ComponentsAreRelative(this IReadOnlyList<string> path)
+        internal bool ComponentsAreRelative(IReadOnlyList<string> path)
         {
-            if (path.ComponentsAreAbsolute())
+            if (ComponentsAreAbsolute(path))
                 return false;
             if (path[0] == "\\")
                 return false;
@@ -1145,228 +1122,228 @@ namespace MoreIO
 
         #region String overloads
 
-        public static IMaybe<PathSpec> Join(this IReadOnlyList<string> descendants)
+        public IMaybe<PathSpec> Join(IReadOnlyList<string> descendants)
         {
-            return descendants.Select(str => str.ToPathSpec()).Join();
+            return descendants.Select(str => ToPathSpec(str)).Join();
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<string> descendants)
+        public IMaybe<PathSpec> Join(IEnumerable<string> descendants)
         {
-            return descendants.ToList().Join();
+            return Join(descendants.ToList());
         }
 
-        public static IMaybe<PathSpec> Join(this IReadOnlyList<IMaybe<string>> descendants)
+        public IMaybe<PathSpec> Join(IReadOnlyList<IMaybe<string>> descendants)
         {
             if (descendants.Any(opt => !opt.HasValue))
                 return Nothing<PathSpec>();
-            return descendants.Select(opt => opt.Value).Join();
+            return Join(descendants.Select(opt => opt.Value));
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<string>> descendants)
+        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<string>> descendants)
         {
-            return descendants.ToList().Join();
+            return Join(descendants.ToList());
         }
 
-        public static IMaybe<PathSpec> Join(this PathSpec root, IEnumerable<string> descendants)
+        public IMaybe<PathSpec> Join(PathSpec root, IEnumerable<string> descendants)
         {
-            return root.Join(descendants.Select(str => str.ToPathSpec()));
+            return root.Join(descendants.Select(str => ToPathSpec(str)));
         }
 
-        public static IMaybe<PathSpec> Join(this IMaybe<PathSpec> root, IEnumerable<string> descendants)
-        {
-            if (!root.HasValue)
-                return Nothing<PathSpec>();
-            return root.Value.Join(descendants.Select(str => str.ToPathSpec()));
-        }
-
-        public static IMaybe<PathSpec> Join(this IMaybe<PathSpec> root, IEnumerable<IMaybe<string>> descendants)
-        {
-            return root.SelectMany(rootVal => rootVal.Join(descendants.Select(m => m.SelectMany(str => str.ToPathSpec()))));
-        }
-
-        public static IMaybe<PathSpec> Join(this PathSpec root, IEnumerable<IMaybe<string>> descendants)
-        {
-            return root.Join(descendants.Select(m => m.SelectMany(str => str.ToPathSpec())));
-        }
-
-        public static IMaybe<PathSpec> Join(this PathSpec root, params string[] descendants)
-        {
-            return root.Join(descendants.Select(str => str.ToPathSpec()));
-        }
-
-        public static IMaybe<PathSpec> Join(this IMaybe<PathSpec> root, params string[] descendants)
+        public IMaybe<PathSpec> Join(IMaybe<PathSpec> root, IEnumerable<string> descendants)
         {
             if (!root.HasValue)
                 return Nothing<PathSpec>();
-            return root.Value.Join(descendants.Select(str => str.ToPathSpec()));
+            return root.Value.Join(descendants.Select(str => ToPathSpec(str)));
         }
 
-        public static IMaybe<PathSpec> Join(this IMaybe<PathSpec> root, params IMaybe<string>[] descendants)
+        public IMaybe<PathSpec> Join(IMaybe<PathSpec> root, IEnumerable<IMaybe<string>> descendants)
         {
-            return root.Join(descendants.Select(m => m.SelectMany(str => str.ToPathSpec())));
+            return root.SelectMany(rootVal => rootVal.Join(descendants.Select(m => m.SelectMany(str => ToPathSpec(str)))));
         }
 
-        public static IMaybe<PathSpec> Join(this PathSpec root, params IMaybe<string>[] descendants)
+        public IMaybe<PathSpec> Join(PathSpec root, IEnumerable<IMaybe<string>> descendants)
         {
-            return root.Join(descendants.Select(m => m.SelectMany(str => str.ToPathSpec())));
+            return root.Join(descendants.Select(m => m.SelectMany(str => ToPathSpec(str))));
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<PathSpec> root, IEnumerable<string> descendants)
+        public IMaybe<PathSpec> Join(PathSpec root, params string[] descendants)
         {
-            return root.Join(descendants.Select(str => str.ToPathSpec()));
+            return root.Join(descendants.Select(str => ToPathSpec(str)));
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<PathSpec>> root, IEnumerable<string> descendants)
+        public IMaybe<PathSpec> Join(IMaybe<PathSpec> root, params string[] descendants)
         {
-            return root.Join(descendants.Select(str => str.ToPathSpec()));
+            if (!root.HasValue)
+                return Nothing<PathSpec>();
+            return root.Value.Join(descendants.Select(str => ToPathSpec(str)));
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<PathSpec>> root, IEnumerable<IMaybe<string>> descendants)
+        public IMaybe<PathSpec> Join(IMaybe<PathSpec> root, params IMaybe<string>[] descendants)
         {
-            return root.Concat(descendants.Select(m => m.SelectMany(str => str.ToPathSpec()))).ToList().Join();
+            return root.Join(descendants.Select(m => m.SelectMany(str => ToPathSpec(str))));
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<PathSpec> root, IEnumerable<IMaybe<string>> descendants)
+        public IMaybe<PathSpec> Join(PathSpec root, params IMaybe<string>[] descendants)
+        {
+            return root.Join(descendants.Select(m => m.SelectMany(str => ToPathSpec(str))));
+        }
+
+        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, IEnumerable<string> descendants)
+        {
+            return root.Join(descendants.Select(str => ToPathSpec(str)));
+        }
+
+        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, IEnumerable<string> descendants)
+        {
+            return root.Join(descendants.Select(str => ToPathSpec(str)));
+        }
+
+        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, IEnumerable<IMaybe<string>> descendants)
+        {
+            return root.Concat(descendants.Select(m => m.SelectMany(str => ToPathSpec(str)))).ToList().Join();
+        }
+
+        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, IEnumerable<IMaybe<string>> descendants)
         {
             return descendants
-                .Select(m => m.SelectMany(str => str.ToPathSpec()))
-                .AllOrNothing().Select(desc => root.Concat(desc).ToList().Join()).Flatten();
+                .Select(m => m.SelectMany(str => ToPathSpec(str)))
+                .AllOrNothing().Select(desc => root.Concat(desc).ToList().Join()).SelectMany(x => x);
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<PathSpec> root, params string[] descendants)
+        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, params string[] descendants)
         {
-            return root.Join(descendants.Select(str => str.ToPathSpec()));
+            return root.Join(descendants.Select(str => ToPathSpec(str)));
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<PathSpec>> root, params string[] descendants)
+        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, params string[] descendants)
         {
-            return root.Concat(descendants.Select(str => str.ToPathSpec())).AllOrNothing().Select(paths => paths.Join()).SelectMany(x => x);
+            return root.Concat(descendants.Select(str => ToPathSpec(str))).AllOrNothing().Select(paths => paths.Join()).SelectMany(x => x);
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<PathSpec>> root, params IMaybe<string>[] descendants)
+        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, params IMaybe<string>[] descendants)
         {
-            return root.Concat(descendants.Select(m => m.SelectMany(str => str.ToPathSpec()))).ToList().Join();
+            return root.Concat(descendants.Select(m => m.SelectMany(str => ToPathSpec(str)))).ToList().Join();
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<PathSpec> root, params IMaybe<string>[] descendants)
+        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, params IMaybe<string>[] descendants)
         {
-            return descendants.Select(m => m.SelectMany(str => str.ToPathSpec())).AllOrNothing().Select(desc => root.Concat(desc).ToList().Join()).Flatten();
+            return descendants.Select(m => m.SelectMany(str => ToPathSpec(str))).AllOrNothing().Select(desc => root.Concat(desc).ToList().Join()).SelectMany(x => x);
         }
 
         #endregion
 
         #region PathSpec overloads
 
-        public static IMaybe<PathSpec> Join(this IReadOnlyList<PathSpec> descendants)
+        public IMaybe<PathSpec> Join(IReadOnlyList<PathSpec> descendants)
         {
             var first = descendants[0];
             if (descendants.Skip(1).Any(c => !c.IsRelative()
                 || c.DirectorySeparator != first.DirectorySeparator
                 || c.Flags != first.Flags))
                 return Nothing<PathSpec>();
-            return Something(new PathSpec(PathUtility.GetDefaultFlagsForThisEnvironment(), first.DirectorySeparator,
+            return Something(new PathSpec(GetDefaultFlagsForThisEnvironment(), first.DirectorySeparator, this,
                 descendants.SelectMany(opt => opt.Components).Where((str, i) => i == 0 || str != ".")));
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<PathSpec> descendants)
+        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> descendants)
         {
             return descendants.ToList().Join();
         }
 
-        public static IMaybe<PathSpec> Join(this IReadOnlyList<IMaybe<PathSpec>> descendants)
+        public IMaybe<PathSpec> Join(IReadOnlyList<IMaybe<PathSpec>> descendants)
         {
             if (descendants.Any(opt => !opt.HasValue))
                 return Nothing<PathSpec>();
             return descendants.Select(opt => opt.Value).Join();
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<PathSpec>> descendants)
+        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> descendants)
         {
             return descendants.ToList().Join();
         }
 
-        public static IMaybe<PathSpec> Join(this PathSpec root, IEnumerable<PathSpec> descendants)
+        public IMaybe<PathSpec> Join(PathSpec root, IEnumerable<PathSpec> descendants)
         {
             return root.ItemConcat(descendants).ToList().Join();
         }
 
-        public static IMaybe<PathSpec> Join(this IMaybe<PathSpec> root, IEnumerable<PathSpec> descendants)
+        public IMaybe<PathSpec> Join(IMaybe<PathSpec> root, IEnumerable<PathSpec> descendants)
         {
             if (!root.HasValue)
                 return Nothing<PathSpec>();
             return root.Value.ItemConcat(descendants).ToList().Join();
         }
 
-        public static IMaybe<PathSpec> Join(this IMaybe<PathSpec> root, IEnumerable<IMaybe<PathSpec>> descendants)
+        public IMaybe<PathSpec> Join(IMaybe<PathSpec> root, IEnumerable<IMaybe<PathSpec>> descendants)
         {
             return root.ItemConcat(descendants).ToList().Join();
         }
 
-        public static IMaybe<PathSpec> Join(this PathSpec root, IEnumerable<IMaybe<PathSpec>> descendants)
+        public IMaybe<PathSpec> Join(PathSpec root, IEnumerable<IMaybe<PathSpec>> descendants)
         {
             return Something(root).ItemConcat(descendants).ToList().Join();
         }
 
-        public static IMaybe<PathSpec> Join(this PathSpec root, params PathSpec[] descendants)
+        public IMaybe<PathSpec> Join(PathSpec root, params PathSpec[] descendants)
         {
             return root.ItemConcat(descendants).ToList().Join();
         }
 
-        public static IMaybe<PathSpec> Join(this IMaybe<PathSpec> root, params PathSpec[] descendants)
+        public IMaybe<PathSpec> Join(IMaybe<PathSpec> root, params PathSpec[] descendants)
         {
             if (!root.HasValue)
                 return Nothing<PathSpec>();
             return root.Value.ItemConcat(descendants).ToList().Join();
         }
 
-        public static IMaybe<PathSpec> Join(this IMaybe<PathSpec> root, params IMaybe<PathSpec>[] descendants)
+        public IMaybe<PathSpec> Join(IMaybe<PathSpec> root, params IMaybe<PathSpec>[] descendants)
         {
             return root.ItemConcat(descendants).ToList().Join();
         }
 
-        public static IMaybe<PathSpec> Join(this PathSpec root, params IMaybe<PathSpec>[] descendants)
+        public IMaybe<PathSpec> Join(PathSpec root, params IMaybe<PathSpec>[] descendants)
         {
             return Something(root).ItemConcat(descendants).ToList().Join();
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<PathSpec> root, IEnumerable<PathSpec> descendants)
+        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, IEnumerable<PathSpec> descendants)
         {
             return root.Concat(descendants).ToList().Join();
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<PathSpec>> root, IEnumerable<PathSpec> descendants)
+        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, IEnumerable<PathSpec> descendants)
         {
-            return root.AllOrNothing().Select(enumerable => enumerable.Concat(descendants).ToList().Join()).Flatten();
+            return root.AllOrNothing().Select(enumerable => enumerable.Concat(descendants).ToList().Join()).SelectMany(x => x);
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<PathSpec>> root, IEnumerable<IMaybe<PathSpec>> descendants)
+        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, IEnumerable<IMaybe<PathSpec>> descendants)
         {
             return root.Concat(descendants).ToList().Join();
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<PathSpec> root, IEnumerable<IMaybe<PathSpec>> descendants)
+        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, IEnumerable<IMaybe<PathSpec>> descendants)
         {
-            return descendants.AllOrNothing().Select(desc => root.Concat(desc).ToList().Join()).Flatten();
+            return descendants.AllOrNothing().Select(desc => root.Concat(desc).ToList().Join()).SelectMany(x => x);
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<PathSpec> root, params PathSpec[] descendants)
+        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, params PathSpec[] descendants)
         {
             return root.Concat(descendants).ToList().Join();
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<PathSpec>> root, params PathSpec[] descendants)
+        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, params PathSpec[] descendants)
         {
-            return root.AllOrNothing().Select(enumerable => enumerable.Concat(descendants).ToList().Join()).Flatten();
+            return root.AllOrNothing().Select(enumerable => enumerable.Concat(descendants).ToList().Join()).SelectMany(x => x);
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<PathSpec>> root, params IMaybe<PathSpec>[] descendants)
+        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, params IMaybe<PathSpec>[] descendants)
         {
             return root.Concat(descendants).ToList().Join();
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<PathSpec> root, params IMaybe<PathSpec>[] descendants)
+        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, params IMaybe<PathSpec>[] descendants)
         {
-            return descendants.AllOrNothing().Select(desc => root.Concat(desc).ToList().Join()).Flatten();
+            return descendants.AllOrNothing().Select(desc => root.Concat(desc).ToList().Join()).SelectMany(x => x);
         }
 
         #endregion
@@ -1377,22 +1354,22 @@ namespace MoreIO
 
         #region String extension methods
 
-        public static IMaybe<PathSpec> ToPathSpec(this string path, PathFlags flags)
+        public IMaybe<PathSpec> ToPathSpec(string path, PathFlags flags)
 		{
-            return PathUtility.TryParsePathSpec(path, flags);
+            return TryParsePathSpec(path, flags);
 		}
 
-        public static IMaybe<PathSpec> ToPathSpec(this string path)
+        public IMaybe<PathSpec> ToPathSpec(string path)
 		{
-			return PathUtility.TryParsePathSpec(path);
+			return TryParsePathSpec(path);
 		}
 
-		public static bool IsAbsoluteWindowsPath(this string path)
+		public bool IsAbsoluteWindowsPath(string path)
 		{
 			return char.IsLetter(path[0]) && path[1] == ':';
 		}
 
-		public static bool IsAbsoluteUnixPath(this string path)
+		public bool IsAbsoluteUnixPath(string path)
 		{
 			return path.StartsWith("/");
 		}
@@ -1400,11 +1377,11 @@ namespace MoreIO
         /// <summary>
         /// Checks for invalid relative paths, like C:\.. (Windows) or /.. (Unix)
         /// </summary>
-        internal static bool IsAncestorOfRoot(this IReadOnlyList<string> pathComponents)
+        internal bool IsAncestorOfRoot(IReadOnlyList<string> pathComponents)
         {
             var result = new List<string>();
             var numberOfComponentsToSkip = 0;
-            var isRelative = pathComponents.ComponentsAreRelative();
+            var isRelative = ComponentsAreRelative(pathComponents);
             for (var i = pathComponents.Count - 1; i >= 0; i--)
             {
                 if (!isRelative && i == 0)
@@ -1422,5 +1399,357 @@ namespace MoreIO
         }
 
 		#endregion
+		
+		
+		public PathSpec CreateTemporaryPath(PathType type)
+                {
+                    var path = Path.GetRandomFileName();
+                    var spec = ToPathSpec(path).Value;
+                    if (type == PathType.File)
+                        spec.Create(PathType.File);
+                    if (type == PathType.Folder)
+                        spec.Create(PathType.Folder);
+                    return spec;
+                }
+        
+                private object _lock = new object();
+                private PathFlags? defaultFlagsForThisEnvironment;
+                private string defaultDirectorySeparatorForThisEnvironment;
+        
+                public PathFlags GetDefaultFlagsForThisEnvironment()
+                {
+                    lock(_lock)
+                    {
+                        if (defaultFlagsForThisEnvironment == null)
+                        {
+                            var file = CreateTemporaryPath(PathType.None);
+                            file = ToPathSpec(file.ToString() + "a").Value;
+                            file.Create(PathType.File);
+                            var caseSensitive = ToPathSpec(file.ToString().ToUpper()).Value.GetPathType() != PathType.File;
+                            file.Delete();
+                            if (caseSensitive)
+                                defaultFlagsForThisEnvironment = PathFlags.CaseSensitive;
+                            else
+                                defaultFlagsForThisEnvironment = PathFlags.None;
+                        }
+                        return defaultFlagsForThisEnvironment.Value;
+                    }
+                }
+        
+                public string GetDefaultDirectorySeparatorForThisEnvironment()
+                {
+                    lock(_lock)
+                    {
+                        if (defaultDirectorySeparatorForThisEnvironment == null)
+                        {
+                            var path = Path.Combine("a", "b");
+                            defaultDirectorySeparatorForThisEnvironment = path.Substring(1, path.Length - 2);
+                        }
+                        return defaultDirectorySeparatorForThisEnvironment;
+                    }
+                }
+        
+                /// <summary>
+                ///   Returns a regex that filters files the same as the specified pattern.
+                ///   From here: http://www.java2s.com/Code/CSharp/Regular-Expressions/Checksifnamematchespatternwithandwildcards.htm
+                /// Copyright:   Julijan ?ribar, 2004-2007
+                /// 
+                /// This software is provided 'as-is', without any express or implied
+                /// warranty.  In no event will the author(s) be held liable for any damages
+                /// arising from the use of this software.
+                /// Permission is granted to anyone to use this software for any purpose,
+                /// including commercial applications, and to alter it and redistribute it
+                /// freely, subject to the following restrictions:
+                /// 1. The origin of this software must not be misrepresented; you must not
+                ///   claim that you wrote the original software. If you use this software
+                ///   in a product, an acknowledgment in the product documentation would be
+                ///   appreciated but is not required.
+                /// 2. Altered source versions must be plainly marked as such, and must not be
+                ///   misrepresented as being the original software.
+                /// 3. This notice may not be removed or altered from any source distribution.
+                /// </summary>
+                /// <param name="filename">
+                ///   Name to match.
+                /// </param>
+                /// <param name="pattern">
+                ///   Pattern to match to.
+                /// </param>
+                /// <returns>
+                ///   <c>true</c> if name matches pattern, otherwise <c>false</c>.
+                /// </returns>
+                public Regex FileNamePatternToRegex(string pattern)
+                {
+                    // prepare the pattern to the form appropriate for Regex class
+                    var sb = new StringBuilder(pattern);
+                    // remove superflous occurences of  "?*" and "*?"
+                    while (sb.ToString().IndexOf("?*") != -1)
+                    {
+                        sb.Replace("?*", "*");
+                    }
+                    while (sb.ToString().IndexOf("*?") != -1)
+                    {
+                        sb.Replace("*?", "*");
+                    }
+                    // remove superflous occurences of asterisk '*'
+                    while (sb.ToString().IndexOf("**") != -1)
+                    {
+                        sb.Replace("**", "*");
+                    }
+                    // if only asterisk '*' is left, the mask is ".*"
+                    if (sb.ToString().Equals("*"))
+                        pattern = ".*";
+                    else
+                    {
+                        // replace '.' with "\."
+                        sb.Replace(".", "\\.");
+                        // replaces all occurrences of '*' with ".*" 
+                        sb.Replace("*", ".*");
+                        // replaces all occurrences of '?' with '.*' 
+                        sb.Replace("?", ".");
+                        // add "\b" to the beginning and end of the pattern
+                        sb.Insert(0, "\\b");
+                        sb.Append("\\b");
+                        pattern = sb.ToString();
+                    }
+                    Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
+                    return regex;
+                }
+        
+                public PathSpec ParsePathSpec(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+                {
+                    string error = string.Empty;
+                    PathSpec pathSpec;
+                    if (!TryParsePathSpec(path, out pathSpec, out error, flags))
+                        throw new ArgumentException(error);
+                    return pathSpec;
+                }
+        
+                public IMaybe<PathSpec> TryParsePathSpec(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+                {
+                    string error = string.Empty;
+                    PathSpec pathSpec;
+                    if (!TryParsePathSpec(path, out pathSpec, out error, flags))
+                        return Nothing<PathSpec>();
+                    return Something(pathSpec);
+                }
+        
+                public bool TryParsePathSpec(string path, out PathSpec pathSpec, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+                {
+                    string error = string.Empty;
+                    return TryParsePathSpec(path, out pathSpec, out error, flags);
+                }
+        
+                public bool TryParsePathSpec(string path, out PathSpec pathSpec, out string error, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+                {
+                    if (flags.HasFlag(PathFlags.UseDefaultsFromUtility) && flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
+                        throw new ArgumentException("Cannot specify both PathFlags.UseDefaultsFromUtility and PathFlags.UseDefaultsForGivenPath");
+                    if (flags.HasFlag(PathFlags.UseDefaultsFromUtility))
+                        flags = GetDefaultFlagsForThisEnvironment();
+                    error = string.Empty;
+                    pathSpec = null;
+                    var isWindowsStyle = path.Contains("\\") || path.Contains(":");
+                    var isUnixStyle = path.Contains("/");
+                    if (isWindowsStyle && isUnixStyle)
+                    {
+                        error = "Cannot mix slashes and backslashes in the same path";
+                        return false;
+                    }
+                    if (isWindowsStyle)
+                    {
+                        if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
+                            flags = PathFlags.None;
+                        if (path.Length > 1 && path.EndsWith("\\"))
+                            path = path.Substring(0, path.Length - 1);
+                        var colonIdx = path.LastIndexOf(':');
+                        if (colonIdx > -1 && (colonIdx != 1 || !char.IsLetter(path[0]) || (path.Length > 2 && path[2] != '\\')))
+                        {
+                            error = "A Windows path may not contain a : character, except as part of the drive specifier.";
+                            return false;
+                        }
+                        var isAbsolute = IsAbsoluteWindowsPath(path);
+                        if (isAbsolute)
+                        {
+                            var components = path.Split('\\').ToList();
+                            components.RemoveWhere((i, str) => i != 0 && str == ".");
+                            if (components.Any(String.IsNullOrEmpty))
+                            {
+                                error = "Must not contain any directories that have empty names";
+                                return false;
+                            }
+                            if (IsAncestorOfRoot(components))
+                            {
+                                error = "Must not point to an ancestor of the filesystem root";
+                                return false;
+                            }
+                            pathSpec = new PathSpec(flags, "\\", this, components);
+                        }
+                        else if (path.StartsWith("."))
+                        {
+                            var components = path.Split('\\').ToList();
+                            components.RemoveWhere((i, str) => i != 0 && str == ".");
+                            if (components.Any(String.IsNullOrEmpty))
+                            {
+                                error = "Must not contain any directories that have empty names";
+                                return false;
+                            }
+                            if (IsAncestorOfRoot(components))
+                            {
+                                error = "Must not point to an ancestor of the filesystem root";
+                                return false;
+                            }
+                            pathSpec = new PathSpec(flags, "\\", this, components);
+                        }
+                        else if (path.StartsWith("\\\\"))
+                        {
+                            var components = "\\\\".ItemConcat(path.Substring(2).Split('\\')).ToList();
+                            components.RemoveWhere((i, str) => i != 0 && str == ".");
+                            if (components.Any(String.IsNullOrEmpty))
+                            {
+                                error = "Must not contain any directories that have empty names";
+                                return false;
+                            }
+                            if (IsAncestorOfRoot(components))
+                            {
+                                error = "Must not point to an ancestor of the filesystem root";
+                                return false;
+                            }
+                            pathSpec = new PathSpec(flags, "\\", this, components);
+                        }
+                        else if (path.StartsWith("\\"))
+                        {
+                            var components = "\\".ItemConcat(path.Substring(1).Split('\\')).ToList();
+                            components.RemoveWhere((i, str) => i != 0 && str == ".");
+                            if (components.Any(String.IsNullOrEmpty))
+                            {
+                                error = "Must not contain any directories that have empty names";
+                                return false;
+                            }
+                            if (IsAncestorOfRoot(components))
+                            {
+                                error = "Must not point to an ancestor of the filesystem root";
+                                return false;
+                            }
+                            pathSpec = new PathSpec(flags, "\\", this, components);
+                        }
+                        else
+                        {
+                            var components = ".".ItemConcat(path.Split('\\')).ToList();
+                            components.RemoveWhere((i, str) => i != 0 && str == ".");
+                            if (components.Any(String.IsNullOrEmpty))
+                            {
+                                error = "Must not contain any directories that have empty names";
+                                return false;
+                            }
+                            if (IsAncestorOfRoot(components))
+                            {
+                                error = "Must not point to an ancestor of the filesystem root";
+                                return false;
+                            }
+                            pathSpec = new PathSpec(flags, "\\", this, components);
+                        }
+                        return true;
+                    }
+                    if (isUnixStyle)
+                    {
+                        if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
+                            flags = PathFlags.CaseSensitive;
+                        if (path.Length > 1 && path.EndsWith("/"))
+                            path = path.Substring(0, path.Length - 1);
+                        if (path.Contains(":"))
+                        {
+                            error = "A Unix path may not contain a : character.";
+                            return false;
+                        }
+                        var isAbsolute = IsAbsoluteUnixPath(path);
+                        if (isAbsolute)
+                        {
+                            var components = "/".ItemConcat(path.Substring(1).Split('/')).ToList();
+                            components.RemoveWhere((i, str) => i != 0 && str == ".");
+                            if (components.Any(String.IsNullOrEmpty))
+                            {
+                                error = "Must not contain any directories that have empty names";
+                                return false;
+                            }
+                            if (IsAncestorOfRoot(components))
+                            {
+                                error = "Must not point to an ancestor of the filesystem root";
+                                return false;
+                            }
+                            pathSpec = new PathSpec(flags, "/", this, components);
+                        }
+                        else if (path.StartsWith("."))
+                        {
+                            var components = path.Split('/').ToList();
+                            components.RemoveWhere((i, str) => i != 0 && str == ".");
+                            if (components.Any(String.IsNullOrEmpty))
+                            {
+                                error = "Must not contain any directories that have empty names";
+                                return false;
+                            }
+                            if (IsAncestorOfRoot(components))
+                            {
+                                error = "Must not point to an ancestor of the filesystem root";
+                                return false;
+                            }
+                            pathSpec = new PathSpec(flags, "/", this, components);
+                        }
+                        else
+                        {
+                            var components = ".".ItemConcat(path.Split('/')).ToList();
+                            components.RemoveWhere((i, str) => i != 0 && str == ".");
+                            if (components.Any(String.IsNullOrEmpty))
+                            {
+                                error = "Must not contain any directories that have empty names";
+                                return false;
+                            }
+                            if (IsAncestorOfRoot(components))
+                            {
+                                error = "Must not point to an ancestor of the filesystem root";
+                                return false;
+                            }
+                            pathSpec = new PathSpec(flags, "/", this, components);
+                        }
+                        return true;
+                    }
+                    // If we reach this point, there are no backslashes or slashes in the path, meaning that it's a
+                    // path with one element.
+                    if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
+                        flags = GetDefaultFlagsForThisEnvironment();
+                    if (path == ".." || path == ".")
+                        pathSpec = new PathSpec(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, path);
+                    else
+                        pathSpec = new PathSpec(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, ".", path);
+                    return true;
+                }
+        
+                public PathSpec CurrentDirectory => ToPathSpec(Environment.CurrentDirectory).Value;
+        
+                public void UpdateStorage()
+                {
+                    var currentStorage = System.IO.Directory.GetLogicalDrives();
+                    foreach (var drive in currentStorage)
+                    {
+                        var drivePath = ToPathSpec(drive).Value;
+                        if (!_knownStorage.Contains(drivePath))
+                            _knownStorage.Add(drivePath);
+                    }
+        
+                    var drivesThatWereRemoved = new List<PathSpec>();
+        
+                    foreach (var drive in _knownStorage)
+                    {
+                        if (!currentStorage.Contains(drive + "\\"))
+                            drivesThatWereRemoved.Add(drive);
+                    }
+        
+                    foreach (var driveThatWasRemoved in drivesThatWereRemoved)
+                    {
+                        _knownStorage.Remove(driveThatWasRemoved);
+                    }
+                }
+        
+                private readonly HashSet<PathSpec> _knownStorage = new HashSet<PathSpec>();
+        
+                public IReadOnlySet<PathSpec> Storage { get; }
     }
 }

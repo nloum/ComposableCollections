@@ -14,12 +14,14 @@ namespace MoreIO
     {
         private readonly PathSpec _path;
         private readonly string _pattern;
+        public IIoService IoService { get; }
 
-        public PathSpecDescendants(PathSpec path, string pattern, bool includeSubdirectories)
+        public PathSpecDescendants(PathSpec path, string pattern, bool includeSubdirectories, IIoService ioService)
         {
             _path = path;
             this._pattern = pattern;
             IncludeSubdirectories = includeSubdirectories;
+            IoService = ioService;
         }
 
         protected bool IncludeSubdirectories { get; }
@@ -39,20 +41,20 @@ namespace MoreIO
                     .Publish()
                     .RefCount()
                     .Select(rename => new[] {
-                    SetChange(LiveLinq.Core.CollectionChangeType.Remove, rename.OldFullPath.ToPathSpec(_path.Flags).Value),
-                    SetChange(LiveLinq.Core.CollectionChangeType.Add, rename.FullPath.ToPathSpec(_path.Flags).Value)
+                    SetChange(LiveLinq.Core.CollectionChangeType.Remove, IoService.ToPathSpec(rename.OldFullPath, _path.Flags).Value),
+                    SetChange(LiveLinq.Core.CollectionChangeType.Add, IoService.ToPathSpec(rename.FullPath, _path.Flags).Value)
                     }.ToObservable())
                     .Merge()
                     .Subscribe(observer);
                 var deletions = Observable.FromEvent<FileSystemEventArgs>(handler => _watcher.Deleted += (_, evt) => handler(evt), handler => _watcher.Deleted -= (_, evt) => handler(evt))
                     .Publish()
                     .RefCount()
-                    .Select(deletion => SetChange(LiveLinq.Core.CollectionChangeType.Remove, deletion.FullPath.ToPathSpec(_path.Flags).Value))
+                    .Select(deletion => SetChange(LiveLinq.Core.CollectionChangeType.Remove, IoService.ToPathSpec(deletion.FullPath, _path.Flags).Value))
                     .Subscribe(observer);
                 var creations = Observable.FromEvent<FileSystemEventArgs>(handler => _watcher.Created += (_, evt) => handler(evt), handler => _watcher.Created -= (_, evt) => handler(evt))
                     .Publish()
                     .RefCount()
-                    .Select(creation => SetChange(LiveLinq.Core.CollectionChangeType.Add, creation.FullPath.ToPathSpec(_path.Flags).Value))
+                    .Select(creation => SetChange(LiveLinq.Core.CollectionChangeType.Add, IoService.ToPathSpec(creation.FullPath, _path.Flags).Value))
                     .Subscribe(observer);
 
                 foreach (var childPath in AsEnumerable())
@@ -76,7 +78,7 @@ namespace MoreIO
 
             foreach (var fse in directory.GetFileSystemInfos(_pattern))
             {
-                var subPath = fse.FullName.ToPathSpec(_path.Flags).Value;
+                var subPath = IoService.ToPathSpec(fse.FullName, _path.Flags).Value;
                 yield return subPath;
                 if (IncludeSubdirectories)
                 {

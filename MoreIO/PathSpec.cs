@@ -11,23 +11,25 @@ namespace MoreIO
 {
     public class PathSpec : IComparable
     {
+        public IIoService IoService { get; }
         public ImmutableList<string> Components { get; }
 
-        internal PathSpec(PathFlags flags, string directorySeparator, IEnumerable<string> elements)
+        internal PathSpec(PathFlags flags, string directorySeparator, IIoService ioService, IEnumerable<string> elements)
         {
             ValidateFlags(flags);
             Flags = flags;
             DirectorySeparator = directorySeparator;
+            IoService = ioService;
             Components = elements.SelectMany(SplitComponent).ToImmutableList();
         }
 
-        internal PathSpec(PathFlags flags, string directorySeparator, params string[] components)
-            : this(flags, directorySeparator, components.AsEnumerable())
+        internal PathSpec(PathFlags flags, string directorySeparator, IIoService ioService, params string[] components)
+            : this(flags, directorySeparator, ioService, components.AsEnumerable())
         {
         }
 
         internal PathSpec(PathSpec other)
-            : this(other.Flags, other.DirectorySeparator, other.Components)
+            : this(other.Flags, other.DirectorySeparator, other.IoService, other.Components)
         {
         }
 
@@ -110,7 +112,7 @@ namespace MoreIO
             //    return false;
             if (!string.Equals(DirectorySeparator, other.DirectorySeparator))
                 return false;
-            StringComparison flags = Flags.ToStringComparison(other.Flags);
+            StringComparison flags = IoService.ToStringComparison(Flags, other.Flags);
             if (Components.Count != other.Components.Count)
                 return false;
             for (int i = 0; i < Components.Count; i++)
@@ -144,7 +146,7 @@ namespace MoreIO
         public IMaybe<PathSpec> Ancestor(int generations)
         {
             if (Components.Count > generations)
-                return Something(new PathSpec(Flags, DirectorySeparator, Components.Subset(0, -1 - generations)));
+                return Something(new PathSpec(Flags, DirectorySeparator, IoService, Components.Subset(0, -1 - generations)));
             return Nothing<PathSpec>();
         }
 

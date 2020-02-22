@@ -7,10 +7,13 @@ namespace MoreIO
 {
     public sealed class FileUriTranslation : IFileUriTranslation
     {
-        internal FileUriTranslation(PathSpec source, PathSpec destination)
+        public IIoService IoService { get; }
+
+        internal FileUriTranslation(PathSpec source, PathSpec destination, IIoService ioService)
         {
             Source = source;
             Destination = destination;
+            IoService = ioService;
         }
 
         public PathSpec Source { get; private set; }
@@ -18,7 +21,7 @@ namespace MoreIO
 
         public IEnumerator<CalculatedFileUriTranslation> GetEnumerator()
         {
-            return Source.Children().Select(child => new CalculatedFileUriTranslation(child, Source, Destination)).GetEnumerator();
+            return Source.Children().Select(child => new CalculatedFileUriTranslation(child, Source, Destination, IoService)).GetEnumerator();
         }
 
         public override string ToString()

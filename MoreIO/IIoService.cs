@@ -11,6 +11,16 @@ namespace MoreIO
 {
     public interface IIoService
     {
+        /// <summary>
+        /// Given a bunch of files or folders in different places that may have the same name,
+        /// create unique names for those files and folders based on their original name and the
+        /// paths to those files and folders.
+        /// </summary>
+        /// <param name="paths">The paths to the files and folders that may have the same name but
+        /// be in different locations.</param>
+        /// <returns>A mapping from the original file path to the new suggested file name.</returns>
+        IEnumerable<KeyValuePair<PathSpec, string>> ProposeUniqueNamesForMovingPathsToSameFolder(
+            IEnumerable<PathSpec> paths);
         IDictionaryChangesStrict<PathSpec, PathSpec> ToLiveLinq(PathSpec root, bool includeFileChanges = true);
         IEnumerable<PathSpec> GetChildren(PathSpec path, bool includeFolders = true, bool includeFiles = true);
         IEnumerable<PathSpec> GetFiles(PathSpec path);

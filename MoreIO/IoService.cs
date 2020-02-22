@@ -24,6 +24,35 @@ namespace MoreIO
     {
         #region File and folder extension methods
         
+        public IEnumerable<KeyValuePair<PathSpec, string>> ProposeUniqueNamesForMovingPathsToSameFolder(
+            IEnumerable<PathSpec> paths ) {
+            var alreadyProposedNames = new HashSet<string>();
+            foreach ( var path in paths ) {
+                var enumerator = ProposeSuccessivelyMoreSpecificNames( path ).GetEnumerator();
+                enumerator.MoveNext();
+                while ( alreadyProposedNames.Contains( enumerator.Current ) ) {
+                    enumerator.MoveNext();
+                }
+
+                alreadyProposedNames.Add( enumerator.Current );
+                yield return new KeyValuePair<PathSpec, string>(path, enumerator.Current);
+                enumerator.Dispose();
+            }
+        }
+
+        private IEnumerable<string> ProposeSuccessivelyMoreSpecificNames( PathSpec path ) {
+            string filename = null;
+            foreach ( var parentPath in path.Ancestors() ) {
+                if ( filename == null ) {
+                    filename = parentPath.Name;
+                } else {
+                    filename = $"{parentPath.Name}.{filename}";
+                }
+
+                yield return filename;
+            }
+        }
+        
         public IDictionaryChangesStrict<PathSpec, PathSpec> ToLiveLinq(PathSpec root, bool includeFileChanges = true)
         {
             var watcher = new FileSystemWatcher(root.ToString())

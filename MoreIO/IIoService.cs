@@ -10,9 +10,13 @@ namespace MoreIO
 {
     public interface IIoService
     {
+        IEnumerable<PathSpec> GetChildren(PathSpec path, bool includeFolders = true, bool includeFiles = true);
+        IEnumerable<PathSpec> GetFiles(PathSpec path);
+        IEnumerable<PathSpec> GetFolders(PathSpec path);
         PathSpec CreateEmptyFile(PathSpec path);
         FileStream CreateFile(PathSpec path);
         PathSpec DeleteFile(PathSpec path);
+        PathSpec ClearFolder(PathSpec path);
         PathSpec Decrypt(PathSpec path);
         PathSpec Encrypt(PathSpec path);
         PathSpec Delete(PathSpec path);
@@ -162,8 +166,8 @@ namespace MoreIO
         IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, params PathSpec[] descendants);
         IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, params IMaybe<PathSpec>[] descendants);
         IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, params IMaybe<PathSpec>[] descendants);
-        IMaybe<PathSpec> ToPathSpec(string path, PathFlags flags);
-        IMaybe<PathSpec> ToPathSpec(string path);
+        IMaybe<PathSpec> ToPath(string path, PathFlags flags);
+        IMaybe<PathSpec> ToPath(string path);
         bool IsAbsoluteWindowsPath(string path);
         bool IsAbsoluteUnixPath(string path);
         StringComparison ToStringComparison(PathFlags pathFlags);

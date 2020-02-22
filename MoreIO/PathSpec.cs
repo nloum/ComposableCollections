@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -9,7 +10,7 @@ using static SimpleMonads.Utility;
 
 namespace MoreIO
 {
-    public class PathSpec : IComparable
+    public class PathSpec : IComparable, IEnumerable<PathSpec>
     {
         public IIoService IoService { get; }
         public ImmutableList<string> Components { get; }
@@ -57,7 +58,17 @@ namespace MoreIO
 
         public PathFlags Flags { get; private set; }
         public string DirectorySeparator { get; private set; }
-        
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public IEnumerator<PathSpec> GetEnumerator()
+        {
+            return IoService.GetChildren(this).GetEnumerator();
+        }
+
         public int CompareTo(object obj)
         {
             var tp = obj as PathSpec;

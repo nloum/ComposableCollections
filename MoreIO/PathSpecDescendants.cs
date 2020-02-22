@@ -41,20 +41,20 @@ namespace MoreIO
                     .Publish()
                     .RefCount()
                     .Select(rename => new[] {
-                    SetChange(LiveLinq.Core.CollectionChangeType.Remove, IoService.ToPathSpec(rename.OldFullPath, _path.Flags).Value),
-                    SetChange(LiveLinq.Core.CollectionChangeType.Add, IoService.ToPathSpec(rename.FullPath, _path.Flags).Value)
+                    SetChange(LiveLinq.Core.CollectionChangeType.Remove, IoService.ToPath(rename.OldFullPath, _path.Flags).Value),
+                    SetChange(LiveLinq.Core.CollectionChangeType.Add, IoService.ToPath(rename.FullPath, _path.Flags).Value)
                     }.ToObservable())
                     .Merge()
                     .Subscribe(observer);
                 var deletions = Observable.FromEvent<FileSystemEventArgs>(handler => _watcher.Deleted += (_, evt) => handler(evt), handler => _watcher.Deleted -= (_, evt) => handler(evt))
                     .Publish()
                     .RefCount()
-                    .Select(deletion => SetChange(LiveLinq.Core.CollectionChangeType.Remove, IoService.ToPathSpec(deletion.FullPath, _path.Flags).Value))
+                    .Select(deletion => SetChange(LiveLinq.Core.CollectionChangeType.Remove, IoService.ToPath(deletion.FullPath, _path.Flags).Value))
                     .Subscribe(observer);
                 var creations = Observable.FromEvent<FileSystemEventArgs>(handler => _watcher.Created += (_, evt) => handler(evt), handler => _watcher.Created -= (_, evt) => handler(evt))
                     .Publish()
                     .RefCount()
-                    .Select(creation => SetChange(LiveLinq.Core.CollectionChangeType.Add, IoService.ToPathSpec(creation.FullPath, _path.Flags).Value))
+                    .Select(creation => SetChange(LiveLinq.Core.CollectionChangeType.Add, IoService.ToPath(creation.FullPath, _path.Flags).Value))
                     .Subscribe(observer);
 
                 foreach (var childPath in AsEnumerable())
@@ -78,7 +78,7 @@ namespace MoreIO
 
             foreach (var fse in directory.GetFileSystemInfos(_pattern))
             {
-                var subPath = IoService.ToPathSpec(fse.FullName, _path.Flags).Value;
+                var subPath = IoService.ToPath(fse.FullName, _path.Flags).Value;
                 yield return subPath;
                 if (IncludeSubdirectories)
                 {

@@ -11,6 +11,20 @@ namespace MoreIO
 {
     public static class IoExtensions
     {
+        public static IEnumerable<PathSpec> GetChildren(this PathSpec path, bool includeFolders = true, bool includeFiles = true)
+        {
+            return path.IoService.GetChildren(path, includeFolders, includeFiles);
+        }
+
+        public static IEnumerable<PathSpec> GetFiles(this PathSpec path)
+        {
+            return path.IoService.GetFiles(path);
+        }
+        
+        public static IEnumerable<PathSpec> GetFolders(this PathSpec path)
+        {
+            return path.IoService.GetFolders(path);
+        }
 
         public static PathSpec CreateEmptyFile(this PathSpec path)
         {
@@ -25,6 +39,11 @@ namespace MoreIO
         public static PathSpec DeleteFile(this PathSpec path)
         {
             return path.IoService.DeleteFile(path);
+        }
+
+        public static PathSpec ClearFolder(this PathSpec path)
+        {
+            return path.IoService.ClearFolder(path);
         }
 
         public static PathSpec Decrypt(this PathSpec path)
@@ -598,5 +617,14 @@ namespace MoreIO
             pathSpec.IoService.WriteText(pathSpec, text, fileMode, fileAccess, fileShare, encoding, bufferSize, leaveOpen);
         }
 
+        public static bool IsFile(this PathSpec pathSpec)
+        {
+            return pathSpec.GetPathType() == PathType.File;
+        }
+        
+        public static bool IsFolder(this PathSpec pathSpec)
+        {
+            return pathSpec.GetPathType() == PathType.Folder;
+        }
     }
 }

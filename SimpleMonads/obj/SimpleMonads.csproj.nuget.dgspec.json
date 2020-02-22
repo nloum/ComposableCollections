@@ -5,7 +5,7 @@
   },
   "projects": {
     "/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/SimpleMonads.csproj": {
-      "version": "1.0.0-alph1",
+      "version": "1.0.0-alpha2",
       "restore": {
         "projectUniqueName": "/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/SimpleMonads.csproj",
         "projectName": "SimpleMonads",
@@ -40,13 +40,10 @@
         "netstandard1.4": {
           "dependencies": {
             "NETStandard.Library": {
+              "suppressParent": "All",
               "target": "Package",
               "version": "[1.6.1, )",
               "autoReferenced": true
-            },
-            "NuGet.Build.Packaging": {
-              "target": "Package",
-              "version": "[0.2.5-dev.8, )"
             },
             "System.Collections.Immutable": {
               "target": "Package",

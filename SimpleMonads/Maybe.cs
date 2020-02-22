@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace SimpleMonads
@@ -127,6 +128,27 @@ namespace SimpleMonads
             {
                 action(maybe.Value);
             }
+        }
+
+        public static IMaybe<IReadOnlyList<T>> AllOrNothing<T>(this IEnumerable<IMaybe<T>> maybes)
+        {
+            var all = new List<T>();
+            foreach (var maybe in maybes)
+            {
+                if (!maybe.HasValue)
+                {
+                    return Maybe<IReadOnlyList<T>>.Nothing;
+                }
+                
+                all.Add(maybe.Value);
+            }
+
+            return all.ToMaybe();
+        }
+        
+        public static IEnumerable<T> WhereHasValue<T>(this IEnumerable<IMaybe<T>> maybes)
+        {
+            return maybes.Where(m => m.HasValue).Select(m => m.Value);
         }
     }
 }

@@ -19,66 +19,66 @@ namespace MoreIO
     {
         #region File and folder extension methods
         
-        public static PathSpec CreateEmptyFile(this PathSpec pathSpec)
+        public static PathSpec CreateEmptyFile(this PathSpec path)
         {
-            pathSpec.CreateFile().Dispose();
-            if (pathSpec.GetPathType() != PathType.File)
-                throw new IOException("Could not create file " + pathSpec);
-            return pathSpec;
+            path.CreateFile().Dispose();
+            if (path.GetPathType() != PathType.File)
+                throw new IOException("Could not create file " + path);
+            return path;
         }
 
-        public static FileStream CreateFile(this PathSpec pathSpec)
+        public static FileStream CreateFile(this PathSpec path)
         {
-            if (pathSpec.Parent().Value.GetPathType() != PathType.Folder)
-                pathSpec.Parent().Value.Create(PathType.Folder);
-            var result = pathSpec.AsFileInfo().Create();
-            if (pathSpec.GetPathType() != PathType.File)
-                throw new IOException("Could not create file " + pathSpec);
+            if (path.Parent().Value.GetPathType() != PathType.Folder)
+                path.Parent().Value.Create(PathType.Folder);
+            var result = path.AsFileInfo().Create();
+            if (path.GetPathType() != PathType.File)
+                throw new IOException("Could not create file " + path);
             return result;
         }
 
-        public static PathSpec DeleteFile(this PathSpec pathSpec)
+        public static PathSpec DeleteFile(this PathSpec path)
         {
-            if (pathSpec.GetPathType() == PathType.None)
-                return pathSpec;
+            if (path.GetPathType() == PathType.None)
+                return path;
             try
             {
-                pathSpec.AsFileInfo().Delete();
+                path.AsFileInfo().Delete();
             }
             catch (IOException)
             {
-                pathSpec.AsFileInfo().Delete();
+                path.AsFileInfo().Delete();
             }
             catch (UnauthorizedAccessException)
             {
-                pathSpec.AsFileInfo().Delete();
+                path.AsFileInfo().Delete();
             }
-            return pathSpec;
+            return path;
         }
 
-        public static PathSpec Decrypt(this PathSpec pathSpec)
+        public static PathSpec Decrypt(this PathSpec path)
         {
-            pathSpec.AsFileInfo().Decrypt();
-            return pathSpec;
+            path.AsFileInfo().Decrypt();
+            return path;
         }
 
-        public static PathSpec Encrypt(this PathSpec pathSpec)
+        public static PathSpec Encrypt(this PathSpec path)
         {
-            pathSpec.AsFileInfo().Encrypt();
-            return pathSpec;
+            path.AsFileInfo().Encrypt();
+            return path;
         }
 
-        public static PathSpec Delete(this PathSpec pathSpec)
+        public static PathSpec Delete(this PathSpec path)
         {
-            if (pathSpec.GetPathType() == PathType.File)
+            if (path.GetPathType() == PathType.File)
             {
-                return pathSpec.DeleteFile();
+                return path.DeleteFile();
             }
-            if (pathSpec.GetPathType() == PathType.Folder)
+            if (path.GetPathType() == PathType.Folder)
             {
-                return pathSpec.DeleteFolder(true);
+                return path.DeleteFolder(true);
             }
-            return pathSpec;
+            return path;
         }
 
         public static string SurroundWithDoubleQuotesIfNecessary(this string str)
@@ -93,14 +93,14 @@ namespace MoreIO
             return str;
         }
 
-        public static bool IsAncestorOf(this PathSpec possibleAncestor, PathSpec possibleDescendant)
+        public static bool IsAncestorOf(this PathSpec path, PathSpec possibleDescendant)
         {
-            return IsDescendantOf(possibleDescendant, possibleAncestor);
+            return IsDescendantOf(possibleDescendant, path);
         }
 
-        public static bool IsDescendantOf(this PathSpec possibleDescendant, PathSpec possibleAncestor)
+        public static bool IsDescendantOf(this PathSpec path, PathSpec possibleAncestor)
         {
-            var possibleDescendantStr = Path.GetFullPath(possibleDescendant.ToString()).ToLower();
+            var possibleDescendantStr = Path.GetFullPath(path.ToString()).ToLower();
             var possibleAncestorStr = Path.GetFullPath(possibleAncestor.ToString()).ToLower();
             return possibleDescendantStr.StartsWith(possibleAncestorStr);
         }
@@ -168,9 +168,9 @@ namespace MoreIO
             return maybePath;
         }
 
-        public static bool HasExtension(this PathSpec pathSpec, string extension)
+        public static bool HasExtension(this PathSpec path, string extension)
         {
-            var actualExtension = Path.GetExtension(pathSpec.ToString());
+            var actualExtension = Path.GetExtension(path.ToString());
             if (actualExtension == extension)
                 return true;
             if (actualExtension == null)
@@ -181,132 +181,132 @@ namespace MoreIO
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="pathSpec"></param>
+        /// <param name="path"></param>
         /// <param name="differentExtension">Must include the "." part of the extension (e.g., ".avi" not "avi")</param>
         /// <returns></returns>
-        public static IMaybe<PathSpec> WithExtension(this PathSpec pathSpec, string differentExtension)
+        public static IMaybe<PathSpec> WithExtension(this PathSpec path, string differentExtension)
         {
-            return ToPathSpec(Path.ChangeExtension(pathSpec.ToString(), differentExtension));
+            return ToPathSpec(Path.ChangeExtension(path.ToString(), differentExtension));
         }
 
-        public static IFileUriTranslation Copy(this IFileUriTranslation sad)
+        public static IFileUriTranslation Copy(this IFileUriTranslation translation)
         {
-            switch (sad.Source.GetPathType())
+            switch (translation.Source.GetPathType())
             {
                 case PathType.File:
-                    sad.CopyFile();
+                    translation.CopyFile();
                     break;
                 case PathType.Folder:
-                    sad.CopyFolder();
+                    translation.CopyFolder();
                     break;
                 case PathType.None:
                     throw new IOException(
                         String.Format("An attempt was made to copy \"{0}\" to \"{1}\", but the source path doesn't exist.",
-                                      sad.Source, sad.Destination));
+                                      translation.Source, translation.Destination));
             }
-            return sad;
+            return translation;
         }
 
-        public static IFileUriTranslation CopyFile(this IFileUriTranslation sad)
+        public static IFileUriTranslation CopyFile(this IFileUriTranslation translation)
         {
-            if (sad.Source.GetPathType() != PathType.File)
+            if (translation.Source.GetPathType() != PathType.File)
                 throw new IOException(String.Format("An attempt was made to copy a file from \"{0}\" to \"{1}\" but the source path is not a file.",
-                    sad.Source, sad.Destination));
-            if (sad.Destination.GetPathType() != PathType.None)
+                    translation.Source, translation.Destination));
+            if (translation.Destination.GetPathType() != PathType.None)
                 throw new IOException(String.Format("An attempt was made to copy \"{0}\" to \"{1}\" but the destination path exists.",
-                    sad.Source, sad.Destination));
-            sad.Destination.Parent().Value.Create(PathType.Folder);
-            File.Copy(sad.Source.ToString(), sad.Destination.ToString());
-            return sad;
+                    translation.Source, translation.Destination));
+            translation.Destination.Parent().Value.Create(PathType.Folder);
+            File.Copy(translation.Source.ToString(), translation.Destination.ToString());
+            return translation;
         }
 
-        public static IFileUriTranslation CopyFolder(this IFileUriTranslation sad)
+        public static IFileUriTranslation CopyFolder(this IFileUriTranslation translation)
         {
-            if (sad.Source.GetPathType() != PathType.Folder)
+            if (translation.Source.GetPathType() != PathType.Folder)
                 throw new IOException(String.Format("An attempt was made to copy a folder from \"{0}\" to \"{1}\" but the source path is not a folder.",
-                    sad.Source, sad.Destination));
-            sad.Destination.Create(PathType.Folder);
-            return sad;
+                    translation.Source, translation.Destination));
+            translation.Destination.Create(PathType.Folder);
+            return translation;
         }
 
-        public static IFileUriTranslation Move(this IFileUriTranslation sad)
+        public static IFileUriTranslation Move(this IFileUriTranslation translation)
         {
-            switch (sad.Source.GetPathType())
+            switch (translation.Source.GetPathType())
             {
                 case PathType.File:
-                    sad.MoveFile();
+                    translation.MoveFile();
                     break;
                 case PathType.Folder:
-                    sad.MoveFolder();
+                    translation.MoveFolder();
                     break;
                 case PathType.None:
                     throw new IOException(
                         String.Format("An attempt was made to move \"{0}\" to \"{1}\", but the source path doesn't exist.",
-                                      sad.Source, sad.Destination));
+                                      translation.Source, translation.Destination));
             }
-            return sad;
+            return translation;
         }
 
-        public static IFileUriTranslation MoveFile(this IFileUriTranslation sad)
+        public static IFileUriTranslation MoveFile(this IFileUriTranslation translation)
         {
-            if (sad.Source.GetPathType() != PathType.File)
+            if (translation.Source.GetPathType() != PathType.File)
                 throw new IOException(String.Format("An attempt was made to move a file from \"{0}\" to \"{1}\" but the source path is not a file.",
-                    sad.Source, sad.Destination));
-            if (sad.Destination.GetPathType() != PathType.None)
+                    translation.Source, translation.Destination));
+            if (translation.Destination.GetPathType() != PathType.None)
                 throw new IOException(String.Format("An attempt was made to move \"{0}\" to \"{1}\" but the destination path exists.",
-                    sad.Source, sad.Destination));
-            if (sad.Destination.IsDescendantOf(sad.Source))
+                    translation.Source, translation.Destination));
+            if (translation.Destination.IsDescendantOf(translation.Source))
                 throw new IOException(String.Format("An attempt was made to move a file from \"{0}\" to \"{1}\" but the destination path is a sub-path of the source path.",
-                    sad.Source, sad.Destination));
-            sad.Destination.Parent().Value.Create(PathType.Folder);
-            File.Move(sad.Source.ToString(), sad.Destination.ToString());
-            return sad;
+                    translation.Source, translation.Destination));
+            translation.Destination.Parent().Value.Create(PathType.Folder);
+            File.Move(translation.Source.ToString(), translation.Destination.ToString());
+            return translation;
         }
         
-        public static IFileUriTranslation MoveFolder(this IFileUriTranslation sad)
+        public static IFileUriTranslation MoveFolder(this IFileUriTranslation translation)
         {
-            if (sad.Source.GetPathType() != PathType.Folder)
+            if (translation.Source.GetPathType() != PathType.Folder)
                 throw new IOException(String.Format("An attempt was made to move a folder from \"{0}\" to \"{1}\" but the source path is not a folder.",
-                    sad.Source, sad.Destination));
-            if (sad.Destination.GetPathType() == PathType.File)
+                    translation.Source, translation.Destination));
+            if (translation.Destination.GetPathType() == PathType.File)
                 throw new IOException(String.Format("An attempt was made to move \"{0}\" to \"{1}\" but the destination path is a file.",
-                    sad.Source, sad.Destination));
-            if (sad.Destination.IsDescendantOf(sad.Source))
+                    translation.Source, translation.Destination));
+            if (translation.Destination.IsDescendantOf(translation.Source))
                 throw new IOException(String.Format("An attempt was made to move a file from \"{0}\" to \"{1}\" but the destination path is a sub-path of the source path.",
-                    sad.Source, sad.Destination));
-            if (sad.Source.Children().Any())
+                    translation.Source, translation.Destination));
+            if (translation.Source.Children().Any())
                 throw new IOException(String.Format("An attempt was made to move the non-empty folder \"{0}\". This is not allowed because all the files should be moved first, and only then can the folder be moved, because the move operation deletes the source folder, which would of course also delete the files and folders within the source folder.",
-                    sad.Source));
-            sad.Destination.Create(PathType.Folder);
-            if (!sad.Source.Children().Any())
-                sad.Source.DeleteFolder(false);
-            return sad;
+                    translation.Source));
+            translation.Destination.Create(PathType.Folder);
+            if (!translation.Source.Children().Any())
+                translation.Source.DeleteFolder(false);
+            return translation;
         }
 
-        private static bool ContainsFiles(this PathSpec pathSpec)
+        private static bool ContainsFiles(this PathSpec path)
         {
-            if (pathSpec.GetPathType() == PathType.File)
+            if (path.GetPathType() == PathType.File)
                 return true;
-            return pathSpec.Children().All(child => child.ContainsFiles());
+            return path.Children().All(child => child.ContainsFiles());
         }
 
-        public static bool FolderContainsFiles(this PathSpec pathSpec)
+        public static bool FolderContainsFiles(this PathSpec path)
         {
-            if (pathSpec.GetPathType() == PathType.File)
+            if (path.GetPathType() == PathType.File)
                 return false;
-            return pathSpec.ContainsFiles();
+            return path.ContainsFiles();
         }
 
-        public static IMaybe<PathSpec> GetCommonAncestry(this PathSpec fileUri1, PathSpec fileUri2)
+        public static IMaybe<PathSpec> GetCommonAncestry(this PathSpec path1, PathSpec path2)
         {
-            return fileUri1.ToString().GetCommonBeginning(fileUri2.ToString()).Trim('\\').ToPathSpec();
+            return path1.ToString().GetCommonBeginning(path2.ToString()).Trim('\\').ToPathSpec();
         }
 
-        public static IMaybe<Uri> GetCommonDescendants(this PathSpec fileUri1, PathSpec fileUri2)
+        public static IMaybe<Uri> GetCommonDescendants(this PathSpec path1, PathSpec path2)
         {
             try
             {
-                return new Maybe<Uri>(new Uri(fileUri1.ToString().GetCommonEnding(fileUri2.ToString()).Trim('\\'), UriKind.Relative));
+                return new Maybe<Uri>(new Uri(path1.ToString().GetCommonEnding(path2.ToString()).Trim('\\'), UriKind.Relative));
             }
             catch (ArgumentNullException)
             {
@@ -318,13 +318,13 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<Tuple<Uri, Uri>> GetNonCommonDescendants(this PathSpec fileUri1, PathSpec fileUri2)
+        public static IMaybe<Tuple<Uri, Uri>> GetNonCommonDescendants(this PathSpec path1, PathSpec path2)
         {
             try
             {
-                var commonAncestry = fileUri1.ToString().GetCommonBeginning(fileUri2.ToString()).Trim('\\');
-                return new Maybe<Tuple<Uri, Uri>>(new Tuple<Uri, Uri>(new Uri(fileUri1.ToString().Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative),
-                                                 new Uri(fileUri2.ToString().Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative)));
+                var commonAncestry = path1.ToString().GetCommonBeginning(path2.ToString()).Trim('\\');
+                return new Maybe<Tuple<Uri, Uri>>(new Tuple<Uri, Uri>(new Uri(path1.ToString().Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative),
+                                                 new Uri(path2.ToString().Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative)));
             }
             catch (ArgumentNullException)
             {
@@ -336,13 +336,13 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<Tuple<Uri, Uri>> GetNonCommonAncestry(this PathSpec fileUri1, PathSpec fileUri2)
+        public static IMaybe<Tuple<Uri, Uri>> GetNonCommonAncestry(this PathSpec path1, PathSpec path2)
         {
             try
             {
-                var commonDescendants = fileUri1.ToString().GetCommonEnding(fileUri2.ToString()).Trim('\\');
-                return new Maybe<Tuple<Uri, Uri>>(new Tuple<Uri, Uri>(new Uri(fileUri1.ToString().Substring(0, fileUri1.ToString().Length - commonDescendants.Length).Trim('\\')),
-                                                 new Uri(fileUri2.ToString().Substring(0, fileUri2.ToString().Length - commonDescendants.Length).Trim('\\'))));
+                var commonDescendants = path1.ToString().GetCommonEnding(path2.ToString()).Trim('\\');
+                return new Maybe<Tuple<Uri, Uri>>(new Tuple<Uri, Uri>(new Uri(path1.ToString().Substring(0, path1.ToString().Length - commonDescendants.Length).Trim('\\')),
+                                                 new Uri(path2.ToString().Substring(0, path2.ToString().Length - commonDescendants.Length).Trim('\\'))));
             }
             catch (ArgumentNullException)
             {
@@ -479,14 +479,14 @@ namespace MoreIO
                     "xpm"
                 };
 
-        public static FileInfo AsFileInfo(this PathSpec pathSpec)
+        public static FileInfo AsFileInfo(this PathSpec path)
         {
-            return new FileInfo(pathSpec.ToString());
+            return new FileInfo(path.ToString());
         }
 
-        public static DirectoryInfo AsDirectoryInfo(this PathSpec pathSpec)
+        public static DirectoryInfo AsDirectoryInfo(this PathSpec path)
         {
-            return new DirectoryInfo(pathSpec.ToString());
+            return new DirectoryInfo(path.ToString());
         }
 
         public static IMaybe<T> As<T>(this T pathName, PathType pathType)
@@ -497,11 +497,11 @@ namespace MoreIO
             return Maybe<T>.Nothing;
         }
 
-        public static IMaybe<bool> IsReadOnly(this PathSpec pathSpec)
+        public static IMaybe<bool> IsReadOnly(this PathSpec path)
         {
             try
             {
-                return new Maybe<bool>(pathSpec.AsFileInfo().IsReadOnly);
+                return new Maybe<bool>(path.AsFileInfo().IsReadOnly);
             }
             catch (IOException)
             {
@@ -517,11 +517,11 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<long> Length(this PathSpec pathSpec)
+        public static IMaybe<long> Length(this PathSpec path)
         {
             try
             {
-                return new Maybe<long>(pathSpec.AsFileInfo().Length);
+                return new Maybe<long>(path.AsFileInfo().Length);
             }
             catch (IOException)
             {
@@ -670,9 +670,9 @@ namespace MoreIO
         }
 
 
-        public static PathSpec Root(this PathSpec fileUri)
+        public static PathSpec Root(this PathSpec path)
         {
-            var ancestor = fileUri;
+            var ancestor = path;
             IMaybe<PathSpec> cachedParent;
             while ((cachedParent = ancestor.Parent()).HasValue)
             {
@@ -737,13 +737,13 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<FileStream> Open(this PathSpec pathSpec, FileMode fileMode)
+        public static IMaybe<FileStream> Open(this PathSpec path, FileMode fileMode)
         {
             try
             {
                 if (fileMode.MayCreateFile())
-                    pathSpec.Parent().IfHasValue(parent => parent.Create(PathType.Folder));
-                return new Maybe<FileStream>(pathSpec.AsFileInfo().Open(fileMode));
+                    path.Parent().IfHasValue(parent => parent.Create(PathType.Folder));
+                return new Maybe<FileStream>(path.AsFileInfo().Open(fileMode));
             }
             catch (IOException)
             {
@@ -755,14 +755,14 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<FileStream> Open(this PathSpec pathSpec, FileMode fileMode,
+        public static IMaybe<FileStream> Open(this PathSpec path, FileMode fileMode,
                                                               FileAccess fileAccess)
         {
             try
             {
                 if (fileMode.MayCreateFile())
-                    pathSpec.Parent().IfHasValue(parent => parent.Create(PathType.Folder));
-                return new Maybe<FileStream>(pathSpec.AsFileInfo().Open(fileMode, fileAccess));
+                    path.Parent().IfHasValue(parent => parent.Create(PathType.Folder));
+                return new Maybe<FileStream>(path.AsFileInfo().Open(fileMode, fileAccess));
             }
             catch (IOException)
             {
@@ -774,14 +774,14 @@ namespace MoreIO
             }
         }
 
-        public static IMaybe<FileStream> Open(this PathSpec pathSpec, FileMode fileMode,
+        public static IMaybe<FileStream> Open(this PathSpec path, FileMode fileMode,
                                                               FileAccess fileAccess, FileShare fileShare)
         {
             try
             {
                 if (fileMode.MayCreateFile())
-                    pathSpec.Parent().IfHasValue(parent => parent.Create(PathType.Folder));
-                return new Maybe<FileStream>(pathSpec.AsFileInfo().Open(fileMode, fileAccess, fileShare));
+                    path.Parent().IfHasValue(parent => parent.Create(PathType.Folder));
+                return new Maybe<FileStream>(path.AsFileInfo().Open(fileMode, fileAccess, fileShare));
             }
             catch (IOException)
             {
@@ -793,23 +793,23 @@ namespace MoreIO
             }
         }
 
-        public static PathSpec CreateFolder(this PathSpec fileUri)
+        public static PathSpec CreateFolder(this PathSpec path)
         {
             try
             {
-                if (fileUri.GetPathType() == PathType.Folder)
-                    return fileUri;
-                fileUri.Parent().IfHasValue(parent => parent.CreateFolder());
-                fileUri.AsDirectoryInfo().Create();
+                if (path.GetPathType() == PathType.Folder)
+                    return path;
+                path.Parent().IfHasValue(parent => parent.CreateFolder());
+                path.AsDirectoryInfo().Create();
             }
             catch (IOException)
             {
-                if (fileUri.GetPathType() != PathType.Folder)
+                if (path.GetPathType() != PathType.Folder)
                     throw;
             }
-            if (fileUri.GetPathType() != PathType.Folder)
-                throw new IOException("Failed to create folder " + fileUri);
-            return fileUri;
+            if (path.GetPathType() != PathType.Folder)
+                throw new IOException("Failed to create folder " + path);
+            return path;
         }
 
         public static void WriteAllText(this PathSpec path, string text)
@@ -839,11 +839,11 @@ namespace MoreIO
 
         #endregion
 
-        public static PathSpec ToAbsolute(this PathSpec pathSpec)
+        public static PathSpec ToAbsolute(this PathSpec path)
         {
-            if (pathSpec.IsRelative())
-                return PathUtility.CurrentDirectory.Join(pathSpec).Value;
-            return pathSpec;
+            if (path.IsRelative())
+                return PathUtility.CurrentDirectory.Join(path).Value;
+            return path;
         }
 
         public static IReadOnlySet<PathSpec> Children(this PathSpec path)
@@ -1007,47 +1007,47 @@ namespace MoreIO
 
         #region PathSpec extension methods
 
-        public static PathSpec RelativeTo(this PathSpec pathSpec, PathSpec relativeTo)
+        public static PathSpec RelativeTo(this PathSpec path, PathSpec relativeTo)
         {
-            var pathSpecStr = pathSpec.Simplify().ToString();
+            var pathStr = path.Simplify().ToString();
             var relativeToStr = relativeTo.Simplify().ToString();
 
-            var common = pathSpec.CommonWith(relativeTo);
+            var common = path.CommonWith(relativeTo);
 
             if (!common.HasValue)
-                return pathSpec;
+                return path;
 
             var sb = new StringBuilder();
 
             for(var i = 0; i < relativeTo.Components.Count - common.Value.Components.Count; i++)
             {
                 sb.Append("..");
-                sb.Append(pathSpec.DirectorySeparator);
+                sb.Append(path.DirectorySeparator);
             }
 
-            var restOfRelativePath = pathSpecStr.ToString().Substring(common.Value.ToString().Length);
-            while (restOfRelativePath.StartsWith(pathSpec.DirectorySeparator))
-                restOfRelativePath = restOfRelativePath.Substring(pathSpec.DirectorySeparator.Length);
+            var restOfRelativePath = pathStr.ToString().Substring(common.Value.ToString().Length);
+            while (restOfRelativePath.StartsWith(path.DirectorySeparator))
+                restOfRelativePath = restOfRelativePath.Substring(path.DirectorySeparator.Length);
 
             sb.Append(restOfRelativePath);
 
             return sb.ToString().ToPathSpec().Value;
 
-            //if (pathSpecStr.StartsWith(relativeToStr))
+            //if (pathStr.StartsWith(relativeToStr))
             //{
-            //    var result = pathSpecStr.Substring(relativeToStr.Length);
-            //    if (result.StartsWith(pathSpec.DirectorySeparator))
-            //        return result.Substring(pathSpec.DirectorySeparator.Length).ToPathSpec().Value;
+            //    var result = pathStr.Substring(relativeToStr.Length);
+            //    if (result.StartsWith(path.DirectorySeparator))
+            //        return result.Substring(path.DirectorySeparator.Length).ToPathSpec().Value;
             //}
             //throw new NotImplementedException();
         }
 
-        public static IMaybe<PathSpec> CommonWith(this PathSpec pathSpec, PathSpec that)
+        public static IMaybe<PathSpec> CommonWith(this PathSpec path, PathSpec that)
         {
-            var path1Str = pathSpec.ToString();
+            var path1Str = path.ToString();
             var path2Str = that.ToString();
 
-            if (!pathSpec.Flags.HasFlag(PathFlags.CaseSensitive) || !that.Flags.HasFlag(PathFlags.CaseSensitive))
+            if (!path.Flags.HasFlag(PathFlags.CaseSensitive) || !that.Flags.HasFlag(PathFlags.CaseSensitive))
             {
                 path1Str = path1Str.ToUpper();
                 path2Str = path2Str.ToUpper();
@@ -1065,20 +1065,20 @@ namespace MoreIO
             return path1Str.Substring(0, i).ToPathSpec();
         }
 
-        public static bool CanBeSimplified(this PathSpec pathSpec)
+        public static bool CanBeSimplified(this PathSpec path)
         {
-            return pathSpec.Components.SkipWhile(str => str == "..").Any(str => str == "..");
+            return path.Components.SkipWhile(str => str == "..").Any(str => str == "..");
         }
 
-        public static PathSpec Simplify(this PathSpec pathSpec)
+        public static PathSpec Simplify(this PathSpec path)
         {
             var result = new List<string>();
             var numberOfComponentsToSkip = 0;
-            for (var i = pathSpec.Components.Count - 1; i >= 0; i--)
+            for (var i = path.Components.Count - 1; i >= 0; i--)
             {
-                if (pathSpec.Components[i] == ".")
+                if (path.Components[i] == ".")
                     continue;
-                if (pathSpec.Components[i] == "..")
+                if (path.Components[i] == "..")
                     numberOfComponentsToSkip++;
                 else if (numberOfComponentsToSkip > 0)
                 {
@@ -1086,10 +1086,10 @@ namespace MoreIO
                 }
                 else
                 {
-                    result.Insert(0, pathSpec.Components[i]);
+                    result.Insert(0, path.Components[i]);
                 }
             }
-            if (numberOfComponentsToSkip > 0 && !pathSpec.IsRelative())
+            if (numberOfComponentsToSkip > 0 && !path.IsRelative())
                 throw new ArgumentException("Error: the specified path points to an ancestor of the root, which means that the specified path is invalid");
             for (var i = 0; i < numberOfComponentsToSkip; i++)
             {
@@ -1100,43 +1100,43 @@ namespace MoreIO
             {
                 sb.Append(result[i]);
                 if (result[i] != "\\" && i != result.Count - 1)
-                    sb.Append(pathSpec.DirectorySeparator);
+                    sb.Append(path.DirectorySeparator);
             }
             var str = sb.ToString();
             if (str.Length == 0)
                 str = ".";
-            return str.ToPathSpec(pathSpec.Flags).Value;
+            return str.ToPathSpec(path.Flags).Value;
         }
 
-        public static IMaybe<PathSpec> Parent(this PathSpec pathSpec)
+        public static IMaybe<PathSpec> Parent(this PathSpec path)
 	    {
-            return pathSpec.Components.Subset(0, -2).Select(str => PathUtility.TryParsePathSpec(str, pathSpec.Flags)).Join();
+            return path.Components.Subset(0, -2).Select(str => PathUtility.TryParsePathSpec(str, path.Flags)).Join();
 	    }
 
-        public static bool IsAbsolute(this PathSpec pathSpec)
+        public static bool IsAbsolute(this PathSpec path)
         {
-            return pathSpec.Components.ComponentsAreAbsolute();
+            return path.Components.ComponentsAreAbsolute();
         }
 
-        public static bool IsRelative(this PathSpec pathSpec)
+        public static bool IsRelative(this PathSpec path)
         {
-            return pathSpec.Components.ComponentsAreRelative();
+            return path.Components.ComponentsAreRelative();
         }
 
-        internal static bool ComponentsAreAbsolute(this IReadOnlyList<string> pathSpec)
+        internal static bool ComponentsAreAbsolute(this IReadOnlyList<string> path)
         {
-            if (pathSpec[0] == "/")
+            if (path[0] == "/")
                 return true;
-            if (char.IsLetter(pathSpec[0][0]) && pathSpec[0][1] == ':')
+            if (char.IsLetter(path[0][0]) && path[0][1] == ':')
                 return true;
             return false;
         }
 
-        internal static bool ComponentsAreRelative(this IReadOnlyList<string> pathSpec)
+        internal static bool ComponentsAreRelative(this IReadOnlyList<string> path)
         {
-            if (pathSpec.ComponentsAreAbsolute())
+            if (path.ComponentsAreAbsolute())
                 return false;
-            if (pathSpec[0] == "\\")
+            if (path[0] == "\\")
                 return false;
             return true;
         }

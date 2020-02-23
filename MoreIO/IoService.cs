@@ -53,7 +53,7 @@ namespace MoreIO
             }
         }
         
-        public IDictionaryChangesStrict<PathSpec, PathSpec> ToLiveLinq(PathSpec root, bool includeFileChanges = true)
+        public IDictionaryChangesStrict<PathSpec, PathSpec> ToLiveLinq(PathSpec root, bool includeFileContentChanges = true)
         {
             var watcher = new FileSystemWatcher(root.ToString())
             {

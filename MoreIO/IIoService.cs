@@ -21,7 +21,7 @@ namespace MoreIO
         /// <returns>A mapping from the original file path to the new suggested file name.</returns>
         IEnumerable<KeyValuePair<PathSpec, string>> ProposeUniqueNamesForMovingPathsToSameFolder(
             IEnumerable<PathSpec> paths);
-        IDictionaryChangesStrict<PathSpec, PathSpec> ToLiveLinq(PathSpec root, bool includeFileChanges = true);
+        IDictionaryChangesStrict<PathSpec, PathSpec> ToLiveLinq(PathSpec root, bool includeFileContentChanges = true);
         IEnumerable<PathSpec> GetChildren(PathSpec path, bool includeFolders = true, bool includeFiles = true);
         IEnumerable<PathSpec> GetFiles(PathSpec path);
         IEnumerable<PathSpec> GetFolders(PathSpec path);

@@ -12,15 +12,18 @@ namespace MoreIO
     public interface IIoService
     {
         /// <summary>
-        /// Given a bunch of files or folders in different places that may have the same name,
-        /// create unique names for those files and folders based on their original name and the
-        /// paths to those files and folders.
+        ///     Given a bunch of files or folders in different places that may have the same name,
+        ///     create unique names for those files and folders based on their original name and the
+        ///     paths to those files and folders.
         /// </summary>
-        /// <param name="paths">The paths to the files and folders that may have the same name but
-        /// be in different locations.</param>
+        /// <param name="paths">
+        ///     The paths to the files and folders that may have the same name but
+        ///     be in different locations.
+        /// </param>
         /// <returns>A mapping from the original file path to the new suggested file name.</returns>
         IEnumerable<KeyValuePair<PathSpec, string>> ProposeUniqueNamesForMovingPathsToSameFolder(
             IEnumerable<PathSpec> paths);
+
         IDictionaryChangesStrict<PathSpec, PathSpec> ToLiveLinq(PathSpec root, bool includeFileContentChanges = true);
         IEnumerable<PathSpec> GetChildren(PathSpec path, bool includeFolders = true, bool includeFiles = true);
         IEnumerable<PathSpec> GetFiles(PathSpec path);
@@ -39,10 +42,11 @@ namespace MoreIO
         string LastPathComponent(PathSpec path);
 
         /// <summary>
-        /// Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from). For example, the ancestors of the path C:\Users\myusername\Documents would be these, in order:
-        /// C:\Users\myusername
-        /// C:\Users
-        /// C:
+        ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
+        ///     For example, the ancestors of the path C:\Users\myusername\Documents would be these, in order:
+        ///     C:\Users\myusername
+        ///     C:\Users
+        ///     C:
         /// </summary>
         /// <param name="path"></param>
         /// <param name="includeItself"></param>
@@ -55,7 +59,6 @@ namespace MoreIO
         bool HasExtension(PathSpec path, string extension);
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="path"></param>
         /// <param name="differentExtension">Must include the "." part of the extension (e.g., ".avi" not "avi")</param>
@@ -92,7 +95,8 @@ namespace MoreIO
         IMaybe<string> FullName(PathSpec attributes);
 
         /// <summary>
-        /// Includes the period character ".". For example, function would return ".exe" if the file pointed to a file named was "test.exe".
+        ///     Includes the period character ".". For example, function would return ".exe" if the file pointed to a file named
+        ///     was "test.exe".
         /// </summary>
         /// <param name="pathName"></param>
         /// <returns></returns>

@@ -17,8 +17,9 @@ namespace MoreIO
         {
             return root.IoService.ToLiveLinq(root, includeFileContentChanges);
         }
-        
-        public static IEnumerable<PathSpec> GetChildren(this PathSpec path, bool includeFolders = true, bool includeFiles = true)
+
+        public static IEnumerable<PathSpec> GetChildren(this PathSpec path, bool includeFolders = true,
+            bool includeFiles = true)
         {
             return path.IoService.GetChildren(path, includeFolders, includeFiles);
         }
@@ -27,7 +28,7 @@ namespace MoreIO
         {
             return path.IoService.GetFiles(path);
         }
-        
+
         public static IEnumerable<PathSpec> GetFolders(this PathSpec path)
         {
             return path.IoService.GetFolders(path);
@@ -152,7 +153,7 @@ namespace MoreIO
         {
             return path.IoService.ContainsFiles(path);
         }
-        
+
         public static bool FolderContainsFiles(this PathSpec path)
         {
             return path.IoService.FolderContainsFiles(path);
@@ -178,7 +179,8 @@ namespace MoreIO
             return path1.IoService.GetNonCommonAncestry(path1, path2);
         }
 
-        public static IPathSpecTranslation Translate(this PathSpec pathToBeCopied, PathSpec source, PathSpec destination)
+        public static IPathSpecTranslation Translate(this PathSpec pathToBeCopied, PathSpec source,
+            PathSpec destination)
         {
             return pathToBeCopied.IoService.Translate(pathToBeCopied, source, destination);
         }
@@ -262,7 +264,7 @@ namespace MoreIO
         {
             return path.IoService.DeleteFolder(path, recursive);
         }
-        
+
         public static void Create(this PathSpec path, PathType pathType)
         {
             path.IoService.Create(path, pathType);
@@ -278,7 +280,8 @@ namespace MoreIO
             return path.IoService.Open(path, fileMode, fileAccess);
         }
 
-        public static IMaybe<FileStream> Open(this PathSpec path, FileMode fileMode, FileAccess fileAccess, FileShare fileShare)
+        public static IMaybe<FileStream> Open(this PathSpec path, FileMode fileMode, FileAccess fileAccess,
+            FileShare fileShare)
         {
             return path.IoService.Open(path, fileMode, fileAccess, fileShare);
         }
@@ -445,7 +448,8 @@ namespace MoreIO
             return ioService.Join(root, descendants);
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<PathSpec>> root, IEnumerable<IMaybe<string>> descendants)
+        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<PathSpec>> root,
+            IEnumerable<IMaybe<string>> descendants)
         {
             var ioService = root.First(x => x.HasValue).Value.IoService;
             return ioService.Join(root, descendants);
@@ -469,7 +473,8 @@ namespace MoreIO
             return ioService.Join(root, descendants);
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<PathSpec>> root, params IMaybe<string>[] descendants)
+        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<PathSpec>> root,
+            params IMaybe<string>[] descendants)
         {
             var ioService = root.First(x => x.HasValue).Value.IoService;
             return ioService.Join(root, descendants);
@@ -557,7 +562,8 @@ namespace MoreIO
             return ioService.Join(root, descendants);
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<PathSpec>> root, IEnumerable<IMaybe<PathSpec>> descendants)
+        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<PathSpec>> root,
+            IEnumerable<IMaybe<PathSpec>> descendants)
         {
             var ioService = root.First(x => x.HasValue).Value.IoService;
             return ioService.Join(root, descendants);
@@ -581,7 +587,8 @@ namespace MoreIO
             return ioService.Join(root, descendants);
         }
 
-        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<PathSpec>> root, params IMaybe<PathSpec>[] descendants)
+        public static IMaybe<PathSpec> Join(this IEnumerable<IMaybe<PathSpec>> root,
+            params IMaybe<PathSpec>[] descendants)
         {
             var ioService = root.First(x => x.HasValue).Value.IoService;
             return ioService.Join(root, descendants);
@@ -592,43 +599,53 @@ namespace MoreIO
             var ioService = root.First().IoService;
             return ioService.Join(root, descendants);
         }
-        
+
         public static IMaybe<StreamWriter> CreateText(this PathSpec pathSpec)
         {
             return pathSpec.IoService.CreateText(pathSpec);
         }
 
-        public static IEnumerable<string> ReadLines(this PathSpec pathSpec, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
-            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
+        public static IEnumerable<string> ReadLines(this PathSpec pathSpec, FileMode fileMode = FileMode.Open,
+            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
+            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            bool leaveOpen = false)
         {
-            return pathSpec.IoService.ReadLines(pathSpec, fileMode, fileAccess, fileShare, encoding, detectEncodingFromByteOrderMarks,
+            return pathSpec.IoService.ReadLines(pathSpec, fileMode, fileAccess, fileShare, encoding,
+                detectEncodingFromByteOrderMarks,
                 bufferSize, leaveOpen);
         }
 
-        public static IMaybe<string> ReadText(this PathSpec pathSpec, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
-            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
+        public static IMaybe<string> ReadText(this PathSpec pathSpec, FileMode fileMode = FileMode.Open,
+            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
+            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            bool leaveOpen = false)
         {
             return pathSpec.IoService.ReadText(pathSpec, fileMode, fileAccess, fileShare, encoding,
                 detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
         }
 
-        public static void WriteText(this PathSpec pathSpec, IEnumerable<string> lines, FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
+        public static void WriteText(this PathSpec pathSpec, IEnumerable<string> lines,
+            FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write,
+            FileShare fileShare = FileShare.None,
             Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
         {
-            pathSpec.IoService.WriteText(pathSpec, lines, fileMode, fileAccess, fileShare, encoding, bufferSize, leaveOpen);
+            pathSpec.IoService.WriteText(pathSpec, lines, fileMode, fileAccess, fileShare, encoding, bufferSize,
+                leaveOpen);
         }
 
-        public static void WriteText(this PathSpec pathSpec, string text, FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
+        public static void WriteText(this PathSpec pathSpec, string text, FileMode fileMode = FileMode.Create,
+            FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
             Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
         {
-            pathSpec.IoService.WriteText(pathSpec, text, fileMode, fileAccess, fileShare, encoding, bufferSize, leaveOpen);
+            pathSpec.IoService.WriteText(pathSpec, text, fileMode, fileAccess, fileShare, encoding, bufferSize,
+                leaveOpen);
         }
 
         public static bool IsFile(this PathSpec pathSpec)
         {
             return pathSpec.GetPathType() == PathType.File;
         }
-        
+
         public static bool IsFolder(this PathSpec pathSpec)
         {
             return pathSpec.GetPathType() == PathType.Folder;

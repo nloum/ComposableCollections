@@ -7,8 +7,6 @@ namespace MoreIO
 {
     public sealed class PathSpecTranslation : IPathSpecTranslation
     {
-        public IIoService IoService { get; }
-
         internal PathSpecTranslation(PathSpec source, PathSpec destination, IIoService ioService)
         {
             Source = source;
@@ -16,22 +14,26 @@ namespace MoreIO
             IoService = ioService;
         }
 
-        public PathSpec Source { get; private set; }
-        public PathSpec Destination { get; private set; }
+        public IIoService IoService { get; }
+
+        public PathSpec Source { get; }
+        public PathSpec Destination { get; }
 
         public IEnumerator<CalculatedPathSpecTranslation> GetEnumerator()
         {
-            return Source.Children().Select(child => new CalculatedPathSpecTranslation(child, Source, Destination, IoService)).GetEnumerator();
-        }
-
-        public override string ToString()
-        {
-            return String.Format("Translate {0} to {1}", Source, Destination);
+            return Source.Children()
+                .Select(child => new CalculatedPathSpecTranslation(child, Source, Destination, IoService))
+                .GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public override string ToString()
+        {
+            return string.Format("Translate {0} to {1}", Source, Destination);
         }
 
         public Tuple<PathSpec, PathSpec> ToTuple()
@@ -55,7 +57,8 @@ namespace MoreIO
         {
             unchecked
             {
-                return ((Source != null ? Source.GetHashCode() : 0)*397) ^ (Destination != null ? Destination.GetHashCode() : 0);
+                return ((Source != null ? Source.GetHashCode() : 0) * 397) ^
+                       (Destination != null ? Destination.GetHashCode() : 0);
             }
         }
 

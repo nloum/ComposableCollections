@@ -10,7 +10,7 @@ namespace MoreIO.Test
         {
             return new IoService();
         }
-        
+
         [TestMethod]
         public void MovingShouldWork()
         {
@@ -22,7 +22,7 @@ namespace MoreIO.Test
                 .ClearFolder();
 
             var text1 = test1.Descendant("test.txt").Value;
-            
+
             text1.WriteText("testing 1 2 3");
 
             var test2 = ioService.ToPath("test2").Value
@@ -34,7 +34,7 @@ namespace MoreIO.Test
             text1.Exists().Should().BeFalse();
             text2.Destination.Exists().Should().BeTrue();
         }
-        
+
         [TestMethod]
         public void MovingShouldPromptChangeDetection()
         {
@@ -46,7 +46,7 @@ namespace MoreIO.Test
                 .ClearFolder();
 
             var text1 = test1.Descendant("test.txt").Value;
-            
+
             text1.WriteText("testing 1 2 3");
 
             var test2 = ioService.ToPath("test2").Value

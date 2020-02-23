@@ -4,6 +4,6 @@ namespace MoreIO
     {
         File,
         Folder,
-        None,
+        None
     }
 }

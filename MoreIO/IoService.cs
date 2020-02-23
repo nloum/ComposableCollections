@@ -7,60 +7,677 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Security;
 using System.Text;
-using System.Threading.Tasks;
-using MoreCollections;
-using UtilityDisposables;
-using LiveLinq.Set;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using LiveLinq.Core;
 using LiveLinq.Dictionary;
+using LiveLinq.Set;
+using MoreCollections;
 using SimpleMonads;
 using TreeLinq;
+using UtilityDisposables;
 using static SimpleMonads.Utility;
 
 namespace MoreIO
 {
     public class IoService : IIoService
     {
-        #region File and folder extension methods
-        
-        public IEnumerable<KeyValuePair<PathSpec, string>> ProposeUniqueNamesForMovingPathsToSameFolder(
-            IEnumerable<PathSpec> paths ) {
-            var alreadyProposedNames = new HashSet<string>();
-            foreach ( var path in paths ) {
-                var enumerator = ProposeSuccessivelyMoreSpecificNames( path ).GetEnumerator();
-                enumerator.MoveNext();
-                while ( alreadyProposedNames.Contains( enumerator.Current ) ) {
-                    enumerator.MoveNext();
+        private readonly HashSet<PathSpec> _knownStorage = new HashSet<PathSpec>();
+
+        private readonly object _lock = new object();
+        private string defaultDirectorySeparatorForThisEnvironment;
+        private PathFlags? defaultFlagsForThisEnvironment;
+
+        public PathSpec CurrentDirectory => ToPath(Environment.CurrentDirectory).Value;
+
+        public IReadOnlyObservableSet<PathSpec> Storage { get; }
+
+        public PathSpec ToAbsolute(PathSpec path)
+        {
+            if (path.IsRelative())
+                return CurrentDirectory.Join(path).Value;
+            return path;
+        }
+
+        public IReadOnlyObservableSet<PathSpec> Children(PathSpec path)
+        {
+            return path.Children("*");
+        }
+
+        public IReadOnlyObservableSet<PathSpec> Children(PathSpec path, string pattern)
+        {
+            return new PathSpecDescendants(path, pattern, false, this);
+        }
+
+        public IReadOnlyObservableSet<PathSpec> Descendants(PathSpec path)
+        {
+            return path.Descendants("*");
+        }
+
+        public IReadOnlyObservableSet<PathSpec> Descendants(PathSpec path, string pattern)
+        {
+            return new PathSpecDescendants(path, pattern, true, this);
+        }
+
+        public IObservable<Unit> ObserveChanges(PathSpec path)
+        {
+            return path.ObserveChanges(NotifyFilters.Attributes | NotifyFilters.CreationTime |
+                                       NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastAccess |
+                                       NotifyFilters.LastWrite | NotifyFilters.Security | NotifyFilters.Size);
+        }
+
+        public IObservable<Unit> ObserveChanges(PathSpec path, NotifyFilters filters)
+        {
+            var parent = path.Parent();
+            if (!parent.HasValue) return Observable.Never<Unit>();
+
+            return Observable.Create<Unit>(observer =>
+            {
+                var watcher = new FileSystemWatcher(parent.Value.ToString())
+                {
+                    IncludeSubdirectories = false,
+                    Filter = path.Name,
+                    EnableRaisingEvents = true,
+                    NotifyFilter = filters
+                };
+
+                var subscription = Observable
+                    .FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+                        handler => watcher.Changed += handler, handler => watcher.Changed -= handler)
+                    .Select(_ => Unit.Default)
+                    .Subscribe(observer);
+
+                return new AnonymousDisposable(() =>
+                {
+                    subscription.Dispose();
+                    watcher.Dispose();
+                });
+            });
+        }
+
+
+        public IMaybe<StreamWriter> CreateText(PathSpec pathSpec)
+        {
+            try
+            {
+                return new Maybe<StreamWriter>(pathSpec.AsFileInfo().CreateText());
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Maybe<StreamWriter>.Nothing;
+            }
+            catch (IOException)
+            {
+                return Maybe<StreamWriter>.Nothing;
+            }
+            catch (SecurityException)
+            {
+                return Maybe<StreamWriter>.Nothing;
+            }
+        }
+
+        public IEnumerable<string> ReadLines(PathSpec pathSpec, FileMode fileMode = FileMode.Open,
+            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
+            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            bool leaveOpen = false)
+        {
+            var maybeFileStream = pathSpec.Open(fileMode, fileAccess, fileShare);
+            if (maybeFileStream.HasValue)
+                using (maybeFileStream.Value)
+                {
+                    return ReadLines(maybeFileStream.Value, encoding, detectEncodingFromByteOrderMarks, bufferSize,
+                        leaveOpen);
                 }
 
-                alreadyProposedNames.Add( enumerator.Current );
+            return EnumerableUtility.EmptyArray<string>();
+        }
+
+        public IMaybe<string> ReadText(PathSpec pathSpec, FileMode fileMode = FileMode.Open,
+            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
+            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            bool leaveOpen = false)
+        {
+            return pathSpec.Open(fileMode, fileAccess, fileShare).Select(
+                fs =>
+                {
+                    using (fs)
+                    {
+                        return ReadText(fs, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
+                    }
+                });
+        }
+
+        public void WriteText(PathSpec pathSpec, IEnumerable<string> lines, FileMode fileMode = FileMode.Create,
+            FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
+            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
+        {
+            var maybeFileStream = pathSpec.Open(fileMode, fileAccess, fileShare);
+            if (maybeFileStream.HasValue)
+                using (maybeFileStream.Value)
+                {
+                    WriteLines(maybeFileStream.Value, lines, encoding, bufferSize, leaveOpen);
+                }
+        }
+
+        public void WriteText(PathSpec pathSpec, string text, FileMode fileMode = FileMode.Create,
+            FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
+            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
+        {
+            var maybeFileStream = pathSpec.Open(fileMode, fileAccess, fileShare);
+            if (maybeFileStream.HasValue)
+                using (maybeFileStream.Value)
+                {
+                    WriteText(maybeFileStream.Value, text, encoding, bufferSize, leaveOpen);
+                }
+        }
+
+        public IEnumerable<string> ReadLines(Stream stream, Encoding encoding = null,
+            bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
+        {
+            if (encoding == null)
+                encoding = Encoding.UTF8;
+            using (var sr = new StreamReader(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen))
+            {
+                string line;
+                while ((line = sr.ReadLine()) != null) yield return line;
+            }
+        }
+
+        public IEnumerable<string> ReadLinesBackwards(Stream stream, Encoding encoding = null,
+            bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
+        {
+            if (encoding == null)
+                encoding = Encoding.UTF8;
+
+            var content = string.Empty;
+            // Seek file pointer to end
+            stream.Seek(0, SeekOrigin.End);
+
+            var buffer = new byte[bufferSize];
+
+            //loop now and read backwards
+            while (stream.Position > 0)
+            {
+                buffer.Initialize();
+
+                int bytesRead;
+
+                if (stream.Position - bufferSize >= 0)
+                {
+                    stream.Seek(-bufferSize, SeekOrigin.Current);
+                    bytesRead = stream.Read(buffer, 0, bufferSize);
+                    stream.Seek(-bufferSize, SeekOrigin.Current);
+                }
+                else
+                {
+                    var finalBufferSize = stream.Position;
+                    stream.Seek(0, SeekOrigin.Begin);
+                    bytesRead = stream.Read(buffer, 0, (int) finalBufferSize);
+                    stream.Seek(0, SeekOrigin.Begin);
+                }
+
+                var strBuffer = encoding.GetString(buffer, 0, bytesRead);
+
+                // lines is equal to what we just read, with the leftover content from last iteration appended to it.
+                var lines = (strBuffer + content).Split('\n');
+
+                // Loop through lines backwards, ignoring the first element, and yield each value
+                for (var i = lines.Length - 1; i > 0; i--) yield return lines[i].Trim('\r');
+
+                // Leftover content is part of a line defined on the line(s) that we'll read next iteration of while loop
+                // so we must save leftover content for later
+                content = lines[0];
+            }
+        }
+
+        public string ReadText(Stream stream, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
+            int bufferSize = 4096, bool leaveOpen = false)
+        {
+            if (encoding == null)
+                encoding = Encoding.UTF8;
+            using (var sr = new StreamReader(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen))
+            {
+                return ReadText(sr);
+            }
+        }
+
+
+        public PathSpec CreateTemporaryPath(PathType type)
+        {
+            var path = Path.GetRandomFileName();
+            var spec = ToPath(path).Value;
+            if (type == PathType.File)
+                spec.Create(PathType.File);
+            if (type == PathType.Folder)
+                spec.Create(PathType.Folder);
+            return spec;
+        }
+
+        public PathFlags GetDefaultFlagsForThisEnvironment()
+        {
+            lock (_lock)
+            {
+                if (defaultFlagsForThisEnvironment == null)
+                {
+                    var file = Path.GetTempFileName();
+                    var caseSensitive = File.Exists(file.ToLower()) && File.Exists(file.ToUpper());
+                    File.Delete(file);
+                    if (caseSensitive)
+                        defaultFlagsForThisEnvironment = PathFlags.CaseSensitive;
+                    else
+                        defaultFlagsForThisEnvironment = PathFlags.None;
+                }
+
+                return defaultFlagsForThisEnvironment.Value;
+            }
+        }
+
+        public string GetDefaultDirectorySeparatorForThisEnvironment()
+        {
+            lock (_lock)
+            {
+                if (defaultDirectorySeparatorForThisEnvironment == null)
+                {
+                    var path = Path.Combine("a", "b");
+                    defaultDirectorySeparatorForThisEnvironment = path.Substring(1, path.Length - 2);
+                }
+
+                return defaultDirectorySeparatorForThisEnvironment;
+            }
+        }
+
+        /// <summary>
+        ///     Returns a regex that filters files the same as the specified pattern.
+        ///     From here: http://www.java2s.com/Code/CSharp/Regular-Expressions/Checksifnamematchespatternwithandwildcards.htm
+        ///     Copyright:   Julijan ?ribar, 2004-2007
+        ///     This software is provided 'as-is', without any express or implied
+        ///     warranty.  In no event will the author(s) be held liable for any damages
+        ///     arising from the use of this software.
+        ///     Permission is granted to anyone to use this software for any purpose,
+        ///     including commercial applications, and to alter it and redistribute it
+        ///     freely, subject to the following restrictions:
+        ///     1. The origin of this software must not be misrepresented; you must not
+        ///     claim that you wrote the original software. If you use this software
+        ///     in a product, an acknowledgment in the product documentation would be
+        ///     appreciated but is not required.
+        ///     2. Altered source versions must be plainly marked as such, and must not be
+        ///     misrepresented as being the original software.
+        ///     3. This notice may not be removed or altered from any source distribution.
+        /// </summary>
+        /// <param name="filename">
+        ///     Name to match.
+        /// </param>
+        /// <param name="pattern">
+        ///     Pattern to match to.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if name matches pattern, otherwise <c>false</c>.
+        /// </returns>
+        public Regex FileNamePatternToRegex(string pattern)
+        {
+            // prepare the pattern to the form appropriate for Regex class
+            var sb = new StringBuilder(pattern);
+            // remove superflous occurences of  "?*" and "*?"
+            while (sb.ToString().IndexOf("?*") != -1) sb.Replace("?*", "*");
+
+            while (sb.ToString().IndexOf("*?") != -1) sb.Replace("*?", "*");
+
+            // remove superflous occurences of asterisk '*'
+            while (sb.ToString().IndexOf("**") != -1) sb.Replace("**", "*");
+
+            // if only asterisk '*' is left, the mask is ".*"
+            if (sb.ToString().Equals("*"))
+            {
+                pattern = ".*";
+            }
+            else
+            {
+                // replace '.' with "\."
+                sb.Replace(".", "\\.");
+                // replaces all occurrences of '*' with ".*" 
+                sb.Replace("*", ".*");
+                // replaces all occurrences of '?' with '.*' 
+                sb.Replace("?", ".");
+                // add "\b" to the beginning and end of the pattern
+                sb.Insert(0, "\\b");
+                sb.Append("\\b");
+                pattern = sb.ToString();
+            }
+
+            var regex = new Regex(pattern, RegexOptions.IgnoreCase);
+            return regex;
+        }
+
+        public PathSpec ParsePathSpec(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+        {
+            var error = string.Empty;
+            PathSpec pathSpec;
+            if (!TryParsePathSpec(path, out pathSpec, out error, flags))
+                throw new ArgumentException(error);
+            return pathSpec;
+        }
+
+        public IMaybe<PathSpec> TryParsePathSpec(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+        {
+            var error = string.Empty;
+            PathSpec pathSpec;
+            if (!TryParsePathSpec(path, out pathSpec, out error, flags))
+                return Nothing<PathSpec>();
+            return Something(pathSpec);
+        }
+
+        public bool TryParsePathSpec(string path, out PathSpec pathSpec,
+            PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+        {
+            var error = string.Empty;
+            return TryParsePathSpec(path, out pathSpec, out error, flags);
+        }
+
+        public bool TryParsePathSpec(string path, out PathSpec pathSpec, out string error,
+            PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+        {
+            if (flags.HasFlag(PathFlags.UseDefaultsFromUtility) && flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
+                throw new ArgumentException(
+                    "Cannot specify both PathFlags.UseDefaultsFromUtility and PathFlags.UseDefaultsForGivenPath");
+            if (flags.HasFlag(PathFlags.UseDefaultsFromUtility))
+                flags = GetDefaultFlagsForThisEnvironment();
+            error = string.Empty;
+            pathSpec = null;
+            var isWindowsStyle = path.Contains("\\") || path.Contains(":");
+            var isUnixStyle = path.Contains("/");
+            if (isWindowsStyle && isUnixStyle)
+            {
+                error = "Cannot mix slashes and backslashes in the same path";
+                return false;
+            }
+
+            if (isWindowsStyle)
+            {
+                if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
+                    flags = PathFlags.None;
+                if (path.Length > 1 && path.EndsWith("\\"))
+                    path = path.Substring(0, path.Length - 1);
+                var colonIdx = path.LastIndexOf(':');
+                if (colonIdx > -1 && (colonIdx != 1 || !char.IsLetter(path[0]) || path.Length > 2 && path[2] != '\\'))
+                {
+                    error = "A Windows path may not contain a : character, except as part of the drive specifier.";
+                    return false;
+                }
+
+                var isAbsolute = IsAbsoluteWindowsPath(path);
+                if (isAbsolute)
+                {
+                    var components = path.Split('\\').ToList();
+                    components.RemoveWhere((i, str) => i != 0 && str == ".");
+                    if (components.Any(string.IsNullOrEmpty))
+                    {
+                        error = "Must not contain any directories that have empty names";
+                        return false;
+                    }
+
+                    if (IsAncestorOfRoot(components))
+                    {
+                        error = "Must not point to an ancestor of the filesystem root";
+                        return false;
+                    }
+
+                    pathSpec = new PathSpec(flags, "\\", this, components);
+                }
+                else if (path.StartsWith("."))
+                {
+                    var components = path.Split('\\').ToList();
+                    components.RemoveWhere((i, str) => i != 0 && str == ".");
+                    if (components.Any(string.IsNullOrEmpty))
+                    {
+                        error = "Must not contain any directories that have empty names";
+                        return false;
+                    }
+
+                    if (IsAncestorOfRoot(components))
+                    {
+                        error = "Must not point to an ancestor of the filesystem root";
+                        return false;
+                    }
+
+                    pathSpec = new PathSpec(flags, "\\", this, components);
+                }
+                else if (path.StartsWith("\\\\"))
+                {
+                    var components = "\\\\".ItemConcat(path.Substring(2).Split('\\')).ToList();
+                    components.RemoveWhere((i, str) => i != 0 && str == ".");
+                    if (components.Any(string.IsNullOrEmpty))
+                    {
+                        error = "Must not contain any directories that have empty names";
+                        return false;
+                    }
+
+                    if (IsAncestorOfRoot(components))
+                    {
+                        error = "Must not point to an ancestor of the filesystem root";
+                        return false;
+                    }
+
+                    pathSpec = new PathSpec(flags, "\\", this, components);
+                }
+                else if (path.StartsWith("\\"))
+                {
+                    var components = "\\".ItemConcat(path.Substring(1).Split('\\')).ToList();
+                    components.RemoveWhere((i, str) => i != 0 && str == ".");
+                    if (components.Any(string.IsNullOrEmpty))
+                    {
+                        error = "Must not contain any directories that have empty names";
+                        return false;
+                    }
+
+                    if (IsAncestorOfRoot(components))
+                    {
+                        error = "Must not point to an ancestor of the filesystem root";
+                        return false;
+                    }
+
+                    pathSpec = new PathSpec(flags, "\\", this, components);
+                }
+                else
+                {
+                    var components = ".".ItemConcat(path.Split('\\')).ToList();
+                    components.RemoveWhere((i, str) => i != 0 && str == ".");
+                    if (components.Any(string.IsNullOrEmpty))
+                    {
+                        error = "Must not contain any directories that have empty names";
+                        return false;
+                    }
+
+                    if (IsAncestorOfRoot(components))
+                    {
+                        error = "Must not point to an ancestor of the filesystem root";
+                        return false;
+                    }
+
+                    pathSpec = new PathSpec(flags, "\\", this, components);
+                }
+
+                return true;
+            }
+
+            if (isUnixStyle)
+            {
+                if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
+                    flags = PathFlags.CaseSensitive;
+                if (path.Length > 1 && path.EndsWith("/"))
+                    path = path.Substring(0, path.Length - 1);
+                if (path.Contains(":"))
+                {
+                    error = "A Unix path may not contain a : character.";
+                    return false;
+                }
+
+                var isAbsolute = IsAbsoluteUnixPath(path);
+                if (isAbsolute)
+                {
+                    var components = "/".ItemConcat(path.Substring(1).Split('/')).ToList();
+                    components.RemoveWhere((i, str) => i != 0 && str == ".");
+                    if (components.Any(string.IsNullOrEmpty))
+                    {
+                        error = "Must not contain any directories that have empty names";
+                        return false;
+                    }
+
+                    if (IsAncestorOfRoot(components))
+                    {
+                        error = "Must not point to an ancestor of the filesystem root";
+                        return false;
+                    }
+
+                    pathSpec = new PathSpec(flags, "/", this, components);
+                }
+                else if (path.StartsWith("."))
+                {
+                    var components = path.Split('/').ToList();
+                    components.RemoveWhere((i, str) => i != 0 && str == ".");
+                    if (components.Any(string.IsNullOrEmpty))
+                    {
+                        error = "Must not contain any directories that have empty names";
+                        return false;
+                    }
+
+                    if (IsAncestorOfRoot(components))
+                    {
+                        error = "Must not point to an ancestor of the filesystem root";
+                        return false;
+                    }
+
+                    pathSpec = new PathSpec(flags, "/", this, components);
+                }
+                else
+                {
+                    var components = ".".ItemConcat(path.Split('/')).ToList();
+                    components.RemoveWhere((i, str) => i != 0 && str == ".");
+                    if (components.Any(string.IsNullOrEmpty))
+                    {
+                        error = "Must not contain any directories that have empty names";
+                        return false;
+                    }
+
+                    if (IsAncestorOfRoot(components))
+                    {
+                        error = "Must not point to an ancestor of the filesystem root";
+                        return false;
+                    }
+
+                    pathSpec = new PathSpec(flags, "/", this, components);
+                }
+
+                return true;
+            }
+
+            // If we reach this point, there are no backslashes or slashes in the path, meaning that it's a
+            // path with one element.
+            if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
+                flags = GetDefaultFlagsForThisEnvironment();
+            if (path == ".." || path == ".")
+                pathSpec = new PathSpec(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, path);
+            else
+                pathSpec = new PathSpec(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, ".", path);
+            return true;
+        }
+
+        public void UpdateStorage()
+        {
+            var currentStorage = Directory.GetLogicalDrives();
+            foreach (var drive in currentStorage)
+            {
+                var drivePath = ToPath(drive).Value;
+                if (!_knownStorage.Contains(drivePath))
+                    _knownStorage.Add(drivePath);
+            }
+
+            var drivesThatWereRemoved = new List<PathSpec>();
+
+            foreach (var drive in _knownStorage)
+                if (!currentStorage.Contains(drive + "\\"))
+                    drivesThatWereRemoved.Add(drive);
+
+            foreach (var driveThatWasRemoved in drivesThatWereRemoved) _knownStorage.Remove(driveThatWasRemoved);
+        }
+
+        private string ReadText(StreamReader streamReader)
+        {
+            return streamReader.ReadToEnd();
+        }
+
+        public void WriteLines(Stream stream, IEnumerable<string> lines, Encoding encoding = null,
+            int bufferSize = 4096, bool leaveOpen = false)
+        {
+            if (encoding == null)
+                encoding = Encoding.UTF8;
+            using (var sw = new StreamWriter(stream, encoding, bufferSize, leaveOpen))
+            {
+                WriteLines(sw, lines);
+            }
+        }
+
+        private void WriteLines(StreamWriter streamWriter, IEnumerable<string> lines)
+        {
+            foreach (var line in lines) streamWriter.WriteLine(line);
+        }
+
+        public void WriteText(Stream stream, string text, Encoding encoding = null, int bufferSize = 4096,
+            bool leaveOpen = false)
+        {
+            if (encoding == null)
+                encoding = Encoding.UTF8;
+            using (var sw = new StreamWriter(stream, encoding, bufferSize, leaveOpen))
+            {
+                WriteText(sw, text);
+            }
+        }
+
+        private void WriteText(StreamWriter streamWriter, string text)
+        {
+            streamWriter.Write(text);
+        }
+
+        #region File and folder extension methods
+
+        public IEnumerable<KeyValuePair<PathSpec, string>> ProposeUniqueNamesForMovingPathsToSameFolder(
+            IEnumerable<PathSpec> paths)
+        {
+            var alreadyProposedNames = new HashSet<string>();
+            foreach (var path in paths)
+            {
+                var enumerator = ProposeSuccessivelyMoreSpecificNames(path).GetEnumerator();
+                enumerator.MoveNext();
+                while (alreadyProposedNames.Contains(enumerator.Current)) enumerator.MoveNext();
+
+                alreadyProposedNames.Add(enumerator.Current);
                 yield return new KeyValuePair<PathSpec, string>(path, enumerator.Current);
                 enumerator.Dispose();
             }
         }
 
-        private IEnumerable<string> ProposeSuccessivelyMoreSpecificNames( PathSpec path ) {
+        private IEnumerable<string> ProposeSuccessivelyMoreSpecificNames(PathSpec path)
+        {
             string filename = null;
-            foreach ( var parentPath in path.Ancestors() ) {
-                if ( filename == null ) {
+            foreach (var parentPath in path.Ancestors())
+            {
+                if (filename == null)
                     filename = parentPath.Name;
-                } else {
+                else
                     filename = $"{parentPath.Name}.{filename}";
-                }
 
                 yield return filename;
             }
         }
-        
-        public IDictionaryChangesStrict<PathSpec, PathSpec> ToLiveLinq(PathSpec root, bool includeFileContentChanges = true)
+
+        public IDictionaryChangesStrict<PathSpec, PathSpec> ToLiveLinq(PathSpec root,
+            bool includeFileContentChanges = true)
         {
             var watcher = new FileSystemWatcher(root.ToString())
             {
                 IncludeSubdirectories = true,
                 Filter = null,
                 EnableRaisingEvents = true,
-                NotifyFilter = NotifyFilters.LastWrite,
+                NotifyFilter = NotifyFilters.LastWrite
             };
 
             var creations = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
@@ -138,30 +755,24 @@ namespace MoreIO
 
         public IEnumerable<PathSpec> GetChildren(PathSpec path, bool includeFolders = true, bool includeFiles = true)
         {
-            if (!path.IsFolder())
-            {
-                return ImmutableArray<PathSpec>.Empty;
-            }
+            if (!path.IsFolder()) return ImmutableArray<PathSpec>.Empty;
+
             if (includeFiles && includeFolders)
-            {
                 return Directory.GetFileSystemEntries(path.AsDirectoryInfo().FullName).Select(x => ParsePathSpec(x));
-            }
-            if (includeFiles)
-            {
-                return Directory.GetFiles(path.AsDirectoryInfo().FullName).Select(x => ParsePathSpec(x));
-            }
+
+            if (includeFiles) return Directory.GetFiles(path.AsDirectoryInfo().FullName).Select(x => ParsePathSpec(x));
+
             if (includeFolders)
-            {
                 return Directory.GetDirectories(path.AsDirectoryInfo().FullName).Select(x => ParsePathSpec(x));
-            }
+
             return ImmutableArray<PathSpec>.Empty;
         }
 
         public IEnumerable<PathSpec> GetFiles(PathSpec path)
         {
-            return GetChildren(path, false, true);
+            return GetChildren(path, false);
         }
-        
+
         public IEnumerable<PathSpec> GetFolders(PathSpec path)
         {
             return GetChildren(path, true, false);
@@ -201,6 +812,7 @@ namespace MoreIO
             {
                 path.AsFileInfo().Delete();
             }
+
             return path;
         }
 
@@ -218,14 +830,10 @@ namespace MoreIO
 
         public PathSpec Delete(PathSpec path)
         {
-            if (path.GetPathType() == PathType.File)
-            {
-                return path.DeleteFile();
-            }
-            if (path.GetPathType() == PathType.Folder)
-            {
-                return path.DeleteFolder(true);
-            }
+            if (path.GetPathType() == PathType.File) return path.DeleteFile();
+
+            if (path.GetPathType() == PathType.Folder) return path.DeleteFolder(true);
+
             return path;
         }
 
@@ -238,6 +846,7 @@ namespace MoreIO
                 if (!str.EndsWith("\""))
                     str = str + "\"";
             }
+
             return str;
         }
 
@@ -260,14 +869,16 @@ namespace MoreIO
 
         public string LastPathComponent(PathSpec path)
         {
-            return path.ToString().Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Last(str => !String.IsNullOrEmpty(str));
+            return path.ToString().Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                .Last(str => !string.IsNullOrEmpty(str));
         }
 
         /// <summary>
-        /// Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from). For example, the ancestors of the path C:\Users\myusername\Documents would be these, in order:
-        /// C:\Users\myusername
-        /// C:\Users
-        /// C:
+        ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
+        ///     For example, the ancestors of the path C:\Users\myusername\Documents would be these, in order:
+        ///     C:\Users\myusername
+        ///     C:\Users
+        ///     C:
         /// </summary>
         /// <param name="path"></param>
         /// <param name="includeItself"></param>
@@ -285,7 +896,9 @@ namespace MoreIO
                     path = maybePath.Value;
                 }
                 else
+                {
                     break;
+                }
             }
         }
 
@@ -306,13 +919,14 @@ namespace MoreIO
 
         public IMaybe<PathSpec> Ancestor(PathSpec path, int level)
         {
-            IMaybe<PathSpec> maybePath = path.ToMaybe();
-            for (int i = 0; i < level; i++)
+            var maybePath = path.ToMaybe();
+            for (var i = 0; i < level; i++)
             {
                 maybePath = maybePath.Select(p => p.Parent()).SelectMany(x => x);
                 if (!maybePath.HasValue)
                     return Maybe<PathSpec>.Nothing;
             }
+
             return maybePath;
         }
 
@@ -327,7 +941,6 @@ namespace MoreIO
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="path"></param>
         /// <param name="differentExtension">Must include the "." part of the extension (e.g., ".avi" not "avi")</param>
@@ -349,19 +962,23 @@ namespace MoreIO
                     break;
                 case PathType.None:
                     throw new IOException(
-                        String.Format("An attempt was made to copy \"{0}\" to \"{1}\", but the source path doesn't exist.",
-                                      translation.Source, translation.Destination));
+                        string.Format(
+                            "An attempt was made to copy \"{0}\" to \"{1}\", but the source path doesn't exist.",
+                            translation.Source, translation.Destination));
             }
+
             return translation;
         }
 
         public IPathSpecTranslation CopyFile(IPathSpecTranslation translation)
         {
             if (translation.Source.GetPathType() != PathType.File)
-                throw new IOException(String.Format("An attempt was made to copy a file from \"{0}\" to \"{1}\" but the source path is not a file.",
+                throw new IOException(string.Format(
+                    "An attempt was made to copy a file from \"{0}\" to \"{1}\" but the source path is not a file.",
                     translation.Source, translation.Destination));
             if (translation.Destination.GetPathType() != PathType.None)
-                throw new IOException(String.Format("An attempt was made to copy \"{0}\" to \"{1}\" but the destination path exists.",
+                throw new IOException(string.Format(
+                    "An attempt was made to copy \"{0}\" to \"{1}\" but the destination path exists.",
                     translation.Source, translation.Destination));
             translation.Destination.Parent().Value.Create(PathType.Folder);
             File.Copy(translation.Source.ToString(), translation.Destination.ToString());
@@ -371,7 +988,8 @@ namespace MoreIO
         public IPathSpecTranslation CopyFolder(IPathSpecTranslation translation)
         {
             if (translation.Source.GetPathType() != PathType.Folder)
-                throw new IOException(String.Format("An attempt was made to copy a folder from \"{0}\" to \"{1}\" but the source path is not a folder.",
+                throw new IOException(string.Format(
+                    "An attempt was made to copy a folder from \"{0}\" to \"{1}\" but the source path is not a folder.",
                     translation.Source, translation.Destination));
             translation.Destination.Create(PathType.Folder);
             return translation;
@@ -389,45 +1007,54 @@ namespace MoreIO
                     break;
                 case PathType.None:
                     throw new IOException(
-                        String.Format("An attempt was made to move \"{0}\" to \"{1}\", but the source path doesn't exist.",
-                                      translation.Source, translation.Destination));
+                        string.Format(
+                            "An attempt was made to move \"{0}\" to \"{1}\", but the source path doesn't exist.",
+                            translation.Source, translation.Destination));
             }
+
             return translation;
         }
 
         public IPathSpecTranslation MoveFile(IPathSpecTranslation translation)
         {
             if (translation.Source.GetPathType() != PathType.File)
-                throw new IOException(String.Format("An attempt was made to move a file from \"{0}\" to \"{1}\" but the source path is not a file.",
+                throw new IOException(string.Format(
+                    "An attempt was made to move a file from \"{0}\" to \"{1}\" but the source path is not a file.",
                     translation.Source, translation.Destination));
             if (translation.Destination.GetPathType() != PathType.None)
-                throw new IOException(String.Format("An attempt was made to move \"{0}\" to \"{1}\" but the destination path exists.",
+                throw new IOException(string.Format(
+                    "An attempt was made to move \"{0}\" to \"{1}\" but the destination path exists.",
                     translation.Source, translation.Destination));
             if (translation.Destination.IsDescendantOf(translation.Source))
-                throw new IOException(String.Format("An attempt was made to move a file from \"{0}\" to \"{1}\" but the destination path is a sub-path of the source path.",
+                throw new IOException(string.Format(
+                    "An attempt was made to move a file from \"{0}\" to \"{1}\" but the destination path is a sub-path of the source path.",
                     translation.Source, translation.Destination));
             translation.Destination.Parent().Value.Create(PathType.Folder);
             File.Move(translation.Source.ToString(), translation.Destination.ToString());
             return translation;
         }
-        
+
         public IPathSpecTranslation MoveFolder(IPathSpecTranslation translation)
         {
             if (translation.Source.GetPathType() != PathType.Folder)
-                throw new IOException(String.Format("An attempt was made to move a folder from \"{0}\" to \"{1}\" but the source path is not a folder.",
+                throw new IOException(string.Format(
+                    "An attempt was made to move a folder from \"{0}\" to \"{1}\" but the source path is not a folder.",
                     translation.Source, translation.Destination));
             if (translation.Destination.GetPathType() == PathType.File)
-                throw new IOException(String.Format("An attempt was made to move \"{0}\" to \"{1}\" but the destination path is a file.",
+                throw new IOException(string.Format(
+                    "An attempt was made to move \"{0}\" to \"{1}\" but the destination path is a file.",
                     translation.Source, translation.Destination));
             if (translation.Destination.IsDescendantOf(translation.Source))
-                throw new IOException(String.Format("An attempt was made to move a file from \"{0}\" to \"{1}\" but the destination path is a sub-path of the source path.",
+                throw new IOException(string.Format(
+                    "An attempt was made to move a file from \"{0}\" to \"{1}\" but the destination path is a sub-path of the source path.",
                     translation.Source, translation.Destination));
             if (translation.Source.Children().Any())
-                throw new IOException(String.Format("An attempt was made to move the non-empty folder \"{0}\". This is not allowed because all the files should be moved first, and only then can the folder be moved, because the move operation deletes the source folder, which would of course also delete the files and folders within the source folder.",
+                throw new IOException(string.Format(
+                    "An attempt was made to move the non-empty folder \"{0}\". This is not allowed because all the files should be moved first, and only then can the folder be moved, because the move operation deletes the source folder, which would of course also delete the files and folders within the source folder.",
                     translation.Source));
             translation.Destination.Create(PathType.Folder);
             if (!translation.Source.Children().Any())
-                translation.Source.DeleteFolder(false);
+                translation.Source.DeleteFolder();
             return translation;
         }
 
@@ -454,7 +1081,8 @@ namespace MoreIO
         {
             try
             {
-                return new Maybe<Uri>(new Uri(path1.ToString().GetCommonEnding(path2.ToString()).Trim('\\'), UriKind.Relative));
+                return new Maybe<Uri>(new Uri(path1.ToString().GetCommonEnding(path2.ToString()).Trim('\\'),
+                    UriKind.Relative));
             }
             catch (ArgumentNullException)
             {
@@ -471,8 +1099,9 @@ namespace MoreIO
             try
             {
                 var commonAncestry = path1.ToString().GetCommonBeginning(path2.ToString()).Trim('\\');
-                return new Maybe<Tuple<Uri, Uri>>(new Tuple<Uri, Uri>(new Uri(path1.ToString().Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative),
-                                                 new Uri(path2.ToString().Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative)));
+                return new Maybe<Tuple<Uri, Uri>>(new Tuple<Uri, Uri>(
+                    new Uri(path1.ToString().Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative),
+                    new Uri(path2.ToString().Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative)));
             }
             catch (ArgumentNullException)
             {
@@ -489,8 +1118,11 @@ namespace MoreIO
             try
             {
                 var commonDescendants = path1.ToString().GetCommonEnding(path2.ToString()).Trim('\\');
-                return new Maybe<Tuple<Uri, Uri>>(new Tuple<Uri, Uri>(new Uri(path1.ToString().Substring(0, path1.ToString().Length - commonDescendants.Length).Trim('\\')),
-                                                 new Uri(path2.ToString().Substring(0, path2.ToString().Length - commonDescendants.Length).Trim('\\'))));
+                return new Maybe<Tuple<Uri, Uri>>(new Tuple<Uri, Uri>(
+                    new Uri(
+                        path1.ToString().Substring(0, path1.ToString().Length - commonDescendants.Length).Trim('\\')),
+                    new Uri(
+                        path2.ToString().Substring(0, path2.ToString().Length - commonDescendants.Length).Trim('\\'))));
             }
             catch (ArgumentNullException)
             {
@@ -522,110 +1154,110 @@ namespace MoreIO
         }
 
         public readonly List<string> VideoFileExtensions = new List<string>
-            {
-                    "3gpp",
-                    "3g2",
-                    "3gp",
-                    "3gp2",
-                    "asf",
-                    "mov",
-                    "avi",
-                    "mts",
-                    "m2ts",
-                    "m2t",
-                    "m4v",
-                    "m3u",
-                    "asx",
-                    "mpe",
-                    "mpeg",
-                    "mpg",
-                    "m1v",
-                    "m2v",
-                    "mp2v",
-                    "mpv2",
-                    "mp4",
-                    "mp4v",
-                    "ts",
-                    "wm",
-                    "wpl",
-                    "wmx",
-                    "wmv",
-                    "wvx"
-                };
+        {
+            "3gpp",
+            "3g2",
+            "3gp",
+            "3gp2",
+            "asf",
+            "mov",
+            "avi",
+            "mts",
+            "m2ts",
+            "m2t",
+            "m4v",
+            "m3u",
+            "asx",
+            "mpe",
+            "mpeg",
+            "mpg",
+            "m1v",
+            "m2v",
+            "mp2v",
+            "mpv2",
+            "mp4",
+            "mp4v",
+            "ts",
+            "wm",
+            "wpl",
+            "wmx",
+            "wmv",
+            "wvx"
+        };
 
         public readonly List<string> ImageFileExtensions = new List<string>
-            {
-                    "ani",
-                    "b3d",
-                    "bmp",
-                    "dib",
-                    "cam",
-                    "clp",
-                    "crw",
-                    "cr2",
-                    "cur",
-                    "dcm",
-                    "acr",
-                    "ima",
-                    "dcx",
-                    "dds",
-                    "djvu",
-                    "iw44",
-                    "dxf",
-                    "ecw",
-                    "emf",
-                    "eps",
-                    "ps",
-                    "exr",
-                    "fpx",
-                    "g3",
-                    "gif",
-                    "hdp",
-                    "jxr",
-                    "wdp",
-                    "icl",
-                    "ico",
-                    "iff",
-                    "lbm",
-                    "img",
-                    "jls",
-                    "jp2",
-                    "jpc",
-                    "j2k",
-                    "jpf",
-                    "jpg",
-                    "jpeg",
-                    "jpe",
-                    "jpm",
-                    "kdc",
-                    "mng",
-                    "jng",
-                    "pbm",
-                    "pcd",
-                    "pcx",
-                    "pgm",
-                    "png",
-                    "ppm",
-                    "psd",
-                    "psp",
-                    "ras",
-                    "sun",
-                    "raw",
-                    "rle",
-                    "sff",
-                    "sfw",
-                    "sgi",
-                    "rgb",
-                    "sid",
-                    "tga",
-                    "tif",
-                    "tiff",
-                    "wbmp",
-                    "webp",
-                    "wmf",
-                    "xbm",
-                    "xpm"
-                };
+        {
+            "ani",
+            "b3d",
+            "bmp",
+            "dib",
+            "cam",
+            "clp",
+            "crw",
+            "cr2",
+            "cur",
+            "dcm",
+            "acr",
+            "ima",
+            "dcx",
+            "dds",
+            "djvu",
+            "iw44",
+            "dxf",
+            "ecw",
+            "emf",
+            "eps",
+            "ps",
+            "exr",
+            "fpx",
+            "g3",
+            "gif",
+            "hdp",
+            "jxr",
+            "wdp",
+            "icl",
+            "ico",
+            "iff",
+            "lbm",
+            "img",
+            "jls",
+            "jp2",
+            "jpc",
+            "j2k",
+            "jpf",
+            "jpg",
+            "jpeg",
+            "jpe",
+            "jpm",
+            "kdc",
+            "mng",
+            "jng",
+            "pbm",
+            "pcd",
+            "pcx",
+            "pgm",
+            "png",
+            "ppm",
+            "psd",
+            "psp",
+            "ras",
+            "sun",
+            "raw",
+            "rle",
+            "sff",
+            "sfw",
+            "sgi",
+            "rgb",
+            "sid",
+            "tga",
+            "tif",
+            "tiff",
+            "wbmp",
+            "webp",
+            "wmf",
+            "xbm",
+            "xpm"
+        };
 
         public FileInfo AsFileInfo(PathSpec path)
         {
@@ -774,14 +1406,15 @@ namespace MoreIO
         }
 
         /// <summary>
-        /// Includes the period character ".". For example, function would return ".exe" if the file pointed to a file named was "test.exe".
+        ///     Includes the period character ".". For example, function would return ".exe" if the file pointed to a file named
+        ///     was "test.exe".
         /// </summary>
         /// <param name="pathName"></param>
         /// <returns></returns>
         public IMaybe<string> Extension(string pathName)
         {
             var result = Path.GetExtension(pathName);
-            if (String.IsNullOrEmpty(result))
+            if (string.IsNullOrEmpty(result))
                 return Maybe<string>.Nothing;
             return new Maybe<string>(result);
         }
@@ -790,10 +1423,10 @@ namespace MoreIO
         {
             if (uri == null)
                 return false;
-            string str = uri.ToString();
+            var str = uri.ToString();
             if (!str.Contains("."))
                 return false;
-            string extension = str.Substring(str.LastIndexOf('.') + 1);
+            var extension = str.Substring(str.LastIndexOf('.') + 1);
             return ImageFileExtensions.Any(curExtension => extension == curExtension);
         }
 
@@ -801,10 +1434,10 @@ namespace MoreIO
         {
             if (uri == null)
                 return false;
-            string str = uri.ToString();
+            var str = uri.ToString();
             if (!str.Contains("."))
                 return false;
-            string extension = str.Substring(str.LastIndexOf('.') + 1);
+            var extension = str.Substring(str.LastIndexOf('.') + 1);
             return VideoFileExtensions.Any(curExtension => extension == curExtension);
         }
 
@@ -822,10 +1455,8 @@ namespace MoreIO
         {
             var ancestor = path;
             IMaybe<PathSpec> cachedParent;
-            while ((cachedParent = ancestor.Parent()).HasValue)
-            {
-                ancestor = cachedParent.Value;
-            }
+            while ((cachedParent = ancestor.Parent()).HasValue) ancestor = cachedParent.Value;
+
             return ancestor;
         }
 
@@ -859,10 +1490,7 @@ namespace MoreIO
 
         public PathSpec ClearFolder(PathSpec path)
         {
-            foreach (var item in path)
-            {
-                item.Delete();
-            }
+            foreach (var item in path) item.Delete();
 
             return path;
         }
@@ -879,7 +1507,7 @@ namespace MoreIO
             return fileMode.HasFlag(FileMode.Append) || fileMode.HasFlag(FileMode.Create) ||
                    fileMode.HasFlag(FileMode.CreateNew) || fileMode.HasFlag(FileMode.OpenOrCreate);
         }
-        
+
         public void Create(PathSpec path, PathType pathType)
         {
             switch (pathType)
@@ -914,7 +1542,7 @@ namespace MoreIO
         }
 
         public IMaybe<FileStream> Open(PathSpec path, FileMode fileMode,
-                                                              FileAccess fileAccess)
+            FileAccess fileAccess)
         {
             try
             {
@@ -933,7 +1561,7 @@ namespace MoreIO
         }
 
         public IMaybe<FileStream> Open(PathSpec path, FileMode fileMode,
-                                                              FileAccess fileAccess, FileShare fileShare)
+            FileAccess fileAccess, FileShare fileShare)
         {
             try
             {
@@ -965,6 +1593,7 @@ namespace MoreIO
                 if (path.GetPathType() != PathType.Folder)
                     throw;
             }
+
             if (path.GetPathType() != PathType.Folder)
                 throw new IOException("Failed to create folder " + path);
             return path;
@@ -997,65 +1626,6 @@ namespace MoreIO
 
         #endregion
 
-        public PathSpec ToAbsolute(PathSpec path)
-        {
-            if (path.IsRelative())
-                return CurrentDirectory.Join(path).Value;
-            return path;
-        }
-
-        public IReadOnlyObservableSet<PathSpec> Children(PathSpec path)
-        {
-            return path.Children("*");
-        }
-
-        public IReadOnlyObservableSet<PathSpec> Children(PathSpec path, string pattern)
-        {
-            return new PathSpecDescendants(path, pattern, false, this);
-        }
-
-        public IReadOnlyObservableSet<PathSpec> Descendants(PathSpec path)
-        {
-            return path.Descendants("*");
-        }
-
-        public IReadOnlyObservableSet<PathSpec> Descendants(PathSpec path, string pattern)
-        {
-            return new PathSpecDescendants(path, pattern, true, this);
-        }
-
-        public IObservable<Unit> ObserveChanges(PathSpec path)
-        {
-            return path.ObserveChanges(NotifyFilters.Attributes | NotifyFilters.CreationTime | NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.Security | NotifyFilters.Size);
-        }
-
-        public IObservable<Unit> ObserveChanges(PathSpec path, NotifyFilters filters)
-        {
-            var parent = path.Parent();
-            if (!parent.HasValue) return Observable.Never<Unit>();
-
-            return Observable.Create<Unit>(observer =>
-            {
-                var watcher = new FileSystemWatcher(parent.Value.ToString())
-                {
-                    IncludeSubdirectories = false,
-                    Filter = path.Name,
-                    EnableRaisingEvents = true,
-                    NotifyFilter = filters
-                };
-
-                var subscription = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(handler => watcher.Changed += handler, handler => watcher.Changed -= handler)
-                    .Select(_ => Unit.Default)
-                    .Subscribe(observer);
-
-                return new AnonymousDisposable(() =>
-                {
-                    subscription.Dispose();
-                    watcher.Dispose();
-                });
-            });
-        }
-
 
         #region FileSystemWatcher extension methods
 
@@ -1063,7 +1633,8 @@ namespace MoreIO
         {
             var parent = path.Parent();
             if (!parent.HasValue) return Observable.Return(path.GetPathType());
-            return parent.Value.Children(path.Name).ToLiveLinq().AsObservable().Select(_ => path.GetPathType()).DistinctUntilChanged();
+            return parent.Value.Children(path.Name).ToLiveLinq().AsObservable().Select(_ => path.GetPathType())
+                .DistinctUntilChanged();
         }
 
         public IObservable<PathSpec> Renamings(PathSpec path)
@@ -1153,13 +1724,13 @@ namespace MoreIO
 
             var sb = new StringBuilder();
 
-            for(var i = 0; i < relativeTo.Components.Count - common.Value.Components.Count; i++)
+            for (var i = 0; i < relativeTo.Components.Count - common.Value.Components.Count; i++)
             {
                 sb.Append("..");
                 sb.Append(path.DirectorySeparator);
             }
 
-            var restOfRelativePath = pathStr.ToString().Substring(common.Value.ToString().Length);
+            var restOfRelativePath = pathStr.Substring(common.Value.ToString().Length);
             while (restOfRelativePath.StartsWith(path.DirectorySeparator))
                 restOfRelativePath = restOfRelativePath.Substring(path.DirectorySeparator.Length);
 
@@ -1189,10 +1760,8 @@ namespace MoreIO
 
             int i;
             for (i = 0; i < path1Str.Length && i < path2Str.Length; i++)
-            {
                 if (!path1Str[i].Equals(path2Str[i]))
                     break;
-            }
 
             if (i == 0)
                 return Nothing<PathSpec>();
@@ -1215,20 +1784,16 @@ namespace MoreIO
                 if (path.Components[i] == "..")
                     numberOfComponentsToSkip++;
                 else if (numberOfComponentsToSkip > 0)
-                {
                     numberOfComponentsToSkip--;
-                }
                 else
-                {
                     result.Insert(0, path.Components[i]);
-                }
             }
+
             if (numberOfComponentsToSkip > 0 && !path.IsRelative())
-                throw new ArgumentException("Error: the specified path points to an ancestor of the root, which means that the specified path is invalid");
-            for (var i = 0; i < numberOfComponentsToSkip; i++)
-            {
-                result.Insert(0, "..");
-            }
+                throw new ArgumentException(
+                    "Error: the specified path points to an ancestor of the root, which means that the specified path is invalid");
+            for (var i = 0; i < numberOfComponentsToSkip; i++) result.Insert(0, "..");
+
             var sb = new StringBuilder();
             for (var i = 0; i < result.Count; i++)
             {
@@ -1236,6 +1801,7 @@ namespace MoreIO
                 if (result[i] != "\\" && i != result.Count - 1)
                     sb.Append(path.DirectorySeparator);
             }
+
             var str = sb.ToString();
             if (str.Length == 0)
                 str = ".";
@@ -1243,9 +1809,9 @@ namespace MoreIO
         }
 
         public IMaybe<PathSpec> Parent(PathSpec path)
-	    {
+        {
             return path.Components.Subset(0, -2).Select(str => TryParsePathSpec(str, path.Flags)).Join();
-	    }
+        }
 
         public bool IsAbsolute(PathSpec path)
         {
@@ -1374,7 +1940,8 @@ namespace MoreIO
 
         public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, params string[] descendants)
         {
-            return root.Concat(descendants.Select(str => ToPath(str))).AllOrNothing().Select(paths => paths.Join()).SelectMany(x => x);
+            return root.Concat(descendants.Select(str => ToPath(str))).AllOrNothing().Select(paths => paths.Join())
+                .SelectMany(x => x);
         }
 
         public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, params IMaybe<string>[] descendants)
@@ -1384,7 +1951,8 @@ namespace MoreIO
 
         public IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, params IMaybe<string>[] descendants)
         {
-            return descendants.Select(m => m.SelectMany(str => ToPath(str))).AllOrNothing().Select(desc => root.Concat(desc).ToList().Join()).SelectMany(x => x);
+            return descendants.Select(m => m.SelectMany(str => ToPath(str))).AllOrNothing()
+                .Select(desc => root.Concat(desc).ToList().Join()).SelectMany(x => x);
         }
 
         #endregion
@@ -1395,8 +1963,8 @@ namespace MoreIO
         {
             var first = descendants[0];
             if (descendants.Skip(1).Any(c => !c.IsRelative()
-                || c.DirectorySeparator != first.DirectorySeparator
-                || c.Flags != first.Flags))
+                                             || c.DirectorySeparator != first.DirectorySeparator
+                                             || c.Flags != first.Flags))
                 return Nothing<PathSpec>();
             return Something(new PathSpec(GetDefaultFlagsForThisEnvironment(), first.DirectorySeparator, this,
                 descendants.SelectMany(opt => opt.Components).Where((str, i) => i == 0 || str != ".")));
@@ -1470,7 +2038,8 @@ namespace MoreIO
 
         public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, IEnumerable<PathSpec> descendants)
         {
-            return root.AllOrNothing().Select(enumerable => enumerable.Concat(descendants).ToList().Join()).SelectMany(x => x);
+            return root.AllOrNothing().Select(enumerable => enumerable.Concat(descendants).ToList().Join())
+                .SelectMany(x => x);
         }
 
         public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, IEnumerable<IMaybe<PathSpec>> descendants)
@@ -1490,7 +2059,8 @@ namespace MoreIO
 
         public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, params PathSpec[] descendants)
         {
-            return root.AllOrNothing().Select(enumerable => enumerable.Concat(descendants).ToList().Join()).SelectMany(x => x);
+            return root.AllOrNothing().Select(enumerable => enumerable.Concat(descendants).ToList().Join())
+                .SelectMany(x => x);
         }
 
         public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, params IMaybe<PathSpec>[] descendants)
@@ -1512,27 +2082,27 @@ namespace MoreIO
         #region String extension methods
 
         public IMaybe<PathSpec> ToPath(string path, PathFlags flags)
-		{
+        {
             return TryParsePathSpec(path, flags);
-		}
+        }
 
         public IMaybe<PathSpec> ToPath(string path)
-		{
-			return TryParsePathSpec(path);
-		}
+        {
+            return TryParsePathSpec(path);
+        }
 
-		public bool IsAbsoluteWindowsPath(string path)
-		{
-			return char.IsLetter(path[0]) && path[1] == ':';
-		}
+        public bool IsAbsoluteWindowsPath(string path)
+        {
+            return char.IsLetter(path[0]) && path[1] == ':';
+        }
 
-		public bool IsAbsoluteUnixPath(string path)
-		{
-			return path.StartsWith("/");
-		}
+        public bool IsAbsoluteUnixPath(string path)
+        {
+            return path.StartsWith("/");
+        }
 
         /// <summary>
-        /// Checks for invalid relative paths, like C:\.. (Windows) or /.. (Unix)
+        ///     Checks for invalid relative paths, like C:\.. (Windows) or /.. (Unix)
         /// </summary>
         internal bool IsAncestorOfRoot(IReadOnlyList<string> pathComponents)
         {
@@ -1540,7 +2110,6 @@ namespace MoreIO
             var numberOfComponentsToSkip = 0;
             var isRelative = ComponentsAreRelative(pathComponents);
             for (var i = pathComponents.Count - 1; i >= 0; i--)
-            {
                 if (!isRelative && i == 0)
                     result.Insert(0, pathComponents[i]);
                 else if (pathComponents[i] == ".")
@@ -1551,545 +2120,10 @@ namespace MoreIO
                     numberOfComponentsToSkip--;
                 else
                     result.Insert(0, pathComponents[i]);
-            }
+
             return numberOfComponentsToSkip > 0 && !isRelative;
         }
 
-		#endregion
-		
-		
-		public PathSpec CreateTemporaryPath(PathType type)
-                {
-                    var path = Path.GetRandomFileName();
-                    var spec = ToPath(path).Value;
-                    if (type == PathType.File)
-                        spec.Create(PathType.File);
-                    if (type == PathType.Folder)
-                        spec.Create(PathType.Folder);
-                    return spec;
-                }
-        
-                private object _lock = new object();
-                private PathFlags? defaultFlagsForThisEnvironment;
-                private string defaultDirectorySeparatorForThisEnvironment;
-        
-                public PathFlags GetDefaultFlagsForThisEnvironment()
-                {
-                    lock(_lock)
-                    {
-                        if (defaultFlagsForThisEnvironment == null)
-                        {
-                            var file = Path.GetTempFileName();
-                            var caseSensitive = File.Exists(file.ToLower()) && File.Exists(file.ToUpper());
-                            File.Delete(file);
-                            if (caseSensitive)
-                                defaultFlagsForThisEnvironment = PathFlags.CaseSensitive;
-                            else
-                                defaultFlagsForThisEnvironment = PathFlags.None;
-                        }
-                        return defaultFlagsForThisEnvironment.Value;
-                    }
-                }
-        
-                public string GetDefaultDirectorySeparatorForThisEnvironment()
-                {
-                    lock(_lock)
-                    {
-                        if (defaultDirectorySeparatorForThisEnvironment == null)
-                        {
-                            var path = Path.Combine("a", "b");
-                            defaultDirectorySeparatorForThisEnvironment = path.Substring(1, path.Length - 2);
-                        }
-                        return defaultDirectorySeparatorForThisEnvironment;
-                    }
-                }
-        
-                /// <summary>
-                ///   Returns a regex that filters files the same as the specified pattern.
-                ///   From here: http://www.java2s.com/Code/CSharp/Regular-Expressions/Checksifnamematchespatternwithandwildcards.htm
-                /// Copyright:   Julijan ?ribar, 2004-2007
-                /// 
-                /// This software is provided 'as-is', without any express or implied
-                /// warranty.  In no event will the author(s) be held liable for any damages
-                /// arising from the use of this software.
-                /// Permission is granted to anyone to use this software for any purpose,
-                /// including commercial applications, and to alter it and redistribute it
-                /// freely, subject to the following restrictions:
-                /// 1. The origin of this software must not be misrepresented; you must not
-                ///   claim that you wrote the original software. If you use this software
-                ///   in a product, an acknowledgment in the product documentation would be
-                ///   appreciated but is not required.
-                /// 2. Altered source versions must be plainly marked as such, and must not be
-                ///   misrepresented as being the original software.
-                /// 3. This notice may not be removed or altered from any source distribution.
-                /// </summary>
-                /// <param name="filename">
-                ///   Name to match.
-                /// </param>
-                /// <param name="pattern">
-                ///   Pattern to match to.
-                /// </param>
-                /// <returns>
-                ///   <c>true</c> if name matches pattern, otherwise <c>false</c>.
-                /// </returns>
-                public Regex FileNamePatternToRegex(string pattern)
-                {
-                    // prepare the pattern to the form appropriate for Regex class
-                    var sb = new StringBuilder(pattern);
-                    // remove superflous occurences of  "?*" and "*?"
-                    while (sb.ToString().IndexOf("?*") != -1)
-                    {
-                        sb.Replace("?*", "*");
-                    }
-                    while (sb.ToString().IndexOf("*?") != -1)
-                    {
-                        sb.Replace("*?", "*");
-                    }
-                    // remove superflous occurences of asterisk '*'
-                    while (sb.ToString().IndexOf("**") != -1)
-                    {
-                        sb.Replace("**", "*");
-                    }
-                    // if only asterisk '*' is left, the mask is ".*"
-                    if (sb.ToString().Equals("*"))
-                        pattern = ".*";
-                    else
-                    {
-                        // replace '.' with "\."
-                        sb.Replace(".", "\\.");
-                        // replaces all occurrences of '*' with ".*" 
-                        sb.Replace("*", ".*");
-                        // replaces all occurrences of '?' with '.*' 
-                        sb.Replace("?", ".");
-                        // add "\b" to the beginning and end of the pattern
-                        sb.Insert(0, "\\b");
-                        sb.Append("\\b");
-                        pattern = sb.ToString();
-                    }
-                    Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
-                    return regex;
-                }
-        
-                public PathSpec ParsePathSpec(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
-                {
-                    string error = string.Empty;
-                    PathSpec pathSpec;
-                    if (!TryParsePathSpec(path, out pathSpec, out error, flags))
-                        throw new ArgumentException(error);
-                    return pathSpec;
-                }
-        
-                public IMaybe<PathSpec> TryParsePathSpec(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
-                {
-                    string error = string.Empty;
-                    PathSpec pathSpec;
-                    if (!TryParsePathSpec(path, out pathSpec, out error, flags))
-                        return Nothing<PathSpec>();
-                    return Something(pathSpec);
-                }
-        
-                public bool TryParsePathSpec(string path, out PathSpec pathSpec, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
-                {
-                    string error = string.Empty;
-                    return TryParsePathSpec(path, out pathSpec, out error, flags);
-                }
-        
-                public bool TryParsePathSpec(string path, out PathSpec pathSpec, out string error, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
-                {
-                    if (flags.HasFlag(PathFlags.UseDefaultsFromUtility) && flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
-                        throw new ArgumentException("Cannot specify both PathFlags.UseDefaultsFromUtility and PathFlags.UseDefaultsForGivenPath");
-                    if (flags.HasFlag(PathFlags.UseDefaultsFromUtility))
-                        flags = GetDefaultFlagsForThisEnvironment();
-                    error = string.Empty;
-                    pathSpec = null;
-                    var isWindowsStyle = path.Contains("\\") || path.Contains(":");
-                    var isUnixStyle = path.Contains("/");
-                    if (isWindowsStyle && isUnixStyle)
-                    {
-                        error = "Cannot mix slashes and backslashes in the same path";
-                        return false;
-                    }
-                    if (isWindowsStyle)
-                    {
-                        if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
-                            flags = PathFlags.None;
-                        if (path.Length > 1 && path.EndsWith("\\"))
-                            path = path.Substring(0, path.Length - 1);
-                        var colonIdx = path.LastIndexOf(':');
-                        if (colonIdx > -1 && (colonIdx != 1 || !char.IsLetter(path[0]) || (path.Length > 2 && path[2] != '\\')))
-                        {
-                            error = "A Windows path may not contain a : character, except as part of the drive specifier.";
-                            return false;
-                        }
-                        var isAbsolute = IsAbsoluteWindowsPath(path);
-                        if (isAbsolute)
-                        {
-                            var components = path.Split('\\').ToList();
-                            components.RemoveWhere((i, str) => i != 0 && str == ".");
-                            if (components.Any(String.IsNullOrEmpty))
-                            {
-                                error = "Must not contain any directories that have empty names";
-                                return false;
-                            }
-                            if (IsAncestorOfRoot(components))
-                            {
-                                error = "Must not point to an ancestor of the filesystem root";
-                                return false;
-                            }
-                            pathSpec = new PathSpec(flags, "\\", this, components);
-                        }
-                        else if (path.StartsWith("."))
-                        {
-                            var components = path.Split('\\').ToList();
-                            components.RemoveWhere((i, str) => i != 0 && str == ".");
-                            if (components.Any(String.IsNullOrEmpty))
-                            {
-                                error = "Must not contain any directories that have empty names";
-                                return false;
-                            }
-                            if (IsAncestorOfRoot(components))
-                            {
-                                error = "Must not point to an ancestor of the filesystem root";
-                                return false;
-                            }
-                            pathSpec = new PathSpec(flags, "\\", this, components);
-                        }
-                        else if (path.StartsWith("\\\\"))
-                        {
-                            var components = "\\\\".ItemConcat(path.Substring(2).Split('\\')).ToList();
-                            components.RemoveWhere((i, str) => i != 0 && str == ".");
-                            if (components.Any(String.IsNullOrEmpty))
-                            {
-                                error = "Must not contain any directories that have empty names";
-                                return false;
-                            }
-                            if (IsAncestorOfRoot(components))
-                            {
-                                error = "Must not point to an ancestor of the filesystem root";
-                                return false;
-                            }
-                            pathSpec = new PathSpec(flags, "\\", this, components);
-                        }
-                        else if (path.StartsWith("\\"))
-                        {
-                            var components = "\\".ItemConcat(path.Substring(1).Split('\\')).ToList();
-                            components.RemoveWhere((i, str) => i != 0 && str == ".");
-                            if (components.Any(String.IsNullOrEmpty))
-                            {
-                                error = "Must not contain any directories that have empty names";
-                                return false;
-                            }
-                            if (IsAncestorOfRoot(components))
-                            {
-                                error = "Must not point to an ancestor of the filesystem root";
-                                return false;
-                            }
-                            pathSpec = new PathSpec(flags, "\\", this, components);
-                        }
-                        else
-                        {
-                            var components = ".".ItemConcat(path.Split('\\')).ToList();
-                            components.RemoveWhere((i, str) => i != 0 && str == ".");
-                            if (components.Any(String.IsNullOrEmpty))
-                            {
-                                error = "Must not contain any directories that have empty names";
-                                return false;
-                            }
-                            if (IsAncestorOfRoot(components))
-                            {
-                                error = "Must not point to an ancestor of the filesystem root";
-                                return false;
-                            }
-                            pathSpec = new PathSpec(flags, "\\", this, components);
-                        }
-                        return true;
-                    }
-                    if (isUnixStyle)
-                    {
-                        if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
-                            flags = PathFlags.CaseSensitive;
-                        if (path.Length > 1 && path.EndsWith("/"))
-                            path = path.Substring(0, path.Length - 1);
-                        if (path.Contains(":"))
-                        {
-                            error = "A Unix path may not contain a : character.";
-                            return false;
-                        }
-                        var isAbsolute = IsAbsoluteUnixPath(path);
-                        if (isAbsolute)
-                        {
-                            var components = "/".ItemConcat(path.Substring(1).Split('/')).ToList();
-                            components.RemoveWhere((i, str) => i != 0 && str == ".");
-                            if (components.Any(String.IsNullOrEmpty))
-                            {
-                                error = "Must not contain any directories that have empty names";
-                                return false;
-                            }
-                            if (IsAncestorOfRoot(components))
-                            {
-                                error = "Must not point to an ancestor of the filesystem root";
-                                return false;
-                            }
-                            pathSpec = new PathSpec(flags, "/", this, components);
-                        }
-                        else if (path.StartsWith("."))
-                        {
-                            var components = path.Split('/').ToList();
-                            components.RemoveWhere((i, str) => i != 0 && str == ".");
-                            if (components.Any(String.IsNullOrEmpty))
-                            {
-                                error = "Must not contain any directories that have empty names";
-                                return false;
-                            }
-                            if (IsAncestorOfRoot(components))
-                            {
-                                error = "Must not point to an ancestor of the filesystem root";
-                                return false;
-                            }
-                            pathSpec = new PathSpec(flags, "/", this, components);
-                        }
-                        else
-                        {
-                            var components = ".".ItemConcat(path.Split('/')).ToList();
-                            components.RemoveWhere((i, str) => i != 0 && str == ".");
-                            if (components.Any(String.IsNullOrEmpty))
-                            {
-                                error = "Must not contain any directories that have empty names";
-                                return false;
-                            }
-                            if (IsAncestorOfRoot(components))
-                            {
-                                error = "Must not point to an ancestor of the filesystem root";
-                                return false;
-                            }
-                            pathSpec = new PathSpec(flags, "/", this, components);
-                        }
-                        return true;
-                    }
-                    // If we reach this point, there are no backslashes or slashes in the path, meaning that it's a
-                    // path with one element.
-                    if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
-                        flags = GetDefaultFlagsForThisEnvironment();
-                    if (path == ".." || path == ".")
-                        pathSpec = new PathSpec(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, path);
-                    else
-                        pathSpec = new PathSpec(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, ".", path);
-                    return true;
-                }
-        
-                public PathSpec CurrentDirectory => ToPath(Environment.CurrentDirectory).Value;
-        
-                public void UpdateStorage()
-                {
-                    var currentStorage = System.IO.Directory.GetLogicalDrives();
-                    foreach (var drive in currentStorage)
-                    {
-                        var drivePath = ToPath(drive).Value;
-                        if (!_knownStorage.Contains(drivePath))
-                            _knownStorage.Add(drivePath);
-                    }
-        
-                    var drivesThatWereRemoved = new List<PathSpec>();
-        
-                    foreach (var drive in _knownStorage)
-                    {
-                        if (!currentStorage.Contains(drive + "\\"))
-                            drivesThatWereRemoved.Add(drive);
-                    }
-        
-                    foreach (var driveThatWasRemoved in drivesThatWereRemoved)
-                    {
-                        _knownStorage.Remove(driveThatWasRemoved);
-                    }
-                }
-        
-                private readonly HashSet<PathSpec> _knownStorage = new HashSet<PathSpec>();
-        
-                public IReadOnlyObservableSet<PathSpec> Storage { get; }
-                
-                
-                public IMaybe<StreamWriter> CreateText(PathSpec pathSpec)
-                        {
-                            try
-                            {
-                                return new Maybe<StreamWriter>(pathSpec.AsFileInfo().CreateText());
-                            }
-                            catch (UnauthorizedAccessException)
-                            {
-                                return Maybe<StreamWriter>.Nothing;
-                            }
-                            catch (IOException)
-                            {
-                                return Maybe<StreamWriter>.Nothing;
-                            }
-                            catch (SecurityException)
-                            {
-                                return Maybe<StreamWriter>.Nothing;
-                            }
-                        }
-                
-                        public IEnumerable<string> ReadLines(PathSpec pathSpec, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
-                            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
-                        {
-                            var maybeFileStream = pathSpec.Open(fileMode, fileAccess, fileShare);
-                            if (maybeFileStream.HasValue)
-                            {
-                                using (maybeFileStream.Value)
-                                {
-                                    return ReadLines(maybeFileStream.Value, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
-                                }
-                            }
-                            return EnumerableUtility.EmptyArray<string>();
-                        }
-                
-                        public IMaybe<string> ReadText(PathSpec pathSpec, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
-                            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
-                        {
-                            return pathSpec.Open(fileMode, fileAccess, fileShare).Select(
-                                fs =>
-                                {
-                                    using (fs)
-                                    {
-                                        return ReadText(fs, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
-                                    }
-                                });
-                        }
-                
-                        public void WriteText(PathSpec pathSpec, IEnumerable<string> lines, FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
-                            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
-                        {
-                            var maybeFileStream = pathSpec.Open(fileMode, fileAccess, fileShare);
-                            if (maybeFileStream.HasValue)
-                            {
-                                using (maybeFileStream.Value)
-                                {
-                                    WriteLines(maybeFileStream.Value, lines, encoding, bufferSize, leaveOpen);
-                                }
-                            }
-                        }
-                
-                        public void WriteText(PathSpec pathSpec, string text, FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
-                            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
-                        {
-                            var maybeFileStream = pathSpec.Open(fileMode, fileAccess, fileShare);
-                            if (maybeFileStream.HasValue)
-                            {
-                                using (maybeFileStream.Value)
-                                {
-                                    WriteText(maybeFileStream.Value, text, encoding, bufferSize, leaveOpen);
-                                }
-                            }
-                        }
-                
-                        public IEnumerable<string> ReadLines(Stream stream, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
-                        {
-                            if (encoding == null)
-                                encoding = Encoding.UTF8;
-                            using (var sr = new StreamReader(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen))
-                            {
-                                string line;
-                                while ((line = sr.ReadLine()) != null)
-                                {
-                                    yield return line;
-                                }
-                            }
-                        }
-                
-                        public IEnumerable<string> ReadLinesBackwards(Stream stream, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
-                        {
-                            if (encoding == null)
-                                encoding = Encoding.UTF8;
-                
-                            string content = string.Empty;
-                            // Seek file pointer to end
-                            stream.Seek(0, SeekOrigin.End);
-                
-                            byte[] buffer = new byte[bufferSize];
-                
-                            //loop now and read backwards
-                            while (stream.Position > 0)
-                            {
-                                buffer.Initialize();
-                
-                                int bytesRead;
-                
-                                if (stream.Position - bufferSize >= 0)
-                                {
-                                    stream.Seek(-bufferSize, SeekOrigin.Current);
-                                    bytesRead = stream.Read(buffer, 0, bufferSize);
-                                    stream.Seek(-bufferSize, SeekOrigin.Current);
-                                }
-                                else
-                                {
-                                    var finalBufferSize = stream.Position;
-                                    stream.Seek(0, SeekOrigin.Begin);
-                                    bytesRead = stream.Read(buffer, 0, (int)finalBufferSize);
-                                    stream.Seek(0, SeekOrigin.Begin);
-                                }
-                
-                                var strBuffer = encoding.GetString(buffer, 0, bytesRead);
-                
-                                // lines is equal to what we just read, with the leftover content from last iteration appended to it.
-                                var lines = (strBuffer + content).Split('\n');
-                
-                                // Loop through lines backwards, ignoring the first element, and yield each value
-                                for (var i = lines.Length - 1; i > 0; i--)
-                                {
-                                    yield return lines[i].Trim('\r');
-                                }
-                
-                                // Leftover content is part of a line defined on the line(s) that we'll read next iteration of while loop
-                                // so we must save leftover content for later
-                                content = lines[0];
-                            }
-                        }
-                
-                        public string ReadText(Stream stream, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
-                        {
-                            if (encoding == null)
-                                encoding = Encoding.UTF8;
-                            using (var sr = new StreamReader(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen))
-                            {
-                                return ReadText(sr);
-                            }
-                        }
-                
-                        private string ReadText(StreamReader streamReader)
-                        {
-                            return streamReader.ReadToEnd();
-                        }
-                
-                        public void WriteLines(Stream stream, IEnumerable<string> lines, Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
-                        {
-                            if (encoding == null)
-                                encoding = Encoding.UTF8;
-                            using (var sw = new StreamWriter(stream, encoding, bufferSize, leaveOpen))
-                            {
-                                WriteLines(sw, lines);
-                            }
-                        }
-                
-                        private void WriteLines(StreamWriter streamWriter, IEnumerable<string> lines)
-                        {
-                            foreach (var line in lines)
-                            {
-                                streamWriter.WriteLine(line);
-                            }
-                        }
-                
-                        public void WriteText(Stream stream, string text, Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
-                        {
-                            if (encoding == null)
-                                encoding = Encoding.UTF8;
-                            using (var sw = new StreamWriter(stream, encoding, bufferSize, leaveOpen))
-                            {
-                                WriteText(sw, text);
-                            }
-                        }
-                
-                        private void WriteText(StreamWriter streamWriter, string text)
-                        {
-                            streamWriter.Write(text);
-                        }
+        #endregion
     }
 }

@@ -1004,22 +1004,22 @@ namespace MoreIO
             return path;
         }
 
-        public IReadOnlySet<PathSpec> Children(PathSpec path)
+        public IReadOnlyObservableSet<PathSpec> Children(PathSpec path)
         {
             return path.Children("*");
         }
 
-        public IReadOnlySet<PathSpec> Children(PathSpec path, string pattern)
+        public IReadOnlyObservableSet<PathSpec> Children(PathSpec path, string pattern)
         {
             return new PathSpecDescendants(path, pattern, false, this);
         }
 
-        public IReadOnlySet<PathSpec> Descendants(PathSpec path)
+        public IReadOnlyObservableSet<PathSpec> Descendants(PathSpec path)
         {
             return path.Descendants("*");
         }
 
-        public IReadOnlySet<PathSpec> Descendants(PathSpec path, string pattern)
+        public IReadOnlyObservableSet<PathSpec> Descendants(PathSpec path, string pattern)
         {
             return new PathSpecDescendants(path, pattern, true, this);
         }
@@ -1905,7 +1905,7 @@ namespace MoreIO
         
                 private readonly HashSet<PathSpec> _knownStorage = new HashSet<PathSpec>();
         
-                public IReadOnlySet<PathSpec> Storage { get; }
+                public IReadOnlyObservableSet<PathSpec> Storage { get; }
                 
                 
                 public IMaybe<StreamWriter> CreateText(PathSpec pathSpec)

@@ -123,10 +123,10 @@ namespace MoreIO
         IEnumerable<string> ReadLines(PathSpec path);
         string ReadAllText(PathSpec path);
         PathSpec ToAbsolute(PathSpec path);
-        IReadOnlySet<PathSpec> Children(PathSpec path);
-        IReadOnlySet<PathSpec> Children(PathSpec path, string pattern);
-        IReadOnlySet<PathSpec> Descendants(PathSpec path);
-        IReadOnlySet<PathSpec> Descendants(PathSpec path, string pattern);
+        IReadOnlyObservableSet<PathSpec> Children(PathSpec path);
+        IReadOnlyObservableSet<PathSpec> Children(PathSpec path, string pattern);
+        IReadOnlyObservableSet<PathSpec> Descendants(PathSpec path);
+        IReadOnlyObservableSet<PathSpec> Descendants(PathSpec path, string pattern);
         IObservable<Unit> ObserveChanges(PathSpec path);
         IObservable<Unit> ObserveChanges(PathSpec path, NotifyFilters filters);
         IObservable<PathType> ObservePathType(PathSpec path);

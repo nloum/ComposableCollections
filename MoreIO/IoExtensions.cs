@@ -318,22 +318,22 @@ namespace MoreIO
             return path.IoService.ToAbsolute(path);
         }
 
-        public static IReadOnlySet<PathSpec> Children(this PathSpec path)
+        public static IReadOnlyObservableSet<PathSpec> Children(this PathSpec path)
         {
             return path.IoService.Children(path);
         }
 
-        public static IReadOnlySet<PathSpec> Children(this PathSpec path, string pattern)
+        public static IReadOnlyObservableSet<PathSpec> Children(this PathSpec path, string pattern)
         {
             return path.IoService.Children(path, pattern);
         }
 
-        public static IReadOnlySet<PathSpec> Descendants(this PathSpec path)
+        public static IReadOnlyObservableSet<PathSpec> Descendants(this PathSpec path)
         {
             return path.IoService.Descendants(path);
         }
 
-        public static IReadOnlySet<PathSpec> Descendants(this PathSpec path, string pattern)
+        public static IReadOnlyObservableSet<PathSpec> Descendants(this PathSpec path, string pattern)
         {
             return path.IoService.Descendants(path, pattern);
         }

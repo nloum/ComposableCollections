@@ -15,7 +15,7 @@ namespace MoreIO
         public static IDictionaryChangesStrict<PathSpec, PathSpec> ToLiveLinq(this PathSpec root,
             bool includeFileContentChanges = true)
         {
-            return root.IoService.ToLiveLinq(root, includeFileChanges);
+            return root.IoService.ToLiveLinq(root, includeFileContentChanges);
         }
         
         public static IEnumerable<PathSpec> GetChildren(this PathSpec path, bool includeFolders = true, bool includeFiles = true)

@@ -47,8 +47,6 @@ namespace MoreIO.Test
 
             var text1 = test1.Descendant("test.txt").Value;
             
-            test1.ObserveChanges().Subscribe()
-            
             text1.WriteText("testing 1 2 3");
 
             var test2 = ioService.ToPath("test2").Value

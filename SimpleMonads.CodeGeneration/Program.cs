@@ -11,9 +11,41 @@ namespace SimpleMonads.CodeGeneration
     {
         static void Main(string[] args)
         {
-            GenerateEither(Console.Out, 4, CodePart.Interface);
-            GenerateEither(Console.Out, 4, CodePart.Class);
-            GenerateEither(Console.Out, 4, CodePart.ExtensionMethods);
+            File.Delete("IEither.cs");
+            File.Delete("Either.cs");
+            File.Delete("EitherExtensions.cs");
+            using (var fs = File.OpenWrite("IEither.cs"))
+            using (var writer = new StreamWriter(fs))
+            {
+                writer.WriteLine("namespace SimpleMonads {");
+                for (var i = 2; i <= 16; i++)
+                {
+                    GenerateEither(writer, i, CodePart.Interface);
+                }
+                writer.WriteLine("}");
+            }
+
+            using (var fs = File.OpenWrite("Either.cs"))
+            using (var writer = new StreamWriter(fs))
+            {
+                writer.WriteLine("namespace SimpleMonads {");
+                for (var i = 2; i <= 16; i++)
+                {
+                    GenerateEither(writer, i, CodePart.Class);
+                }
+                writer.WriteLine("}");
+            }
+
+            using (var fs = File.OpenWrite("EitherExtensions.cs"))
+            using (var writer = new StreamWriter(fs))
+            {
+                writer.WriteLine("using System;\n\nnamespace SimpleMonads {");
+                for (var i = 2; i <= 16; i++)
+                {
+                    GenerateEither(writer, i, CodePart.ExtensionMethods);
+                }
+                writer.WriteLine("}");
+            }
         }
 
         private enum CodePart

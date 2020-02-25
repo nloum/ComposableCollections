@@ -15,21 +15,15 @@ jobs:
     - uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '3.1.101' # SDK Version to use.
-    - name: Copy nuget.config
-      run: cp .github/workflows/nuget.config ./nuget.config
-    - name: Set NuGet credentials
-      shell: pwsh
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: ./.github/workflows/Set-NuGetCredentials -ConfigFile ./nuget.config -Source github -Username nloum -Password $env:GITHUB_TOKEN
     - name: Build NuGet package
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
       run: dotnet pack --configuration Release
     - name: Publish NuGet package
+      run: dotnet nuget push GenericNumbers/bin/Release/*.nupkg --api-key $NUGET_API_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      run: dotnet nuget push GenericNumbers/bin/Release/*.nupkg -s "github" --skip-duplicate
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
   test:
     runs-on: ubuntu-latest
 

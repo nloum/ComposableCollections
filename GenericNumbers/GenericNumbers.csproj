@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.4</TargetFramework>
-    <PackageVersion>1.0.0-alpha1</PackageVersion>
+    <PackageVersion>1.0.0-alpha2</PackageVersion>
     <Authors>nloum</Authors>
   </PropertyGroup>
 
@@ -12,6 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SimpleMonads" Version="1.0.0-alpha1" />
+    <PackageReference Include="SimpleMonads" Version="1.0.0-alpha4" />
   </ItemGroup>
 </Project>

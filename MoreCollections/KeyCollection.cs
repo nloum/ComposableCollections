@@ -28,7 +28,7 @@ namespace MoreCollections {
     /// <summary>
     /// The source dictionary
     /// </summary>
-    private ObservableDictionary<TKey, TValue> _dictionary;
+    private BindableDictionary<TKey, TValue> _dictionary;
 
     #endregion Private Fields
 
@@ -40,7 +40,7 @@ namespace MoreCollections {
     /// <summary>
     /// Constructor that takes the source dictionary as a parameter
     /// </summary>
-    public KeyCollection(ObservableDictionary<TKey, TValue> dictionary) {
+    public KeyCollection(BindableDictionary<TKey, TValue> dictionary) {
       _dictionary = dictionary;
     }
 

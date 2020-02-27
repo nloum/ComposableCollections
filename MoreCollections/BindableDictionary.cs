@@ -11,7 +11,7 @@ namespace MoreCollections
     /// <summary>
     ///     This class provides a dictionary that can be bound to a WPF control.
     /// </summary>
-    public class ObservableDictionary<TKey, TValue> : INotifyCollectionChanged,
+    public class BindableDictionary<TKey, TValue> : INotifyCollectionChanged,
                                                       IDictionary<TKey, TValue>,
                                                       ICollection<IKeyValuePair<TKey, TValue>>,
                                                       IEnumerable<IKeyValuePair<TKey, TValue>>,
@@ -101,7 +101,7 @@ namespace MoreCollections
         ///     initial capacity, and uses the default equality comparer for the key
         ///     type.
         /// </summary>
-        public ObservableDictionary()
+        public BindableDictionary()
         {
             _keyToIndex = new Dictionary<TKey, DoubleLinkListIndexNode>();
             _masterList = new ObservableCollection<IKeyValuePair<TKey, TValue>>();
@@ -119,7 +119,7 @@ namespace MoreCollections
         ///         equality comparer for the key type.
         /// </summary>
         /// <param name="source"></param>
-        public ObservableDictionary(IDictionary<TKey, TValue> source)
+        public BindableDictionary(IDictionary<TKey, TValue> source)
             : this()
         {
             foreach (var pair in source)
@@ -133,7 +133,7 @@ namespace MoreCollections
         ///     initial capacity, and uses the specified IEqualityComparer<T>.
         /// </summary>
         /// <param name="equalityComparer"></param>
-        public ObservableDictionary(IEqualityComparer<TKey> equalityComparer)
+        public BindableDictionary(IEqualityComparer<TKey> equalityComparer)
             : this()
         {
             _keyToIndex = new Dictionary<TKey, DoubleLinkListIndexNode>(equalityComparer);
@@ -145,7 +145,7 @@ namespace MoreCollections
         ///     the key type.
         /// </summary>
         /// <param name="capactity"></param>
-        public ObservableDictionary(int capactity)
+        public BindableDictionary(int capactity)
             : this()
         {
             _keyToIndex = new Dictionary<TKey, DoubleLinkListIndexNode>(capactity);
@@ -160,7 +160,7 @@ namespace MoreCollections
         /// </summary>
         /// <param name="source"></param>
         /// <param name="equalityComparer"></param>
-        public ObservableDictionary(IDictionary<TKey, TValue> source, IEqualityComparer<TKey> equalityComparer)
+        public BindableDictionary(IDictionary<TKey, TValue> source, IEqualityComparer<TKey> equalityComparer)
             : this(equalityComparer)
         {
             foreach (var pair in source)
@@ -176,7 +176,7 @@ namespace MoreCollections
         /// </summary>
         /// <param name="capacity"></param>
         /// <param name="equalityComparer"></param>
-        public ObservableDictionary(int capacity, IEqualityComparer<TKey> equalityComparer)
+        public BindableDictionary(int capacity, IEqualityComparer<TKey> equalityComparer)
             : this()
         {
             _keyToIndex = new Dictionary<TKey, DoubleLinkListIndexNode>(capacity, equalityComparer);

@@ -19,7 +19,7 @@ namespace MoreCollections {
   /// This class provides a sorted collection that can be bound to
   /// a WPF control.
   /// </summary>
-  public class ObservableSortedDictionary<TKey, TValue> : ObservableDictionary<TKey, TValue> {
+  public class BindableSortedDictionary<TKey, TValue> : BindableDictionary<TKey, TValue> {
 
     // ************************************************************************
     // Private Fields
@@ -42,7 +42,7 @@ namespace MoreCollections {
     /// Constructor with an optional IComparer<TKey> parameter.
     /// </summary>
     /// <param name="comparer">Comparer used to sort the keys.</param>
-    public ObservableSortedDictionary(IComparer<TKey> comparer = null) {
+    public BindableSortedDictionary(IComparer<TKey> comparer = null) {
       _sorter = new BinarySorter<TKey>(comparer);
     }
 

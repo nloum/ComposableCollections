@@ -7,6 +7,7 @@ namespace SimpleMonads
     public interface IMaybe<out T> : IMonad<T>, IMaybe
     {
         T Value { get; }
+        T ValueOrDefault { get; }
     }
 
     /// <summary>

@@ -9,6 +9,8 @@ namespace SimpleMonads
     [DataContract]
     public class Maybe<T> : IMaybe<T>
     {
+        private T _value;
+
         [DataMember]
         public bool HasValue { get; set; }
         public static Maybe<T> Nothing { get; } = new Maybe<T>();
@@ -26,8 +28,24 @@ namespace SimpleMonads
             Value = value;
         }
 
+        public T Value
+        {
+            get {
+                if (object.ReferenceEquals(this, Nothing))
+                {
+                    throw new InvalidOperationException("Cannot access the value of a maybe. Use ValueOrDefault instead of Value.");
+                }
+                return _value;
+            }
+            set => _value = value;
+        }
+        
         [DataMember]
-        public T Value { get; set; }
+        public T ValueOrDefault
+        {
+            get => _value;
+            set => _value = value;
+        }
 
         protected bool Equals(IMaybe<T> other)
         {
@@ -98,7 +116,7 @@ namespace SimpleMonads
                 return selector(source.Value);
             return Utility.Nothing<T2>();
         }
-        
+
         public static T OtherwiseThrow<T>(this IMaybe<T> source)
         {
             return source.Otherwise(() =>
@@ -127,12 +145,34 @@ namespace SimpleMonads
             return result;
         }
 
-        public static void IfHasValue<T>(this IMaybe<T> maybe, Action<T> action)
+        public static IMaybe<T> IfHasValue<T>(this IMaybe<T> maybe, Action<T> action)
         {
             if (maybe.HasValue)
             {
                 action(maybe.Value);
             }
+            return maybe;
+        }
+
+        public static IMaybe<IReadOnlyList<T>> AllOrNothing<T>(this IEnumerable<IMaybe<T>> maybes)
+        {
+            var all = new List<T>();
+            foreach (var maybe in maybes)
+            {
+                if (!maybe.HasValue)
+                {
+                    return Maybe<IReadOnlyList<T>>.Nothing;
+                }
+                
+                all.Add(maybe.Value);
+            }
+
+            return all.ToMaybe();
+        }
+        
+        public static IEnumerable<T> WhereHasValue<T>(this IEnumerable<IMaybe<T>> maybes)
+        {
+            return maybes.Where(m => m.HasValue).Select(m => m.Value);
         }
     }
 }

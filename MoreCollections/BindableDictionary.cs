@@ -24,7 +24,7 @@ namespace MoreCollections
             }
         }
         
-        public void AddRange(IEnumerable<TKey> keys) {
+        public void RemoveRange(IEnumerable<TKey> keys) {
             foreach(var key in keys) {
                 Remove(key);
             }

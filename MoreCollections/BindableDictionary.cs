@@ -11,13 +11,24 @@ namespace MoreCollections
     /// <summary>
     ///     This class provides a dictionary that can be bound to a WPF control.
     /// </summary>
-    public class BindableDictionary<TKey, TValue> : INotifyCollectionChanged,
+    public class BindableDictionary<TKey, TValue> : IReadOnlyBindableDictionary<TKey, TValue>,
                                                       IDictionary<TKey, TValue>,
                                                       ICollection<IKeyValuePair<TKey, TValue>>,
                                                       IEnumerable<IKeyValuePair<TKey, TValue>>,
                                                       IEnumerable,
                                                       ICollection
     {
+        // ************************************************************************
+        // IReadOnlyDictionary<TKey, TValue> Members
+        // ************************************************************************
+    
+        #region IReadOnlyDictionary<TKey, TValue> Members
+    
+        IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => _keys;
+        IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => _values;
+
+        #endregion IReadOnlyDictionary<TKey, TValue> Members
+
         // ************************************************************************
         // IEnumerable<IKeyValuePair<TKey, TValue>> Members
         // ************************************************************************

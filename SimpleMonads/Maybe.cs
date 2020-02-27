@@ -83,11 +83,6 @@ namespace SimpleMonads
     
     public static class Maybe
     {
-        public static IEnumerable<T> WhereHasValue<T>(this IEnumerable<IMaybe<T>> maybes)
-        {
-            return maybes.Where(m => m.HasValue).Select(m => m.Value);
-        }
-        
         public static IMaybe<TElement> ToMaybe<TElement>(this TElement element)
         {
             if (element == null)

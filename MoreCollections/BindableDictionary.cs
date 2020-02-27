@@ -18,6 +18,18 @@ namespace MoreCollections
                                                       IEnumerable,
                                                       ICollection
     {
+        public void AddRange(IEnumerable<IKeyValuePair<TKey, TValue>> keyValuePairs) {
+            foreach(var keyValuePair in keyValuePairs) {
+                Add(keyValuePair.Key, keyValuePair.Value);
+            }
+        }
+        
+        public void AddRange(IEnumerable<TKey> keys) {
+            foreach(var key in keys) {
+                Remove(key);
+            }
+        }
+        
         // ************************************************************************
         // IReadOnlyDictionary<TKey, TValue> Members
         // ************************************************************************

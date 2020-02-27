@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace SimpleMonads
@@ -64,6 +65,11 @@ namespace SimpleMonads
     
     public static class Maybe
     {
+        public static IEnumerable<T> WhereHasValue<T>(this IEnumerable<IMaybe<T>> maybes)
+        {
+            return maybes.Where(m => m.HasValue).Select(m => m.Value);
+        }
+        
         public static IMaybe<TElement> ToMaybe<TElement>(this TElement element)
         {
             if (element == null)

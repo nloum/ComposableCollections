@@ -362,6 +362,6 @@ namespace MoreIO
 
         private static readonly HashSet<PathSpec> _knownStorage = new HashSet<PathSpec>();
 
-        public static IReadOnlySet<PathSpec> Storage { get; }
+        public static IReadOnlyObservableSet<PathSpec> Storage { get; }
     }
 }

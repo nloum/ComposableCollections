@@ -846,22 +846,22 @@ namespace MoreIO
             return pathSpec;
         }
 
-        public static IReadOnlySet<PathSpec> Children(this PathSpec path)
+        public static IReadOnlyObservableSet<PathSpec> Children(this PathSpec path)
         {
             return path.Children("*");
         }
 
-        public static IReadOnlySet<PathSpec> Children(this PathSpec path, string pattern)
+        public static IReadOnlyObservableSet<PathSpec> Children(this PathSpec path, string pattern)
         {
             return new PathSpecDescendants(path, pattern, false);
         }
 
-        public static IReadOnlySet<PathSpec> Descendants(this PathSpec path)
+        public static IReadOnlyObservableSet<PathSpec> Descendants(this PathSpec path)
         {
             return path.Descendants("*");
         }
 
-        public static IReadOnlySet<PathSpec> Descendants(this PathSpec path, string pattern)
+        public static IReadOnlyObservableSet<PathSpec> Descendants(this PathSpec path, string pattern)
         {
             return new PathSpecDescendants(path, pattern, true);
         }

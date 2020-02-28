@@ -10,7 +10,7 @@ using LiveLinq.Set;
 
 namespace MoreIO
 {
-    public class PathSpecDescendants : IReadOnlySet<PathSpec>
+    public class PathSpecDescendants : IReadOnlyObservableSet<PathSpec>
     {
         private readonly PathSpec _path;
         private readonly string _pattern;

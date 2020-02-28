@@ -2,13 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageVersion>1.0.0-alpha2</PackageVersion>
+    <PackageVersion>1.0.0-alpha6</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="LiveLinq" Version="1.0.0-pre20" />
     <PackageReference Include="MoreCollections" Version="1.0.0-pre9" />
     <PackageReference Include="SimpleMonads" Version="1.0.0-alpha4" />
+    <PackageReference Include="TreeLinq" Version="1.0.0-alpha2" />
     <PackageReference Include="UtilityDisposables" Version="1.0.0-alpha2" />
   </ItemGroup>
 

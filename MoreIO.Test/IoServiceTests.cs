@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ReactiveProcesses;
 
 namespace MoreIO.Test
 {
@@ -8,7 +9,7 @@ namespace MoreIO.Test
     {
         private IIoService CreateUnitUnderTest()
         {
-            return new IoService();
+            return new IoService(new ReactiveProcessFactory());
         }
 
         [TestMethod]

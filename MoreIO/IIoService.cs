@@ -6,6 +6,7 @@ using System.Text;
 using LiveLinq.Dictionary;
 using LiveLinq.Set;
 using SimpleMonads;
+using TreeLinq;
 
 namespace MoreIO
 {
@@ -24,7 +25,9 @@ namespace MoreIO
         IEnumerable<KeyValuePair<PathSpec, string>> ProposeUniqueNamesForMovingPathsToSameFolder(
             IEnumerable<PathSpec> paths);
 
-        IDictionaryChangesStrict<PathSpec, PathSpec> ToLiveLinq(PathSpec root, bool includeFileContentChanges = true);
+        IEnumerable<TreeTraversal<string, PathSpec>> TraverseDescendants(PathSpec path);
+        IEnumerable<PathSpec> GetDescendants(PathSpec path);
+        ISetChanges<PathSpec> ToLiveLinq(PathSpec root, bool includeFileContentChanges = true, PathObservationMethod observationMethod = PathObservationMethod.Default);
         IEnumerable<PathSpec> GetChildren(PathSpec path, bool includeFolders = true, bool includeFiles = true);
         IEnumerable<PathSpec> GetFiles(PathSpec path);
         IEnumerable<PathSpec> GetFolders(PathSpec path);

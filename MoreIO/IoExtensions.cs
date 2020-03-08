@@ -7,15 +7,26 @@ using System.Text;
 using LiveLinq.Dictionary;
 using LiveLinq.Set;
 using SimpleMonads;
+using TreeLinq;
 
 namespace MoreIO
 {
     public static class IoExtensions
     {
-        public static IDictionaryChangesStrict<PathSpec, PathSpec> ToLiveLinq(this PathSpec root,
-            bool includeFileContentChanges = true)
+        public static ISetChanges<PathSpec> ToLiveLinq(this PathSpec root,
+            bool includeFileContentChanges = true, PathObservationMethod observationMethod = PathObservationMethod.Default)
         {
-            return root.IoService.ToLiveLinq(root, includeFileContentChanges);
+            return root.IoService.ToLiveLinq(root, includeFileContentChanges, observationMethod);
+        }
+
+        public static IEnumerable<PathSpec> GetDescendants(this PathSpec path)
+        {
+            return path.IoService.GetDescendants(path);
+        }
+
+        public static IEnumerable<TreeTraversal<string, PathSpec>> TraverseDescendants(this PathSpec path)
+        {
+            return path.IoService.TraverseDescendants(path);
         }
 
         public static IEnumerable<PathSpec> GetChildren(this PathSpec path, bool includeFolders = true,

@@ -4,19 +4,22 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using LiveLinq.Core;
-using LiveLinq.Dictionary;
 using LiveLinq.Set;
 using MoreCollections;
+using ReactiveProcesses;
 using SimpleMonads;
 using TreeLinq;
 using UtilityDisposables;
 using static SimpleMonads.Utility;
+using Utility = LiveLinq.Set.Utility;
 
 namespace MoreIO
 {
@@ -27,6 +30,7 @@ namespace MoreIO
         private readonly object _lock = new object();
         private string defaultDirectorySeparatorForThisEnvironment;
         private PathFlags? defaultFlagsForThisEnvironment;
+        private readonly IReactiveProcessFactory _reactiveProcessFactory;
 
         public PathSpec CurrentDirectory => ToPath(Environment.CurrentDirectory).Value;
 
@@ -37,6 +41,21 @@ namespace MoreIO
             if (path.IsRelative())
                 return CurrentDirectory.Join(path).Value;
             return path;
+        }
+
+        public IEnumerable<TreeTraversal<string, PathSpec>> TraverseDescendants(PathSpec path)
+        {
+            return path.TraverseTree(x => x.Select(child => child.LastPathComponent()), (PathSpec node, string name, out PathSpec child) =>
+            {
+                child = node.Descendant(name).Value;
+                return child.Exists();
+            });
+        }
+
+        public IEnumerable<PathSpec> GetDescendants(PathSpec path)
+        {
+            return path.TraverseDescendants().Where(x => x.Type != TreeTraversalType.ExitBranch).Select(x => x.Value)
+                .Skip(1);
         }
 
         public IReadOnlyObservableSet<PathSpec> Children(PathSpec path)
@@ -58,43 +77,6 @@ namespace MoreIO
         {
             return new PathSpecDescendants(path, pattern, true, this);
         }
-
-        public IObservable<Unit> ObserveChanges(PathSpec path)
-        {
-            return path.ObserveChanges(NotifyFilters.Attributes | NotifyFilters.CreationTime |
-                                       NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastAccess |
-                                       NotifyFilters.LastWrite | NotifyFilters.Security | NotifyFilters.Size);
-        }
-
-        public IObservable<Unit> ObserveChanges(PathSpec path, NotifyFilters filters)
-        {
-            var parent = path.Parent();
-            if (!parent.HasValue) return Observable.Never<Unit>();
-
-            return Observable.Create<Unit>(observer =>
-            {
-                var watcher = new FileSystemWatcher(parent.Value.ToString())
-                {
-                    IncludeSubdirectories = false,
-                    Filter = path.Name,
-                    EnableRaisingEvents = true,
-                    NotifyFilter = filters
-                };
-
-                var subscription = Observable
-                    .FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                        handler => watcher.Changed += handler, handler => watcher.Changed -= handler)
-                    .Select(_ => Unit.Default)
-                    .Subscribe(observer);
-
-                return new AnonymousDisposable(() =>
-                {
-                    subscription.Dispose();
-                    watcher.Dispose();
-                });
-            });
-        }
-
 
         public IMaybe<StreamWriter> CreateText(PathSpec pathSpec)
         {
@@ -669,90 +651,6 @@ namespace MoreIO
             }
         }
 
-        public IDictionaryChangesStrict<PathSpec, PathSpec> ToLiveLinq(PathSpec root,
-            bool includeFileContentChanges = true)
-        {
-            var watcher = new FileSystemWatcher(root.ToString())
-            {
-                IncludeSubdirectories = true,
-                Filter = null,
-                EnableRaisingEvents = true,
-                NotifyFilter = NotifyFilters.LastWrite
-            };
-
-            var creations = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                    handler => watcher.Created += handler,
-                    handler => watcher.Created -= handler)
-                .Select(args =>
-                {
-                    var path = root.IoService.ToPath(args.EventArgs.FullPath).Value;
-                    return new DictionaryChangeStrict<PathSpec, PathSpec>(CollectionChangeType.Add,
-                        ImmutableDictionary<PathSpec, PathSpec>.Empty.Add(path, path));
-                });
-
-            var deletions = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                    handler => watcher.Deleted += handler,
-                    handler => watcher.Deleted -= handler)
-                .Select(args =>
-                {
-                    var path = root.IoService.ToPath(args.EventArgs.FullPath).Value;
-                    return new DictionaryChangeStrict<PathSpec, PathSpec>(CollectionChangeType.Remove,
-                        ImmutableDictionary<PathSpec, PathSpec>.Empty.Add(path, path));
-                });
-
-            var changes = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
-                    handler => watcher.Changed += handler,
-                    handler => watcher.Changed -= handler)
-                .Where(x => x.EventArgs.ChangeType == WatcherChangeTypes.Changed)
-                .GroupBy(x => x.EventArgs.FullPath)
-                .Select(x => x.Throttle(TimeSpan.FromSeconds(.2)))
-                .Merge()
-                .SelectMany(args =>
-                {
-                    var path = root.IoService.ToPath(args.EventArgs.FullPath).Value;
-                    return new[]
-                    {
-                        new DictionaryChangeStrict<PathSpec, PathSpec>(CollectionChangeType.Remove,
-                            ImmutableDictionary<PathSpec, PathSpec>.Empty.Add(path, path)),
-                        new DictionaryChangeStrict<PathSpec, PathSpec>(CollectionChangeType.Add,
-                            ImmutableDictionary<PathSpec, PathSpec>.Empty.Add(path, path))
-                    }.ToObservable();
-                });
-
-            var renames = Observable.FromEventPattern<RenamedEventHandler, RenamedEventArgs>(
-                    handler => watcher.Renamed += handler,
-                    handler => watcher.Renamed -= handler)
-                .SelectMany(args =>
-                {
-                    var oldPath = root.IoService.ToPath(args.EventArgs.OldFullPath).Value;
-                    var path = root.IoService.ToPath(args.EventArgs.FullPath).Value;
-                    return new[]
-                    {
-                        new DictionaryChangeStrict<PathSpec, PathSpec>(CollectionChangeType.Remove,
-                            ImmutableDictionary<PathSpec, PathSpec>.Empty.Add(oldPath, oldPath)),
-                        new DictionaryChangeStrict<PathSpec, PathSpec>(CollectionChangeType.Add,
-                            ImmutableDictionary<PathSpec, PathSpec>.Empty.Add(path, path))
-                    }.ToObservable();
-                });
-
-            var initialStateTree = root.TraverseTree(x => x, (PathSpec node, PathSpec name, out PathSpec child) =>
-            {
-                child = node.Descendant(name).Value;
-                return child.Exists();
-            });
-
-            var initialState = initialStateTree
-                .Where(tt => tt.Type != TreeTraversalType.ExitBranch && !tt.Path.IsRoot)
-                .Select(tt => tt.Path.Last)
-                .Select(path => new DictionaryChangeStrict<PathSpec, PathSpec>(CollectionChangeType.Add,
-                    ImmutableDictionary<PathSpec, PathSpec>.Empty.Add(path, path)))
-                .ToObservable();
-
-            var unified = initialState.Concat(creations.Merge(deletions).Merge(renames).Merge(changes));
-
-            return unified.ToLiveLinq();
-        }
-
         public IEnumerable<PathSpec> GetChildren(PathSpec path, bool includeFolders = true, bool includeFiles = true)
         {
             if (!path.IsFolder()) return ImmutableArray<PathSpec>.Empty;
@@ -1259,6 +1157,11 @@ namespace MoreIO
             "xpm"
         };
 
+        public IoService(IReactiveProcessFactory reactiveProcessFactory)
+        {
+            _reactiveProcessFactory = reactiveProcessFactory;
+        }
+
         public FileInfo AsFileInfo(PathSpec path)
         {
             return new FileInfo(path.ToString());
@@ -1626,8 +1529,220 @@ namespace MoreIO
 
         #endregion
 
-
         #region FileSystemWatcher extension methods
+
+        public ISetChanges<PathSpec> ToLiveLinq(PathSpec root,
+            bool includeFileContentChanges = true, PathObservationMethod observationMethod = PathObservationMethod.Default)
+        {
+            if (observationMethod == PathObservationMethod.Default)
+            {
+                observationMethod = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? PathObservationMethod.FileSystemWatcher : PathObservationMethod.FsWatchDefault;
+            }
+            
+            if (observationMethod == PathObservationMethod.FileSystemWatcher)
+            {
+                return ToLiveLinqWithFileSystemWatcher(root, includeFileContentChanges);
+            }
+
+            return ToLiveLinqWithFsWatch(root, observationMethod);
+        }
+
+        private ISetChanges<PathSpec> ToLiveLinqWithFsWatch(PathSpec root, PathObservationMethod observationMethod)
+        {
+            ReactiveProcess proc;
+
+            if (observationMethod == PathObservationMethod.FsWatchDefault)
+            {
+                proc = _reactiveProcessFactory.Start("fswatch", $"-0 --recursive \"{root}\"");
+            }
+            else if (observationMethod == PathObservationMethod.FsWatchPollMonitor)
+            {
+                proc = _reactiveProcessFactory.Start("fswatch", $"--monitor=poll_monitor -0 --recursive \"{root}\"");
+            }
+            else if (observationMethod == PathObservationMethod.FsWatchFsEventsMonitor)
+            {
+                proc = _reactiveProcessFactory.Start("fswatch", $"--monitor=fsevents_monitor -0 --recursive \"{root}\"");
+            }
+            else if (observationMethod == PathObservationMethod.FsWatchKQueueMonitor)
+            {
+                proc = _reactiveProcessFactory.Start("fswatch", $"--monitor=kqueue_monitor -0 --recursive \"{root}\"");
+            }
+            else
+            {
+                throw new ArgumentException($"Unknown path observation method: {observationMethod}");
+            }
+
+            var initialState = root.GetDescendants().ToImmutableHashSet();
+
+            var resultObservable = proc.StandardOutput
+                .Scan(new {StringBuilder = new StringBuilder(), BuiltString = (string) null},
+                    (state, ch) =>
+                    {
+                        if (ch == 0)
+                        {
+                            return new
+                            {
+                                StringBuilder = new StringBuilder(), BuiltString = state.StringBuilder.ToString()
+                            };
+                        }
+
+                        state.StringBuilder.Append(ch);
+                        return new {state.StringBuilder, BuiltString = (string) null};
+                    }).Where(state => state.BuiltString != null).Select(state => state.BuiltString)
+                .Scan(new {State = initialState, LastEvents = (ISetChange<PathSpec>[]) null},
+                    (state, itemString) =>
+                    {
+                        var item = ToPath(itemString).Value;
+                        if (state.State.Contains(item))
+                        {
+                            if (File.Exists(itemString) || Directory.Exists(itemString))
+                            {
+                                return new
+                                {
+                                    state.State,
+                                    LastEvents = new []
+                                    {
+                                        Utility.SetChange(CollectionChangeType.Remove, item),
+                                        Utility.SetChange(CollectionChangeType.Add, item)
+                                    }
+                                };
+                            }
+                            else
+                            {
+                                // TODO - fix bug where when a directory is deleted, subdirectories and subfolders are not removed from the state.
+                                
+                                return new
+                                {
+                                    State = state.State.Remove(item),
+                                    LastEvents = new ISetChange<PathSpec>[]
+                                    {
+                                        Utility.SetChange(CollectionChangeType.Remove, item),
+                                    }
+                                };
+                            }
+                        }
+                        else
+                        {
+                            return new
+                            {
+                                State = state.State.Add(item),
+                                LastEvents = new ISetChange<PathSpec>[]
+                                {
+                                    Utility.SetChange(CollectionChangeType.Add, item),
+                                }
+                            };
+                        }
+                    })
+                .SelectMany(state => state.LastEvents);
+            resultObservable = Observable.Return(Utility.SetChange<PathSpec>(CollectionChangeType.Add, initialState))
+                .Concat(resultObservable);
+                
+            return resultObservable.ToLiveLinq();
+        }
+
+        private ISetChanges<PathSpec> ToLiveLinqWithFileSystemWatcher(PathSpec root, bool includeFileContentChanges)
+        {
+            var watcher = new FileSystemWatcher(root.ToString())
+            {
+                IncludeSubdirectories = true,
+                Filter = null,
+                EnableRaisingEvents = true,
+                NotifyFilter = NotifyFilters.LastWrite
+            };
+
+            var creations = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+                    handler => watcher.Created += handler,
+                    handler => watcher.Created -= handler)
+                .Select(args =>
+                {
+                    var path = root.IoService.ToPath(args.EventArgs.FullPath).Value;
+                    return Utility.SetChange(CollectionChangeType.Add, path);
+                });
+
+            var deletions = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+                    handler => watcher.Deleted += handler,
+                    handler => watcher.Deleted -= handler)
+                .Select(args =>
+                {
+                    var path = root.IoService.ToPath(args.EventArgs.FullPath).Value;
+                    return Utility.SetChange(CollectionChangeType.Remove, path);
+                });
+
+            var changes = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+                    handler => watcher.Changed += handler,
+                    handler => watcher.Changed -= handler)
+                .Where(x => x.EventArgs.ChangeType == WatcherChangeTypes.Changed)
+                .GroupBy(x => x.EventArgs.FullPath)
+                .Select(x => x.Throttle(TimeSpan.FromSeconds(.2)))
+                .Merge()
+                .SelectMany(args =>
+                {
+                    var path = root.IoService.ToPath(args.EventArgs.FullPath).Value;
+                    return new[]
+                    {
+                        Utility.SetChange(CollectionChangeType.Remove, path),
+                        Utility.SetChange(CollectionChangeType.Add, path),
+                    }.ToObservable();
+                });
+
+            var renames = Observable.FromEventPattern<RenamedEventHandler, RenamedEventArgs>(
+                    handler => watcher.Renamed += handler,
+                    handler => watcher.Renamed -= handler)
+                .SelectMany(args =>
+                {
+                    var oldPath = root.IoService.ToPath(args.EventArgs.OldFullPath).Value;
+                    var path = root.IoService.ToPath(args.EventArgs.FullPath).Value;
+                    return new[]
+                    {
+                        Utility.SetChange(CollectionChangeType.Remove, oldPath),
+                        Utility.SetChange(CollectionChangeType.Add, path),
+                    }.ToObservable();
+                });
+
+            var initialState = root.GetDescendants()
+                .Select(path => LiveLinq.Set.Utility.SetChange(CollectionChangeType.Add, path))
+                .ToObservable();
+
+            var unified = initialState.Concat(creations.Merge(deletions).Merge(renames).Merge(changes));
+
+            return unified.ToLiveLinq();
+        }
+
+        public IObservable<Unit> ObserveChanges(PathSpec path)
+        {
+            return path.ObserveChanges(NotifyFilters.Attributes | NotifyFilters.CreationTime |
+                                       NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastAccess |
+                                       NotifyFilters.LastWrite | NotifyFilters.Security | NotifyFilters.Size);
+        }
+
+        public IObservable<Unit> ObserveChanges(PathSpec path, NotifyFilters filters)
+        {
+            var parent = path.Parent();
+            if (!parent.HasValue) return Observable.Never<Unit>();
+
+            return Observable.Create<Unit>(observer =>
+            {
+                var watcher = new FileSystemWatcher(parent.Value.ToString())
+                {
+                    IncludeSubdirectories = false,
+                    Filter = path.Name,
+                    EnableRaisingEvents = true,
+                    NotifyFilter = filters
+                };
+
+                var subscription = Observable
+                    .FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+                        handler => watcher.Changed += handler, handler => watcher.Changed -= handler)
+                    .Select(_ => Unit.Default)
+                    .Subscribe(observer);
+
+                return new AnonymousDisposable(() =>
+                {
+                    subscription.Dispose();
+                    watcher.Dispose();
+                });
+            });
+        }
 
         public IObservable<PathType> ObservePathType(PathSpec path)
         {

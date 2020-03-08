@@ -86,13 +86,12 @@ namespace MoreIO
 
         public override int GetHashCode()
         {
-            unchecked
+            if (Flags.HasFlag(PathFlags.CaseSensitive))
             {
-                var hashCode = Flags.GetHashCode();
-                hashCode = (hashCode * 397) ^ (Components != null ? Components.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (DirectorySeparator != null ? DirectorySeparator.GetHashCode() : 0);
-                return hashCode;
+                return ToString().GetHashCode();
             }
+            
+            return ToString().ToLower().GetHashCode();
         }
 
         public int CompareTo(PathSpec other)
@@ -117,19 +116,7 @@ namespace MoreIO
 
         public bool Equals(PathSpec other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            //if (Flags != other.Flags)
-            //    return false;
-            if (!string.Equals(DirectorySeparator, other.DirectorySeparator))
-                return false;
-            var flags = IoService.ToStringComparison(Flags, other.Flags);
-            if (Components.Count != other.Components.Count)
-                return false;
-            for (var i = 0; i < Components.Count; i++)
-                if (!string.Equals(Components[i], other.Components[i], flags))
-                    return false;
-            return true;
+            return GetHashCode().Equals(other.GetHashCode());
         }
 
         public override string ToString()

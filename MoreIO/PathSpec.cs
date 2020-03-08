@@ -76,6 +76,24 @@ namespace MoreIO
                 StringSplitOptions.RemoveEmptyEntries)) yield return subcomponent;
         }
 
+        /// <summary>
+        /// The file extension, if there is one, including the dot.
+        /// </summary>
+        public IMaybe<string> Extension
+        {
+            get
+            {
+                var lastPathComponent = this.LastPathComponent();
+                var dotIndex = lastPathComponent.IndexOf('.');
+                if (dotIndex < 0)
+                {
+                    return Maybe<string>.Nothing;
+                }
+
+                return lastPathComponent.Substring(dotIndex).ToMaybe();
+            }
+        }
+
         private static void ValidateFlags(PathFlags flags)
         {
             if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))

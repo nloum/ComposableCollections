@@ -1534,6 +1534,13 @@ namespace MoreIO
         public ISetChanges<PathSpec> ToLiveLinq(PathSpec root,
             bool includeFileContentChanges = true, PathObservationMethod observationMethod = PathObservationMethod.Default)
         {
+            // TODO - add support for FSWatch events on Windows and Linux as well. Although I think I already support all the ones on Linux
+            // and the FileSystemWatcher class on Windows should be sufficient, it would be nice to have this support for
+            // completeness' sake.
+            
+            // TODO - add option for specifying whether to ignore file content changes.
+            // Right now they are always represented as a remove then an immediate add.
+        
             if (observationMethod == PathObservationMethod.Default)
             {
                 observationMethod = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? PathObservationMethod.FileSystemWatcher : PathObservationMethod.FsWatchDefault;

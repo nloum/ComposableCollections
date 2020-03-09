@@ -1538,9 +1538,6 @@ namespace MoreIO
             // and the FileSystemWatcher class on Windows should be sufficient, it would be nice to have this support for
             // completeness' sake.
             
-            // TODO - add option for specifying whether to ignore file content changes.
-            // Right now they are always represented as a remove then an immediate add.
-        
             if (observationMethod == PathObservationMethod.Default)
             {
                 observationMethod = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? PathObservationMethod.FileSystemWatcher : PathObservationMethod.FsWatchDefault;
@@ -1551,10 +1548,10 @@ namespace MoreIO
                 return ToLiveLinqWithFileSystemWatcher(root, includeFileContentChanges);
             }
 
-            return ToLiveLinqWithFsWatch(root, observationMethod);
+            return ToLiveLinqWithFsWatch(root, includeFileContentChanges, observationMethod);
         }
 
-        private ISetChanges<PathSpec> ToLiveLinqWithFsWatch(PathSpec root, PathObservationMethod observationMethod)
+        private ISetChanges<PathSpec> ToLiveLinqWithFsWatch(PathSpec root, bool includeFileContentChanges, PathObservationMethod observationMethod)
         {
             ReactiveProcess proc;
 
@@ -1604,15 +1601,26 @@ namespace MoreIO
                         {
                             if (File.Exists(itemString) || Directory.Exists(itemString))
                             {
-                                return new
+                                if (includeFileContentChanges)
                                 {
-                                    state.State,
-                                    LastEvents = new []
+                                    return new
                                     {
-                                        Utility.SetChange(CollectionChangeType.Remove, item),
-                                        Utility.SetChange(CollectionChangeType.Add, item)
-                                    }
-                                };
+                                        state.State,
+                                        LastEvents = new []
+                                        {
+                                            Utility.SetChange(CollectionChangeType.Remove, item),
+                                            Utility.SetChange(CollectionChangeType.Add, item)
+                                        }
+                                    };
+                                }
+                                else
+                                {
+                                    return new
+                                    {
+                                        state.State,
+                                        LastEvents = new ISetChange<PathSpec>[0]
+                                    };
+                                }
                             }
                             else
                             {

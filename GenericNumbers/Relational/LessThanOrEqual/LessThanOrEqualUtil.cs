@@ -26,7 +26,7 @@ namespace GenericNumbers.Relational.LessThanOrEqual
                             return ((IComparable<TInput>)arg1).CompareTo(input) <= 0;
                         if (arg1 is IComparable)
                             return ((IComparable)arg1).CompareTo(input) <= 0;
-                        throw new ArgumentException("arg1");
+                        throw new ArgumentException($"An attempt was made to determine whether a {nameof(T)} was less than or equal to a {nameof(TInput)} but {nameof(T)} is not an IComparable<{nameof(TInput)}> or an IComparable");
                     };
                 }
 

@@ -7,6 +7,26 @@ namespace MoreCollections
 {
     public static class Extensions
     {
+        public static IReadOnlyList<T> SkipEfficiently<T>(this IReadOnlyList<T> source, int skip)
+        {
+            return new SkipReadOnlyList<T>(source, skip);
+        }
+
+        public static IReadOnlyList<T> TakeEfficiently<T>(this IReadOnlyList<T> source, int take)
+        {
+            return new TakeReadOnlyList<T>(source, take);
+        }
+
+        public static IReadOnlyList<TOutput> SelectEfficiently<TInput, TOutput>(this IReadOnlyList<TInput> source, Func<TInput, int, TOutput> selector)
+        {
+            return new SelectReadOnlyList<TInput, TOutput>(source, selector);
+        }
+
+        public static IReadOnlyList<TOutput> SelectEfficiently<TInput, TOutput>(this IReadOnlyList<TInput> source, Func<TInput, TOutput> selector)
+        {
+            return new SelectReadOnlyList<TInput, TOutput>(source, (item, index) => selector(item));
+        }
+
         public static string GetCommonBeginning(this string str1, string str2)
         {
             int i;

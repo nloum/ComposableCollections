@@ -8,9 +8,9 @@ namespace MoreCollections
     public class SelectReadOnlyList<TSource, TResult> : IReadOnlyList<TResult>
     {
         private readonly IReadOnlyList<TSource> _source;
-        private readonly Func<TSource, TResult> _selector;
+        private readonly Func<TSource, int, TResult> _selector;
 
-        public SelectReadOnlyList(IReadOnlyList<TSource> source, Func<TSource, TResult> selector)
+        public SelectReadOnlyList(IReadOnlyList<TSource> source, Func<TSource, int, TResult> selector)
         {
             _source = source;
             _selector = selector;
@@ -23,17 +23,14 @@ namespace MoreCollections
 
         public IEnumerator<TResult> GetEnumerator()
         {
-            foreach (var item in _source)
+            for (var i = 0; i < _source.Count; i++)
             {
-                yield return _selector(item);
+                yield return _selector(_source[i], i);
             }
         }
 
         public int Count => _source.Count;
 
-        public TResult this[int index]
-        {
-            get { return _selector(_source[index]); }
-        }
+        public TResult this[int index] => _selector(_source[index], index);
     }
 }

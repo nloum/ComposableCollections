@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -7,6 +8,22 @@ namespace MoreCollections.Tests
     [TestClass]
     public class TakeReadOnlyListTests
     {
+        [TestMethod]
+        public void TakeRangeShouldWork()
+        {
+            var source = new List<string>();
+            source.Add("a");
+            source.Add("b");
+            source.Add("c");
+            source.Add("d");
+            source.Add("e");
+
+            var uut = source.TakeEfficiently(GenericNumbers.NumbersUtility.Range(1, 3));
+            uut.Count.Should().Be(2);
+            uut[0].Should().Be("b");
+            uut[1].Should().Be("c");
+        }
+        
         [TestMethod]
         public void ShouldLimitItems()
         {

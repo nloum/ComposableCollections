@@ -1,11 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
-using System.Collections.Generic;
-using MoreCollections;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Common.Collections.Tests
+namespace MoreCollections.Tests
 {
     [TestClass]
     public class EnumerableExtensionsTests

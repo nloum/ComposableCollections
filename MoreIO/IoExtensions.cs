@@ -13,7 +13,7 @@ namespace MoreIO
 {
     public static class IoExtensions
     {
-        public static ISetChanges<PathSpec> ToLiveLinq(this PathSpec root,
+        public static IDictionaryChangesStrict<PathSpec, PathType> ToLiveLinq(this PathSpec root,
             bool includeFileContentChanges = true, PathObservationMethod observationMethod = PathObservationMethod.Default)
         {
             return root.IoService.ToLiveLinq(root, includeFileContentChanges, observationMethod);

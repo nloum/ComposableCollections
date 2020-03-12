@@ -12,6 +12,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using LiveLinq.Core;
+using LiveLinq.Dictionary;
 using LiveLinq.Set;
 using MoreCollections;
 using ReactiveProcesses;
@@ -1531,7 +1532,7 @@ namespace MoreIO
 
         #region FileSystemWatcher extension methods
 
-        public ISetChanges<PathSpec> ToLiveLinq(PathSpec root,
+        public IDictionaryChangesStrict<PathSpec, PathType> ToLiveLinq(PathSpec root,
             bool includeFileContentChanges = true, PathObservationMethod observationMethod = PathObservationMethod.Default)
         {
             // TODO - add support for FSWatch events on Windows and Linux as well. Although I think I already support all the ones on Linux
@@ -1545,13 +1546,14 @@ namespace MoreIO
             
             if (observationMethod == PathObservationMethod.FileSystemWatcher)
             {
-                return ToLiveLinqWithFileSystemWatcher(root, includeFileContentChanges);
+                return ToLiveLinqWithFileSystemWatcher(root, includeFileContentChanges)
+                    .ToDictionaryLiveLinq(x => x, x => x.GetPathType());
             }
 
             return ToLiveLinqWithFsWatch(root, includeFileContentChanges, observationMethod);
         }
 
-        private ISetChanges<PathSpec> ToLiveLinqWithFsWatch(PathSpec root, bool includeFileContentChanges, PathObservationMethod observationMethod)
+        private IDictionaryChangesStrict<PathSpec, PathType> ToLiveLinqWithFsWatch(PathSpec root, bool includeFileContentChanges, PathObservationMethod observationMethod)
         {
             ReactiveProcess proc;
 
@@ -1576,7 +1578,7 @@ namespace MoreIO
                 throw new ArgumentException($"Unknown path observation method: {observationMethod}");
             }
 
-            var initialState = root.GetDescendants().ToImmutableHashSet();
+            var initialState = root.GetDescendants().ToImmutableDictionary(x => x, x => x.GetPathType());
 
             var resultObservable = proc.StandardOutput
                 .Scan(new {StringBuilder = new StringBuilder(), BuiltString = (string) null},
@@ -1593,11 +1595,11 @@ namespace MoreIO
                         state.StringBuilder.Append(ch);
                         return new {state.StringBuilder, BuiltString = (string) null};
                     }).Where(state => state.BuiltString != null).Select(state => state.BuiltString)
-                .Scan(new {State = initialState, LastEvents = (ISetChange<PathSpec>[]) null},
+                .Scan(new {State = initialState, LastEvents = (IDictionaryChangeStrict<PathSpec, PathType>[]) null},
                     (state, itemString) =>
                     {
                         var item = ToPath(itemString).Value;
-                        if (state.State.Contains(item))
+                        if (state.State.ContainsKey(item))
                         {
                             if (File.Exists(itemString) || Directory.Exists(itemString))
                             {
@@ -1608,8 +1610,8 @@ namespace MoreIO
                                         state.State,
                                         LastEvents = new []
                                         {
-                                            Utility.SetChange(CollectionChangeType.Remove, item),
-                                            Utility.SetChange(CollectionChangeType.Add, item)
+                                            LiveLinq.Dictionary.Utility.DictionaryRemove(MoreCollections.Utility.KeyValuePair(item, state.State[item])),
+                                            LiveLinq.Dictionary.Utility.DictionaryAdd(MoreCollections.Utility.KeyValuePair(item, item.GetPathType()))
                                         }
                                     };
                                 }
@@ -1618,7 +1620,7 @@ namespace MoreIO
                                     return new
                                     {
                                         state.State,
-                                        LastEvents = new ISetChange<PathSpec>[0]
+                                        LastEvents = new IDictionaryChangeStrict<PathSpec, PathType>[0]
                                     };
                                 }
                             }
@@ -1629,9 +1631,9 @@ namespace MoreIO
                                 return new
                                 {
                                     State = state.State.Remove(item),
-                                    LastEvents = new ISetChange<PathSpec>[]
+                                    LastEvents = new IDictionaryChangeStrict<PathSpec, PathType>[]
                                     {
-                                        Utility.SetChange(CollectionChangeType.Remove, item),
+                                        LiveLinq.Dictionary.Utility.DictionaryRemove(MoreCollections.Utility.KeyValuePair(item, state.State[item])),
                                     }
                                 };
                             }
@@ -1640,16 +1642,16 @@ namespace MoreIO
                         {
                             return new
                             {
-                                State = state.State.Add(item),
-                                LastEvents = new ISetChange<PathSpec>[]
+                                State = state.State.Add(item, item.GetPathType()),
+                                LastEvents = new IDictionaryChangeStrict<PathSpec, PathType>[]
                                 {
-                                    Utility.SetChange(CollectionChangeType.Add, item),
+                                    LiveLinq.Dictionary.Utility.DictionaryAdd(MoreCollections.Utility.KeyValuePair(item, item.GetPathType())),
                                 }
                             };
                         }
                     })
                 .SelectMany(state => state.LastEvents);
-            resultObservable = Observable.Return(Utility.SetChange<PathSpec>(CollectionChangeType.Add, initialState))
+            resultObservable = Observable.Return(LiveLinq.Dictionary.Utility.DictionaryAdd(initialState))
                 .Concat(resultObservable);
                 
             return resultObservable.ToLiveLinq();

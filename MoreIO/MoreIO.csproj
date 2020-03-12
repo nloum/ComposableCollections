@@ -2,16 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageVersion>1.0.0-beta002</PackageVersion>
+    <PackageVersion>1.0.0-beta003</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LiveLinq" Version="1.0.0-pre20" />
-    <PackageReference Include="MoreCollections" Version="1.0.0-pre9" />
+    <PackageReference Include="LiveLinq" Version="1.0.0-beta002" />
+    <PackageReference Include="MoreCollections" Version="1.0.0-beta003" />
     <PackageReference Include="ReactiveProcesses" Version="1.0.0-alpha001" />
-    <PackageReference Include="SimpleMonads" Version="1.0.0-alpha4" />
+    <PackageReference Include="SimpleMonads" Version="1.0.0-beta001" />
     <PackageReference Include="TreeLinq" Version="1.0.0-alpha2" />
-    <PackageReference Include="UtilityDisposables" Version="1.0.0-alpha2" />
+    <PackageReference Include="UtilityDisposables" Version="1.0.0-beta002" />
   </ItemGroup>
 
 </Project>

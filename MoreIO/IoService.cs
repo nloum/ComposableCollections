@@ -4,13 +4,13 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using LiveLinq;
 using LiveLinq.Core;
 using LiveLinq.Dictionary;
 using LiveLinq.Set;
@@ -20,7 +20,7 @@ using SimpleMonads;
 using TreeLinq;
 using UtilityDisposables;
 using static SimpleMonads.Utility;
-using Utility = LiveLinq.Set.Utility;
+using Utility = LiveLinq.Utility;
 
 namespace MoreIO
 {
@@ -1610,8 +1610,8 @@ namespace MoreIO
                                         state.State,
                                         LastEvents = new []
                                         {
-                                            LiveLinq.Dictionary.Utility.DictionaryRemove(MoreCollections.Utility.KeyValuePair(item, state.State[item])),
-                                            LiveLinq.Dictionary.Utility.DictionaryAdd(MoreCollections.Utility.KeyValuePair(item, item.GetPathType()))
+                                            Utility.DictionaryRemove(MoreCollections.Utility.KeyValuePair(item, state.State[item])),
+                                            Utility.DictionaryAdd(MoreCollections.Utility.KeyValuePair(item, item.GetPathType()))
                                         }
                                     };
                                 }
@@ -1633,7 +1633,7 @@ namespace MoreIO
                                     State = state.State.Remove(item),
                                     LastEvents = new IDictionaryChangeStrict<PathSpec, PathType>[]
                                     {
-                                        LiveLinq.Dictionary.Utility.DictionaryRemove(MoreCollections.Utility.KeyValuePair(item, state.State[item])),
+                                        Utility.DictionaryRemove(MoreCollections.Utility.KeyValuePair(item, state.State[item])),
                                     }
                                 };
                             }
@@ -1645,13 +1645,13 @@ namespace MoreIO
                                 State = state.State.Add(item, item.GetPathType()),
                                 LastEvents = new IDictionaryChangeStrict<PathSpec, PathType>[]
                                 {
-                                    LiveLinq.Dictionary.Utility.DictionaryAdd(MoreCollections.Utility.KeyValuePair(item, item.GetPathType())),
+                                    Utility.DictionaryAdd(MoreCollections.Utility.KeyValuePair(item, item.GetPathType())),
                                 }
                             };
                         }
                     })
                 .SelectMany(state => state.LastEvents);
-            resultObservable = Observable.Return(LiveLinq.Dictionary.Utility.DictionaryAdd(initialState))
+            resultObservable = Observable.Return(Utility.DictionaryAdd(initialState))
                 .Concat(resultObservable);
                 
             return resultObservable.ToLiveLinq();
@@ -1717,7 +1717,7 @@ namespace MoreIO
                 });
 
             var initialState = root.GetDescendants()
-                .Select(path => LiveLinq.Set.Utility.SetChange(CollectionChangeType.Add, path))
+                .Select(path => Utility.SetChange(CollectionChangeType.Add, path))
                 .ToObservable();
 
             var unified = initialState.Concat(creations.Merge(deletions).Merge(renames).Merge(changes));

@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reactive.Linq;
+using LiveLinq;
 using LiveLinq.Core;
 using LiveLinq.Set;
 using UtilityDisposables;
-using static LiveLinq.Set.Utility;
+using static LiveLinq.Utility;
 
 namespace MoreIO
 {

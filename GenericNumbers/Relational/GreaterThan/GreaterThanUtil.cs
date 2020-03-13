@@ -26,7 +26,7 @@ namespace GenericNumbers.Relational.GreaterThan
                             return ((IComparable<TInput>)arg1).CompareTo(input) > 0;
                         if (arg1 is IComparable)
                             return ((IComparable)arg1).CompareTo(input) > 0;
-                        throw new ArgumentException($"An attempt was made to determine whether a {nameof(T)} was greater than a {nameof(TInput)} but {nameof(T)} is not an IComparable<{nameof(TInput)}> or an IComparable");
+                        throw new ArgumentException($"An attempt was made to determine whether a {NumbersUtility.ConvertToCSharpTypeName(typeof(T))} was greater than a {NumbersUtility.ConvertToCSharpTypeName(typeof(TInput))} but {NumbersUtility.ConvertToCSharpTypeName(typeof(T))} is not an IComparable<{NumbersUtility.ConvertToCSharpTypeName(typeof(TInput))}> or an IComparable");
                     };
                 }
 

@@ -30,7 +30,7 @@ namespace GenericNumbers.Relational.NotEqual
                             return ((IComparable)arg1).CompareTo(input) != 0;
                         if (arg1 is IEquatable<TInput>)
                             return !((IEquatable<TInput>)arg1).Equals(input);
-                        throw new ArgumentException($"An attempt was made to determine whether a {nameof(T)} was not equal to a {nameof(TInput)} but {nameof(T)} is not an IComparable<{nameof(TInput)}>, an IComparable, or an IEquatable<{nameof(TInput)}>");
+                        throw new ArgumentException($"An attempt was made to determine whether a {NumbersUtility.ConvertToCSharpTypeName(typeof(T))} was not equal to a {NumbersUtility.ConvertToCSharpTypeName(typeof(TInput))} but {NumbersUtility.ConvertToCSharpTypeName(typeof(T))} is not an IComparable<{NumbersUtility.ConvertToCSharpTypeName(typeof(TInput))}>, an IComparable, or an IEquatable<{NumbersUtility.ConvertToCSharpTypeName(typeof(TInput))}>");
                     };
                 }
 

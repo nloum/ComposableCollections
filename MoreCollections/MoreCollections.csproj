@@ -2,12 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageVersion>1.0.0-beta003</PackageVersion>
+    <PackageVersion>1.0.0-beta004</PackageVersion>
     <Authors>nloum</Authors>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GenericNumbers" Version="1.0.0-beta002" />
+    <PackageReference Include="GenericNumbers" Version="1.0.0-beta003" />
     <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
   </ItemGroup>
 

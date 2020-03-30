@@ -366,6 +366,10 @@ namespace MoreIO
                 flags = GetDefaultFlagsForThisEnvironment();
             error = string.Empty;
             pathSpec = null;
+            if (path.Contains(":") && path.Contains("/"))
+            {
+                path = path.Replace("/", "\\");
+            }
             var isWindowsStyle = path.Contains("\\") || path.Contains(":");
             var isUnixStyle = path.Contains("/");
             if (isWindowsStyle && isUnixStyle)
@@ -810,10 +814,13 @@ namespace MoreIO
         {
             var pathStr = path.ToString();
             // Make sure that pathStr is treated as a directory.
-            if (!pathStr.EndsWith(@"\"))
+            if (!pathStr.EndsWith(path.DirectorySeparator))
                 pathStr += path.DirectorySeparator;
 
-            return ToPath(Path.Combine(pathStr, Path.Combine(paths)));
+            var result = path.Components.Concat(paths).ToArray();
+            var combinedResult = Path.Combine(result);
+            var pathResult = ToPath(combinedResult);
+            return pathResult;
         }
 
         public IMaybe<PathSpec> Ancestor(PathSpec path, int level)
@@ -1890,14 +1897,16 @@ namespace MoreIO
                 path2Str = path2Str.ToUpper();
             }
 
-            int i;
-            for (i = 0; i < path1Str.Length && i < path2Str.Length; i++)
-                if (!path1Str[i].Equals(path2Str[i]))
-                    break;
+            var caseSensitive = path.Flags.HasFlag(PathFlags.CaseSensitive) ||
+                                that.Flags.HasFlag(PathFlags.CaseSensitive);
+            var zippedComponents = path.Components.Zip(that.Components, (comp1, comp2) => 
+                new
+                {
+                    equals = comp1.Equals(comp2, !caseSensitive ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal),
+                    component = comp1
+                });
 
-            if (i == 0)
-                return Nothing<PathSpec>();
-            return ToPath(path1Str.Substring(0, i));
+            return ToPath(string.Join(path.DirectorySeparator, zippedComponents.TakeWhile(x => x.equals).Select(x => x.component)));
         }
 
         public bool CanBeSimplified(PathSpec path)

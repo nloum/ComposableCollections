@@ -170,5 +170,15 @@ namespace MoreIO
         {
             return Ancestor(1);
         }
+
+        public static PathSpec operator / (PathSpec start, PathSpec next)
+        {
+            return start.Descendant(next).Value;
+        }
+
+        public static PathSpec operator / (PathSpec start, string next)
+        {
+            return start.Descendant(next).Value;
+        }
     }
 }

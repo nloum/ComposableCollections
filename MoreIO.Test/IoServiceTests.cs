@@ -13,6 +13,34 @@ namespace MoreIO.Test
         }
 
         [TestMethod]
+        public void CommonShouldOnlyReturnFullFolderNames()
+        {
+            var ioService = CreateUnitUnderTest();
+
+            var parent = ioService.ToPath("C:\\test1\\test2").Value;
+            var item1 = parent / "test3" / "test.csproj";
+            var item2 = parent / "test4";
+
+            var result = item1.CommonWith(item2).Value;
+
+            result.ToString().Should().Be(parent.ToString());
+        }
+
+        [TestMethod]
+        public void RelativePathShouldWork()
+        {
+            var ioService = CreateUnitUnderTest();
+
+            var parent = ioService.ToPath("C:\\test1\\test2").Value;
+            var item1 = parent / "test3" / "test.csproj";
+            var item2 = parent / "test4";
+
+            var result = item1.RelativeTo(item2);
+
+            result.ToString().Should().Be("..\\test3\\test.csproj");
+        }
+        
+        [TestMethod]
         public void MovingShouldWork()
         {
             var ioService = CreateUnitUnderTest();

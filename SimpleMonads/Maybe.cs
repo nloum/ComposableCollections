@@ -33,7 +33,7 @@ namespace SimpleMonads
             get {
                 if (object.ReferenceEquals(this, Nothing))
                 {
-                    throw new InvalidOperationException("Cannot access the value of a maybe. Use ValueOrDefault instead of Value.");
+                    throw new MissingMemberException("Cannot access value of a Nothing");
                 }
                 return _value;
             }

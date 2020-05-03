@@ -31,6 +31,9 @@ namespace TreeLinq
             return new AbsolutePath<TNodeName>(Components.Concat(whatToAdd.Components));
         }
 
+        public override bool IsAbsolute => true;
+        public override bool IsRelative => false;
+
         public AbsolutePaths<TNodeName> Add(params RelativePath<TNodeName>[] whatToAdd)
         {
             return Add(whatToAdd.AsEnumerable());

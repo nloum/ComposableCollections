@@ -22,6 +22,9 @@ namespace TreeLinq
         {
         }
 		
+        public override bool IsAbsolute => false;
+        public override bool IsRelative => true;
+
         public RelativePath<TNodeName> SkipDescendants( int skipDescendants ) {
             return new RelativePath<TNodeName>( Components.Take(Count - skipDescendants ) );
         }

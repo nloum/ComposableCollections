@@ -28,6 +28,9 @@ namespace TreeLinq
 			Components = components;
 		}
 
+		public abstract bool IsAbsolute { get; }
+		public abstract bool IsRelative { get; }
+		
 		public static bool operator ==( Path<TNodeName> path1, Path<TNodeName> path2 ) {
 			if ( object.ReferenceEquals(path1, path2) ) {
 				return true;

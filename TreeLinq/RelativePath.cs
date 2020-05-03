@@ -54,7 +54,7 @@ namespace TreeLinq
         public RelativePaths<TNodeName> Add(IEnumerable<RelativePath<TNodeName>> whatToAdd)
         {
             return new RelativePaths<TNodeName>(
-                Components.Select(c => new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(whatToAdd))
+                Components.Select(c => new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(c))
                     .Concat(new[]{new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(whatToAdd)}));
         }
 

@@ -21,14 +21,9 @@ namespace TreeLinq
             return new RelativePaths<TNodeName>(Components.Concat(new[]{new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(whatToAdd)}));
         }
 
-        public RelativePaths<TNodeName> Add(IEnumerable<RelativePath<TNodeName>> whatToAdd)
+        public RelativePaths<TNodeName> Add(params TNodeName[] whatToAdd)
         {
-            return new RelativePaths<TNodeName>(Components.Concat(new[]{new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(whatToAdd)}));
-        }
-
-        public RelativePaths<TNodeName> Add(params RelativePath<TNodeName>[] whatToAdd)
-        {
-            return new RelativePaths<TNodeName>(Components.Concat(new[]{new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(whatToAdd)}));
+            return new RelativePaths<TNodeName>(Components.Concat(new[]{new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(new []{new RelativePath<TNodeName>(whatToAdd)})}));
         }
 
         public RelativePaths<TNodeName> Add(IEnumerable<TNodeName> whatToAdd)
@@ -36,11 +31,21 @@ namespace TreeLinq
             return new RelativePaths<TNodeName>(Components.Concat(new[]{new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(new []{new RelativePath<TNodeName>(whatToAdd)})}));
         }
 
-        public RelativePaths<TNodeName> Add(params TNodeName[] whatToAdd)
+        public RelativePaths<TNodeName> Add(RelativePath<TNodeName> whatToAdd)
         {
-            return new RelativePaths<TNodeName>(Components.Concat(new[]{new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(new []{new RelativePath<TNodeName>(whatToAdd)})}));
+            return new RelativePaths<TNodeName>(Components.Concat(whatToAdd.Components.Select(x => new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(x))));
         }
-        
+
+        public RelativePaths<TNodeName> Add(params RelativePath<TNodeName>[] whatToAdd)
+        {
+            return new RelativePaths<TNodeName>(Components.Concat(new[]{new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(whatToAdd)}));
+        }
+
+        public RelativePaths<TNodeName> Add(IEnumerable<RelativePath<TNodeName>> whatToAdd)
+        {
+            return new RelativePaths<TNodeName>(Components.Concat(new[]{new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(whatToAdd)}));
+        }
+
         public ParametricRelativePaths<TNodeName> Add(
             Func<RelativePath<TNodeName>, IEnumerable<RelativePath<TNodeName>>> whatToAdd)
         {
@@ -87,6 +92,32 @@ namespace TreeLinq
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+        
+        public static RelativePaths<TNodeName> operator / (RelativePaths<TNodeName> relPath, TNodeName whatToAdd)
+        {
+            return relPath.Add(whatToAdd);
+        }
+
+        public static RelativePaths<TNodeName> operator / (RelativePaths<TNodeName> relPath, IEnumerable<RelativePath<TNodeName>> whatToAdd)
+        {
+            return relPath.Add(whatToAdd);
+        }
+
+        public static RelativePaths<TNodeName> operator / (RelativePaths<TNodeName> relPath, RelativePath<TNodeName> whatToAdd)
+        {
+            return relPath.Add(whatToAdd);
+        }
+
+        public static RelativePaths<TNodeName> operator / (RelativePaths<TNodeName> relPath, IEnumerable<TNodeName> whatToAdd)
+        {
+            return relPath.Add(whatToAdd);
+        }
+
+        public static ParametricRelativePaths<TNodeName> operator / (RelativePaths<TNodeName> relPath,
+            Func<RelativePath<TNodeName>, IEnumerable<RelativePath<TNodeName>>> whatToAdd)
+        {
+            return relPath.Add(whatToAdd);
         }
     }
 }

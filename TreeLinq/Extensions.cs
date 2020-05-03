@@ -18,7 +18,7 @@ namespace TreeLinq
 			var start = new[] { new TreeTraversal<TNodeName, TNode>( TreeTraversalType.EnterBranch, AbsolutePath<TNodeName>.Root ) };
 			var enumerable = branchChildren.SelectMany( child =>
 				child.Value.AsEnumerable().Select( x =>
-					new TreeTraversal<TNodeName, TNode>( x.Type, child.Key.NameToPath().Add(x.Path), x.Value ) ) );
+					new TreeTraversal<TNodeName, TNode>( x.Type, child.Key.NameToPath().Add(new RelativePath<TNodeName>(x.Path)), x.Value ) ) );
 			var finish = new[] {new TreeTraversal<TNodeName, TNode>( TreeTraversalType.ExitBranch, AbsolutePath<TNodeName>.Root )};
 
 			return new LazyTree<TNodeName, TNode>( start.Concat(enumerable).Concat(finish) );

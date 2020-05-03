@@ -16,7 +16,12 @@ namespace TreeLinq
             Components = components.ToImmutableList();
         }
 
-        public AbsolutePaths<TNodeName> Add(TNodeName whatToAdd)
+        public AbsolutePaths<TNodeName> Add(RelativePath<TNodeName> whatToAdd)
+        {
+            return new AbsolutePaths<TNodeName>(Components.Concat(whatToAdd.Components.Select(c => new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(c))));
+        }
+
+        public AbsolutePaths<TNodeName> Add(params RelativePath<TNodeName>[] whatToAdd)
         {
             return new AbsolutePaths<TNodeName>(Components.Concat(new[]{new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(whatToAdd)}));
         }
@@ -26,14 +31,9 @@ namespace TreeLinq
             return new AbsolutePaths<TNodeName>(Components.Concat(new[]{new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(whatToAdd)}));
         }
 
-        public AbsolutePaths<TNodeName> Add(params RelativePath<TNodeName>[] whatToAdd)
+        public AbsolutePaths<TNodeName> Add(TNodeName whatToAdd)
         {
             return new AbsolutePaths<TNodeName>(Components.Concat(new[]{new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(whatToAdd)}));
-        }
-
-        public AbsolutePaths<TNodeName> Add(IEnumerable<TNodeName> whatToAdd)
-        {
-            return new AbsolutePaths<TNodeName>(Components.Concat(new[]{new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(new []{new RelativePath<TNodeName>(whatToAdd)})}));
         }
 
         public AbsolutePaths<TNodeName> Add(params TNodeName[] whatToAdd)
@@ -41,6 +41,11 @@ namespace TreeLinq
             return new AbsolutePaths<TNodeName>(Components.Concat(new[]{new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(new []{new RelativePath<TNodeName>(whatToAdd)})}));
         }
         
+        public AbsolutePaths<TNodeName> Add(IEnumerable<TNodeName> whatToAdd)
+        {
+            return new AbsolutePaths<TNodeName>(Components.Concat(new[]{new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(new []{new RelativePath<TNodeName>(whatToAdd)})}));
+        }
+
         public ParametricAbsolutePaths<TNodeName> Add(
             Func<AbsolutePath<TNodeName>, IEnumerable<RelativePath<TNodeName>>> whatToAdd)
         {
@@ -92,6 +97,32 @@ namespace TreeLinq
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+        
+        public static AbsolutePaths<TNodeName> operator / (AbsolutePaths<TNodeName> absPath, TNodeName whatToAdd)
+        {
+            return absPath.Add(whatToAdd);
+        }
+
+        public static AbsolutePaths<TNodeName> operator / (AbsolutePaths<TNodeName> absPath, IEnumerable<RelativePath<TNodeName>> whatToAdd)
+        {
+            return absPath.Add(whatToAdd);
+        }
+
+        public static AbsolutePaths<TNodeName> operator / (AbsolutePaths<TNodeName> absPath, RelativePath<TNodeName> whatToAdd)
+        {
+            return absPath.Add(whatToAdd);
+        }
+
+        public static AbsolutePaths<TNodeName> operator / (AbsolutePaths<TNodeName> absPath, IEnumerable<TNodeName> whatToAdd)
+        {
+            return absPath.Add(whatToAdd);
+        }
+
+        public static ParametricAbsolutePaths<TNodeName> operator / (AbsolutePaths<TNodeName> absPath,
+            Func<AbsolutePath<TNodeName>, IEnumerable<RelativePath<TNodeName>>> whatToAdd)
+        {
+            return absPath.Add(whatToAdd);
         }
     }
 }

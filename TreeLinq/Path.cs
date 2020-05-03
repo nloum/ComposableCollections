@@ -16,12 +16,12 @@ namespace TreeLinq
 
 		public bool IsRoot => Count == 0;
 
-		protected Path( params TNodeName[] wrapped ) {
-			Components = ImmutableList<TNodeName>.Empty.AddRange( wrapped );
+		protected Path( params TNodeName[] components ) {
+			Components = ImmutableList<TNodeName>.Empty.AddRange( components );
 		}
 
-		protected Path( IEnumerable<TNodeName> wrapped ) {
-			Components = wrapped.ToImmutableList();
+		protected Path( IEnumerable<TNodeName> components ) {
+			Components = components.ToImmutableList();
 		}
 
 		public Path( ImmutableList<TNodeName> components ) {

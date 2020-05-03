@@ -8,19 +8,19 @@ namespace TreeLinq
 	public class TreeTraversal<TNodeName, TNode> : IComparable<TreeTraversal<TNodeName, TNode>>, IComparable
 		where TNodeName : IComparable {
 
-		public TreeTraversal( TreeTraversalType type, IEnumerable<TNodeName> path, TNode value ) : this( type, new Path<TNodeName>( path.ToImmutableList() ), value ) {
+		public TreeTraversal( TreeTraversalType type, IEnumerable<TNodeName> path, TNode value ) : this( type, new AbsolutePath<TNodeName>( path.ToImmutableList() ), value ) {
 		}
 
-		public TreeTraversal( TreeTraversalType type, IEnumerable<TNodeName> path ) : this(type, new Path<TNodeName>( path.ToImmutableList() ) ) {
+		public TreeTraversal( TreeTraversalType type, IEnumerable<TNodeName> path ) : this(type, new AbsolutePath<TNodeName>( path.ToImmutableList() ) ) {
 		}
 
-		public TreeTraversal( TreeTraversalType type, Path<TNodeName> path, TNode value ) {
+		public TreeTraversal( TreeTraversalType type, AbsolutePath<TNodeName> path, TNode value ) {
 			Type = type;
 			Value = value;
 			Path = path;
 		}
 
-		public TreeTraversal( TreeTraversalType type, Path<TNodeName> path ) {
+		public TreeTraversal( TreeTraversalType type, AbsolutePath<TNodeName> path ) {
 			if ( type == TreeTraversalType.Leaf ) {
 				throw new InvalidEnumArgumentException( "Leaf tree traversals need to specify a value" );
 			}
@@ -30,7 +30,7 @@ namespace TreeLinq
 		}
 
 		public TreeTraversalType Type { get; }
-		public Path<TNodeName> Path { get; }
+		public AbsolutePath<TNodeName> Path { get; }
 		public TNode Value { get; }
 
 		public int CompareTo( TreeTraversal<TNodeName, TNode> other ) {

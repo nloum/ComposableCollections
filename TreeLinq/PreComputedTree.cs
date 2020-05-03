@@ -95,29 +95,29 @@ namespace TreeLinq
 
 		private IEnumerable<TreeTraversal<TNodeName, TNode>> GetEnumerable() {
 			if (IsLeaf) {
-				yield return new TreeTraversal<TNodeName, TNode>( TreeTraversalType.Leaf, Path<TNodeName>.Empty, Value );
+				yield return new TreeTraversal<TNodeName, TNode>( TreeTraversalType.Leaf, AbsolutePath<TNodeName>.Root, Value );
 				yield break;
 			}
 
 			var traversalStack = new Stack<TreeTraversalState<TNodeName, PreComputedTree<TNodeName, TNode>>>();
-			traversalStack.Push( new TreeTraversalState<TNodeName, PreComputedTree<TNodeName, TNode>>( Path<TNodeName>.Empty, this, ChildrenNames ) );
+			traversalStack.Push( new TreeTraversalState<TNodeName, PreComputedTree<TNodeName, TNode>>( AbsolutePath<TNodeName>.Root, this, ChildrenNames ) );
 
 			var hasYieldedInitialIteration = false;
 
 			while ( traversalStack.Count > 0 ) {
 				if ( !hasYieldedInitialIteration ) {
-					yield return new TreeTraversal<TNodeName, TNode>( TreeTraversalType.EnterBranch, Path<TNodeName>.Empty );
+					yield return new TreeTraversal<TNodeName, TNode>( TreeTraversalType.EnterBranch, AbsolutePath<TNodeName>.Root );
 					hasYieldedInitialIteration = true;
 				}
 
 				if ( !traversalStack.Peek().ChildNames.MoveNext() ) {
 					traversalStack.Pop();
 					if ( traversalStack.Count > 0 ) {
-						var path = traversalStack.Peek().Path + traversalStack.Peek().ChildNames.Current;
+						var path = traversalStack.Peek().Path.Add(traversalStack.Peek().ChildNames.Current);
 						yield return new TreeTraversal<TNodeName, TNode>( TreeTraversalType.ExitBranch, path );
 					}
 				} else {
-					var path = traversalStack.Peek().Path + traversalStack.Peek().ChildNames.Current;
+					var path = traversalStack.Peek().Path.Add(traversalStack.Peek().ChildNames.Current);
 					if (!traversalStack.Peek().Node._children.ContainsKey( traversalStack.Peek().ChildNames.Current ) ) {
 						throw new InvalidDataException( "Attempted to access child by name and failed" );
 					}

@@ -2,38 +2,30 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Data.Common;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace TreeLinq
 {
-	public class Path<TNodeName> : IReadOnlyList<TNodeName>, IComparable<Path<TNodeName>>, IComparable
+	public abstract class Path<TNodeName> : IReadOnlyList<TNodeName>, IComparable<Path<TNodeName>>, IComparable
 		where TNodeName : IComparable {
-		private readonly ImmutableList<TNodeName> _wrapped;
-
-		public static Path<TNodeName> Empty { get; } = new Path<TNodeName>( ImmutableList<TNodeName>.Empty );
-
+		public ImmutableList<TNodeName> Components { get; }
+		
 		public TNodeName Name => Count == 0 ? default( TNodeName ) : this[this.Count - 1];
 
 		public bool IsRoot => Count == 0;
 
-		public Path( params TNodeName[] wrapped ) {
-			_wrapped = ImmutableList<TNodeName>.Empty.AddRange( wrapped );
+		protected Path( params TNodeName[] wrapped ) {
+			Components = ImmutableList<TNodeName>.Empty.AddRange( wrapped );
 		}
 
-		public Path( IEnumerable<TNodeName> wrapped ) {
-			_wrapped = wrapped.ToImmutableList();
+		protected Path( IEnumerable<TNodeName> wrapped ) {
+			Components = wrapped.ToImmutableList();
 		}
 
-		public Path( ImmutableList<TNodeName> wrapped ) {
-			_wrapped = wrapped;
-		}
-
-		public static Path<TNodeName> operator +( Path<TNodeName> path1, Path<TNodeName> path2 ) {
-			return new Path<TNodeName>( path1.Concat( path2 ) );
-		}
-
-		public static Path<TNodeName> operator +( Path<TNodeName> path1, TNodeName path2 ) {
-			return new Path<TNodeName>( path1.Concat( new[] { path2 } ) );
+		public Path( ImmutableList<TNodeName> components ) {
+			Components = components;
 		}
 
 		public static bool operator ==( Path<TNodeName> path1, Path<TNodeName> path2 ) {
@@ -69,8 +61,8 @@ namespace TreeLinq
 		}
 
 		private IEnumerable<TNodeName> Elements() {
-			for ( var i = 0; i < _wrapped.Count; i++ ) {
-				yield return _wrapped[i];
+			for ( var i = 0; i < Components.Count; i++ ) {
+				yield return Components[i];
 			}
 		}
 
@@ -78,16 +70,12 @@ namespace TreeLinq
 
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-		public int Count => _wrapped.Count;
+		public int Count => Components.Count;
 
-		public TNodeName this[int index] => _wrapped[index];
+		public TNodeName this[int index] => Components[index];
 
-		public Path<TNodeName> SkipAncestors( int skipAncestors ) {
-			return new Path<TNodeName>( _wrapped.Skip(skipAncestors) );
-		}
-
-		public Path<TNodeName> SkipDescendants( int skipDescendants ) {
-			return new Path<TNodeName>( _wrapped.Take(Count - skipDescendants ) );
+		public RelativePath<TNodeName> SkipAncestors( int skipAncestors ) {
+			return new RelativePath<TNodeName>( Components.Skip(skipAncestors) );
 		}
 
 		public TNodeName Last => this[this.Count - 1];
@@ -160,7 +148,7 @@ namespace TreeLinq
 				return hash;
 			}
 		}
-
+		
 		public override string ToString() {
 			return string.Join( "/", this.Select( x => x.ToString() ) );
 		}

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using Castle.Components.DictionaryAdapter;
 using TreeLinq.Exceptions;
@@ -14,11 +15,11 @@ namespace TreeLinq
 
 		public static LazyTree<TNodeName, TNode> BranchChildrenToTree<TNodeName, TNode>( this IReadOnlyDictionary<TNodeName, LazyTree<TNodeName, TNode>> branchChildren )
 			where TNodeName : IComparable {
-			var start = new[] { new TreeTraversal<TNodeName, TNode>( TreeTraversalType.EnterBranch, Path<TNodeName>.Empty ) };
+			var start = new[] { new TreeTraversal<TNodeName, TNode>( TreeTraversalType.EnterBranch, AbsolutePath<TNodeName>.Root ) };
 			var enumerable = branchChildren.SelectMany( child =>
 				child.Value.AsEnumerable().Select( x =>
-					new TreeTraversal<TNodeName, TNode>( x.Type, child.Key.NameToPath() + x.Path, x.Value ) ) );
-			var finish = new[] {new TreeTraversal<TNodeName, TNode>( TreeTraversalType.ExitBranch, Path<TNodeName>.Empty )};
+					new TreeTraversal<TNodeName, TNode>( x.Type, child.Key.NameToPath().Add(x.Path), x.Value ) ) );
+			var finish = new[] {new TreeTraversal<TNodeName, TNode>( TreeTraversalType.ExitBranch, AbsolutePath<TNodeName>.Root )};
 
 			return new LazyTree<TNodeName, TNode>( start.Concat(enumerable).Concat(finish) );
 		}
@@ -28,7 +29,7 @@ namespace TreeLinq
 		}
 
 		public static IEnumerable<TreeTraversal<TNodeName, TNode>> AsLeaf<TNodeName, TNode>(this TNode node) where TNodeName : IComparable {
-			yield return new TreeTraversal<TNodeName, TNode>( TreeTraversalType.Leaf, Path<TNodeName>.Empty, node );
+			yield return new TreeTraversal<TNodeName, TNode>( TreeTraversalType.Leaf, AbsolutePath<TNodeName>.Root, node );
 		}
 
 		public static object As<TNodeName, TNode>(this LazyTree<TNodeName, TNode> tree, Type type ) where TNodeName : IComparable {
@@ -127,23 +128,23 @@ namespace TreeLinq
 
 		public static TNode GetRootLeaf<TNodeName, TNode>( this ITree<TNodeName, TNode> tree )
 			where TNodeName : IComparable {
-			return tree.GetLeaf( Path<TNodeName>.Empty );
+			return tree.GetLeaf( AbsolutePath<TNodeName>.Root );
 		}
 
 		public static bool TryGetRootLeaf<TNodeName, TNode, TNode1>( this ITree<TNodeName, TNode> tree, out TNode1 leaf1 )
 			where TNodeName : IComparable
 			where TNode1 : TNode {
-			return tree.TryGetLeaf( Path<TNodeName>.Empty, out leaf1 );
+			return tree.TryGetLeaf( AbsolutePath<TNodeName>.Root, out leaf1 );
 		}
 
-		public static TNode GetLeaf<TNodeName, TNode>( this ITree<TNodeName, TNode> tree, Path<TNodeName> path1 ) where TNodeName : IComparable {
+		public static TNode GetLeaf<TNodeName, TNode>( this ITree<TNodeName, TNode> tree, AbsolutePath<TNodeName> path1 ) where TNodeName : IComparable {
 			if ( !tree.TryGetLeaf( path1, out TNode result ) ) {
 				throw new NoSuchNodeNameException();
 			}
 			return result;
 		}
 
-        public static ITree<TNodeName, TNode> GetBranch<TNodeName, TNode>( this ITree<TNodeName, TNode> tree, Path<TNodeName> path1 )
+        public static ITree<TNodeName, TNode> GetBranch<TNodeName, TNode>( this ITree<TNodeName, TNode> tree, AbsolutePath<TNodeName> path1 )
 	        where TNodeName : IComparable {
 	        if ( !tree.TryGetBranch( path1, out var result ) ) {
 				throw new NoSuchNodeNameException();
@@ -152,11 +153,11 @@ namespace TreeLinq
 	        return result;
         }
 
-		internal static Path<TNodeName> NameToPath<TNodeName>(this TNodeName name) where TNodeName : IComparable {
-            return new Path<TNodeName>( name );
+		internal static AbsolutePath<TNodeName> NameToPath<TNodeName>(this TNodeName name) where TNodeName : IComparable {
+            return new AbsolutePath<TNodeName>( name );
 		}
 
-		public static bool ContainsNode<TNodeName, TNode>( this LazyTree<TNodeName, TNode> tree, Path<TNodeName> path ) where TNodeName : IComparable {
+		public static bool ContainsNode<TNodeName, TNode>( this LazyTree<TNodeName, TNode> tree, AbsolutePath<TNodeName> path ) where TNodeName : IComparable {
 			foreach ( var item in tree.AsEnumerable() ) {
 				if ( item.Path == path ) {
 					return true;
@@ -320,34 +321,34 @@ namespace TreeLinq
 
 		public static LazyTree<TNodeName, TNode> AsRoot<TNodeName, TNode>( this TNode root ) where TNodeName : IComparable {
 			var items = new List<TreeTraversal<TNodeName, TNode>>();
-			items.Add(new TreeTraversal<TNodeName, TNode>( TreeTraversalType.Leaf, Path<TNodeName>.Empty, root ));
+			items.Add(new TreeTraversal<TNodeName, TNode>( TreeTraversalType.Leaf, AbsolutePath<TNodeName>.Root, root ));
 			return new LazyTree<TNodeName, TNode>( items );
 		}
 
 		public static LazyTree<TNodeName, TNode> SetNode<TNodeName, TNode>( this LazyTree<TNodeName, TNode> tree,
 			TNodeName name, TNode newValue ) where TNodeName : IComparable {
-			return tree.SetNode( new Path<TNodeName>( name ), newValue.AsRoot<TNodeName, TNode>() );
+			return tree.SetNode( new AbsolutePath<TNodeName>( name ), newValue.AsRoot<TNodeName, TNode>() );
 		}
 
 		public static LazyTree<TNodeName, TNode> SetNode<TNodeName, TNode>( this LazyTree<TNodeName, TNode> tree,
-			Path<TNodeName> path, TNode newValue ) where TNodeName : IComparable {
+			AbsolutePath<TNodeName> path, TNode newValue ) where TNodeName : IComparable {
 			return tree.SetNode( path, newValue.AsRoot<TNodeName, TNode>() );
 		}
 
 		public static LazyTree<TNodeName, TNode> SetNode<TNodeName, TNode>( this LazyTree<TNodeName, TNode> tree,
 			TNodeName name, LazyTree<TNodeName, TNode> newValue ) where TNodeName : IComparable {
-			return tree.SetNode( new Path<TNodeName>( name ), newValue );
+			return tree.SetNode( new AbsolutePath<TNodeName>( name ), newValue );
 		}
 
 		public static LazyTree<TNodeName, TNode> SetNode<TNodeName, TNode>( this LazyTree<TNodeName, TNode> tree,
-			Path<TNodeName> path, LazyTree<TNodeName, TNode> newValue ) where TNodeName : IComparable {
+			AbsolutePath<TNodeName> path, LazyTree<TNodeName, TNode> newValue ) where TNodeName : IComparable {
 			if ( path.IsRoot ) {
 				return newValue;
 			}
 			return new LazyTree<TNodeName, TNode>( SetNodeInternal( tree, path, newValue));
 		}
 
-		private static IEnumerable<TreeTraversal<TNodeName, TNode>> SetNodeInternal<TNodeName, TNode>( this LazyTree<TNodeName, TNode> tree, Path<TNodeName> path, LazyTree<TNodeName, TNode> newValue ) where TNodeName : IComparable {
+		private static IEnumerable<TreeTraversal<TNodeName, TNode>> SetNodeInternal<TNodeName, TNode>( this LazyTree<TNodeName, TNode> tree, AbsolutePath<TNodeName> path, LazyTree<TNodeName, TNode> newValue ) where TNodeName : IComparable {
 			foreach ( var traversal in tree.AsEnumerable() ) {
 				if ( traversal.Type == TreeTraversalType.Leaf && traversal.Path.StartsWith( path ) ) {
 					yield return new TreeTraversal<TNodeName, TNode>( TreeTraversalType.EnterBranch, traversal.Path, traversal.Value );
@@ -519,6 +520,15 @@ namespace TreeLinq
 			return new LazyTree<TNodeName, TNode>( root.TraverseTree( getChildNames, getChild ) );
 		}
 
+		public static IEnumerable<TreeTraversal<TNodeName, TNodeName>> TraverseTree<TNodeName>(
+			this TNodeName root,
+			Func<TNodeName, IEnumerable<TNodeName>> getChildNames,
+			TryGetChild<TNodeName, TNodeName> getChild)
+		where TNodeName : IComparable
+		{
+			return root.TraverseTree<TNodeName, TNodeName>(getChildNames, getChild);
+		}
+		
 		public static IEnumerable<TreeTraversal<TNodeName, TNode>> TraverseTree<TNodeName, TNode>(
 			this TNode root,
 			Func<TNode, IEnumerable<TNodeName>> getChildNames,
@@ -526,12 +536,12 @@ namespace TreeLinq
 		where TNodeName : IComparable
 		{
 			if (!getChildNames(root).Any()) {
-				yield return new TreeTraversal<TNodeName, TNode>( TreeTraversalType.Leaf, Path<TNodeName>.Empty, root );
+				yield return new TreeTraversal<TNodeName, TNode>( TreeTraversalType.Leaf, AbsolutePath<TNodeName>.Root, root );
 				yield break;
 			}
 
 			var traversalStack = new Stack<TreeTraversalState<TNodeName, TNode>>();
-			traversalStack.Push( new TreeTraversalState<TNodeName, TNode>( Path<TNodeName>.Empty, root, getChildNames( root ) ) );
+			traversalStack.Push( new TreeTraversalState<TNodeName, TNode>( AbsolutePath<TNodeName>.Root, root, getChildNames( root ) ) );
 
 			var hasYieldedInitialIteration = false;
 
@@ -544,11 +554,11 @@ namespace TreeLinq
 				if ( !traversalStack.Peek().ChildNames.MoveNext() ) {
 					traversalStack.Pop();
 					if ( traversalStack.Count > 0 ) {
-						var path = traversalStack.Peek().Path + traversalStack.Peek().ChildNames.Current;
+						var path = traversalStack.Peek().Path.Add(traversalStack.Peek().ChildNames.Current);
 						yield return new TreeTraversal<TNodeName, TNode>( TreeTraversalType.ExitBranch, path );
 					}
 				} else {
-					var path = traversalStack.Peek().Path + traversalStack.Peek().ChildNames.Current;
+					var path = traversalStack.Peek().Path.Add(traversalStack.Peek().ChildNames.Current);
 					if ( !getChild( traversalStack.Peek().Node, traversalStack.Peek().ChildNames.Current,
 						out var node ) ) {
 						throw new InvalidDataException("Attempted to access child by name and failed");

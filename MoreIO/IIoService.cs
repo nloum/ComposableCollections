@@ -185,8 +185,8 @@ namespace MoreIO
         IMaybe<AbsolutePath> Join(IEnumerable<IMaybe<AbsolutePath>> root, params AbsolutePath[] descendants);
         IMaybe<AbsolutePath> Join(IEnumerable<IMaybe<AbsolutePath>> root, params IMaybe<AbsolutePath>[] descendants);
         IMaybe<AbsolutePath> Join(IEnumerable<AbsolutePath> root, params IMaybe<AbsolutePath>[] descendants);
-        IMaybe<AbsolutePath> ToPath(string path, PathFlags flags);
-        IMaybe<AbsolutePath> ToPath(string path);
+        IMaybe<AbsolutePath> ToAbsolutePath(string path, PathFlags flags);
+        IMaybe<AbsolutePath> ToAbsolutePath(string path);
         bool IsAbsoluteWindowsPath(string path);
         bool IsAbsoluteUnixPath(string path);
         StringComparison ToStringComparison(PathFlags pathFlags);

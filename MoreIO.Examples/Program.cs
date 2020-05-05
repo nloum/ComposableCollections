@@ -9,7 +9,7 @@ namespace MoreIO.Examples
         private static void Main(string[] args)
         {
             var service = new IoService(new ReactiveProcessFactory());
-            var test1 = service.ToPath(Environment.CurrentDirectory).Value;
+            var test1 = service.ToAbsolutePath(Environment.CurrentDirectory).Value;
 
             Console.WriteLine($"Monitoring {Environment.CurrentDirectory}");
             var changes = test1.ToLiveLinq();

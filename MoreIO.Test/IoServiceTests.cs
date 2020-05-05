@@ -17,7 +17,7 @@ namespace MoreIO.Test
         {
             var ioService = CreateUnitUnderTest();
 
-            var parent = ioService.ToPath("C:\\test1\\test2").Value;
+            var parent = ioService.ToAbsolutePath("C:\\test1\\test2").Value;
             var item1 = parent / "test3" / "test.csproj";
             var item2 = parent / "test4";
 
@@ -31,7 +31,7 @@ namespace MoreIO.Test
         {
             var ioService = CreateUnitUnderTest();
 
-            var parent = ioService.ToPath("C:\\test1\\test2").Value;
+            var parent = ioService.ToAbsolutePath("C:\\test1\\test2").Value;
             var item1 = parent / "test3" / "test.csproj";
             var item2 = parent / "test4";
 
@@ -45,7 +45,7 @@ namespace MoreIO.Test
         {
             var ioService = CreateUnitUnderTest();
 
-            var test1 = ioService.ToPath("test1").Value;
+            var test1 = ioService.ToAbsolutePath("test1").Value;
 
             test1.CreateFolder()
                 .ClearFolder();
@@ -54,7 +54,7 @@ namespace MoreIO.Test
 
             text1.WriteText("testing 1 2 3");
 
-            var test2 = ioService.ToPath("test2").Value
+            var test2 = ioService.ToAbsolutePath("test2").Value
                 .CreateFolder()
                 .ClearFolder();
 
@@ -69,7 +69,7 @@ namespace MoreIO.Test
         {
             var ioService = CreateUnitUnderTest();
 
-            var test1 = ioService.ToPath("test1").Value;
+            var test1 = ioService.ToAbsolutePath("test1").Value;
 
             test1.CreateFolder()
                 .ClearFolder();
@@ -78,7 +78,7 @@ namespace MoreIO.Test
 
             text1.WriteText("testing 1 2 3");
 
-            var test2 = ioService.ToPath("test2").Value
+            var test2 = ioService.ToAbsolutePath("test2").Value
                 .CreateFolder()
                 .ClearFolder();
 

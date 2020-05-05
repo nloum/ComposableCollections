@@ -45,8 +45,8 @@ namespace MoreIO
                     .RefCount()
                     .Select(rename => new[]
                     {
-                        SetChange(CollectionChangeType.Remove, IoService.ToPath(rename.OldFullPath, _path.Flags).Value),
-                        SetChange(CollectionChangeType.Add, IoService.ToPath(rename.FullPath, _path.Flags).Value)
+                        SetChange(CollectionChangeType.Remove, IoService.ToAbsolutePath(rename.OldFullPath, _path.Flags).Value),
+                        SetChange(CollectionChangeType.Add, IoService.ToAbsolutePath(rename.FullPath, _path.Flags).Value)
                     }.ToObservable())
                     .Merge()
                     .Subscribe(observer);
@@ -56,7 +56,7 @@ namespace MoreIO
                     .Publish()
                     .RefCount()
                     .Select(deletion => SetChange(CollectionChangeType.Remove,
-                        IoService.ToPath(deletion.FullPath, _path.Flags).Value))
+                        IoService.ToAbsolutePath(deletion.FullPath, _path.Flags).Value))
                     .Subscribe(observer);
                 var creations = Observable.FromEvent<FileSystemEventArgs>(
                         handler => _watcher.Created += (_, evt) => handler(evt),
@@ -64,7 +64,7 @@ namespace MoreIO
                     .Publish()
                     .RefCount()
                     .Select(creation => SetChange(CollectionChangeType.Add,
-                        IoService.ToPath(creation.FullPath, _path.Flags).Value))
+                        IoService.ToAbsolutePath(creation.FullPath, _path.Flags).Value))
                     .Subscribe(observer);
 
                 foreach (var childPath in AsEnumerable())
@@ -96,7 +96,7 @@ namespace MoreIO
 
             foreach (var fse in directory.GetFileSystemInfos(_pattern))
             {
-                var subPath = IoService.ToPath(fse.FullName, _path.Flags).Value;
+                var subPath = IoService.ToAbsolutePath(fse.FullName, _path.Flags).Value;
                 yield return subPath;
                 if (IncludeSubdirectories)
                     foreach (var descendant in subPath.Descendants())

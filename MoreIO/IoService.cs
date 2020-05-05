@@ -26,60 +26,60 @@ namespace MoreIO
 {
     public class IoService : IIoService
     {
-        private readonly HashSet<PathSpec> _knownStorage = new HashSet<PathSpec>();
+        private readonly HashSet<AbsolutePath> _knownStorage = new HashSet<AbsolutePath>();
 
         private readonly object _lock = new object();
         private string defaultDirectorySeparatorForThisEnvironment;
         private PathFlags? defaultFlagsForThisEnvironment;
         private readonly IReactiveProcessFactory _reactiveProcessFactory;
 
-        public PathSpec CurrentDirectory => ToPath(Environment.CurrentDirectory).Value;
+        public AbsolutePath CurrentDirectory => ToPath(Environment.CurrentDirectory).Value;
 
-        public IReadOnlyObservableSet<PathSpec> Storage { get; }
+        public IReadOnlyObservableSet<AbsolutePath> Storage { get; }
 
-        public PathSpec ToAbsolute(PathSpec path)
+        public AbsolutePath ToAbsolute(AbsolutePath path)
         {
             if (path.IsRelative())
                 return CurrentDirectory.Join(path).Value;
             return path;
         }
 
-        public IEnumerable<TreeTraversal<string, PathSpec>> TraverseDescendants(PathSpec path)
+        public IEnumerable<TreeTraversal<string, AbsolutePath>> TraverseDescendants(AbsolutePath path)
         {
-            return path.TraverseTree(x => x.Select(child => child.LastPathComponent()), (PathSpec node, string name, out PathSpec child) =>
+            return path.TraverseTree(x => x.Select(child => child.LastPathComponent()), (AbsolutePath node, string name, out AbsolutePath child) =>
             {
                 child = node.Descendant(name).Value;
                 return child.Exists();
             });
         }
 
-        public IEnumerable<PathSpec> GetDescendants(PathSpec path)
+        public IEnumerable<AbsolutePath> GetDescendants(AbsolutePath path)
         {
             return path.TraverseDescendants().Where(x => x.Type != TreeTraversalType.ExitBranch).Select(x => x.Value)
                 .Skip(1);
         }
 
-        public IReadOnlyObservableSet<PathSpec> Children(PathSpec path)
+        public IReadOnlyObservableSet<AbsolutePath> Children(AbsolutePath path)
         {
             return path.Children("*");
         }
 
-        public IReadOnlyObservableSet<PathSpec> Children(PathSpec path, string pattern)
+        public IReadOnlyObservableSet<AbsolutePath> Children(AbsolutePath path, string pattern)
         {
-            return new PathSpecDescendants(path, pattern, false, this);
+            return new AbsolutePathDescendants(path, pattern, false, this);
         }
 
-        public IReadOnlyObservableSet<PathSpec> Descendants(PathSpec path)
+        public IReadOnlyObservableSet<AbsolutePath> Descendants(AbsolutePath path)
         {
             return path.Descendants("*");
         }
 
-        public IReadOnlyObservableSet<PathSpec> Descendants(PathSpec path, string pattern)
+        public IReadOnlyObservableSet<AbsolutePath> Descendants(AbsolutePath path, string pattern)
         {
-            return new PathSpecDescendants(path, pattern, true, this);
+            return new AbsolutePathDescendants(path, pattern, true, this);
         }
 
-        public IMaybe<StreamWriter> CreateText(PathSpec pathSpec)
+        public IMaybe<StreamWriter> CreateText(AbsolutePath pathSpec)
         {
             try
             {
@@ -99,7 +99,7 @@ namespace MoreIO
             }
         }
 
-        public IEnumerable<string> ReadLines(PathSpec pathSpec, FileMode fileMode = FileMode.Open,
+        public IEnumerable<string> ReadLines(AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false)
@@ -115,7 +115,7 @@ namespace MoreIO
             return EnumerableUtility.EmptyArray<string>();
         }
 
-        public IMaybe<string> ReadText(PathSpec pathSpec, FileMode fileMode = FileMode.Open,
+        public IMaybe<string> ReadText(AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false)
@@ -130,7 +130,7 @@ namespace MoreIO
                 });
         }
 
-        public void WriteText(PathSpec pathSpec, IEnumerable<string> lines, FileMode fileMode = FileMode.Create,
+        public void WriteText(AbsolutePath pathSpec, IEnumerable<string> lines, FileMode fileMode = FileMode.Create,
             FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
             Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
         {
@@ -142,7 +142,7 @@ namespace MoreIO
                 }
         }
 
-        public void WriteText(PathSpec pathSpec, string text, FileMode fileMode = FileMode.Create,
+        public void WriteText(AbsolutePath pathSpec, string text, FileMode fileMode = FileMode.Create,
             FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
             Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
         {
@@ -224,8 +224,7 @@ namespace MoreIO
             }
         }
 
-
-        public PathSpec CreateTemporaryPath(PathType type)
+        public AbsolutePath CreateTemporaryPath(PathType type)
         {
             var path = Path.GetRandomFileName();
             var spec = ToPath(path).Value;
@@ -331,32 +330,32 @@ namespace MoreIO
             return regex;
         }
 
-        public PathSpec ParsePathSpec(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+        public AbsolutePath ParseAbsolutePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
         {
             var error = string.Empty;
-            PathSpec pathSpec;
-            if (!TryParsePathSpec(path, out pathSpec, out error, flags))
+            AbsolutePath pathSpec;
+            if (!TryParseAbsolutePath(path, out pathSpec, out error, flags))
                 throw new ArgumentException(error);
             return pathSpec;
         }
 
-        public IMaybe<PathSpec> TryParsePathSpec(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+        public IMaybe<AbsolutePath> TryParseAbsolutePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
         {
             var error = string.Empty;
-            PathSpec pathSpec;
-            if (!TryParsePathSpec(path, out pathSpec, out error, flags))
-                return Nothing<PathSpec>();
+            AbsolutePath pathSpec;
+            if (!TryParseAbsolutePath(path, out pathSpec, out error, flags))
+                return Nothing<AbsolutePath>();
             return Something(pathSpec);
         }
 
-        public bool TryParsePathSpec(string path, out PathSpec pathSpec,
+        public bool TryParseAbsolutePath(string path, out AbsolutePath pathSpec,
             PathFlags flags = PathFlags.UseDefaultsForGivenPath)
         {
             var error = string.Empty;
-            return TryParsePathSpec(path, out pathSpec, out error, flags);
+            return TryParseAbsolutePath(path, out pathSpec, out error, flags);
         }
 
-        public bool TryParsePathSpec(string path, out PathSpec pathSpec, out string error,
+        public bool TryParseAbsolutePath(string path, out AbsolutePath pathSpec, out string error,
             PathFlags flags = PathFlags.UseDefaultsForGivenPath)
         {
             if (flags.HasFlag(PathFlags.UseDefaultsFromUtility) && flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
@@ -408,7 +407,7 @@ namespace MoreIO
                         return false;
                     }
 
-                    pathSpec = new PathSpec(flags, "\\", this, components);
+                    pathSpec = new AbsolutePath(flags, "\\", this, components);
                 }
                 else if (path.StartsWith("."))
                 {
@@ -426,7 +425,7 @@ namespace MoreIO
                         return false;
                     }
 
-                    pathSpec = new PathSpec(flags, "\\", this, components);
+                    pathSpec = new AbsolutePath(flags, "\\", this, components);
                 }
                 else if (path.StartsWith("\\\\"))
                 {
@@ -444,7 +443,7 @@ namespace MoreIO
                         return false;
                     }
 
-                    pathSpec = new PathSpec(flags, "\\", this, components);
+                    pathSpec = new AbsolutePath(flags, "\\", this, components);
                 }
                 else if (path.StartsWith("\\"))
                 {
@@ -462,7 +461,7 @@ namespace MoreIO
                         return false;
                     }
 
-                    pathSpec = new PathSpec(flags, "\\", this, components);
+                    pathSpec = new AbsolutePath(flags, "\\", this, components);
                 }
                 else
                 {
@@ -480,7 +479,7 @@ namespace MoreIO
                         return false;
                     }
 
-                    pathSpec = new PathSpec(flags, "\\", this, components);
+                    pathSpec = new AbsolutePath(flags, "\\", this, components);
                 }
 
                 return true;
@@ -515,7 +514,7 @@ namespace MoreIO
                         return false;
                     }
 
-                    pathSpec = new PathSpec(flags, "/", this, components);
+                    pathSpec = new AbsolutePath(flags, "/", this, components);
                 }
                 else if (path.StartsWith("."))
                 {
@@ -533,7 +532,7 @@ namespace MoreIO
                         return false;
                     }
 
-                    pathSpec = new PathSpec(flags, "/", this, components);
+                    pathSpec = new AbsolutePath(flags, "/", this, components);
                 }
                 else
                 {
@@ -551,7 +550,7 @@ namespace MoreIO
                         return false;
                     }
 
-                    pathSpec = new PathSpec(flags, "/", this, components);
+                    pathSpec = new AbsolutePath(flags, "/", this, components);
                 }
 
                 return true;
@@ -562,9 +561,9 @@ namespace MoreIO
             if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
                 flags = GetDefaultFlagsForThisEnvironment();
             if (path == ".." || path == ".")
-                pathSpec = new PathSpec(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, path);
+                pathSpec = new AbsolutePath(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, new[]{path});
             else
-                pathSpec = new PathSpec(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, ".", path);
+                pathSpec = new AbsolutePath(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, new[]{".", path});
             return true;
         }
 
@@ -578,7 +577,7 @@ namespace MoreIO
                     _knownStorage.Add(drivePath);
             }
 
-            var drivesThatWereRemoved = new List<PathSpec>();
+            var drivesThatWereRemoved = new List<AbsolutePath>();
 
             foreach (var drive in _knownStorage)
                 if (!currentStorage.Contains(drive + "\\"))
@@ -626,8 +625,8 @@ namespace MoreIO
 
         #region File and folder extension methods
 
-        public IEnumerable<KeyValuePair<PathSpec, string>> ProposeUniqueNamesForMovingPathsToSameFolder(
-            IEnumerable<PathSpec> paths)
+        public IEnumerable<KeyValuePair<AbsolutePath, string>> ProposeUniqueNamesForMovingPathsToSameFolder(
+            IEnumerable<AbsolutePath> paths)
         {
             var alreadyProposedNames = new HashSet<string>();
             foreach (var path in paths)
@@ -637,12 +636,12 @@ namespace MoreIO
                 while (alreadyProposedNames.Contains(enumerator.Current)) enumerator.MoveNext();
 
                 alreadyProposedNames.Add(enumerator.Current);
-                yield return new KeyValuePair<PathSpec, string>(path, enumerator.Current);
+                yield return new KeyValuePair<AbsolutePath, string>(path, enumerator.Current);
                 enumerator.Dispose();
             }
         }
 
-        private IEnumerable<string> ProposeSuccessivelyMoreSpecificNames(PathSpec path)
+        private IEnumerable<string> ProposeSuccessivelyMoreSpecificNames(AbsolutePath path)
         {
             string filename = null;
             foreach (var parentPath in path.Ancestors())
@@ -656,32 +655,32 @@ namespace MoreIO
             }
         }
 
-        public IEnumerable<PathSpec> GetChildren(PathSpec path, bool includeFolders = true, bool includeFiles = true)
+        public IEnumerable<AbsolutePath> GetChildren(AbsolutePath path, bool includeFolders = true, bool includeFiles = true)
         {
-            if (!path.IsFolder()) return ImmutableArray<PathSpec>.Empty;
+            if (!path.IsFolder()) return ImmutableArray<AbsolutePath>.Empty;
 
             if (includeFiles && includeFolders)
-                return Directory.GetFileSystemEntries(path.AsDirectoryInfo().FullName).Select(x => ParsePathSpec(x));
+                return Directory.GetFileSystemEntries(path.AsDirectoryInfo().FullName).Select(x => ParseAbsolutePath(x));
 
-            if (includeFiles) return Directory.GetFiles(path.AsDirectoryInfo().FullName).Select(x => ParsePathSpec(x));
+            if (includeFiles) return Directory.GetFiles(path.AsDirectoryInfo().FullName).Select(x => ParseAbsolutePath(x));
 
             if (includeFolders)
-                return Directory.GetDirectories(path.AsDirectoryInfo().FullName).Select(x => ParsePathSpec(x));
+                return Directory.GetDirectories(path.AsDirectoryInfo().FullName).Select(x => ParseAbsolutePath(x));
 
-            return ImmutableArray<PathSpec>.Empty;
+            return ImmutableArray<AbsolutePath>.Empty;
         }
 
-        public IEnumerable<PathSpec> GetFiles(PathSpec path)
+        public IEnumerable<AbsolutePath> GetFiles(AbsolutePath path)
         {
             return GetChildren(path, false);
         }
 
-        public IEnumerable<PathSpec> GetFolders(PathSpec path)
+        public IEnumerable<AbsolutePath> GetFolders(AbsolutePath path)
         {
             return GetChildren(path, true, false);
         }
 
-        public PathSpec CreateEmptyFile(PathSpec path)
+        public AbsolutePath CreateEmptyFile(AbsolutePath path)
         {
             path.CreateFile().Dispose();
             if (path.GetPathType() != PathType.File)
@@ -689,7 +688,7 @@ namespace MoreIO
             return path;
         }
 
-        public FileStream CreateFile(PathSpec path)
+        public FileStream CreateFile(AbsolutePath path)
         {
             if (path.Parent().Value.GetPathType() != PathType.Folder)
                 path.Parent().Value.Create(PathType.Folder);
@@ -699,7 +698,7 @@ namespace MoreIO
             return result;
         }
 
-        public PathSpec DeleteFile(PathSpec path)
+        public AbsolutePath DeleteFile(AbsolutePath path)
         {
             if (path.GetPathType() == PathType.None)
                 return path;
@@ -719,19 +718,19 @@ namespace MoreIO
             return path;
         }
 
-        public PathSpec Decrypt(PathSpec path)
+        public AbsolutePath Decrypt(AbsolutePath path)
         {
             path.AsFileInfo().Decrypt();
             return path;
         }
 
-        public PathSpec Encrypt(PathSpec path)
+        public AbsolutePath Encrypt(AbsolutePath path)
         {
             path.AsFileInfo().Encrypt();
             return path;
         }
 
-        public PathSpec Delete(PathSpec path)
+        public AbsolutePath Delete(AbsolutePath path)
         {
             if (path.GetPathType() == PathType.File) return path.DeleteFile();
 
@@ -753,24 +752,24 @@ namespace MoreIO
             return str;
         }
 
-        public bool IsAncestorOf(PathSpec path, PathSpec possibleDescendant)
+        public bool IsAncestorOf(AbsolutePath path, AbsolutePath possibleDescendant)
         {
             return IsDescendantOf(possibleDescendant, path);
         }
 
-        public bool IsDescendantOf(PathSpec path, PathSpec possibleAncestor)
+        public bool IsDescendantOf(AbsolutePath path, AbsolutePath possibleAncestor)
         {
             var possibleDescendantStr = Path.GetFullPath(path.ToString()).ToLower();
             var possibleAncestorStr = Path.GetFullPath(possibleAncestor.ToString()).ToLower();
             return possibleDescendantStr.StartsWith(possibleAncestorStr);
         }
 
-        public IEnumerable<string> Split(PathSpec path)
+        public IEnumerable<string> Split(AbsolutePath path)
         {
             return Ancestors(path, true).Select(pathName => Path.GetFileName(pathName.ToString())).Reverse();
         }
 
-        public string LastPathComponent(PathSpec path)
+        public string LastPathComponent(AbsolutePath path)
         {
             return path.ToString().Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
                 .Last(str => !string.IsNullOrEmpty(str));
@@ -786,7 +785,7 @@ namespace MoreIO
         /// <param name="path"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        public IEnumerable<PathSpec> Ancestors(PathSpec path, bool includeItself = false)
+        public IEnumerable<AbsolutePath> Ancestors(AbsolutePath path, bool includeItself = false)
         {
             if (includeItself)
                 yield return path;
@@ -805,38 +804,38 @@ namespace MoreIO
             }
         }
 
-        public IMaybe<PathSpec> Descendant(PathSpec path, params PathSpec[] paths)
+        public IMaybe<AbsolutePath> Descendant(AbsolutePath path, params AbsolutePath[] paths)
         {
             return path.Descendant(paths.Select(p => p.ToString()).ToArray());
         }
 
-        public IMaybe<PathSpec> Descendant(PathSpec path, params string[] paths)
+        public IMaybe<AbsolutePath> Descendant(AbsolutePath path, params string[] paths)
         {
             var pathStr = path.ToString();
             // Make sure that pathStr is treated as a directory.
             if (!pathStr.EndsWith(path.DirectorySeparator))
                 pathStr += path.DirectorySeparator;
 
-            var result = path.Components.Concat(paths).ToArray();
+            var result = path.Path.Concat(paths).ToArray();
             var combinedResult = Path.Combine(result);
             var pathResult = ToPath(combinedResult);
             return pathResult;
         }
 
-        public IMaybe<PathSpec> Ancestor(PathSpec path, int level)
+        public IMaybe<AbsolutePath> Ancestor(AbsolutePath path, int level)
         {
             var maybePath = path.ToMaybe();
             for (var i = 0; i < level; i++)
             {
                 maybePath = maybePath.Select(p => p.Parent()).SelectMany(x => x);
                 if (!maybePath.HasValue)
-                    return Maybe<PathSpec>.Nothing;
+                    return Maybe<AbsolutePath>.Nothing;
             }
 
             return maybePath;
         }
 
-        public bool HasExtension(PathSpec path, string extension)
+        public bool HasExtension(AbsolutePath path, string extension)
         {
             var actualExtension = Path.GetExtension(path.ToString());
             if (actualExtension == extension)
@@ -851,12 +850,12 @@ namespace MoreIO
         /// <param name="path"></param>
         /// <param name="differentExtension">Must include the "." part of the extension (e.g., ".avi" not "avi")</param>
         /// <returns></returns>
-        public IMaybe<PathSpec> WithExtension(PathSpec path, string differentExtension)
+        public IMaybe<AbsolutePath> WithExtension(AbsolutePath path, string differentExtension)
         {
             return ToPath(Path.ChangeExtension(path.ToString(), differentExtension));
         }
 
-        public IPathSpecTranslation Copy(IPathSpecTranslation translation)
+        public IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation)
         {
             switch (translation.Source.GetPathType())
             {
@@ -876,7 +875,7 @@ namespace MoreIO
             return translation;
         }
 
-        public IPathSpecTranslation CopyFile(IPathSpecTranslation translation)
+        public IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation)
         {
             if (translation.Source.GetPathType() != PathType.File)
                 throw new IOException(string.Format(
@@ -891,7 +890,7 @@ namespace MoreIO
             return translation;
         }
 
-        public IPathSpecTranslation CopyFolder(IPathSpecTranslation translation)
+        public IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation)
         {
             if (translation.Source.GetPathType() != PathType.Folder)
                 throw new IOException(string.Format(
@@ -901,7 +900,7 @@ namespace MoreIO
             return translation;
         }
 
-        public IPathSpecTranslation Move(IPathSpecTranslation translation)
+        public IAbsolutePathTranslation Move(IAbsolutePathTranslation translation)
         {
             switch (translation.Source.GetPathType())
             {
@@ -921,7 +920,7 @@ namespace MoreIO
             return translation;
         }
 
-        public IPathSpecTranslation MoveFile(IPathSpecTranslation translation)
+        public IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation)
         {
             if (translation.Source.GetPathType() != PathType.File)
                 throw new IOException(string.Format(
@@ -940,7 +939,7 @@ namespace MoreIO
             return translation;
         }
 
-        public IPathSpecTranslation MoveFolder(IPathSpecTranslation translation)
+        public IAbsolutePathTranslation MoveFolder(IAbsolutePathTranslation translation)
         {
             if (translation.Source.GetPathType() != PathType.Folder)
                 throw new IOException(string.Format(
@@ -964,26 +963,26 @@ namespace MoreIO
             return translation;
         }
 
-        public bool ContainsFiles(PathSpec path)
+        public bool ContainsFiles(AbsolutePath path)
         {
             if (path.GetPathType() == PathType.File)
                 return true;
             return path.Children().All(child => child.ContainsFiles());
         }
 
-        public bool FolderContainsFiles(PathSpec path)
+        public bool FolderContainsFiles(AbsolutePath path)
         {
             if (path.GetPathType() == PathType.File)
                 return false;
             return path.ContainsFiles();
         }
 
-        public IMaybe<PathSpec> GetCommonAncestry(PathSpec path1, PathSpec path2)
+        public IMaybe<AbsolutePath> GetCommonAncestry(AbsolutePath path1, AbsolutePath path2)
         {
             return ToPath(path1.ToString().GetCommonBeginning(path2.ToString()).Trim('\\'));
         }
 
-        public IMaybe<Uri> GetCommonDescendants(PathSpec path1, PathSpec path2)
+        public IMaybe<Uri> GetCommonDescendants(AbsolutePath path1, AbsolutePath path2)
         {
             try
             {
@@ -1000,7 +999,7 @@ namespace MoreIO
             }
         }
 
-        public IMaybe<Tuple<Uri, Uri>> GetNonCommonDescendants(PathSpec path1, PathSpec path2)
+        public IMaybe<Tuple<Uri, Uri>> GetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2)
         {
             try
             {
@@ -1019,7 +1018,7 @@ namespace MoreIO
             }
         }
 
-        public IMaybe<Tuple<Uri, Uri>> GetNonCommonAncestry(PathSpec path1, PathSpec path2)
+        public IMaybe<Tuple<Uri, Uri>> GetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2)
         {
             try
             {
@@ -1040,14 +1039,14 @@ namespace MoreIO
             }
         }
 
-        public IPathSpecTranslation Translate(PathSpec pathToBeCopied, PathSpec source, PathSpec destination)
+        public IAbsolutePathTranslation Translate(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination)
         {
-            return new CalculatedPathSpecTranslation(pathToBeCopied, source, destination, this);
+            return new CalculatedAbsolutePathTranslation(pathToBeCopied, source, destination, this);
         }
 
-        public IPathSpecTranslation Translate(PathSpec source, PathSpec destination)
+        public IAbsolutePathTranslation Translate(AbsolutePath source, AbsolutePath destination)
         {
-            return new PathSpecTranslation(source, destination, this);
+            return new AbsolutePathTranslation(source, destination, this);
         }
 
         public Uri Child(Uri parent, Uri child)
@@ -1170,25 +1169,25 @@ namespace MoreIO
             _reactiveProcessFactory = reactiveProcessFactory;
         }
 
-        public FileInfo AsFileInfo(PathSpec path)
+        public FileInfo AsFileInfo(AbsolutePath path)
         {
             return new FileInfo(path.ToString());
         }
 
-        public DirectoryInfo AsDirectoryInfo(PathSpec path)
+        public DirectoryInfo AsDirectoryInfo(AbsolutePath path)
         {
             return new DirectoryInfo(path.ToString());
         }
 
         public IMaybe<T> As<T>(T pathName, PathType pathType)
-            where T : PathSpec
+            where T : AbsolutePath
         {
             if (pathName.GetPathType() == pathType)
                 return new Maybe<T>(pathName);
             return Maybe<T>.Nothing;
         }
 
-        public IMaybe<bool> IsReadOnly(PathSpec path)
+        public IMaybe<bool> IsReadOnly(AbsolutePath path)
         {
             try
             {
@@ -1208,7 +1207,7 @@ namespace MoreIO
             }
         }
 
-        public IMaybe<long> Length(PathSpec path)
+        public IMaybe<long> Length(AbsolutePath path)
         {
             try
             {
@@ -1220,7 +1219,7 @@ namespace MoreIO
             }
         }
 
-        public IMaybe<FileAttributes> Attributes(PathSpec attributes)
+        public IMaybe<FileAttributes> Attributes(AbsolutePath attributes)
         {
             try
             {
@@ -1240,7 +1239,7 @@ namespace MoreIO
             }
         }
 
-        public IMaybe<DateTime> CreationTime(PathSpec attributes)
+        public IMaybe<DateTime> CreationTime(AbsolutePath attributes)
         {
             try
             {
@@ -1260,7 +1259,7 @@ namespace MoreIO
             }
         }
 
-        public IMaybe<DateTime> LastAccessTime(PathSpec attributes)
+        public IMaybe<DateTime> LastAccessTime(AbsolutePath attributes)
         {
             try
             {
@@ -1280,7 +1279,7 @@ namespace MoreIO
             }
         }
 
-        public IMaybe<DateTime> LastWriteTime(PathSpec attributes)
+        public IMaybe<DateTime> LastWriteTime(AbsolutePath attributes)
         {
             try
             {
@@ -1300,7 +1299,7 @@ namespace MoreIO
             }
         }
 
-        public IMaybe<string> FullName(PathSpec attributes)
+        public IMaybe<string> FullName(AbsolutePath attributes)
         {
             try
             {
@@ -1362,16 +1361,16 @@ namespace MoreIO
         }
 
 
-        public PathSpec Root(PathSpec path)
+        public AbsolutePath Root(AbsolutePath path)
         {
             var ancestor = path;
-            IMaybe<PathSpec> cachedParent;
+            IMaybe<AbsolutePath> cachedParent;
             while ((cachedParent = ancestor.Parent()).HasValue) ancestor = cachedParent.Value;
 
             return ancestor;
         }
 
-        public void RenameTo(PathSpec source, PathSpec target)
+        public void RenameTo(AbsolutePath source, AbsolutePath target)
         {
             switch (source.GetPathType())
             {
@@ -1384,12 +1383,12 @@ namespace MoreIO
             }
         }
 
-        public bool Exists(PathSpec path)
+        public bool Exists(AbsolutePath path)
         {
             return path.GetPathType() != PathType.None;
         }
 
-        public PathType GetPathType(PathSpec path)
+        public PathType GetPathType(AbsolutePath path)
         {
             var str = path.ToString();
             if (File.Exists(str))
@@ -1399,14 +1398,14 @@ namespace MoreIO
             return PathType.None;
         }
 
-        public PathSpec ClearFolder(PathSpec path)
+        public AbsolutePath ClearFolder(AbsolutePath path)
         {
             foreach (var item in path) item.Delete();
 
             return path;
         }
 
-        public PathSpec DeleteFolder(PathSpec path, bool recursive = false)
+        public AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false)
         {
             Directory.Delete(path.ToString(), recursive);
 
@@ -1419,7 +1418,7 @@ namespace MoreIO
                    fileMode.HasFlag(FileMode.CreateNew) || fileMode.HasFlag(FileMode.OpenOrCreate);
         }
 
-        public void Create(PathSpec path, PathType pathType)
+        public void Create(AbsolutePath path, PathType pathType)
         {
             switch (pathType)
             {
@@ -1434,7 +1433,7 @@ namespace MoreIO
             }
         }
 
-        public IMaybe<FileStream> Open(PathSpec path, FileMode fileMode)
+        public IMaybe<FileStream> Open(AbsolutePath path, FileMode fileMode)
         {
             try
             {
@@ -1452,7 +1451,7 @@ namespace MoreIO
             }
         }
 
-        public IMaybe<FileStream> Open(PathSpec path, FileMode fileMode,
+        public IMaybe<FileStream> Open(AbsolutePath path, FileMode fileMode,
             FileAccess fileAccess)
         {
             try
@@ -1471,7 +1470,7 @@ namespace MoreIO
             }
         }
 
-        public IMaybe<FileStream> Open(PathSpec path, FileMode fileMode,
+        public IMaybe<FileStream> Open(AbsolutePath path, FileMode fileMode,
             FileAccess fileAccess, FileShare fileShare)
         {
             try
@@ -1490,7 +1489,7 @@ namespace MoreIO
             }
         }
 
-        public PathSpec CreateFolder(PathSpec path)
+        public AbsolutePath CreateFolder(AbsolutePath path)
         {
             try
             {
@@ -1510,27 +1509,27 @@ namespace MoreIO
             return path;
         }
 
-        public void WriteAllText(PathSpec path, string text)
+        public void WriteAllText(AbsolutePath path, string text)
         {
             File.WriteAllText(path.ToString(), text);
         }
 
-        public void WriteAllLines(PathSpec path, IEnumerable<string> lines)
+        public void WriteAllLines(AbsolutePath path, IEnumerable<string> lines)
         {
             File.WriteAllLines(path.ToString(), lines);
         }
 
-        public void WriteAllLines(PathSpec path, byte[] bytes)
+        public void WriteAllLines(AbsolutePath path, byte[] bytes)
         {
             File.WriteAllBytes(path.ToString(), bytes);
         }
 
-        public IEnumerable<string> ReadLines(PathSpec path)
+        public IEnumerable<string> ReadLines(AbsolutePath path)
         {
             return File.ReadLines(path.ToString());
         }
 
-        public string ReadAllText(PathSpec path)
+        public string ReadAllText(AbsolutePath path)
         {
             return File.ReadAllText(path.ToString());
         }
@@ -1539,7 +1538,7 @@ namespace MoreIO
 
         #region FileSystemWatcher extension methods
 
-        public IDictionaryChangesStrict<PathSpec, PathType> ToLiveLinq(PathSpec root,
+        public IDictionaryChangesStrict<AbsolutePath, PathType> ToLiveLinq(AbsolutePath root,
             bool includeFileContentChanges = true, PathObservationMethod observationMethod = PathObservationMethod.Default)
         {
             // TODO - add support for FSWatch events on Windows and Linux as well. Although I think I already support all the ones on Linux
@@ -1560,7 +1559,7 @@ namespace MoreIO
             return ToLiveLinqWithFsWatch(root, includeFileContentChanges, observationMethod);
         }
 
-        private IDictionaryChangesStrict<PathSpec, PathType> ToLiveLinqWithFsWatch(PathSpec root, bool includeFileContentChanges, PathObservationMethod observationMethod)
+        private IDictionaryChangesStrict<AbsolutePath, PathType> ToLiveLinqWithFsWatch(AbsolutePath root, bool includeFileContentChanges, PathObservationMethod observationMethod)
         {
             ReactiveProcess proc;
 
@@ -1602,7 +1601,7 @@ namespace MoreIO
                         state.StringBuilder.Append(ch);
                         return new {state.StringBuilder, BuiltString = (string) null};
                     }).Where(state => state.BuiltString != null).Select(state => state.BuiltString)
-                .Scan(new {State = initialState, LastEvents = (IDictionaryChangeStrict<PathSpec, PathType>[]) null},
+                .Scan(new {State = initialState, LastEvents = (IDictionaryChangeStrict<AbsolutePath, PathType>[]) null},
                     (state, itemString) =>
                     {
                         var item = ToPath(itemString).Value;
@@ -1627,7 +1626,7 @@ namespace MoreIO
                                     return new
                                     {
                                         state.State,
-                                        LastEvents = new IDictionaryChangeStrict<PathSpec, PathType>[0]
+                                        LastEvents = new IDictionaryChangeStrict<AbsolutePath, PathType>[0]
                                     };
                                 }
                             }
@@ -1638,7 +1637,7 @@ namespace MoreIO
                                 return new
                                 {
                                     State = state.State.Remove(item),
-                                    LastEvents = new IDictionaryChangeStrict<PathSpec, PathType>[]
+                                    LastEvents = new IDictionaryChangeStrict<AbsolutePath, PathType>[]
                                     {
                                         Utility.DictionaryRemove(MoreCollections.Utility.KeyValuePair(item, state.State[item])),
                                     }
@@ -1650,7 +1649,7 @@ namespace MoreIO
                             return new
                             {
                                 State = state.State.Add(item, item.GetPathType()),
-                                LastEvents = new IDictionaryChangeStrict<PathSpec, PathType>[]
+                                LastEvents = new IDictionaryChangeStrict<AbsolutePath, PathType>[]
                                 {
                                     Utility.DictionaryAdd(MoreCollections.Utility.KeyValuePair(item, item.GetPathType())),
                                 }
@@ -1664,7 +1663,7 @@ namespace MoreIO
             return resultObservable.ToLiveLinq();
         }
 
-        private ISetChanges<PathSpec> ToLiveLinqWithFileSystemWatcher(PathSpec root, bool includeFileContentChanges)
+        private ISetChanges<AbsolutePath> ToLiveLinqWithFileSystemWatcher(AbsolutePath root, bool includeFileContentChanges)
         {
             var watcher = new FileSystemWatcher(root.ToString())
             {
@@ -1732,14 +1731,14 @@ namespace MoreIO
             return unified.ToLiveLinq();
         }
 
-        public IObservable<Unit> ObserveChanges(PathSpec path)
+        public IObservable<Unit> ObserveChanges(AbsolutePath path)
         {
             return path.ObserveChanges(NotifyFilters.Attributes | NotifyFilters.CreationTime |
                                        NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastAccess |
                                        NotifyFilters.LastWrite | NotifyFilters.Security | NotifyFilters.Size);
         }
 
-        public IObservable<Unit> ObserveChanges(PathSpec path, NotifyFilters filters)
+        public IObservable<Unit> ObserveChanges(AbsolutePath path, NotifyFilters filters)
         {
             var parent = path.Parent();
             if (!parent.HasValue) return Observable.Never<Unit>();
@@ -1768,7 +1767,7 @@ namespace MoreIO
             });
         }
 
-        public IObservable<PathType> ObservePathType(PathSpec path)
+        public IObservable<PathType> ObservePathType(AbsolutePath path)
         {
             var parent = path.Parent();
             if (!parent.HasValue) return Observable.Return(path.GetPathType());
@@ -1776,12 +1775,12 @@ namespace MoreIO
                 .DistinctUntilChanged();
         }
 
-        public IObservable<PathSpec> Renamings(PathSpec path)
+        public IObservable<AbsolutePath> Renamings(AbsolutePath path)
         {
             var parent = path.Parent();
             if (!parent.HasValue) return Observable.Return(path);
 
-            return Observable.Create<PathSpec>(
+            return Observable.Create<AbsolutePath>(
                 async (observer, token) =>
                 {
                     var currentPath = path;
@@ -1793,11 +1792,11 @@ namespace MoreIO
                             Filter = currentPath.Name
                         };
 
-                        var tcs = new TaskCompletionSource<PathSpec>();
+                        var tcs = new TaskCompletionSource<AbsolutePath>();
 
                         RenamedEventHandler handler = (_, args) =>
                         {
-                            tcs.SetResult(new PathSpec(path.Flags, path.DirectorySeparator, this, args.FullPath));
+                            tcs.SetResult(new AbsolutePath(path.Flags, path.DirectorySeparator, this, new[]{args.FullPath}));
                         };
 
                         watcher.EnableRaisingEvents = true;
@@ -1849,9 +1848,9 @@ namespace MoreIO
 
         #endregion
 
-        #region PathSpec extension methods
+        #region AbsolutePath extension methods
 
-        public PathSpec RelativeTo(PathSpec path, PathSpec relativeTo)
+        public AbsolutePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo)
         {
             var pathStr = path.Simplify().ToString();
             var relativeToStr = relativeTo.Simplify().ToString();
@@ -1863,7 +1862,7 @@ namespace MoreIO
 
             var sb = new StringBuilder();
 
-            for (var i = 0; i < relativeTo.Components.Count - common.Value.Components.Count; i++)
+            for (var i = 0; i < relativeTo.Path.Count - common.Value.Path.Count; i++)
             {
                 sb.Append("..");
                 sb.Append(path.DirectorySeparator);
@@ -1881,12 +1880,12 @@ namespace MoreIO
             //{
             //    var result = pathStr.Substring(relativeToStr.Length);
             //    if (result.StartsWith(path.DirectorySeparator))
-            //        return ToPathSpec(result.Substring(path.DirectorySeparator.Length)).Value;
+            //        return ToAbsolutePath(result.Substring(path.DirectorySeparator.Length)).Value;
             //}
             //throw new NotImplementedException();
         }
 
-        public IMaybe<PathSpec> CommonWith(PathSpec path, PathSpec that)
+        public IMaybe<AbsolutePath> CommonWith(AbsolutePath path, AbsolutePath that)
         {
             var path1Str = path.ToString();
             var path2Str = that.ToString();
@@ -1899,7 +1898,7 @@ namespace MoreIO
 
             var caseSensitive = path.Flags.HasFlag(PathFlags.CaseSensitive) ||
                                 that.Flags.HasFlag(PathFlags.CaseSensitive);
-            var zippedComponents = path.Components.Zip(that.Components, (comp1, comp2) => 
+            var zippedComponents = path.Path.Zip(that.Path, (comp1, comp2) => 
                 new
                 {
                     equals = comp1.Equals(comp2, !caseSensitive ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal),
@@ -1909,25 +1908,25 @@ namespace MoreIO
             return ToPath(string.Join(path.DirectorySeparator, zippedComponents.TakeWhile(x => x.equals).Select(x => x.component)));
         }
 
-        public bool CanBeSimplified(PathSpec path)
+        public bool CanBeSimplified(AbsolutePath path)
         {
-            return path.Components.SkipWhile(str => str == "..").Any(str => str == "..");
+            return path.Path.SkipWhile(str => str == "..").Any(str => str == "..");
         }
 
-        public PathSpec Simplify(PathSpec path)
+        public AbsolutePath Simplify(AbsolutePath path)
         {
             var result = new List<string>();
             var numberOfComponentsToSkip = 0;
-            for (var i = path.Components.Count - 1; i >= 0; i--)
+            for (var i = path.Path.Count - 1; i >= 0; i--)
             {
-                if (path.Components[i] == ".")
+                if (path.Path[i] == ".")
                     continue;
-                if (path.Components[i] == "..")
+                if (path.Path[i] == "..")
                     numberOfComponentsToSkip++;
                 else if (numberOfComponentsToSkip > 0)
                     numberOfComponentsToSkip--;
                 else
-                    result.Insert(0, path.Components[i]);
+                    result.Insert(0, path.Path[i]);
             }
 
             if (numberOfComponentsToSkip > 0 && !path.IsRelative())
@@ -1949,19 +1948,19 @@ namespace MoreIO
             return ToPath(str, path.Flags).Value;
         }
 
-        public IMaybe<PathSpec> Parent(PathSpec path)
+        public IMaybe<AbsolutePath> Parent(AbsolutePath path)
         {
-            return path.Components.Subset(0, -2).Select(str => TryParsePathSpec(str, path.Flags)).Join();
+            return path.Path.Subset(0, -2).Select(str => TryParseAbsolutePath(str, path.Flags)).Join();
         }
 
-        public bool IsAbsolute(PathSpec path)
+        public bool IsAbsolute(AbsolutePath path)
         {
-            return ComponentsAreAbsolute(path.Components);
+            return ComponentsAreAbsolute(path.Path);
         }
 
-        public bool IsRelative(PathSpec path)
+        public bool IsRelative(AbsolutePath path)
         {
-            return ComponentsAreRelative(path.Components);
+            return ComponentsAreRelative(path.Path);
         }
 
         internal bool ComponentsAreAbsolute(IReadOnlyList<string> path)
@@ -1982,115 +1981,115 @@ namespace MoreIO
             return true;
         }
 
-        #region Ways of combining PathSpecs
+        #region Ways of combining AbsolutePaths
 
         #region String overloads
 
-        public IMaybe<PathSpec> Join(IReadOnlyList<string> descendants)
+        public IMaybe<AbsolutePath> Join(IReadOnlyList<string> descendants)
         {
             return descendants.Select(str => ToPath(str)).Join();
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<string> descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<string> descendants)
         {
             return Join(descendants.ToList());
         }
 
-        public IMaybe<PathSpec> Join(IReadOnlyList<IMaybe<string>> descendants)
+        public IMaybe<AbsolutePath> Join(IReadOnlyList<IMaybe<string>> descendants)
         {
             if (descendants.Any(opt => !opt.HasValue))
-                return Nothing<PathSpec>();
+                return Nothing<AbsolutePath>();
             return Join(descendants.Select(opt => opt.Value));
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<string>> descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<IMaybe<string>> descendants)
         {
             return Join(descendants.ToList());
         }
 
-        public IMaybe<PathSpec> Join(PathSpec root, IEnumerable<string> descendants)
+        public IMaybe<AbsolutePath> Join(AbsolutePath root, IEnumerable<string> descendants)
         {
             return root.Join(descendants.Select(str => ToPath(str)));
         }
 
-        public IMaybe<PathSpec> Join(IMaybe<PathSpec> root, IEnumerable<string> descendants)
+        public IMaybe<AbsolutePath> Join(IMaybe<AbsolutePath> root, IEnumerable<string> descendants)
         {
             if (!root.HasValue)
-                return Nothing<PathSpec>();
+                return Nothing<AbsolutePath>();
             return root.Value.Join(descendants.Select(str => ToPath(str)));
         }
 
-        public IMaybe<PathSpec> Join(IMaybe<PathSpec> root, IEnumerable<IMaybe<string>> descendants)
+        public IMaybe<AbsolutePath> Join(IMaybe<AbsolutePath> root, IEnumerable<IMaybe<string>> descendants)
         {
             return root.SelectMany(rootVal => rootVal.Join(descendants.Select(m => m.SelectMany(str => ToPath(str)))));
         }
 
-        public IMaybe<PathSpec> Join(PathSpec root, IEnumerable<IMaybe<string>> descendants)
+        public IMaybe<AbsolutePath> Join(AbsolutePath root, IEnumerable<IMaybe<string>> descendants)
         {
             return root.Join(descendants.Select(m => m.SelectMany(str => ToPath(str))));
         }
 
-        public IMaybe<PathSpec> Join(PathSpec root, params string[] descendants)
+        public IMaybe<AbsolutePath> Join(AbsolutePath root, params string[] descendants)
         {
             return root.Join(descendants.Select(str => ToPath(str)));
         }
 
-        public IMaybe<PathSpec> Join(IMaybe<PathSpec> root, params string[] descendants)
+        public IMaybe<AbsolutePath> Join(IMaybe<AbsolutePath> root, params string[] descendants)
         {
             if (!root.HasValue)
-                return Nothing<PathSpec>();
+                return Nothing<AbsolutePath>();
             return root.Value.Join(descendants.Select(str => ToPath(str)));
         }
 
-        public IMaybe<PathSpec> Join(IMaybe<PathSpec> root, params IMaybe<string>[] descendants)
+        public IMaybe<AbsolutePath> Join(IMaybe<AbsolutePath> root, params IMaybe<string>[] descendants)
         {
             return root.Join(descendants.Select(m => m.SelectMany(str => ToPath(str))));
         }
 
-        public IMaybe<PathSpec> Join(PathSpec root, params IMaybe<string>[] descendants)
+        public IMaybe<AbsolutePath> Join(AbsolutePath root, params IMaybe<string>[] descendants)
         {
             return root.Join(descendants.Select(m => m.SelectMany(str => ToPath(str))));
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, IEnumerable<string> descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<AbsolutePath> root, IEnumerable<string> descendants)
         {
             return root.Join(descendants.Select(str => ToPath(str)));
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, IEnumerable<string> descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<IMaybe<AbsolutePath>> root, IEnumerable<string> descendants)
         {
             return root.Join(descendants.Select(str => ToPath(str)));
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, IEnumerable<IMaybe<string>> descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<IMaybe<AbsolutePath>> root, IEnumerable<IMaybe<string>> descendants)
         {
             return root.Concat(descendants.Select(m => m.SelectMany(str => ToPath(str)))).ToList().Join();
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, IEnumerable<IMaybe<string>> descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<AbsolutePath> root, IEnumerable<IMaybe<string>> descendants)
         {
             return descendants
                 .Select(m => m.SelectMany(str => ToPath(str)))
                 .AllOrNothing().Select(desc => root.Concat(desc).ToList().Join()).SelectMany(x => x);
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, params string[] descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<AbsolutePath> root, params string[] descendants)
         {
             return root.Join(descendants.Select(str => ToPath(str)));
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, params string[] descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<IMaybe<AbsolutePath>> root, params string[] descendants)
         {
             return root.Concat(descendants.Select(str => ToPath(str))).AllOrNothing().Select(paths => paths.Join())
                 .SelectMany(x => x);
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, params IMaybe<string>[] descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<IMaybe<AbsolutePath>> root, params IMaybe<string>[] descendants)
         {
             return root.Concat(descendants.Select(m => m.SelectMany(str => ToPath(str)))).ToList().Join();
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, params IMaybe<string>[] descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<AbsolutePath> root, params IMaybe<string>[] descendants)
         {
             return descendants.Select(m => m.SelectMany(str => ToPath(str))).AllOrNothing()
                 .Select(desc => root.Concat(desc).ToList().Join()).SelectMany(x => x);
@@ -2098,118 +2097,118 @@ namespace MoreIO
 
         #endregion
 
-        #region PathSpec overloads
+        #region AbsolutePath overloads
 
-        public IMaybe<PathSpec> Join(IReadOnlyList<PathSpec> descendants)
+        public IMaybe<AbsolutePath> Join(IReadOnlyList<AbsolutePath> descendants)
         {
             var first = descendants[0];
             if (descendants.Skip(1).Any(c => !c.IsRelative()
                                              || c.DirectorySeparator != first.DirectorySeparator
                                              || c.Flags != first.Flags))
-                return Nothing<PathSpec>();
-            return Something(new PathSpec(GetDefaultFlagsForThisEnvironment(), first.DirectorySeparator, this,
-                descendants.SelectMany(opt => opt.Components).Where((str, i) => i == 0 || str != ".")));
+                return Nothing<AbsolutePath>();
+            return Something(new AbsolutePath(GetDefaultFlagsForThisEnvironment(), first.DirectorySeparator, this,
+                descendants.SelectMany(opt => opt.Path).Where((str, i) => i == 0 || str != ".")));
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<AbsolutePath> descendants)
         {
             return descendants.ToList().Join();
         }
 
-        public IMaybe<PathSpec> Join(IReadOnlyList<IMaybe<PathSpec>> descendants)
+        public IMaybe<AbsolutePath> Join(IReadOnlyList<IMaybe<AbsolutePath>> descendants)
         {
             if (descendants.Any(opt => !opt.HasValue))
-                return Nothing<PathSpec>();
+                return Nothing<AbsolutePath>();
             return descendants.Select(opt => opt.Value).Join();
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<IMaybe<AbsolutePath>> descendants)
         {
             return descendants.ToList().Join();
         }
 
-        public IMaybe<PathSpec> Join(PathSpec root, IEnumerable<PathSpec> descendants)
+        public IMaybe<AbsolutePath> Join(AbsolutePath root, IEnumerable<AbsolutePath> descendants)
         {
             return root.ItemConcat(descendants).ToList().Join();
         }
 
-        public IMaybe<PathSpec> Join(IMaybe<PathSpec> root, IEnumerable<PathSpec> descendants)
+        public IMaybe<AbsolutePath> Join(IMaybe<AbsolutePath> root, IEnumerable<AbsolutePath> descendants)
         {
             if (!root.HasValue)
-                return Nothing<PathSpec>();
+                return Nothing<AbsolutePath>();
             return root.Value.ItemConcat(descendants).ToList().Join();
         }
 
-        public IMaybe<PathSpec> Join(IMaybe<PathSpec> root, IEnumerable<IMaybe<PathSpec>> descendants)
+        public IMaybe<AbsolutePath> Join(IMaybe<AbsolutePath> root, IEnumerable<IMaybe<AbsolutePath>> descendants)
         {
             return root.ItemConcat(descendants).ToList().Join();
         }
 
-        public IMaybe<PathSpec> Join(PathSpec root, IEnumerable<IMaybe<PathSpec>> descendants)
+        public IMaybe<AbsolutePath> Join(AbsolutePath root, IEnumerable<IMaybe<AbsolutePath>> descendants)
         {
             return Something(root).ItemConcat(descendants).ToList().Join();
         }
 
-        public IMaybe<PathSpec> Join(PathSpec root, params PathSpec[] descendants)
+        public IMaybe<AbsolutePath> Join(AbsolutePath root, params AbsolutePath[] descendants)
         {
             return root.ItemConcat(descendants).ToList().Join();
         }
 
-        public IMaybe<PathSpec> Join(IMaybe<PathSpec> root, params PathSpec[] descendants)
+        public IMaybe<AbsolutePath> Join(IMaybe<AbsolutePath> root, params AbsolutePath[] descendants)
         {
             if (!root.HasValue)
-                return Nothing<PathSpec>();
+                return Nothing<AbsolutePath>();
             return root.Value.ItemConcat(descendants).ToList().Join();
         }
 
-        public IMaybe<PathSpec> Join(IMaybe<PathSpec> root, params IMaybe<PathSpec>[] descendants)
+        public IMaybe<AbsolutePath> Join(IMaybe<AbsolutePath> root, params IMaybe<AbsolutePath>[] descendants)
         {
             return root.ItemConcat(descendants).ToList().Join();
         }
 
-        public IMaybe<PathSpec> Join(PathSpec root, params IMaybe<PathSpec>[] descendants)
+        public IMaybe<AbsolutePath> Join(AbsolutePath root, params IMaybe<AbsolutePath>[] descendants)
         {
             return Something(root).ItemConcat(descendants).ToList().Join();
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, IEnumerable<PathSpec> descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<AbsolutePath> root, IEnumerable<AbsolutePath> descendants)
         {
             return root.Concat(descendants).ToList().Join();
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, IEnumerable<PathSpec> descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<IMaybe<AbsolutePath>> root, IEnumerable<AbsolutePath> descendants)
         {
             return root.AllOrNothing().Select(enumerable => enumerable.Concat(descendants).ToList().Join())
                 .SelectMany(x => x);
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, IEnumerable<IMaybe<PathSpec>> descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<IMaybe<AbsolutePath>> root, IEnumerable<IMaybe<AbsolutePath>> descendants)
         {
             return root.Concat(descendants).ToList().Join();
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, IEnumerable<IMaybe<PathSpec>> descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<AbsolutePath> root, IEnumerable<IMaybe<AbsolutePath>> descendants)
         {
             return descendants.AllOrNothing().Select(desc => root.Concat(desc).ToList().Join()).SelectMany(x => x);
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, params PathSpec[] descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<AbsolutePath> root, params AbsolutePath[] descendants)
         {
             return root.Concat(descendants).ToList().Join();
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, params PathSpec[] descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<IMaybe<AbsolutePath>> root, params AbsolutePath[] descendants)
         {
             return root.AllOrNothing().Select(enumerable => enumerable.Concat(descendants).ToList().Join())
                 .SelectMany(x => x);
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<IMaybe<PathSpec>> root, params IMaybe<PathSpec>[] descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<IMaybe<AbsolutePath>> root, params IMaybe<AbsolutePath>[] descendants)
         {
             return root.Concat(descendants).ToList().Join();
         }
 
-        public IMaybe<PathSpec> Join(IEnumerable<PathSpec> root, params IMaybe<PathSpec>[] descendants)
+        public IMaybe<AbsolutePath> Join(IEnumerable<AbsolutePath> root, params IMaybe<AbsolutePath>[] descendants)
         {
             return descendants.AllOrNothing().Select(desc => root.Concat(desc).ToList().Join()).SelectMany(x => x);
         }
@@ -2222,14 +2221,14 @@ namespace MoreIO
 
         #region String extension methods
 
-        public IMaybe<PathSpec> ToPath(string path, PathFlags flags)
+        public IMaybe<AbsolutePath> ToPath(string path, PathFlags flags)
         {
-            return TryParsePathSpec(path, flags);
+            return TryParseAbsolutePath(path, flags);
         }
 
-        public IMaybe<PathSpec> ToPath(string path)
+        public IMaybe<AbsolutePath> ToPath(string path)
         {
-            return TryParsePathSpec(path);
+            return TryParseAbsolutePath(path);
         }
 
         public bool IsAbsoluteWindowsPath(string path)

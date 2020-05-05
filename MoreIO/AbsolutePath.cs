@@ -1,48 +1,35 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using MoreCollections;
 using SimpleMonads;
+using TreeLinq;
 using static SimpleMonads.Utility;
 
 namespace MoreIO
 {
-    public class PathSpec : IComparable, IEnumerable<PathSpec>
+    public class AbsolutePath : IComparable, IEnumerable<AbsolutePath>
     {
-        internal PathSpec(PathFlags flags, string directorySeparator, IIoService ioService,
-            IEnumerable<string> elements)
+        public PathFlags Flags { get; }
+        public string DirectorySeparator { get; }
+        public IIoService IoService { get; }
+        public AbsolutePath<string> Path { get; }
+
+        public AbsolutePath(PathFlags flags, string directorySeparator, IIoService ioService, IEnumerable<string> path)
         {
-            ValidateFlags(flags);
             Flags = flags;
             DirectorySeparator = directorySeparator;
             IoService = ioService;
-            Components = elements.SelectMany(SplitComponent).ToImmutableList();
+            Path = new AbsolutePath<string>(path);
         }
 
-        internal PathSpec(PathFlags flags, string directorySeparator, IIoService ioService, params string[] components)
-            : this(flags, directorySeparator, ioService, components.AsEnumerable())
-        {
-        }
-
-        internal PathSpec(PathSpec other)
-            : this(other.Flags, other.DirectorySeparator, other.IoService, other.Components)
-        {
-        }
-
-        public IIoService IoService { get; }
-        public ImmutableList<string> Components { get; }
-
-        public string Name => Components[Components.Count - 1];
-
-        public PathFlags Flags { get; }
-        public string DirectorySeparator { get; }
+        public string Name => Path[Path.Count - 1];
 
         public int CompareTo(object obj)
         {
-            var tp = obj as PathSpec;
+            var tp = obj as AbsolutePath;
             if (tp != null)
                 return CompareTo(tp);
             return GetHashCode().CompareTo(obj.GetHashCode());
@@ -53,7 +40,7 @@ namespace MoreIO
             return GetEnumerator();
         }
 
-        public IEnumerator<PathSpec> GetEnumerator()
+        public IEnumerator<AbsolutePath> GetEnumerator()
         {
             return IoService.GetChildren(this).GetEnumerator();
         }
@@ -112,14 +99,14 @@ namespace MoreIO
             return ToString().ToLower().GetHashCode();
         }
 
-        public int CompareTo(PathSpec other)
+        public int CompareTo(AbsolutePath other)
         {
-            var compareCounts = Components.Count - other.Components.Count;
+            var compareCounts = Path.Count - other.Path.Count;
             if (compareCounts != 0)
                 return compareCounts;
-            for (var i = 0; i < Components.Count; i++)
+            for (var i = 0; i < Path.Count; i++)
             {
-                var compareElement = Components[i].CompareTo(other.Components[i]);
+                var compareElement = Path[i].CompareTo(other.Path[i]);
                 if (compareElement != 0)
                     return compareElement;
             }
@@ -127,12 +114,7 @@ namespace MoreIO
             return 0;
         }
 
-        public object Clone()
-        {
-            return new PathSpec(this);
-        }
-
-        public bool Equals(PathSpec other)
+        public bool Equals(AbsolutePath other)
         {
             return GetHashCode().Equals(other.GetHashCode());
         }
@@ -140,10 +122,10 @@ namespace MoreIO
         public override string ToString()
         {
             var sb = new StringBuilder();
-            for (var i = 0; i < Components.Count; i++)
+            for (var i = 0; i < Path.Count; i++)
             {
-                sb.Append(Components[i]);
-                if (Components[i] != DirectorySeparator && i + 1 != Components.Count)
+                sb.Append(Path[i]);
+                if (Path[i] != DirectorySeparator && i + 1 != Path.Count)
                     sb.Append(DirectorySeparator);
             }
 
@@ -155,30 +137,45 @@ namespace MoreIO
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((PathSpec) obj);
+            return Equals((AbsolutePath) obj);
         }
 
-        public IMaybe<PathSpec> Ancestor(int generations)
+        public IMaybe<AbsolutePath> Ancestor(int generations)
         {
-            if (Components.Count > generations)
-                return Something(new PathSpec(Flags, DirectorySeparator, IoService,
-                    Components.Subset(0, -1 - generations)));
-            return Nothing<PathSpec>();
+            if (Path.Count > generations)
+                return Something(new AbsolutePath(Flags, DirectorySeparator, IoService,
+                    Path.Subset(0, -1 - generations)));
+            return Nothing<AbsolutePath>();
         }
 
-        public IMaybe<PathSpec> Parent()
+        public IMaybe<AbsolutePath> Parent()
         {
             return Ancestor(1);
         }
-
-        public static PathSpec operator / (PathSpec start, PathSpec next)
+        
+        public static AbsolutePath operator / (AbsolutePath absPath, string whatToAdd)
         {
-            return start.Descendant(next).Value;
+            return new AbsolutePath(absPath.Flags, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd);
         }
 
-        public static PathSpec operator / (PathSpec start, string next)
+        public static AbsolutePaths operator / (AbsolutePath absPath, IEnumerable<RelativePath> whatToAdd)
         {
-            return start.Descendant(next).Value;
+            return new AbsolutePaths(absPath.Flags, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd.Select(x => x.Path));
+        }
+
+        public static AbsolutePaths operator / (AbsolutePath absPath, Func<AbsolutePath, IEnumerable<RelativePath>> whatToAdd)
+        {
+            return new AbsolutePaths(absPath.Flags, absPath.DirectorySeparator, absPath.IoService, absPath.Path / (x => whatToAdd(new AbsolutePath(absPath.Flags, absPath.DirectorySeparator, absPath.IoService, x)).Select(y => y.Path)));
+        }
+
+        public static AbsolutePath operator / (AbsolutePath absPath, RelativePath whatToAdd)
+        {
+            return new AbsolutePath(absPath.Flags, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd.Path);
+        }
+
+        public static AbsolutePaths operator / (AbsolutePath absPath, IEnumerable<string> whatToAdd)
+        {
+            return new AbsolutePaths(absPath.Flags, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd);
         }
     }
 }

@@ -5,9 +5,9 @@ using System.Linq;
 
 namespace MoreIO
 {
-    public sealed class PathSpecTranslation : IPathSpecTranslation
+    public sealed class AbsolutePathTranslation : IAbsolutePathTranslation
     {
-        internal PathSpecTranslation(PathSpec source, PathSpec destination, IIoService ioService)
+        internal AbsolutePathTranslation(AbsolutePath source, AbsolutePath destination, IIoService ioService)
         {
             Source = source;
             Destination = destination;
@@ -16,13 +16,13 @@ namespace MoreIO
 
         public IIoService IoService { get; }
 
-        public PathSpec Source { get; }
-        public PathSpec Destination { get; }
+        public AbsolutePath Source { get; }
+        public AbsolutePath Destination { get; }
 
-        public IEnumerator<CalculatedPathSpecTranslation> GetEnumerator()
+        public IEnumerator<CalculatedAbsolutePathTranslation> GetEnumerator()
         {
             return Source.Children()
-                .Select(child => new CalculatedPathSpecTranslation(child, Source, Destination, IoService))
+                .Select(child => new CalculatedAbsolutePathTranslation(child, Source, Destination, IoService))
                 .GetEnumerator();
         }
 
@@ -36,12 +36,12 @@ namespace MoreIO
             return string.Format("Translate {0} to {1}", Source, Destination);
         }
 
-        public Tuple<PathSpec, PathSpec> ToTuple()
+        public Tuple<AbsolutePath, AbsolutePath> ToTuple()
         {
-            return new Tuple<PathSpec, PathSpec>(Source, Destination);
+            return new Tuple<AbsolutePath, AbsolutePath>(Source, Destination);
         }
 
-        private bool Equals(PathSpecTranslation other)
+        private bool Equals(AbsolutePathTranslation other)
         {
             return Equals(Source, other.Source) && Equals(Destination, other.Destination);
         }
@@ -50,7 +50,7 @@ namespace MoreIO
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj is PathSpecTranslation && Equals((PathSpecTranslation) obj);
+            return obj is AbsolutePathTranslation && Equals((AbsolutePathTranslation) obj);
         }
 
         public override int GetHashCode()
@@ -62,12 +62,12 @@ namespace MoreIO
             }
         }
 
-        public static bool operator ==(PathSpecTranslation left, PathSpecTranslation right)
+        public static bool operator ==(AbsolutePathTranslation left, AbsolutePathTranslation right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(PathSpecTranslation left, PathSpecTranslation right)
+        public static bool operator !=(AbsolutePathTranslation left, AbsolutePathTranslation right)
         {
             return !Equals(left, right);
         }

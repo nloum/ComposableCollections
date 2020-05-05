@@ -5,23 +5,23 @@ using System.Linq;
 
 namespace MoreIO
 {
-    public class CalculatedPathSpecTranslation : IPathSpecTranslation
+    public class CalculatedAbsolutePathTranslation : IAbsolutePathTranslation
     {
-        private readonly PathSpecTranslation _actualValues;
+        private readonly AbsolutePathTranslation _actualValues;
 
-        internal CalculatedPathSpecTranslation(PathSpec pathSpec, PathSpec ancestorSource, PathSpec ancestorDestination,
+        internal CalculatedAbsolutePathTranslation(AbsolutePath pathSpec, AbsolutePath ancestorSource, AbsolutePath ancestorDestination,
             IIoService ioService)
         {
-            PathSpec = pathSpec;
+            AbsolutePath = pathSpec;
             AncestorSource = ancestorSource;
             AncestorDestination = ancestorDestination;
             IoService = ioService;
             _actualValues = Calculate();
         }
 
-        public PathSpec PathSpec { get; }
-        public PathSpec AncestorSource { get; }
-        public PathSpec AncestorDestination { get; }
+        public AbsolutePath AbsolutePath { get; }
+        public AbsolutePath AncestorSource { get; }
+        public AbsolutePath AncestorDestination { get; }
 
         public IIoService IoService { get; }
 
@@ -32,29 +32,29 @@ namespace MoreIO
                 AncestorDestination);
         }
 
-        private PathSpecTranslation Calculate()
+        private AbsolutePathTranslation Calculate()
         {
             if (AncestorSource.Equals(AncestorDestination))
                 throw new InvalidOperationException(
                     string.Format(
                         "An attempt was made to calculate the path if a file (\"{0}\") was copied from \"{1}\" to \"{2}\". It is illegal to have the destination and source directories be the same, which is true in this case.",
-                        PathSpec, AncestorSource, AncestorDestination));
-            if (!PathSpec.IsDescendantOf(AncestorSource))
+                        AbsolutePath, AncestorSource, AncestorDestination));
+            if (!AbsolutePath.IsDescendantOf(AncestorSource))
                 throw new InvalidOperationException(
                     string.Format(
                         "The path \"{2}\" cannot be copied to \"{1}\" because the path isn't under the source path: \"{0}\"",
-                        AncestorSource, AncestorDestination, PathSpec));
-            if (AncestorSource.Equals(PathSpec))
-                return new PathSpecTranslation(AncestorSource, AncestorDestination, IoService);
-            var relativePath = PathSpec.RelativeTo(AncestorSource);
+                        AncestorSource, AncestorDestination, AbsolutePath));
+            if (AncestorSource.Equals(AbsolutePath))
+                return new AbsolutePathTranslation(AncestorSource, AncestorDestination, IoService);
+            var relativePath = AbsolutePath.RelativeTo(AncestorSource);
             var pathToBeCopiedDestination = AncestorDestination.Descendant(relativePath).Value;
-            return new PathSpecTranslation(PathSpec, pathToBeCopiedDestination, IoService);
+            return new AbsolutePathTranslation(AbsolutePath, pathToBeCopiedDestination, IoService);
         }
 
-        protected bool Equals(CalculatedPathSpecTranslation other)
+        protected bool Equals(CalculatedAbsolutePathTranslation other)
         {
             return Equals(AncestorDestination, other.AncestorDestination) &&
-                   Equals(AncestorSource, other.AncestorSource) && Equals(PathSpec, other.PathSpec);
+                   Equals(AncestorSource, other.AncestorSource) && Equals(AbsolutePath, other.AbsolutePath);
         }
 
         public override bool Equals(object obj)
@@ -62,7 +62,7 @@ namespace MoreIO
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((CalculatedPathSpecTranslation) obj);
+            return Equals((CalculatedAbsolutePathTranslation) obj);
         }
 
         public override int GetHashCode()
@@ -71,32 +71,32 @@ namespace MoreIO
             {
                 var hashCode = AncestorDestination != null ? AncestorDestination.GetHashCode() : 0;
                 hashCode = (hashCode * 397) ^ (AncestorSource != null ? AncestorSource.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (PathSpec != null ? PathSpec.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (AbsolutePath != null ? AbsolutePath.GetHashCode() : 0);
                 return hashCode;
             }
         }
 
-        public static bool operator ==(CalculatedPathSpecTranslation left, CalculatedPathSpecTranslation right)
+        public static bool operator ==(CalculatedAbsolutePathTranslation left, CalculatedAbsolutePathTranslation right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(CalculatedPathSpecTranslation left, CalculatedPathSpecTranslation right)
+        public static bool operator !=(CalculatedAbsolutePathTranslation left, CalculatedAbsolutePathTranslation right)
         {
             return !Equals(left, right);
         }
 
         #region IFileUriTranslation Members
 
-        public PathSpec Source => _actualValues.Source;
+        public AbsolutePath Source => _actualValues.Source;
 
-        public PathSpec Destination => _actualValues.Destination;
+        public AbsolutePath Destination => _actualValues.Destination;
 
-        public IEnumerator<CalculatedPathSpecTranslation> GetEnumerator()
+        public IEnumerator<CalculatedAbsolutePathTranslation> GetEnumerator()
         {
             return
                 Source.Children()
-                    .Select(fileUri => new CalculatedPathSpecTranslation(fileUri, Source, Destination, IoService))
+                    .Select(fileUri => new CalculatedAbsolutePathTranslation(fileUri, Source, Destination, IoService))
                     .GetEnumerator();
         }
 

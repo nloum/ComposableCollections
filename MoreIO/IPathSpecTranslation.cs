@@ -2,10 +2,10 @@ using System.Collections.Generic;
 
 namespace MoreIO
 {
-    public interface IPathSpecTranslation : IEnumerable<CalculatedPathSpecTranslation>
+    public interface IAbsolutePathTranslation : IEnumerable<CalculatedAbsolutePathTranslation>
     {
         IIoService IoService { get; }
-        PathSpec Source { get; }
-        PathSpec Destination { get; }
+        AbsolutePath Source { get; }
+        AbsolutePath Destination { get; }
     }
 }

@@ -10,12 +10,12 @@ using static LiveLinq.Utility;
 
 namespace MoreIO
 {
-    public class PathSpecDescendants : IReadOnlyObservableSet<PathSpec>
+    public class AbsolutePathDescendants : IReadOnlyObservableSet<AbsolutePath>
     {
-        private readonly PathSpec _path;
+        private readonly AbsolutePath _path;
         private readonly string _pattern;
 
-        public PathSpecDescendants(PathSpec path, string pattern, bool includeSubdirectories, IIoService ioService)
+        public AbsolutePathDescendants(AbsolutePath path, string pattern, bool includeSubdirectories, IIoService ioService)
         {
             _path = path;
             _pattern = pattern;
@@ -27,9 +27,9 @@ namespace MoreIO
 
         protected bool IncludeSubdirectories { get; }
 
-        public ISetChanges<PathSpec> ToLiveLinq()
+        public ISetChanges<AbsolutePath> ToLiveLinq()
         {
-            return Observable.Create<ISetChange<PathSpec>>(observer =>
+            return Observable.Create<ISetChange<AbsolutePath>>(observer =>
             {
                 var _watcher = new FileSystemWatcher(_path.ToString())
                 {
@@ -80,7 +80,7 @@ namespace MoreIO
             }).ToLiveLinq();
         }
 
-        public IEnumerator<PathSpec> GetEnumerator()
+        public IEnumerator<AbsolutePath> GetEnumerator()
         {
             return AsEnumerable().GetEnumerator();
         }
@@ -90,7 +90,7 @@ namespace MoreIO
             return GetEnumerator();
         }
 
-        private IEnumerable<PathSpec> AsEnumerable()
+        private IEnumerable<AbsolutePath> AsEnumerable()
         {
             var directory = new DirectoryInfo(_path.ToString());
 

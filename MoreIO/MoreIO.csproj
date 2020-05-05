@@ -9,8 +9,8 @@
     <PackageReference Include="LiveLinq" Version="1.0.0-beta005" />
     <PackageReference Include="MoreCollections" Version="1.0.0-beta003" />
     <PackageReference Include="ReactiveProcesses" Version="1.0.0-alpha001" />
-    <PackageReference Include="SimpleMonads" Version="1.0.0-beta001" />
-    <PackageReference Include="TreeLinq" Version="1.0.0-alpha2" />
+    <PackageReference Include="SimpleMonads" Version="1.0.0-beta002" />
+    <PackageReference Include="TreeLinq" Version="1.0.0-beta002" />
     <PackageReference Include="UtilityDisposables" Version="1.0.0-beta002" />
   </ItemGroup>
 

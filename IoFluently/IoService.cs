@@ -22,7 +22,7 @@ using UtilityDisposables;
 using static SimpleMonads.Utility;
 using Utility = LiveLinq.Utility;
 
-namespace MoreIO
+namespace IoFluently
 {
     public class IoService : IIoService
     {

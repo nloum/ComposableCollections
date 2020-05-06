@@ -9,7 +9,7 @@ using LiveLinq.Set;
 using SimpleMonads;
 using TreeLinq;
 
-namespace MoreIO
+namespace IoFluently
 {
     public static class IoExtensions
     {

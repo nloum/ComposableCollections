@@ -1,4 +1,4 @@
-namespace MoreIO
+namespace IoFluently
 {
     public enum PathType
     {

@@ -2,7 +2,7 @@
 using System.Linq;
 using ReactiveProcesses;
 
-namespace MoreIO.Examples
+namespace IoFluently.Examples
 {
     internal class Program
     {

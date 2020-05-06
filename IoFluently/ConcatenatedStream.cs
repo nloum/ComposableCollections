@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace MoreIO
+namespace IoFluently
 {
 	/// <summary>
 	///     From here: http://stackoverflow.com/a/3879231

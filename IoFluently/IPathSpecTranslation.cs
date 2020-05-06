@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace MoreIO
+namespace IoFluently
 {
     public interface IAbsolutePathTranslation : IEnumerable<CalculatedAbsolutePathTranslation>
     {

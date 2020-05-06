@@ -8,7 +8,7 @@ using SimpleMonads;
 using TreeLinq;
 using static SimpleMonads.Utility;
 
-namespace MoreIO
+namespace IoFluently
 {
     public class AbsolutePath : IComparable, IEnumerable<AbsolutePath>
     {

@@ -1,10 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoreIO", "MoreIO\MoreIO.csproj", "{18F98FB5-3B5D-4004-AA5B-96DAC4C2AEE2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoFluently", "IoFluently\IoFluently.csproj", "{18F98FB5-3B5D-4004-AA5B-96DAC4C2AEE2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoreIO.Examples", "MoreIO.Examples\MoreIO.Examples.csproj", "{BF97D0B6-B425-4B3D-BAB8-DAC964F1A1C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoFluently.Examples", "IoFluently.Examples\IoFluently.Examples.csproj", "{BF97D0B6-B425-4B3D-BAB8-DAC964F1A1C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoreIO.Test", "MoreIO.Test\MoreIO.Test.csproj", "{A53C66AA-775F-4361-BB36-2FC241040342}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoFluently.Test", "IoFluently.Test\IoFluently.Test.csproj", "{A53C66AA-775F-4361-BB36-2FC241040342}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

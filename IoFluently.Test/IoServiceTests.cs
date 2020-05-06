@@ -2,7 +2,7 @@ using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ReactiveProcesses;
 
-namespace MoreIO.Test
+namespace IoFluently.Test
 {
     [TestClass]
     public class IoServiceTests

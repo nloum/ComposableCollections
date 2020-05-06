@@ -8,7 +8,7 @@ using LiveLinq.Set;
 using UtilityDisposables;
 using static LiveLinq.Utility;
 
-namespace MoreIO
+namespace IoFluently
 {
     public class AbsolutePathDescendants : IReadOnlyObservableSet<AbsolutePath>
     {

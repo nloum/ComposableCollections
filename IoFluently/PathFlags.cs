@@ -1,6 +1,6 @@
 using System;
 
-namespace MoreIO
+namespace IoFluently
 {
     [Flags]
     public enum PathFlags : ulong

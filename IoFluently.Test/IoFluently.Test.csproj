@@ -15,7 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\MoreIO\MoreIO.csproj" />
+      <ProjectReference Include="..\IoFluently\IoFluently.csproj" />
     </ItemGroup>
 
 </Project>

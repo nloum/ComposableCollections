@@ -5,7 +5,7 @@ using System.Linq;
 using GenericNumbers.Relational;
 using TreeLinq;
 
-namespace MoreIO
+namespace IoFluently
 {
     public class AbsolutePaths : IComparable, IEnumerable<AbsolutePath>
     {

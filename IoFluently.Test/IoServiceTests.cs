@@ -17,7 +17,7 @@ namespace IoFluently.Test
         {
             var ioService = CreateUnitUnderTest();
 
-            var parent = ioService.ToAbsolutePath("C:\\test1\\test2").Value;
+            var parent = ioService.TryToAbsolutePath("C:\\test1\\test2").Value;
             var item1 = parent / "test3" / "test.csproj";
             var item2 = parent / "test4";
 
@@ -31,7 +31,7 @@ namespace IoFluently.Test
         {
             var ioService = CreateUnitUnderTest();
 
-            var parent = ioService.ToAbsolutePath("C:\\test1\\test2").Value;
+            var parent = ioService.TryToAbsolutePath("C:\\test1\\test2").Value;
             var item1 = parent / "test3" / "test.csproj";
             var item2 = parent / "test4";
 
@@ -45,16 +45,16 @@ namespace IoFluently.Test
         {
             var ioService = CreateUnitUnderTest();
 
-            var test1 = ioService.ToAbsolutePath("test1").Value;
+            var test1 = ioService.TryToAbsolutePath("test1").Value;
 
             test1.CreateFolder()
                 .ClearFolder();
 
-            var text1 = test1.Descendant("test.txt").Value;
+            var text1 = test1.TryDescendant("test.txt").Value;
 
             text1.WriteText("testing 1 2 3");
 
-            var test2 = ioService.ToAbsolutePath("test2").Value
+            var test2 = ioService.TryToAbsolutePath("test2").Value
                 .CreateFolder()
                 .ClearFolder();
 
@@ -69,16 +69,16 @@ namespace IoFluently.Test
         {
             var ioService = CreateUnitUnderTest();
 
-            var test1 = ioService.ToAbsolutePath("test1").Value;
+            var test1 = ioService.TryToAbsolutePath("test1").Value;
 
             test1.CreateFolder()
                 .ClearFolder();
 
-            var text1 = test1.Descendant("test.txt").Value;
+            var text1 = test1.TryDescendant("test.txt").Value;
 
             text1.WriteText("testing 1 2 3");
 
-            var test2 = ioService.ToAbsolutePath("test2").Value
+            var test2 = ioService.TryToAbsolutePath("test2").Value
                 .CreateFolder()
                 .ClearFolder();
 

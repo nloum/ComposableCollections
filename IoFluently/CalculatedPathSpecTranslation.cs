@@ -28,7 +28,7 @@ namespace IoFluently
         public override string ToString()
         {
             return string.Format("Translate {0} from {1} to {2}",
-                AncestorSource.GetNonCommonDescendants(Source).Value.Item2.OriginalString, AncestorSource,
+                AncestorSource.TryGetNonCommonDescendants(Source).Value.Item2.OriginalString, AncestorSource,
                 AncestorDestination);
         }
 
@@ -47,7 +47,7 @@ namespace IoFluently
             if (AncestorSource.Equals(AbsolutePath))
                 return new AbsolutePathTranslation(AncestorSource, AncestorDestination, IoService);
             var relativePath = AbsolutePath.RelativeTo(AncestorSource);
-            var pathToBeCopiedDestination = AncestorDestination.Descendant(relativePath).Value;
+            var pathToBeCopiedDestination = AncestorDestination.TryDescendant(relativePath).Value;
             return new AbsolutePathTranslation(AbsolutePath, pathToBeCopiedDestination, IoService);
         }
 

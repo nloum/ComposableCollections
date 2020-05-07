@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Text;
 using LiveLinq.Dictionary;
 using LiveLinq.Set;
+using ReactiveProcesses;
 using SimpleMonads;
 using TreeLinq;
 
@@ -12,6 +13,8 @@ namespace IoFluently
 {
     public interface IIoService
     {
+        IReactiveProcessFactory ReactiveProcessFactory { get; }
+        
         /// <summary>
         ///     Given a bunch of files or folders in different places that may have the same name,
         ///     create unique names for those files and folders based on their original name and the

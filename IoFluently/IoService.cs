@@ -2231,6 +2231,16 @@ namespace IoFluently
             return TryParseAbsolutePath(path);
         }
 
+        public AbsolutePath ToAbsolutePath(string path, PathFlags flags)
+        {
+            return TryParseAbsolutePath(path, flags).Value;
+        }
+
+        public AbsolutePath ToAbsolutePath(string path)
+        {
+            return TryParseAbsolutePath(path).Value;
+        }
+
         public bool IsAbsoluteWindowsPath(string path)
         {
             return char.IsLetter(path[0]) && path[1] == ':';

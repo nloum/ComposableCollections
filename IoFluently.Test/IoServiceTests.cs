@@ -17,7 +17,7 @@ namespace IoFluently.Test
         {
             var ioService = CreateUnitUnderTest();
 
-            var parent = ioService.TryToAbsolutePath("C:\\test1\\test2").Value;
+            var parent = ioService.ToAbsolutePath("C:\\test1\\test2");
             var item1 = parent / "test3" / "test.csproj";
             var item2 = parent / "test4";
 

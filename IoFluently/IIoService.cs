@@ -187,6 +187,8 @@ namespace IoFluently
         IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> root, params IMaybe<AbsolutePath>[] descendants);
         IMaybe<AbsolutePath> TryToAbsolutePath(string path, PathFlags flags);
         IMaybe<AbsolutePath> TryToAbsolutePath(string path);
+        AbsolutePath ToAbsolutePath(string path, PathFlags flags);
+        AbsolutePath ToAbsolutePath(string path);
         bool IsAbsoluteWindowsPath(string path);
         bool IsAbsoluteUnixPath(string path);
         StringComparison ToStringComparison(PathFlags pathFlags);

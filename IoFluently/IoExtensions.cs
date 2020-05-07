@@ -722,6 +722,11 @@ namespace IoFluently
             return pathSpec.IoService.TryCreateText(pathSpec);
         }
 
+        public static StreamWriter CreateText(this AbsolutePath pathSpec)
+        {
+            return pathSpec.IoService.TryCreateText(pathSpec).Value;
+        }
+
         public static IEnumerable<string> ReadLines(this AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
@@ -739,6 +744,15 @@ namespace IoFluently
         {
             return pathSpec.IoService.TryReadText(pathSpec, fileMode, fileAccess, fileShare, encoding,
                 detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
+        }
+
+        public static string ReadText(this AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
+            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
+            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            bool leaveOpen = false)
+        {
+            return pathSpec.IoService.TryReadText(pathSpec, fileMode, fileAccess, fileShare, encoding,
+                detectEncodingFromByteOrderMarks, bufferSize, leaveOpen).Value;
         }
 
         public static void WriteText(this AbsolutePath pathSpec, IEnumerable<string> lines,

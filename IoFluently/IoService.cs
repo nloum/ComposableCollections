@@ -31,7 +31,8 @@ namespace IoFluently
         private readonly object _lock = new object();
         private string defaultDirectorySeparatorForThisEnvironment;
         private PathFlags? defaultFlagsForThisEnvironment;
-        private readonly IReactiveProcessFactory _reactiveProcessFactory;
+        
+        public IReactiveProcessFactory ReactiveProcessFactory { get; }
 
         public AbsolutePath CurrentDirectory => TryToAbsolutePath(Environment.CurrentDirectory).Value;
 
@@ -1166,7 +1167,7 @@ namespace IoFluently
 
         public IoService(IReactiveProcessFactory reactiveProcessFactory)
         {
-            _reactiveProcessFactory = reactiveProcessFactory;
+            ReactiveProcessFactory = reactiveProcessFactory;
         }
 
         public FileInfo AsFileInfo(AbsolutePath path)
@@ -1565,19 +1566,19 @@ namespace IoFluently
 
             if (observationMethod == PathObservationMethod.FsWatchDefault)
             {
-                proc = _reactiveProcessFactory.Start("fswatch", $"-0 --recursive \"{root}\"");
+                proc = ReactiveProcessFactory.Start("fswatch", $"-0 --recursive \"{root}\"");
             }
             else if (observationMethod == PathObservationMethod.FsWatchPollMonitor)
             {
-                proc = _reactiveProcessFactory.Start("fswatch", $"--monitor=poll_monitor -0 --recursive \"{root}\"");
+                proc = ReactiveProcessFactory.Start("fswatch", $"--monitor=poll_monitor -0 --recursive \"{root}\"");
             }
             else if (observationMethod == PathObservationMethod.FsWatchFsEventsMonitor)
             {
-                proc = _reactiveProcessFactory.Start("fswatch", $"--monitor=fsevents_monitor -0 --recursive \"{root}\"");
+                proc = ReactiveProcessFactory.Start("fswatch", $"--monitor=fsevents_monitor -0 --recursive \"{root}\"");
             }
             else if (observationMethod == PathObservationMethod.FsWatchKQueueMonitor)
             {
-                proc = _reactiveProcessFactory.Start("fswatch", $"--monitor=kqueue_monitor -0 --recursive \"{root}\"");
+                proc = ReactiveProcessFactory.Start("fswatch", $"--monitor=kqueue_monitor -0 --recursive \"{root}\"");
             }
             else
             {

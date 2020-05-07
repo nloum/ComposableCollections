@@ -21,7 +21,7 @@ namespace IoFluently.Test
             var item1 = parent / "test3" / "test.csproj";
             var item2 = parent / "test4";
 
-            var result = item1.CommonWith(item2).Value;
+            var result = item1.TryCommonWith(item2).Value;
 
             result.ToString().Should().Be(parent.ToString());
         }

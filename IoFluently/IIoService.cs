@@ -86,7 +86,7 @@ namespace IoFluently
         FileInfo AsFileInfo(AbsolutePath path);
         DirectoryInfo AsDirectoryInfo(AbsolutePath path);
 
-        IMaybe<T> As<T>(T pathName, PathType pathType)
+        IMaybe<T> TryAs<T>(T pathName, PathType pathType)
             where T : AbsolutePath;
 
         IMaybe<bool> TryIsReadOnly(AbsolutePath path);
@@ -139,7 +139,7 @@ namespace IoFluently
         IObservable<PathType> ObservePathType(AbsolutePath path);
         IObservable<AbsolutePath> Renamings(AbsolutePath path);
         AbsolutePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo);
-        IMaybe<AbsolutePath> CommonWith(AbsolutePath path, AbsolutePath that);
+        IMaybe<AbsolutePath> TryCommonWith(AbsolutePath path, AbsolutePath that);
         bool CanBeSimplified(AbsolutePath path);
         AbsolutePath Simplify(AbsolutePath path);
         IMaybe<AbsolutePath> TryParent(AbsolutePath path);

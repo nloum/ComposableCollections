@@ -40,7 +40,7 @@ namespace IoFluently
         public AbsolutePath ToAbsolute(AbsolutePath path)
         {
             if (path.IsRelative())
-                return CurrentDirectory.Join(path).Value;
+                return CurrentDirectory.TryJoin(path).Value;
             return path;
         }
 
@@ -1179,7 +1179,7 @@ namespace IoFluently
             return new DirectoryInfo(path.ToString());
         }
 
-        public IMaybe<T> As<T>(T pathName, PathType pathType)
+        public IMaybe<T> TryAs<T>(T pathName, PathType pathType)
             where T : AbsolutePath
         {
             if (pathName.GetPathType() == pathType)
@@ -1855,7 +1855,7 @@ namespace IoFluently
             var pathStr = path.Simplify().ToString();
             var relativeToStr = relativeTo.Simplify().ToString();
 
-            var common = path.CommonWith(relativeTo);
+            var common = path.TryCommonWith(relativeTo);
 
             if (!common.HasValue)
                 return path;
@@ -1885,7 +1885,7 @@ namespace IoFluently
             //throw new NotImplementedException();
         }
 
-        public IMaybe<AbsolutePath> CommonWith(AbsolutePath path, AbsolutePath that)
+        public IMaybe<AbsolutePath> TryCommonWith(AbsolutePath path, AbsolutePath that)
         {
             var path1Str = path.ToString();
             var path2Str = that.ToString();
@@ -1950,7 +1950,7 @@ namespace IoFluently
 
         public IMaybe<AbsolutePath> TryParent(AbsolutePath path)
         {
-            return path.Path.Subset(0, -2).Select(str => TryParseAbsolutePath(str, path.Flags)).Join();
+            return path.Path.Subset(0, -2).Select(str => TryParseAbsolutePath(str, path.Flags)).TryJoin();
         }
 
         public bool IsAbsolute(AbsolutePath path)
@@ -1987,7 +1987,7 @@ namespace IoFluently
 
         public IMaybe<AbsolutePath> TryJoin(IReadOnlyList<string> descendants)
         {
-            return descendants.Select(str => TryToAbsolutePath(str)).Join();
+            return descendants.Select(str => TryToAbsolutePath(str)).TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<string> descendants)
@@ -2009,90 +2009,90 @@ namespace IoFluently
 
         public IMaybe<AbsolutePath> TryJoin(AbsolutePath root, IEnumerable<string> descendants)
         {
-            return root.Join(descendants.Select(str => TryToAbsolutePath(str)));
+            return root.TryJoin(descendants.Select(str => TryToAbsolutePath(str)));
         }
 
         public IMaybe<AbsolutePath> TryJoin(IMaybe<AbsolutePath> root, IEnumerable<string> descendants)
         {
             if (!root.HasValue)
                 return Nothing<AbsolutePath>();
-            return root.Value.Join(descendants.Select(str => TryToAbsolutePath(str)));
+            return root.Value.TryJoin(descendants.Select(str => TryToAbsolutePath(str)));
         }
 
         public IMaybe<AbsolutePath> TryJoin(IMaybe<AbsolutePath> root, IEnumerable<IMaybe<string>> descendants)
         {
-            return root.SelectMany(rootVal => rootVal.Join(descendants.Select(m => m.SelectMany(str => TryToAbsolutePath(str)))));
+            return root.SelectMany(rootVal => rootVal.TryJoin(descendants.Select(m => m.SelectMany(str => TryToAbsolutePath(str)))));
         }
 
         public IMaybe<AbsolutePath> TryJoin(AbsolutePath root, IEnumerable<IMaybe<string>> descendants)
         {
-            return root.Join(descendants.Select(m => m.SelectMany(str => TryToAbsolutePath(str))));
+            return root.TryJoin(descendants.Select(m => m.SelectMany(str => TryToAbsolutePath(str))));
         }
 
         public IMaybe<AbsolutePath> TryJoin(AbsolutePath root, params string[] descendants)
         {
-            return root.Join(descendants.Select(str => TryToAbsolutePath(str)));
+            return root.TryJoin(descendants.Select(str => TryToAbsolutePath(str)));
         }
 
         public IMaybe<AbsolutePath> TryJoin(IMaybe<AbsolutePath> root, params string[] descendants)
         {
             if (!root.HasValue)
                 return Nothing<AbsolutePath>();
-            return root.Value.Join(descendants.Select(str => TryToAbsolutePath(str)));
+            return root.Value.TryJoin(descendants.Select(str => TryToAbsolutePath(str)));
         }
 
         public IMaybe<AbsolutePath> TryJoin(IMaybe<AbsolutePath> root, params IMaybe<string>[] descendants)
         {
-            return root.Join(descendants.Select(m => m.SelectMany(str => TryToAbsolutePath(str))));
+            return root.TryJoin(descendants.Select(m => m.SelectMany(str => TryToAbsolutePath(str))));
         }
 
         public IMaybe<AbsolutePath> TryJoin(AbsolutePath root, params IMaybe<string>[] descendants)
         {
-            return root.Join(descendants.Select(m => m.SelectMany(str => TryToAbsolutePath(str))));
+            return root.TryJoin(descendants.Select(m => m.SelectMany(str => TryToAbsolutePath(str))));
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> root, IEnumerable<string> descendants)
         {
-            return root.Join(descendants.Select(str => TryToAbsolutePath(str)));
+            return root.TryJoin(descendants.Select(str => TryToAbsolutePath(str)));
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> root, IEnumerable<string> descendants)
         {
-            return root.Join(descendants.Select(str => TryToAbsolutePath(str)));
+            return root.TryJoin(descendants.Select(str => TryToAbsolutePath(str)));
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> root, IEnumerable<IMaybe<string>> descendants)
         {
-            return root.Concat(descendants.Select(m => m.SelectMany(str => TryToAbsolutePath(str)))).ToList().Join();
+            return root.Concat(descendants.Select(m => m.SelectMany(str => TryToAbsolutePath(str)))).ToList().TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> root, IEnumerable<IMaybe<string>> descendants)
         {
             return descendants
                 .Select(m => m.SelectMany(str => TryToAbsolutePath(str)))
-                .AllOrNothing().Select(desc => root.Concat(desc).ToList().Join()).SelectMany(x => x);
+                .AllOrNothing().Select(desc => root.Concat(desc).ToList().TryJoin()).SelectMany(x => x);
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> root, params string[] descendants)
         {
-            return root.Join(descendants.Select(str => TryToAbsolutePath(str)));
+            return root.TryJoin(descendants.Select(str => TryToAbsolutePath(str)));
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> root, params string[] descendants)
         {
-            return root.Concat(descendants.Select(str => TryToAbsolutePath(str))).AllOrNothing().Select(paths => paths.Join())
+            return root.Concat(descendants.Select(str => TryToAbsolutePath(str))).AllOrNothing().Select(paths => paths.TryJoin())
                 .SelectMany(x => x);
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> root, params IMaybe<string>[] descendants)
         {
-            return root.Concat(descendants.Select(m => m.SelectMany(str => TryToAbsolutePath(str)))).ToList().Join();
+            return root.Concat(descendants.Select(m => m.SelectMany(str => TryToAbsolutePath(str)))).ToList().TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> root, params IMaybe<string>[] descendants)
         {
             return descendants.Select(m => m.SelectMany(str => TryToAbsolutePath(str))).AllOrNothing()
-                .Select(desc => root.Concat(desc).ToList().Join()).SelectMany(x => x);
+                .Select(desc => root.Concat(desc).ToList().TryJoin()).SelectMany(x => x);
         }
 
         #endregion
@@ -2112,105 +2112,105 @@ namespace IoFluently
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> descendants)
         {
-            return descendants.ToList().Join();
+            return descendants.ToList().TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(IReadOnlyList<IMaybe<AbsolutePath>> descendants)
         {
             if (descendants.Any(opt => !opt.HasValue))
                 return Nothing<AbsolutePath>();
-            return descendants.Select(opt => opt.Value).Join();
+            return descendants.Select(opt => opt.Value).TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> descendants)
         {
-            return descendants.ToList().Join();
+            return descendants.ToList().TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(AbsolutePath root, IEnumerable<AbsolutePath> descendants)
         {
-            return root.ItemConcat(descendants).ToList().Join();
+            return root.ItemConcat(descendants).ToList().TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(IMaybe<AbsolutePath> root, IEnumerable<AbsolutePath> descendants)
         {
             if (!root.HasValue)
                 return Nothing<AbsolutePath>();
-            return root.Value.ItemConcat(descendants).ToList().Join();
+            return root.Value.ItemConcat(descendants).ToList().TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(IMaybe<AbsolutePath> root, IEnumerable<IMaybe<AbsolutePath>> descendants)
         {
-            return root.ItemConcat(descendants).ToList().Join();
+            return root.ItemConcat(descendants).ToList().TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(AbsolutePath root, IEnumerable<IMaybe<AbsolutePath>> descendants)
         {
-            return Something(root).ItemConcat(descendants).ToList().Join();
+            return Something(root).ItemConcat(descendants).ToList().TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(AbsolutePath root, params AbsolutePath[] descendants)
         {
-            return root.ItemConcat(descendants).ToList().Join();
+            return root.ItemConcat(descendants).ToList().TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(IMaybe<AbsolutePath> root, params AbsolutePath[] descendants)
         {
             if (!root.HasValue)
                 return Nothing<AbsolutePath>();
-            return root.Value.ItemConcat(descendants).ToList().Join();
+            return root.Value.ItemConcat(descendants).ToList().TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(IMaybe<AbsolutePath> root, params IMaybe<AbsolutePath>[] descendants)
         {
-            return root.ItemConcat(descendants).ToList().Join();
+            return root.ItemConcat(descendants).ToList().TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(AbsolutePath root, params IMaybe<AbsolutePath>[] descendants)
         {
-            return Something(root).ItemConcat(descendants).ToList().Join();
+            return Something(root).ItemConcat(descendants).ToList().TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> root, IEnumerable<AbsolutePath> descendants)
         {
-            return root.Concat(descendants).ToList().Join();
+            return root.Concat(descendants).ToList().TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> root, IEnumerable<AbsolutePath> descendants)
         {
-            return root.AllOrNothing().Select(enumerable => enumerable.Concat(descendants).ToList().Join())
+            return root.AllOrNothing().Select(enumerable => enumerable.Concat(descendants).ToList().TryJoin())
                 .SelectMany(x => x);
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> root, IEnumerable<IMaybe<AbsolutePath>> descendants)
         {
-            return root.Concat(descendants).ToList().Join();
+            return root.Concat(descendants).ToList().TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> root, IEnumerable<IMaybe<AbsolutePath>> descendants)
         {
-            return descendants.AllOrNothing().Select(desc => root.Concat(desc).ToList().Join()).SelectMany(x => x);
+            return descendants.AllOrNothing().Select(desc => root.Concat(desc).ToList().TryJoin()).SelectMany(x => x);
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> root, params AbsolutePath[] descendants)
         {
-            return root.Concat(descendants).ToList().Join();
+            return root.Concat(descendants).ToList().TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> root, params AbsolutePath[] descendants)
         {
-            return root.AllOrNothing().Select(enumerable => enumerable.Concat(descendants).ToList().Join())
+            return root.AllOrNothing().Select(enumerable => enumerable.Concat(descendants).ToList().TryJoin())
                 .SelectMany(x => x);
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> root, params IMaybe<AbsolutePath>[] descendants)
         {
-            return root.Concat(descendants).ToList().Join();
+            return root.Concat(descendants).ToList().TryJoin();
         }
 
         public IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> root, params IMaybe<AbsolutePath>[] descendants)
         {
-            return descendants.AllOrNothing().Select(desc => root.Concat(desc).ToList().Join()).SelectMany(x => x);
+            return descendants.AllOrNothing().Select(desc => root.Concat(desc).ToList().TryJoin()).SelectMany(x => x);
         }
 
         #endregion

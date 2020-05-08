@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace IoFluently
 {
-    public class FileWithKnownFormatAsync<TReader>
+    internal class FileWithKnownFormatAsync<TReader> : IFileWithKnownFormatAsync<TReader>
     {
         public AbsolutePath Path { get; }
         
@@ -21,7 +21,7 @@ namespace IoFluently
         }
     }
     
-    public class FileWithKnownFormatSync<TReader>
+    internal class FileWithKnownFormatSync<TReader> : IFileWithKnownFormatSync<TReader>
     {
         public AbsolutePath Path { get; }
         
@@ -39,7 +39,7 @@ namespace IoFluently
         }
     }
 
-    public class FileWithKnownFormatAsync<TReader, TWriter> : FileWithKnownFormatAsync<TReader>
+    internal class FileWithKnownFormatAsync<TReader, TWriter> : FileWithKnownFormatAsync<TReader>, IFileWithKnownFormatAsync<TReader, TWriter>
     {
         private Func<AbsolutePath, TWriter, Task> _write;
 
@@ -55,7 +55,7 @@ namespace IoFluently
         }
     }
     
-    public class FileWithKnownFormatAsyncSync<TReader, TWriter> : FileWithKnownFormatAsync<TReader>
+    internal class FileWithKnownFormatAsyncSync<TReader, TWriter> : FileWithKnownFormatAsync<TReader>, IFileWithKnownFormatAsyncSync<TReader, TWriter>
     {
         private Action<AbsolutePath, TWriter> _write;
 
@@ -71,7 +71,7 @@ namespace IoFluently
         }
     }
     
-    public class FileWithKnownFormatSync<TReader, TWriter> : FileWithKnownFormatSync<TReader>
+    internal class FileWithKnownFormatSync<TReader, TWriter> : FileWithKnownFormatSync<TReader>, IFileWithKnownFormatSync<TReader, TWriter>
     {
         private Action<AbsolutePath, TWriter> _write;
 
@@ -87,7 +87,7 @@ namespace IoFluently
         }
     }
     
-    public class FileWithKnownFormatSyncAsync<TReader, TWriter> : FileWithKnownFormatSync<TReader>
+    internal class FileWithKnownFormatSyncAsync<TReader, TWriter> : FileWithKnownFormatSync<TReader>, IFileWithKnownFormatSyncAsync<TReader, TWriter>
     {
         private Func<AbsolutePath, TWriter, Task> _write;
 
@@ -101,5 +101,37 @@ namespace IoFluently
         {
             return _write(Path, writer);
         }
+    }
+    
+    public interface IFileWithKnownFormatAsync<TReader>
+    {
+        AbsolutePath Path { get; }
+        Task<TReader> Read();
+    }
+    
+    public interface IFileWithKnownFormatSync<out TReader>
+    {
+        AbsolutePath Path { get; }
+        TReader Read();
+    }
+
+    public interface IFileWithKnownFormatAsync<TReader, in TWriter> : IFileWithKnownFormatAsync<TReader>
+    {
+        Task Write(TWriter writer);
+    }
+    
+    public interface IFileWithKnownFormatAsyncSync<TReader, in TWriter> : IFileWithKnownFormatAsync<TReader>
+    {
+        void Write(TWriter writer);
+    }
+    
+    public interface IFileWithKnownFormatSync<out TReader, in TWriter> : IFileWithKnownFormatSync<TReader>
+    {
+        void Write(TWriter writer);
+    }
+    
+    public interface IFileWithKnownFormatSyncAsync<out TReader, in TWriter> : IFileWithKnownFormatSync<TReader>
+    {
+        Task Write(TWriter writer);
     }
 }

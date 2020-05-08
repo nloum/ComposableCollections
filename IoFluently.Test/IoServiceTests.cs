@@ -21,7 +21,7 @@ namespace IoFluently.Test
             var item1 = parent / "test3" / "test.csproj";
             var item2 = parent / "test4";
 
-            var result = item1.TryCommonWith(item2).Value;
+            var result = item1.CommonWith(item2);
 
             result.ToString().Should().Be(parent.ToString());
         }
@@ -31,7 +31,7 @@ namespace IoFluently.Test
         {
             var ioService = CreateUnitUnderTest();
 
-            var parent = ioService.TryToAbsolutePath("C:\\test1\\test2").Value;
+            var parent = ioService.ToAbsolutePath("C:\\test1\\test2");
             var item1 = parent / "test3" / "test.csproj";
             var item2 = parent / "test4";
 
@@ -45,47 +45,28 @@ namespace IoFluently.Test
         {
             var ioService = CreateUnitUnderTest();
 
-            var test1 = ioService.TryToAbsolutePath("test1").Value;
+            var sourceFolder = ioService.CurrentDirectory / "test1";
 
-            test1.CreateFolder()
+            sourceFolder.CreateFolder()
                 .ClearFolder();
 
-            var text1 = test1.TryDescendant("test.txt").Value;
+            var textFileInSourceFolder = sourceFolder / "test.txt";
 
-            text1.WriteText("testing 1 2 3");
+            textFileInSourceFolder.WriteText("testing 1 2 3");
 
-            var test2 = ioService.TryToAbsolutePath("test2").Value
+            var targetFolder = (ioService.CurrentDirectory / "test2")
                 .CreateFolder()
                 .ClearFolder();
 
-            var text2 = text1.Translate(test1, test2).Move();
+            var textFileMovePlan = textFileInSourceFolder.Translate(sourceFolder, targetFolder);
 
-            text1.Exists().Should().BeFalse();
-            text2.Destination.Exists().Should().BeTrue();
-        }
+            textFileInSourceFolder.Exists().Should().BeTrue();
+            textFileMovePlan.Destination.Exists().Should().BeFalse();
+            
+            textFileMovePlan.Move();
 
-        [TestMethod]
-        public void MovingShouldPromptChangeDetection()
-        {
-            var ioService = CreateUnitUnderTest();
-
-            var test1 = ioService.TryToAbsolutePath("test1").Value;
-
-            test1.CreateFolder()
-                .ClearFolder();
-
-            var text1 = test1.TryDescendant("test.txt").Value;
-
-            text1.WriteText("testing 1 2 3");
-
-            var test2 = ioService.TryToAbsolutePath("test2").Value
-                .CreateFolder()
-                .ClearFolder();
-
-            var text2 = text1.Translate(test1, test2).Move();
-
-            text1.Exists().Should().BeFalse();
-            text2.Destination.Exists().Should().BeTrue();
+            textFileInSourceFolder.Exists().Should().BeFalse();
+            textFileMovePlan.Destination.Exists().Should().BeTrue();
         }
     }
 }

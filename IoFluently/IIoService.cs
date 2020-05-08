@@ -14,6 +14,7 @@ namespace IoFluently
     public interface IIoService
     {
         IReactiveProcessFactory ReactiveProcessFactory { get; }
+        AbsolutePath CurrentDirectory { get; }
         
         /// <summary>
         ///     Given a bunch of files or folders in different places that may have the same name,

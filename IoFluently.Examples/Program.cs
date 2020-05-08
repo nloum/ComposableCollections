@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
+using LiveLinq;
+using LiveLinq.Core;
 using ReactiveProcesses;
 
 namespace IoFluently.Examples
@@ -9,14 +12,36 @@ namespace IoFluently.Examples
         private static void Main(string[] args)
         {
             var service = new IoService(new ReactiveProcessFactory());
-            var test1 = service.TryToAbsolutePath(Environment.CurrentDirectory).Value;
-
-            Console.WriteLine($"Monitoring {Environment.CurrentDirectory}");
-            var changes = test1.ToLiveLinq();
+            
+            var repositoryRoot = service.CurrentDirectory.Ancestors().First(ancestor => (ancestor / "IoFluently.sln").Exists());
+            
+            var todoRegex = new Regex(@"TODO:(?<todoDescription>[^\n]+)");
+            
+            var changes = repositoryRoot.ToLiveLinq()
+                .Where((path, pathType) => path.HasExtension(".md") && pathType == PathType.File)
+                .SelectKey((path, pathType) => path.AsTextFile().Read().Lines
+                    .Select(line => todoRegex.Match(line))
+                    .Where(match => match.Success)
+                    .Select(match => new { match, path }))
+                .KeysAsSet()
+                .SelectMany(x => x);
 
             changes.AsObservable().Subscribe(x =>
             {
-                Console.WriteLine($"{x.Type}: {string.Join(", ", x.Values.Select(b => b.ToString()))}");
+                if (x.Type == CollectionChangeType.Add)
+                {
+                    foreach (var item in x.Values)
+                    {
+                        Console.WriteLine($"A TODO item was added: {item.match.Groups["todoDescription"].Value.Trim()}");
+                    }
+                }
+                else
+                {
+                    foreach (var item in x.Values)
+                    {
+                        Console.WriteLine($"A TODO item was removed: {item.match.Groups["todoDescription"].Value.Trim()}");
+                    }
+                }
             });
 
             Console.WriteLine("Press any key to exit");

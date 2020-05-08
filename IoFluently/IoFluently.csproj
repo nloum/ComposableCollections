@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LiveLinq" Version="1.0.0-beta005" />
+    <PackageReference Include="LiveLinq" Version="1.0.0-beta015" />
     <PackageReference Include="MoreCollections" Version="1.0.0-beta003" />
     <PackageReference Include="ReactiveProcesses" Version="1.0.0-alpha002" />
     <PackageReference Include="SimpleMonads" Version="1.0.0-beta002" />

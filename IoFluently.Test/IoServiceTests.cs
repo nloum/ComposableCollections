@@ -13,6 +13,15 @@ namespace IoFluently.Test
         }
 
         [TestMethod]
+        public void WithoutExtensionsShouldWork()
+        {
+            var uut = CreateUnitUnderTest();
+            var testTxt = uut.ToAbsolutePath("/test.test.txt");
+            var test = testTxt.WithoutExtension();
+            test.ToString().Should().Be("/test.test");
+        }
+
+        [TestMethod]
         public void CommonShouldOnlyReturnFullFolderNames()
         {
             var ioService = CreateUnitUnderTest();

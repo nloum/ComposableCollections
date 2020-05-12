@@ -28,7 +28,7 @@ namespace IoFluently
             }
 
             var name = path.Name;
-            newComponents.Add(name.Substring(0, name.IndexOf('.')));
+            newComponents.Add(name.Substring(0, name.LastIndexOf('.')));
             
             return new AbsolutePath(path.Flags, path.DirectorySeparator, path.IoService, newComponents);
         }

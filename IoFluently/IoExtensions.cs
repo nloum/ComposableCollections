@@ -19,6 +19,29 @@ namespace IoFluently
             return root.IoService.ToLiveLinq(root, includeFileContentChanges, observationMethod);
         }
 
+        /// <summary>
+        /// Gets the descendants of the specified folder that match the specified search pattern,
+        /// even if they are nested in subfolders of the specified folder.
+        /// </summary>
+        /// <param name="path">The path to the folder</param>
+        /// <param name="searchPattern">E.g., *.csproj</param>
+        /// <returns></returns>
+        public static IEnumerable<AbsolutePath> GetDescendants(this AbsolutePath path, string searchPattern)
+        {
+            return path.IoService.GetDescendants(path, searchPattern);
+        }
+
+        /// <summary>
+        /// Gets the immediate descendants of the specified folder that match the specified search pattern.
+        /// </summary>
+        /// <param name="path">The path to the folder</param>
+        /// <param name="searchPattern">E.g., *.csproj</param>
+        /// <returns></returns>
+        public static IEnumerable<AbsolutePath> GetChildren(this AbsolutePath path, string searchPattern)
+        {
+            return path.IoService.GetChildren(path, searchPattern);
+        }
+
         public static IEnumerable<AbsolutePath> GetDescendants(this AbsolutePath path)
         {
             return path.IoService.GetDescendants(path);

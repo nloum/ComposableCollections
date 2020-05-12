@@ -31,6 +31,8 @@ namespace IoFluently
 
         IEnumerable<TreeTraversal<string, AbsolutePath>> TraverseDescendants(AbsolutePath path);
         IEnumerable<AbsolutePath> GetDescendants(AbsolutePath path);
+        IEnumerable<AbsolutePath> GetDescendants(AbsolutePath path, string searchPattern);
+        IEnumerable<AbsolutePath> GetChildren(AbsolutePath path, string searchPattern);
         IDictionaryChangesStrict<AbsolutePath, PathType> ToLiveLinq(AbsolutePath root, bool includeFileContentChanges = true, PathObservationMethod observationMethod = PathObservationMethod.Default);
         IEnumerable<AbsolutePath> GetChildren(AbsolutePath path, bool includeFolders = true, bool includeFiles = true);
         IEnumerable<AbsolutePath> GetFiles(AbsolutePath path);

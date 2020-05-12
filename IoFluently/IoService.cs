@@ -60,6 +60,18 @@ namespace IoFluently
                 .Skip(1);
         }
 
+        public IEnumerable<AbsolutePath> GetDescendants(AbsolutePath path, string searchPattern)
+        {
+            return Directory.GetFiles(path.ToString(), searchPattern, SearchOption.AllDirectories)
+                .Select(x => ToAbsolutePath(x));
+        }
+
+        public IEnumerable<AbsolutePath> GetChildren(AbsolutePath path, string searchPattern)
+        {
+            return Directory.GetFiles(path.ToString(), searchPattern, SearchOption.TopDirectoryOnly)
+                .Select(x => ToAbsolutePath(x));
+        }
+
         public IReadOnlyObservableSet<AbsolutePath> Children(AbsolutePath path)
         {
             return path.Children("*");

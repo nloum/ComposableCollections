@@ -13,6 +13,31 @@ namespace IoFluently
 {
     public static class IoExtensions
     {
+        public static AbsolutePath WithoutExtension(this AbsolutePath path)
+        {
+            if (!path.HasExtension())
+            {
+                return path;
+            }
+
+            var newComponents = new List<string>();
+
+            for (var i = 0; i < path.Path.Components.Count - 1; i++)
+            {
+                newComponents.Add(path.Path.Components[i]);
+            }
+
+            var name = path.Name;
+            newComponents.Add(name.Substring(0, name.IndexOf('.')));
+            
+            return new AbsolutePath(path.Flags, path.DirectorySeparator, path.IoService, newComponents);
+        }
+
+        public static bool HasExtension(this AbsolutePath path)
+        {
+            return path.Extension.HasValue;
+        }
+        
         public static IDictionaryChangesStrict<AbsolutePath, PathType> ToLiveLinq(this AbsolutePath root,
             bool includeFileContentChanges = true, PathObservationMethod observationMethod = PathObservationMethod.Default)
         {

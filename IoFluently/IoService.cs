@@ -703,8 +703,8 @@ namespace IoFluently
 
         public FileStream CreateFile(AbsolutePath path)
         {
-            if (path.Parent().Value.GetPathType() != PathType.Folder)
-                path.Parent().Value.Create(PathType.Folder);
+            if (path.Parent().GetPathType() != PathType.Folder)
+                path.Parent().Create(PathType.Folder);
             var result = path.AsFileInfo().Create();
             if (path.GetPathType() != PathType.File)
                 throw new IOException("Could not create file " + path);
@@ -804,7 +804,7 @@ namespace IoFluently
                 yield return path;
             while (true)
             {
-                var maybePath = path.Parent();
+                var maybePath = path.TryParent();
                 if (maybePath.HasValue)
                 {
                     yield return maybePath.Value;
@@ -840,7 +840,7 @@ namespace IoFluently
             var maybePath = path.ToMaybe();
             for (var i = 0; i < level; i++)
             {
-                maybePath = maybePath.Select(p => p.Parent()).SelectMany(x => x);
+                maybePath = maybePath.Select(p => p.TryParent()).SelectMany(x => x);
                 if (!maybePath.HasValue)
                     return Maybe<AbsolutePath>.Nothing;
             }
@@ -898,7 +898,7 @@ namespace IoFluently
                 throw new IOException(string.Format(
                     "An attempt was made to copy \"{0}\" to \"{1}\" but the destination path exists.",
                     translation.Source, translation.Destination));
-            translation.Destination.Parent().Value.Create(PathType.Folder);
+            translation.Destination.TryParent().Value.Create(PathType.Folder);
             File.Copy(translation.Source.ToString(), translation.Destination.ToString());
             return translation;
         }
@@ -947,7 +947,7 @@ namespace IoFluently
                 throw new IOException(string.Format(
                     "An attempt was made to move a file from \"{0}\" to \"{1}\" but the destination path is a sub-path of the source path.",
                     translation.Source, translation.Destination));
-            translation.Destination.Parent().Value.Create(PathType.Folder);
+            translation.Destination.TryParent().Value.Create(PathType.Folder);
             File.Move(translation.Source.ToString(), translation.Destination.ToString());
             return translation;
         }
@@ -1378,7 +1378,7 @@ namespace IoFluently
         {
             var ancestor = path;
             IMaybe<AbsolutePath> cachedParent;
-            while ((cachedParent = ancestor.Parent()).HasValue) ancestor = cachedParent.Value;
+            while ((cachedParent = ancestor.TryParent()).HasValue) ancestor = cachedParent.Value;
 
             return ancestor;
         }
@@ -1451,7 +1451,7 @@ namespace IoFluently
             try
             {
                 if (MayCreateFile(fileMode))
-                    path.Parent().IfHasValue(parent => parent.Create(PathType.Folder));
+                    path.TryParent().IfHasValue(parent => parent.Create(PathType.Folder));
                 return new Maybe<FileStream>(path.AsFileInfo().Open(fileMode));
             }
             catch (IOException)
@@ -1470,7 +1470,7 @@ namespace IoFluently
             try
             {
                 if (MayCreateFile(fileMode))
-                    path.Parent().IfHasValue(parent => parent.Create(PathType.Folder));
+                    path.TryParent().IfHasValue(parent => parent.Create(PathType.Folder));
                 return new Maybe<FileStream>(path.AsFileInfo().Open(fileMode, fileAccess));
             }
             catch (IOException)
@@ -1489,7 +1489,7 @@ namespace IoFluently
             try
             {
                 if (MayCreateFile(fileMode))
-                    path.Parent().IfHasValue(parent => parent.Create(PathType.Folder));
+                    path.TryParent().IfHasValue(parent => parent.Create(PathType.Folder));
                 return new Maybe<FileStream>(path.AsFileInfo().Open(fileMode, fileAccess, fileShare));
             }
             catch (IOException)
@@ -1508,7 +1508,7 @@ namespace IoFluently
             {
                 if (path.GetPathType() == PathType.Folder)
                     return path;
-                path.Parent().IfHasValue(parent => parent.CreateFolder());
+                path.TryParent().IfHasValue(parent => parent.CreateFolder());
                 path.AsDirectoryInfo().Create();
             }
             catch (IOException)
@@ -1753,7 +1753,7 @@ namespace IoFluently
 
         public IObservable<Unit> ObserveChanges(AbsolutePath path, NotifyFilters filters)
         {
-            var parent = path.Parent();
+            var parent = path.TryParent();
             if (!parent.HasValue) return Observable.Never<Unit>();
 
             return Observable.Create<Unit>(observer =>
@@ -1782,7 +1782,7 @@ namespace IoFluently
 
         public IObservable<PathType> ObservePathType(AbsolutePath path)
         {
-            var parent = path.Parent();
+            var parent = path.TryParent();
             if (!parent.HasValue) return Observable.Return(path.GetPathType());
             return parent.Value.Children(path.Name).ToLiveLinq().AsObservable().Select(_ => path.GetPathType())
                 .DistinctUntilChanged();
@@ -1790,7 +1790,7 @@ namespace IoFluently
 
         public IObservable<AbsolutePath> Renamings(AbsolutePath path)
         {
-            var parent = path.Parent();
+            var parent = path.TryParent();
             if (!parent.HasValue) return Observable.Return(path);
 
             return Observable.Create<AbsolutePath>(
@@ -1799,7 +1799,7 @@ namespace IoFluently
                     var currentPath = path;
                     while (!token.IsCancellationRequested)
                     {
-                        var watcher = new FileSystemWatcher(currentPath.Parent().Value.ToString())
+                        var watcher = new FileSystemWatcher(currentPath.Parent().ToString())
                         {
                             IncludeSubdirectories = false,
                             Filter = currentPath.Name

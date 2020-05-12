@@ -140,7 +140,7 @@ namespace IoFluently
             return Equals((AbsolutePath) obj);
         }
 
-        public IMaybe<AbsolutePath> Ancestor(int generations)
+        public IMaybe<AbsolutePath> TryAncestor(int generations)
         {
             if (Path.Count > generations)
                 return Something(new AbsolutePath(Flags, DirectorySeparator, IoService,
@@ -148,11 +148,21 @@ namespace IoFluently
             return Nothing<AbsolutePath>();
         }
 
-        public IMaybe<AbsolutePath> Parent()
+        public AbsolutePath Ancestor(int generations)
         {
-            return Ancestor(1);
+            return TryAncestor(generations).Value;
         }
-        
+
+        public IMaybe<AbsolutePath> TryParent()
+        {
+            return TryAncestor(1);
+        }
+
+        public AbsolutePath Parent()
+        {
+            return TryParent().Value;
+        }
+
         public static AbsolutePath operator / (AbsolutePath absPath, string whatToAdd)
         {
             return new AbsolutePath(absPath.Flags, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd);

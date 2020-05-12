@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace IoFluently
 {
@@ -68,6 +70,22 @@ namespace IoFluently
         {
             return path.AsFile(absPath => new Text(absPath.ReadLines()),
                 (absPath, text) => absPath.WriteAllLines(text.Lines));
+        }
+
+        public static IFileWithKnownFormatSync<XmlDocument> AsXmlFile(this AbsolutePath path)
+        {
+            return path.AsFile(absPath =>
+            {
+                var doc = new XmlDocument();
+                doc.Load(absPath.ToString());
+                return doc;
+            }, (absPath, doc) =>
+            {
+                using (var stream = absPath.Open(FileMode.Create, FileAccess.Write))
+                {
+                    doc.Save(stream);
+                }
+            });
         }
 
         public static Text AsText(this IEnumerable<string> lines)

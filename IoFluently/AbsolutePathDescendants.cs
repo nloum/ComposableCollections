@@ -45,8 +45,8 @@ namespace IoFluently
                     .RefCount()
                     .Select(rename => new[]
                     {
-                        SetChange(CollectionChangeType.Remove, IoService.TryToAbsolutePath(rename.OldFullPath, _path.Flags).Value),
-                        SetChange(CollectionChangeType.Add, IoService.TryToAbsolutePath(rename.FullPath, _path.Flags).Value)
+                        SetChange(CollectionChangeType.Remove, IoService.TryParseAbsolutePath(rename.OldFullPath, _path.Flags).Value),
+                        SetChange(CollectionChangeType.Add, IoService.TryParseAbsolutePath(rename.FullPath, _path.Flags).Value)
                     }.ToObservable())
                     .Merge()
                     .Subscribe(observer);
@@ -56,7 +56,7 @@ namespace IoFluently
                     .Publish()
                     .RefCount()
                     .Select(deletion => SetChange(CollectionChangeType.Remove,
-                        IoService.TryToAbsolutePath(deletion.FullPath, _path.Flags).Value))
+                        IoService.TryParseAbsolutePath(deletion.FullPath, _path.Flags).Value))
                     .Subscribe(observer);
                 var creations = Observable.FromEvent<FileSystemEventArgs>(
                         handler => _watcher.Created += (_, evt) => handler(evt),
@@ -64,7 +64,7 @@ namespace IoFluently
                     .Publish()
                     .RefCount()
                     .Select(creation => SetChange(CollectionChangeType.Add,
-                        IoService.TryToAbsolutePath(creation.FullPath, _path.Flags).Value))
+                        IoService.TryParseAbsolutePath(creation.FullPath, _path.Flags).Value))
                     .Subscribe(observer);
 
                 foreach (var childPath in AsEnumerable())
@@ -96,7 +96,7 @@ namespace IoFluently
 
             foreach (var fse in directory.GetFileSystemInfos(_pattern))
             {
-                var subPath = IoService.TryToAbsolutePath(fse.FullName, _path.Flags).Value;
+                var subPath = IoService.TryParseAbsolutePath(fse.FullName, _path.Flags).Value;
                 yield return subPath;
                 if (IncludeSubdirectories)
                     foreach (var descendant in subPath.Descendants())

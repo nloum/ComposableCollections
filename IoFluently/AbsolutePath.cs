@@ -23,6 +23,21 @@ namespace IoFluently
             DirectorySeparator = directorySeparator;
             IoService = ioService;
             Path = new AbsolutePath<string>(path);
+            if (!ComponentsAreAbsolute(Path.Components))
+            {
+                throw new ArgumentException($"The path {Path} is not absolute");
+            }
+        }
+        
+        private static bool ComponentsAreAbsolute(IReadOnlyList<string> path)
+        {
+            if (path[0] == "/")
+                return true;
+            if (char.IsLetter(path[0][0]) && path[0][1] == ':')
+                return true;
+            if (path[0] == "\\")
+                return true;
+            return false;
         }
 
         public string Name => Path[Path.Count - 1];
@@ -70,7 +85,7 @@ namespace IoFluently
         {
             get
             {
-                var lastPathComponent = this.LastPathComponent();
+                var lastPathComponent = Name;
                 var dotIndex = lastPathComponent.IndexOf('.');
                 if (dotIndex < 0)
                 {

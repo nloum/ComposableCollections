@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reactive;
 using System.Text;
+using System.Text.RegularExpressions;
 using LiveLinq.Dictionary;
 using LiveLinq.Set;
 using ReactiveProcesses;
@@ -13,6 +14,46 @@ namespace IoFluently
 {
     public interface IIoService
     {
+        AbsolutePath CreateTemporaryPath(PathType type);
+        PathFlags GetDefaultFlagsForThisEnvironment();
+        string GetDefaultDirectorySeparatorForThisEnvironment();
+
+        /// <summary>
+        ///     Returns a regex that filters files the same as the specified pattern.
+        ///     From here: http://www.java2s.com/Code/CSharp/Regular-Expressions/Checksifnamematchespatternwithandwildcards.htm
+        ///     Copyright:   Julijan ?ribar, 2004-2007
+        ///     This software is provided 'as-is', without any express or implied
+        ///     warranty.  In no event will the author(s) be held liable for any damages
+        ///     arising from the use of this software.
+        ///     Permission is granted to anyone to use this software for any purpose,
+        ///     including commercial applications, and to alter it and redistribute it
+        ///     freely, subject to the following restrictions:
+        ///     1. The origin of this software must not be misrepresented; you must not
+        ///     claim that you wrote the original software. If you use this software
+        ///     in a product, an acknowledgment in the product documentation would be
+        ///     appreciated but is not required.
+        ///     2. Altered source versions must be plainly marked as such, and must not be
+        ///     misrepresented as being the original software.
+        ///     3. This notice may not be removed or altered from any source distribution.
+        /// </summary>
+        /// <param name="filename">
+        ///     Name to match.
+        /// </param>
+        /// <param name="pattern">
+        ///     Pattern to match to.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if name matches pattern, otherwise <c>false</c>.
+        /// </returns>
+        Regex FileNamePatternToRegex(string pattern);
+
+        AbsolutePath ParseAbsolutePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
+        IMaybe<AbsolutePath> TryParseAbsolutePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
+        bool TryParseAbsolutePath(string path, out AbsolutePath pathSpec,
+            PathFlags flags = PathFlags.UseDefaultsForGivenPath);
+        bool TryParseAbsolutePath(string path, out AbsolutePath pathSpec, out string error,
+            PathFlags flags = PathFlags.UseDefaultsForGivenPath);
+        void UpdateStorage();
         IReactiveProcessFactory ReactiveProcessFactory { get; }
         AbsolutePath CurrentDirectory { get; }
         
@@ -48,7 +89,6 @@ namespace IoFluently
         bool IsAncestorOf(AbsolutePath path, AbsolutePath possibleDescendant);
         bool IsDescendantOf(AbsolutePath path, AbsolutePath possibleAncestor);
         IEnumerable<string> Split(AbsolutePath path);
-        string LastPathComponent(AbsolutePath path);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -92,9 +132,6 @@ namespace IoFluently
         FileInfo AsFileInfo(AbsolutePath path);
         DirectoryInfo AsDirectoryInfo(AbsolutePath path);
 
-        IMaybe<T> TryAs<T>(T pathName, PathType pathType)
-            where T : AbsolutePath;
-
         IMaybe<bool> TryIsReadOnly(AbsolutePath path);
         IMaybe<long> TryLength(AbsolutePath path);
         IMaybe<FileAttributes> TryAttributes(AbsolutePath attributes);
@@ -135,7 +172,6 @@ namespace IoFluently
         void WriteAllLines(AbsolutePath path, byte[] bytes);
         IEnumerable<string> ReadLines(AbsolutePath path);
         string ReadAllText(AbsolutePath path);
-        AbsolutePath ToAbsolute(AbsolutePath path);
         IReadOnlyObservableSet<AbsolutePath> Children(AbsolutePath path);
         IReadOnlyObservableSet<AbsolutePath> Children(AbsolutePath path, string pattern);
         IReadOnlyObservableSet<AbsolutePath> Descendants(AbsolutePath path);
@@ -148,53 +184,8 @@ namespace IoFluently
         IMaybe<AbsolutePath> TryCommonWith(AbsolutePath path, AbsolutePath that);
         bool CanBeSimplified(AbsolutePath path);
         AbsolutePath Simplify(AbsolutePath path);
+        RelativePath Simplify(RelativePath path);
         IMaybe<AbsolutePath> TryParent(AbsolutePath path);
-        bool IsAbsolute(AbsolutePath path);
-        bool IsRelative(AbsolutePath path);
-        IMaybe<AbsolutePath> TryJoin(IReadOnlyList<string> descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<string> descendants);
-        IMaybe<AbsolutePath> TryJoin(IReadOnlyList<IMaybe<string>> descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<string>> descendants);
-        IMaybe<AbsolutePath> TryJoin(AbsolutePath root, IEnumerable<string> descendants);
-        IMaybe<AbsolutePath> TryJoin(IMaybe<AbsolutePath> root, IEnumerable<string> descendants);
-        IMaybe<AbsolutePath> TryJoin(IMaybe<AbsolutePath> root, IEnumerable<IMaybe<string>> descendants);
-        IMaybe<AbsolutePath> TryJoin(AbsolutePath root, IEnumerable<IMaybe<string>> descendants);
-        IMaybe<AbsolutePath> TryJoin(AbsolutePath root, params string[] descendants);
-        IMaybe<AbsolutePath> TryJoin(IMaybe<AbsolutePath> root, params string[] descendants);
-        IMaybe<AbsolutePath> TryJoin(IMaybe<AbsolutePath> root, params IMaybe<string>[] descendants);
-        IMaybe<AbsolutePath> TryJoin(AbsolutePath root, params IMaybe<string>[] descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> root, IEnumerable<string> descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> root, IEnumerable<string> descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> root, IEnumerable<IMaybe<string>> descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> root, IEnumerable<IMaybe<string>> descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> root, params string[] descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> root, params string[] descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> root, params IMaybe<string>[] descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> root, params IMaybe<string>[] descendants);
-        IMaybe<AbsolutePath> TryJoin(IReadOnlyList<AbsolutePath> descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> descendants);
-        IMaybe<AbsolutePath> TryJoin(IReadOnlyList<IMaybe<AbsolutePath>> descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> descendants);
-        IMaybe<AbsolutePath> TryJoin(AbsolutePath root, IEnumerable<AbsolutePath> descendants);
-        IMaybe<AbsolutePath> TryJoin(IMaybe<AbsolutePath> root, IEnumerable<AbsolutePath> descendants);
-        IMaybe<AbsolutePath> TryJoin(IMaybe<AbsolutePath> root, IEnumerable<IMaybe<AbsolutePath>> descendants);
-        IMaybe<AbsolutePath> TryJoin(AbsolutePath root, IEnumerable<IMaybe<AbsolutePath>> descendants);
-        IMaybe<AbsolutePath> TryJoin(AbsolutePath root, params AbsolutePath[] descendants);
-        IMaybe<AbsolutePath> TryJoin(IMaybe<AbsolutePath> root, params AbsolutePath[] descendants);
-        IMaybe<AbsolutePath> TryJoin(IMaybe<AbsolutePath> root, params IMaybe<AbsolutePath>[] descendants);
-        IMaybe<AbsolutePath> TryJoin(AbsolutePath root, params IMaybe<AbsolutePath>[] descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> root, IEnumerable<AbsolutePath> descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> root, IEnumerable<AbsolutePath> descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> root, IEnumerable<IMaybe<AbsolutePath>> descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> root, IEnumerable<IMaybe<AbsolutePath>> descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> root, params AbsolutePath[] descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> root, params AbsolutePath[] descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<IMaybe<AbsolutePath>> root, params IMaybe<AbsolutePath>[] descendants);
-        IMaybe<AbsolutePath> TryJoin(IEnumerable<AbsolutePath> root, params IMaybe<AbsolutePath>[] descendants);
-        IMaybe<AbsolutePath> TryToAbsolutePath(string path, PathFlags flags);
-        IMaybe<AbsolutePath> TryToAbsolutePath(string path);
-        AbsolutePath ToAbsolutePath(string path, PathFlags flags);
-        AbsolutePath ToAbsolutePath(string path);
         bool IsAbsoluteWindowsPath(string path);
         bool IsAbsoluteUnixPath(string path);
         StringComparison ToStringComparison(PathFlags pathFlags);

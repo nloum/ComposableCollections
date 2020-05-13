@@ -143,11 +143,6 @@ namespace IoFluently
             return path.IoService.Split(path);
         }
 
-        public static string LastPathComponent(this AbsolutePath path)
-        {
-            return path.IoService.LastPathComponent(path);
-        }
-
         public static IEnumerable<AbsolutePath> Ancestors(this AbsolutePath path, bool includeItself = false)
         {
             return path.IoService.Ancestors(path, includeItself);
@@ -297,16 +292,6 @@ namespace IoFluently
         public static DirectoryInfo AsDirectoryInfo(this AbsolutePath path)
         {
             return path.IoService.AsDirectoryInfo(path);
-        }
-
-        public static IMaybe<T> TryAs<T>(T pathName, PathType pathType) where T : AbsolutePath
-        {
-            return pathName.IoService.TryAs(pathName, pathType);
-        }
-
-        public static T As<T>(T pathName, PathType pathType) where T : AbsolutePath
-        {
-            return pathName.IoService.TryAs(pathName, pathType).Value;
         }
 
         public static IMaybe<bool> TryIsReadOnly(this AbsolutePath path)
@@ -471,11 +456,6 @@ namespace IoFluently
             return path.IoService.ReadAllText(path);
         }
 
-        public static AbsolutePath ToAbsolute(this AbsolutePath path)
-        {
-            return path.IoService.ToAbsolute(path);
-        }
-
         public static IReadOnlyObservableSet<AbsolutePath> Children(this AbsolutePath path)
         {
             return path.IoService.Children(path);
@@ -549,220 +529,6 @@ namespace IoFluently
         public static AbsolutePath Parent(this AbsolutePath path)
         {
             return path.IoService.TryParent(path).Value;
-        }
-
-        public static bool IsAbsolute(this AbsolutePath path)
-        {
-            return path.IoService.IsAbsolute(path);
-        }
-
-        public static bool IsRelative(this AbsolutePath path)
-        {
-            return path.IoService.IsRelative(path);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this AbsolutePath root, IEnumerable<string> descendants)
-        {
-            return root.IoService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IMaybe<AbsolutePath> root, IEnumerable<string> descendants)
-        {
-            return root.SelectMany(r => r.IoService.TryJoin(root, descendants));
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IMaybe<AbsolutePath> root, IEnumerable<IMaybe<string>> descendants)
-        {
-            return root.SelectMany(r => r.IoService.TryJoin(root, descendants));
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this AbsolutePath root, IEnumerable<IMaybe<string>> descendants)
-        {
-            return root.IoService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this AbsolutePath root, params string[] descendants)
-        {
-            return root.IoService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IMaybe<AbsolutePath> root, params string[] descendants)
-        {
-            return root.SelectMany(r => r.IoService.TryJoin(root, descendants));
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IMaybe<AbsolutePath> root, params IMaybe<string>[] descendants)
-        {
-            return root.SelectMany(r => r.IoService.TryJoin(root, descendants));
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this AbsolutePath root, params IMaybe<string>[] descendants)
-        {
-            return root.IoService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<AbsolutePath> root, IEnumerable<string> descendants)
-        {
-            var ioService = root.First().IoService;
-            return ioService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<IMaybe<AbsolutePath>> root, IEnumerable<string> descendants)
-        {
-            var ioService = root.First(x => x.HasValue).Value.IoService;
-            return ioService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<IMaybe<AbsolutePath>> root,
-            IEnumerable<IMaybe<string>> descendants)
-        {
-            var ioService = root.First(x => x.HasValue).Value.IoService;
-            return ioService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<AbsolutePath> root, IEnumerable<IMaybe<string>> descendants)
-        {
-            var ioService = root.First().IoService;
-            return ioService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<AbsolutePath> root, params string[] descendants)
-        {
-            var ioService = root.First().IoService;
-            return ioService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<IMaybe<AbsolutePath>> root, params string[] descendants)
-        {
-            var ioService = root.First(x => x.HasValue).Value.IoService;
-            return ioService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<IMaybe<AbsolutePath>> root,
-            params IMaybe<string>[] descendants)
-        {
-            var ioService = root.First(x => x.HasValue).Value.IoService;
-            return ioService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<AbsolutePath> root, params IMaybe<string>[] descendants)
-        {
-            var ioService = root.First().IoService;
-            return ioService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IReadOnlyList<AbsolutePath> descendants)
-        {
-            var ioService = descendants.First().IoService;
-            return ioService.TryJoin(descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<AbsolutePath> descendants)
-        {
-            var ioService = descendants.First().IoService;
-            return ioService.TryJoin(descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IReadOnlyList<IMaybe<AbsolutePath>> descendants)
-        {
-            var ioService = descendants.First(x => x.HasValue).Value.IoService;
-            return ioService.TryJoin(descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<IMaybe<AbsolutePath>> descendants)
-        {
-            var ioService = descendants.First(x => x.HasValue).Value.IoService;
-            return ioService.TryJoin(descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this AbsolutePath root, IEnumerable<AbsolutePath> descendants)
-        {
-            return root.IoService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IMaybe<AbsolutePath> root, IEnumerable<AbsolutePath> descendants)
-        {
-            return root.SelectMany(r => r.IoService.TryJoin(root, descendants));
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IMaybe<AbsolutePath> root, IEnumerable<IMaybe<AbsolutePath>> descendants)
-        {
-            return root.SelectMany(r => r.IoService.TryJoin(root, descendants));
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this AbsolutePath root, IEnumerable<IMaybe<AbsolutePath>> descendants)
-        {
-            return root.IoService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this AbsolutePath root, params AbsolutePath[] descendants)
-        {
-            return root.IoService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IMaybe<AbsolutePath> root, params AbsolutePath[] descendants)
-        {
-            return root.SelectMany(r => r.IoService.TryJoin(root, descendants));
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IMaybe<AbsolutePath> root, params IMaybe<AbsolutePath>[] descendants)
-        {
-            return root.SelectMany(r => r.IoService.TryJoin(root, descendants));
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this AbsolutePath root, params IMaybe<AbsolutePath>[] descendants)
-        {
-            return root.IoService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<AbsolutePath> root, IEnumerable<AbsolutePath> descendants)
-        {
-            var ioService = root.First().IoService;
-            return ioService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<IMaybe<AbsolutePath>> root, IEnumerable<AbsolutePath> descendants)
-        {
-            var ioService = root.First(x => x.HasValue).Value.IoService;
-            return ioService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<IMaybe<AbsolutePath>> root,
-            IEnumerable<IMaybe<AbsolutePath>> descendants)
-        {
-            var ioService = root.First(x => x.HasValue).Value.IoService;
-            return ioService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<AbsolutePath> root, IEnumerable<IMaybe<AbsolutePath>> descendants)
-        {
-            var ioService = root.First().IoService;
-            return ioService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<AbsolutePath> root, params AbsolutePath[] descendants)
-        {
-            var ioService = root.First().IoService;
-            return ioService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<IMaybe<AbsolutePath>> root, params AbsolutePath[] descendants)
-        {
-            var ioService = root.First(x => x.HasValue).Value.IoService;
-            return ioService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<IMaybe<AbsolutePath>> root,
-            params IMaybe<AbsolutePath>[] descendants)
-        {
-            var ioService = root.First(x => x.HasValue).Value.IoService;
-            return ioService.TryJoin(root, descendants);
-        }
-
-        public static IMaybe<AbsolutePath> TryJoin(this IEnumerable<AbsolutePath> root, params IMaybe<AbsolutePath>[] descendants)
-        {
-            var ioService = root.First().IoService;
-            return ioService.TryJoin(root, descendants);
         }
 
         public static IMaybe<StreamWriter> TryCreateText(this AbsolutePath pathSpec)

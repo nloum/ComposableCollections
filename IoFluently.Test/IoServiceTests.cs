@@ -16,7 +16,7 @@ namespace IoFluently.Test
         public void WithoutExtensionsShouldWork()
         {
             var uut = CreateUnitUnderTest();
-            var testTxt = uut.ToAbsolutePath("/test.test.txt");
+            var testTxt = uut.ParseAbsolutePath("/test.test.txt");
             var test = testTxt.WithoutExtension();
             test.ToString().Should().Be("/test.test");
         }
@@ -26,7 +26,7 @@ namespace IoFluently.Test
         {
             var ioService = CreateUnitUnderTest();
 
-            var parent = ioService.ToAbsolutePath("C:\\test1\\test2");
+            var parent = ioService.ParseAbsolutePath("C:\\test1\\test2");
             var item1 = parent / "test3" / "test.csproj";
             var item2 = parent / "test4";
 
@@ -40,7 +40,7 @@ namespace IoFluently.Test
         {
             var ioService = CreateUnitUnderTest();
 
-            var parent = ioService.ToAbsolutePath("C:\\test1\\test2");
+            var parent = ioService.ParseAbsolutePath("C:\\test1\\test2");
             var item1 = parent / "test3" / "test.csproj";
             var item2 = parent / "test4";
 

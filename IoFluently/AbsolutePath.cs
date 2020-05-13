@@ -57,7 +57,7 @@ namespace IoFluently
 
         public IEnumerator<AbsolutePath> GetEnumerator()
         {
-            return IoService.GetChildren(this).GetEnumerator();
+            return IoService.EnumerateChildren(this).GetEnumerator();
         }
 
         private IEnumerable<string> SplitComponent(string component)

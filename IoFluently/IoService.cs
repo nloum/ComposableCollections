@@ -47,40 +47,40 @@ namespace IoFluently
             });
         }
 
-        public IEnumerable<AbsolutePath> GetDescendants(AbsolutePath path)
+        public IEnumerable<AbsolutePath> EnumerateDescendants(AbsolutePath path)
         {
             return path.TraverseDescendants().Where(x => x.Type != TreeTraversalType.ExitBranch).Select(x => x.Value)
                 .Skip(1);
         }
 
-        public IEnumerable<AbsolutePath> GetDescendants(AbsolutePath path, string searchPattern)
+        public IEnumerable<AbsolutePath> EnumerateDescendants(AbsolutePath path, string searchPattern)
         {
             return Directory.GetFiles(path.ToString(), searchPattern, SearchOption.AllDirectories)
                 .Select(x => ParseAbsolutePath(x));
         }
 
-        public IEnumerable<AbsolutePath> GetChildren(AbsolutePath path, string searchPattern)
+        public IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, string searchPattern)
         {
             return Directory.GetFiles(path.ToString(), searchPattern, SearchOption.TopDirectoryOnly)
                 .Select(x => ParseAbsolutePath(x));
         }
 
-        public IReadOnlyObservableSet<AbsolutePath> Children(AbsolutePath path)
+        public IReadOnlyObservableSet<AbsolutePath> ObserveChildren(AbsolutePath path)
         {
             return path.Children("*");
         }
 
-        public IReadOnlyObservableSet<AbsolutePath> Children(AbsolutePath path, string pattern)
+        public IReadOnlyObservableSet<AbsolutePath> ObserveChildren(AbsolutePath path, string pattern)
         {
             return new AbsolutePathDescendants(path, pattern, false, this);
         }
 
-        public IReadOnlyObservableSet<AbsolutePath> Descendants(AbsolutePath path)
+        public IReadOnlyObservableSet<AbsolutePath> ObserveDescendants(AbsolutePath path)
         {
             return path.Descendants("*");
         }
 
-        public IReadOnlyObservableSet<AbsolutePath> Descendants(AbsolutePath path, string pattern)
+        public IReadOnlyObservableSet<AbsolutePath> ObserveDescendants(AbsolutePath path, string pattern)
         {
             return new AbsolutePathDescendants(path, pattern, true, this);
         }
@@ -112,11 +112,13 @@ namespace IoFluently
         {
             var maybeFileStream = pathSpec.TryOpen(fileMode, fileAccess, fileShare);
             if (maybeFileStream.HasValue)
+            {
                 using (maybeFileStream.Value)
                 {
                     return ReadLines(maybeFileStream.Value, encoding, detectEncodingFromByteOrderMarks, bufferSize,
                         leaveOpen);
                 }
+            }
 
             return EnumerableUtility.EmptyArray<string>();
         }
@@ -661,7 +663,7 @@ namespace IoFluently
             }
         }
 
-        public IEnumerable<AbsolutePath> GetChildren(AbsolutePath path, bool includeFolders = true, bool includeFiles = true)
+        public IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, bool includeFolders = true, bool includeFiles = true)
         {
             if (!path.IsFolder()) return ImmutableArray<AbsolutePath>.Empty;
 
@@ -678,12 +680,12 @@ namespace IoFluently
 
         public IEnumerable<AbsolutePath> GetFiles(AbsolutePath path)
         {
-            return GetChildren(path, false);
+            return EnumerateChildren(path, false);
         }
 
         public IEnumerable<AbsolutePath> GetFolders(AbsolutePath path)
         {
-            return GetChildren(path, true, false);
+            return EnumerateChildren(path, true, false);
         }
 
         public AbsolutePath CreateEmptyFile(AbsolutePath path)

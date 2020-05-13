@@ -71,11 +71,11 @@ namespace IoFluently
             IEnumerable<AbsolutePath> paths);
 
         IEnumerable<TreeTraversal<string, AbsolutePath>> TraverseDescendants(AbsolutePath path);
-        IEnumerable<AbsolutePath> GetDescendants(AbsolutePath path);
-        IEnumerable<AbsolutePath> GetDescendants(AbsolutePath path, string searchPattern);
-        IEnumerable<AbsolutePath> GetChildren(AbsolutePath path, string searchPattern);
+        IEnumerable<AbsolutePath> EnumerateDescendants(AbsolutePath path);
+        IEnumerable<AbsolutePath> EnumerateDescendants(AbsolutePath path, string searchPattern);
+        IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, string searchPattern);
         IDictionaryChangesStrict<AbsolutePath, PathType> ToLiveLinq(AbsolutePath root, bool includeFileContentChanges = true, PathObservationMethod observationMethod = PathObservationMethod.Default);
-        IEnumerable<AbsolutePath> GetChildren(AbsolutePath path, bool includeFolders = true, bool includeFiles = true);
+        IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, bool includeFolders = true, bool includeFiles = true);
         IEnumerable<AbsolutePath> GetFiles(AbsolutePath path);
         IEnumerable<AbsolutePath> GetFolders(AbsolutePath path);
         AbsolutePath CreateEmptyFile(AbsolutePath path);
@@ -172,10 +172,10 @@ namespace IoFluently
         void WriteAllLines(AbsolutePath path, byte[] bytes);
         IEnumerable<string> ReadLines(AbsolutePath path);
         string ReadAllText(AbsolutePath path);
-        IReadOnlyObservableSet<AbsolutePath> Children(AbsolutePath path);
-        IReadOnlyObservableSet<AbsolutePath> Children(AbsolutePath path, string pattern);
-        IReadOnlyObservableSet<AbsolutePath> Descendants(AbsolutePath path);
-        IReadOnlyObservableSet<AbsolutePath> Descendants(AbsolutePath path, string pattern);
+        IReadOnlyObservableSet<AbsolutePath> ObserveChildren(AbsolutePath path);
+        IReadOnlyObservableSet<AbsolutePath> ObserveChildren(AbsolutePath path, string pattern);
+        IReadOnlyObservableSet<AbsolutePath> ObserveDescendants(AbsolutePath path);
+        IReadOnlyObservableSet<AbsolutePath> ObserveDescendants(AbsolutePath path, string pattern);
         IObservable<Unit> ObserveChanges(AbsolutePath path);
         IObservable<Unit> ObserveChanges(AbsolutePath path, NotifyFilters filters);
         IObservable<PathType> ObservePathType(AbsolutePath path);

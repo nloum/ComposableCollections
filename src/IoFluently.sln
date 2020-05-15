@@ -8,12 +8,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoFluently.Test", "IoFluent
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoFluently.Documentation", "IoFluently.Documentation\IoFluently.Documentation.csproj", "{54FBB345-DC93-4B91-A4F0-0FC092D23CEE}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "..\build\_build.csproj", "{84EA3669-FD2E-4C68-B21C-9A088890410E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{84EA3669-FD2E-4C68-B21C-9A088890410E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84EA3669-FD2E-4C68-B21C-9A088890410E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{18F98FB5-3B5D-4004-AA5B-96DAC4C2AEE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{18F98FB5-3B5D-4004-AA5B-96DAC4C2AEE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{18F98FB5-3B5D-4004-AA5B-96DAC4C2AEE2}.Release|Any CPU.ActiveCfg = Release|Any CPU

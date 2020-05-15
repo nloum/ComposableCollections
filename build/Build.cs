@@ -183,7 +183,7 @@ class Build : NukeBuild
             DotNetPack(s => s
                 .EnableNoRestore()
                 .EnableNoBuild()
-				.SetProject(Solution)
+				.SetProject(PackageProject)
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
                 .SetVersion(GitVersion.NuGetVersionV2)

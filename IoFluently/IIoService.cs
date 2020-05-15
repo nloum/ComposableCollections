@@ -114,12 +114,12 @@ namespace IoFluently
         /// <returns></returns>
         IMaybe<AbsolutePath> TryWithExtension(AbsolutePath path, string differentExtension);
 
-        IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation);
-        IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation);
-        IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation);
-        IAbsolutePathTranslation Move(IAbsolutePathTranslation translation);
-        IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation);
-        IAbsolutePathTranslation MoveFolder(IAbsolutePathTranslation translation);
+        IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation, bool overwrite = false);
+        IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation, bool overwrite = false);
+        IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation, bool overwrite = false);
+        IAbsolutePathTranslation Move(IAbsolutePathTranslation translation, bool overwrite = false);
+        IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation, bool overwrite = false);
+        IAbsolutePathTranslation MoveFolder(IAbsolutePathTranslation translation, bool overwrite = false);
         bool ContainsFiles(AbsolutePath path);
         bool FolderContainsFiles(AbsolutePath path);
         IMaybe<AbsolutePath> TryGetCommonAncestry(AbsolutePath path1, AbsolutePath path2);

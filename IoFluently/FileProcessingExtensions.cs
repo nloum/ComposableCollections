@@ -3,11 +3,20 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
+using UtilityDisposables;
 
 namespace IoFluently
 {
-    public static class FileWithKnownFormatExtensions
+    public static class FileProcessingExtensions
     {
+        public static IDisposable TemporaryChanges(this AbsolutePath path)
+        {
+            var translation = path.Translate(path.Parent(), path.WithExtension(x => x + ".backup"));
+            translation.Copy();
+
+            return new AnonymousDisposable(() => translation.Invert().Move(true));
+        }
+        
         public static IFileWithKnownFormatSync<T> AsFile<T>(this AbsolutePath path, Func<AbsolutePath, T> read)
         {
             return new FileWithKnownFormatSync<T>(path, read);

@@ -19,6 +19,11 @@ namespace IoFluently
         public AbsolutePath Source { get; }
         public AbsolutePath Destination { get; }
 
+        public IAbsolutePathTranslation Invert()
+        {
+            return new AbsolutePathTranslation(Destination, Source, IoService);
+        }
+
         public IEnumerator<CalculatedAbsolutePathTranslation> GetEnumerator()
         {
             return Source.Children()

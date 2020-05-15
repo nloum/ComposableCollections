@@ -9,17 +9,22 @@ namespace IoFluently
     {
         private readonly AbsolutePathTranslation _actualValues;
 
-        internal CalculatedAbsolutePathTranslation(AbsolutePath pathSpec, AbsolutePath ancestorSource, AbsolutePath ancestorDestination,
+        internal CalculatedAbsolutePathTranslation(AbsolutePath absolutePath, AbsolutePath ancestorSource, AbsolutePath ancestorDestination,
             IIoService ioService)
         {
-            AbsolutePath = pathSpec;
+            AbsoluteAbsolutePath = absolutePath;
             AncestorSource = ancestorSource;
             AncestorDestination = ancestorDestination;
             IoService = ioService;
             _actualValues = Calculate();
         }
 
-        public AbsolutePath AbsolutePath { get; }
+        public IAbsolutePathTranslation Invert()
+        {
+            return new CalculatedAbsolutePathTranslation(AbsoluteAbsolutePath, AncestorDestination, AncestorSource, IoService);
+        }
+
+        public AbsolutePath AbsoluteAbsolutePath { get; }
         public AbsolutePath AncestorSource { get; }
         public AbsolutePath AncestorDestination { get; }
 
@@ -38,23 +43,23 @@ namespace IoFluently
                 throw new InvalidOperationException(
                     string.Format(
                         "An attempt was made to calculate the path if a file (\"{0}\") was copied from \"{1}\" to \"{2}\". It is illegal to have the destination and source directories be the same, which is true in this case.",
-                        AbsolutePath, AncestorSource, AncestorDestination));
-            if (!AbsolutePath.IsDescendantOf(AncestorSource))
+                        AbsoluteAbsolutePath, AncestorSource, AncestorDestination));
+            if (!AbsoluteAbsolutePath.IsDescendantOf(AncestorSource))
                 throw new InvalidOperationException(
                     string.Format(
                         "The path \"{2}\" cannot be copied to \"{1}\" because the path isn't under the source path: \"{0}\"",
-                        AncestorSource, AncestorDestination, AbsolutePath));
-            if (AncestorSource.Equals(AbsolutePath))
+                        AncestorSource, AncestorDestination, AbsoluteAbsolutePath));
+            if (AncestorSource.Equals(AbsoluteAbsolutePath))
                 return new AbsolutePathTranslation(AncestorSource, AncestorDestination, IoService);
-            var relativePath = AbsolutePath.RelativeTo(AncestorSource);
+            var relativePath = AbsoluteAbsolutePath.RelativeTo(AncestorSource);
             var pathToBeCopiedDestination = AncestorDestination.TryDescendant(relativePath).Value;
-            return new AbsolutePathTranslation(AbsolutePath, pathToBeCopiedDestination, IoService);
+            return new AbsolutePathTranslation(AbsoluteAbsolutePath, pathToBeCopiedDestination, IoService);
         }
 
         protected bool Equals(CalculatedAbsolutePathTranslation other)
         {
             return Equals(AncestorDestination, other.AncestorDestination) &&
-                   Equals(AncestorSource, other.AncestorSource) && Equals(AbsolutePath, other.AbsolutePath);
+                   Equals(AncestorSource, other.AncestorSource) && Equals(AbsoluteAbsolutePath, other.AbsoluteAbsolutePath);
         }
 
         public override bool Equals(object obj)
@@ -71,7 +76,7 @@ namespace IoFluently
             {
                 var hashCode = AncestorDestination != null ? AncestorDestination.GetHashCode() : 0;
                 hashCode = (hashCode * 397) ^ (AncestorSource != null ? AncestorSource.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (AbsolutePath != null ? AbsolutePath.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (AbsoluteAbsolutePath != null ? AbsoluteAbsolutePath.GetHashCode() : 0);
                 return hashCode;
             }
         }

@@ -193,34 +193,39 @@ namespace IoFluently
             return path.IoService.TryWithExtension(path, differentExtension).Value;
         }
 
-        public static IAbsolutePathTranslation Copy(this IAbsolutePathTranslation translation)
+        public static AbsolutePath WithExtension(this AbsolutePath path, Func<string, string> differentExtension)
         {
-            return translation.IoService.Copy(translation);
+            return path.IoService.TryWithExtension(path, differentExtension(path.Extension.ValueOrDefault ?? string.Empty)).Value;
         }
 
-        public static IAbsolutePathTranslation CopyFile(this IAbsolutePathTranslation translation)
+        public static IAbsolutePathTranslation Copy(this IAbsolutePathTranslation translation, bool overwrite = false)
         {
-            return translation.IoService.CopyFile(translation);
+            return translation.IoService.Copy(translation, overwrite);
         }
 
-        public static IAbsolutePathTranslation CopyFolder(this IAbsolutePathTranslation translation)
+        public static IAbsolutePathTranslation CopyFile(this IAbsolutePathTranslation translation, bool overwrite = false)
         {
-            return translation.IoService.CopyFolder(translation);
+            return translation.IoService.CopyFile(translation, overwrite);
         }
 
-        public static IAbsolutePathTranslation Move(this IAbsolutePathTranslation translation)
+        public static IAbsolutePathTranslation CopyFolder(this IAbsolutePathTranslation translation, bool overwrite = false)
         {
-            return translation.IoService.Move(translation);
+            return translation.IoService.CopyFolder(translation, overwrite);
         }
 
-        public static IAbsolutePathTranslation MoveFile(this IAbsolutePathTranslation translation)
+        public static IAbsolutePathTranslation Move(this IAbsolutePathTranslation translation, bool overwrite = false)
         {
-            return translation.IoService.MoveFile(translation);
+            return translation.IoService.Move(translation, overwrite);
         }
 
-        public static IAbsolutePathTranslation MoveFolder(this IAbsolutePathTranslation translation)
+        public static IAbsolutePathTranslation MoveFile(this IAbsolutePathTranslation translation, bool overwrite = false)
         {
-            return translation.IoService.MoveFolder(translation);
+            return translation.IoService.MoveFile(translation, overwrite);
+        }
+
+        public static IAbsolutePathTranslation MoveFolder(this IAbsolutePathTranslation translation, bool overwrite = false)
+        {
+            return translation.IoService.MoveFolder(translation, overwrite);
         }
 
         public static bool ContainsFiles(this AbsolutePath path)
@@ -374,6 +379,12 @@ namespace IoFluently
             source.IoService.RenameTo(source, target);
         }
 
+        public static AbsolutePaths GlobFiles(this AbsolutePath path, string pattern)
+        {
+            Func<AbsolutePath, IEnumerable<RelativePath>> patternFunc = absPath => absPath.GetChildren(pattern).Select(x => new RelativePath(x.Flags, x.DirectorySeparator, x.IoService, new[]{x.Name}));
+            return path / patternFunc;
+        }
+        
         public static bool Exists(this AbsolutePath path)
         {
             return path.IoService.Exists(path);

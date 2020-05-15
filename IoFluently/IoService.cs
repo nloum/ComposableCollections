@@ -857,15 +857,15 @@ namespace IoFluently
             return TryParseAbsolutePath(Path.ChangeExtension(path.ToString(), differentExtension));
         }
 
-        public IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation)
+        public IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation, bool overwrite = false)
         {
             switch (translation.Source.GetPathType())
             {
                 case PathType.File:
-                    translation.CopyFile();
+                    translation.CopyFile(overwrite);
                     break;
                 case PathType.Folder:
-                    translation.CopyFolder();
+                    translation.CopyFolder(overwrite);
                     break;
                 case PathType.None:
                     throw new IOException(
@@ -877,23 +877,41 @@ namespace IoFluently
             return translation;
         }
 
-        public IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation)
+        public IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation, bool overwrite = false)
         {
+            if (translation.Destination.Exists())
+            {
+                if (!overwrite)
+                {
+                    throw new IOException($"An attempt was made to move a file from \"{0}\" to \"{1}\" without overwriting the destination, but the destination already exists");
+                }
+                else
+                {
+                    translation.Destination.Delete();
+                }
+            }
             if (translation.Source.GetPathType() != PathType.File)
                 throw new IOException(string.Format(
                     "An attempt was made to copy a file from \"{0}\" to \"{1}\" but the source path is not a file.",
-                    translation.Source, translation.Destination));
-            if (translation.Destination.GetPathType() != PathType.None)
-                throw new IOException(string.Format(
-                    "An attempt was made to copy \"{0}\" to \"{1}\" but the destination path exists.",
                     translation.Source, translation.Destination));
             translation.Destination.TryParent().Value.Create(PathType.Folder);
             File.Copy(translation.Source.ToString(), translation.Destination.ToString());
             return translation;
         }
 
-        public IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation)
+        public IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation, bool overwrite = false)
         {
+            if (translation.Destination.Exists())
+            {
+                if (!overwrite)
+                {
+                    throw new IOException($"An attempt was made to move a file from \"{0}\" to \"{1}\" without overwriting the destination, but the destination already exists");
+                }
+                else
+                {
+                    translation.Destination.Delete();
+                }
+            }
             if (translation.Source.GetPathType() != PathType.Folder)
                 throw new IOException(string.Format(
                     "An attempt was made to copy a folder from \"{0}\" to \"{1}\" but the source path is not a folder.",
@@ -902,15 +920,15 @@ namespace IoFluently
             return translation;
         }
 
-        public IAbsolutePathTranslation Move(IAbsolutePathTranslation translation)
+        public IAbsolutePathTranslation Move(IAbsolutePathTranslation translation, bool overwrite = false)
         {
             switch (translation.Source.GetPathType())
             {
                 case PathType.File:
-                    translation.MoveFile();
+                    translation.MoveFile(overwrite);
                     break;
                 case PathType.Folder:
-                    translation.MoveFolder();
+                    translation.MoveFolder(overwrite);
                     break;
                 case PathType.None:
                     throw new IOException(
@@ -922,8 +940,19 @@ namespace IoFluently
             return translation;
         }
 
-        public IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation)
+        public IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation, bool overwrite = false)
         {
+            if (translation.Destination.Exists())
+            {
+                if (!overwrite)
+                {
+                    throw new IOException($"An attempt was made to move a file from \"{0}\" to \"{1}\" without overwriting the destination, but the destination already exists");
+                }
+                else
+                {
+                    translation.Destination.Delete();
+                }
+            }
             if (translation.Source.GetPathType() != PathType.File)
                 throw new IOException(string.Format(
                     "An attempt was made to move a file from \"{0}\" to \"{1}\" but the source path is not a file.",
@@ -941,8 +970,19 @@ namespace IoFluently
             return translation;
         }
 
-        public IAbsolutePathTranslation MoveFolder(IAbsolutePathTranslation translation)
+        public IAbsolutePathTranslation MoveFolder(IAbsolutePathTranslation translation, bool overwrite = false)
         {
+            if (translation.Destination.Exists())
+            {
+                if (!overwrite)
+                {
+                    throw new IOException($"An attempt was made to move a file from \"{0}\" to \"{1}\" without overwriting the destination, but the destination already exists");
+                }
+                else
+                {
+                    translation.Destination.Delete();
+                }
+            }
             if (translation.Source.GetPathType() != PathType.Folder)
                 throw new IOException(string.Format(
                     "An attempt was made to move a folder from \"{0}\" to \"{1}\" but the source path is not a folder.",

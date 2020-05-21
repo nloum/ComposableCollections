@@ -7,6 +7,14 @@ namespace IoFluently.Test
     [TestClass]
     public class IoServiceTests
     {
+        [TestMethod]
+        public void SimplifyShouldNotChangeSimplePath()
+        {
+            var uut = CreateUnitUnderTest();
+            var simplified = uut.CurrentDirectory.Simplify();
+            uut.CurrentDirectory.ToString().Should().Be(simplified.ToString());
+        }
+        
         private IIoService CreateUnitUnderTest()
         {
             return new IoService(new ReactiveProcessFactory());

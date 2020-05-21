@@ -557,7 +557,7 @@ namespace IoFluently
                         error = "Must not point to an ancestor of the filesystem root";
                         return false;
                     }
-
+                    
                     pathSpec = new AbsolutePath(flags, "/", this, components);
                 }
 
@@ -1886,7 +1886,8 @@ namespace IoFluently
 
         public AbsolutePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo)
         {
-            var pathStr = path.Simplify().ToString();
+            var simplified = path.Simplify();
+            var pathStr = simplified.ToString();
             var relativeToStr = relativeTo.Simplify().ToString();
 
             var common = path.TryCommonWith(relativeTo);
@@ -1998,7 +1999,7 @@ namespace IoFluently
             for (var i = 0; i < result.Count; i++)
             {
                 sb.Append(result[i]);
-                if (result[i] != "\\" && i != result.Count - 1)
+                if (result[i] != "\\" && result[i] != "/" && i != result.Count - 1)
                     sb.Append(path.DirectorySeparator);
             }
 

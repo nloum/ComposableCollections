@@ -13,7 +13,16 @@ namespace IoFluently.Examples
         {
             var service = new IoService(new ReactiveProcessFactory());
             
-            var repositoryRoot = service.CurrentDirectory.Ancestors().First(ancestor => (ancestor / "IoFluently.sln").Exists());
+            var repositoryRoot = service.CurrentDirectory.Ancestors().First(ancestor => (ancestor / ".git").Exists());
+
+            var readme = repositoryRoot / "readme.md";
+            using (readme.TemporaryChanges())
+            {
+                readme.Delete();
+                Console.WriteLine("Readme should not exist: " + readme.Exists());
+            }
+
+            Console.WriteLine("Readme should exist: " + readme.Exists());
             
             var todoRegex = new Regex(@"TODO:(?<todoDescription>[^\n]+)");
             

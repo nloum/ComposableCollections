@@ -11,7 +11,8 @@ namespace IoFluently
     {
         public static IDisposable TemporaryChanges(this AbsolutePath path)
         {
-            var translation = path.Translate(path.Parent(), path.WithExtension(x => x + ".backup"));
+            var backupPath = path.WithExtension(x => x + ".backup");
+            var translation = path.Translate(backupPath);
             translation.Copy();
 
             return new AnonymousDisposable(() => translation.Invert().Move(true));

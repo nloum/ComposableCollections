@@ -140,7 +140,7 @@ namespace IoFluently
             for (var i = 0; i < Path.Count; i++)
             {
                 sb.Append(Path[i]);
-                if (Path[i] != DirectorySeparator && i + 1 != Path.Count)
+                if (Path[i] != DirectorySeparator && i + 1 != Path.Count && sb.ToString() != DirectorySeparator)
                     sb.Append(DirectorySeparator);
             }
 

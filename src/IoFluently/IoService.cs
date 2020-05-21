@@ -870,8 +870,7 @@ namespace IoFluently
                 case PathType.None:
                     throw new IOException(
                         string.Format(
-                            "An attempt was made to copy \"{0}\" to \"{1}\", but the source path doesn't exist.",
-                            translation.Source, translation.Destination));
+                            $"An attempt was made to copy \"{translation.Source}\" to \"{translation.Destination}\", but the source path doesn't exist."));
             }
 
             return translation;
@@ -883,7 +882,7 @@ namespace IoFluently
             {
                 if (!overwrite)
                 {
-                    throw new IOException($"An attempt was made to move a file from \"{0}\" to \"{1}\" without overwriting the destination, but the destination already exists");
+                    throw new IOException($"An attempt was made to move a file from \"{translation.Source}\" to \"{translation.Destination}\" without overwriting the destination, but the destination already exists");
                 }
                 else
                 {
@@ -892,8 +891,7 @@ namespace IoFluently
             }
             if (translation.Source.GetPathType() != PathType.File)
                 throw new IOException(string.Format(
-                    "An attempt was made to copy a file from \"{0}\" to \"{1}\" but the source path is not a file.",
-                    translation.Source, translation.Destination));
+                    "An attempt was made to copy a file from \"{translation.Source}\" to \"{translation.Destination}\" but the source path is not a file."));
             translation.Destination.TryParent().Value.Create(PathType.Folder);
             File.Copy(translation.Source.ToString(), translation.Destination.ToString());
             return translation;
@@ -905,7 +903,7 @@ namespace IoFluently
             {
                 if (!overwrite)
                 {
-                    throw new IOException($"An attempt was made to move a file from \"{0}\" to \"{1}\" without overwriting the destination, but the destination already exists");
+                    throw new IOException($"An attempt was made to move a file from \"{translation.Source}\" to \"{translation.Destination}\" without overwriting the destination, but the destination already exists");
                 }
                 else
                 {
@@ -914,8 +912,7 @@ namespace IoFluently
             }
             if (translation.Source.GetPathType() != PathType.Folder)
                 throw new IOException(string.Format(
-                    "An attempt was made to copy a folder from \"{0}\" to \"{1}\" but the source path is not a folder.",
-                    translation.Source, translation.Destination));
+                    $"An attempt was made to copy a folder from \"{translation.Source}\" to \"{translation.Destination}\" but the source path is not a folder."));
             translation.Destination.Create(PathType.Folder);
             return translation;
         }
@@ -933,8 +930,7 @@ namespace IoFluently
                 case PathType.None:
                     throw new IOException(
                         string.Format(
-                            "An attempt was made to move \"{0}\" to \"{1}\", but the source path doesn't exist.",
-                            translation.Source, translation.Destination));
+                            $"An attempt was made to move \"{translation.Source}\" to \"{translation.Destination}\", but the source path doesn't exist."));
             }
 
             return translation;
@@ -946,7 +942,7 @@ namespace IoFluently
             {
                 if (!overwrite)
                 {
-                    throw new IOException($"An attempt was made to move a file from \"{0}\" to \"{1}\" without overwriting the destination, but the destination already exists");
+                    throw new IOException($"An attempt was made to move a file from \"{translation.Source}\" to \"{translation.Destination}\" without overwriting the destination, but the destination already exists");
                 }
                 else
                 {
@@ -955,16 +951,13 @@ namespace IoFluently
             }
             if (translation.Source.GetPathType() != PathType.File)
                 throw new IOException(string.Format(
-                    "An attempt was made to move a file from \"{0}\" to \"{1}\" but the source path is not a file.",
-                    translation.Source, translation.Destination));
+                    $"An attempt was made to move a file from \"{translation.Source}\" to \"{translation.Destination}\" but the source path is not a file."));
             if (translation.Destination.GetPathType() != PathType.None)
                 throw new IOException(string.Format(
-                    "An attempt was made to move \"{0}\" to \"{1}\" but the destination path exists.",
-                    translation.Source, translation.Destination));
+                    $"An attempt was made to move \"{translation.Source}\" to \"{translation.Destination}\" but the destination path exists."));
             if (translation.Destination.IsDescendantOf(translation.Source))
                 throw new IOException(string.Format(
-                    "An attempt was made to move a file from \"{0}\" to \"{1}\" but the destination path is a sub-path of the source path.",
-                    translation.Source, translation.Destination));
+                    $"An attempt was made to move a file from \"{translation.Source}\" to \"{translation.Destination}\" but the destination path is a sub-path of the source path."));
             translation.Destination.TryParent().Value.Create(PathType.Folder);
             File.Move(translation.Source.ToString(), translation.Destination.ToString());
             return translation;
@@ -976,7 +969,7 @@ namespace IoFluently
             {
                 if (!overwrite)
                 {
-                    throw new IOException($"An attempt was made to move a file from \"{0}\" to \"{1}\" without overwriting the destination, but the destination already exists");
+                    throw new IOException($"An attempt was made to move a file from \"{translation.Source}\" to \"{translation.Destination}\" without overwriting the destination, but the destination already exists");
                 }
                 else
                 {
@@ -985,20 +978,16 @@ namespace IoFluently
             }
             if (translation.Source.GetPathType() != PathType.Folder)
                 throw new IOException(string.Format(
-                    "An attempt was made to move a folder from \"{0}\" to \"{1}\" but the source path is not a folder.",
-                    translation.Source, translation.Destination));
+                    $"An attempt was made to move a folder from \"{translation.Source}\" to \"{translation.Destination}\" but the source path is not a folder."));
             if (translation.Destination.GetPathType() == PathType.File)
                 throw new IOException(string.Format(
-                    "An attempt was made to move \"{0}\" to \"{1}\" but the destination path is a file.",
-                    translation.Source, translation.Destination));
+                    $"An attempt was made to move \"{translation.Source}\" to \"{translation.Destination}\" but the destination path is a file."));
             if (translation.Destination.IsDescendantOf(translation.Source))
                 throw new IOException(string.Format(
-                    "An attempt was made to move a file from \"{0}\" to \"{1}\" but the destination path is a sub-path of the source path.",
-                    translation.Source, translation.Destination));
+                    $"An attempt was made to move a file from \"{translation.Source}\" to \"{translation.Destination}\" but the destination path is a sub-path of the source path."));
             if (translation.Source.Children().Any())
                 throw new IOException(string.Format(
-                    "An attempt was made to move the non-empty folder \"{0}\". This is not allowed because all the files should be moved first, and only then can the folder be moved, because the move operation deletes the source folder, which would of course also delete the files and folders within the source folder.",
-                    translation.Source));
+                    $"An attempt was made to move the non-empty folder \"{translation.Source}\". This is not allowed because all the files should be moved first, and only then can the folder be moved, because the move operation deletes the source folder, which would of course also delete the files and folders within the source folder."));
             translation.Destination.Create(PathType.Folder);
             if (!translation.Source.Children().Any())
                 translation.Source.DeleteFolder();

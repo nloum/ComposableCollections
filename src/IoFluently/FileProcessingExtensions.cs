@@ -86,7 +86,7 @@ namespace IoFluently
             return path.AsFile(absPath => absPath.ReadAllText(), (absPath, text) => absPath.WriteAllText(text));
         }
         
-        public static IFileWithKnownFormatSync<XmlDocument> AsXmlFile(this AbsolutePath path)
+        public static IFileWithKnownFormatSync<XmlDocument, XmlDocument> AsXmlFile(this AbsolutePath path)
         {
             return path.AsFile(absPath =>
             {

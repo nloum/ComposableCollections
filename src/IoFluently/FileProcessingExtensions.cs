@@ -13,7 +13,7 @@ namespace IoFluently
         {
             var backupPath = path.WithExtension(x => x + ".backup");
             var translation = path.Translate(backupPath);
-            translation.Copy();
+            translation.Copy(true);
 
             return new AnonymousDisposable(() => translation.Invert().Move(true));
         }

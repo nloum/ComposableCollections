@@ -50,10 +50,10 @@ namespace IoFluently
                     .ToDictionaryLiveLinq(x => x, x => x.GetPathType()).KeysAsSet();
             }
 
-            return ToLiveLinqWithFsWatch(_path, includeFileContentChanges, observationMethod).KeysAsSet();
+            return ToLiveLinqWithFsWatch(_path, includeFileContentChanges, observationMethod);
         }
 
-        private IDictionaryChangesStrict<AbsolutePath, PathType> ToLiveLinqWithFsWatch(AbsolutePath root, bool includeFileContentChanges, PathObservationMethod observationMethod)
+        private ISetChanges<AbsolutePath> ToLiveLinqWithFsWatch(AbsolutePath root, bool includeFileContentChanges, PathObservationMethod observationMethod)
         {
             // TODO - add support for FSWatch events on Windows and Linux as well. Although I think I already support all the ones on Linux
             // and the FileSystemWatcher class on Windows should be sufficient, it would be nice to have this support for
@@ -84,7 +84,8 @@ namespace IoFluently
                 throw new ArgumentException($"Unknown path observation method: {observationMethod}");
             }
 
-            var initialState = GetChildren(root).ToImmutableDictionary(x => x, x => x.GetPathType());
+            var initialState = this
+                .ToImmutableDictionary(x => x, x => x.GetPathType());
 
             var resultObservable = proc.StandardOutput
                 .Scan(new {StringBuilder = new StringBuilder(), BuiltString = (string) null},
@@ -157,12 +158,19 @@ namespace IoFluently
                         }
                     })
                 .SelectMany(state => state.LastEvents);
+            
             resultObservable = Observable.Return(Utility.DictionaryAdd(initialState))
                 .Concat(resultObservable);
-                
-            // TODO - add pattern support for fswatch
             
-            return resultObservable.ToLiveLinq();
+            var result = resultObservable.ToLiveLinq().KeysAsSet();
+            
+            if (!string.IsNullOrWhiteSpace(_pattern))
+            {
+                var regex = IoService.FileNamePatternToRegex(_pattern);
+                result = result.Where(path => regex.IsMatch(path.Name));
+            }
+            
+            return result;
         }
 
         private ISetChanges<AbsolutePath> ToLiveLinqWithFileSystemWatcher(AbsolutePath root, bool includeFileContentChanges)

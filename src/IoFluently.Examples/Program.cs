@@ -19,13 +19,11 @@ namespace IoFluently.Examples
             
             var changes = repositoryRoot.Descendants()
                 .ToLiveLinq()
-                .ToDictionaryLiveLinq(abs => abs, abs => abs.GetPathType())
-                .Where((path, pathType) => path.HasExtension(".md") && pathType == PathType.File)
-                .SelectKey((path, pathType) => path.AsTextFile().Read().Lines
+                .Where(path => path.HasExtension(".md") && path.GetPathType() == PathType.File)
+                .Select(path => path.AsTextFile().Read().Lines
                     .Select(line => todoRegex.Match(line))
                     .Where(match => match.Success)
                     .Select(match => new { match, path }))
-                .KeysAsSet()
                 .SelectMany(x => x);
 
             changes.AsObservable().Subscribe(x =>

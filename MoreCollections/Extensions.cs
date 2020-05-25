@@ -2,12 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 using GenericNumbers;
 
 namespace MoreCollections
 {
     public static class Extensions
     {
+        public static IDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(
+            this IDictionary<TKey, TValue> dictionary, Func<TKey, TValue> defaultValue, bool persist)
+        {
+            return new DictionaryGetOrDefault<TKey, TValue>(dictionary, defaultValue, persist);
+        }
+        
         public static IReadOnlyList<T> SkipEfficiently<T>(this IReadOnlyList<T> source, int skip)
         {
             return new SkipReadOnlyList<T>(source, skip);

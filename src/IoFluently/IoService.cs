@@ -667,13 +667,15 @@ namespace IoFluently
         {
             if (!path.IsFolder()) return ImmutableArray<AbsolutePath>.Empty;
 
-            if (includeFiles && includeFolders)
-                return Directory.GetFileSystemEntries(path.AsDirectoryInfo().FullName).Select(x => ParseAbsolutePath(x));
+            var fullName = path.AsDirectoryInfo().FullName;
 
-            if (includeFiles) return Directory.GetFiles(path.AsDirectoryInfo().FullName).Select(x => ParseAbsolutePath(x));
+            if (includeFiles && includeFolders)
+                return Directory.GetFileSystemEntries(fullName).Select(x => ParseAbsolutePath(x));
+
+            if (includeFiles) return Directory.GetFiles(fullName).Select(x => ParseAbsolutePath(x));
 
             if (includeFolders)
-                return Directory.GetDirectories(path.AsDirectoryInfo().FullName).Select(x => ParseAbsolutePath(x));
+                return Directory.GetDirectories(fullName).Select(x => ParseAbsolutePath(x));
 
             return ImmutableArray<AbsolutePath>.Empty;
         }

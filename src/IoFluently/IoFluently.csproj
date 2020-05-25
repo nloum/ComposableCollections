@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageVersion>1.0.0-alpha018</PackageVersion>
+    <PackageVersion>1.0.0-alpha019</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LiveLinq" Version="1.0.0-beta016" />
+    <PackageReference Include="LiveLinq" Version="1.0.0-beta017" />
     <PackageReference Include="MoreCollections" Version="1.0.0-beta004" />
     <PackageReference Include="ReactiveProcesses" Version="1.0.0-alpha003" />
     <PackageReference Include="SimpleMonads" Version="1.0.0-beta002" />

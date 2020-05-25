@@ -37,61 +37,6 @@ namespace IoFluently
         {
             return path.Extension.HasValue;
         }
-        
-        public static IDictionaryChangesStrict<AbsolutePath, PathType> ToLiveLinq(this AbsolutePath root,
-            bool includeFileContentChanges = true, PathObservationMethod observationMethod = PathObservationMethod.Default)
-        {
-            return root.IoService.ToLiveLinq(root, includeFileContentChanges, observationMethod);
-        }
-
-        /// <summary>
-        /// Gets the descendants of the specified folder that match the specified search pattern,
-        /// even if they are nested in subfolders of the specified folder.
-        /// </summary>
-        /// <param name="path">The path to the folder</param>
-        /// <param name="searchPattern">E.g., *.csproj</param>
-        /// <returns></returns>
-        public static IEnumerable<AbsolutePath> GetDescendants(this AbsolutePath path, string searchPattern)
-        {
-            return path.IoService.EnumerateDescendants(path, searchPattern);
-        }
-
-        /// <summary>
-        /// Gets the immediate descendants of the specified folder that match the specified search pattern.
-        /// </summary>
-        /// <param name="path">The path to the folder</param>
-        /// <param name="searchPattern">E.g., *.csproj</param>
-        /// <returns></returns>
-        public static IEnumerable<AbsolutePath> GetChildren(this AbsolutePath path, string searchPattern)
-        {
-            return path.IoService.EnumerateChildren(path, searchPattern);
-        }
-
-        public static IEnumerable<AbsolutePath> GetDescendants(this AbsolutePath path)
-        {
-            return path.IoService.EnumerateDescendants(path);
-        }
-
-        public static IEnumerable<TreeTraversal<string, AbsolutePath>> TraverseDescendants(this AbsolutePath path)
-        {
-            return path.IoService.TraverseDescendants(path);
-        }
-
-        public static IEnumerable<AbsolutePath> GetChildren(this AbsolutePath path, bool includeFolders = true,
-            bool includeFiles = true)
-        {
-            return path.IoService.EnumerateChildren(path, includeFolders, includeFiles);
-        }
-
-        public static IEnumerable<AbsolutePath> GetFiles(this AbsolutePath path)
-        {
-            return path.IoService.GetFiles(path);
-        }
-
-        public static IEnumerable<AbsolutePath> GetFolders(this AbsolutePath path)
-        {
-            return path.IoService.GetFolders(path);
-        }
 
         public static AbsolutePath CreateEmptyFile(this AbsolutePath path)
         {
@@ -381,7 +326,7 @@ namespace IoFluently
 
         public static AbsolutePaths GlobFiles(this AbsolutePath path, string pattern)
         {
-            Func<AbsolutePath, IEnumerable<RelativePath>> patternFunc = absPath => absPath.GetChildren(pattern).Select(x => new RelativePath(x.Flags, x.DirectorySeparator, x.IoService, new[]{x.Name}));
+            Func<AbsolutePath, IEnumerable<RelativePath>> patternFunc = absPath => absPath.Children(pattern).Select(x => new RelativePath(x.Flags, x.DirectorySeparator, x.IoService, new[]{x.Name}));
             return path / patternFunc;
         }
         
@@ -465,26 +410,6 @@ namespace IoFluently
         public static string ReadAllText(this AbsolutePath path)
         {
             return path.IoService.ReadAllText(path);
-        }
-
-        public static IReadOnlyObservableSet<AbsolutePath> Children(this AbsolutePath path)
-        {
-            return path.IoService.ObserveChildren(path);
-        }
-
-        public static IReadOnlyObservableSet<AbsolutePath> Children(this AbsolutePath path, string pattern)
-        {
-            return path.IoService.ObserveChildren(path, pattern);
-        }
-
-        public static IReadOnlyObservableSet<AbsolutePath> Descendants(this AbsolutePath path)
-        {
-            return path.IoService.ObserveDescendants(path);
-        }
-
-        public static IReadOnlyObservableSet<AbsolutePath> Descendants(this AbsolutePath path, string pattern)
-        {
-            return path.IoService.ObserveDescendants(path, pattern);
         }
 
         public static IObservable<Unit> ObserveChanges(this AbsolutePath path)

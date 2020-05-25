@@ -10,7 +10,7 @@ using static SimpleMonads.Utility;
 
 namespace IoFluently
 {
-    public class AbsolutePath : IComparable, IEnumerable<AbsolutePath>
+    public class AbsolutePath : IComparable
     {
         public PathFlags Flags { get; }
         public string DirectorySeparator { get; }
@@ -28,6 +28,10 @@ namespace IoFluently
                 throw new ArgumentException($"The path {Path} is not absolute");
             }
         }
+
+        public AbsolutePathChildren Children(string pattern = null) => new AbsolutePathChildren(this, pattern, IoService);
+        
+        public AbsolutePathDescendants Descendants(string pattern = null) => new AbsolutePathDescendants(this, pattern, IoService);
         
         private static bool ComponentsAreAbsolute(IReadOnlyList<string> path)
         {
@@ -48,16 +52,6 @@ namespace IoFluently
             if (tp != null)
                 return CompareTo(tp);
             return GetHashCode().CompareTo(obj.GetHashCode());
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public IEnumerator<AbsolutePath> GetEnumerator()
-        {
-            return IoService.EnumerateChildren(this).GetEnumerator();
         }
 
         private IEnumerable<string> SplitComponent(string component)

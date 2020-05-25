@@ -17,7 +17,9 @@ namespace IoFluently.Examples
 
             var todoRegex = new Regex(@"TODO:(?<todoDescription>[^\n]+)");
             
-            var changes = repositoryRoot.ToLiveLinq()
+            var changes = repositoryRoot.Descendants()
+                .ToLiveLinq()
+                .ToDictionaryLiveLinq(abs => abs, abs => abs.GetPathType())
                 .Where((path, pathType) => path.HasExtension(".md") && pathType == PathType.File)
                 .SelectKey((path, pathType) => path.AsTextFile().Read().Lines
                     .Select(line => todoRegex.Match(line))

@@ -1,107 +1,27 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Reactive.Linq;
-using LiveLinq;
-using LiveLinq.Core;
-using LiveLinq.Set;
-using UtilityDisposables;
-using static LiveLinq.Utility;
+using System.Linq;
+using TreeLinq;
 
 namespace IoFluently
 {
-    public class AbsolutePathDescendants : IReadOnlyObservableSet<AbsolutePath>
+    public class AbsolutePathDescendants : AbsolutePathDescendantsOrChildren
     {
-        private readonly AbsolutePath _path;
-        private readonly string _pattern;
-
-        public AbsolutePathDescendants(AbsolutePath path, string pattern, bool includeSubdirectories, IIoService ioService)
+        public AbsolutePathDescendants(AbsolutePath path, string pattern, IIoService ioService) : base(path, pattern, true, ioService)
         {
-            _path = path;
-            _pattern = pattern;
-            IncludeSubdirectories = includeSubdirectories;
-            IoService = ioService;
         }
-
-        public IIoService IoService { get; }
-
-        protected bool IncludeSubdirectories { get; }
-
-        public ISetChanges<AbsolutePath> ToLiveLinq()
+        
+        public IEnumerable<TreeTraversal<string, AbsolutePath>> Traverse()
         {
-            return Observable.Create<ISetChange<AbsolutePath>>(observer =>
+            return _path.TraverseTree(x => GetChildren(x).Select(child => child.Name), (AbsolutePath node, string name, out AbsolutePath child) =>
             {
-                var _watcher = new FileSystemWatcher(_path.ToString())
-                {
-                    EnableRaisingEvents = true,
-                    IncludeSubdirectories = IncludeSubdirectories,
-                    Filter = _pattern
-                };
-
-                var renamings = Observable
-                    .FromEvent<RenamedEventArgs>(handler => _watcher.Renamed += (_, evt) => handler(evt),
-                        handler => _watcher.Renamed -= (_, evt) => handler(evt))
-                    .Publish()
-                    .RefCount()
-                    .Select(rename => new[]
-                    {
-                        SetChange(CollectionChangeType.Remove, IoService.TryParseAbsolutePath(rename.OldFullPath, _path.Flags).Value),
-                        SetChange(CollectionChangeType.Add, IoService.TryParseAbsolutePath(rename.FullPath, _path.Flags).Value)
-                    }.ToObservable())
-                    .Merge()
-                    .Subscribe(observer);
-                var deletions = Observable.FromEvent<FileSystemEventArgs>(
-                        handler => _watcher.Deleted += (_, evt) => handler(evt),
-                        handler => _watcher.Deleted -= (_, evt) => handler(evt))
-                    .Publish()
-                    .RefCount()
-                    .Select(deletion => SetChange(CollectionChangeType.Remove,
-                        IoService.TryParseAbsolutePath(deletion.FullPath, _path.Flags).Value))
-                    .Subscribe(observer);
-                var creations = Observable.FromEvent<FileSystemEventArgs>(
-                        handler => _watcher.Created += (_, evt) => handler(evt),
-                        handler => _watcher.Created -= (_, evt) => handler(evt))
-                    .Publish()
-                    .RefCount()
-                    .Select(creation => SetChange(CollectionChangeType.Add,
-                        IoService.TryParseAbsolutePath(creation.FullPath, _path.Flags).Value))
-                    .Subscribe(observer);
-
-                foreach (var childPath in AsEnumerable())
-                    observer.OnNext(SetChange(CollectionChangeType.Add, childPath));
-
-                return new AnonymousDisposable(() =>
-                {
-                    renamings.Dispose();
-                    deletions.Dispose();
-                    creations.Dispose();
-                    _watcher.Dispose();
-                });
-            }).ToLiveLinq();
+                child = node.TryDescendant(name).Value;
+                return child.Exists();
+            });
         }
-
-        public IEnumerator<AbsolutePath> GetEnumerator()
+        
+        public override IEnumerator<AbsolutePath> GetEnumerator()
         {
-            return AsEnumerable().GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        private IEnumerable<AbsolutePath> AsEnumerable()
-        {
-            var directory = new DirectoryInfo(_path.ToString());
-
-            foreach (var fse in directory.GetFileSystemInfos(_pattern))
-            {
-                var subPath = IoService.TryParseAbsolutePath(fse.FullName, _path.Flags).Value;
-                yield return subPath;
-                if (IncludeSubdirectories)
-                    foreach (var descendant in subPath.Descendants())
-                        yield return descendant;
-            }
+            return Traverse().Skip(1).Where(x => x.Type != TreeTraversalType.ExitBranch).Select(x => x.Value).GetEnumerator();
         }
     }
 }

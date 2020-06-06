@@ -557,11 +557,21 @@ namespace TreeLinq
 						var path = traversalStack.Peek().Path.Add(traversalStack.Peek().ChildNames.Current);
 						yield return new TreeTraversal<TNodeName, TNode>( TreeTraversalType.ExitBranch, path );
 					}
-				} else {
-					var path = traversalStack.Peek().Path.Add(traversalStack.Peek().ChildNames.Current);
-					if ( !getChild( traversalStack.Peek().Node, traversalStack.Peek().ChildNames.Current,
+				} else
+				{
+					var peek = traversalStack.Peek();
+					var currentChildName = peek.ChildNames.Current;
+					var path = peek.Path.Add(currentChildName);
+					if ( !getChild( peek.Node, currentChildName,
 						out var node ) ) {
-						throw new InvalidDataException("Attempted to access child by name and failed");
+						try
+						{
+							throw new InvalidDataException($"Attempted to access child of {peek.Node} by name {currentChildName} and failed");
+						}
+						catch (Exception e)
+						{
+							throw new InvalidDataException($"Attempted to access child by name and failed");
+						}
 					}
 					if ( getChildNames( node ).Any() ) {
 						yield return new TreeTraversal<TNodeName, TNode>( TreeTraversalType.EnterBranch, path, node );

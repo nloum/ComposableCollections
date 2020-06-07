@@ -19,6 +19,11 @@ namespace IoFluently
         {
             return _read(Path);
         }
+
+        public override string ToString()
+        {
+            return $"{Path}, read asynchronously using a {Utility.ConvertToCSharpTypeName(typeof(TReader))} and cannot be written to";
+        }
     }
     
     internal class FileWithKnownFormatSync<TReader> : IFileWithKnownFormatSync<TReader>
@@ -37,6 +42,11 @@ namespace IoFluently
         {
             return _read(Path);
         }
+        
+        public override string ToString()
+        {
+            return $"{Path}, read synchronously using a {Utility.ConvertToCSharpTypeName(typeof(TReader))} and cannot be written to";
+        }
     }
 
     internal class FileWithKnownFormatAsync<TReader, TWriter> : FileWithKnownFormatAsync<TReader>, IFileWithKnownFormatAsync<TReader, TWriter>
@@ -52,6 +62,11 @@ namespace IoFluently
         public Task Write(TWriter writer)
         {
             return _write(Path, writer);
+        }
+
+        public override string ToString()
+        {
+            return $"{Path}, read asynchronously using a {Utility.ConvertToCSharpTypeName(typeof(TReader))} and written to asynchronously using a {Utility.ConvertToCSharpTypeName(typeof(TWriter))}";
         }
     }
     
@@ -69,6 +84,11 @@ namespace IoFluently
         {
             _write(Path, writer);
         }
+
+        public override string ToString()
+        {
+            return $"{Path}, read asynchronously using a {Utility.ConvertToCSharpTypeName(typeof(TReader))} and written to synchronously using a {Utility.ConvertToCSharpTypeName(typeof(TWriter))}";
+        }
     }
     
     internal class FileWithKnownFormatSync<TReader, TWriter> : FileWithKnownFormatSync<TReader>, IFileWithKnownFormatSync<TReader, TWriter>
@@ -85,6 +105,11 @@ namespace IoFluently
         {
             _write(Path, writer);
         }
+
+        public override string ToString()
+        {
+            return $"{Path}, read synchronously using a {Utility.ConvertToCSharpTypeName(typeof(TReader))} and written to synchronously using a {Utility.ConvertToCSharpTypeName(typeof(TWriter))}";
+        }
     }
     
     internal class FileWithKnownFormatSyncAsync<TReader, TWriter> : FileWithKnownFormatSync<TReader>, IFileWithKnownFormatSyncAsync<TReader, TWriter>
@@ -100,6 +125,11 @@ namespace IoFluently
         public Task Write(TWriter writer)
         {
             return _write(Path, writer);
+        }
+
+        public override string ToString()
+        {
+            return $"{Path}, read synchronously using a {Utility.ConvertToCSharpTypeName(typeof(TReader))} and written to asynchronously using a {Utility.ConvertToCSharpTypeName(typeof(TWriter))}";
         }
     }
     

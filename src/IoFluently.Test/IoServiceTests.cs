@@ -7,6 +7,8 @@ namespace IoFluently.Test
     [TestClass]
     public class IoServiceTests
     {
+        
+        
         [TestMethod]
         public void SimplifyShouldNotChangeSimplePath()
         {
@@ -41,6 +43,27 @@ namespace IoFluently.Test
             var result = item1.CommonWith(item2);
 
             result.ToString().Should().Be(parent.ToString());
+        }
+
+        [TestMethod]
+        public void ShouldNotParseWindowsAbsolutePathAsRelativePath()
+        {
+            var ioService = CreateUnitUnderTest();
+            ioService.TryParseRelativePath("C:\\test1").HasValue.Should().BeFalse();
+        }
+
+        [TestMethod]
+        public void ShouldNotParseUnixAbsolutePathAsRelativePath()
+        {
+            var ioService = CreateUnitUnderTest();
+            ioService.TryParseRelativePath("/test1").HasValue.Should().BeFalse();
+        }
+
+        [TestMethod]
+        public void ShouldNotParseRelativePathAsAbsolutePath()
+        {
+            var ioService = CreateUnitUnderTest();
+            ioService.TryParseAbsolutePath("test1").HasValue.Should().BeFalse();
         }
 
         [TestMethod]

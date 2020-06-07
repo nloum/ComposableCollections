@@ -117,8 +117,8 @@ namespace IoFluently
                                         state.State,
                                         LastEvents = new []
                                         {
-                                            Utility.DictionaryRemove(MoreCollections.Utility.KeyValuePair(item, state.State[item])),
-                                            Utility.DictionaryAdd(MoreCollections.Utility.KeyValuePair(item, item.GetPathType()))
+                                            LiveLinq.Utility.DictionaryRemove(MoreCollections.Utility.KeyValuePair(item, state.State[item])),
+                                            LiveLinq.Utility.DictionaryAdd(MoreCollections.Utility.KeyValuePair(item, item.GetPathType()))
                                         }
                                     };
                                 }
@@ -140,7 +140,7 @@ namespace IoFluently
                                     State = state.State.Remove(item),
                                     LastEvents = new IDictionaryChangeStrict<AbsolutePath, PathType>[]
                                     {
-                                        Utility.DictionaryRemove(MoreCollections.Utility.KeyValuePair(item, state.State[item])),
+                                        LiveLinq.Utility.DictionaryRemove(MoreCollections.Utility.KeyValuePair(item, state.State[item])),
                                     }
                                 };
                             }
@@ -152,14 +152,14 @@ namespace IoFluently
                                 State = state.State.Add(item, item.GetPathType()),
                                 LastEvents = new IDictionaryChangeStrict<AbsolutePath, PathType>[]
                                 {
-                                    Utility.DictionaryAdd(MoreCollections.Utility.KeyValuePair(item, item.GetPathType())),
+                                    LiveLinq.Utility.DictionaryAdd(MoreCollections.Utility.KeyValuePair(item, item.GetPathType())),
                                 }
                             };
                         }
                     })
                 .SelectMany(state => state.LastEvents);
             
-            resultObservable = Observable.Return(Utility.DictionaryAdd(initialState))
+            resultObservable = Observable.Return(LiveLinq.Utility.DictionaryAdd(initialState))
                 .Concat(resultObservable);
             
             var result = resultObservable.ToLiveLinq().KeysAsSet();
@@ -189,7 +189,7 @@ namespace IoFluently
                 .Select(args =>
                 {
                     var path = root.IoService.TryParseAbsolutePath(args.EventArgs.FullPath).Value;
-                    return Utility.SetChange(CollectionChangeType.Add, path);
+                    return LiveLinq.Utility.SetChange(CollectionChangeType.Add, path);
                 });
 
             var deletions = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
@@ -198,7 +198,7 @@ namespace IoFluently
                 .Select(args =>
                 {
                     var path = root.IoService.TryParseAbsolutePath(args.EventArgs.FullPath).Value;
-                    return Utility.SetChange(CollectionChangeType.Remove, path);
+                    return LiveLinq.Utility.SetChange(CollectionChangeType.Remove, path);
                 });
 
             var changes = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
@@ -213,8 +213,8 @@ namespace IoFluently
                     var path = root.IoService.TryParseAbsolutePath(args.EventArgs.FullPath).Value;
                     return new[]
                     {
-                        Utility.SetChange(CollectionChangeType.Remove, path),
-                        Utility.SetChange(CollectionChangeType.Add, path),
+                        LiveLinq.Utility.SetChange(CollectionChangeType.Remove, path),
+                        LiveLinq.Utility.SetChange(CollectionChangeType.Add, path),
                     }.ToObservable();
                 });
 
@@ -227,13 +227,13 @@ namespace IoFluently
                     var path = root.IoService.TryParseAbsolutePath(args.EventArgs.FullPath).Value;
                     return new[]
                     {
-                        Utility.SetChange(CollectionChangeType.Remove, oldPath),
-                        Utility.SetChange(CollectionChangeType.Add, path),
+                        LiveLinq.Utility.SetChange(CollectionChangeType.Remove, oldPath),
+                        LiveLinq.Utility.SetChange(CollectionChangeType.Add, path),
                     }.ToObservable();
                 });
 
             var initialState = GetChildren(root)
-                .Select(path => Utility.SetChange(CollectionChangeType.Add, path))
+                .Select(path => LiveLinq.Utility.SetChange(CollectionChangeType.Add, path))
                 .ToObservable();
 
             var unified = initialState.Concat(creations.Merge(deletions).Merge(renames).Merge(changes));

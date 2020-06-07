@@ -432,7 +432,7 @@ namespace IoFluently
             return path.IoService.Renamings(path);
         }
 
-        public static AbsolutePath RelativeTo(this AbsolutePath path, AbsolutePath relativeTo)
+        public static RelativePath RelativeTo(this AbsolutePath path, AbsolutePath relativeTo)
         {
             return path.IoService.RelativeTo(path, relativeTo);
         }

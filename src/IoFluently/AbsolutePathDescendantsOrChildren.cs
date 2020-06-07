@@ -250,7 +250,13 @@ namespace IoFluently
 
         protected IEnumerable<AbsolutePath> GetChildren(AbsolutePath parent)
         {
-            return Directory.GetFileSystemEntries(_path.ToString()).Select(x => IoService.ParseAbsolutePath(x, _path.Flags));
+            var parentString = parent.ToString();
+            if (Directory.Exists(parentString))
+            {
+                return Directory.GetFileSystemEntries(parentString).Select(x => IoService.ParseAbsolutePath(x, _path.Flags));
+            }
+            
+            return Enumerable.Empty<AbsolutePath>();
         }
     }
 }

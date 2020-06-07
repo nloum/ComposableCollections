@@ -12,10 +12,17 @@ namespace IoFluently
         
         public IEnumerable<TreeTraversal<string, AbsolutePath>> Traverse()
         {
-            return _path.TraverseTree(x => GetChildren(x).Select(child => child.Name), (AbsolutePath node, string name, out AbsolutePath child) =>
+            return _path.TraverseTree(x =>
             {
-                child = node.TryDescendant(name).Value;
-                return child.Exists();
+                var children = GetChildren(x);
+                var childrenNames = children.Select(child => child.Name);
+                return childrenNames;
+            }, (AbsolutePath node, string name, out AbsolutePath child) =>
+            {
+                var maybeChild = node.TryDescendant(name);
+                child = maybeChild.Value;
+                var result = child.Exists();
+                return result;
             });
         }
         

@@ -35,15 +35,15 @@ namespace IoFluently.Documentation
                 .Select(markdownFile =>
                 {
                     var markdown = markdownFile.Read();
-                    var Html = "<html>" + Markdig.Markdown.ToHtml(markdown) + "</html>";
-                    return new {markdownFile.Path, Html};
+                    var html = "<html>" + Markdig.Markdown.ToHtml(markdown) + "</html>";
+                    var document = new XmlDocument();
+                    document.LoadXml(html);
+                    return new {markdownFile.Path, Html = document};
                 });
 
             var backLinks = htmls.SelectMany(html =>
                 {
-                    var document = new XmlDocument();
-                    document.LoadXml(html.Html);
-                    var links = document.SelectNodes("//a");
+                    var links = html.Html.SelectNodes("//a");
                     var backLinksForThisFile = new List<Tuple<AbsolutePath, AbsolutePath, string>>();
                     foreach (var link in links)
                     {
@@ -71,7 +71,7 @@ namespace IoFluently.Documentation
                 .SelectValue(x => x.Select(y => Tuple.Create(y.Item1, y.Item3)))
                 .ToReadOnlyObservableDictionary();
             
-            htmls = htmls.Select(html => backLinks.ToLiveLinq()[html.Path]
+            var transformedHtmls = htmls.Select(html => backLinks.ToLiveLinq()[html.Path]
                 .SelectLatest(x =>
                 {
                     return x.Select(y => y.ToObservableState()).Otherwise(() =>
@@ -79,6 +79,31 @@ namespace IoFluently.Documentation
                 })
                 .Select(backLinksForThisHtml =>
             {
+                var links = html.Html.SelectNodes("//a");
+                foreach (var link in links)
+                {
+                    var linkEl = link as XmlElement;
+                    var href = linkEl.Attributes["href"].InnerText;
+                    var text = linkEl.InnerText;
+                    if (href.Contains(":"))
+                    {
+                        continue;
+                    }
+
+                    var maybePath = service.TryParseRelativePath(href);
+                    if (!maybePath.HasValue)
+                    {
+                        continue;
+                    }
+
+                    if (linkEl.Attributes["href"].InnerText.EndsWith(".md"))
+                    {
+                        linkEl.Attributes["href"].InnerText =
+                            linkEl.Attributes["href"].InnerText
+                                .Substring(0, linkEl.Attributes["href"].InnerText.Length - 3) + ".html";
+                    }
+                }
+                
                 var backLinkHtml =
                     "<ul>" + string.Join("\n",
                         backLinksForThisHtml.Select(x =>
@@ -87,10 +112,10 @@ namespace IoFluently.Documentation
                             return
                                     $"<li>This page is \"{x.Item2}\" of - <a href=\"{relativePath}\">{relativePath}</a></li>";
                         })) + "</ul>";
-                return new {html.Path, Html = html.Html + backLinkHtml};
+                return new {html.Path, Html = html.Html.OuterXml + backLinkHtml};
             }));
             
-            htmls
+            transformedHtmls
                 .Subscribe(addedHtml => {
                     Console.WriteLine($"Adding a markdown file: {addedHtml.Path}");
                     addedHtml.Path.WithExtension(".html").WriteAllText(addedHtml.Html);

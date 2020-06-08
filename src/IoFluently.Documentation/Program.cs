@@ -10,14 +10,6 @@ using SimpleMonads;
 
 namespace IoFluently.Documentation
 {
-    public static class Extensions
-    {
-        public static ImmutableHashSet<T> OtherwiseEmpty<T>(this IMaybe<ImmutableHashSet<T>> maybe)
-        {
-            return maybe.Otherwise(ImmutableHashSet<T>.Empty);
-        }
-    }
-    
     class Program
     {
         static void Main(string[] args)

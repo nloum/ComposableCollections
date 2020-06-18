@@ -3,13 +3,13 @@ using System.Threading.Tasks;
 
 namespace IoFluently
 {
-    internal class FileWithKnownFormatAsync<TReader> : IFileWithKnownFormatAsync<TReader>
+    internal class PathWithKnownFormatAsync<TReader> : IPathWithKnownFormatAsync<TReader>
     {
         public AbsolutePath Path { get; }
         
         private Func<AbsolutePath, Task<TReader>> _read;
 
-        public FileWithKnownFormatAsync(AbsolutePath path, Func<AbsolutePath, Task<TReader>> read)
+        public PathWithKnownFormatAsync(AbsolutePath path, Func<AbsolutePath, Task<TReader>> read)
         {
             Path = path;
             _read = read;
@@ -26,13 +26,13 @@ namespace IoFluently
         }
     }
     
-    internal class FileWithKnownFormatSync<TReader> : IFileWithKnownFormatSync<TReader>
+    internal class PathWithKnownFormatSync<TReader> : IPathWithKnownFormatSync<TReader>
     {
         public AbsolutePath Path { get; }
         
         private Func<AbsolutePath, TReader> _read;
 
-        public FileWithKnownFormatSync(AbsolutePath path, Func<AbsolutePath, TReader> read)
+        public PathWithKnownFormatSync(AbsolutePath path, Func<AbsolutePath, TReader> read)
         {
             Path = path;
             _read = read;
@@ -49,11 +49,11 @@ namespace IoFluently
         }
     }
 
-    internal class FileWithKnownFormatAsync<TReader, TWriter> : FileWithKnownFormatAsync<TReader>, IFileWithKnownFormatAsync<TReader, TWriter>
+    internal class PathWithKnownFormatAsync<TReader, TWriter> : PathWithKnownFormatAsync<TReader>, IPathWithKnownFormatAsync<TReader, TWriter>
     {
         private Func<AbsolutePath, TWriter, Task> _write;
 
-        public FileWithKnownFormatAsync(AbsolutePath path, Func<AbsolutePath, Task<TReader>> read,
+        public PathWithKnownFormatAsync(AbsolutePath path, Func<AbsolutePath, Task<TReader>> read,
             Func<AbsolutePath, TWriter, Task> write) : base(path, read)
         {
             _write = write;
@@ -70,11 +70,11 @@ namespace IoFluently
         }
     }
     
-    internal class FileWithKnownFormatAsyncSync<TReader, TWriter> : FileWithKnownFormatAsync<TReader>, IFileWithKnownFormatAsyncSync<TReader, TWriter>
+    internal class PathWithKnownFormatAsyncSync<TReader, TWriter> : PathWithKnownFormatAsync<TReader>, IPathWithKnownFormatAsyncSync<TReader, TWriter>
     {
         private Action<AbsolutePath, TWriter> _write;
 
-        public FileWithKnownFormatAsyncSync(AbsolutePath path, Func<AbsolutePath, Task<TReader>> read,
+        public PathWithKnownFormatAsyncSync(AbsolutePath path, Func<AbsolutePath, Task<TReader>> read,
             Action<AbsolutePath, TWriter> write) : base(path, read)
         {
             _write = write;
@@ -91,11 +91,11 @@ namespace IoFluently
         }
     }
     
-    internal class FileWithKnownFormatSync<TReader, TWriter> : FileWithKnownFormatSync<TReader>, IFileWithKnownFormatSync<TReader, TWriter>
+    internal class PathWithKnownFormatSync<TReader, TWriter> : PathWithKnownFormatSync<TReader>, IPathWithKnownFormatSync<TReader, TWriter>
     {
         private Action<AbsolutePath, TWriter> _write;
 
-        public FileWithKnownFormatSync(AbsolutePath path, Func<AbsolutePath, TReader> read,
+        public PathWithKnownFormatSync(AbsolutePath path, Func<AbsolutePath, TReader> read,
             Action<AbsolutePath, TWriter> write) : base(path, read)
         {
             _write = write;
@@ -112,11 +112,11 @@ namespace IoFluently
         }
     }
     
-    internal class FileWithKnownFormatSyncAsync<TReader, TWriter> : FileWithKnownFormatSync<TReader>, IFileWithKnownFormatSyncAsync<TReader, TWriter>
+    internal class PathWithKnownFormatSyncAsync<TReader, TWriter> : PathWithKnownFormatSync<TReader>, IPathWithKnownFormatSyncAsync<TReader, TWriter>
     {
         private Func<AbsolutePath, TWriter, Task> _write;
 
-        public FileWithKnownFormatSyncAsync(AbsolutePath path, Func<AbsolutePath, TReader> read,
+        public PathWithKnownFormatSyncAsync(AbsolutePath path, Func<AbsolutePath, TReader> read,
             Func<AbsolutePath, TWriter, Task> write) : base(path, read)
         {
             _write = write;
@@ -133,34 +133,34 @@ namespace IoFluently
         }
     }
     
-    public interface IFileWithKnownFormatAsync<TReader>
+    public interface IPathWithKnownFormatAsync<TReader>
     {
         AbsolutePath Path { get; }
         Task<TReader> Read();
     }
     
-    public interface IFileWithKnownFormatSync<out TReader>
+    public interface IPathWithKnownFormatSync<out TReader>
     {
         AbsolutePath Path { get; }
         TReader Read();
     }
 
-    public interface IFileWithKnownFormatAsync<TReader, in TWriter> : IFileWithKnownFormatAsync<TReader>
+    public interface IPathWithKnownFormatAsync<TReader, in TWriter> : IPathWithKnownFormatAsync<TReader>
     {
         Task Write(TWriter writer);
     }
     
-    public interface IFileWithKnownFormatAsyncSync<TReader, in TWriter> : IFileWithKnownFormatAsync<TReader>
+    public interface IPathWithKnownFormatAsyncSync<TReader, in TWriter> : IPathWithKnownFormatAsync<TReader>
     {
         void Write(TWriter writer);
     }
     
-    public interface IFileWithKnownFormatSync<out TReader, in TWriter> : IFileWithKnownFormatSync<TReader>
+    public interface IPathWithKnownFormatSync<out TReader, in TWriter> : IPathWithKnownFormatSync<TReader>
     {
         void Write(TWriter writer);
     }
     
-    public interface IFileWithKnownFormatSyncAsync<out TReader, in TWriter> : IFileWithKnownFormatSync<TReader>
+    public interface IPathWithKnownFormatSyncAsync<out TReader, in TWriter> : IPathWithKnownFormatSync<TReader>
     {
         Task Write(TWriter writer);
     }

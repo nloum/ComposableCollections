@@ -1,5 +1,7 @@
 # IoFluently
 
+![dotnetcore](https://img.shields.io/github/workflow/status/nloum/IoFluently/dotnetcore) ![nuget](https://img.shields.io/nuget/v/IoFluently) ![license](https://img.shields.io/github/license/nloum/IoFluently)
+
 IoFluently is a .NET Standard 2.0 class library for dealing with files and folders. Its API is fluent, mockable, and dependency injectable.
 
 Here's what it looks like:

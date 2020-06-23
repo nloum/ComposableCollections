@@ -47,6 +47,13 @@ namespace IoFluently
         /// </returns>
         Regex FileNamePatternToRegex(string pattern);
 
+        bool ComponentsAreAbsolute(IReadOnlyList<string> path);
+        RelativePath ParseRelativePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
+        IMaybe<RelativePath> TryParseRelativePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
+        bool TryParseRelativePath(string path, out RelativePath pathSpec,
+            PathFlags flags = PathFlags.UseDefaultsForGivenPath);
+        bool TryParseRelativePath(string path, out RelativePath pathSpec, out string error,
+            PathFlags flags = PathFlags.UseDefaultsForGivenPath);
         AbsolutePath ParseAbsolutePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
         IMaybe<AbsolutePath> TryParseAbsolutePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
         bool TryParseAbsolutePath(string path, out AbsolutePath pathSpec,
@@ -168,7 +175,7 @@ namespace IoFluently
         IObservable<Unit> ObserveChanges(AbsolutePath path, NotifyFilters filters);
         IObservable<PathType> ObservePathType(AbsolutePath path);
         IObservable<AbsolutePath> Renamings(AbsolutePath path);
-        AbsolutePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo);
+        RelativePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo);
         IMaybe<AbsolutePath> TryCommonWith(AbsolutePath path, AbsolutePath that);
         bool CanBeSimplified(AbsolutePath path);
         AbsolutePath Simplify(AbsolutePath path);

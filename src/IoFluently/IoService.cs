@@ -291,6 +291,283 @@ namespace IoFluently
             return regex;
         }
 
+        public RelativePath ParseRelativePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+        {
+            var error = string.Empty;
+            RelativePath pathSpec;
+            if (!TryParseRelativePath(path, out pathSpec, out error, flags))
+                throw new ArgumentException(error);
+            return pathSpec;
+        }
+
+        public IMaybe<RelativePath> TryParseRelativePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+        {
+            var error = string.Empty;
+            RelativePath pathSpec;
+            if (!TryParseRelativePath(path, out pathSpec, out error, flags))
+                return Nothing<RelativePath>();
+            return Something(pathSpec);
+        }
+
+        public bool TryParseRelativePath(string path, out RelativePath pathSpec,
+            PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+        {
+            var error = string.Empty;
+            return TryParseRelativePath(path, out pathSpec, out error, flags);
+        }
+
+        public bool TryParseRelativePath(string path, out RelativePath pathSpec, out string error,
+            PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+        {
+            if (flags.HasFlag(PathFlags.UseDefaultsFromUtility) && flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
+                throw new ArgumentException(
+                    "Cannot specify both PathFlags.UseDefaultsFromUtility and PathFlags.UseDefaultsForGivenPath");
+            if (flags.HasFlag(PathFlags.UseDefaultsFromUtility))
+                flags = GetDefaultFlagsForThisEnvironment();
+            error = string.Empty;
+            pathSpec = null;
+            if (path.Contains(":") && path.Contains("/"))
+            {
+                path = path.Replace("/", "\\");
+            }
+            var isWindowsStyle = path.Contains("\\") || path.Contains(":");
+            var isUnixStyle = path.Contains("/");
+            if (isWindowsStyle && isUnixStyle)
+            {
+                error = "Cannot mix slashes and backslashes in the same path";
+                return false;
+            }
+
+            if (isWindowsStyle)
+            {
+                if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
+                    flags = PathFlags.None;
+                if (path.Length > 1 && path.EndsWith("\\"))
+                    path = path.Substring(0, path.Length - 1);
+                var colonIdx = path.LastIndexOf(':');
+                if (colonIdx > -1 && (colonIdx != 1 || !char.IsLetter(path[0]) || path.Length > 2 && path[2] != '\\'))
+                {
+                    error = "A Windows path may not contain a : character, except as part of the drive specifier.";
+                    return false;
+                }
+
+                var isRelative = IsAbsoluteWindowsPath(path);
+                if (isRelative)
+                {
+                    var components = path.Split('\\').ToList();
+                    components.RemoveWhere((i, str) => i != 0 && str == ".");
+                    if (components.Any(string.IsNullOrEmpty))
+                    {
+                        error = "Must not contain any directories that have empty names";
+                        return false;
+                    }
+
+                    if (IsAncestorOfRoot(components))
+                    {
+                        error = "Must not point to an ancestor of the filesystem root";
+                        return false;
+                    }
+
+                    if (ComponentsAreAbsolute(components))
+                    {
+                        error = "Must not be an absolute path";
+                        return false;
+                    }
+                    pathSpec = new RelativePath(flags, "\\", this, components);
+                }
+                else if (path.StartsWith("."))
+                {
+                    var components = path.Split('\\').ToList();
+                    components.RemoveWhere((i, str) => i != 0 && str == ".");
+                    if (components.Any(string.IsNullOrEmpty))
+                    {
+                        error = "Must not contain any directories that have empty names";
+                        return false;
+                    }
+
+                    if (IsAncestorOfRoot(components))
+                    {
+                        error = "Must not point to an ancestor of the filesystem root";
+                        return false;
+                    }
+
+                    if (ComponentsAreAbsolute(components))
+                    {
+                        error = "Must not be an absolute path";
+                        return false;
+                    }
+                    pathSpec = new RelativePath(flags, "\\", this, components);
+                }
+                else if (path.StartsWith("\\\\"))
+                {
+                    var components = "\\\\".ItemConcat(path.Substring(2).Split('\\')).ToList();
+                    components.RemoveWhere((i, str) => i != 0 && str == ".");
+                    if (components.Any(string.IsNullOrEmpty))
+                    {
+                        error = "Must not contain any directories that have empty names";
+                        return false;
+                    }
+
+                    if (IsAncestorOfRoot(components))
+                    {
+                        error = "Must not point to an ancestor of the filesystem root";
+                        return false;
+                    }
+
+                    if (ComponentsAreAbsolute(components))
+                    {
+                        error = "Must not be an absolute path";
+                        return false;
+                    }
+                    pathSpec = new RelativePath(flags, "\\", this, components);
+                }
+                else if (path.StartsWith("\\"))
+                {
+                    var components = "\\".ItemConcat(path.Substring(1).Split('\\')).ToList();
+                    components.RemoveWhere((i, str) => i != 0 && str == ".");
+                    if (components.Any(string.IsNullOrEmpty))
+                    {
+                        error = "Must not contain any directories that have empty names";
+                        return false;
+                    }
+
+                    if (IsAncestorOfRoot(components))
+                    {
+                        error = "Must not point to an ancestor of the filesystem root";
+                        return false;
+                    }
+
+                    if (ComponentsAreAbsolute(components))
+                    {
+                        error = "Must not be an absolute path";
+                        return false;
+                    }
+                    pathSpec = new RelativePath(flags, "\\", this, components);
+                }
+                else
+                {
+                    var components = ".".ItemConcat(path.Split('\\')).ToList();
+                    components.RemoveWhere((i, str) => i != 0 && str == ".");
+                    if (components.Any(string.IsNullOrEmpty))
+                    {
+                        error = "Must not contain any directories that have empty names";
+                        return false;
+                    }
+
+                    if (IsAncestorOfRoot(components))
+                    {
+                        error = "Must not point to an ancestor of the filesystem root";
+                        return false;
+                    }
+
+                    if (ComponentsAreAbsolute(components))
+                    {
+                        error = "Must not be an absolute path";
+                        return false;
+                    }
+                    pathSpec = new RelativePath(flags, "\\", this, components);
+                }
+
+                return true;
+            }
+
+            if (isUnixStyle)
+            {
+                if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
+                    flags = PathFlags.CaseSensitive;
+                if (path.Length > 1 && path.EndsWith("/"))
+                    path = path.Substring(0, path.Length - 1);
+                if (path.Contains(":"))
+                {
+                    error = "A Unix path may not contain a : character.";
+                    return false;
+                }
+
+                var isRelative = IsAbsoluteUnixPath(path);
+                if (isRelative)
+                {
+                    var components = "/".ItemConcat(path.Substring(1).Split('/')).ToList();
+                    components.RemoveWhere((i, str) => i != 0 && str == ".");
+                    if (components.Any(string.IsNullOrEmpty))
+                    {
+                        error = "Must not contain any directories that have empty names";
+                        return false;
+                    }
+
+                    if (IsAncestorOfRoot(components))
+                    {
+                        error = "Must not point to an ancestor of the filesystem root";
+                        return false;
+                    }
+
+                    if (ComponentsAreAbsolute(components))
+                    {
+                        error = "Must not be an absolute path";
+                        return false;
+                    }
+                    pathSpec = new RelativePath(flags, "/", this, components);
+                }
+                else if (path.StartsWith("."))
+                {
+                    var components = path.Split('/').ToList();
+                    components.RemoveWhere((i, str) => i != 0 && str == ".");
+                    if (components.Any(string.IsNullOrEmpty))
+                    {
+                        error = "Must not contain any directories that have empty names";
+                        return false;
+                    }
+
+                    if (IsAncestorOfRoot(components))
+                    {
+                        error = "Must not point to an ancestor of the filesystem root";
+                        return false;
+                    }
+
+                    if (ComponentsAreAbsolute(components))
+                    {
+                        error = "Must not be an absolute path";
+                        return false;
+                    }
+                    pathSpec = new RelativePath(flags, "/", this, components);
+                }
+                else
+                {
+                    var components = ".".ItemConcat(path.Split('/')).ToList();
+                    components.RemoveWhere((i, str) => i != 0 && str == ".");
+                    if (components.Any(string.IsNullOrEmpty))
+                    {
+                        error = "Must not contain any directories that have empty names";
+                        return false;
+                    }
+
+                    if (IsAncestorOfRoot(components))
+                    {
+                        error = "Must not point to an ancestor of the filesystem root";
+                        return false;
+                    }
+                    
+                    if (ComponentsAreAbsolute(components))
+                    {
+                        error = "Must not be an absolute path";
+                        return false;
+                    }
+                    pathSpec = new RelativePath(flags, "/", this, components);
+                }
+
+                return true;
+            }
+
+            // If we reach this point, there are no backslashes or slashes in the path, meaning that it's a
+            // path with one element.
+            if (flags.HasFlag(PathFlags.UseDefaultsFromUtility))
+                flags = GetDefaultFlagsForThisEnvironment();
+            if (path == ".." || path == ".")
+                pathSpec = new RelativePath(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, new[]{path});
+            else
+                pathSpec = new RelativePath(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, new[]{".", path});
+            return true;
+        }
+
         public AbsolutePath ParseAbsolutePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
         {
             var error = string.Empty;
@@ -386,6 +663,11 @@ namespace IoFluently
                         return false;
                     }
 
+                    if (!ComponentsAreAbsolute(components))
+                    {
+                        error = "Must be an absolute path";
+                        return false;
+                    }
                     pathSpec = new AbsolutePath(flags, "\\", this, components);
                 }
                 else if (path.StartsWith("\\\\"))
@@ -404,6 +686,11 @@ namespace IoFluently
                         return false;
                     }
 
+                    if (!ComponentsAreAbsolute(components))
+                    {
+                        error = "Must be an absolute path";
+                        return false;
+                    }
                     pathSpec = new AbsolutePath(flags, "\\", this, components);
                 }
                 else if (path.StartsWith("\\"))
@@ -422,6 +709,11 @@ namespace IoFluently
                         return false;
                     }
 
+                    if (!ComponentsAreAbsolute(components))
+                    {
+                        error = "Must be an absolute path";
+                        return false;
+                    }
                     pathSpec = new AbsolutePath(flags, "\\", this, components);
                 }
                 else
@@ -440,6 +732,11 @@ namespace IoFluently
                         return false;
                     }
 
+                    if (!ComponentsAreAbsolute(components))
+                    {
+                        error = "Must be an absolute path";
+                        return false;
+                    }
                     pathSpec = new AbsolutePath(flags, "\\", this, components);
                 }
 
@@ -475,6 +772,11 @@ namespace IoFluently
                         return false;
                     }
 
+                    if (!ComponentsAreAbsolute(components))
+                    {
+                        error = "Must be an absolute path";
+                        return false;
+                    }
                     pathSpec = new AbsolutePath(flags, "/", this, components);
                 }
                 else if (path.StartsWith("."))
@@ -493,6 +795,11 @@ namespace IoFluently
                         return false;
                     }
 
+                    if (!ComponentsAreAbsolute(components))
+                    {
+                        error = "Must be an absolute path";
+                        return false;
+                    }
                     pathSpec = new AbsolutePath(flags, "/", this, components);
                 }
                 else
@@ -511,6 +818,11 @@ namespace IoFluently
                         return false;
                     }
                     
+                    if (!ComponentsAreAbsolute(components))
+                    {
+                        error = "Must be an absolute path";
+                        return false;
+                    }
                     pathSpec = new AbsolutePath(flags, "/", this, components);
                 }
 
@@ -519,13 +831,8 @@ namespace IoFluently
 
             // If we reach this point, there are no backslashes or slashes in the path, meaning that it's a
             // path with one element.
-            if (flags.HasFlag(PathFlags.UseDefaultsFromUtility))
-                flags = GetDefaultFlagsForThisEnvironment();
-            if (path == ".." || path == ".")
-                pathSpec = new AbsolutePath(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, new[]{path});
-            else
-                pathSpec = new AbsolutePath(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, new[]{".", path});
-            return true;
+            error = "Must be an absolute path";
+            return false;
         }
 
         public void UpdateStorage()
@@ -1638,7 +1945,7 @@ namespace IoFluently
 
         #region AbsolutePath extension methods
 
-        public AbsolutePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo)
+        public RelativePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo)
         {
             var simplified = path.Simplify();
             var pathStr = simplified.ToString();
@@ -1647,7 +1954,8 @@ namespace IoFluently
             var common = path.TryCommonWith(relativeTo);
 
             if (!common.HasValue)
-                return path;
+                throw new InvalidOperationException("No common ancestor");
+            //return path;
 
             var sb = new StringBuilder();
 
@@ -1663,7 +1971,7 @@ namespace IoFluently
 
             sb.Append(restOfRelativePath);
 
-            return TryParseAbsolutePath(sb.ToString()).Value;
+            return TryParseRelativePath(sb.ToString()).Value;
 
             //if (pathStr.StartsWith(relativeToStr))
             //{
@@ -1687,14 +1995,21 @@ namespace IoFluently
 
             var caseSensitive = path.Flags.HasFlag(PathFlags.CaseSensitive) ||
                                 that.Flags.HasFlag(PathFlags.CaseSensitive);
-            var zippedComponents = path.Path.Zip(that.Path, (comp1, comp2) => 
+            var zippedComponents = path.Path.Components.SkipWhile(x => x == path.DirectorySeparator).Zip(that.Path.Components.SkipWhile(x => x == path.DirectorySeparator), (comp1, comp2) => 
                 new
                 {
                     equals = comp1.Equals(comp2, !caseSensitive ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal),
                     component = comp1
                 });
 
-            return TryParseAbsolutePath(string.Join(path.DirectorySeparator, zippedComponents.TakeWhile(x => x.equals).Select(x => x.component)));
+            if (path.DirectorySeparator == "/")
+            {
+                return TryParseAbsolutePath("/" + string.Join(path.DirectorySeparator, zippedComponents.TakeWhile(x => x.equals).Select(x => x.component)));
+            }
+            else
+            {
+                return TryParseAbsolutePath(string.Join(path.DirectorySeparator, zippedComponents.TakeWhile(x => x.equals).Select(x => x.component)));
+            }
         }
 
         public bool CanBeSimplified(AbsolutePath path)
@@ -1813,7 +2128,7 @@ namespace IoFluently
             return numberOfComponentsToSkip > 0 && !isRelative;
         }
 
-        private static bool ComponentsAreAbsolute(IReadOnlyList<string> path)
+        public bool ComponentsAreAbsolute(IReadOnlyList<string> path)
         {
             if (path[0] == "/")
                 return true;

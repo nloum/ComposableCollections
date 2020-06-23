@@ -52,7 +52,7 @@ namespace IoFluently
             if (AncestorSource.Equals(AbsoluteAbsolutePath))
                 return new AbsolutePathTranslation(AncestorSource, AncestorDestination, IoService);
             var relativePath = AbsoluteAbsolutePath.RelativeTo(AncestorSource);
-            var pathToBeCopiedDestination = AncestorDestination.TryDescendant(relativePath).Value;
+            var pathToBeCopiedDestination = AncestorDestination / relativePath;
             return new AbsolutePathTranslation(AbsoluteAbsolutePath, pathToBeCopiedDestination, IoService);
         }
 

@@ -23,21 +23,10 @@ namespace IoFluently
             DirectorySeparator = directorySeparator;
             IoService = ioService;
             Path = new RelativePath<string>(path);
-            if (ComponentsAreAbsolute(Path.Components))
+            if (ioService.ComponentsAreAbsolute(Path.Components))
             {
                 throw new ArgumentException($"The path {Path} is not relative");
             }
-        }
-
-        private static bool ComponentsAreAbsolute(IReadOnlyList<string> path)
-        {
-            if (path[0] == "/")
-                return true;
-            if (char.IsLetter(path[0][0]) && path[0][1] == ':')
-                return true;
-            if (path[0] == "\\")
-                return true;
-            return false;
         }
 
         public string Name => Path[Path.Count - 1];

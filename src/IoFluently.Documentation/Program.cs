@@ -15,6 +15,10 @@ namespace IoFluently.Documentation
         static void Main(string[] args)
         {
             var service = new IoService(new ReactiveProcessFactory());
+            var readme = (service.CurrentDirectory / "readme.md").AsSmallTextFile();
+            var text = readme.Read();
+            Console.WriteLine(text);
+            
             var repositoryRoot = service.CurrentDirectory.Ancestors().First(ancestor => (ancestor / ".git").Exists());
             var documentationRoot = repositoryRoot / "docs";
 

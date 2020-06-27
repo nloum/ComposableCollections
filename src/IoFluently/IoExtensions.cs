@@ -43,7 +43,7 @@ namespace IoFluently
             return path.IoService.CreateEmptyFile(path);
         }
 
-        public static FileStream CreateFile(this AbsolutePath path)
+        public static Stream CreateFile(this AbsolutePath path)
         {
             return path.IoService.CreateFile(path);
         }
@@ -234,16 +234,6 @@ namespace IoFluently
             return source.IoService.Translate(source, destination);
         }
 
-        public static FileInfo AsFileInfo(this AbsolutePath path)
-        {
-            return path.IoService.AsFileInfo(path);
-        }
-
-        public static DirectoryInfo AsDirectoryInfo(this AbsolutePath path)
-        {
-            return path.IoService.AsDirectoryInfo(path);
-        }
-
         public static IMaybe<bool> TryIsReadOnly(this AbsolutePath path)
         {
             return path.IoService.TryIsReadOnly(path);
@@ -274,32 +264,32 @@ namespace IoFluently
             return attributes.IoService.TryAttributes(attributes).Value;
         }
 
-        public static IMaybe<DateTime> TryCreationTime(this AbsolutePath attributes)
+        public static IMaybe<DateTimeOffset> TryCreationTime(this AbsolutePath attributes)
         {
             return attributes.IoService.TryCreationTime(attributes);
         }
 
-        public static DateTime CreationTime(this AbsolutePath attributes)
+        public static DateTimeOffset CreationTime(this AbsolutePath attributes)
         {
             return attributes.IoService.TryCreationTime(attributes).Value;
         }
 
-        public static IMaybe<DateTime> TryLastAccessTime(this AbsolutePath attributes)
+        public static IMaybe<DateTimeOffset> TryLastAccessTime(this AbsolutePath attributes)
         {
             return attributes.IoService.TryLastAccessTime(attributes);
         }
 
-        public static DateTime LastAccessTime(this AbsolutePath attributes)
+        public static DateTimeOffset LastAccessTime(this AbsolutePath attributes)
         {
             return attributes.IoService.TryLastAccessTime(attributes).Value;
         }
 
-        public static IMaybe<DateTime> TryLastWriteTime(this AbsolutePath attributes)
+        public static IMaybe<DateTimeOffset> TryLastWriteTime(this AbsolutePath attributes)
         {
             return attributes.IoService.TryLastWriteTime(attributes);
         }
 
-        public static DateTime LastWriteTime(this AbsolutePath attributes)
+        public static DateTimeOffset LastWriteTime(this AbsolutePath attributes)
         {
             return attributes.IoService.TryLastWriteTime(attributes).Value;
         }
@@ -350,33 +340,33 @@ namespace IoFluently
             path.IoService.Create(path, pathType);
         }
 
-        public static IMaybe<FileStream> TryOpen(this AbsolutePath path, FileMode fileMode)
+        public static IMaybe<Stream> TryOpen(this AbsolutePath path, FileMode fileMode)
         {
             return path.IoService.TryOpen(path, fileMode);
         }
 
-        public static IMaybe<FileStream> TryOpen(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess)
+        public static IMaybe<Stream> TryOpen(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess)
         {
             return path.IoService.TryOpen(path, fileMode, fileAccess);
         }
 
-        public static IMaybe<FileStream> TryOpen(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess,
+        public static IMaybe<Stream> TryOpen(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess,
             FileShare fileShare)
         {
             return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare);
         }
 
-        public static FileStream Open(this AbsolutePath path, FileMode fileMode)
+        public static Stream Open(this AbsolutePath path, FileMode fileMode)
         {
             return path.IoService.TryOpen(path, fileMode).Value;
         }
 
-        public static FileStream Open(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess)
+        public static Stream Open(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess)
         {
             return path.IoService.TryOpen(path, fileMode, fileAccess).Value;
         }
 
-        public static FileStream Open(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess,
+        public static Stream Open(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess,
             FileShare fileShare)
         {
             return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare).Value;
@@ -397,9 +387,9 @@ namespace IoFluently
             path.IoService.WriteAllLines(path, lines);
         }
 
-        public static void WriteAllLines(this AbsolutePath path, byte[] bytes)
+        public static void WriteAllBytes(this AbsolutePath path, byte[] bytes)
         {
-            path.IoService.WriteAllLines(path, bytes);
+            path.IoService.WriteAllBytes(path, bytes);
         }
 
         public static IEnumerable<string> ReadLines(this AbsolutePath path)

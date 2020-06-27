@@ -15,34 +15,17 @@ namespace IoFluently.Examples
             
             var repositoryRoot = service.CurrentDirectory.Ancestors().First(ancestor => (ancestor / ".git").Exists());
 
-            var todoRegex = new Regex(@"TODO:(?<todoDescription>[^\n]+)");
-            
-            var changes = repositoryRoot.Descendants()
-                .ToLiveLinq()
-                .Where(path => path.HasExtension(".md") && path.GetPathType() == PathType.File)
-                .Select(path => path.AsTextFile().Read().Lines
-                    .Select(line => todoRegex.Match(line))
-                    .Where(match => match.Success)
-                    .Select(match => new { match, path }))
-                .SelectMany(x => x);
+            var source = repositoryRoot / "packages";
+            var destination = repositoryRoot / "new-packages";
 
-            changes.AsObservable().Subscribe(x =>
+            foreach (var sourceAndDestination in source.Translate(destination))
             {
-                if (x.Type == CollectionChangeType.Add)
+                // Each sourceAndDestination represents a single source / destination pair.
+                if (sourceAndDestination.Source.LastWriteTime() > sourceAndDestination.Destination.LastWriteTime())
                 {
-                    foreach (var item in x.Values)
-                    {
-                        Console.WriteLine($"A TODO item was added: {item.match.Groups["todoDescription"].Value.Trim()}");
-                    }
+                    sourceAndDestination.Copy(overwrite: true);
                 }
-                else
-                {
-                    foreach (var item in x.Values)
-                    {
-                        Console.WriteLine($"A TODO item was removed: {item.match.Groups["todoDescription"].Value.Trim()}");
-                    }
-                }
-            });
+            }
 
             Console.WriteLine("Press any key to exit");
             Console.ReadKey();

@@ -78,7 +78,7 @@ namespace IoFluently
             IEnumerable<AbsolutePath> paths);
 
         AbsolutePath CreateEmptyFile(AbsolutePath path);
-        FileStream CreateFile(AbsolutePath path);
+        Stream CreateFile(AbsolutePath path);
         AbsolutePath DeleteFile(AbsolutePath path);
         AbsolutePath ClearFolder(AbsolutePath path);
         AbsolutePath Decrypt(AbsolutePath path);
@@ -128,15 +128,13 @@ namespace IoFluently
         IAbsolutePathTranslation Translate(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination);
         IAbsolutePathTranslation Translate(AbsolutePath source, AbsolutePath destination);
         Uri Child(Uri parent, Uri child);
-        FileInfo AsFileInfo(AbsolutePath path);
-        DirectoryInfo AsDirectoryInfo(AbsolutePath path);
 
         IMaybe<bool> TryIsReadOnly(AbsolutePath path);
         IMaybe<long> TryLength(AbsolutePath path);
         IMaybe<FileAttributes> TryAttributes(AbsolutePath attributes);
-        IMaybe<DateTime> TryCreationTime(AbsolutePath attributes);
-        IMaybe<DateTime> TryLastAccessTime(AbsolutePath attributes);
-        IMaybe<DateTime> TryLastWriteTime(AbsolutePath attributes);
+        IMaybe<DateTimeOffset> TryCreationTime(AbsolutePath attributes);
+        IMaybe<DateTimeOffset> TryLastAccessTime(AbsolutePath attributes);
+        IMaybe<DateTimeOffset> TryLastWriteTime(AbsolutePath attributes);
         IMaybe<string> TryFullName(AbsolutePath attributes);
 
         /// <summary>
@@ -157,18 +155,18 @@ namespace IoFluently
         AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false);
         bool MayCreateFile(FileMode fileMode);
         void Create(AbsolutePath path, PathType pathType);
-        IMaybe<FileStream> TryOpen(AbsolutePath path, FileMode fileMode);
+        IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode);
 
-        IMaybe<FileStream> TryOpen(AbsolutePath path, FileMode fileMode,
+        IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
             FileAccess fileAccess);
 
-        IMaybe<FileStream> TryOpen(AbsolutePath path, FileMode fileMode,
+        IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
             FileAccess fileAccess, FileShare fileShare);
 
         AbsolutePath CreateFolder(AbsolutePath path);
         void WriteAllText(AbsolutePath path, string text);
         void WriteAllLines(AbsolutePath path, IEnumerable<string> lines);
-        void WriteAllLines(AbsolutePath path, byte[] bytes);
+        void WriteAllBytes(AbsolutePath path, byte[] bytes);
         IEnumerable<string> ReadLines(AbsolutePath path);
         string ReadAllText(AbsolutePath path);
         IObservable<Unit> ObserveChanges(AbsolutePath path);

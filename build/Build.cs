@@ -113,68 +113,6 @@ class Build : NukeBuild
 			);
         });
     
-    Target Test => _ => _
-        .DependsOn(Compile)
-        .Produces(TestResultDirectory / "*.trx")
-        .Produces(TestResultDirectory / "*.xml")
-        .Executes(() =>
-        {
-            DotNetTest(_ => _
-                .SetConfiguration(Configuration)
-                .SetNoBuild(InvokedTargets.Contains(Compile))
-                .ResetVerbosity()
-                .SetResultsDirectory(TestResultDirectory)
-                .When(InvokedTargets.Contains(Coverage) || IsServerBuild, _ => _
-                    .EnableCollectCoverage()
-                    .SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
-                    .SetExcludeByFile("*.Generated.cs")
-                    .When(IsServerBuild, _ => _
-                        .EnableUseSourceLink()))
-                .CombineWith(TestProjects, (_, v) => _
-                    .SetProjectFile(v)
-                    .SetLogger($"trx;LogFileName={v.Name}.trx")
-                    .When(InvokedTargets.Contains(Coverage) || IsServerBuild, _ => _
-                        .SetCoverletOutput(TestResultDirectory / $"{v.Name}.xml"))));
-
-            // ArtifactsDirectory.GlobFiles("*.trx").ForEach(x =>
-            //     AzurePipelines?.PublishTestResults(
-            //         type: AzurePipelinesTestResultsType.VSTest,
-            //         title: $"{Path.GetFileNameWithoutExtension(x)} ({AzurePipelines.StageDisplayName})",
-            //         files: new string[] { x }));
-        });
-
-    string CoverageReportDirectory => ArtifactsDirectory / "coverage-report";
-    // string CoverageReportArchive => ArtifactsDirectory / "coverage-report.zip";
-
-    Target Coverage => _ => _
-        .DependsOn(Test)
-        .TriggeredBy(Test)
-        .Consumes(Test)
-        //.Produces(CoverageReportArchive)
-        .Executes(() =>
-        {
-	        var package = NuGetPackageResolver.GetGlobalInstalledPackage("dotnet-reportgenerator-globaltool", "4.5.8", null);
-	        //var settings = new GitVersionSettings().SetToolPath( package.Directory / "tools/netcoreapp3.1/any/gitversion.dll");
-
-	        ReportGenerator(_ => _
-	            .SetToolPath(package.Directory / "tools/netcoreapp3.1/any/reportgenerator.dll")
-                .SetReports(TestResultDirectory / "*.xml")
-                .SetReportTypes(ReportTypes.HtmlInline)
-                .SetTargetDirectory(CoverageReportDirectory)
-                .SetFramework("netcoreapp2.1"));
-
-            // TestResultDirectory.GlobFiles("*.xml").ForEach(x =>
-            //     AzurePipelines?.PublishCodeCoverage(
-            //         AzurePipelinesCodeCoverageToolType.Cobertura,
-            //         x,
-            //         CoverageReportDirectory));
-            //
-            // CompressZip(
-            //     directory: CoverageReportDirectory,
-            //     archiveFile: CoverageReportArchive,
-            //     fileMode: FileMode.Create);
-        });
-    
     Target Pack => _ => _
         .DependsOn(Compile)
 		.Requires(() => Configuration == Configuration.Release)

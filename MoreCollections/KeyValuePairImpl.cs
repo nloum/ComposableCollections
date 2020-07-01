@@ -48,5 +48,10 @@ namespace MoreCollections
                 return (EqualityComparer<TKey>.Default.GetHashCode(Key)*397) ^ EqualityComparer<TValue>.Default.GetHashCode(Value);
             }
         }
+
+        public override string ToString()
+        {
+            return $"[{Key}, {Value}]";
+        }
     }
 }

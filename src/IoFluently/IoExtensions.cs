@@ -467,6 +467,16 @@ namespace IoFluently
             return pathSpec.IoService.TryCreateText(pathSpec).Value;
         }
 
+        public static IMaybe<StreamReader> TryReadText(this AbsolutePath path)
+        {
+            return path.TryOpen(FileMode.Open, FileAccess.Read, FileShare.Read).Select(stream => new StreamReader(stream));
+        }
+
+        public static StreamReader ReadText(this AbsolutePath path)
+        {
+            return path.TryReadText().Value;
+        }
+
         public static IEnumerable<string> ReadLines(this AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,

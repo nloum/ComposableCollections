@@ -177,7 +177,7 @@ namespace IoFluently
         {
             var watcher = new FileSystemWatcher(root.ToString())
             {
-                IncludeSubdirectories = true,
+                IncludeSubdirectories = IncludeSubdirectories,
                 Filter = _pattern,
                 EnableRaisingEvents = true,
                 NotifyFilter = NotifyFilters.LastWrite

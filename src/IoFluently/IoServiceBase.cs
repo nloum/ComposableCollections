@@ -33,7 +33,7 @@ namespace IoFluently
 
         public abstract IReadOnlyObservableSet<AbsolutePath> Storage { get; }
 
-        public abstract IMaybe<StreamWriter> TryCreateText(AbsolutePath pathSpec);
+        public abstract IMaybe<StreamWriter> TryOpenWriter(AbsolutePath pathSpec);
 
         public virtual IEnumerable<string> ReadLines(AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,

@@ -457,24 +457,24 @@ namespace IoFluently
             return path.IoService.TryParent(path).Value;
         }
 
-        public static IMaybe<StreamWriter> TryCreateText(this AbsolutePath pathSpec)
+        public static IMaybe<StreamWriter> TryOpenWriter(this AbsolutePath pathSpec)
         {
-            return pathSpec.IoService.TryCreateText(pathSpec);
+            return pathSpec.IoService.TryOpenWriter(pathSpec);
         }
 
-        public static StreamWriter CreateText(this AbsolutePath pathSpec)
+        public static StreamWriter OpenWriter(this AbsolutePath pathSpec)
         {
-            return pathSpec.IoService.TryCreateText(pathSpec).Value;
+            return pathSpec.IoService.TryOpenWriter(pathSpec).Value;
         }
 
-        public static IMaybe<StreamReader> TryReadText(this AbsolutePath path)
+        public static IMaybe<StreamReader> TryOpenReader(this AbsolutePath path)
         {
             return path.TryOpen(FileMode.Open, FileAccess.Read, FileShare.Read).Select(stream => new StreamReader(stream));
         }
 
-        public static StreamReader ReadText(this AbsolutePath path)
+        public static StreamReader OpenReader(this AbsolutePath path)
         {
-            return path.TryReadText().Value;
+            return path.TryOpenReader().Value;
         }
 
         public static IEnumerable<string> ReadLines(this AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,

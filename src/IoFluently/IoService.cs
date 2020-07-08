@@ -19,7 +19,7 @@ namespace IoFluently
             
         }
         
-        public override IMaybe<StreamWriter> TryCreateText(AbsolutePath pathSpec)
+        public override IMaybe<StreamWriter> TryOpenWriter(AbsolutePath pathSpec)
         {
             try
             {

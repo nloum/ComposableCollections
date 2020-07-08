@@ -184,7 +184,7 @@ namespace IoFluently
         StringComparison ToStringComparison(PathFlags pathFlags);
         StringComparison ToStringComparison(PathFlags pathFlags, PathFlags otherPathFlags);
 
-        IMaybe<StreamWriter> TryCreateText(AbsolutePath pathSpec);
+        IMaybe<StreamWriter> TryOpenWriter(AbsolutePath pathSpec);
 
         IEnumerable<string> ReadLines(AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,

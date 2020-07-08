@@ -37,6 +37,12 @@ namespace IoFluently
             return ToLiveLinq(true, PathObservationMethod.Default);
         }
 
+        public int Count => this.AsEnumerable().Count();
+        
+        public void Dispose()
+        {
+        }
+
         public ISetChanges<AbsolutePath> ToLiveLinq(bool includeFileContentChanges, PathObservationMethod observationMethod = PathObservationMethod.Default)
         {
             if (observationMethod == PathObservationMethod.Default)

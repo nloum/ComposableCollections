@@ -44,7 +44,7 @@ namespace IoFluently
             _defaultPathFlags = defaultPathFlags;
         }
 
-        public override IReadOnlyObservableSet<AbsolutePath> Storage => RootFolders.ToLiveLinq().KeysAsSet().Select(x => ParseAbsolutePath(x)).ToReadOnlySet();
+        public override IReadOnlyObservableSet<AbsolutePath> Storage => RootFolders.ToLiveLinq().KeysAsSet().Select(x => ParseAbsolutePath(x)).ToReadOnlyObservableSet();
 
         private IMaybe<File> GetFile(AbsolutePath path)
         {

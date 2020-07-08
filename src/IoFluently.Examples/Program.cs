@@ -1,6 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
+using System.Xml;
 using LiveLinq;
 using LiveLinq.Core;
 using ReactiveProcesses;
@@ -11,12 +15,15 @@ namespace IoFluently.Examples
     {
         private static void Main(string[] args)
         {
-            var service = new IoService(new ReactiveProcessFactory());
-            
-            var repositoryRoot = service.CurrentDirectory.Ancestors().First(ancestor => (ancestor / ".git").Exists());
+            var ioService = new IoService(new ReactiveProcessFactory());
 
-            var source = repositoryRoot / "packages";
-            var destination = repositoryRoot / "new-packages";
+            var repositoryRootFolder = ioService.CurrentDirectory.Ancestors().First(ancestor => (ancestor / ".git").Exists());
+
+            ioService.CurrentDirectory.Children().Where(x => x.HasExtension(".md") && x.GetPathType() == PathType.File);
+
+
+            var source = repositoryRootFolder / "packages";
+            var destination = repositoryRootFolder / "new-packages";
 
             foreach (var sourceAndDestination in source.Translate(destination))
             {

@@ -90,3 +90,10 @@ foreach (var sourceAndDestination in source.Translate(destination))
 
 Because the copy operation consists of a loop, you can easily change the behavior depending on arbitrary behaviors that the developer can define.
 
+### In-memory implementation
+
+Any code that uses IoFluently requires minimal modification to run against an in-memory, virtual implementation of `IoService`. To do this, just use the `InMemoryIoService` class. For example:
+
+```
+var ioService = new InMemoryIoService(new ReactiveProcessFactory(), Environment.NewLine, PathFlags.CaseSensitive);
+```

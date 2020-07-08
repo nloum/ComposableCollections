@@ -54,6 +54,10 @@ namespace IoFluently
             PathFlags flags = PathFlags.UseDefaultsForGivenPath);
         bool TryParseRelativePath(string path, out RelativePath pathSpec, out string error,
             PathFlags flags = PathFlags.UseDefaultsForGivenPath);
+        AbsolutePath ParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
+        IEither<AbsolutePath, RelativePath> ParsePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
+        bool IsRelativePath(string path);
+        bool IsAbsolutePath(string path);
         AbsolutePath ParseAbsolutePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
         IMaybe<AbsolutePath> TryParseAbsolutePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
         bool TryParseAbsolutePath(string path, out AbsolutePath pathSpec,

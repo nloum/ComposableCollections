@@ -1206,6 +1206,39 @@ namespace IoFluently
             return new AbsolutePathTranslation(source, destination, this);
         }
 
+        public AbsolutePath ParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo,
+            PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+        {
+            var relativePath = TryParseRelativePath(path, flags);
+            if (relativePath.HasValue)
+            {
+                return optionallyRelativeTo / path;
+            }
+
+            return ParseAbsolutePath(path, flags);
+        }
+
+        public IEither<AbsolutePath, RelativePath> ParsePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+        {
+            var relativePath = TryParseRelativePath(path, flags);
+            if (relativePath.HasValue)
+            {
+                return new Either<AbsolutePath, RelativePath>(relativePath.Value);
+            }
+            
+            return new Either<AbsolutePath, RelativePath>(ParseAbsolutePath(path, flags));
+        }
+
+        public bool IsRelativePath(string path)
+        {
+            return TryParseRelativePath(path, PathFlags.UseDefaultsForGivenPath).HasValue;
+        }
+
+        public bool IsAbsolutePath(string path)
+        {
+            return TryParseAbsolutePath(path, PathFlags.UseDefaultsForGivenPath).HasValue;
+        }
+
         public virtual Uri Child(Uri parent, Uri child)
         {
             var parentLocalPath = parent.ToString();

@@ -11,6 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SimpleMonads" Version="1.0.0-alpha4" />
+    <PackageReference Include="SimpleMonads" Version="1.0.0-alpha0031" />
   </ItemGroup>
 </Project>

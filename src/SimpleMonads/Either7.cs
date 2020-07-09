@@ -2,7 +2,7 @@ using System;
 
 namespace SimpleMonads
 {
-    public sealed class Either<T1, T2, T3, T4, T5> : IEither<T1, T2, T3, T4, T5>
+    public class Either<T1, T2, T3, T4, T5, T6, T7> : IEither<T1, T2, T3, T4, T5, T6, T7>
     {
         public Either(T1 item1)
         {
@@ -29,73 +29,25 @@ namespace SimpleMonads
             Item5 = item5.ToMaybe();
         }
 
+        public Either(T6 item6)
+        {
+            Item6 = item6.ToMaybe();
+        }
+
+        public Either(T7 item7)
+        {
+            Item7 = item7.ToMaybe();
+        }
+
         public IMaybe<T1> Item1 { get; } = Utility.Nothing<T1>();
         public IMaybe<T2> Item2 { get; } = Utility.Nothing<T2>();
         public IMaybe<T3> Item3 { get; } = Utility.Nothing<T3>();
         public IMaybe<T4> Item4 { get; } = Utility.Nothing<T4>();
         public IMaybe<T5> Item5 { get; } = Utility.Nothing<T5>();
+        public IMaybe<T6> Item6 { get; } = Utility.Nothing<T6>();
+        public IMaybe<T7> Item7 { get; } = Utility.Nothing<T7>();
 
-        public IEither<T1, T2, T3, T4, T5, T6> Or<T6>()
-        {
-            if (Item1.HasValue)
-            {
-                return new Either<T1, T2, T3, T4, T5, T6>(Item1.Value);
-            }
-
-            if (Item2.HasValue)
-            {
-                return new Either<T1, T2, T3, T4, T5, T6>(Item2.Value);
-            }
-
-            if (Item3.HasValue)
-            {
-                return new Either<T1, T2, T3, T4, T5, T6>(Item3.Value);
-            }
-
-            if (Item4.HasValue)
-            {
-                return new Either<T1, T2, T3, T4, T5, T6>(Item4.Value);
-            }
-
-            if (Item5.HasValue)
-            {
-                return new Either<T1, T2, T3, T4, T5, T6>(Item5.Value);
-            }
-
-            throw new System.InvalidOperationException("The either has no values");
-        }
-
-        public IEither<T1, T2, T3, T4, T5, T6, T7> Or<T6, T7>()
-        {
-            if (Item1.HasValue)
-            {
-                return new Either<T1, T2, T3, T4, T5, T6, T7>(Item1.Value);
-            }
-
-            if (Item2.HasValue)
-            {
-                return new Either<T1, T2, T3, T4, T5, T6, T7>(Item2.Value);
-            }
-
-            if (Item3.HasValue)
-            {
-                return new Either<T1, T2, T3, T4, T5, T6, T7>(Item3.Value);
-            }
-
-            if (Item4.HasValue)
-            {
-                return new Either<T1, T2, T3, T4, T5, T6, T7>(Item4.Value);
-            }
-
-            if (Item5.HasValue)
-            {
-                return new Either<T1, T2, T3, T4, T5, T6, T7>(Item5.Value);
-            }
-
-            throw new System.InvalidOperationException("The either has no values");
-        }
-
-        public IEither<T1, T2, T3, T4, T5, T6, T7, T8> Or<T6, T7, T8>()
+        public IEither<T1, T2, T3, T4, T5, T6, T7, T8> Or<T8>()
         {
             if (Item1.HasValue)
             {
@@ -122,10 +74,20 @@ namespace SimpleMonads
                 return new Either<T1, T2, T3, T4, T5, T6, T7, T8>(Item5.Value);
             }
 
+            if (Item6.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8>(Item6.Value);
+            }
+
+            if (Item7.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8>(Item7.Value);
+            }
+
             throw new System.InvalidOperationException("The either has no values");
         }
 
-        public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9> Or<T6, T7, T8, T9>()
+        public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9> Or<T8, T9>()
         {
             if (Item1.HasValue)
             {
@@ -152,10 +114,20 @@ namespace SimpleMonads
                 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item5.Value);
             }
 
+            if (Item6.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item6.Value);
+            }
+
+            if (Item7.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item7.Value);
+            }
+
             throw new System.InvalidOperationException("The either has no values");
         }
 
-        public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Or<T6, T7, T8, T9, T10>()
+        public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Or<T8, T9, T10>()
         {
             if (Item1.HasValue)
             {
@@ -182,10 +154,20 @@ namespace SimpleMonads
                 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(Item5.Value);
             }
 
+            if (Item6.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(Item6.Value);
+            }
+
+            if (Item7.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(Item7.Value);
+            }
+
             throw new System.InvalidOperationException("The either has no values");
         }
 
-        public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Or<T6, T7, T8, T9, T10, T11>()
+        public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Or<T8, T9, T10, T11>()
         {
             if (Item1.HasValue)
             {
@@ -212,10 +194,20 @@ namespace SimpleMonads
                 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Item5.Value);
             }
 
+            if (Item6.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Item6.Value);
+            }
+
+            if (Item7.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Item7.Value);
+            }
+
             throw new System.InvalidOperationException("The either has no values");
         }
 
-        public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Or<T6, T7, T8, T9, T10, T11, T12>()
+        public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Or<T8, T9, T10, T11, T12>()
         {
             if (Item1.HasValue)
             {
@@ -242,10 +234,20 @@ namespace SimpleMonads
                 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(Item5.Value);
             }
 
+            if (Item6.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(Item6.Value);
+            }
+
+            if (Item7.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(Item7.Value);
+            }
+
             throw new System.InvalidOperationException("The either has no values");
         }
 
-        public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Or<T6, T7, T8, T9, T10, T11, T12, T13>()
+        public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Or<T8, T9, T10, T11, T12, T13>()
         {
             if (Item1.HasValue)
             {
@@ -272,11 +274,21 @@ namespace SimpleMonads
                 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(Item5.Value);
             }
 
+            if (Item6.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(Item6.Value);
+            }
+
+            if (Item7.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(Item7.Value);
+            }
+
             throw new System.InvalidOperationException("The either has no values");
         }
 
-        public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Or<T6, T7, T8, T9, T10, T11, T12,
-            T13, T14>()
+        public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>
+            Or<T8, T9, T10, T11, T12, T13, T14>()
         {
             if (Item1.HasValue)
             {
@@ -303,11 +315,21 @@ namespace SimpleMonads
                 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item5.Value);
             }
 
+            if (Item6.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item6.Value);
+            }
+
+            if (Item7.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item7.Value);
+            }
+
             throw new System.InvalidOperationException("The either has no values");
         }
 
-        public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Or<T6, T7, T8, T9, T10, T11,
-            T12, T13, T14, T15>()
+        public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Or<T8, T9, T10, T11, T12, T13,
+            T14, T15>()
         {
             if (Item1.HasValue)
             {
@@ -334,11 +356,21 @@ namespace SimpleMonads
                 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item5.Value);
             }
 
+            if (Item6.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item6.Value);
+            }
+
+            if (Item7.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item7.Value);
+            }
+
             throw new System.InvalidOperationException("The either has no values");
         }
 
-        public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Or<T6, T7, T8, T9, T10,
-            T11, T12, T13, T14, T15, T16>()
+        public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Or<T8, T9, T10, T11, T12,
+            T13, T14, T15, T16>()
         {
             if (Item1.HasValue)
             {
@@ -363,6 +395,16 @@ namespace SimpleMonads
             if (Item5.HasValue)
             {
                 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item5.Value);
+            }
+
+            if (Item6.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item6.Value);
+            }
+
+            if (Item7.HasValue)
+            {
+                return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item7.Value);
             }
 
             throw new System.InvalidOperationException("The either has no values");

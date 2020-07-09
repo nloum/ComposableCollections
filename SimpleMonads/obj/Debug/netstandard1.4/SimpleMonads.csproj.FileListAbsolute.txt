@@ -1,8 +1,0 @@
-/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/bin/Debug/netstandard1.4/SimpleMonads.deps.json
-/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/bin/Debug/netstandard1.4/SimpleMonads.dll
-/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/bin/Debug/netstandard1.4/SimpleMonads.pdb
-/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/obj/Debug/netstandard1.4/SimpleMonads.csprojAssemblyReference.cache
-/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/obj/Debug/netstandard1.4/SimpleMonads.AssemblyInfoInputs.cache
-/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/obj/Debug/netstandard1.4/SimpleMonads.AssemblyInfo.cs
-/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/obj/Debug/netstandard1.4/SimpleMonads.dll
-/Users/amreact/src/GitHub/SimpleMonads/SimpleMonads/obj/Debug/netstandard1.4/SimpleMonads.pdb

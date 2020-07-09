@@ -77,7 +77,7 @@ namespace SimpleMonads.CodeGeneration
             if (part == CodePart.Class)
             {
                 writer.WriteLine(
-                    $"public sealed class Either<{string.Join(", ", genericArgNames)}> : IEither<{string.Join(", ", genericArgNames)}>\n{{");
+                    $"public class Either<{string.Join(", ", genericArgNames)}> : IEither<{string.Join(", ", genericArgNames)}>\n{{");
                 writer.WriteLine(string.Join("\n", constructors));
                 writer.WriteLine(string.Join("\n", classProperties));
                 for (var i = arity + 1; i <= maxArity; i++) GenerateOrImplementation(writer, arity, i);

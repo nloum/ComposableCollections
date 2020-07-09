@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GenericNumbers" Version="1.0.0-beta003" />
+    <PackageReference Include="GenericNumbers" Version="1.0.0-alpha0022" />
     <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
   </ItemGroup>
 

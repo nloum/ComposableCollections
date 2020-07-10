@@ -100,7 +100,7 @@ namespace IoFluently
         public IEnumerator<CalculatedAbsolutePathTranslation> GetEnumerator()
         {
             return
-                Source.Children()
+                Source.Descendants()
                     .Select(fileUri => new CalculatedAbsolutePathTranslation(fileUri, Source, Destination, IoService))
                     .GetEnumerator();
         }

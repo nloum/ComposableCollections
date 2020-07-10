@@ -189,34 +189,34 @@ namespace IoFluently
                 NotifyFilter = NotifyFilters.LastWrite
             };
 
-            var creations = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+            var creations = Observable.FromEvent<FileSystemEventHandler, FileSystemEventArgs>(
                     handler => watcher.Created += handler,
                     handler => watcher.Created -= handler)
                 .Select(args =>
                 {
-                    var path = root.IoService.TryParseAbsolutePath(args.EventArgs.FullPath).Value;
+                    var path = root.IoService.TryParseAbsolutePath(args.FullPath).Value;
                     return LiveLinq.Utility.SetChange(CollectionChangeType.Add, path);
                 });
 
-            var deletions = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+            var deletions = Observable.FromEvent<FileSystemEventHandler, FileSystemEventArgs>(
                     handler => watcher.Deleted += handler,
                     handler => watcher.Deleted -= handler)
                 .Select(args =>
                 {
-                    var path = root.IoService.TryParseAbsolutePath(args.EventArgs.FullPath).Value;
+                    var path = root.IoService.TryParseAbsolutePath(args.FullPath).Value;
                     return LiveLinq.Utility.SetChange(CollectionChangeType.Remove, path);
                 });
 
-            var changes = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+            var changes = !includeFileContentChanges ? Observable.Empty<ISetChange<AbsolutePath>>() : Observable.FromEvent<FileSystemEventHandler, FileSystemEventArgs>(
                     handler => watcher.Changed += handler,
                     handler => watcher.Changed -= handler)
-                .Where(x => x.EventArgs.ChangeType == WatcherChangeTypes.Changed)
-                .GroupBy(x => x.EventArgs.FullPath)
+                .Where(x => x.ChangeType == WatcherChangeTypes.Changed)
+                .GroupBy(x => x.FullPath)
                 .Select(x => x.Throttle(TimeSpan.FromSeconds(.2)))
                 .Merge()
                 .SelectMany(args =>
                 {
-                    var path = root.IoService.TryParseAbsolutePath(args.EventArgs.FullPath).Value;
+                    var path = root.IoService.TryParseAbsolutePath(args.FullPath).Value;
                     return new[]
                     {
                         LiveLinq.Utility.SetChange(CollectionChangeType.Remove, path),
@@ -224,13 +224,13 @@ namespace IoFluently
                     }.ToObservable();
                 });
 
-            var renames = Observable.FromEventPattern<RenamedEventHandler, RenamedEventArgs>(
+            var renames = Observable.FromEvent<RenamedEventHandler, RenamedEventArgs>(
                     handler => watcher.Renamed += handler,
                     handler => watcher.Renamed -= handler)
                 .SelectMany(args =>
                 {
-                    var oldPath = root.IoService.TryParseAbsolutePath(args.EventArgs.OldFullPath).Value;
-                    var path = root.IoService.TryParseAbsolutePath(args.EventArgs.FullPath).Value;
+                    var oldPath = root.IoService.TryParseAbsolutePath(args.OldFullPath).Value;
+                    var path = root.IoService.TryParseAbsolutePath(args.FullPath).Value;
                     return new[]
                     {
                         LiveLinq.Utility.SetChange(CollectionChangeType.Remove, oldPath),

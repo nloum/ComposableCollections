@@ -1004,6 +1004,10 @@ namespace IoFluently
 
         public virtual bool HasExtension(AbsolutePath path, string extension)
         {
+            if (!extension.StartsWith(".")) {
+                extension = "." + extension;
+            }
+
             var actualExtension = Path.GetExtension(path.ToString());
             if (actualExtension == extension)
                 return true;

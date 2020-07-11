@@ -2,13 +2,11 @@ using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ReactiveProcesses;
 
-namespace IoFluently.Test
+namespace IoFluently.Tests
 {
     [TestClass]
     public class IoServiceTests
     {
-        
-        
         [TestMethod]
         public void SimplifyShouldNotChangeSimplePath()
         {
@@ -20,6 +18,14 @@ namespace IoFluently.Test
         private IIoService CreateUnitUnderTest()
         {
             return new IoService(new ReactiveProcessFactory());
+        }
+
+        [TestMethod]
+        public void HasExtensionShouldWorkWithAndWithoutTheDot() {
+            var uut = CreateUnitUnderTest();
+            var testTxt = uut.ParseAbsolutePath("/test.txt");
+            testTxt.HasExtension(".txt").Should().BeTrue();
+            testTxt.HasExtension("txt").Should().BeTrue();
         }
 
         [TestMethod]

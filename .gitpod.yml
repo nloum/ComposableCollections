@@ -1,7 +1,7 @@
 image: gitpod/workspace-dotnet
 
 tasks:
-  - init: dotnet build src/LiveLinq.sln
+  - init: dotnet build src/IoFluently.sln
 
 vscode:
   extensions:

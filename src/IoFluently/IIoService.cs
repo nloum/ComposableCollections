@@ -50,9 +50,9 @@ namespace IoFluently
         bool ComponentsAreAbsolute(IReadOnlyList<string> path);
         RelativePath ParseRelativePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
         IMaybe<RelativePath> TryParseRelativePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
-        bool TryParseRelativePath(string path, out RelativePath pathSpec,
+        bool TryParseRelativePath(string path, out RelativePath relativePath,
             PathFlags flags = PathFlags.UseDefaultsForGivenPath);
-        bool TryParseRelativePath(string path, out RelativePath pathSpec, out string error,
+        bool TryParseRelativePath(string path, out RelativePath relativePath, out string error,
             PathFlags flags = PathFlags.UseDefaultsForGivenPath);
         AbsolutePath ParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
         IEither<AbsolutePath, RelativePath> ParsePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
@@ -60,9 +60,9 @@ namespace IoFluently
         bool IsAbsolutePath(string path);
         AbsolutePath ParseAbsolutePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
         IMaybe<AbsolutePath> TryParseAbsolutePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
-        bool TryParseAbsolutePath(string path, out AbsolutePath pathSpec,
+        bool TryParseAbsolutePath(string path, out AbsolutePath absolutePath,
             PathFlags flags = PathFlags.UseDefaultsForGivenPath);
-        bool TryParseAbsolutePath(string path, out AbsolutePath pathSpec, out string error,
+        bool TryParseAbsolutePath(string path, out AbsolutePath absolutePath, out string error,
             PathFlags flags = PathFlags.UseDefaultsForGivenPath);
         void UpdateStorage();
         IReactiveProcessFactory ReactiveProcessFactory { get; }
@@ -188,24 +188,24 @@ namespace IoFluently
         StringComparison ToStringComparison(PathFlags pathFlags);
         StringComparison ToStringComparison(PathFlags pathFlags, PathFlags otherPathFlags);
 
-        IMaybe<StreamWriter> TryOpenWriter(AbsolutePath pathSpec);
+        IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath);
 
-        IEnumerable<string> ReadLines(AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
+        IEnumerable<string> ReadLines(AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false);
 
-        IMaybe<string> TryReadText(AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
+        IMaybe<string> TryReadText(AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
             int bufferSize = 4096, bool leaveOpen = false);
 
-        void WriteText(AbsolutePath pathSpec, IEnumerable<string> lines,
+        void WriteText(AbsolutePath absolutePath, IEnumerable<string> lines,
             FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write,
             FileShare fileShare = FileShare.None,
             Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false);
 
-        void WriteText(AbsolutePath pathSpec, string text, FileMode fileMode = FileMode.Create,
+        void WriteText(AbsolutePath absolutePath, string text, FileMode fileMode = FileMode.Create,
             FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
             Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false);
 

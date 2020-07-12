@@ -457,14 +457,14 @@ namespace IoFluently
             return path.IoService.TryParent(path).Value;
         }
 
-        public static IMaybe<StreamWriter> TryOpenWriter(this AbsolutePath pathSpec)
+        public static IMaybe<StreamWriter> TryOpenWriter(this AbsolutePath absolutePath)
         {
-            return pathSpec.IoService.TryOpenWriter(pathSpec);
+            return absolutePath.IoService.TryOpenWriter(absolutePath);
         }
 
-        public static StreamWriter OpenWriter(this AbsolutePath pathSpec)
+        public static StreamWriter OpenWriter(this AbsolutePath absolutePath)
         {
-            return pathSpec.IoService.TryOpenWriter(pathSpec).Value;
+            return absolutePath.IoService.TryOpenWriter(absolutePath).Value;
         }
 
         public static IMaybe<StreamReader> TryOpenReader(this AbsolutePath path)
@@ -477,59 +477,59 @@ namespace IoFluently
             return path.TryOpenReader().Value;
         }
 
-        public static IEnumerable<string> ReadLines(this AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
+        public static IEnumerable<string> ReadLines(this AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false)
         {
-            return pathSpec.IoService.ReadLines(pathSpec, fileMode, fileAccess, fileShare, encoding,
+            return absolutePath.IoService.ReadLines(absolutePath, fileMode, fileAccess, fileShare, encoding,
                 detectEncodingFromByteOrderMarks,
                 bufferSize, leaveOpen);
         }
 
-        public static IMaybe<string> TryReadText(this AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
+        public static IMaybe<string> TryReadText(this AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false)
         {
-            return pathSpec.IoService.TryReadText(pathSpec, fileMode, fileAccess, fileShare, encoding,
+            return absolutePath.IoService.TryReadText(absolutePath, fileMode, fileAccess, fileShare, encoding,
                 detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
         }
 
-        public static string ReadText(this AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
+        public static string ReadText(this AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false)
         {
-            return pathSpec.IoService.TryReadText(pathSpec, fileMode, fileAccess, fileShare, encoding,
+            return absolutePath.IoService.TryReadText(absolutePath, fileMode, fileAccess, fileShare, encoding,
                 detectEncodingFromByteOrderMarks, bufferSize, leaveOpen).Value;
         }
 
-        public static void WriteText(this AbsolutePath pathSpec, IEnumerable<string> lines,
+        public static void WriteText(this AbsolutePath absolutePath, IEnumerable<string> lines,
             FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write,
             FileShare fileShare = FileShare.None,
             Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
         {
-            pathSpec.IoService.WriteText(pathSpec, lines, fileMode, fileAccess, fileShare, encoding, bufferSize,
+            absolutePath.IoService.WriteText(absolutePath, lines, fileMode, fileAccess, fileShare, encoding, bufferSize,
                 leaveOpen);
         }
 
-        public static void WriteText(this AbsolutePath pathSpec, string text, FileMode fileMode = FileMode.Create,
+        public static void WriteText(this AbsolutePath absolutePath, string text, FileMode fileMode = FileMode.Create,
             FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
             Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
         {
-            pathSpec.IoService.WriteText(pathSpec, text, fileMode, fileAccess, fileShare, encoding, bufferSize,
+            absolutePath.IoService.WriteText(absolutePath, text, fileMode, fileAccess, fileShare, encoding, bufferSize,
                 leaveOpen);
         }
 
-        public static bool IsFile(this AbsolutePath pathSpec)
+        public static bool IsFile(this AbsolutePath absolutePath)
         {
-            return pathSpec.GetPathType() == PathType.File;
+            return absolutePath.GetPathType() == PathType.File;
         }
 
-        public static bool IsFolder(this AbsolutePath pathSpec)
+        public static bool IsFolder(this AbsolutePath absolutePath)
         {
-            return pathSpec.GetPathType() == PathType.Folder;
+            return absolutePath.GetPathType() == PathType.Folder;
         }
     }
 }

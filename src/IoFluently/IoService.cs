@@ -19,11 +19,11 @@ namespace IoFluently
             
         }
         
-        public override IMaybe<StreamWriter> TryOpenWriter(AbsolutePath pathSpec)
+        public override IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath)
         {
             try
             {
-                return new Maybe<StreamWriter>(AsFileInfo(pathSpec).CreateText());
+                return new Maybe<StreamWriter>(AsFileInfo(absolutePath).CreateText());
             }
             catch (UnauthorizedAccessException)
             {

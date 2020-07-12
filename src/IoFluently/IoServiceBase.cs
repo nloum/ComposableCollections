@@ -269,14 +269,14 @@ namespace IoFluently
             return Something(pathSpec);
         }
 
-        public virtual bool TryParseRelativePath(string path, out RelativePath pathSpec,
+        public virtual bool TryParseRelativePath(string path, out RelativePath relativePath,
             PathFlags flags = PathFlags.UseDefaultsForGivenPath)
         {
             var error = string.Empty;
-            return TryParseRelativePath(path, out pathSpec, out error, flags);
+            return TryParseRelativePath(path, out relativePath, out error, flags);
         }
 
-        public virtual bool TryParseRelativePath(string path, out RelativePath pathSpec, out string error,
+        public virtual bool TryParseRelativePath(string path, out RelativePath relativePath, out string error,
             PathFlags flags = PathFlags.UseDefaultsForGivenPath)
         {
             if (flags.HasFlag(PathFlags.UseDefaultsFromUtility) && flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
@@ -285,7 +285,7 @@ namespace IoFluently
             if (flags.HasFlag(PathFlags.UseDefaultsFromUtility))
                 flags = GetDefaultFlagsForThisEnvironment();
             error = string.Empty;
-            pathSpec = null;
+            relativePath = null;
             if (path.Contains(":") && path.Contains("/"))
             {
                 path = path.Replace("/", "\\");
@@ -333,7 +333,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    pathSpec = new RelativePath(flags, "\\", this, components);
+                    relativePath = new RelativePath(flags, "\\", this, components);
                 }
                 else if (path.StartsWith("."))
                 {
@@ -356,7 +356,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    pathSpec = new RelativePath(flags, "\\", this, components);
+                    relativePath = new RelativePath(flags, "\\", this, components);
                 }
                 else if (path.StartsWith("\\\\"))
                 {
@@ -379,7 +379,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    pathSpec = new RelativePath(flags, "\\", this, components);
+                    relativePath = new RelativePath(flags, "\\", this, components);
                 }
                 else if (path.StartsWith("\\"))
                 {
@@ -402,7 +402,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    pathSpec = new RelativePath(flags, "\\", this, components);
+                    relativePath = new RelativePath(flags, "\\", this, components);
                 }
                 else
                 {
@@ -425,7 +425,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    pathSpec = new RelativePath(flags, "\\", this, components);
+                    relativePath = new RelativePath(flags, "\\", this, components);
                 }
 
                 return true;
@@ -465,7 +465,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    pathSpec = new RelativePath(flags, "/", this, components);
+                    relativePath = new RelativePath(flags, "/", this, components);
                 }
                 else if (path.StartsWith("."))
                 {
@@ -488,7 +488,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    pathSpec = new RelativePath(flags, "/", this, components);
+                    relativePath = new RelativePath(flags, "/", this, components);
                 }
                 else
                 {
@@ -511,7 +511,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    pathSpec = new RelativePath(flags, "/", this, components);
+                    relativePath = new RelativePath(flags, "/", this, components);
                 }
 
                 return true;
@@ -522,9 +522,9 @@ namespace IoFluently
             if (flags.HasFlag(PathFlags.UseDefaultsFromUtility))
                 flags = GetDefaultFlagsForThisEnvironment();
             if (path == ".." || path == ".")
-                pathSpec = new RelativePath(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, new[]{path});
+                relativePath = new RelativePath(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, new[]{path});
             else
-                pathSpec = new RelativePath(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, new[]{".", path});
+                relativePath = new RelativePath(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, new[]{".", path});
             return true;
         }
 

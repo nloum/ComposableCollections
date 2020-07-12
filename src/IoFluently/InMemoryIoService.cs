@@ -113,7 +113,7 @@ namespace IoFluently
             return Maybe<Folder>.Nothing;
         }
         
-        public override IMaybe<StreamWriter> TryOpenWriter(AbsolutePath pathSpec)
+        public override IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath)
         {
             throw new NotImplementedException();
         }

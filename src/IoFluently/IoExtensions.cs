@@ -335,9 +335,9 @@ namespace IoFluently
             return path.IoService.DeleteFolder(path, recursive);
         }
 
-        public static void Create(this AbsolutePath path, PathType pathType)
+        public static AbsolutePath Create(this AbsolutePath path, PathType pathType)
         {
-            path.IoService.Create(path, pathType);
+            return path.IoService.Create(path, pathType);
         }
 
         public static IMaybe<Stream> TryOpen(this AbsolutePath path, FileMode fileMode)

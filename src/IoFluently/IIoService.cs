@@ -158,7 +158,7 @@ namespace IoFluently
         PathType GetPathType(AbsolutePath path);
         AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false);
         bool MayCreateFile(FileMode fileMode);
-        void Create(AbsolutePath path, PathType pathType);
+        AbsolutePath Create(AbsolutePath path, PathType pathType);
         IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode);
 
         IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,

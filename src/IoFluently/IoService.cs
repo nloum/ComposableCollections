@@ -388,22 +388,7 @@ namespace IoFluently
                 return Maybe<Stream>.Nothing;
             }
         }
-
-        public override void Create(AbsolutePath path, PathType pathType)
-        {
-            switch (pathType)
-            {
-                case PathType.Folder:
-                    Directory.CreateDirectory(path.ToString());
-                    break;
-                case PathType.File:
-                    File.WriteAllText(path.ToString(), string.Empty);
-                    break;
-                default:
-                    throw new ArgumentException(nameof(pathType));
-            }
-        }
-
+        
         public override AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false)
         {
             Directory.Delete(path.ToString(), recursive);
@@ -419,27 +404,6 @@ namespace IoFluently
             if (Directory.Exists(str))
                 return PathType.Folder;
             return PathType.None;
-        }
-
-        public override IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation, bool overwrite = false)
-        {
-            if (translation.Destination.Exists())
-            {
-                if (!overwrite)
-                {
-                    throw new IOException($"An attempt was made to move a file from \"{translation.Source}\" to \"{translation.Destination}\" without overwriting the destination, but the destination already exists");
-                }
-                else
-                {
-                    translation.Destination.Delete();
-                }
-            }
-            if (translation.Source.GetPathType() != PathType.File)
-                throw new IOException(string.Format(
-                    "An attempt was made to copy a file from \"{translation.Source}\" to \"{translation.Destination}\" but the source path is not a file."));
-            translation.Destination.TryParent().Value.Create(PathType.Folder);
-            File.Copy(translation.Source.ToString(), translation.Destination.ToString());
-            return translation;
         }
 
         public override IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation, bool overwrite = false)

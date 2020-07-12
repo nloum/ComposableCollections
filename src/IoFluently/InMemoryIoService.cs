@@ -155,51 +155,6 @@ namespace IoFluently
             return path;
         }
 
-        public override IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation, bool overwrite = false)
-        {
-            var sourcePath = translation.Source.Simplify();
-            var targetPath = translation.Destination.Simplify();
-            var sourceFile = GetFile(sourcePath).Value;
-            var sourceFolder = GetFolder(sourcePath.Parent()).Value;
-            var targetFile = GetFile(targetPath);
-            var targetFolder = GetFolder(targetPath.Parent());
-            if (targetFile.HasValue && !overwrite)
-            {
-                throw new IOException($"Cannot overwrite existing file located at {targetPath}" );
-            }
-
-            if (!targetFolder.HasValue)
-            {
-                CreateFolder(targetPath.Parent());
-                targetFolder = GetFolder(targetPath.Parent());
-            }
-
-            sourceFile.Lock.AcquireReaderLock(0);
-
-            try
-            {
-                var newContents = new byte[sourceFile.Contents.Length];
-                Array.Copy(sourceFile.Contents, newContents, newContents.Length);
-                var newTargetFile = new File()
-                {
-                    Attributes = sourceFile.Attributes,
-                    Contents = newContents,
-                    IsEncrypted = sourceFile.IsEncrypted,
-                    CreationTime = DateTimeOffset.UtcNow,
-                    LastAccessTime = sourceFile.LastAccessTime,
-                    LastWriteTime = sourceFile.LastWriteTime,
-                };
-
-                targetFolder.Value.Files.Add(targetPath.Name, newTargetFile);
-            }
-            finally
-            {
-                sourceFile.Lock.ReleaseReaderLock();
-            }
-
-            return translation;
-        }
-
         public override IMaybe<bool> TryIsReadOnly(AbsolutePath path)
         {
             return GetFile(path).Select(x => x.IsReadOnly);
@@ -263,11 +218,6 @@ namespace IoFluently
             var parentFolder = GetFolder(path.Parent());
             parentFolder.Value.Folders.Remove(path.Simplify().Name);
             return path;
-        }
-
-        public override void Create(AbsolutePath path, PathType pathType)
-        {
-            throw new NotImplementedException();
         }
 
         public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, FileShare fileShare)

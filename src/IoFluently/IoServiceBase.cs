@@ -882,19 +882,13 @@ namespace IoFluently
         public virtual AbsolutePath CreateEmptyFile(AbsolutePath path)
         {
             path.CreateFile().Dispose();
-            if (path.GetPathType() != PathType.File)
-                throw new IOException("Could not create file " + path);
             return path;
         }
 
         public virtual Stream CreateFile(AbsolutePath path)
         {
-            if (path.Parent().GetPathType() != PathType.Folder)
-                path.Parent().Create(PathType.Folder);
-            Create(path, PathType.File);
-            if (path.GetPathType() != PathType.File)
-                throw new IOException("Could not create file " + path);
-            return path.Open(FileMode.Open);
+            var stream = TryOpen(path, FileMode.CreateNew, FileAccess.ReadWrite).Value;
+            return stream;
         }
 
         public abstract AbsolutePath DeleteFile(AbsolutePath path);
@@ -1045,7 +1039,21 @@ namespace IoFluently
             return translation;
         }
 
-        public abstract IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation, bool overwrite = false);
+        public virtual IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation, bool overwrite = false)
+        {
+            using (var source = translation.Source.Open(FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var destination = translation.Destination.Open(FileMode.Open, FileAccess.Write))
+            {
+                byte[] buffer = new byte[32768];
+                int read;
+                while ((read = source.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    destination.Write (buffer, 0, read);
+                }
+            }
+            
+            return translation;
+        }
         
         public virtual IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation, bool overwrite = false)
         {
@@ -1465,7 +1473,19 @@ namespace IoFluently
                    fileMode.HasFlag(FileMode.CreateNew) || fileMode.HasFlag(FileMode.OpenOrCreate);
         }
 
-        public abstract void Create(AbsolutePath path, PathType pathType);
+        public virtual AbsolutePath Create(AbsolutePath path, PathType pathType)
+        {
+            if (pathType == PathType.File)
+            {
+                CreateEmptyFile(path);
+            }
+            else
+            {
+                CreateFolder(path);
+            }
+            
+            return path;
+        }
 
         public virtual IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode)
         {

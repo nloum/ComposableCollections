@@ -6,7 +6,7 @@ namespace SimpleMonads
     {
         public static IMaybe<TElement> Nothing<TElement>()
         {
-            return Maybe<TElement>.Nothing;
+            return Maybe<TElement>.Nothing();
         }
 
         public static IMaybe<TElement> Something<TElement>(TElement element)

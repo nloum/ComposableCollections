@@ -13,10 +13,19 @@ namespace SimpleMonads
 
         [DataMember]
         public bool HasValue { get; set; }
-        public static Maybe<T> Nothing { get; } = new Maybe<T>();
+
+        private readonly static IMaybe<T> _nothing = new Maybe<T>();
+        private string _errorMessage;
+        public static IMaybe<T> Nothing() => _nothing;
+
+        public static IMaybe<T> Nothing(string errorMessage)
+        {
+             return new Maybe<T>(errorMessage);
+        }
 
         private Maybe()
         {
+            _errorMessage = "Cannot access value of a Nothing";
             HasValue = false;
         }
 
@@ -28,10 +37,16 @@ namespace SimpleMonads
             Value = value;
         }
 
+        private Maybe(string errorMessage)
+        {
+            _errorMessage = errorMessage;
+            HasValue = false;
+        }
+
         public T Value
         {
             get {
-                if (object.ReferenceEquals(this, Nothing))
+                if (!HasValue)
                 {
                     throw new MissingMemberException("Cannot access value of a Nothing");
                 }
@@ -86,7 +101,14 @@ namespace SimpleMonads
         public static IMaybe<TElement> ToMaybe<TElement>(this TElement element)
         {
             if (element == null)
-                return Maybe<TElement>.Nothing;
+                return Maybe<TElement>.Nothing("The element this maybe was created from was null");
+            return new Maybe<TElement>(element);
+        }
+
+        public static IMaybe<TElement> ToMaybe<TElement>(this TElement element, string errorMessage)
+        {
+            if (element == null)
+                return Maybe<TElement>.Nothing(errorMessage);
             return new Maybe<TElement>(element);
         }
 
@@ -111,15 +133,7 @@ namespace SimpleMonads
                 return selector(source.Value);
             return Utility.Nothing<T2>();
         }
-
-        public static T OtherwiseThrow<T>(this IMaybe<T> source)
-        {
-            return source.Otherwise(() =>
-            {
-                throw new MissingMemberException("Cannot access value of a Nothing");
-            });
-        }
-
+        
         public static T Otherwise<T>(this IMaybe<T> source, Func<T> fallback)
         {
             if (source.HasValue)
@@ -156,7 +170,7 @@ namespace SimpleMonads
             {
                 if (!maybe.HasValue)
                 {
-                    return Maybe<IReadOnlyList<T>>.Nothing;
+                    return Maybe<IReadOnlyList<T>>.Nothing();
                 }
                 
                 all.Add(maybe.Value);

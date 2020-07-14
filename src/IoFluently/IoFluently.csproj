@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LiveLinq" Version="1.1.0-alpha0099" />
-    <PackageReference Include="MoreCollections" Version="1.0.0-alpha0041" />
+    <PackageReference Include="LiveLinq" Version="1.1.0-alpha0100" />
+    <PackageReference Include="MoreCollections" Version="1.0.0-alpha0042" />
     <PackageReference Include="ReactiveProcesses" Version="1.0.0-alpha003" />
     <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0039" />
     <PackageReference Include="TreeLinq" Version="1.0.0-beta003" />

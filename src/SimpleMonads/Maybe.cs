@@ -15,7 +15,7 @@ namespace SimpleMonads
         public bool HasValue { get; set; }
 
         private readonly static IMaybe<T> _nothing = new Maybe<T>();
-        private string _errorMessage;
+        public  string ErrorMessage { get; }
         public static IMaybe<T> Nothing() => _nothing;
 
         public static IMaybe<T> Nothing(string errorMessage)
@@ -25,11 +25,11 @@ namespace SimpleMonads
 
         private Maybe()
         {
-            _errorMessage = "Cannot access value of a Nothing";
+            ErrorMessage = "Cannot access value of a Nothing";
             HasValue = false;
         }
 
-        public Maybe(T value)
+        internal Maybe(T value)
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
@@ -39,7 +39,7 @@ namespace SimpleMonads
 
         private Maybe(string errorMessage)
         {
-            _errorMessage = errorMessage;
+            ErrorMessage = errorMessage;
             HasValue = false;
         }
 
@@ -48,7 +48,7 @@ namespace SimpleMonads
             get {
                 if (!HasValue)
                 {
-                    throw new MissingMemberException("Cannot access value of a Nothing");
+                    throw new MissingMemberException(ErrorMessage);
                 }
                 return _value;
             }
@@ -98,6 +98,18 @@ namespace SimpleMonads
     
     public static class Maybe
     {
+        public static IMaybe<T> WithErrorMessage<T>(this IMaybe<T> maybe, string errorMessage)
+        {
+            if (maybe.HasValue)
+            {
+                return maybe;
+            }
+            else
+            {
+                return Maybe<T>.Nothing(errorMessage);
+            }
+        }
+        
         public static IMaybe<TElement> ToMaybe<TElement>(this TElement element)
         {
             if (element == null)
@@ -124,16 +136,30 @@ namespace SimpleMonads
         {
             if (source.HasValue)
                 return selector(source.Value).ToMaybe();
-            return Utility.Nothing<T2>();
+            return Maybe<T2>.Nothing(source.ErrorMessage);
+        }
+
+        public static IMaybe<T2> Select<T1, T2>(this IMaybe<T1> source, Func<T1, T2> selector, string errorMessage)
+        {
+            if (source.HasValue)
+                return selector(source.Value).ToMaybe();
+            return Maybe<T2>.Nothing(errorMessage);
         }
 
         public static IMaybe<T2> SelectMany<T1, T2>(this IMaybe<T1> source, Func<T1, IMaybe<T2>> selector)
         {
             if (source.HasValue)
                 return selector(source.Value);
-            return Utility.Nothing<T2>();
+            return Maybe<T2>.Nothing(source.ErrorMessage);
         }
         
+        public static IMaybe<T2> SelectMany<T1, T2>(this IMaybe<T1> source, Func<T1, IMaybe<T2>> selector, string errorMessage)
+        {
+            if (source.HasValue)
+                return selector(source.Value);
+            return Maybe<T2>.Nothing(errorMessage);
+        }
+
         public static T Otherwise<T>(this IMaybe<T> source, Func<T> fallback)
         {
             if (source.HasValue)
@@ -178,7 +204,23 @@ namespace SimpleMonads
 
             return all.ToMaybe();
         }
-        
+
+        public static IMaybe<IReadOnlyList<T>> AllOrNothing<T>(this IEnumerable<IMaybe<T>> maybes, string errorMessage)
+        {
+            var all = new List<T>();
+            foreach (var maybe in maybes)
+            {
+                if (!maybe.HasValue)
+                {
+                    return Maybe<IReadOnlyList<T>>.Nothing(errorMessage);
+                }
+                
+                all.Add(maybe.Value);
+            }
+
+            return all.ToMaybe();
+        }
+
         public static IEnumerable<T> WhereHasValue<T>(this IEnumerable<IMaybe<T>> maybes)
         {
             return maybes.Where(m => m.HasValue).Select(m => m.Value);

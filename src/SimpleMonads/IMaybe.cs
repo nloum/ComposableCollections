@@ -8,6 +8,7 @@ namespace SimpleMonads
     {
         T Value { get; }
         T ValueOrDefault { get; }
+        string ErrorMessage { get; }
     }
 
     /// <summary>

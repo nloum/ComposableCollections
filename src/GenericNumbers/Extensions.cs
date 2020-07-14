@@ -111,7 +111,7 @@ namespace GenericNumbers
 
         public static IMaybe<T> Maximum<T, TNumber>(this IEnumerable<T> enumerable, Func<T, TNumber> selector)
         {
-            IMaybe<T> currentMax = Nothing<T>();
+            IMaybe<T> currentMax = Nothing<T>(() => throw new InvalidOperationException($"There were no elements in the list, so the maximum could not be computed"));
             foreach (var item in enumerable)
             {
                 if (!currentMax.HasValue || selector(item).GreaterThan(selector(currentMax.Value)))
@@ -122,7 +122,7 @@ namespace GenericNumbers
 
         public static IMaybe<T> Minimum<T, TNumber>(this IEnumerable<T> enumerable, Func<T, TNumber> selector)
         {
-            IMaybe<T> currentMin = Nothing<T>();
+            IMaybe<T> currentMin = Nothing<T>(() => throw new InvalidOperationException($"There were no elements in the list, so the minimum could not be computed"));
             foreach (var item in enumerable)
             {
                 if (!currentMin.HasValue || selector(item).LessThan(selector(currentMin.Value)))
@@ -135,7 +135,7 @@ namespace GenericNumbers
         {
             List<TNumber> list = enumerable.ToList();
             if (!list.Any())
-                return Nothing<TNumber>();
+                return Nothing<TNumber>(() => throw new InvalidOperationException($"There were no elements in the list, so the mean could not be computed"));
             var sum = 0.ConvertTo<int, TNumber>();
             foreach (var item in list)
             {
@@ -153,7 +153,7 @@ namespace GenericNumbers
         {
             List<TNumber> list = enumerable.ToList();
             if (!list.Any())
-                return Nothing<TNumber>();
+                return Nothing<TNumber>(() => throw new InvalidOperationException($"There were no elements in the list, so the variance could not be computed"));
             var average = list.Mean().Value;
             for (int i = 0; i < list.Count; i++)
             {

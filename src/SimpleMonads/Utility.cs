@@ -4,6 +4,22 @@ namespace SimpleMonads
 {
     public static class Utility
     {
+        /// <summary>
+        /// Returns a maybe with the result of the calculation, unless an exception is thrown.
+        /// If an exception is thrown by calculation, returns a Nothing.
+        /// </summary>
+        public static IMaybe<T> MaybeCatch<T>(Func<T> calculation)
+        {
+            try
+            {
+                return calculation().ToMaybe();
+            }
+            catch (Exception e)
+            {
+                return Nothing<T>(() => throw e);
+            }
+        }
+    
         public static IMaybe<TElement> Nothing<TElement>()
         {
             return Maybe<TElement>.Nothing();

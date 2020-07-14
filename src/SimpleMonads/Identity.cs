@@ -6,9 +6,6 @@ namespace SimpleMonads
     [DataContract]
     public class Identity<T> : IIdentity<T>
     {
-        [DataMember]
-        public T Value { get; set; }
-
         public Identity()
         {
         }
@@ -17,6 +14,8 @@ namespace SimpleMonads
         {
             Value = value;
         }
+
+        [DataMember] public T Value { get; set; }
 
         public TMonad2 Bind<TMonad2, TElement2>(Func<T, TMonad2> f) where TMonad2 : IMonad<TElement2>
         {
@@ -32,11 +31,11 @@ namespace SimpleMonads
         }
 
         public static IIdentity<TNumber3> SelectMany<TNumber1, TNumber2, TNumber3>(this IIdentity<TNumber1> a,
-                                                                                Func<TNumber1, IIdentity<TNumber2>> func,
-                                                                                Func<TNumber1, TNumber2, TNumber3>
-                                                                                    select)
+            Func<TNumber1, IIdentity<TNumber2>> func,
+            Func<TNumber1, TNumber2, TNumber3>
+                select)
         {
-            return a.SelectMany(func, @select, ToIdentity);
+            return a.SelectMany(func, select, ToIdentity);
         }
     }
 }

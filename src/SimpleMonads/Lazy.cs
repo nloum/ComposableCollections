@@ -8,9 +8,8 @@ namespace SimpleMonads
     internal class Lazy<T> : ILazy<T>
     {
         private readonly Func<T> _calculateValue;
-        private T _value;
-        public LazyState LazyState { get; private set; }
         private readonly object _lock = new object();
+        private T _value;
 
         public Lazy(Func<T> calculateValue)
         {
@@ -26,6 +25,8 @@ namespace SimpleMonads
             _value = value;
         }
 
+        public LazyState LazyState { get; private set; }
+
         public T Value
         {
             get
@@ -40,6 +41,7 @@ namespace SimpleMonads
                         OnPropertyChanged();
                         OnPropertyChanged(nameof(ObjectValue));
                     }
+
                     return _value;
                 }
             }
@@ -51,6 +53,8 @@ namespace SimpleMonads
         {
             return f(_value);
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public override string ToString()
         {
@@ -76,7 +80,7 @@ namespace SimpleMonads
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((Lazy<T>) obj);
         }
 
@@ -85,18 +89,16 @@ namespace SimpleMonads
             unchecked
             {
                 var _ = Value;
-                return (EqualityComparer<T>.Default.GetHashCode(_value)*397) ^ (int) LazyState;
+                return (EqualityComparer<T>.Default.GetHashCode(_value) * 397) ^ (int) LazyState;
             }
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
-    
+
     public static class Lazy
     {
         public static ILazy<TElement> ToLazy<TElement>(this TElement element)
@@ -105,14 +107,15 @@ namespace SimpleMonads
         }
 
         public static ILazy<TNumber3> SelectMany<TNumber1, TNumber2, TNumber3>(this ILazy<TNumber1> a,
-                                                                                Func<TNumber1, ILazy<TNumber2>> func,
-                                                                                Func<TNumber1, TNumber2, TNumber3>
-                                                                                    select)
+            Func<TNumber1, ILazy<TNumber2>> func,
+            Func<TNumber1, TNumber2, TNumber3>
+                select)
         {
-            return a.SelectMany(func, @select, ToLazy);
+            return a.SelectMany(func, select, ToLazy);
         }
 
-        public static ILazy<T2> Select<T1, T2>(this ILazy<T1> source, Func<T1, T2> selector, bool beLazyEvenIfSourceIsAlreadyCalculated = true)
+        public static ILazy<T2> Select<T1, T2>(this ILazy<T1> source, Func<T1, T2> selector,
+            bool beLazyEvenIfSourceIsAlreadyCalculated = true)
         {
             if (source.LazyState == LazyState.Calculated && !beLazyEvenIfSourceIsAlreadyCalculated)
                 return ToLazy(selector(source.Value));

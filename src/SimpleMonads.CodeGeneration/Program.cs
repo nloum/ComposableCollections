@@ -2,6 +2,8 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using IoFluently;
+using ReactiveProcesses;
 
 namespace SimpleMonads.CodeGeneration
 {
@@ -9,32 +11,36 @@ namespace SimpleMonads.CodeGeneration
     {
         private static void Main(string[] args)
         {
+            var ioService = new IoService(new ReactiveProcessFactory());
+
+            var simpleMonadsSourcePath = ioService.CurrentDirectory.Ancestors().First(x => (x / ".git").IsFolder()) / "src" / "SimpleMonads";
+            
             var maxArity = 16;
 
             for (var i = 2; i <= maxArity; i++)
             {
-                File.Delete($"IEither{i}.cs");
-                File.Delete($"Either{i}.cs");
-                File.Delete($"EitherExtensions{i}.cs");
+                var interfacePath = simpleMonadsSourcePath / $"IEither{i}.cs";
+                var classPath = simpleMonadsSourcePath / $"Either{i}.cs";
+                var extensionsPath = simpleMonadsSourcePath / $"Either{i}Extensions.cs";
+                interfacePath.DeleteFile();
+                classPath.DeleteFile();
+                extensionsPath.DeleteFile();
 
-                using (var fs = File.OpenWrite($"IEither{i}.cs"))
-                using (var writer = new StreamWriter(fs))
+                using (var writer = interfacePath.OpenWriter())
                 {
                     writer.WriteLine("namespace SimpleMonads {");
                     GenerateEither(writer, i, maxArity, CodePart.Interface);
                     writer.WriteLine("}");
                 }
 
-                using (var fs = File.OpenWrite($"Either{i}.cs"))
-                using (var writer = new StreamWriter(fs))
+                using (var writer = classPath.OpenWriter())
                 {
                     writer.WriteLine("using System;\n\nnamespace SimpleMonads {");
                     GenerateEither(writer, i, maxArity, CodePart.Class);
                     writer.WriteLine("}");
                 }
 
-                using (var fs = File.OpenWrite($"Either{i}Extensions.cs"))
-                using (var writer = new StreamWriter(fs))
+                using (var writer = extensionsPath.OpenWriter())
                 {
                     writer.WriteLine("using System;\n\nnamespace SimpleMonads {");
                     GenerateEither(writer, i, maxArity, CodePart.ExtensionMethods);
@@ -81,6 +87,7 @@ namespace SimpleMonads.CodeGeneration
                 writer.WriteLine(string.Join("\n", constructors));
                 writer.WriteLine(string.Join("\n", classProperties));
                 for (var i = arity + 1; i <= maxArity; i++) GenerateOrImplementation(writer, arity, i);
+                GenerateToString(writer, arity);
                 writer.WriteLine("}");
             }
 
@@ -93,6 +100,20 @@ namespace SimpleMonads.CodeGeneration
 
                 writer.WriteLine("}");
             }
+        }
+
+        private static void GenerateToString(TextWriter writer, int arity)
+        {
+            writer.WriteLine("public override string ToString() {");
+            var genericParameters = string.Join(", ", Enumerable.Repeat(0, arity).Select((_, i) => $"T{i + 1}"));
+            for (var i = 0; i < arity; i++)
+            {
+                writer.WriteLine($"if (Item{i+1}.HasValue) {{");
+                writer.WriteLine("return $\"{Utility.ConvertToCSharpTypeName(typeof(Either<" + genericParameters + ">))}({Utility.ConvertToCSharpTypeName(typeof(T" + (i + 1) + "))} Item" + (i+1) + ": {Item" + (i+1) + ".Value})\";");
+                writer.WriteLine("}");
+            }
+            writer.WriteLine("throw new InvalidOperationException(\"None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class?\");");
+            writer.WriteLine("}");
         }
 
         private static void GenerateOrDeclaration(TextWriter writer, int arity, int biggerArityArgs)

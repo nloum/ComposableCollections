@@ -9,20 +9,9 @@ namespace SimpleMonads
     [DataContract]
     public class Maybe<T> : IMaybe<T>
     {
-        private T _value;
-
-        [DataMember]
-        public bool HasValue { get; set; }
-
-        private readonly static IMaybe<T> _nothing = new Maybe<T>();
-        public static IMaybe<T> Nothing() => _nothing;
+        private static readonly IMaybe<T> _nothing = new Maybe<T>();
 
         private readonly Action _throwOnNothingAccessed;
-
-        public static IMaybe<T> Nothing(Action throwOnNothingAccessed)
-        {
-             return new Maybe<T>(throwOnNothingAccessed);
-        }
 
         private Maybe()
         {
@@ -44,50 +33,19 @@ namespace SimpleMonads
             HasValue = false;
         }
 
+        [DataMember] public bool HasValue { get; set; }
+
         public T Value
         {
-            get {
-                if (!HasValue)
-                {
-                    _throwOnNothingAccessed();
-                }
-                return _value;
-            }
-            set => _value = value;
-        }
-        
-        [DataMember]
-        public T ValueOrDefault
-        {
-            get => _value;
-            set => _value = value;
-        }
-
-        protected bool Equals(IMaybe<T> other)
-        {
-            return HasValue == other.HasValue && EqualityComparer<T>.Default.Equals(Value, other.Value);
-        }
-        
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((IMaybe<T>) obj);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
+            get
             {
-                return (EqualityComparer<T>.Default.GetHashCode(Value) *397) ^ HasValue.GetHashCode();
+                if (!HasValue) _throwOnNothingAccessed();
+                return ValueOrDefault;
             }
+            set => ValueOrDefault = value;
         }
 
-        public override string ToString()
-        {
-            return HasValue ? $"Some({Value})" : "None";
-        }
+        [DataMember] public T ValueOrDefault { get; set; }
 
         public object ObjectValue => Value;
 
@@ -95,26 +53,58 @@ namespace SimpleMonads
         {
             return f(Value);
         }
+
+        public static IMaybe<T> Nothing()
+        {
+            return _nothing;
+        }
+
+        public static IMaybe<T> Nothing(Action throwOnNothingAccessed)
+        {
+            return new Maybe<T>(throwOnNothingAccessed);
+        }
+
+        protected bool Equals(IMaybe<T> other)
+        {
+            return HasValue == other.HasValue && EqualityComparer<T>.Default.Equals(Value, other.Value);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((IMaybe<T>) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (EqualityComparer<T>.Default.GetHashCode(Value) * 397) ^ HasValue.GetHashCode();
+            }
+        }
+
+        public override string ToString()
+        {
+            return HasValue ? $"Some({Value})" : "None";
+        }
     }
-    
+
     public static class Maybe
     {
         public static IMaybe<T> WithErrorMessage<T>(this IMaybe<T> maybe, Action errorMessage)
         {
             if (maybe.HasValue)
-            {
                 return maybe;
-            }
-            else
-            {
-                return Maybe<T>.Nothing(errorMessage);
-            }
+            return Maybe<T>.Nothing(errorMessage);
         }
-        
+
         public static IMaybe<TElement> ToMaybe<TElement>(this TElement element)
         {
             if (element == null)
-                return Maybe<TElement>.Nothing(() => throw new IndexOutOfRangeException("The element this maybe was created from was null"));
+                return Maybe<TElement>.Nothing(() =>
+                    throw new IndexOutOfRangeException("The element this maybe was created from was null"));
             return new Maybe<TElement>(element);
         }
 
@@ -126,11 +116,11 @@ namespace SimpleMonads
         }
 
         public static IMaybe<TNumber3> SelectMany<TNumber1, TNumber2, TNumber3>(this IMaybe<TNumber1> a,
-                                                                                Func<TNumber1, IMaybe<TNumber2>> func,
-                                                                                Func<TNumber1, TNumber2, TNumber3>
-                                                                                    select)
+            Func<TNumber1, IMaybe<TNumber2>> func,
+            Func<TNumber1, TNumber2, TNumber3>
+                select)
         {
-            return a.SelectMany(func, @select, ToMaybe);
+            return a.SelectMany(func, select, ToMaybe);
         }
 
         public static IMaybe<T2> Select<T1, T2>(this IMaybe<T1> source, Func<T1, T2> selector)
@@ -143,7 +133,8 @@ namespace SimpleMonads
             });
         }
 
-        public static IMaybe<T2> Select<T1, T2>(this IMaybe<T1> source, Func<T1, T2> selector, Action throwOnNothingAccessed)
+        public static IMaybe<T2> Select<T1, T2>(this IMaybe<T1> source, Func<T1, T2> selector,
+            Action throwOnNothingAccessed)
         {
             if (source.HasValue)
                 return selector(source.Value).ToMaybe();
@@ -159,8 +150,9 @@ namespace SimpleMonads
                 var tmp = source.Value;
             });
         }
-        
-        public static IMaybe<T2> SelectMany<T1, T2>(this IMaybe<T1> source, Func<T1, IMaybe<T2>> selector, Action throwOnNothingAccessed)
+
+        public static IMaybe<T2> SelectMany<T1, T2>(this IMaybe<T1> source, Func<T1, IMaybe<T2>> selector,
+            Action throwOnNothingAccessed)
         {
             if (source.HasValue)
                 return selector(source.Value);
@@ -183,16 +175,14 @@ namespace SimpleMonads
 
         public static IEnumerable<T> ToEnumerable<T>(this IMaybe<T> source)
         {
-            var result = source.Select(value => ImmutableList<T>.Empty.Add(value)).Otherwise(() => ImmutableList<T>.Empty);
+            var result = source.Select(value => ImmutableList<T>.Empty.Add(value))
+                .Otherwise(() => ImmutableList<T>.Empty);
             return result;
         }
 
         public static IMaybe<T> IfHasValue<T>(this IMaybe<T> maybe, Action<T> action)
         {
-            if (maybe.HasValue)
-            {
-                action(maybe.Value);
-            }
+            if (maybe.HasValue) action(maybe.Value);
             return maybe;
         }
 
@@ -201,27 +191,22 @@ namespace SimpleMonads
             var all = new List<T>();
             foreach (var maybe in maybes)
             {
-                if (!maybe.HasValue)
-                {
-                    return Maybe<IReadOnlyList<T>>.Nothing();
-                }
-                
+                if (!maybe.HasValue) return Maybe<IReadOnlyList<T>>.Nothing();
+
                 all.Add(maybe.Value);
             }
 
             return all.ToMaybe();
         }
 
-        public static IMaybe<IReadOnlyList<T>> AllOrNothing<T>(this IEnumerable<IMaybe<T>> maybes, Action throwOnNothingAccessed)
+        public static IMaybe<IReadOnlyList<T>> AllOrNothing<T>(this IEnumerable<IMaybe<T>> maybes,
+            Action throwOnNothingAccessed)
         {
             var all = new List<T>();
             foreach (var maybe in maybes)
             {
-                if (!maybe.HasValue)
-                {
-                    return Maybe<IReadOnlyList<T>>.Nothing(throwOnNothingAccessed);
-                }
-                
+                if (!maybe.HasValue) return Maybe<IReadOnlyList<T>>.Nothing(throwOnNothingAccessed);
+
                 all.Add(maybe.Value);
             }
 

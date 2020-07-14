@@ -4,6 +4,6 @@ namespace SimpleMonads
     {
         Uncalculated,
         Calculating,
-        Calculated,
+        Calculated
     }
 }

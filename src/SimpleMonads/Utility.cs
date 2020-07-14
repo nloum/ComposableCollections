@@ -9,9 +9,9 @@ namespace SimpleMonads
             return Maybe<TElement>.Nothing();
         }
 
-        public static IMaybe<TElement> Nothing<TElement>(string errorMessage)
+        public static IMaybe<TElement> Nothing<TElement>(Action throwOnNothingAccessed)
         {
-            return Maybe<TElement>.Nothing(errorMessage);
+            return Maybe<TElement>.Nothing(throwOnNothingAccessed);
         }
 
         public static IMaybe<TElement> Something<TElement>(TElement element)
@@ -58,11 +58,11 @@ namespace SimpleMonads
         /// <param name="element"></param>
         /// <param name="errorMessage">The error message the maybe should have if hasValue is false</param>
         /// <returns></returns>
-        public static IMaybe<TElement> SomethingOrNothing<TElement>(bool hasValue, Func<TElement> element, Func<string> errorMessage)
+        public static IMaybe<TElement> SomethingOrNothing<TElement>(bool hasValue, Func<TElement> element, Action throwOnNothingAccessed)
         {
             if (hasValue)
                 return Something(element());
-            return Nothing<TElement>(errorMessage());
+            return Nothing<TElement>(throwOnNothingAccessed);
         }
 
         /// <summary>
@@ -74,11 +74,11 @@ namespace SimpleMonads
         /// <param name="element"></param>
         /// <param name="errorMessage">The error message the maybe should have if hasValue is false</param>
         /// <returns></returns>
-        public static IMaybe<TElement> SomethingOrNothing<TElement>(bool hasValue, TElement element, string errorMessage)
+        public static IMaybe<TElement> SomethingOrNothing<TElement>(bool hasValue, TElement element, Action throwOnNothingAccessed)
         {
             if (hasValue)
                 return Something(element);
-            return Nothing<TElement>(errorMessage);
+            return Nothing<TElement>(throwOnNothingAccessed);
         }
 
         public static ILazy<TElement> Lazify<TElement>(TElement element)

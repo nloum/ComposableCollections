@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29409.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TreeLinq", "TreeLinq\TreeLinq.csproj", "{0747CAAB-484B-48D5-B8AC-32BEC9F040AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TreeLinq.Tests", "TreeLinq.Tests\TreeLinq.Tests.csproj", "{B8BF7A83-0965-4B7D-8651-1D08C2F92885}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "..\build\_build.csproj", "{53A85CCB-4CF3-4DC4-A081-388ADE8180FB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{53A85CCB-4CF3-4DC4-A081-388ADE8180FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53A85CCB-4CF3-4DC4-A081-388ADE8180FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0747CAAB-484B-48D5-B8AC-32BEC9F040AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0747CAAB-484B-48D5-B8AC-32BEC9F040AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0747CAAB-484B-48D5-B8AC-32BEC9F040AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0747CAAB-484B-48D5-B8AC-32BEC9F040AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8BF7A83-0965-4B7D-8651-1D08C2F92885}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8BF7A83-0965-4B7D-8651-1D08C2F92885}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8BF7A83-0965-4B7D-8651-1D08C2F92885}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8BF7A83-0965-4B7D-8651-1D08C2F92885}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C363A252-44EB-4DC2-9C40-98FE2B9D3FD7}
+	EndGlobalSection
+EndGlobal

@@ -17,7 +17,7 @@ namespace IoFluently
         public IIoService IoService { get; }
         public AbsolutePath<string> Path { get; }
 
-        public AbsolutePath(PathFlags flags, string directorySeparator, IIoService ioService, IEnumerable<string> path)
+        internal AbsolutePath(PathFlags flags, string directorySeparator, IIoService ioService, IEnumerable<string> path)
         {
             Flags = flags;
             DirectorySeparator = directorySeparator;
@@ -72,7 +72,7 @@ namespace IoFluently
                 var dotIndex = lastPathComponent.IndexOf('.');
                 if (dotIndex < 0)
                 {
-                    return Maybe<string>.Nothing;
+                    return Nothing<string>(() => throw new InvalidOperationException($"The path {this} has no extension"));
                 }
 
                 return lastPathComponent.Substring(dotIndex).ToMaybe();

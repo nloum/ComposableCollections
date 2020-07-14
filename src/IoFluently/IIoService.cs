@@ -141,14 +141,6 @@ namespace IoFluently
         IMaybe<DateTimeOffset> TryLastWriteTime(AbsolutePath attributes);
         IMaybe<string> TryFullName(AbsolutePath attributes);
 
-        /// <summary>
-        ///     Includes the period character ".". For example, function would return ".exe" if the file pointed to a file named
-        ///     was "test.exe".
-        /// </summary>
-        /// <param name="pathName"></param>
-        /// <returns></returns>
-        IMaybe<string> TryExtension(string pathName);
-
         bool IsImageUri(Uri uri);
         bool IsVideoUri(Uri uri);
         string StripQuotes(string str);

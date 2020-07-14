@@ -21,7 +21,7 @@ namespace IoFluently
         protected readonly AbsolutePath _path;
         protected readonly string _pattern;
 
-        public AbsolutePathDescendantsOrChildren(AbsolutePath path, string pattern, bool includeSubdirectories, IIoService ioService)
+        protected AbsolutePathDescendantsOrChildren(AbsolutePath path, string pattern, bool includeSubdirectories, IIoService ioService)
         {
             _path = path;
             _pattern = pattern;

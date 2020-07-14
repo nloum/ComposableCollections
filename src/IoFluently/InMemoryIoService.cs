@@ -13,6 +13,8 @@ using LiveLinq.Set;
 using ReactiveProcesses;
 using SimpleMonads;
 
+using static SimpleMonads.Utility;
+
 namespace IoFluently
 {
     public class InMemoryIoService : IoServiceBase
@@ -52,23 +54,23 @@ namespace IoFluently
             var components = path.Path.Components;
             if (RootFolders.ContainsKey(components[0]))
             {
-                return GetFile(RootFolders[components[0]], components.Skip(1).ToList());
+                return GetFile(RootFolders[components[0]], components.Skip(1).ToList(), path);
             }
-            return Maybe<File>.Nothing;
+            return Nothing<File>(() => throw new InvalidOperationException($"The root folder of {path} does not exist"));
         }
 
-        private IMaybe<File> GetFile(Folder folder, IReadOnlyList<string> components)
+        private IMaybe<File> GetFile(Folder folder, IReadOnlyList<string> components, AbsolutePath originalPath)
         {
             if (components.Count == 0)
             {
-                return Maybe<File>.Nothing;
+                return Nothing<File>(() => throw new InvalidOperationException("There are no components in the specified path"));
             }
             
             if (folder.Files.ContainsKey(components[0]))
             {
                 if (components.Count > 1)
                 {
-                    return Maybe<File>.Nothing;
+                    return Nothing<File>(() => throw new InvalidOperationException($"The {components[0]} folder in the path {originalPath} is actually a file, not a folder"));
                 }
 
                 return folder.Files[components[0]].ToMaybe();
@@ -76,10 +78,10 @@ namespace IoFluently
 
             if (folder.Folders.ContainsKey(components[0]))
             {
-                return GetFile(folder.Folders[components[0]], components.Skip(1).ToList());
+                return GetFile(folder.Folders[components[0]], components.Skip(1).ToList(), originalPath);
             }
 
-            return Maybe<File>.Nothing;
+            return Nothing<File>(() => throw new InvalidOperationException($"The {components[0]} part of the path {originalPath} is missing"));
         }
         
         private IMaybe<Folder> GetFolder(AbsolutePath path)
@@ -88,12 +90,12 @@ namespace IoFluently
             var components = path.Path.Components;
             if (RootFolders.ContainsKey(components[0]))
             {
-                return GetFolder(RootFolders[components[0]], components.Skip(1).ToList());
+                return GetFolder(RootFolders[components[0]], components.Skip(1).ToList(), path);
             }
-            return Maybe<Folder>.Nothing;
+            return Nothing<Folder>(() => throw new InvalidOperationException($"The root folder of {path} does not exist"));
         }
 
-        private IMaybe<Folder> GetFolder(Folder folder, IReadOnlyList<string> components)
+        private IMaybe<Folder> GetFolder(Folder folder, IReadOnlyList<string> components, AbsolutePath originalPath)
         {
             if (components.Count == 0)
             {
@@ -102,15 +104,15 @@ namespace IoFluently
             
             if (folder.Files.ContainsKey(components[0]))
             {
-                return Maybe<Folder>.Nothing;
+                return Nothing<Folder>(() => throw new InvalidOperationException($"The {components[0]} folder in the path {originalPath} is actually a file, not a folder"));
             }
 
             if (folder.Folders.ContainsKey(components[0]))
             {
-                return GetFolder(folder.Folders[components[0]], components.Skip(1).ToList());
+                return GetFolder(folder.Folders[components[0]], components.Skip(1).ToList(), originalPath);
             }
 
-            return Maybe<Folder>.Nothing;
+            return Nothing<Folder>(() => throw new InvalidOperationException($"The {components[0]} part of the path {originalPath} is missing"));
         }
         
         public override IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath)
@@ -257,7 +259,7 @@ namespace IoFluently
             {
                 if (fileMode.HasFlag(FileMode.CreateNew))
                 {
-                    return Maybe<FileStream>.Nothing;
+                    return Nothing<FileStream>(() => throw new InvalidOperationException($"The FileMode.CreateNew flag was specified, but the file {path} did indeed exist"));
                 }
                 
                 file = GetFile(path).Value;

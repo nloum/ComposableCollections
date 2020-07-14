@@ -5,10 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LiveLinq" Version="1.1.0-alpha0095" />
-    <PackageReference Include="MoreCollections" Version="1.0.0-alpha0038" />
+    <PackageReference Include="LiveLinq" Version="1.1.0-alpha0098" />
+    <PackageReference Include="MoreCollections" Version="1.0.0-alpha0041" />
     <PackageReference Include="ReactiveProcesses" Version="1.0.0-alpha003" />
-    <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0032" />
+    <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0039" />
     <PackageReference Include="TreeLinq" Version="1.0.0-beta003" />
     <PackageReference Include="UtilityDisposables" Version="1.1.0-alpha0006" />
   </ItemGroup>

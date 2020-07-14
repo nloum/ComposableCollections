@@ -990,7 +990,7 @@ namespace IoFluently
             {
                 maybePath = maybePath.Select(p => p.TryParent()).SelectMany(x => x);
                 if (!maybePath.HasValue)
-                    return Maybe<AbsolutePath>.Nothing;
+                    return Nothing<AbsolutePath>(() => throw new InvalidOperationException($"The path {path} has no ancestor"));
             }
 
             return maybePath;
@@ -1153,59 +1153,32 @@ namespace IoFluently
 
         public virtual IMaybe<Uri> TryGetCommonDescendants(AbsolutePath path1, AbsolutePath path2)
         {
-            try
-            {
-                return new Maybe<Uri>(new Uri(path1.ToString().GetCommonEnding(path2.ToString()).Trim('\\'),
+            return MaybeCatch(() => new Uri(path1.ToString().GetCommonEnding(path2.ToString()).Trim('\\'),
                     UriKind.Relative));
-            }
-            catch (ArgumentNullException)
-            {
-                return Maybe<Uri>.Nothing;
-            }
-            catch (UriFormatException)
-            {
-                return Maybe<Uri>.Nothing;
-            }
         }
 
         public virtual IMaybe<Tuple<Uri, Uri>> TryGetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2)
         {
-            try
+            return MaybeCatch(() =>
             {
                 var commonAncestry = path1.ToString().GetCommonBeginning(path2.ToString()).Trim('\\');
-                return new Maybe<Tuple<Uri, Uri>>(new Tuple<Uri, Uri>(
+                return new Tuple<Uri, Uri>(
                     new Uri(path1.ToString().Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative),
-                    new Uri(path2.ToString().Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative)));
-            }
-            catch (ArgumentNullException)
-            {
-                return Maybe<Tuple<Uri, Uri>>.Nothing;
-            }
-            catch (UriFormatException)
-            {
-                return Maybe<Tuple<Uri, Uri>>.Nothing;
-            }
+                    new Uri(path2.ToString().Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative));
+            });
         }
 
         public virtual IMaybe<Tuple<Uri, Uri>> TryGetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2)
         {
-            try
+            return MaybeCatch(() =>
             {
                 var commonDescendants = path1.ToString().GetCommonEnding(path2.ToString()).Trim('\\');
-                return new Maybe<Tuple<Uri, Uri>>(new Tuple<Uri, Uri>(
+                return new Tuple<Uri, Uri>(
                     new Uri(
                         path1.ToString().Substring(0, path1.ToString().Length - commonDescendants.Length).Trim('\\')),
                     new Uri(
-                        path2.ToString().Substring(0, path2.ToString().Length - commonDescendants.Length).Trim('\\'))));
-            }
-            catch (ArgumentNullException)
-            {
-                return Maybe<Tuple<Uri, Uri>>.Nothing;
-            }
-            catch (UriFormatException)
-            {
-                return Maybe<Tuple<Uri, Uri>>.Nothing;
-            }
+                        path2.ToString().Substring(0, path2.ToString().Length - commonDescendants.Length).Trim('\\')));
+            });
         }
 
         public virtual IAbsolutePathTranslation Translate(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination)
@@ -1387,20 +1360,6 @@ namespace IoFluently
         public abstract IMaybe<DateTimeOffset> TryLastWriteTime(AbsolutePath attributes);
 
         public abstract IMaybe<string> TryFullName(AbsolutePath attributes);
-
-        /// <summary>
-        ///     Includes the period character ".". For example, function would return ".exe" if the file pointed to a file named
-        ///     was "test.exe".
-        /// </summary>
-        /// <param name="pathName"></param>
-        /// <returns></returns>
-        public virtual IMaybe<string> TryExtension(string pathName)
-        {
-            var result = Path.GetExtension(pathName);
-            if (string.IsNullOrEmpty(result))
-                return Maybe<string>.Nothing;
-            return new Maybe<string>(result);
-        }
 
         public virtual bool IsImageUri(Uri uri)
         {
@@ -1750,7 +1709,7 @@ namespace IoFluently
             }
             else
             {
-                return Maybe<AbsolutePath>.Nothing;
+                return Nothing<AbsolutePath>(() => throw new InvalidOperationException($"The path {path} has only one component, so there is no parent"));
             }
         }
         

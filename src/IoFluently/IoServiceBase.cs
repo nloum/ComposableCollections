@@ -1042,7 +1042,7 @@ namespace IoFluently
         public virtual IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation, bool overwrite = false)
         {
             using (var source = translation.Source.Open(FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (var destination = translation.Destination.Open(FileMode.Open, FileAccess.Write))
+            using (var destination = translation.Destination.Open(overwrite ? FileMode.OpenOrCreate : FileMode.CreateNew, FileAccess.Write))
             {
                 byte[] buffer = new byte[32768];
                 int read;

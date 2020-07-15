@@ -14,7 +14,7 @@ namespace IoFluently
         public IIoService IoService { get; }
         public AbsolutePaths<string> Paths { get; }
 
-        public AbsolutePaths(PathFlags flags, string directorySeparator, IIoService ioService, AbsolutePaths<string> paths)
+        internal AbsolutePaths(PathFlags flags, string directorySeparator, IIoService ioService, AbsolutePaths<string> paths)
         {
             Flags = flags;
             DirectorySeparator = directorySeparator;

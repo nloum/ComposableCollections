@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using LiveLinq.Set;
 using ReactiveProcesses;
 using SimpleMonads;
+using static SimpleMonads.Utility;
 
 namespace IoFluently
 {
@@ -23,19 +24,11 @@ namespace IoFluently
         {
             try
             {
-                return new Maybe<StreamWriter>(AsFileInfo(absolutePath).CreateText());
+                return Something(AsFileInfo(absolutePath).CreateText());
             }
-            catch (UnauthorizedAccessException)
+            catch (Exception ex)
             {
-                return Maybe<StreamWriter>.Nothing;
-            }
-            catch (IOException)
-            {
-                return Maybe<StreamWriter>.Nothing;
-            }
-            catch (SecurityException)
-            {
-                return Maybe<StreamWriter>.Nothing;
+                return Nothing<StreamWriter>(() => throw ex);
             }
         }
 
@@ -46,15 +39,11 @@ namespace IoFluently
             {
                 if (MayCreateFile(fileMode))
                     path.TryParent().IfHasValue(parent => parent.Create(PathType.Folder));
-                return new Maybe<Stream>(AsFileInfo(path).Open(fileMode, fileAccess, fileShare));
+                return Something<Stream>(AsFileInfo(path).Open(fileMode, fileAccess, fileShare));
             }
-            catch (IOException)
+            catch (Exception ex)
             {
-                return Maybe<Stream>.Nothing;
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Maybe<Stream>.Nothing;
+                return Nothing<Stream>(() => throw ex);
             }
         }
 
@@ -62,19 +51,11 @@ namespace IoFluently
         {
             try
             {
-                return new Maybe<FileAttributes>(AsFileInfo(attributes).Attributes);
+                return Something(AsFileInfo(attributes).Attributes);
             }
-            catch (IOException)
+            catch (Exception ex)
             {
-                return Maybe<FileAttributes>.Nothing;
-            }
-            catch (SecurityException)
-            {
-                return Maybe<FileAttributes>.Nothing;
-            }
-            catch (ArgumentException)
-            {
-                return Maybe<FileAttributes>.Nothing;
+                return Nothing<FileAttributes>(() => throw ex);
             }
         }
 
@@ -82,19 +63,11 @@ namespace IoFluently
         {
             try
             {
-                return new Maybe<DateTimeOffset>(AsFileInfo(attributes).CreationTime);
+                return Something<DateTimeOffset>(AsFileInfo(attributes).CreationTime);
             }
-            catch (IOException)
+            catch (Exception ex)
             {
-                return Maybe<DateTimeOffset>.Nothing;
-            }
-            catch (PlatformNotSupportedException)
-            {
-                return Maybe<DateTimeOffset>.Nothing;
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                return Maybe<DateTimeOffset>.Nothing;
+                return Nothing<DateTimeOffset>(() => throw ex);
             }
         }
 
@@ -102,19 +75,11 @@ namespace IoFluently
         {
             try
             {
-                return new Maybe<DateTimeOffset>(AsFileInfo(attributes).LastAccessTime);
+                return Something<DateTimeOffset>(AsFileInfo(attributes).LastAccessTime);
             }
-            catch (IOException)
+            catch (Exception ex)
             {
-                return Maybe<DateTimeOffset>.Nothing;
-            }
-            catch (PlatformNotSupportedException)
-            {
-                return Maybe<DateTimeOffset>.Nothing;
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                return Maybe<DateTimeOffset>.Nothing;
+                return Nothing<DateTimeOffset>(() => throw ex);
             }
         }
 
@@ -122,19 +87,11 @@ namespace IoFluently
         {
             try
             {
-                return new Maybe<DateTimeOffset>(AsFileInfo(attributes).LastWriteTime);
+                return Something<DateTimeOffset>(AsFileInfo(attributes).LastWriteTime);
             }
-            catch (IOException)
+            catch (Exception ex)
             {
-                return Maybe<DateTimeOffset>.Nothing;
-            }
-            catch (PlatformNotSupportedException)
-            {
-                return Maybe<DateTimeOffset>.Nothing;
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                return Maybe<DateTimeOffset>.Nothing;
+                return Nothing<DateTimeOffset>(() => throw ex);
             }
         }
 
@@ -142,15 +99,11 @@ namespace IoFluently
         {
             try
             {
-                return new Maybe<string>(AsFileInfo(attributes).FullName);
+                return Something(AsFileInfo(attributes).FullName);
             }
-            catch (SecurityException)
+            catch (Exception ex)
             {
-                return Maybe<string>.Nothing;
-            }
-            catch (PathTooLongException)
-            {
-                return Maybe<string>.Nothing;
+                return Nothing<string>(() => throw ex);
             }
         }
         
@@ -158,11 +111,11 @@ namespace IoFluently
         {
             try
             {
-                return new Maybe<long>(AsFileInfo(path).Length);
+                return Something<long>(AsFileInfo(path).Length);
             }
-            catch (IOException)
+            catch (Exception ex)
             {
-                return Maybe<long>.Nothing;
+                return Nothing<long>(() => throw ex);
             }
         }
 
@@ -170,19 +123,11 @@ namespace IoFluently
         {
             try
             {
-                return new Maybe<bool>(AsFileInfo(path).IsReadOnly);
+                return Something<bool>(AsFileInfo(path).IsReadOnly);
             }
-            catch (IOException)
+            catch (Exception ex)
             {
-                return Maybe<bool>.Nothing;
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Maybe<bool>.Nothing;
-            }
-            catch (ArgumentException)
-            {
-                return Maybe<bool>.Nothing;
+                return Nothing<bool>(() => throw ex);
             }
         }
 
@@ -377,15 +322,11 @@ namespace IoFluently
             {
                 if (MayCreateFile(fileMode))
                     path.TryParent().IfHasValue(parent => parent.Create(PathType.Folder));
-                return new Maybe<Stream>(AsFileInfo(path).Open(fileMode, fileAccess));
+                return Something(AsFileInfo(path).Open(fileMode, fileAccess));
             }
-            catch (IOException)
+            catch (Exception ex)
             {
-                return Maybe<Stream>.Nothing;
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Maybe<Stream>.Nothing;
+                return Nothing<Stream>(() => throw ex);
             }
         }
         

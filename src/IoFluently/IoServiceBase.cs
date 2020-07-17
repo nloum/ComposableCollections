@@ -33,6 +33,9 @@ namespace IoFluently
 
         public abstract IReadOnlyObservableSet<AbsolutePath> Storage { get; }
 
+        public abstract ISetChanges<AbsolutePath> ToLiveLinq(AbsolutePath path, bool includeFileContentChanges,
+            bool includeSubFolders, string pattern);
+
         public abstract IMaybe<StreamWriter> TryOpenWriter(AbsolutePath pathSpec);
 
         public virtual IEnumerable<string> ReadLines(AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,

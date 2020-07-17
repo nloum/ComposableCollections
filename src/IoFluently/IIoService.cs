@@ -14,6 +14,8 @@ namespace IoFluently
 {
     public interface IIoService
     {
+        ISetChanges<AbsolutePath> ToLiveLinq(AbsolutePath path, bool includeFileContentChanges,
+            bool includeSubFolders, string pattern);
         AbsolutePath CreateTemporaryPath(PathType type);
         PathFlags GetDefaultFlagsForThisEnvironment();
         string GetDefaultDirectorySeparatorForThisEnvironment();

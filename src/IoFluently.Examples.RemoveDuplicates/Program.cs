@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Autofac;
@@ -7,34 +6,6 @@ using CommandLine;
 
 namespace IoFluently.Examples.RemoveDuplicates
 {
-    [Verb("find")]
-    public class BuildPlanVerb
-    {
-        public BuildPlanVerb(IEnumerable<string> rootFolders, string planPath)
-        {
-            RootFolders = rootFolders;
-            PlanPath = planPath;
-        }
-
-        [Value(0)]
-        public IEnumerable<string> RootFolders { get; }
-        
-        [Option('p', "plan", Required = true)]
-        public string PlanPath { get; }
-    }
-    
-    [Verb("execute")]
-    public class ExecutePlanVerb
-    {
-        public ExecutePlanVerb(string planPath)
-        {
-            PlanPath = planPath;
-        }
-
-        [Option('p', "plan", Required = true)]
-        public string PlanPath { get; }
-    }
-    
     class Program
     {
         static void Main(string[] args)

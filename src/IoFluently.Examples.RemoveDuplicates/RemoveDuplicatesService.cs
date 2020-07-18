@@ -1,20 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using Autofac.Core;
 using Serilog;
 
 namespace IoFluently.Examples.RemoveDuplicates
 {
-    public interface IRemoveDuplicatesService
-    {
-        DuplicateRemovalPlan FindDuplicates(IEnumerable<AbsolutePath> rootFolders);
-        void Execute(DuplicateRemovalPlan plan);
-    }
-
     public class RemoveDuplicatesService : IRemoveDuplicatesService
     {
         private readonly ILogger _logger;
@@ -62,34 +52,5 @@ namespace IoFluently.Examples.RemoveDuplicates
                 }
             }
         }
-    }
-
-    public class DuplicateRemovalPlan
-    {
-        public DuplicateRemovalPlan(ImmutableDictionary<string, DuplicateFiles> duplicateFiles)
-        {
-            DuplicateFiles = duplicateFiles;
-        }
-
-        public ImmutableDictionary<string, DuplicateFiles> DuplicateFiles { get; }
-    }
-
-    public class DuplicateFiles
-    {
-        public DuplicateFiles(string mdh5Hash, ImmutableDictionary<AbsolutePath, DuplicateFileAction> paths)
-        {
-            Mdh5Hash = mdh5Hash;
-            Paths = paths;
-        }
-
-        public string Mdh5Hash { get; }
-        public ImmutableDictionary<AbsolutePath, DuplicateFileAction> Paths { get; }
-    }
-
-    public enum DuplicateFileAction
-    {
-        Undecided,
-        Delete,
-        Keep,
     }
 }

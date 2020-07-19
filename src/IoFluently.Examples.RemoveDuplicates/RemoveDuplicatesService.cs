@@ -83,9 +83,11 @@ namespace IoFluently.Examples.RemoveDuplicates
             var filesGroupedByHash = new Dictionary<string, List<Tuple<AbsolutePath, Information>>>();
             var totalHashedCount = 0;
             var totalHashedSize = Information.Zero;
+            counter = 0;
 
             foreach (var possibleDuplicate in filesGroupedBySize.SelectMany(x => x.Value.Select(path => new { path, size = x.Key })))
             {
+                counter++;
                 var hash = possibleDuplicate.path.Md5().ToHexString();
                 if (!filesGroupedByHash.ContainsKey(hash))
                 {
@@ -98,7 +100,7 @@ namespace IoFluently.Examples.RemoveDuplicates
                 
                 if (logPeriodically.HasBeenLongEnough())
                 {
-                    var percentage = Math.Round(filesGroupedByHash.Count / (double) filesGroupedBySize.Count * 100, 2);
+                    var percentage = Math.Round(counter / (double) filesGroupedBySize.Count * 100, 2);
                     _logger.Information(
                         "Step {CurrentStep} {Percentage}%: hashed {Size} in {Count:N0} files",
                         3, percentage, ConvertToOptimalUnit(totalHashedSize), totalHashedCount);

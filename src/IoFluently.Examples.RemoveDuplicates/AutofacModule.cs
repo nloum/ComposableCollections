@@ -19,6 +19,8 @@ namespace IoFluently.Examples.RemoveDuplicates
             builder.RegisterType<ReactiveProcessFactory>().As<IReactiveProcessFactory>().SingleInstance();
             builder.RegisterType<IoService>().As<IIoService>().SingleInstance();
             builder.RegisterType<RemoveDuplicatesService>().As<IRemoveDuplicatesService>().SingleInstance();
+            builder.RegisterType<ExecuteService>().AsImplementedInterfaces().SingleInstance();
+            builder.RegisterType<PlanService>().AsImplementedInterfaces().SingleInstance();
         }
     }
 }

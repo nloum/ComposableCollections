@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Serilog;
 using UnitsNet;
+using UnitsNet.Units;
 
 namespace IoFluently.Examples.RemoveDuplicates
 {
@@ -22,6 +23,7 @@ namespace IoFluently.Examples.RemoveDuplicates
 
             var filesGroupedBySize = new Dictionary<Information, List<AbsolutePath>>();
             var totalFileCount = 0;
+            var totalFileSize = Information.Zero;
 
             foreach (var rootFolder in rootFolders)
             {
@@ -32,23 +34,24 @@ namespace IoFluently.Examples.RemoveDuplicates
                         continue;
                     }
 
-                    var length = path.FileSize();
-                    if (!filesGroupedBySize.ContainsKey(length))
+                    var size = path.FileSize();
+                    totalFileSize += size;
+                    if (!filesGroupedBySize.ContainsKey(size))
                     {
-                        filesGroupedBySize[length] = new List<AbsolutePath>();
+                        filesGroupedBySize[size] = new List<AbsolutePath>();
                     }
 
                     if (logPeriodically.HasBeenLongEnough())
                     {
-                        _logger.Information("Step {CurrentStep}: iterated {Count} files", 1, totalFileCount);
+                        _logger.Information("Step {CurrentStep}: iterated {Size} in {Count:N0} files", 1, ConvertToOptimalUnit(totalFileSize), totalFileCount);
                     }
                     
                     totalFileCount++;
-                    filesGroupedBySize[length].Add(path);
+                    filesGroupedBySize[size].Add(path);
                 }
             }
 
-            _logger.Information("Step {CurrentStep}: done iterating {Count} files", 1, totalFileCount);
+            _logger.Information("Step {CurrentStep}: done iterating {Size} in {Count:N0} files", 1, ConvertToOptimalUnit(totalFileSize), totalFileCount);
 
             var filesWithNoDuplicatesBySizeCount = 0;
             var filesWithNoDuplicatesBySizeSize = Information.Zero;
@@ -67,15 +70,15 @@ namespace IoFluently.Examples.RemoveDuplicates
                     {
                         var percentage = Math.Round(counter / (double) filesGroupedBySize.Count * 100, 2);
                         _logger.Information(
-                            "Step {CurrentStep} {Percentage}%: ignored {Count} files with a total size of {Size} that definitely don't have duplicates because they have a unique size",
-                            2, percentage, filesWithNoDuplicatesBySizeCount, filesWithNoDuplicatesBySizeSize);
+                            "Step {CurrentStep} {Percentage}%: ignored {Size} in {Count:N0} files that definitely don't have duplicates because they have a unique size",
+                            2, percentage, ConvertToOptimalUnit(filesWithNoDuplicatesBySizeSize), filesWithNoDuplicatesBySizeCount);
                     }
                 }
             }
 
             _logger.Information(
-                "Step {CurrentStep} {Percentage}%: done ignoring {Count} files with a total size of {Size} that definitely don't have duplicates because they have a unique size",
-                2, 100, filesWithNoDuplicatesBySizeCount, filesWithNoDuplicatesBySizeSize);
+                "Step {CurrentStep} {Percentage}%: done ignoring {Size} in {Count:N0} files that definitely don't have duplicates because they have a unique size",
+                2, 100, ConvertToOptimalUnit(filesWithNoDuplicatesBySizeSize), filesWithNoDuplicatesBySizeCount);
 
             var filesGroupedByHash = new Dictionary<string, List<Tuple<AbsolutePath, Information>>>();
             var totalHashedCount = 0;
@@ -97,14 +100,14 @@ namespace IoFluently.Examples.RemoveDuplicates
                 {
                     var percentage = Math.Round(filesGroupedByHash.Count / (double) filesGroupedBySize.Count * 100, 2);
                     _logger.Information(
-                        "Step {CurrentStep} {Percentage}%: hashed {Count} files for a total of {Size}",
-                        3, percentage, totalHashedCount, totalHashedSize);
+                        "Step {CurrentStep} {Percentage}%: hashed {Size} in {Count:N0} files",
+                        3, percentage, ConvertToOptimalUnit(totalHashedSize), totalHashedCount);
                 }
             }
 
             _logger.Information(
-                "Step {CurrentStep} {Percentage}%: done hashing {Count} files for a total of {Size}",
-                3, 100, totalHashedCount, totalHashedSize);
+                "Step {CurrentStep} {Percentage}%: done hashing {Size} in {Count:N0} files",
+                3, 100, ConvertToOptimalUnit(totalHashedSize), totalHashedCount);
             
             var filesWithNoDuplicatesByHashCount = 0;
             var filesWithNoDuplicatesByHashSize = Information.Zero;
@@ -123,21 +126,46 @@ namespace IoFluently.Examples.RemoveDuplicates
                     {
                         var percentage = Math.Round(counter / (double) filesGroupedByHash.Count * 100, 2);
                         _logger.Information(
-                            "Step {CurrentStep} {Percentage}%: ignored {Count} files with a total size of {Size} that definitely don't have duplicates because they have a unique hash",
-                            4, percentage, filesWithNoDuplicatesByHashCount, filesWithNoDuplicatesByHashSize);
+                            "Step {CurrentStep} {Percentage}%: ignored {Size} in {Count:N0} files that definitely don't have duplicates because they have a unique hash",
+                            4, percentage, ConvertToOptimalUnit(filesWithNoDuplicatesByHashSize), filesWithNoDuplicatesByHashCount);
                     }
                 }
             }
             
             _logger.Information(
-                "Step {CurrentStep} {Percentage}%: done ignoring {Count} files with a total size of {Size} that definitely don't have duplicates because they have a unique hash",
-                4, 100, filesWithNoDuplicatesByHashCount, filesWithNoDuplicatesByHashSize);
+                "Step {CurrentStep} {Percentage}%: done ignoring {Size} in {Count:N0} files that definitely don't have duplicates because they have a unique hash",
+                4, 100, ConvertToOptimalUnit(filesWithNoDuplicatesByHashSize), filesWithNoDuplicatesByHashCount);
 
             var result = new DuplicateRemovalPlan(filesGroupedByHash.ToImmutableDictionary(x => x.Key, x => new DuplicateFiles(x.Key, x.Value.ToImmutableDictionary(path => path.Item1, _ => DuplicateFileAction.Undecided))));
             
             _logger.Information("Step {CurrentStep}: done compiling results", 5);
             
             return result;
+        }
+
+        private Information ConvertToOptimalUnit(Information info)
+        {
+            if (info > Information.FromTerabytes(1))
+            {
+                return info.ToUnit(InformationUnit.Terabyte);
+            }
+            
+            if (info > Information.FromGigabytes(1))
+            {
+                return info.ToUnit(InformationUnit.Gigabyte);
+            }
+
+            if (info > Information.FromMegabytes(1))
+            {
+                return info.ToUnit(InformationUnit.Megabyte);
+            }
+            
+            if (info > Information.FromKilobytes(1))
+            {
+                return info.ToUnit(InformationUnit.Kilobyte);
+            }
+
+            return info;
         }
 
         public void Execute(DuplicateRemovalPlan plan)

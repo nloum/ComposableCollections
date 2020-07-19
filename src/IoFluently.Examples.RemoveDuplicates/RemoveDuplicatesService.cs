@@ -85,25 +85,28 @@ namespace IoFluently.Examples.RemoveDuplicates
             var totalHashedSize = Information.Zero;
             counter = 0;
 
-            foreach (var possibleDuplicate in filesGroupedBySize.SelectMany(x => x.Value.Select(path => new { path, size = x.Key })))
+            foreach (var possibleDuplicates in filesGroupedBySize)
             {
                 counter++;
-                var hash = possibleDuplicate.path.Md5().ToHexString();
-                if (!filesGroupedByHash.ContainsKey(hash))
+                foreach (var possibleDuplicate in possibleDuplicates.Value.Select(path => new {path, size = possibleDuplicates.Key}))
                 {
-                    filesGroupedByHash[hash] = new List<Tuple<AbsolutePath, Information>>();
-                }
+                    var hash = possibleDuplicate.path.Md5().ToHexString();
+                    if (!filesGroupedByHash.ContainsKey(hash))
+                    {
+                        filesGroupedByHash[hash] = new List<Tuple<AbsolutePath, Information>>();
+                    }
 
-                filesGroupedByHash[hash].Add(Tuple.Create(possibleDuplicate.path, possibleDuplicate.size));
-                totalHashedCount++;
-                totalHashedSize += possibleDuplicate.size;
+                    filesGroupedByHash[hash].Add(Tuple.Create(possibleDuplicate.path, possibleDuplicate.size));
+                    totalHashedCount++;
+                    totalHashedSize += possibleDuplicate.size;
                 
-                if (logPeriodically.HasBeenLongEnough())
-                {
-                    var percentage = Math.Round(counter / (double) filesGroupedBySize.Count * 100, 2);
-                    _logger.Information(
-                        "Step {CurrentStep} {Percentage}%: hashed {Size} in {Count:N0} files",
-                        3, percentage, ConvertToOptimalUnit(totalHashedSize), totalHashedCount);
+                    if (logPeriodically.HasBeenLongEnough())
+                    {
+                        var percentage = Math.Round(counter / (double) filesGroupedBySize.Count * 100, 2);
+                        _logger.Information(
+                            "Step {CurrentStep} {Percentage}%: hashed {Size} in {Count:N0} files",
+                            3, percentage, ConvertToOptimalUnit(totalHashedSize), totalHashedCount);
+                    }
                 }
             }
 

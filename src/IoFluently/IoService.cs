@@ -13,6 +13,7 @@ using LiveLinq.Dictionary;
 using LiveLinq.Set;
 using ReactiveProcesses;
 using SimpleMonads;
+using UnitsNet;
 using UtilityDisposables;
 using static SimpleMonads.Utility;
 
@@ -332,15 +333,15 @@ namespace IoFluently
             }
         }
         
-        public override IMaybe<long> TryLength(AbsolutePath path)
+        public override IMaybe<Information> TryFileSize(AbsolutePath path)
         {
             try
             {
-                return Something<long>(AsFileInfo(path).Length);
+                return Something(Information.FromBytes(AsFileInfo(path).Length));
             }
             catch (Exception ex)
             {
-                return Nothing<long>(() => throw ex);
+                return Nothing<Information>(() => throw ex);
             }
         }
 

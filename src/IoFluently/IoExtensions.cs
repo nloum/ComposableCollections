@@ -8,6 +8,7 @@ using LiveLinq.Dictionary;
 using LiveLinq.Set;
 using SimpleMonads;
 using TreeLinq;
+using UnitsNet;
 
 namespace IoFluently
 {
@@ -244,14 +245,14 @@ namespace IoFluently
             return path.IoService.TryIsReadOnly(path).Value;
         }
 
-        public static IMaybe<long> TryLength(this AbsolutePath path)
+        public static IMaybe<Information> TryFileSize(this AbsolutePath path)
         {
-            return path.IoService.TryLength(path);
+            return path.IoService.TryFileSize(path);
         }
 
-        public static long Length(this AbsolutePath path)
+        public static Information FileSize(this AbsolutePath path)
         {
-            return path.IoService.TryLength(path).Value;
+            return path.IoService.TryFileSize(path).Value;
         }
 
         public static IMaybe<FileAttributes> TryAttributes(this AbsolutePath attributes)

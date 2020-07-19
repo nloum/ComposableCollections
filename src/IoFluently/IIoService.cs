@@ -9,6 +9,7 @@ using LiveLinq.Set;
 using ReactiveProcesses;
 using SimpleMonads;
 using TreeLinq;
+using UnitsNet;
 
 namespace IoFluently
 {
@@ -136,7 +137,7 @@ namespace IoFluently
         Uri Child(Uri parent, Uri child);
 
         IMaybe<bool> TryIsReadOnly(AbsolutePath path);
-        IMaybe<long> TryLength(AbsolutePath path);
+        IMaybe<Information> TryFileSize(AbsolutePath path);
         IMaybe<FileAttributes> TryAttributes(AbsolutePath attributes);
         IMaybe<DateTimeOffset> TryCreationTime(AbsolutePath attributes);
         IMaybe<DateTimeOffset> TryLastAccessTime(AbsolutePath attributes);

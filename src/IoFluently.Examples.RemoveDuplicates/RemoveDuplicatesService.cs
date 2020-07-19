@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Serilog;
+using UnitsNet;
 
 namespace IoFluently.Examples.RemoveDuplicates
 {
@@ -18,13 +19,10 @@ namespace IoFluently.Examples.RemoveDuplicates
         public DuplicateRemovalPlan FindDuplicates(IEnumerable<AbsolutePath> rootFolders)
         {
             var logPeriodically = new LogPeriodically(TimeSpan.FromSeconds(3));
-            _logger.Information("Finding files that may be duplicates based on their size");
 
-            var filesGroupedBySize = new Dictionary<long, List<AbsolutePath>>();
+            var filesGroupedBySize = new Dictionary<Information, List<AbsolutePath>>();
             var totalFileCount = 0;
 
-            _logger.Information("Starting to iterate files");
-            
             foreach (var rootFolder in rootFolders)
             {
                 foreach (var path in rootFolder.Descendants())
@@ -34,7 +32,7 @@ namespace IoFluently.Examples.RemoveDuplicates
                         continue;
                     }
 
-                    var length = path.Length();
+                    var length = path.FileSize();
                     if (!filesGroupedBySize.ContainsKey(length))
                     {
                         filesGroupedBySize[length] = new List<AbsolutePath>();
@@ -42,7 +40,7 @@ namespace IoFluently.Examples.RemoveDuplicates
 
                     if (logPeriodically.HasBeenLongEnough())
                     {
-                        _logger.Information("Iterated {Count} files", totalFileCount);
+                        _logger.Information("Step {CurrentStep}: iterated {Count} files", 1, totalFileCount);
                     }
                     
                     totalFileCount++;
@@ -50,13 +48,15 @@ namespace IoFluently.Examples.RemoveDuplicates
                 }
             }
 
-            _logger.Information("Done iterating {Count} files", totalFileCount);
+            _logger.Information("Step {CurrentStep}: done iterating {Count} files", 1, totalFileCount);
 
             var filesWithNoDuplicatesBySizeCount = 0;
-            long filesWithNoDuplicatesBySizeSize = 0;
+            var filesWithNoDuplicatesBySizeSize = Information.Zero;
+            var counter = 0;
             
             foreach (var key in filesGroupedBySize.Keys.ToImmutableList())
             {
+                counter++;
                 if (filesGroupedBySize[key].Count == 1)
                 {
                     filesWithNoDuplicatesBySizeCount++;
@@ -65,48 +65,77 @@ namespace IoFluently.Examples.RemoveDuplicates
 
                     if (logPeriodically.HasBeenLongEnough())
                     {
+                        var percentage = Math.Round(counter / (double) filesGroupedBySize.Count * 100, 2);
                         _logger.Information(
-                            "Ignored {Count} files with a total size of {Size} bytes that definitely don't have duplicates because they have a unique size",
-                            filesWithNoDuplicatesBySizeCount, filesWithNoDuplicatesBySizeSize);
+                            "Step {CurrentStep} {Percentage}%: ignored {Count} files with a total size of {Size} that definitely don't have duplicates because they have a unique size",
+                            2, percentage, filesWithNoDuplicatesBySizeCount, filesWithNoDuplicatesBySizeSize);
                     }
                 }
             }
 
             _logger.Information(
-                "Done ignoring {Count} files with a total size of {Size} bytes that definitely don't have duplicates because they have a unique size",
-                filesWithNoDuplicatesBySizeCount, filesWithNoDuplicatesBySizeSize);
+                "Step {CurrentStep} {Percentage}%: done ignoring {Count} files with a total size of {Size} that definitely don't have duplicates because they have a unique size",
+                2, 100, filesWithNoDuplicatesBySizeCount, filesWithNoDuplicatesBySizeSize);
 
-            var filesGroupedByHash = new Dictionary<string, List<AbsolutePath>>();
+            var filesGroupedByHash = new Dictionary<string, List<Tuple<AbsolutePath, Information>>>();
             var totalHashedCount = 0;
-            long totalHashedSize = 0;
+            var totalHashedSize = Information.Zero;
 
             foreach (var possibleDuplicate in filesGroupedBySize.SelectMany(x => x.Value.Select(path => new { path, size = x.Key })))
             {
                 var hash = possibleDuplicate.path.Md5().ToHexString();
                 if (!filesGroupedByHash.ContainsKey(hash))
                 {
-                    filesGroupedByHash[hash] = new List<AbsolutePath>();
+                    filesGroupedByHash[hash] = new List<Tuple<AbsolutePath, Information>>();
                 }
 
-                filesGroupedByHash[hash].Add(possibleDuplicate.path);
+                filesGroupedByHash[hash].Add(Tuple.Create(possibleDuplicate.path, possibleDuplicate.size));
                 totalHashedCount++;
                 totalHashedSize += possibleDuplicate.size;
                 
                 if (logPeriodically.HasBeenLongEnough())
                 {
+                    var percentage = Math.Round(filesGroupedByHash.Count / (double) filesGroupedBySize.Count * 100, 2);
                     _logger.Information(
-                        "Hashed {Count} files for a total of {Size} bytes",
-                        totalHashedCount, totalHashedSize);
+                        "Step {CurrentStep} {Percentage}%: hashed {Count} files for a total of {Size}",
+                        3, percentage, totalHashedCount, totalHashedSize);
                 }
             }
 
             _logger.Information(
-                "Done hashing {Count} files for a total of {Size} bytes",
-                totalHashedCount, totalHashedSize);
-
-            var result = new DuplicateRemovalPlan(filesGroupedByHash.ToImmutableDictionary(x => x.Key, x => new DuplicateFiles(x.Key, x.Value.ToImmutableDictionary(path => path, _ => DuplicateFileAction.Undecided))));
+                "Step {CurrentStep} {Percentage}%: done hashing {Count} files for a total of {Size}",
+                3, 100, totalHashedCount, totalHashedSize);
             
-            _logger.Information("Done compiling results");
+            var filesWithNoDuplicatesByHashCount = 0;
+            var filesWithNoDuplicatesByHashSize = Information.Zero;
+            counter = 0;
+            
+            foreach (var key in filesGroupedByHash.Keys.ToImmutableList())
+            {
+                counter++;
+                if (filesGroupedByHash[key].Count == 1)
+                {
+                    filesWithNoDuplicatesByHashCount++;
+                    filesWithNoDuplicatesByHashSize += filesGroupedByHash[key][0].Item2;
+                    filesGroupedByHash.Remove(key);
+
+                    if (logPeriodically.HasBeenLongEnough())
+                    {
+                        var percentage = Math.Round(counter / (double) filesGroupedByHash.Count * 100, 2);
+                        _logger.Information(
+                            "Step {CurrentStep} {Percentage}%: ignored {Count} files with a total size of {Size} that definitely don't have duplicates because they have a unique hash",
+                            4, percentage, filesWithNoDuplicatesByHashCount, filesWithNoDuplicatesByHashSize);
+                    }
+                }
+            }
+            
+            _logger.Information(
+                "Step {CurrentStep} {Percentage}%: done ignoring {Count} files with a total size of {Size} that definitely don't have duplicates because they have a unique hash",
+                4, 100, filesWithNoDuplicatesByHashCount, filesWithNoDuplicatesByHashSize);
+
+            var result = new DuplicateRemovalPlan(filesGroupedByHash.ToImmutableDictionary(x => x.Key, x => new DuplicateFiles(x.Key, x.Value.ToImmutableDictionary(path => path.Item1, _ => DuplicateFileAction.Undecided))));
+            
+            _logger.Information("Step {CurrentStep}: done compiling results", 5);
             
             return result;
         }

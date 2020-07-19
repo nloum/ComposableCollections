@@ -15,6 +15,7 @@ using LiveLinq.Set;
 using MoreCollections;
 using ReactiveProcesses;
 using SimpleMonads;
+using UnitsNet;
 using UtilityDisposables;
 using EnumerableUtility = MoreCollections.EnumerableUtility;
 using static SimpleMonads.Utility;
@@ -1352,7 +1353,7 @@ namespace IoFluently
 
         public abstract IMaybe<bool> TryIsReadOnly(AbsolutePath path);
 
-        public abstract IMaybe<long> TryLength(AbsolutePath path);
+        public abstract IMaybe<Information> TryFileSize(AbsolutePath path);
 
         public abstract IMaybe<FileAttributes> TryAttributes(AbsolutePath attributes);
 

@@ -12,7 +12,7 @@ using LiveLinq.Dictionary;
 using LiveLinq.Set;
 using ReactiveProcesses;
 using SimpleMonads;
-
+using UnitsNet;
 using static SimpleMonads.Utility;
 
 namespace IoFluently
@@ -167,9 +167,9 @@ namespace IoFluently
             return GetFile(path).Select(x => x.IsReadOnly);
         }
 
-        public override IMaybe<long> TryLength(AbsolutePath path)
+        public override IMaybe<Information> TryFileSize(AbsolutePath path)
         {
-            return GetFile(path).Select(x => x.Contents.LongLength);
+            return GetFile(path).Select(x => Information.FromBytes(x.Contents.LongLength));
          }
 
         public override IMaybe<FileAttributes> TryAttributes(AbsolutePath path)

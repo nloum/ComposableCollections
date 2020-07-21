@@ -7,9 +7,9 @@ namespace IoFluently
     {
         public AbsolutePath Path { get; }
         
-        private Func<AbsolutePath, Task<TReader>> _read;
+        private Func<Task<TReader>> _read;
 
-        public PathWithKnownFormatAsync(AbsolutePath path, Func<AbsolutePath, Task<TReader>> read)
+        public PathWithKnownFormatAsync(AbsolutePath path, Func<Task<TReader>> read)
         {
             Path = path;
             _read = read;
@@ -17,7 +17,25 @@ namespace IoFluently
 
         public Task<TReader> Read()
         {
-            return _read(Path);
+            return _read();
+        }
+
+        protected bool Equals(PathWithKnownFormatAsync<TReader> other)
+        {
+            return Equals(Path, other.Path);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((PathWithKnownFormatAsync<TReader>) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Path != null ? Path.GetHashCode() : 0);
         }
 
         public override string ToString()
@@ -30,9 +48,9 @@ namespace IoFluently
     {
         public AbsolutePath Path { get; }
         
-        private Func<AbsolutePath, TReader> _read;
+        private Func<TReader> _read;
 
-        public PathWithKnownFormatSync(AbsolutePath path, Func<AbsolutePath, TReader> read)
+        public PathWithKnownFormatSync(AbsolutePath path, Func<TReader> read)
         {
             Path = path;
             _read = read;
@@ -40,9 +58,27 @@ namespace IoFluently
 
         public TReader Read()
         {
-            return _read(Path);
+            return _read();
         }
-        
+
+        protected bool Equals(PathWithKnownFormatSync<TReader> other)
+        {
+            return Equals(Path, other.Path);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((PathWithKnownFormatSync<TReader>) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Path != null ? Path.GetHashCode() : 0);
+        }
+
         public override string ToString()
         {
             return $"{Path}, read synchronously using a {Utility.ConvertToCSharpTypeName(typeof(TReader))} and cannot be written to";
@@ -51,18 +87,22 @@ namespace IoFluently
 
     internal class PathWithKnownFormatAsync<TReader, TWriter> : PathWithKnownFormatAsync<TReader>, IPathWithKnownFormatAsync<TReader, TWriter>
     {
-        private Func<AbsolutePath, TWriter, Task> _write;
+        private readonly AbsolutePath _path;
+        private Func<TWriter, Task> _write;
 
-        public PathWithKnownFormatAsync(AbsolutePath path, Func<AbsolutePath, Task<TReader>> read,
-            Func<AbsolutePath, TWriter, Task> write) : base(path, read)
+        public PathWithKnownFormatAsync(AbsolutePath path, Func<Task<TReader>> read,
+            Func<TWriter, Task> write) : base(path, read)
         {
+            _path = path;
             _write = write;
         }
 
         public Task Write(TWriter writer)
         {
-            return _write(Path, writer);
+            return _write(writer);
         }
+
+        public AbsolutePath Path { get; }
 
         public override string ToString()
         {
@@ -72,17 +112,40 @@ namespace IoFluently
     
     internal class PathWithKnownFormatAsyncSync<TReader, TWriter> : PathWithKnownFormatAsync<TReader>, IPathWithKnownFormatAsyncSync<TReader, TWriter>
     {
-        private Action<AbsolutePath, TWriter> _write;
+        private readonly AbsolutePath _path;
+        private Action<TWriter> _write;
 
-        public PathWithKnownFormatAsyncSync(AbsolutePath path, Func<AbsolutePath, Task<TReader>> read,
-            Action<AbsolutePath, TWriter> write) : base(path, read)
+        public PathWithKnownFormatAsyncSync(AbsolutePath path, Func<Task<TReader>> read,
+            Action<TWriter> write) : base(path, read)
         {
+            _path = path;
             _write = write;
         }
 
         public void Write(TWriter writer)
         {
-            _write(Path, writer);
+            _write(writer);
+        }
+
+        protected bool Equals(PathWithKnownFormatAsyncSync<TReader, TWriter> other)
+        {
+            return base.Equals(other) && Equals(_path, other._path);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((PathWithKnownFormatAsyncSync<TReader, TWriter>) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (base.GetHashCode() * 397) ^ (_path != null ? _path.GetHashCode() : 0);
+            }
         }
 
         public override string ToString()
@@ -93,17 +156,40 @@ namespace IoFluently
     
     internal class PathWithKnownFormatSync<TReader, TWriter> : PathWithKnownFormatSync<TReader>, IPathWithKnownFormatSync<TReader, TWriter>
     {
-        private Action<AbsolutePath, TWriter> _write;
+        private readonly AbsolutePath _path;
+        private Action<TWriter> _write;
 
-        public PathWithKnownFormatSync(AbsolutePath path, Func<AbsolutePath, TReader> read,
-            Action<AbsolutePath, TWriter> write) : base(path, read)
+        public PathWithKnownFormatSync(AbsolutePath path, Func<TReader> read,
+            Action<TWriter> write) : base(path, read)
         {
+            _path = path;
             _write = write;
         }
 
         public void Write(TWriter writer)
         {
-            _write(Path, writer);
+            _write(writer);
+        }
+
+        protected bool Equals(PathWithKnownFormatSync<TReader, TWriter> other)
+        {
+            return base.Equals(other) && Equals(_path, other._path);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((PathWithKnownFormatSync<TReader, TWriter>) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (base.GetHashCode() * 397) ^ (_path != null ? _path.GetHashCode() : 0);
+            }
         }
 
         public override string ToString()
@@ -114,17 +200,40 @@ namespace IoFluently
     
     internal class PathWithKnownFormatSyncAsync<TReader, TWriter> : PathWithKnownFormatSync<TReader>, IPathWithKnownFormatSyncAsync<TReader, TWriter>
     {
-        private Func<AbsolutePath, TWriter, Task> _write;
+        private readonly AbsolutePath _path;
+        private Func<TWriter, Task> _write;
 
-        public PathWithKnownFormatSyncAsync(AbsolutePath path, Func<AbsolutePath, TReader> read,
-            Func<AbsolutePath, TWriter, Task> write) : base(path, read)
+        public PathWithKnownFormatSyncAsync(AbsolutePath path, Func<TReader> read,
+            Func<TWriter, Task> write) : base(path, read)
         {
+            _path = path;
             _write = write;
         }
 
         public Task Write(TWriter writer)
         {
-            return _write(Path, writer);
+            return _write(writer);
+        }
+
+        protected bool Equals(PathWithKnownFormatSyncAsync<TReader, TWriter> other)
+        {
+            return base.Equals(other) && Equals(_path, other._path);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((PathWithKnownFormatSyncAsync<TReader, TWriter>) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (base.GetHashCode() * 397) ^ (_path != null ? _path.GetHashCode() : 0);
+            }
         }
 
         public override string ToString()

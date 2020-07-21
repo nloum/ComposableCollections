@@ -18,85 +18,85 @@ namespace IoFluently
             return new AnonymousDisposable(() => translation.Invert().Move(true));
         }
         
-        public static IPathWithKnownFormatSync<T> AsPathFormat<T>(this AbsolutePath path, Func<AbsolutePath, T> read)
+        public static IPathWithKnownFormatSync<T> AsPathFormat<T>(this AbsolutePath path, Func<T> read)
         {
             return new PathWithKnownFormatSync<T>(path, read);
         }
 
-        public static IPathWithKnownFormatAsync<T> AsPathFormat<T>(this AbsolutePath path, Func<AbsolutePath, Task<T>> read)
+        public static IPathWithKnownFormatAsync<T> AsPathFormat<T>(this AbsolutePath path, Func<Task<T>> read)
         {
             return new PathWithKnownFormatAsync<T>(path, read);
         }
         
-        public static IPathWithKnownFormatSync<T, T> AsPathFormat<T>(this AbsolutePath path, Func<AbsolutePath, T> read,
-            Action<AbsolutePath, T> write)
+        public static IPathWithKnownFormatSync<T, T> AsPathFormat<T>(this AbsolutePath path, Func<T> read,
+            Action<T> write)
         {
             return new PathWithKnownFormatSync<T, T>(path, read, write);
         }
 
-        public static IPathWithKnownFormatSyncAsync<T, T> AsPathFormat<T>(this AbsolutePath path, Func<AbsolutePath, T> read,
-            Func<AbsolutePath, T, Task> write)
+        public static IPathWithKnownFormatSyncAsync<T, T> AsPathFormat<T>(this AbsolutePath path, Func<T> read,
+            Func<T, Task> write)
         {
             return new PathWithKnownFormatSyncAsync<T, T>(path, read, write);
         }
 
-        public static IPathWithKnownFormatAsyncSync<T, T> AsPathFormat<T>(this AbsolutePath path, Func<AbsolutePath, Task<T>> read,
-            Action<AbsolutePath, T> write)
+        public static IPathWithKnownFormatAsyncSync<T, T> AsPathFormat<T>(this AbsolutePath path, Func<Task<T>> read,
+            Action<T> write)
         {
             return new PathWithKnownFormatAsyncSync<T, T>(path, read, write);
         }
 
-        public static IPathWithKnownFormatAsync<T, T> AsPathFormat<T>(this AbsolutePath path, Func<AbsolutePath, Task<T>> read,
-            Func<AbsolutePath, T, Task> write)
+        public static IPathWithKnownFormatAsync<T, T> AsPathFormat<T>(this AbsolutePath path, Func<Task<T>> read,
+            Func<T, Task> write)
         {
             return new PathWithKnownFormatAsync<T, T>(path, read, write);
         }
         
-        public static IPathWithKnownFormatSync<TReader, TWriter> AsPathFormat<TReader, TWriter>(this AbsolutePath path, Func<AbsolutePath, TReader> read,
-            Action<AbsolutePath, TWriter> write)
+        public static IPathWithKnownFormatSync<TReader, TWriter> AsPathFormat<TReader, TWriter>(this AbsolutePath path, Func<TReader> read,
+            Action<TWriter> write)
         {
             return new PathWithKnownFormatSync<TReader, TWriter>(path, read, write);
         }
 
-        public static IPathWithKnownFormatSyncAsync<TReader, TWriter> AsPathFormat<TReader, TWriter>(this AbsolutePath path, Func<AbsolutePath, TReader> read,
-            Func<AbsolutePath, TWriter, Task> write)
+        public static IPathWithKnownFormatSyncAsync<TReader, TWriter> AsPathFormat<TReader, TWriter>(this AbsolutePath path, Func<TReader> read,
+            Func<TWriter, Task> write)
         {
             return new PathWithKnownFormatSyncAsync<TReader, TWriter>(path, read, write);
         }
 
-        public static IPathWithKnownFormatAsyncSync<TReader, TWriter> AsPathFormat<TReader, TWriter>(this AbsolutePath path, Func<AbsolutePath, Task<TReader>> read,
-            Action<AbsolutePath, TWriter> write)
+        public static IPathWithKnownFormatAsyncSync<TReader, TWriter> AsPathFormat<TReader, TWriter>(this AbsolutePath path, Func<Task<TReader>> read,
+            Action<TWriter> write)
         {
             return new PathWithKnownFormatAsyncSync<TReader, TWriter>(path, read, write);
         }
 
-        public static IPathWithKnownFormatAsync<TReader, TWriter> AsPathFormat<TReader, TWriter>(this AbsolutePath path, Func<AbsolutePath, Task<TReader>> read,
-            Func<AbsolutePath, TWriter, Task> write)
+        public static IPathWithKnownFormatAsync<TReader, TWriter> AsPathFormat<TReader, TWriter>(this AbsolutePath path, Func<Task<TReader>> read,
+            Func<TWriter, Task> write)
         {
             return new PathWithKnownFormatAsync<TReader, TWriter>(path, read, write);
         }
 
         public static IPathWithKnownFormatSync<Text, Text> AsTextFile(this AbsolutePath path)
         {
-            return path.AsPathFormat(absPath => new Text(absPath.ReadLines()),
-                (absPath, text) => absPath.WriteAllLines(text.Lines));
+            return path.AsPathFormat(() => new Text(path.ReadLines()),
+                (text) => path.WriteAllLines(text.Lines));
         }
 
         public static IPathWithKnownFormatSync<string> AsSmallTextFile(this AbsolutePath path)
         {
-            return path.AsPathFormat(absPath => absPath.ReadAllText(), (absPath, text) => absPath.WriteAllText(text));
+            return path.AsPathFormat(() => path.ReadAllText(), (text) => path.WriteAllText(text));
         }
         
         public static IPathWithKnownFormatSync<XmlDocument, XmlDocument> AsXmlFile(this AbsolutePath path)
         {
-            return path.AsPathFormat(absPath =>
+            return path.AsPathFormat(() =>
             {
                 var doc = new XmlDocument();
-                doc.Load(absPath.ToString());
+                doc.Load(path.ToString());
                 return doc;
-            }, (absPath, doc) =>
+            }, (doc) =>
             {
-                using (var stream = absPath.Open(FileMode.Create, FileAccess.Write))
+                using (var stream = path.Open(FileMode.Create, FileAccess.Write))
                 {
                     doc.Save(stream);
                 }

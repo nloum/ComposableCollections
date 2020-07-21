@@ -28,9 +28,9 @@ namespace IoFluently.Examples.RemoveDuplicates
             return hex.ToString();
         }
 
-        public static IPathWithKnownFormatSync<DuplicateRemovalPlan, DuplicateRemovalPlan> AsDuplicateRemovalPlan(this AbsolutePath x)
+        public static IPathWithKnownFormatSync<DuplicateRemovalPlan, DuplicateRemovalPlan> AsDuplicateRemovalPlan(this AbsolutePath path)
         {
-            return x.AsPathFormat(path =>
+            return path.AsPathFormat(() =>
             {
                 var result = new List<KeyValuePair<string, DuplicateFiles>>();
                 
@@ -51,13 +51,13 @@ namespace IoFluently.Examples.RemoveDuplicates
                     else
                     {
                         var parts = line.Trim().Split(':');
-                        files.Add(new KeyValuePair<AbsolutePath, DuplicateFileAction>(x.IoService.ParseAbsolutePath(parts[0].Trim()), Enum.Parse<DuplicateFileAction>(parts[1].Trim())));
+                        files.Add(new KeyValuePair<AbsolutePath, DuplicateFileAction>(path.IoService.ParseAbsolutePath(parts[0].Trim()), Enum.Parse<DuplicateFileAction>(parts[1].Trim())));
                     }
                 }
                 result.Add(new KeyValuePair<string, DuplicateFiles>(currentHash, new DuplicateFiles(currentHash, files.ToImmutableDictionary())));
                 
                 return new DuplicateRemovalPlan(result.ToImmutableDictionary());
-            }, (path, duplicateRemovalPlan) =>
+            }, (duplicateRemovalPlan) =>
             {
                 using (var writer = path.OpenWriter())
                 {

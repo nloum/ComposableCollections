@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using GenericNumbers;
+using SimpleMonads;
 
 namespace MoreCollections
 {
@@ -12,7 +13,17 @@ namespace MoreCollections
         public static IDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(
             this IDictionary<TKey, TValue> dictionary, Func<TKey, TValue> defaultValue, bool persist)
         {
-            return new DictionaryGetOrDefault<TKey, TValue>(dictionary, defaultValue, persist);
+            return new DictionaryGetOrDefault<TKey, TValue>(dictionary, (TKey key, out IMaybe<TValue> maybeResult, out bool persistForThisValue) =>
+            {
+                maybeResult = defaultValue(key).ToMaybe();
+                persistForThisValue = persist;
+            });
+        }
+        
+        public static IDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(
+            this IDictionary<TKey, TValue> dictionary, GetDefaultValue<TKey, TValue> defaultValue)
+        {
+            return new DictionaryGetOrDefault<TKey, TValue>(dictionary, defaultValue);
         }
         
         public static IReadOnlyList<T> SkipEfficiently<T>(this IReadOnlyList<T> source, int skip)

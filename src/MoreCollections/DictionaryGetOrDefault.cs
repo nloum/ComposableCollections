@@ -1,20 +1,22 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+using SimpleMonads;
 
 namespace MoreCollections
 {
+    public delegate void GetDefaultValue<TKey, TValue>(TKey key, out IMaybe<TValue> maybeValue, out bool persist);
+    
     public class DictionaryGetOrDefault<TKey, TValue> : IDictionary<TKey, TValue>
     {
         private readonly IDictionary<TKey, TValue> _dictionary;
-        private readonly Func<TKey, TValue> _defaultValue;
-        private readonly bool _persist;
+        private readonly GetDefaultValue<TKey, TValue> _getDefaultValue;
 
-        public DictionaryGetOrDefault(IDictionary<TKey, TValue> dictionary, Func<TKey, TValue> defaultValue, bool persist)
+        public DictionaryGetOrDefault(IDictionary<TKey, TValue> dictionary, GetDefaultValue<TKey, TValue> getDefaultValue)
         {
             _dictionary = dictionary;
-            _defaultValue = defaultValue;
-            _persist = persist;
+            _getDefaultValue = getDefaultValue;
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -75,17 +77,20 @@ namespace MoreCollections
         {
             if (!_dictionary.ContainsKey(key))
             {
-                if (_persist)
+                _getDefaultValue(key, out var maybeValue, out var persist);
+                if (persist && maybeValue.HasValue)
                 {
-                    _dictionary[key] = _defaultValue(key);
-                    value = _dictionary[key];
+                    _dictionary[key] = maybeValue.Value;
+                }
+
+                if (maybeValue.HasValue)
+                {
+                    value = maybeValue.Value;
                     return true;
                 }
-                else
-                {
-                    value = _defaultValue(key);
-                    return true;
-                }
+
+                value = default;
+                return false;
             }
             else
             {
@@ -98,22 +103,12 @@ namespace MoreCollections
         {
             get
             {
-                if (!_dictionary.ContainsKey(key))
+                if (!TryGetValue(key, out var value))
                 {
-                    if (_persist)
-                    {
-                        _dictionary[key] = _defaultValue(key);
-                        return _dictionary[key];
-                    }
-                    else
-                    {
-                        return _defaultValue(key);
-                    }
+                    throw new KeyNotFoundException();
                 }
-                else
-                {
-                    return _dictionary[key];
-                }
+
+                return value;
             }
             
             set => _dictionary[key] = value;

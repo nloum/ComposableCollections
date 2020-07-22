@@ -1,5 +1,5 @@
 namespace SimpleMonads {
-public interface IEither<out T1, out T2, out T3, out T4, out T5, out T6, out T7, out T8, out T9, out T10, out T11, out T12, out T13, out T14, out T15, out T16>
+public interface IEither<out T1, out T2, out T3, out T4, out T5, out T6, out T7, out T8, out T9, out T10, out T11, out T12, out T13, out T14, out T15, out T16> 
 {
 IMaybe<T1> Item1 { get; }
 IMaybe<T2> Item2 { get; }

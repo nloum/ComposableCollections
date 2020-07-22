@@ -1,7 +1,7 @@
 using System;
 
 namespace SimpleMonads {
-public class Either<T1, T2, T3> : IEither<T1, T2, T3>
+public class Either<T1, T2, T3> : IEither<T1, T2, T3>, IEquatable<IEither<T1, T2, T3>>
 {
 public Either(T1 item1) {
 Item1 = item1.ToMaybe();
@@ -183,6 +183,25 @@ if (Item3.HasValue) {
 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item3.Value);
 }
 throw new System.InvalidOperationException("The either has no values");
+}
+public bool Equals(IEither<T1, T2, T3> other) {
+if (ReferenceEquals(null, other)) return false;
+if (ReferenceEquals(this, other)) return true;
+return Equals(Item1, other.Item1) && Equals(Item2, other.Item2) && Equals(Item3, other.Item3);
+}
+
+public override bool Equals(object obj) {
+return ReferenceEquals(this, obj) || (obj is IEither<T1, T2, T3> other && Equals(other));
+}
+
+public override int GetHashCode() {
+unchecked {
+int hash = 17;
+hash = hash * 23 + Item1.GetHashCode();
+hash = hash * 23 + Item2.GetHashCode();
+hash = hash * 23 + Item3.GetHashCode();
+return hash;
+}
 }
 public override string ToString() {
 if (Item1.HasValue) {

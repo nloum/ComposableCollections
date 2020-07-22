@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using IoFluently;
 using ReactiveProcesses;
@@ -74,7 +76,7 @@ namespace SimpleMonads.CodeGeneration
 
             if (part == CodePart.Interface)
             {
-                writer.WriteLine($"public interface IEither<{string.Join(", ", genericArgDefinitions)}>\n{{");
+                writer.WriteLine($"public interface IEither<{string.Join(", ", genericArgDefinitions)}> \n{{");
                 writer.WriteLine(string.Join("\n", interfaceProperties));
                 for (var i = arity + 1; i <= maxArity; i++) GenerateOrDeclaration(writer, arity, i);
                 writer.WriteLine("}");
@@ -83,10 +85,11 @@ namespace SimpleMonads.CodeGeneration
             if (part == CodePart.Class)
             {
                 writer.WriteLine(
-                    $"public class Either<{string.Join(", ", genericArgNames)}> : IEither<{string.Join(", ", genericArgNames)}>\n{{");
+                    $"public class Either<{string.Join(", ", genericArgNames)}> : IEither<{string.Join(", ", genericArgNames)}>, IEquatable<IEither<{string.Join(", ", genericArgNames)}>>\n{{");
                 writer.WriteLine(string.Join("\n", constructors));
                 writer.WriteLine(string.Join("\n", classProperties));
                 for (var i = arity + 1; i <= maxArity; i++) GenerateOrImplementation(writer, arity, i);
+                GenerateEqualityMembers(writer, arity);
                 GenerateToString(writer, arity);
                 writer.WriteLine("}");
             }
@@ -100,6 +103,39 @@ namespace SimpleMonads.CodeGeneration
 
                 writer.WriteLine("}");
             }
+        }
+
+        private static void GenerateEqualityMembers(TextWriter writer, int arity)
+        {
+            var genericParameters = string.Join(", ", Enumerable.Repeat(0, arity).Select((_, i) => $"T{i + 1}"));
+            writer.WriteLine($"public bool Equals(IEither<{genericParameters}> other) {{");
+            writer.WriteLine("if (ReferenceEquals(null, other)) return false;");
+            writer.WriteLine("if (ReferenceEquals(this, other)) return true;");
+            writer.Write("return ");
+            for (var i = 0; i < arity; i++)
+            {
+                writer.Write($"Equals(Item{i+1}, other.Item{i+1})");
+                if (i + 1 < arity)
+                {
+                    writer.Write(" && ");
+                }
+                else
+                {
+                    writer.WriteLine(";\n}\n");
+                }
+            }
+            
+            writer.WriteLine($"public override bool Equals(object obj) {{\nreturn ReferenceEquals(this, obj) || (obj is IEither<{genericParameters}> other && Equals(other));\n}}\n");
+
+            writer.WriteLine("public override int GetHashCode() {");
+            writer.WriteLine("unchecked {");
+            writer.WriteLine("int hash = 17;");
+            for (var i = 0; i < arity; i++)
+            {
+                writer.WriteLine($"hash = hash * 23 + Item{i+1}.GetHashCode();");
+            }
+            writer.WriteLine("return hash;");
+            writer.WriteLine("}\n}");
         }
 
         private static void GenerateToString(TextWriter writer, int arity)

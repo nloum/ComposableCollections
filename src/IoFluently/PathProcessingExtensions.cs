@@ -102,6 +102,30 @@ namespace IoFluently
                 }
             });
         }
+        
+                
+        public static IPathWithKnownFormatSync<TModel, TModel> AsSerializedXmlFile<TModel>(
+            this AbsolutePath path, Action<TModel> preSerialize = null, Action<TModel> postDeserialize = null)
+        {
+            return path.AsPathFormat<TModel, TModel>(() =>
+            {
+                var serializer = new XmlSerializer(typeof(TModel));
+                using (var reader = path.OpenReader())
+                {
+                    var result = (TModel) serializer.Deserialize(reader);
+                    postDeserialize?.Invoke(result);
+                    return result;
+                }
+            }, (model) =>
+            {
+                var serializer = new XmlSerializer(typeof(TModel));
+                using (var writer = path.OpenWriter())
+                {
+                    preSerialize?.Invoke(model);
+                    serializer.Serialize(writer, model);
+                }
+            });
+        }
 
         public static Text AsText(this IEnumerable<string> lines)
         {

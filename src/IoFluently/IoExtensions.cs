@@ -331,6 +331,68 @@ namespace IoFluently
             return path.IoService.GetPathType(path);
         }
 
+        public static AbsolutePath EnsureIsFolder(this AbsolutePath path)
+        {
+            if (!path.IsFolder())
+            {
+                path.CreateFolder();
+            }
+
+            return path;
+        }
+
+        public static AbsolutePath EnsureIsNotFolder(this AbsolutePath path)
+        {
+            if (path.IsFolder())
+            {
+                path.DeleteFolder();
+            }
+
+            return path;
+        }
+
+        public static AbsolutePath EnsureIsFile(this AbsolutePath path)
+        {
+            if (!path.IsFile())
+            {
+                path.CreateEmptyFile();
+            }
+
+            return path;
+        }
+
+        public static AbsolutePath EnsureIsNotFile(this AbsolutePath path)
+        {
+            if (path.IsFile())
+            {
+                path.DeleteFile();
+            }
+
+            return path;
+        }
+
+        public static AbsolutePath EnsureDoesNotExist(this AbsolutePath path)
+        {
+            if (path.Exists())
+            {
+                path.Delete();
+            }
+
+            return path;
+        }
+
+        public static AbsolutePath EnsureIsEmptyFolder(this AbsolutePath path)
+        {
+            if (path.Exists())
+            {
+                path.Delete();
+            }
+
+            path.CreateFolder();
+
+            return path;
+        }
+
         public static AbsolutePath DeleteFolder(this AbsolutePath path, bool recursive = false)
         {
             return path.IoService.DeleteFolder(path, recursive);

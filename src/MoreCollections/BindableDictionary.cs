@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-
+using SimpleMonads;
 using static MoreCollections.Utility;
 
 namespace MoreCollections
@@ -13,9 +13,8 @@ namespace MoreCollections
     /// </summary>
     public class BindableDictionary<TKey, TValue> : IReadOnlyBindableDictionary<TKey, TValue>,
                                                       IDictionary<TKey, TValue>,
+                                                      IReadOnlyDictionary<TKey, TValue>,
                                                       ICollection<IKeyValuePair<TKey, TValue>>,
-                                                      IEnumerable<IKeyValuePair<TKey, TValue>>,
-                                                      IEnumerable,
                                                       ICollection
     {
         public void AddRange(IEnumerable<IKeyValuePair<TKey, TValue>> keyValuePairs) {
@@ -320,12 +319,24 @@ namespace MoreCollections
         /// <summary>
         ///     Gets an ICollection<T> containing the keys of the IDictionary<TKey, TValue>.
         /// </summary>
-        public ICollection<TKey> Keys
+        public IEnumerable<TKey> Keys
         {
             get
             {
                 return _keys;
             }
+        }
+
+        IEnumerable<TValue> IReadOnlyDictionaryEx<TKey, TValue>.Values => Values;
+
+        public IMaybe<TValue> TryGetValue(TKey key)
+        {
+            if (TryGetValue(key, out var result))
+            {
+                return result.ToMaybe();
+            }
+            
+            return Maybe<TValue>.Nothing();
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using SimpleMonads;
 
@@ -8,7 +9,7 @@ namespace MoreCollections
 {
     public delegate void GetDefaultValue<TKey, TValue>(TKey key, out IMaybe<TValue> maybeValue, out bool persist);
     
-    public class DictionaryGetOrDefault<TKey, TValue> : IDictionary<TKey, TValue>
+    public class DictionaryGetOrDefault<TKey, TValue> : IDictionary<TKey, TValue>, IReadOnlyDictionaryEx<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
     {
         private readonly IDictionary<TKey, TValue> _dictionary;
         private readonly GetDefaultValue<TKey, TValue> _getDefaultValue;
@@ -17,6 +18,29 @@ namespace MoreCollections
         {
             _dictionary = dictionary;
             _getDefaultValue = getDefaultValue;
+        }
+
+        IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => Keys;
+
+        IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => Values;
+
+        IEnumerator<IKeyValuePair<TKey, TValue>> IEnumerable<IKeyValuePair<TKey, TValue>>.GetEnumerator()
+        {
+            return _dictionary.Select(kvp => Utility.KeyValuePair<TKey, TValue>(kvp.Key, kvp.Value)).GetEnumerator();
+        }
+
+        IEnumerable<TKey> IReadOnlyDictionaryEx<TKey, TValue>.Keys => Keys;
+
+        IEnumerable<TValue> IReadOnlyDictionaryEx<TKey, TValue>.Values => Values;
+
+        public IMaybe<TValue> TryGetValue(TKey key)
+        {
+            if (TryGetValue(key, out TValue value))
+            {
+                return value.ToMaybe();
+            }
+            
+            return Maybe<TValue>.Nothing();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

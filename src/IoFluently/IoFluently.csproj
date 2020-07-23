@@ -6,10 +6,10 @@
 
   <ItemGroup>
     <PackageReference Include="LiveLinq" Version="1.1.0-alpha0104" />
-    <PackageReference Include="MoreCollections" Version="1.1.0-alpha0043" />
+    <PackageReference Include="MoreCollections" Version="1.1.0-alpha0046" />
     <PackageReference Include="ReactiveProcesses" Version="1.0.0-alpha003" />
-    <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0039" />
-    <PackageReference Include="TreeLinq" Version="1.0.0-alpha0017" />
+    <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0040" />
+    <PackageReference Include="TreeLinq" Version="1.0.0-alpha0018" />
     <PackageReference Include="UnitsNet" Version="4.67.0" />
     <PackageReference Include="UtilityDisposables" Version="1.1.0-alpha0006" />
   </ItemGroup>

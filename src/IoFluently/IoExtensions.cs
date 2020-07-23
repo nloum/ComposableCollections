@@ -69,9 +69,9 @@ namespace IoFluently
             return path.IoService.Encrypt(path);
         }
 
-        public static AbsolutePath Delete(this AbsolutePath path)
+        public static AbsolutePath Delete(this AbsolutePath path, bool recursiveDeleteIfFolder = false)
         {
-            return path.IoService.Delete(path);
+            return path.IoService.Delete(path, recursiveDeleteIfFolder);
         }
 
         public static bool IsAncestorOf(this AbsolutePath path, AbsolutePath possibleDescendant)
@@ -341,11 +341,11 @@ namespace IoFluently
             return path;
         }
 
-        public static AbsolutePath EnsureIsNotFolder(this AbsolutePath path)
+        public static AbsolutePath EnsureIsNotFolder(this AbsolutePath path, bool recursive = false)
         {
             if (path.IsFolder())
             {
-                path.DeleteFolder();
+                path.DeleteFolder(recursive);
             }
 
             return path;
@@ -371,21 +371,21 @@ namespace IoFluently
             return path;
         }
 
-        public static AbsolutePath EnsureDoesNotExist(this AbsolutePath path)
+        public static AbsolutePath EnsureDoesNotExist(this AbsolutePath path, bool recursiveDeleteIfFolder = false)
         {
             if (path.Exists())
             {
-                path.Delete();
+                path.Delete(recursiveDeleteIfFolder);
             }
 
             return path;
         }
 
-        public static AbsolutePath EnsureIsEmptyFolder(this AbsolutePath path)
+        public static AbsolutePath EnsureIsEmptyFolder(this AbsolutePath path, bool recursiveDeleteIfFolder = false)
         {
             if (path.Exists())
             {
-                path.Delete();
+                path.Delete(recursiveDeleteIfFolder);
             }
 
             path.CreateFolder();

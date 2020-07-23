@@ -90,7 +90,7 @@ namespace IoFluently
         AbsolutePath ClearFolder(AbsolutePath path);
         AbsolutePath Decrypt(AbsolutePath path);
         AbsolutePath Encrypt(AbsolutePath path);
-        AbsolutePath Delete(AbsolutePath path);
+        AbsolutePath Delete(AbsolutePath path, bool recursiveDeleteIfFolder = false);
         string SurroundWithDoubleQuotesIfNecessary(string str);
         bool IsAncestorOf(AbsolutePath path, AbsolutePath possibleDescendant);
         bool IsDescendantOf(AbsolutePath path, AbsolutePath possibleAncestor);

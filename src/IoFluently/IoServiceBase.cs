@@ -901,11 +901,11 @@ namespace IoFluently
 
         public abstract AbsolutePath Encrypt(AbsolutePath path);
 
-        public virtual AbsolutePath Delete(AbsolutePath path)
+        public virtual AbsolutePath Delete(AbsolutePath path, bool recursiveDeleteIfFolder = false)
         {
             if (path.GetPathType() == PathType.File) return path.DeleteFile();
 
-            if (path.GetPathType() == PathType.Folder) return path.DeleteFolder(true);
+            if (path.GetPathType() == PathType.Folder) return path.DeleteFolder(recursiveDeleteIfFolder);
 
             return path;
         }

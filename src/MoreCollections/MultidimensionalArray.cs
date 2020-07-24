@@ -7,7 +7,7 @@ using GenericNumbers.Relational;
 
 namespace MoreCollections
 {
-    public class MultidimensionalArray<T> : IMultidimensionalArray<T>, IComparable<IMultidimensionalArray<T>>
+    public class MultidimensionalArray<T> : IMultidimensionalArray<T>, IComparable<IMultidimensionalArray<T>> where T : notnull
     {
         private readonly T[] _elements;
         public int[] Dimensions { get; }

@@ -136,7 +136,7 @@ namespace MoreCollections
         /// the return value of this function are YieldStartEvenIfEmpty and YieldStopEvenIfEmpty.</param>
         public static IEnumerable<IList<T>> Between<T>(this IEnumerable<Tuple<int, int>> splitters, IList<T> haystack, BetweenOptions options = BetweenOptions.None)
         {
-            var enumerator = splitters.GetEnumerator();
+            using var enumerator = splitters.GetEnumerator();
             var list = new List<T>();
             var i = 0;
             var inSplitter = false;
@@ -177,8 +177,6 @@ namespace MoreCollections
                     list.Add(haystack[i]);
                 i++;
             }
-            if (list.Any() || options.HasFlag(BetweenOptions.YieldStopEvenIfEmpty))
-                yield return list;
         }
 
         /// <summary>
@@ -1278,7 +1276,7 @@ namespace MoreCollections
         /// <summary>
         ///     Returns the longest ordered subset common between the two specified lists.
         /// </summary>
-        public static IEnumerable<T> LongestCommonOrderedSubset<T>(this IReadOnlyList<T> a, IReadOnlyList<T> b)
+        public static IEnumerable<T> LongestCommonOrderedSubset<T>(this IReadOnlyList<T> a, IReadOnlyList<T> b) where T : notnull
         {
             // Ensure that b is the longer list.
             if (b.Count < a.Count)
@@ -1303,7 +1301,7 @@ namespace MoreCollections
         /// <summary>
         ///     Returns whether or not haystack contains needle
         /// </summary>
-        public static bool Contains<T>(this IEnumerable<T> haystack, IEnumerable<T> needle)
+        public static bool Contains<T>(this IEnumerable<T> haystack, IEnumerable<T> needle) where T : notnull
         {
             return haystack.Select(t => t.GetHashCode()).ToList().Search(needle.Select(t => t.GetHashCode()).ToList()) >= 0;
         }
@@ -2435,7 +2433,7 @@ namespace MoreCollections
         ///     However, this Slice implementation is much faster than that.
         ///     From: http://stackoverflow.com/a/1301347
         /// </summary>
-        public static IEnumerable<T> Slice<T>(this IEnumerable<T> source, int count)
+        public static IEnumerable<T> Slice<T>(this IEnumerable<T> source, int count) where T : notnull
         {
             // If the enumeration is null, throw an exception.
             if (source == null) throw new ArgumentNullException("source");
@@ -2467,12 +2465,9 @@ namespace MoreCollections
             return SliceEverything(source, count);
         }
 
-        private static IEnumerable<T> SliceArray<T>(T[] arr, int count)
+        private static IEnumerable<T> SliceArray<T>(T[] arr, int count) where T : notnull
         {
-            // Error checking has been done, but use diagnostics or code
-            // contract checking here.
-            Debug.Assert(arr != null);
-            Debug.Assert(count > 0);
+            if (arr == null) throw new ArgumentNullException(nameof(arr));
 
             // Return from the count to the end of the array.
             for (int index = count; index < arr.Length; index++)
@@ -2491,9 +2486,10 @@ namespace MoreCollections
 
         private static IEnumerable<T> SliceList<T>(IList<T> list, int count)
         {
+            if (list == null) throw new ArgumentNullException(nameof(list));
+            
             // Error checking has been done, but use diagnostics or code
             // contract checking here.
-            Debug.Assert(list != null);
             Debug.Assert(count > 0);
 
             // Return from the count to the end of the list.
@@ -2515,10 +2511,11 @@ namespace MoreCollections
         /// Helps with storing the sliced items.
         /// </summary>
         private static IEnumerable<T> SliceEverything<T>(
-            this IEnumerable<T> source, int count)
+            this IEnumerable<T> source, int count) where T : notnull
         {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            
             // Test assertions.
-            Debug.Assert(source != null);
             Debug.Assert(count > 0);
 
             // Create the helper.
@@ -2543,8 +2540,9 @@ namespace MoreCollections
 
             internal SliceHelper(IEnumerable<T> source, int count)
             {
+                if (source == null) throw new ArgumentNullException(nameof(source));
+                
                 // Test assertions.
-                Debug.Assert(source != null);
                 Debug.Assert(count > 0);
 
                 // Set up the backing store for the list of items

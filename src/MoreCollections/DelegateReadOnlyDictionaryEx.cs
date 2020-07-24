@@ -7,6 +7,11 @@ namespace MoreCollections
     {
         private IReadOnlyDictionary<TKey, TValue> _wrapped;
 
+        public DelegateReadOnlyDictionaryEx(IReadOnlyDictionary<TKey, TValue> wrapped)
+        {
+            _wrapped = wrapped;
+        }
+
         public override bool TryGetValue(TKey key, out TValue value)
         {
             return _wrapped.TryGetValue(key, out value);

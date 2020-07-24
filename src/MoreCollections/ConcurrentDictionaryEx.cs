@@ -24,6 +24,20 @@ namespace MoreCollections
             }
         }
 
+        public override bool TryUpdate(TKey key, TValue value)
+        {
+            lock (Lock)
+            {
+                if (ContainsKeyInsideLock(key))
+                {
+                    State = State.SetItem(key, value);
+                    return true;
+                }
+            
+                return false;
+            }
+        }
+
         public override bool TryGetValue(TKey key, out TValue value)
         {
             return State.TryGetValue(key, out value);
@@ -51,14 +65,6 @@ namespace MoreCollections
             
                 State = State.Add(key, value);
                 return AddOrUpdateResult.Add;
-            }
-        }
-
-        public override void Add(TKey key, TValue value)
-        {
-            lock (Lock)
-            {
-                State = State.Add(key, value);
             }
         }
 
@@ -143,33 +149,35 @@ namespace MoreCollections
             }
         }
 
-        public override int TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems,
+        public override IReadOnlyDictionaryEx<TKey, bool> TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems,
             Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
             lock (Lock)
             {
-                var count = 0;
+                var result = new DictionaryEx<TKey, bool>();
                 foreach (var newItem in newItems)
                 {
                     var newKey = key(newItem);
                     if (!ContainsKeyInsideLock(newKey))
                     {
                         State = State.Add(newKey, value(newItem));
-                        count++;
+                        result[newKey] = true;
+                    }
+                    else
+                    {
+                        result[newKey] = false;
                     }
                 }
 
-                return count;
+                return result;
             }
         }
         
-        public override ImmutableDictionary<AddOrUpdateResult, int> AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
+        public override IReadOnlyDictionaryEx<TKey, AddOrUpdateResult> AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
             lock (Lock)
             {
-                var dictionary = new Dictionary<AddOrUpdateResult, int>();
-                dictionary[AddOrUpdateResult.Add] = 0;
-                dictionary[AddOrUpdateResult.Update] = 0;
+                var dictionary = new DictionaryEx<TKey, AddOrUpdateResult>();
 
                 foreach (var newItem in newItems)
                 {
@@ -178,16 +186,16 @@ namespace MoreCollections
                     if (ContainsKeyInsideLock(newKey))
                     {
                         State = State.SetItem(newKey, newValue);
-                        dictionary[AddOrUpdateResult.Update]++;
+                        dictionary[newKey] = AddOrUpdateResult.Update;
                     }
                     else
                     {
                         State = State.Add(newKey, newValue);
-                        dictionary[AddOrUpdateResult.Add]++;
+                        dictionary[newKey] = AddOrUpdateResult.Add;
                     }
                 }
 
-                return dictionary.ToImmutableDictionary();
+                return dictionary;
             }
         }
 

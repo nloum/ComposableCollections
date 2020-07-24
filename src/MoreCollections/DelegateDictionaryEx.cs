@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using SimpleMonads;
 
 namespace MoreCollections
@@ -48,32 +47,92 @@ namespace MoreCollections
             return _wrapped.TryGetValue(key, out value);
         }
 
+        public bool TryUpdate(TKey key, TValue value)
+        {
+            return _wrapped.TryUpdate(key, value);
+        }
+
+        public IReadOnlyDictionaryEx<TKey, bool> TryUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
+        {
+            return _wrapped.TryUpdateRange(newItems);
+        }
+
+        public IReadOnlyDictionaryEx<TKey, bool> TryUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
+        {
+            return _wrapped.TryUpdateRange(newItems);
+        }
+
+        public IReadOnlyDictionaryEx<TKey, bool> TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
+        {
+            return _wrapped.TryUpdateRange(newItems, key, value);
+        }
+
+        public IReadOnlyDictionaryEx<TKey, bool> TryUpdateRange(params IKeyValuePair<TKey, TValue>[] newItems)
+        {
+            return _wrapped.TryUpdateRange(newItems);
+        }
+
+        public IReadOnlyDictionaryEx<TKey, bool> TryUpdateRange(params KeyValuePair<TKey, TValue>[] newItems)
+        {
+            return _wrapped.TryUpdateRange(newItems);
+        }
+
+        public void Update(TKey key, TValue value)
+        {
+            _wrapped.Update(key, value);
+        }
+
+        public void UpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
+        {
+            _wrapped.UpdateRange(newItems);
+        }
+
+        public void UpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
+        {
+            _wrapped.UpdateRange(newItems);
+        }
+
+        public void UpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
+        {
+            _wrapped.UpdateRange(newItems, key, value);
+        }
+
+        public void UpdateRange(params IKeyValuePair<TKey, TValue>[] newItems)
+        {
+            _wrapped.UpdateRange(newItems);
+        }
+
+        public void UpdateRange(params KeyValuePair<TKey, TValue>[] newItems)
+        {
+            _wrapped.UpdateRange(newItems);
+        }
+
         public AddOrUpdateResult AddOrUpdate(TKey key, TValue value)
         {
             return _wrapped.AddOrUpdate(key, value);
         }
 
-        public ImmutableDictionary<AddOrUpdateResult, int> AddOrUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
+        public IReadOnlyDictionaryEx<TKey, AddOrUpdateResult> AddOrUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
         {
             return _wrapped.AddOrUpdateRange(newItems);
         }
 
-        public ImmutableDictionary<AddOrUpdateResult, int> AddOrUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
+        public IReadOnlyDictionaryEx<TKey, AddOrUpdateResult> AddOrUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
             return _wrapped.AddOrUpdateRange(newItems);
         }
 
-        public ImmutableDictionary<AddOrUpdateResult, int> AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
+        public IReadOnlyDictionaryEx<TKey, AddOrUpdateResult> AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
             return _wrapped.AddOrUpdateRange(newItems, key, value);
         }
 
-        public ImmutableDictionary<AddOrUpdateResult, int> AddOrUpdateRange(params IKeyValuePair<TKey, TValue>[] newItems)
+        public IReadOnlyDictionaryEx<TKey, AddOrUpdateResult> AddOrUpdateRange(params IKeyValuePair<TKey, TValue>[] newItems)
         {
             return _wrapped.AddOrUpdateRange(newItems);
         }
 
-        public ImmutableDictionary<AddOrUpdateResult, int> AddOrUpdateRange(params KeyValuePair<TKey, TValue>[] newItems)
+        public IReadOnlyDictionaryEx<TKey, AddOrUpdateResult> AddOrUpdateRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
             return _wrapped.AddOrUpdateRange(newItems);
         }
@@ -83,27 +142,27 @@ namespace MoreCollections
             return _wrapped.TryAdd(key, value);
         }
 
-        public int TryAddRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
+        public IReadOnlyDictionaryEx<TKey, bool> TryAddRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
         {
             return _wrapped.TryAddRange(newItems);
         }
 
-        public int TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
+        public IReadOnlyDictionaryEx<TKey, bool> TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
             return _wrapped.TryAddRange(newItems);
         }
 
-        public int TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
+        public IReadOnlyDictionaryEx<TKey, bool> TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
             return _wrapped.TryAddRange(newItems, key, value);
         }
 
-        public int TryAddRange(params IKeyValuePair<TKey, TValue>[] newItems)
+        public IReadOnlyDictionaryEx<TKey, bool> TryAddRange(params IKeyValuePair<TKey, TValue>[] newItems)
         {
             return _wrapped.TryAddRange(newItems);
         }
 
-        public int TryAddRange(params KeyValuePair<TKey, TValue>[] newItems)
+        public IReadOnlyDictionaryEx<TKey, bool> TryAddRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
             return _wrapped.TryAddRange(newItems);
         }

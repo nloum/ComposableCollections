@@ -14,8 +14,19 @@ namespace MoreCollections
                 return false;
             }
             
-            Add(key, value);
+            State.Add(key, value);
             return true;
+        }
+
+        public override bool TryUpdate(TKey key, TValue value)
+        {
+            if (ContainsKey(key))
+            {
+                State[key] = value;
+                return true;
+            }
+            
+            return false;
         }
 
         public override bool TryGetValue(TKey key, out TValue value)
@@ -43,11 +54,6 @@ namespace MoreCollections
             
             Add(key, value);
             return AddOrUpdateResult.Add;
-        }
-
-        public override void Add(TKey key, TValue value)
-        {
-            State.Add(key, value);
         }
 
         public override bool TryRemove(TKey key)

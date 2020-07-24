@@ -20,10 +20,21 @@ namespace MoreCollections
                 return false;
             }
             
-            Add(key, value);
+            _wrapped.Add(key, value);
             return true;
         }
+        
+        public override bool TryUpdate(TKey key, TValue value)
+        {
+            if (ContainsKey(key))
+            {
+                _wrapped[key] = value;
+                return true;
+            }
 
+            return false;
+        }
+        
         public override AddOrUpdateResult AddOrUpdate(TKey key, TValue value)
         {
             if (ContainsKey(key))
@@ -57,11 +68,6 @@ namespace MoreCollections
         public override bool TryGetValue(TKey key, out TValue value)
         {
             return _wrapped.TryGetValue(key, out value);
-        }
-
-        public override void Add(TKey key, TValue value)
-        {
-            _wrapped.Add(key, value);
         }
 
         public override void AddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)

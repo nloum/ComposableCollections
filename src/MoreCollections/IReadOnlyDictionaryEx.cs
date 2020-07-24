@@ -5,6 +5,9 @@ namespace MoreCollections
 {
     public interface IReadOnlyDictionaryEx<TKey, out TValue> : IReadOnlyCollection<IKeyValuePair<TKey, TValue>>
     {
+        int Count { get; }
+        IEqualityComparer<TKey> Comparer { get; }
+
         /// <summary>Gets the element that has the specified key in the read-only dictionary.</summary>
         /// <param name="key">The key to locate.</param>
         /// <returns>The element that has the specified key in the read-only dictionary.</returns>

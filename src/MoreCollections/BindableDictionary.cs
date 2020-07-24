@@ -17,6 +17,8 @@ namespace MoreCollections
                                                       ICollection<IKeyValuePair<TKey, TValue>>,
                                                       ICollection
     {
+        public IEqualityComparer<TKey> Comparer => EqualityComparer<TKey>.Default;
+
         public void AddRange(IEnumerable<IKeyValuePair<TKey, TValue>> keyValuePairs) {
             foreach(var keyValuePair in keyValuePairs) {
                 Add(keyValuePair.Key, keyValuePair.Value);

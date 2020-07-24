@@ -1,145 +1,46 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using SimpleMonads;
 
 namespace MoreCollections
 {
     public delegate void GetDefaultValue<TKey, TValue>(TKey key, out IMaybe<TValue> maybeValue, out bool persist);
     
-    public class DictionaryGetOrDefault<TKey, TValue> : IDictionary<TKey, TValue>, IReadOnlyDictionaryEx<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
+    public class DictionaryGetOrDefault<TKey, TValue> : DictionaryEx<TKey, TValue>
     {
-        private readonly IDictionary<TKey, TValue> _dictionary;
         private readonly GetDefaultValue<TKey, TValue> _getDefaultValue;
 
-        public DictionaryGetOrDefault(IDictionary<TKey, TValue> dictionary, GetDefaultValue<TKey, TValue> getDefaultValue)
+        public DictionaryGetOrDefault(GetDefaultValue<TKey, TValue> getDefaultValue)
         {
-            _dictionary = dictionary;
             _getDefaultValue = getDefaultValue;
         }
 
-        IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => Keys;
-
-        IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => Values;
-
-        IEnumerator<IKeyValuePair<TKey, TValue>> IEnumerable<IKeyValuePair<TKey, TValue>>.GetEnumerator()
+        public override bool TryGetValue(TKey key, out TValue value)
         {
-            return _dictionary.Select(kvp => Utility.KeyValuePair<TKey, TValue>(kvp.Key, kvp.Value)).GetEnumerator();
-        }
-
-        IEnumerable<TKey> IReadOnlyDictionaryEx<TKey, TValue>.Keys => Keys;
-
-        IEnumerable<TValue> IReadOnlyDictionaryEx<TKey, TValue>.Values => Values;
-
-        public IMaybe<TValue> TryGetValue(TKey key)
-        {
-            if (TryGetValue(key, out TValue value))
-            {
-                return value.ToMaybe();
-            }
-            
-            return Maybe<TValue>.Nothing();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-        {
-            return _dictionary.GetEnumerator();
-        }
-
-        public void Add(KeyValuePair<TKey, TValue> item)
-        {
-            _dictionary.Add(item);
-        }
-
-        public void Clear()
-        {
-            _dictionary.Clear();
-        }
-
-        public bool Contains(KeyValuePair<TKey, TValue> item)
-        {
-            return _dictionary.Contains(item);
-        }
-
-        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
-        {
-            _dictionary.CopyTo(array, arrayIndex);
-        }
-
-        public bool Remove(KeyValuePair<TKey, TValue> item)
-        {
-            return _dictionary.Remove(item);
-        }
-
-        public int Count => _dictionary.Count;
-
-        public bool IsReadOnly => _dictionary.IsReadOnly;
-
-        public void Add(TKey key, TValue value)
-        {
-            _dictionary.Add(key, value);
-        }
-
-        public bool ContainsKey(TKey key)
-        {
-            return _dictionary.ContainsKey(key);
-        }
-
-        public bool Remove(TKey key)
-        {
-            return _dictionary.Remove(key);
-        }
-
-        public bool TryGetValue(TKey key, out TValue value)
-        {
-            if (!_dictionary.ContainsKey(key))
+            if (!base.TryGetValue(key, out value))
             {
                 _getDefaultValue(key, out var maybeValue, out var persist);
-                if (persist && maybeValue.HasValue)
-                {
-                    _dictionary[key] = maybeValue.Value;
-                }
-
+                
                 if (maybeValue.HasValue)
                 {
+                    if (persist)
+                    {
+                        State.Add(key, maybeValue.Value);
+                    }
+
                     value = maybeValue.Value;
                     return true;
                 }
-
-                value = default;
-                return false;
-            }
-            else
-            {
-                value = _dictionary[key];
-                return true;
-            }
-        }
-
-        public TValue this[TKey key]
-        {
-            get
-            {
-                if (!TryGetValue(key, out var value))
+                else
                 {
-                    throw new KeyNotFoundException();
+                    return false;
                 }
-
-                return value;
             }
-            
-            set => _dictionary[key] = value;
+
+            return true;
         }
 
-        public ICollection<TKey> Keys => _dictionary.Keys;
-
-        public ICollection<TValue> Values => _dictionary.Values;
+        public override bool ContainsKey(TKey key)
+        {
+            return TryGetValue(key, out var value);
+        }
     }
 }

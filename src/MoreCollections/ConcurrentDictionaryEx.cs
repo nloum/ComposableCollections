@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using SimpleMonads;
 
 namespace MoreCollections
 {
@@ -9,34 +10,6 @@ namespace MoreCollections
     {
         protected ImmutableDictionary<TKey, TValue> State = ImmutableDictionary<TKey, TValue>.Empty;
         protected readonly object Lock = new object();
-
-        public override bool TryAdd(TKey key, TValue value)
-        {
-            lock (Lock)
-            {
-                if (ContainsKeyInsideLock(key))
-                {
-                    return false;
-                }
-            
-                State = State.Add(key, value);
-                return true;
-            }
-        }
-
-        public override bool TryUpdate(TKey key, TValue value)
-        {
-            lock (Lock)
-            {
-                if (ContainsKeyInsideLock(key))
-                {
-                    State = State.SetItem(key, value);
-                    return true;
-                }
-            
-                return false;
-            }
-        }
 
         public override bool TryGetValue(TKey key, out TValue value)
         {
@@ -49,153 +22,125 @@ namespace MoreCollections
         }
 
         public override int Count => State.Count;
-
         public override IEqualityComparer<TKey> Comparer => EqualityComparer<TKey>.Default;
         public override IEnumerable<TKey> Keys => State.Keys;
         public override IEnumerable<TValue> Values => State.Values;
-        public override AddOrUpdateResult AddOrUpdate(TKey key, TValue value)
+        
+        public override bool TryAdd(TKey key, Func<TValue> value)
         {
             lock (Lock)
             {
-                if (ContainsKeyInsideLock(key))
+                if (TryGetValueInsideLock(key, out var _))
                 {
-                    State = State.SetItem(key, value);
-                    return AddOrUpdateResult.Update;
+                    return false;
                 }
             
-                State = State.Add(key, value);
-                return AddOrUpdateResult.Add;
+                State = State.Add(key, value());
+                return true;
             }
         }
 
-        public override bool TryRemove(TKey key)
+        public override bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue)
         {
             lock (Lock)
             {
-                if (ContainsKeyInsideLock(key))
+                if (TryGetValueInsideLock(key, out previousValue))
                 {
-                    State.Remove(key);
+                    State = State.SetItem(key, value(previousValue));
                     return true;
                 }
 
+                previousValue = default;
                 return false;
             }
         }
 
-        public override bool ContainsKey(TKey key)
-        {
-            return ContainsKeyOutsideLock(key);
-        }
-
-        protected virtual bool ContainsKeyInsideLock(TKey key)
-        {
-            return State.ContainsKey(key);
-        }
-
-        protected virtual bool ContainsKeyOutsideLock(TKey key)
-        {
-            return State.ContainsKey(key);
-        }
-
-        public override void RemoveWhere(Func<TKey, TValue, bool> predicate)
+        public override IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue)
         {
             lock (Lock)
             {
-                State = State.RemoveRange(State.Where(kvp => predicate(kvp.Key, kvp.Value)).Select(kvp => kvp.Key));
-            }
-        }
-
-        public override void RemoveWhere(Func<IKeyValuePair<TKey, TValue>, bool> predicate)
-        {
-            lock (Lock)
-            {
-                State = State.RemoveRange(this.Where(kvp => predicate(kvp)).Select(kvp => kvp.Key));
-            }
-        }
-
-        public override int TryRemoveRange(IEnumerable<TKey> keysToRemove)
-        {
-            lock (Lock)
-            {
-                var beforeCount = State.Count;
-                State = State.RemoveRange(keysToRemove);
-                var afterCount = State.Count;
-                return beforeCount - afterCount;
-            }
-        }
-
-        public override void RemoveRange(IEnumerable<TKey> keysToRemove)
-        {
-            lock (Lock)
-            {
-                var keysToRemoveList = keysToRemove.ToImmutableList();
-                var beforeCount = State.Count;
-                var tmpWrapped = State.RemoveRange(keysToRemoveList);
-                var afterCount = tmpWrapped.Count;
-                if (beforeCount - afterCount != keysToRemoveList.Count)
+                if (TryGetValueInsideLock(key, out previousValue))
                 {
-                    throw new KeyNotFoundException("Some of the keys specified to be removed did not exist in the dictionary");
+                    State = State.SetItem(key, valueIfUpdating(previousValue));
+                    return previousValue.ToMaybe();
+                }
+            
+                State = State.Add(key, valueIfAdding());
+                return Maybe<TValue>.Nothing();
+            }
+        }
+
+        public override bool TryRemove(TKey key, out TValue removedItem)
+        {
+            lock (Lock)
+            {
+                if (TryGetValueInsideLock(key, out removedItem))
+                {
+                    State.Remove(key);
+                    return true;
+                }
+            
+                return false;
+            }
+        }
+
+        public override void RemoveRange(IEnumerable<TKey> keysToRemove, out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+        {
+            lock (Lock)
+            {
+                var result = new DictionaryEx<TKey, TValue>();
+                removedItems = result;
+            
+                foreach (var key in keysToRemove)
+                {
+                    if (!TryGetValue(key, out var previousValue))
+                    {
+                        result.Clear();
+                        throw new KeyNotFoundException($"Key not found: {key}");
+                    }
+
+                    result[key] = previousValue;
                 }
 
-                State = tmpWrapped;
-            }
-        }
-
-        public override void Clear()
-        {
-            lock (Lock)
-            {
-                State = ImmutableDictionary<TKey, TValue>.Empty;
-            }
-        }
-
-        public override IReadOnlyDictionaryEx<TKey, bool> TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems,
-            Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
-        {
-            lock (Lock)
-            {
-                var result = new DictionaryEx<TKey, bool>();
-                foreach (var newItem in newItems)
+                foreach (var key in result.Keys)
                 {
-                    var newKey = key(newItem);
-                    if (!ContainsKeyInsideLock(newKey))
-                    {
-                        State = State.Add(newKey, value(newItem));
-                        result[newKey] = true;
-                    }
-                    else
-                    {
-                        result[newKey] = false;
-                    }
+                    State.Remove(key);
                 }
-
-                return result;
             }
         }
         
-        public override IReadOnlyDictionaryEx<TKey, AddOrUpdateResult> AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
+        protected virtual bool TryGetValueInsideLock(TKey key, out TValue value)
+        {
+            return State.TryGetValue(key, out value);
+        }
+        
+        protected virtual bool TryGetValueOutsideLock(TKey key, out TValue value)
+        {
+            return State.TryGetValue(key, out value);
+        }
+        
+        public override void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, bool> result)
         {
             lock (Lock)
             {
-                var dictionary = new DictionaryEx<TKey, AddOrUpdateResult>();
-
+                var finalResult = new DictionaryEx<TKey, bool>();
+                result = finalResult;
+            
                 foreach (var newItem in newItems)
                 {
                     var newKey = key(newItem);
                     var newValue = value(newItem);
-                    if (ContainsKeyInsideLock(newKey))
+
+                    if (!TryGetValueInsideLock(newKey, out var previousValue))
                     {
-                        State = State.SetItem(newKey, newValue);
-                        dictionary[newKey] = AddOrUpdateResult.Update;
+                        finalResult[newKey] = true;
+                        State = State.Add(newKey, newValue);
                     }
                     else
                     {
-                        State = State.Add(newKey, newValue);
-                        dictionary[newKey] = AddOrUpdateResult.Add;
+                        finalResult[newKey] = false;
                     }
                 }
-
-                return dictionary;
             }
         }
 
@@ -203,17 +148,81 @@ namespace MoreCollections
         {
             lock (Lock)
             {
-                var newItemsNonLazy = newItems
-                    .Select(newItem => new KeyValuePair<TKey, TValue>(key(newItem), value(newItem))).ToImmutableList();
-                var beforeCount = State.Count;
-                var tmpWrapped = State.AddRange(newItemsNonLazy);
-                var afterCount = tmpWrapped.Count;
-                if (beforeCount - afterCount != newItemsNonLazy.Count)
-                {
-                    throw new InvalidOperationException("Some of the specified keys already existed, and therefore could not be added");
-                }
+                State = State.AddRange(newItems.Select(kvp => new KeyValuePair<TKey, TValue>(key(kvp), value(kvp))));
+            }
+        }
 
-                State = tmpWrapped;
+        public override void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, TValue> result)
+        {
+            lock (Lock)
+            {
+                var finalResult = new DictionaryEx<TKey, TValue>();
+                result = finalResult;
+            
+                foreach (var newItem in newItems)
+                {
+                    var newKey = key(newItem);
+                    var newValue = value(newItem);
+
+                    if (TryGetValueInsideLock(newKey, out var previousValue))
+                    {
+                        finalResult[newKey] = previousValue;
+                        State = State.SetItem(newKey, newValue);
+                    }
+                }
+            }
+        }
+
+        public override void UpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, TValue> previousValues)
+        {
+            lock (Lock)
+            {
+                var finalResult = new DictionaryEx<TKey, TValue>();
+                previousValues = finalResult;
+
+                foreach (var newItem in newItems)
+                {
+                    var newKey = key(newItem);
+                    var newValue = value(newItem);
+                
+                    Update(newKey, newValue, out var previousValue);
+                    finalResult[newKey] = previousValue;
+                }
+            }
+        }
+
+        public override void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IMaybe<TValue>> result)
+        {
+            lock (Lock)
+            {
+                var finalResult = new DictionaryEx<TKey, IMaybe<TValue>>();
+                result = finalResult;
+            
+                foreach (var newItem in newItems)
+                {
+                    var newKey = key(newItem);
+                    var newValue = value(newItem);
+
+                    finalResult[newKey] = AddOrUpdate(newKey, newValue);
+                }
+            }
+        }
+
+        public override void TryRemoveRange(IEnumerable<TKey> keysToRemove,
+            out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+        {
+            lock (Lock)
+            {
+                var result = new DictionaryEx<TKey, TValue>();
+                removedItems = result;
+            
+                foreach (var key in keysToRemove)
+                {
+                    if (TryRemove(key, out var removedItem))
+                    {
+                        result[key] = removedItem;
+                    }
+                }
             }
         }
     }

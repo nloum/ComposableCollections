@@ -1,29 +1,284 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
+using SimpleMonads;
 
 namespace MoreCollections
 {
     public abstract class DictionaryBaseEx<TKey, TValue> : ReadOnlyDictionaryBaseEx<TKey, TValue>, IDictionaryEx<TKey, TValue>
     {
-        #region Stuff that definitely doesn't need to be overridden for atomicity or performance reasons
+        #region Abstract methods
 
-        public IReadOnlyDictionaryEx<TKey, AddOrUpdateResult> AddOrUpdateRange(params IKeyValuePair<TKey, TValue>[] newItems)
+        public abstract bool TryAdd(TKey key, Func<TValue> value);
+        public abstract bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue);
+        public abstract IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue);
+        public abstract bool TryRemove(TKey key, out TValue removedItem);
+        public abstract void RemoveRange(IEnumerable<TKey> keysToRemove,
+            out IReadOnlyDictionaryEx<TKey, TValue> removedItems);
+
+        #endregion
+        
+        #region Stuff that may need to be overridden for atomicity or performance reasons
+
+        #region Methods that loop through parameters and call individual add/remove/update methods on each item
+
+        public virtual void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, bool> result)
         {
-            return AddOrUpdateRange(newItems.AsEnumerable());
+            var finalResult = new DictionaryEx<TKey, bool>();
+            result = finalResult;
+            
+            foreach (var newItem in newItems)
+            {
+                var newKey = key(newItem);
+                var newValue = value(newItem);
+
+                finalResult[newKey] = TryAdd(newKey, newValue);
+            }
         }
 
-        public IReadOnlyDictionaryEx<TKey, AddOrUpdateResult> AddOrUpdateRange(params KeyValuePair<TKey, TValue>[] newItems)
+        public virtual void AddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
-            return AddOrUpdateRange(newItems.AsEnumerable());
+            foreach (var newItem in newItems)
+            {
+                var newKey = key(newItem);
+                var newValue = value(newItem);
+
+                Add(newKey, newValue);
+            }
+        }
+
+        public virtual void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, TValue> result)
+        {
+            var finalResult = new DictionaryEx<TKey, TValue>();
+            result = finalResult;
+            
+            foreach (var newItem in newItems)
+            {
+                var newKey = key(newItem);
+                var newValue = value(newItem);
+
+                if (TryUpdate(newKey, newValue, out var previousValue))
+                {
+                    finalResult[newKey] = previousValue;
+                }
+            }
+        }
+
+        public virtual void UpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, TValue> previousValues)
+        {
+            var finalResult = new DictionaryEx<TKey, TValue>();
+            previousValues = finalResult;
+
+            foreach (var newItem in newItems)
+            {
+                var newKey = key(newItem);
+                var newValue = value(newItem);
+                
+                Update(newKey, newValue, out var previousValue);
+                finalResult[newKey] = previousValue;
+            }
+        }
+
+        public virtual void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IMaybe<TValue>> result)
+        {
+            var finalResult = new DictionaryEx<TKey, IMaybe<TValue>>();
+            result = finalResult;
+            
+            foreach (var newItem in newItems)
+            {
+                var newKey = key(newItem);
+                var newValue = value(newItem);
+
+                finalResult[newKey] = AddOrUpdate(newKey, newValue);
+            }
+        }
+
+        public virtual void TryRemoveRange(IEnumerable<TKey> keysToRemove,
+            out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+        {
+            var result = new DictionaryEx<TKey, TValue>();
+            removedItems = result;
+            
+            foreach (var key in keysToRemove)
+            {
+                if (TryRemove(key, out var removedItem))
+                {
+                    result[key] = removedItem;
+                }
+            }
+        }
+
+        #endregion
+        
+        #region Methods that throw away bulk result objects, and hence could represent opportunities to have a more optimal implementation
+        
+        public virtual void UpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
+        {
+            UpdateRange(newItems, key, value, out var _);
+        }
+
+        public virtual void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
+        {
+            TryAddRange(newItems, key, value, out var _);
+        }
+
+        public virtual void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
+        {
+            TryUpdateRange(newItems, key, value, out var _);
+        }
+
+        public virtual void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
+        {
+            AddOrUpdateRange(newItems, key, value, out var _);
+        }
+        
+        public virtual void Clear()
+        {
+            Clear(out var _);
+        }
+
+        #endregion
+        
+        #region Methods that throw away non-bulk result objects
+        
+        public virtual IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating)
+        {
+            return AddOrUpdate(key, valueIfAdding, valueIfUpdating, out var _);
+        }
+        
+        public virtual bool TryRemove(TKey key)
+        {
+            return TryRemove(key, out var _);
+        }
+
+        public virtual void TryRemoveRange(IEnumerable<TKey> keysToRemove)
+        {
+            TryRemoveRange(keysToRemove, out var _);
+        }
+
+        public virtual void RemoveRange(IEnumerable<TKey> keysToRemove)
+        {
+            RemoveRange(keysToRemove, out var _);
+        }
+
+        #endregion
+        
+        #region Methods that enumerate this class, its Keys or its Values completely, end hence represent opportunities to optimize
+        
+        public virtual void RemoveWhere(Func<TKey, TValue, bool> predicate)
+        {
+            var keysToRemove = this.Where(kvp => predicate(kvp.Key, kvp.Value)).Select(kvp => kvp.Key);
+            RemoveRange(keysToRemove);
+        }
+
+        public virtual void RemoveWhere(Func<IKeyValuePair<TKey, TValue>, bool> predicate)
+        {
+            var keysToRemove = this.Where(kvp => predicate(kvp)).Select(kvp => kvp.Key);
+            RemoveRange(keysToRemove);
+        }
+
+        public virtual void RemoveWhere(Func<TKey, TValue, bool> predicate, out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+        {
+            var keysToRemove = this.Where(kvp => predicate(kvp.Key, kvp.Value)).Select(kvp => kvp.Key);
+            RemoveRange(keysToRemove, out removedItems);
+        }
+
+        public virtual void RemoveWhere(Func<IKeyValuePair<TKey, TValue>, bool> predicate, out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+        {
+            var keysToRemove = this.Where(kvp => predicate(kvp)).Select(kvp => kvp.Key);
+            RemoveRange(keysToRemove, out removedItems);
+        }
+
+        public virtual void Clear(out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+        {
+            RemoveRange(Keys, out removedItems);
+        }
+
+        #endregion
+        
+        #region Methods that probably don't need to be optimized, but it's still possible so they're still virtual
+
+        public virtual void Remove(TKey key)
+        {
+            if (!TryRemove(key))
+            {
+                throw new KeyNotFoundException();
+            }
+        }
+        
+        public virtual void Remove(TKey key, out TValue removedItem)
+        {
+            if (!TryRemove(key, out removedItem))
+            {
+                throw new InvalidOperationException("Cannot remove item from dictionary");
+            }
+        }
+
+        #endregion
+        
+        #endregion
+        
+        #region Stuff that definitely doesn't need to be overridden for atomicity or performance reasons
+
+        public bool TryAdd(TKey key, TValue value)
+        {
+            return TryAdd(key, () => value);
+        }
+
+        public void Add(TKey key, TValue value)
+        {
+            if (!TryAdd(key, value))
+            {
+                throw new InvalidOperationException("Cannot add an item to the dictionary because the key already exists");
+            }
+        }
+
+        public bool TryUpdate(TKey key, TValue value, out TValue previousValue)
+        {
+            return TryUpdate(key, _ => value, out previousValue);
+        }
+
+        public bool TryUpdate(TKey key, TValue value)
+        {
+            return TryUpdate(key, _ => value, out var _);
+        }
+
+        public void Update(TKey key, TValue value)
+        {
+            if (!TryUpdate(key, value))
+            {
+                throw new KeyNotFoundException();
+            }
+        }
+
+        public void Update(TKey key, TValue value, out TValue previousValue)
+        {
+            if (!TryUpdate(key, value, out previousValue))
+            {
+                throw new KeyNotFoundException();
+            }
+        }
+
+        public IMaybe<TValue> AddOrUpdate(TKey key, TValue value)
+        {
+            return AddOrUpdate(key, () => value, _ => value);
+        }
+        
+        public void AddOrUpdateRange(params IKeyValuePair<TKey, TValue>[] newItems)
+        {
+            AddOrUpdateRange(newItems.AsEnumerable());
+        }
+        
+        public void AddOrUpdateRange(params KeyValuePair<TKey, TValue>[] newItems)
+        {
+            AddOrUpdateRange(newItems.AsEnumerable());
         }
         
         public void AddRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
         {
             AddRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
         }
-
+        
         public void AddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
             AddRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
@@ -33,244 +288,127 @@ namespace MoreCollections
         {
             UpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
         }
-
+        
         public void UpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
             UpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
         }
-
-        public IReadOnlyDictionaryEx<TKey, AddOrUpdateResult> AddOrUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
+        
+        public void AddOrUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
         {
-            return AddOrUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
+            AddOrUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
         }
-
-        public IReadOnlyDictionaryEx<TKey, AddOrUpdateResult> AddOrUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
+        
+        public void AddOrUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
-            return AddOrUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
+            AddOrUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
         }
         
         public void AddRange(params IKeyValuePair<TKey, TValue>[] newItems)
         {
             AddRange(newItems.AsEnumerable());
         }
-
+        
         public void AddRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
             AddRange(newItems.AsEnumerable());
         }
-
+        
         public void UpdateRange(params IKeyValuePair<TKey, TValue>[] newItems)
         {
             UpdateRange(newItems.AsEnumerable());
         }
-
+        
         public void UpdateRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
             UpdateRange(newItems.AsEnumerable());
         }
-
-        public void Remove(TKey key)
-        {
-            if (!TryRemove(key))
-            {
-                throw new KeyNotFoundException();
-            }
-        }
-
-        public IReadOnlyDictionaryEx<TKey, bool> TryAddRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
-        {
-            return TryAddRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
-        }
-
-        public IReadOnlyDictionaryEx<TKey, bool> TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
-        {
-            return TryAddRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
-        }
-
-        public IReadOnlyDictionaryEx<TKey, bool> TryAddRange(params IKeyValuePair<TKey, TValue>[] newItems)
-        {
-            return TryAddRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
-        }
-
-        public IReadOnlyDictionaryEx<TKey, bool> TryAddRange(params KeyValuePair<TKey, TValue>[] newItems)
-        {
-            return TryAddRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
-        }
-
         
+        public void TryAddRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
+        {
+            TryAddRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
+        }
         
-        public IReadOnlyDictionaryEx<TKey, bool> TryUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
+        public void TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
-            return TryUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
+            TryAddRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
         }
-
-        public IReadOnlyDictionaryEx<TKey, bool> TryUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
-        {
-            return TryUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
-        }
-
-        public IReadOnlyDictionaryEx<TKey, bool> TryUpdateRange(params IKeyValuePair<TKey, TValue>[] newItems)
-        {
-            return TryUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
-        }
-
-        public IReadOnlyDictionaryEx<TKey, bool> TryUpdateRange(params KeyValuePair<TKey, TValue>[] newItems)
-        {
-            return TryUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
-        }
-
         
+        public void TryAddRange(params IKeyValuePair<TKey, TValue>[] newItems)
+        {
+            TryAddRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
+        }
+        
+        public void TryAddRange(params KeyValuePair<TKey, TValue>[] newItems)
+        {
+            TryAddRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
+        }
+        
+        public void TryUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
+        {
+            TryUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
+        }
+        
+        public void TryUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
+        {
+            TryUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
+        }
+        
+        public void TryUpdateRange(params IKeyValuePair<TKey, TValue>[] newItems)
+        {
+            TryUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
+        }
+        
+        public void TryUpdateRange(params KeyValuePair<TKey, TValue>[] newItems)
+        {
+            TryUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value);
+        }
         
         public new TValue this[TKey key]
         {
             get => base[key];
             set => AddOrUpdate(key, value);
         }
-
-        public void Add(TKey key, TValue value)
-        {
-            if (!TryAdd(key, value))
-            {
-                throw new InvalidOperationException("Could not add item");
-            }
-        }
-
-        public void Update(TKey key, TValue value)
-        {
-            if (!TryUpdate(key, value))
-            {
-                throw new InvalidOperationException("Could not update item");
-            }
-        }
         
-        #endregion
-        
-        #region Stuff that might need to be overridden for atomicity or performance reasons
-
-        public virtual void RemoveWhere(Func<TKey, TValue, bool> predicate)
+        public void TryAddRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, bool> result)
         {
-            RemoveWhere(kvp => predicate(kvp.Key, kvp.Value));
+            TryAddRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
         }
 
-        public virtual void RemoveWhere(Func<IKeyValuePair<TKey, TValue>, bool> predicate)
+        public void TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, bool> result)
         {
-            RemoveRange(this.Where(predicate).Select(kvp => kvp.Key));
+            TryAddRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
         }
 
-        public virtual int TryRemoveRange(IEnumerable<TKey> keysToRemove)
+        public void TryUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, TValue> result)
         {
-            var count = 0;
-            foreach (var keyToRemove in keysToRemove)
-            {
-                if (TryRemove(keyToRemove))
-                {
-                    count++;
-                }
-            }
-
-            return count;
+            TryUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
         }
 
-        public virtual void RemoveRange(IEnumerable<TKey> keysToRemove)
+        public void TryUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, TValue> result)
         {
-            foreach (var keyToRemove in keysToRemove)
-            {
-                Remove(keyToRemove);
-            }
+            TryUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
         }
 
-        public virtual void Clear()
+        public void UpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, TValue> previousValues)
         {
-            RemoveRange(Keys.ToImmutableHashSet());
+            UpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out previousValues);
         }
 
-        public virtual IReadOnlyDictionaryEx<TKey, AddOrUpdateResult> AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
+        public void UpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, TValue> previousValues)
         {
-            var dictionary = new DictionaryEx<TKey, AddOrUpdateResult>();
-
-            foreach (var newItem in newItems)
-            {
-                var newKey = key(newItem);
-                var result = AddOrUpdate(newKey, value(newItem));
-                if (result == AddOrUpdateResult.Add)
-                {
-                    dictionary[newKey] = AddOrUpdateResult.Add;
-                }
-                else
-                {
-                    dictionary[newKey] = AddOrUpdateResult.Update;
-                }
-            }
-
-            return dictionary;
+            UpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out previousValues);
         }
 
-        public virtual IReadOnlyDictionaryEx<TKey, bool> TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems,
-            Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
+        public void AddOrUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IMaybe<TValue>> result)
         {
-            var result = new DictionaryEx<TKey, bool>();
-            foreach (var newItem in newItems)
-            {
-                var newKey = key(newItem);
-                if (TryAdd(newKey, value(newItem)))
-                {
-                    result[newKey] = true;
-                }
-                else
-                {
-                    result[newKey] = false;
-                }
-            }
-
-            return result;
+            AddOrUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
         }
 
-        public virtual void AddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
+        public void AddOrUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IMaybe<TValue>> result)
         {
-            foreach (var newItem in newItems)
-            {
-                Add(key(newItem), value(newItem));
-            }
+            AddOrUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
         }
-        
-        public virtual IReadOnlyDictionaryEx<TKey, bool> TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems,
-            Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
-        {
-            var result = new DictionaryEx<TKey, bool>();
-            foreach (var newItem in newItems)
-            {
-                var newKey = key(newItem);
-                if (TryUpdate(newKey, value(newItem)))
-                {
-                    result[newKey] = true;
-                }
-                else
-                {
-                    result[newKey] = false;
-                }
-            }
-
-            return result;
-        }
-
-        public virtual void UpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
-        {
-            foreach (var newItem in newItems)
-            {
-                Update(key(newItem), value(newItem));
-            }
-        }
-
-        #endregion
-
-        #region Abstract methods
-
-        public abstract bool TryAdd(TKey key, TValue value);
-        public abstract bool TryUpdate(TKey key, TValue value);
-
-        public abstract AddOrUpdateResult AddOrUpdate(TKey key, TValue value);
-        
-        public abstract bool TryRemove(TKey key);
 
         #endregion
     }

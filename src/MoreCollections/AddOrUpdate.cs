@@ -1,6 +1,6 @@
 namespace MoreCollections
 {
-    public enum AddOrUpdateResult
+    public enum AddOrUpdate
     {
         Add,
         Update

@@ -37,12 +37,12 @@ namespace MoreCollections
             }
         }
 
-        protected override bool ContainsKeyInsideLock(TKey key)
+        protected override bool TryGetValueInsideLock(TKey key, out TValue value)
         {
-            if (!State.ContainsKey(key))
+            if (!State.TryGetValue(key, out value))
             {
                 _getDefaultValue(key, out var maybeValue, out var persist);
-                
+
                 if (maybeValue.HasValue)
                 {
                     if (persist)
@@ -52,16 +52,18 @@ namespace MoreCollections
 
                     return true;
                 }
+
+                return false;
             }
 
             return true;
         }
 
-        protected override bool ContainsKeyOutsideLock(TKey key)
+        protected override bool TryGetValueOutsideLock(TKey key, out TValue value)
         {
             lock (Lock)
             {
-                return ContainsKeyInsideLock(key);
+                return TryGetValueInsideLock(key, out value);
             }
         }
     }

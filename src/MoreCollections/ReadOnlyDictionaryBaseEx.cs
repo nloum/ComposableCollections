@@ -6,6 +6,22 @@ namespace MoreCollections
 {
     public abstract class ReadOnlyDictionaryBaseEx<TKey, TValue> : IReadOnlyDictionaryEx<TKey, TValue>
     {
+        #region Abstract members
+
+        public abstract bool TryGetValue(TKey key, out TValue value);
+
+        public abstract IEnumerator<IKeyValuePair<TKey, TValue>> GetEnumerator();
+
+        public abstract int Count { get; }
+
+        public abstract IEqualityComparer<TKey> Comparer { get; }
+
+        public abstract IEnumerable<TKey> Keys { get; }
+
+        public abstract IEnumerable<TValue> Values { get; }
+        
+        #endregion
+        
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -21,8 +37,6 @@ namespace MoreCollections
             return Maybe<TValue>.Nothing();
         }
 
-        public abstract bool TryGetValue(TKey key, out TValue value);
-        
         public TValue this[TKey key]
         {
             get
@@ -40,15 +54,5 @@ namespace MoreCollections
         {
             return TryGetValue(key, out var value);
         }
-        
-        public abstract IEnumerator<IKeyValuePair<TKey, TValue>> GetEnumerator();
-
-        public abstract int Count { get; }
-
-        public abstract IEqualityComparer<TKey> Comparer { get; }
-
-        public abstract IEnumerable<TKey> Keys { get; }
-
-        public abstract IEnumerable<TValue> Values { get; }
     }
 }

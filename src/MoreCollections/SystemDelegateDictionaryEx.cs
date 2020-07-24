@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SimpleMonads;
 
 namespace MoreCollections
 {
@@ -13,38 +14,70 @@ namespace MoreCollections
             _wrapped = wrapped;
         }
 
-        public override bool TryAdd(TKey key, TValue value)
+        public override bool TryAdd(TKey key, Func<TValue> value)
         {
-            if (ContainsKey(key))
+            if (_wrapped.ContainsKey(key))
             {
                 return false;
             }
             
-            _wrapped.Add(key, value);
+            _wrapped.Add(key, value());
             return true;
         }
-        
-        public override bool TryUpdate(TKey key, TValue value)
+
+        public override bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue)
         {
-            if (ContainsKey(key))
+            if (!_wrapped.TryGetValue(key, out previousValue))
             {
-                _wrapped[key] = value;
+                return false;
+            }
+
+            _wrapped[key] = value(previousValue);
+            return true;
+        }
+
+        public override IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue)
+        {
+            if (_wrapped.TryGetValue(key, out previousValue))
+            {
+                _wrapped[key] = valueIfUpdating(previousValue);
+                return previousValue.ToMaybe();
+            }
+            else
+            {
+                _wrapped[key] = valueIfAdding();
+                return Maybe<TValue>.Nothing();
+            }
+        }
+
+        public override bool TryRemove(TKey key, out TValue removedItem)
+        {
+            if (_wrapped.TryGetValue(key, out removedItem))
+            {
+                _wrapped.Remove(key);
                 return true;
             }
 
             return false;
         }
-        
-        public override AddOrUpdateResult AddOrUpdate(TKey key, TValue value)
+
+        public override void RemoveRange(IEnumerable<TKey> keysToRemove, out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
         {
-            if (ContainsKey(key))
-            {
-                _wrapped[key] = value;
-                return AddOrUpdateResult.Update;
-            }
+            var result = new DictionaryEx<TKey, TValue>();
+            removedItems = result;
             
-            _wrapped.Add(key, value);
-            return AddOrUpdateResult.Add;
+            foreach (var key in keysToRemove)
+            {
+                if (!TryGetValue(key, out var previousValue))
+                {
+                    result.Clear();
+                    throw new KeyNotFoundException($"Key not found: {key}");
+                }
+
+                result[key] = previousValue;
+            }
+
+            _wrapped.RemoveRange(result.Keys);
         }
 
         public override IEnumerator<IKeyValuePair<TKey, TValue>> GetEnumerator()

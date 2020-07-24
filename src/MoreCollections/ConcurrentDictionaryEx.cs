@@ -26,46 +26,52 @@ namespace MoreCollections
         public override IEnumerable<TKey> Keys => State.Keys;
         public override IEnumerable<TValue> Values => State.Values;
         
-        public override bool TryAdd(TKey key, Func<TValue> value)
+        public override bool TryAdd(TKey key, Func<TValue> value, out TValue newValue)
         {
             lock (Lock)
             {
                 if (TryGetValueInsideLock(key, out var _))
                 {
+                    newValue = default;
                     return false;
                 }
-            
-                State = State.Add(key, value());
+
+                newValue = value();
+                State = State.Add(key, newValue);
                 return true;
             }
         }
 
-        public override bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue)
+        public override bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue, out TValue newValue)
         {
             lock (Lock)
             {
                 if (TryGetValueInsideLock(key, out previousValue))
                 {
-                    State = State.SetItem(key, value(previousValue));
+                    newValue = value(previousValue);
+                    State = State.SetItem(key, newValue);
                     return true;
                 }
 
+                newValue = default;
                 previousValue = default;
                 return false;
             }
         }
 
-        public override IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue)
+        public override IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue)
         {
             lock (Lock)
             {
                 if (TryGetValueInsideLock(key, out previousValue))
                 {
-                    State = State.SetItem(key, valueIfUpdating(previousValue));
+                    newValue = valueIfUpdating(previousValue);
+                    State = State.SetItem(key, newValue);
                     return previousValue.ToMaybe();
                 }
-            
-                State = State.Add(key, valueIfAdding());
+
+                newValue = valueIfAdding();
+                State = State.Add(key, newValue);
                 return Maybe<TValue>.Nothing();
             }
         }
@@ -223,6 +229,23 @@ namespace MoreCollections
                         result[key] = removedItem;
                     }
                 }
+            }
+        }
+        
+        public override void Clear(out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+        {
+            lock (Lock)
+            {
+                removedItems = State.ToDictionaryEx();
+                State = ImmutableDictionary<TKey, TValue>.Empty;
+            }
+        }
+        
+        public override void Clear()
+        {
+            lock (Lock)
+            {
+                State = ImmutableDictionary<TKey, TValue>.Empty;
             }
         }
     }

@@ -23,38 +23,45 @@ namespace MoreCollections
         public override IEqualityComparer<TKey> Comparer => State.Comparer;
         public override IEnumerable<TKey> Keys => State.Keys;
         public override IEnumerable<TValue> Values => State.Values;
-        public override bool TryAdd(TKey key, Func<TValue> value)
+        public override bool TryAdd(TKey key, Func<TValue> value, out TValue newValue)
         {
             if (State.ContainsKey(key))
             {
+                newValue = default;
                 return false;
             }
-            
-            State.Add(key, value());
+
+            newValue = value();
+            State.Add(key, newValue);
             return true;
         }
 
-        public override bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue)
+        public override bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue, out TValue newValue)
         {
             if (TryGetValue(key, out previousValue))
             {
-                State[key] = value(previousValue);
+                newValue = value(previousValue);
+                State[key] = newValue;
                 return true;
             }
 
+            newValue = default;
             return false;
         }
 
-        public override IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue)
+        public override IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue)
         {
             if (TryGetValue(key, out previousValue))
             {
-                State[key] = valueIfUpdating(previousValue);
+                newValue = valueIfUpdating(previousValue);
+                State[key] = newValue;
                 return previousValue.ToMaybe();
             }
             else
             {
-                State.Add(key, valueIfAdding());
+                previousValue = default;
+                newValue = valueIfAdding();
+                State.Add(key, newValue);
                 return Maybe<TValue>.Nothing();
             }
         }

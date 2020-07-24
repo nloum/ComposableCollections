@@ -13,6 +13,7 @@ namespace MoreCollections
         
         bool TryAdd(TKey key, TValue value);
         bool TryAdd(TKey key, Func<TValue> value);
+        bool TryAdd(TKey key, Func<TValue> value, out TValue result);
         void TryAddRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, bool> result);
         void TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, bool> result);
         void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, bool> result);
@@ -35,7 +36,7 @@ namespace MoreCollections
         
         bool TryUpdate(TKey key, TValue value);
         bool TryUpdate(TKey key, TValue value, out TValue previousValue);
-        bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue);
+        bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue, out TValue newValue);
         void TryUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems);
         void TryUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems);
         void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value);
@@ -61,6 +62,7 @@ namespace MoreCollections
         
         IMaybe<TValue> AddOrUpdate(TKey key, TValue value);
         IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating);
+        IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue);
         void AddOrUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IMaybe<TValue>> result);
         void AddOrUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IMaybe<TValue>> result);
         void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IMaybe<TValue>> result);

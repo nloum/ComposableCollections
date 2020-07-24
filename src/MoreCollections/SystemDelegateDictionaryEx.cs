@@ -14,38 +14,44 @@ namespace MoreCollections
             _wrapped = wrapped;
         }
 
-        public override bool TryAdd(TKey key, Func<TValue> value)
+        public override bool TryAdd(TKey key, Func<TValue> value, out TValue newValue)
         {
             if (_wrapped.ContainsKey(key))
             {
+                newValue = default;
                 return false;
             }
-            
-            _wrapped.Add(key, value());
+
+            newValue = value();
+            _wrapped.Add(key, newValue);
             return true;
         }
 
-        public override bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue)
+        public override bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue, out TValue newValue)
         {
             if (!_wrapped.TryGetValue(key, out previousValue))
             {
+                newValue = default;
                 return false;
             }
 
-            _wrapped[key] = value(previousValue);
+            newValue = value(previousValue);
+            _wrapped[key] = newValue;
             return true;
         }
 
-        public override IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue)
+        public override IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue)
         {
             if (_wrapped.TryGetValue(key, out previousValue))
             {
-                _wrapped[key] = valueIfUpdating(previousValue);
+                newValue = valueIfUpdating(previousValue);
+                _wrapped[key] = newValue;
                 return previousValue.ToMaybe();
             }
             else
             {
-                _wrapped[key] = valueIfAdding();
+                newValue = valueIfAdding();
+                _wrapped[key] = newValue;
                 return Maybe<TValue>.Nothing();
             }
         }

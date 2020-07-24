@@ -9,9 +9,9 @@ namespace MoreCollections
     {
         #region Abstract methods
 
-        public abstract bool TryAdd(TKey key, Func<TValue> value);
-        public abstract bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue);
-        public abstract IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue);
+        public abstract bool TryAdd(TKey key, Func<TValue> value, out TValue result);
+        public abstract bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue, out TValue newValue);
+        public abstract IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue);
         public abstract bool TryRemove(TKey key, out TValue removedItem);
         public abstract void RemoveRange(IEnumerable<TKey> keysToRemove,
             out IReadOnlyDictionaryEx<TKey, TValue> removedItems);
@@ -140,10 +140,15 @@ namespace MoreCollections
         #endregion
         
         #region Methods that throw away non-bulk result objects
-        
+
+        public bool TryAdd(TKey key, Func<TValue> value)
+        {
+            return TryAdd(key, value, out var _);
+        }
+
         public virtual IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating)
         {
-            return AddOrUpdate(key, valueIfAdding, valueIfUpdating, out var _);
+            return AddOrUpdate(key, valueIfAdding, valueIfUpdating, out var _, out var __);
         }
         
         public virtual bool TryRemove(TKey key)
@@ -222,7 +227,7 @@ namespace MoreCollections
 
         public bool TryAdd(TKey key, TValue value)
         {
-            return TryAdd(key, () => value);
+            return TryAdd(key, () => value, out var _);
         }
 
         public void Add(TKey key, TValue value)
@@ -235,12 +240,12 @@ namespace MoreCollections
 
         public bool TryUpdate(TKey key, TValue value, out TValue previousValue)
         {
-            return TryUpdate(key, _ => value, out previousValue);
+            return TryUpdate(key, _ => value, out previousValue, out var _);
         }
 
         public bool TryUpdate(TKey key, TValue value)
         {
-            return TryUpdate(key, _ => value, out var _);
+            return TryUpdate(key, _ => value, out var _, out var __);
         }
 
         public void Update(TKey key, TValue value)

@@ -63,6 +63,11 @@ namespace MoreCollections
             return _wrapped.TryAdd(key, value);
         }
 
+        public bool TryAdd(TKey key, Func<TValue> value, out TValue result)
+        {
+            return _wrapped.TryAdd(key, value, out result);
+        }
+
         public void TryAddRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, bool> result)
         {
             _wrapped.TryAddRange(newItems, out result);
@@ -143,9 +148,9 @@ namespace MoreCollections
             return _wrapped.TryUpdate(key, value, out previousValue);
         }
 
-        public bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue)
+        public bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue, out TValue newValue)
         {
-            return _wrapped.TryUpdate(key, value, out previousValue);
+            return _wrapped.TryUpdate(key, value, out previousValue, out newValue);
         }
 
         public void TryUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
@@ -246,6 +251,11 @@ namespace MoreCollections
         public IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating)
         {
             return _wrapped.AddOrUpdate(key, valueIfAdding, valueIfUpdating);
+        }
+
+        public IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue)
+        {
+            return _wrapped.AddOrUpdate(key, valueIfAdding, valueIfUpdating, out previousValue, out newValue);
         }
 
         public void AddOrUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IMaybe<TValue>> result)

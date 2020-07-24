@@ -3,25 +3,23 @@ using System.Linq;
 
 namespace MoreCollections
 {
-    public class DelegateReadOnlyDictionaryEx<TKey, TValue> : ReadOnlyDictionaryBaseEx<TKey, TValue>
+    public class SystemDelegateReadOnlyDictionaryEx<TKey, TValue> : ReadOnlyDictionaryBaseEx<TKey, TValue>
     {
-        private IReadOnlyDictionaryEx<TKey, TValue> _wrapped;
+        private IReadOnlyDictionary<TKey, TValue> _wrapped;
 
-        public DelegateReadOnlyDictionaryEx(IReadOnlyDictionaryEx<TKey, TValue> wrapped)
+        public SystemDelegateReadOnlyDictionaryEx(IReadOnlyDictionary<TKey, TValue> wrapped)
         {
             _wrapped = wrapped;
         }
 
         public override bool TryGetValue(TKey key, out TValue value)
         {
-            var result = _wrapped.TryGetValue(key);
-            value = result.ValueOrDefault;
-            return result.HasValue;
+            return _wrapped.TryGetValue(key, out value);
         }
 
         public override IEnumerator<IKeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            return _wrapped.Select(kvp => Utility.KeyValuePair<TKey, TValue>(kvp.Key, kvp.Value)).GetEnumerator();
+            return _wrapped.Select(kvp => Utility.KeyValuePair(kvp.Key, kvp.Value)).GetEnumerator();
         }
 
         public override int Count => _wrapped.Count;

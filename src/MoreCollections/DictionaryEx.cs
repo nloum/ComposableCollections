@@ -57,13 +57,11 @@ namespace MoreCollections
                 State[key] = newValue;
                 return previousValue.ToMaybe();
             }
-            else
-            {
-                previousValue = default;
-                newValue = valueIfAdding();
-                State.Add(key, newValue);
-                return Maybe<TValue>.Nothing();
-            }
+            
+            previousValue = default;
+            newValue = valueIfAdding();
+            State.Add(key, newValue);
+            return Maybe<TValue>.Nothing();
         }
 
         public override bool TryRemove(TKey key, out TValue removedItem)

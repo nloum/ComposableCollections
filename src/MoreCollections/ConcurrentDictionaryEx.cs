@@ -82,7 +82,7 @@ namespace MoreCollections
             {
                 if (TryGetValueInsideLock(key, out removedItem))
                 {
-                    State.Remove(key);
+                    State = State.Remove(key);
                     return true;
                 }
             
@@ -108,10 +108,14 @@ namespace MoreCollections
                     results[key] = previousValue;
                 }
 
+                var state = State;
+                
                 foreach (var key in results.Keys)
                 {
-                    State.Remove(key);
+                    state = state.Remove(key);
                 }
+
+                State = state;
             }
         }
         

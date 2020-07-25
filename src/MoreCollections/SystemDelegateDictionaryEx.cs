@@ -69,21 +69,21 @@ namespace MoreCollections
 
         public override void RemoveRange(IEnumerable<TKey> keysToRemove, out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
         {
-            var result = new DictionaryEx<TKey, TValue>();
-            removedItems = result;
+            var results = new DictionaryEx<TKey, TValue>();
+            removedItems = results;
             
             foreach (var key in keysToRemove)
             {
                 if (!TryGetValue(key, out var previousValue))
                 {
-                    result.Clear();
+                    results.Clear();
                     throw new KeyNotFoundException($"Key not found: {key}");
                 }
 
-                result[key] = previousValue;
+                results[key] = previousValue;
             }
 
-            _wrapped.RemoveRange(result.Keys);
+            _wrapped.RemoveRange(results.Keys);
         }
 
         public override IEnumerator<IKeyValuePair<TKey, TValue>> GetEnumerator()

@@ -51,10 +51,10 @@ namespace MoreCollections
 
         #region Methods that loop through parameters and call individual add/remove/update methods on each item
 
-        public virtual void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> result)
+        public virtual void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
-            var finalResult = new DictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>>();
-            result = finalResult;
+            var finalResults = new DictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>>();
+            results = finalResults;
             
             foreach (var newItem in newItems)
             {
@@ -62,14 +62,14 @@ namespace MoreCollections
                 var newValue = value(newItem);
 
                 var added = TryAdd(newKey, () => newValue, out TValue _,out TValue existingValue);
-                finalResult[newKey] = new DictionaryItemAddAttempt<TValue>(added, added ? Maybe<TValue>.Nothing() : existingValue.ToMaybe(), newValue.ToMaybe());
+                finalResults[newKey] = new DictionaryItemAddAttempt<TValue>(added, added ? Maybe<TValue>.Nothing() : existingValue.ToMaybe(), newValue.ToMaybe());
             }
         }
 
-        public virtual void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> result)
+        public virtual void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            var finalResult = new DictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>>();
-            result = finalResult;
+            var finalResults = new DictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>>();
+            results = finalResults;
             
             foreach (var newItem in newItems)
             {
@@ -78,19 +78,19 @@ namespace MoreCollections
 
                 if (TryUpdate(newKey, _ => value(newItem), out var previousValue, out var newValue))
                 {
-                    finalResult[newKey] = new DictionaryItemUpdateAttempt<TValue>(true, previousValue.ToMaybe(), newValue.ToMaybe());
+                    finalResults[newKey] = new DictionaryItemUpdateAttempt<TValue>(true, previousValue.ToMaybe(), newValue.ToMaybe());
                 }
                 else
                 {
-                    finalResult[newKey] = new DictionaryItemUpdateAttempt<TValue>(false, Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing());
+                    finalResults[newKey] = new DictionaryItemUpdateAttempt<TValue>(false, Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing());
                 }
             }
         }
 
-        public virtual void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> result)
+        public virtual void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
         {
-            var finalResult = new DictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>>();
-            result = finalResult;
+            var finalResults = new DictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>>();
+            results = finalResults;
             
             foreach (var newItem in newItems)
             {
@@ -98,21 +98,21 @@ namespace MoreCollections
                 var newValue = value(newItem);
 
                 var newResult = AddOrUpdate(newKey, () => newValue, _ => newValue, out var previousValue, out var _);
-                finalResult[newKey] = new DictionaryItemAddOrUpdate<TValue>(newResult, newResult == DictionaryItemAddOrUpdateResult.Update ? previousValue.ToMaybe() : Maybe<TValue>.Nothing(), newValue);
+                finalResults[newKey] = new DictionaryItemAddOrUpdate<TValue>(newResult, newResult == DictionaryItemAddOrUpdateResult.Update ? previousValue.ToMaybe() : Maybe<TValue>.Nothing(), newValue);
             }
         }
 
         public virtual void TryRemoveRange(IEnumerable<TKey> keysToRemove,
             out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
         {
-            var result = new DictionaryEx<TKey, TValue>();
-            removedItems = result;
+            var results = new DictionaryEx<TKey, TValue>();
+            removedItems = results;
             
             foreach (var key in keysToRemove)
             {
                 if (TryRemove(key, out var removedItem))
                 {
-                    result[key] = removedItem;
+                    results[key] = removedItem;
                 }
             }
         }
@@ -384,24 +384,24 @@ namespace MoreCollections
             set => AddOrUpdate(key, value);
         }
         
-        public void TryAddRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> result)
+        public void TryAddRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
-            TryAddRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
+            TryAddRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out results);
         }
 
-        public void TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> result)
+        public void TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
-            TryAddRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
+            TryAddRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out results);
         }
 
-        public void TryUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> result)
+        public void TryUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            TryUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
+            TryUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out results);
         }
 
-        public void TryUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> result)
+        public void TryUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            TryUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
+            TryUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out results);
         }
 
         public void UpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> previousValues)
@@ -414,14 +414,14 @@ namespace MoreCollections
             UpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out previousValues);
         }
 
-        public void AddOrUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> result)
+        public void AddOrUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
         {
-            AddOrUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
+            AddOrUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out results);
         }
 
-        public void AddOrUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> result)
+        public void AddOrUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
         {
-            AddOrUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
+            AddOrUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out results);
         }
 
         #endregion

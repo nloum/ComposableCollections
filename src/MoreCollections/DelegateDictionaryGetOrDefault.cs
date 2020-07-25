@@ -105,19 +105,19 @@ namespace MoreCollections
             return _wrapped.TryAdd(key, value, out existingValue, out newValue);
         }
 
-        public void TryAddRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> result)
+        public void TryAddRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
-            _wrapped.TryAddRange(newItems, out result);
+            _wrapped.TryAddRange(newItems, out results);
         }
 
-        public void TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> result)
+        public void TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
-            _wrapped.TryAddRange(newItems, out result);
+            _wrapped.TryAddRange(newItems, out results);
         }
 
-        public void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> result)
+        public void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
-            _wrapped.TryAddRange(newItems, key, value, out result);
+            _wrapped.TryAddRange(newItems, key, value, out results);
         }
 
         public void TryAddRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
@@ -215,19 +215,19 @@ namespace MoreCollections
             _wrapped.TryUpdateRange(newItems);
         }
 
-        public void TryUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> result)
+        public void TryUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            _wrapped.TryUpdateRange(newItems, out result);
+            _wrapped.TryUpdateRange(newItems, out results);
         }
 
-        public void TryUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> result)
+        public void TryUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            _wrapped.TryUpdateRange(newItems, out result);
+            _wrapped.TryUpdateRange(newItems, out results);
         }
 
-        public void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> result)
+        public void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            _wrapped.TryUpdateRange(newItems, key, value, out result);
+            _wrapped.TryUpdateRange(newItems, key, value, out results);
         }
 
         public void Update(TKey key, TValue value)
@@ -296,19 +296,19 @@ namespace MoreCollections
             return _wrapped.AddOrUpdate(key, valueIfAdding, valueIfUpdating, out previousValue, out newValue);
         }
 
-        public void AddOrUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> result)
+        public void AddOrUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
         {
-            _wrapped.AddOrUpdateRange(newItems, out result);
+            _wrapped.AddOrUpdateRange(newItems, out results);
         }
 
-        public void AddOrUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> result)
+        public void AddOrUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
         {
-            _wrapped.AddOrUpdateRange(newItems, out result);
+            _wrapped.AddOrUpdateRange(newItems, out results);
         }
 
-        public void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> result)
+        public void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
         {
-            _wrapped.AddOrUpdateRange(newItems, key, value, out result);
+            _wrapped.AddOrUpdateRange(newItems, key, value, out results);
         }
 
         public void AddOrUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)

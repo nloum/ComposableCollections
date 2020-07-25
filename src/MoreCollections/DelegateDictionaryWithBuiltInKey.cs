@@ -68,9 +68,9 @@ namespace MoreCollections
             return _wrapped.TryAdd(key, value, out existingValue, out newValue);
         }
 
-        public void TryAddRange(IEnumerable<TValue> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> result)
+        public void TryAddRange(IEnumerable<TValue> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
-            _wrapped.TryAddRange(newItems, GetKey, x => x, out result);
+            _wrapped.TryAddRange(newItems, GetKey, x => x, out results);
         }
 
         public void TryAddRange(params TValue[] newItems)
@@ -166,10 +166,10 @@ namespace MoreCollections
             return _wrapped.AddOrUpdate(key, valueIfAdding, valueIfUpdating, out previousValue, out newValue);
         }
 
-        public void AddOrUpdateRange(IEnumerable<TValue> newItems, out IReadOnlyDictionaryWithBuiltInKey<TKey, IDictionaryItemAddOrUpdate<TValue>> result)
+        public void AddOrUpdateRange(IEnumerable<TValue> newItems, out IReadOnlyDictionaryWithBuiltInKey<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
         {
             _wrapped.AddOrUpdateRange(newItems, GetKey, x => x, out var innerResult);
-            result = new DelegateReadOnlyDictionaryWithBuiltInKey<TKey, IDictionaryItemAddOrUpdate<TValue>>(innerResult);
+            results = new DelegateReadOnlyDictionaryWithBuiltInKey<TKey, IDictionaryItemAddOrUpdate<TValue>>(innerResult);
         }
 
         public void AddOrUpdateRange(params TValue[] newItems)

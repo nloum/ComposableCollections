@@ -23,9 +23,9 @@ namespace MoreCollections
         public override IEqualityComparer<TKey> Comparer => State.Comparer;
         public override IEnumerable<TKey> Keys => State.Keys;
         public override IEnumerable<TValue> Values => State.Values;
-        public override bool TryAdd(TKey key, Func<TValue> value, out TValue newValue)
+        public override bool TryAdd(TKey key, Func<TValue> value, out TValue existingValue, out TValue newValue)
         {
-            if (State.ContainsKey(key))
+            if (State.TryGetValue(key, out existingValue))
             {
                 newValue = default;
                 return false;
@@ -49,19 +49,19 @@ namespace MoreCollections
             return false;
         }
 
-        public override IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue)
+        public override DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue)
         {
             if (TryGetValue(key, out previousValue))
             {
                 newValue = valueIfUpdating(previousValue);
                 State[key] = newValue;
-                return previousValue.ToMaybe();
+                return DictionaryItemAddOrUpdateResult.Update;
             }
             
             previousValue = default;
             newValue = valueIfAdding();
             State.Add(key, newValue);
-            return Maybe<TValue>.Nothing();
+            return DictionaryItemAddOrUpdateResult.Add;
         }
 
         public override bool TryRemove(TKey key, out TValue removedItem)

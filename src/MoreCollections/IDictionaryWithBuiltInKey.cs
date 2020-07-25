@@ -12,10 +12,10 @@ namespace MoreCollections
 
         #region Add
         
-        bool TryAdd(TValue value);
-        bool TryAdd(TKey key, Func<TValue> value);
-        bool TryAdd(TKey key, Func<TValue> value, out TValue result);
-        void TryAddRange(IEnumerable<TValue> newItems, out IReadOnlyDictionaryEx<TKey, bool> result);
+        DictionaryItemAddResult TryAdd(TValue value);
+        DictionaryItemAddResult TryAdd(TKey key, Func<TValue> value);
+        DictionaryItemAddResult TryAdd(TKey key, Func<TValue> value, out TValue result);
+        void TryAddRange(IEnumerable<TValue> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> result);
         void TryAddRange(params TValue[] newItems);
         void Add(TValue value);
         void AddRange(TValue newItems);
@@ -25,9 +25,9 @@ namespace MoreCollections
         
         #region Update
         
-        bool TryUpdate(TValue value);
-        bool TryUpdate(TValue value, out TValue previousValue);
-        bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue, out TValue newValue);
+        DictionaryItemUpdateResult TryUpdate(TValue value);
+        DictionaryItemUpdateResult TryUpdate(TValue value, out TValue previousValue);
+        DictionaryItemUpdateResult TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue, out TValue newValue);
         void TryUpdateRange(params TValue[] newItems);
         void TryUpdateRange(IEnumerable<TValue> newItems);
         void TryUpdateRange(IEnumerable<TValue> newItems, out IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> prviousValues);
@@ -41,9 +41,9 @@ namespace MoreCollections
         
         #region AddOrUpdate
         
-        IMaybe<TValue> AddOrUpdate(TValue value);
-        IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating);
-        IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue);
+        DictionaryItemAddOrUpdateResult AddOrUpdate(TValue value);
+        DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating);
+        DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue);
         void AddOrUpdateRange(IEnumerable<TValue> newItems, out IReadOnlyDictionaryWithBuiltInKey<TKey, IMaybe<TValue>> result);
         void AddOrUpdateRange(params TValue[] newItems);
         

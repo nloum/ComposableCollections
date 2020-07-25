@@ -14,9 +14,9 @@ namespace MoreCollections
             _wrapped = wrapped;
         }
 
-        public override bool TryAdd(TKey key, Func<TValue> value, out TValue newValue)
+        public override bool TryAdd(TKey key, Func<TValue> value, out TValue existingValue, out TValue newValue)
         {
-            if (_wrapped.ContainsKey(key))
+            if (_wrapped.TryGetValue(key, out existingValue))
             {
                 newValue = default;
                 return false;
@@ -40,19 +40,19 @@ namespace MoreCollections
             return true;
         }
 
-        public override IMaybe<TValue> AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue)
+        public override DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue)
         {
             if (_wrapped.TryGetValue(key, out previousValue))
             {
                 newValue = valueIfUpdating(previousValue);
                 _wrapped[key] = newValue;
-                return previousValue.ToMaybe();
+                return DictionaryItemAddOrUpdateResult.Update;
             }
             else
             {
                 newValue = valueIfAdding();
                 _wrapped[key] = newValue;
-                return Maybe<TValue>.Nothing();
+                return DictionaryItemAddOrUpdateResult.Add;
             }
         }
 

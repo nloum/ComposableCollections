@@ -6,12 +6,12 @@ using SimpleMonads;
 
 namespace MoreCollections
 {
-    public class DelegateDictionaryGetOrDefault<TKey, TValue> : IDictionaryEx<TKey, TValue>
+    public class DictionaryGetOrDefaultDecorator<TKey, TValue> : IDictionaryEx<TKey, TValue>
     {
         private readonly IDictionaryEx<TKey, TValue> _wrapped;
         private readonly GetDefaultValue<TKey, TValue> _getDefaultValue;
 
-        public DelegateDictionaryGetOrDefault(IDictionaryEx<TKey, TValue> wrapped, GetDefaultValue<TKey, TValue> getDefaultValue)
+        public DictionaryGetOrDefaultDecorator(IDictionaryEx<TKey, TValue> wrapped, GetDefaultValue<TKey, TValue> getDefaultValue)
         {
             _wrapped = wrapped;
             _getDefaultValue = getDefaultValue;

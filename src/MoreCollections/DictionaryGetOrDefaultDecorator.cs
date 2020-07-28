@@ -8,10 +8,20 @@ namespace MoreCollections
 {
     public class DictionaryGetOrDefaultDecorator<TKey, TValue> : IDictionaryEx<TKey, TValue>
     {
-        private readonly IDictionaryEx<TKey, TValue> _wrapped;
-        private readonly GetDefaultValue<TKey, TValue> _getDefaultValue;
+        private IDictionaryEx<TKey, TValue> _wrapped;
+        private GetDefaultValue<TKey, TValue> _getDefaultValue;
 
         public DictionaryGetOrDefaultDecorator(IDictionaryEx<TKey, TValue> wrapped, GetDefaultValue<TKey, TValue> getDefaultValue)
+        {
+            _wrapped = wrapped;
+            _getDefaultValue = getDefaultValue;
+        }
+
+        protected DictionaryGetOrDefaultDecorator()
+        {
+        }
+
+        protected void Initialize(IDictionaryEx<TKey, TValue> wrapped, GetDefaultValue<TKey, TValue> getDefaultValue)
         {
             _wrapped = wrapped;
             _getDefaultValue = getDefaultValue;

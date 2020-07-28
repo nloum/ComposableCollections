@@ -19,7 +19,7 @@ namespace MoreCollections
             _wrapped = null;
         }
 
-        protected virtual void Initialize(IDictionaryEx<TKey, TValue> wrapped)
+        protected void Initialize(IDictionaryEx<TKey, TValue> wrapped)
         {
             _wrapped = wrapped;
         }

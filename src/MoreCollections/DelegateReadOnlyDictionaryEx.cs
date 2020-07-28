@@ -17,7 +17,7 @@ namespace MoreCollections
         {
         }
 
-        protected virtual void SetWrapped(IReadOnlyDictionaryEx<TKey, TValue> wrapped)
+        protected virtual void Initialize(IReadOnlyDictionaryEx<TKey, TValue> wrapped)
         {
             _wrapped = wrapped;
         }

@@ -9,7 +9,7 @@ namespace MoreCollections
     {
         #region Abstract methods
 
-        public abstract bool TryAdd(TKey key, Func<TValue> value, out TValue result, out TValue previousValue);
+        public abstract bool TryAdd(TKey key, Func<TValue> value, out TValue existingValue, out TValue newValue);
         public abstract bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue, out TValue newValue);
         public abstract DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue);
         public abstract bool TryRemove(TKey key, out TValue removedItem);

@@ -10,6 +10,29 @@ namespace MoreCollections.Tests
     public class DictionaryGetOrDefaultTests
     {
         [TestMethod]
+        public void AddShouldOnlyWorkIfTheItemDoesNotExistYet()
+        {
+            var uut = new DictionaryEx<string, int>();
+            uut["ha"] = 2;
+            uut.ContainsKey("ha").Should().BeTrue();
+            uut.TryGetValue("ha", out var _).Should().BeTrue();
+            uut["ha"].Should().Be(2);
+            uut.ContainsKey("hey").Should().BeFalse();
+            uut.TryGetValue("hey", out var _).Should().BeFalse();
+        }
+        [TestMethod]
+        public void ConcurrentAddShouldOnlyWorkIfTheItemDoesNotExistYet()
+        {
+            var uut = new ConcurrentDictionaryEx<string, int>();
+            uut["ha"] = 2;
+            uut.ContainsKey("ha").Should().BeTrue();
+            uut.TryGetValue("ha", out var _).Should().BeTrue();
+            uut["ha"].Should().Be(2);
+            uut.ContainsKey("hey").Should().BeFalse();
+            uut.TryGetValue("hey", out var _).Should().BeFalse();
+        }
+
+        [TestMethod]
         public void NonExistentItemShouldBeCreatedAndPersistedIfSpecified()
         {
             var uut = new DictionaryGetOrDefault<string, Guid>((string key, out IMaybe<Guid> value, out bool persist) =>

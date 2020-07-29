@@ -100,6 +100,11 @@ namespace MoreCollections
             return _wrapped.TryAdd(key, value);
         }
 
+        public void Mutate(IEnumerable<DictionaryMutation<TKey, TValue>> mutations, out IReadOnlyList<DictionaryMutationResult<TKey, TValue>> results)
+        {
+            _wrapped.Mutate(mutations, out results);
+        }
+
         public bool TryAdd(TKey key, Func<TValue> value, out TValue existingValue, out TValue newValue)
         {
             return _wrapped.TryAdd(key, value, out existingValue, out newValue);

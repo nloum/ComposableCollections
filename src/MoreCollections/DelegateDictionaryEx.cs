@@ -37,6 +37,11 @@ namespace MoreCollections
             return _wrapped.ContainsKey(key);
         }
 
+        public void Mutate(IEnumerable<DictionaryMutation<TKey, TValue>> mutations, out IReadOnlyList<DictionaryMutationResult<TKey, TValue>> results)
+        {
+            _wrapped.Mutate(mutations, out results);
+        }
+
         public IMaybe<TValue> TryGetValue(TKey key)
         {
             return _wrapped.TryGetValue(key);

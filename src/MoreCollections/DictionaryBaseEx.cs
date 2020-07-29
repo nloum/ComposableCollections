@@ -1,124 +1,121 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GenericNumbers;
 using SimpleMonads;
 
 namespace MoreCollections
 {
     public abstract class DictionaryBaseEx<TKey, TValue> : ReadOnlyDictionaryBaseEx<TKey, TValue>, IDictionaryEx<TKey, TValue>
     {
-        #region Abstract methods
+        public abstract void Mutate(IEnumerable<DictionaryMutation<TKey, TValue>> mutations,
+            out IReadOnlyList<DictionaryMutationResult<TKey, TValue>> results);
 
-        public abstract bool TryAdd(TKey key, Func<TValue> value, out TValue result, out TValue previousValue);
-        public abstract bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue, out TValue newValue);
-        public abstract DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue);
-        public abstract bool TryRemove(TKey key, out TValue removedItem);
-        public abstract void RemoveRange(IEnumerable<TKey> keysToRemove,
-            out IReadOnlyDictionaryEx<TKey, TValue> removedItems);
+        #region Stuff that may need to be overridden for atomicity or performance reasons
+
+        #region Individual mutation methods that call bulk mutation methods
+
+        public virtual bool TryAdd(TKey key, Func<TValue> value, out TValue result, out TValue previousValue)
+        {
+            Mutate(new[] { DictionaryMutation<TKey, TValue>.CreateTryAdd(key, value) }, out var results);
+            var firstResult = results.First();
+            result = firstResult.Add.Value.NewValue.ValueOrDefault;
+            previousValue = firstResult.Add.Value.ExistingValue.ValueOrDefault;
+            return firstResult.Add.Value.NewValue.HasValue;
+        }
+
+        public virtual bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue, out TValue newValue)
+        {
+            Mutate(new[] {DictionaryMutation<TKey, TValue>.CreateTryUpdate(key, value)}, out var results);
+            var firstResult = results.First();
+            newValue = firstResult.Update.Value.NewValue.ValueOrDefault;
+            previousValue = firstResult.Update.Value.ExistingValue.ValueOrDefault;
+            return firstResult.Update.Value.NewValue.HasValue;
+        }
+
+        public DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TValue> valueIfAdding,
+            Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue)
+        {
+            Mutate(new[] {DictionaryMutation<TKey, TValue>.CreateAddOrUpdate(key, valueIfAdding, valueIfUpdating)}, out var results);
+            var firstResult = results.First();
+            newValue = firstResult.Update.Value.NewValue.ValueOrDefault;
+            previousValue = firstResult.Update.Value.ExistingValue.ValueOrDefault;
+            if (firstResult.Update.Value.ExistingValue.HasValue)
+            {
+                return DictionaryItemAddOrUpdateResult.Update;
+            }
+
+            return DictionaryItemAddOrUpdateResult.Add;
+        }
+
+        public virtual bool TryRemove(TKey key, out TValue removedItem)
+        {
+            Mutate(new[] {DictionaryMutation<TKey, TValue>.CreateTryRemove(key)}, out var results);
+            var firstResult = results.First();
+            removedItem = firstResult.Remove.Value.ValueOrDefault;
+            return firstResult.Remove.Value.HasValue;
+        }
+
+        #endregion
+
+        #region Bulk mutation methods of only one type that call Mutate
+
+        public virtual void RemoveRange(IEnumerable<TKey> keysToRemove,
+            out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+        {
+            Mutate(keysToRemove.Select(key => DictionaryMutation<TKey, TValue>.CreateTryRemove(key)), out var results);
+            removedItems = results
+                .Where(x => x.Remove.Value.HasValue)
+                .ToDictionaryEx(x => x.Key, x => x.Remove.Value.Value);
+        }
 
         public virtual void AddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key,
             Func<TKeyValuePair, TValue> value)
         {
-            foreach (var newItem in newItems)
-            {
-                var newKey = key(newItem);
-                var newValue = value(newItem);
-        
-                Add(newKey, newValue);
-            }
+            Mutate(newItems.Select(x => DictionaryMutation<TKey, TValue>.CreateAdd(key(x), () => value(x))), out var _);
         }
 
         public virtual void UpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems,
             Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value,
             out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> previousValues)
         {
-            var finalResult = new DictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>>();
-            previousValues = finalResult;
-        
-            foreach (var newItem in newItems)
-            {
-                var newKey = key(newItem);
-                var newValue = value(newItem);
-                
-                Update(newKey, newValue, out var previousValue);
-                finalResult[newKey] = new DictionaryItemUpdateAttempt<TValue>(true, previousValue.ToMaybe(), newValue.ToMaybe());
-            }
+            Mutate(newItems.Select(x => DictionaryMutation<TKey, TValue>.CreateUpdate(key(x), _ => value(x))), out var results);
+            previousValues = results
+                .ToDictionaryEx(x => x.Key, x => x.Update.Value);
         }
-        
-        #endregion
-        
-        #region Stuff that may need to be overridden for atomicity or performance reasons
-
-        #region Methods that loop through parameters and call individual add/remove/update methods on each item
 
         public virtual void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> result)
         {
-            var finalResult = new DictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>>();
-            result = finalResult;
-            
-            foreach (var newItem in newItems)
-            {
-                var newKey = key(newItem);
-                var newValue = value(newItem);
-
-                var added = TryAdd(newKey, () => newValue, out TValue _,out TValue existingValue);
-                finalResult[newKey] = new DictionaryItemAddAttempt<TValue>(added, added ? Maybe<TValue>.Nothing() : existingValue.ToMaybe(), newValue.ToMaybe());
-            }
+            Mutate(newItems.Select(x => DictionaryMutation<TKey, TValue>.CreateUpdate(key(x), _ => value(x))), out var results);
+            result = results
+                .ToDictionaryEx(x => x.Key, x => x.Add.Value);
         }
 
         public virtual void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> result)
         {
-            var finalResult = new DictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>>();
-            result = finalResult;
-            
-            foreach (var newItem in newItems)
-            {
-                var newKey = key(newItem);
-                //var newValue = value(newItem);
-
-                if (TryUpdate(newKey, _ => value(newItem), out var previousValue, out var newValue))
-                {
-                    finalResult[newKey] = new DictionaryItemUpdateAttempt<TValue>(true, previousValue.ToMaybe(), newValue.ToMaybe());
-                }
-                else
-                {
-                    finalResult[newKey] = new DictionaryItemUpdateAttempt<TValue>(false, Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing());
-                }
-            }
+            Mutate(newItems.Select(x => DictionaryMutation<TKey, TValue>.CreateUpdate(key(x), _ => value(x))), out var results);
+            result = results
+                .ToDictionaryEx(x => x.Key, x => x.Update.Value);
         }
 
         public virtual void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> result)
         {
-            var finalResult = new DictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>>();
-            result = finalResult;
-            
-            foreach (var newItem in newItems)
-            {
-                var newKey = key(newItem);
-                var newValue = value(newItem);
-
-                var newResult = AddOrUpdate(newKey, () => newValue, _ => newValue, out var previousValue, out var _);
-                finalResult[newKey] = new DictionaryItemAddOrUpdate<TValue>(newResult, newResult == DictionaryItemAddOrUpdateResult.Update ? previousValue.ToMaybe() : Maybe<TValue>.Nothing(), newValue);
-            }
+            Mutate(newItems.Select(x => DictionaryMutation<TKey, TValue>.CreateUpdate(key(x), _ => value(x))), out var results);
+            result = results
+                .ToDictionaryEx(x => x.Key, x => x.AddOrUpdate.Value);
         }
 
         public virtual void TryRemoveRange(IEnumerable<TKey> keysToRemove,
             out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
         {
-            var result = new DictionaryEx<TKey, TValue>();
-            removedItems = result;
-            
-            foreach (var key in keysToRemove)
-            {
-                if (TryRemove(key, out var removedItem))
-                {
-                    result[key] = removedItem;
-                }
-            }
+            Mutate(keysToRemove.Select(key => DictionaryMutation<TKey, TValue>.CreateTryRemove(key)), out var results);
+            removedItems = results
+                .Where(x => x.Remove.Value.HasValue)
+                .ToDictionaryEx(x => x.Key, x => x.Remove.Value.Value);
         }
 
         #endregion
-        
+
         #region Methods that throw away bulk result objects, and hence could represent opportunities to have a more optimal implementation
         
         public virtual void UpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)

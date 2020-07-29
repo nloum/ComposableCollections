@@ -8,9 +8,10 @@ namespace MoreCollections
     {
         bool TryGetValue(TKey key, out TValue value);
         new TValue this[TKey key] { get; set; }
-
+        void Mutate(IEnumerable<DictionaryMutation<TKey, TValue>> mutations, out IReadOnlyList<DictionaryMutationResult<TKey, TValue>> results);
+        
         #region Add
-         
+        
         bool TryAdd(TKey key, TValue value);
         bool TryAdd(TKey key, Func<TValue> value);
         bool TryAdd(TKey key, Func<TValue> value, out TValue existingValue, out TValue newValue);

@@ -14,6 +14,104 @@ namespace MoreCollections
             _wrapped = wrapped;
         }
 
+        public override void Mutate(IEnumerable<DictionaryMutation<TKey, TValue>> mutations, out IReadOnlyList<DictionaryMutationResult<TKey, TValue>> results)
+        {
+            var finalResults = new List<DictionaryMutationResult<TKey, TValue>>();
+            results = finalResults;
+            
+            foreach (var mutation in mutations)
+            {
+                switch (mutation.Type)
+                {
+                    case DictionaryMutationType.Add:
+                    {
+                        var value = mutation.ValueIfAdding.Value();
+                        _wrapped.Add(mutation.Key, value);
+                        finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateAdd(mutation.Key, true, Maybe<TValue>.Nothing(), value.ToMaybe()));
+                    }
+                    break;
+                    case DictionaryMutationType.TryAdd:
+                    {
+                        if (!_wrapped.TryGetValue(mutation.Key, out var existingValue))
+                        {
+                            var newValue = mutation.ValueIfAdding.Value();
+                            _wrapped.Add(mutation.Key, newValue);
+                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateTryAdd(mutation.Key, true, Maybe<TValue>.Nothing(), newValue.ToMaybe()));
+                        }
+                        else
+                        {
+                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateAdd(mutation.Key, true, existingValue.ToMaybe(), Maybe<TValue>.Nothing()));
+                        }
+                    }
+                    break;
+                    case DictionaryMutationType.Update:
+                    {
+                        if (_wrapped.TryGetValue(mutation.Key, out var previousValue))
+                        {
+                            var newValue = mutation.ValueIfUpdating.Value(previousValue);
+                            _wrapped.Add(mutation.Key, newValue);
+                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, true, previousValue.ToMaybe(), newValue.ToMaybe()));
+                        }
+                        else
+                        {
+                            throw new KeyNotFoundException();
+                        }
+                    }
+                    break;
+                    case DictionaryMutationType.TryUpdate:
+                    {
+                        if (_wrapped.TryGetValue(mutation.Key, out var previousValue))
+                        {
+                            var newValue = mutation.ValueIfUpdating.Value(previousValue);
+                            _wrapped.Add(mutation.Key, newValue);
+                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, true, previousValue.ToMaybe(), newValue.ToMaybe()));
+                        }
+                        else
+                        {
+                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, false, Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing()));
+                        }
+                    }
+                    break;
+                    case DictionaryMutationType.AddOrUpdate:
+                    {
+                        if (_wrapped.TryGetValue(mutation.Key, out var previousValue))
+                        {
+                            var newValue = mutation.ValueIfUpdating.Value(previousValue);
+                            _wrapped.Add(mutation.Key, newValue);
+                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, true, previousValue.ToMaybe(), newValue.ToMaybe()));
+                        }
+                        else
+                        {
+                            var newValue = mutation.ValueIfAdding.Value();
+                            _wrapped[mutation.Key] = newValue;
+                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, false, Maybe<TValue>.Nothing(), newValue.ToMaybe()));
+                        }
+                    }
+                    break;
+                    case DictionaryMutationType.Remove:
+                    {
+                        if (_wrapped.TryGetValue(mutation.Key, out var removedValue))
+                        {
+                            _wrapped.Remove(mutation.Key);
+                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateRemove(mutation.Key, removedValue.ToMaybe()));
+                        }
+                    }
+                    break;
+                    case DictionaryMutationType.TryRemove:
+                    {
+                        if (_wrapped.TryGetValue(mutation.Key, out var removedValue))
+                        {
+                            _wrapped.Remove(mutation.Key);
+                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateRemove(mutation.Key, removedValue.ToMaybe()));
+                        }
+                    }
+                    break;
+                    default:
+                        throw new ArgumentException($"Unknown mutation type: {mutation.Type}");
+                }
+            }
+        }
+        
         public override bool TryAdd(TKey key, Func<TValue> value, out TValue existingValue, out TValue newValue)
         {
             if (_wrapped.TryGetValue(key, out existingValue))
@@ -40,22 +138,8 @@ namespace MoreCollections
             return true;
         }
 
-        public override DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue)
-        {
-            if (_wrapped.TryGetValue(key, out previousValue))
-            {
-                newValue = valueIfUpdating(previousValue);
-                _wrapped[key] = newValue;
-                return DictionaryItemAddOrUpdateResult.Update;
-            }
-            else
-            {
-                newValue = valueIfAdding();
-                _wrapped[key] = newValue;
-                return DictionaryItemAddOrUpdateResult.Add;
-            }
-        }
-
+        
+        
         public override bool TryRemove(TKey key, out TValue removedItem)
         {
             if (_wrapped.TryGetValue(key, out removedItem))

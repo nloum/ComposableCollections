@@ -59,20 +59,85 @@ namespace MoreCollections
             }
         }
 
-        public override DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue)
+        public override void Mutate(IEnumerable<DictionaryMutation<TKey, TValue>> mutations, out IReadOnlyList<DictionaryMutationResult<TKey, TValue>> results)
         {
             lock (Lock)
             {
-                if (TryGetValueInsideLock(key, out previousValue))
+                var finalResults = new List<DictionaryMutationResult<TKey, TValue>>();
+                results = finalResults;
+                foreach (var mutation in mutations)
                 {
-                    newValue = valueIfUpdating(previousValue);
-                    State = State.SetItem(key, newValue);
-                    return DictionaryItemAddOrUpdateResult.Update;
+                    switch (mutation.Type)
+                    {
+                        case DictionaryMutationType.Add:
+                        {
+                            var value = mutation.ValueIfAdding.Value();
+                            State = State.Add(mutation.Key, value);
+                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateAdd(mutation.Key, true, Maybe<TValue>.Nothing(), value.ToMaybe()));
+                        }
+                        break;
+                        case DictionaryMutationType.TryAdd:
+                        {
+                            if (!State.TryGetValue(mutation.Key, out var existingValue))
+                            {
+                                var newValue = mutation.ValueIfAdding.Value();
+                                State = State.Add(mutation.Key, newValue);
+                                finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateTryAdd(mutation.Key, true, Maybe<TValue>.Nothing(), newValue.ToMaybe()));
+                            }
+                            else
+                            {
+                                finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateAdd(mutation.Key, true, existingValue.ToMaybe(), Maybe<TValue>.Nothing()));
+                            }
+                        }
+                        break;
+                        case DictionaryMutationType.Update:
+                        {
+                            if (State.TryGetValue(mutation.Key, out var previousValue))
+                            {
+                                var newValue = mutation.ValueIfUpdating.Value(previousValue);
+                                State = State.Add(mutation.Key, newValue);
+                                finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, true, previousValue.ToMaybe(), newValue.ToMaybe()));
+                            }
+                            else
+                            {
+                                throw new KeyNotFoundException();
+                            }
+                        }
+                        break;
+                        case DictionaryMutationType.TryUpdate:
+                        {
+                            if (State.TryGetValue(mutation.Key, out var previousValue))
+                            {
+                                var newValue = mutation.ValueIfUpdating.Value(previousValue);
+                                State = State.Add(mutation.Key, newValue);
+                                finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, true, previousValue.ToMaybe(), newValue.ToMaybe()));
+                            }
+                            else
+                            {
+                                finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, false, Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing()));
+                            }
+                        }
+                        break;
+                        case DictionaryMutationType.AddOrUpdate:
+                        {
+                            if (State.TryGetValue(mutation.Key, out var previousValue))
+                            {
+                                var newValue = mutation.ValueIfUpdating.Value(previousValue);
+                                State.Add(mutation.Key, newValue);
+                                finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, true, previousValue.ToMaybe(), newValue.ToMaybe()));
+                            }
+                            else
+                            {
+                                var newValue = mutation.ValueIfAdding.Value();
+                                State = State.SetItem(mutation.Key, newValue);
+                                finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, false, Maybe<TValue>.Nothing(), newValue.ToMaybe()));
+                            }
+                        }
+                        break;
+                        default:
+                            throw new ArgumentException($"Unknown mutation type: {mutation.Type}");
+                    }
                 }
-
-                newValue = valueIfAdding();
-                State = State.Add(key, newValue);
-                return DictionaryItemAddOrUpdateResult.Add;
             }
         }
 

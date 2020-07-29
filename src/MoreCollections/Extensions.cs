@@ -10,20 +10,20 @@ namespace MoreCollections
 {
     public static class Extensions
     {
-        public static DelegateDictionaryGetOrDefault<TKey, TValue> WithDefaultValue<TKey, TValue>(
+        public static DictionaryGetOrDefaultDecorator<TKey, TValue> WithDefaultValue<TKey, TValue>(
             this IDictionary<TKey, TValue> dictionary, Func<TKey, TValue> defaultValue, bool persist)
         {
-            return new DelegateDictionaryGetOrDefault<TKey, TValue>(new SystemDelegateDictionaryEx<TKey, TValue>(dictionary), (TKey key, out IMaybe<TValue> maybeResult, out bool persistForThisValue) =>
+            return new DictionaryGetOrDefaultDecorator<TKey, TValue>(new SystemDelegateDictionaryEx<TKey, TValue>(dictionary), (TKey key, out IMaybe<TValue> maybeResult, out bool persistForThisValue) =>
             {
                 maybeResult = defaultValue(key).ToMaybe();
                 persistForThisValue = persist;
             });
         }
         
-        public static DelegateDictionaryGetOrDefault<TKey, TValue> WithDefaultValue<TKey, TValue>(
+        public static DictionaryGetOrDefaultDecorator<TKey, TValue> WithDefaultValue<TKey, TValue>(
             this IDictionary<TKey, TValue> dictionary, GetDefaultValue<TKey, TValue> defaultValue)
         {
-            return new DelegateDictionaryGetOrDefault<TKey, TValue>(new SystemDelegateDictionaryEx<TKey, TValue>(dictionary), defaultValue);
+            return new DictionaryGetOrDefaultDecorator<TKey, TValue>(new SystemDelegateDictionaryEx<TKey, TValue>(dictionary), defaultValue);
         }
         
         public static IReadOnlyList<T> SkipEfficiently<T>(this IReadOnlyList<T> source, int skip)

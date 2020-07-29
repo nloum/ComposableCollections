@@ -15,7 +15,7 @@ namespace MoreCollections
         bool TryAdd(TValue value);
         bool TryAdd(TKey key, Func<TValue> value);
         bool TryAdd(TKey key, Func<TValue> value, out TValue existingValue, out TValue newValue);
-        void TryAddRange(IEnumerable<TValue> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> result);
+        void TryAddRange(IEnumerable<TValue> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> results);
         void TryAddRange(params TValue[] newItems);
         void Add(TValue value);
         void AddRange(IEnumerable<TValue> newItems);

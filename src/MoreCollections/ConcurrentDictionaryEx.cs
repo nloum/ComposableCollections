@@ -147,7 +147,7 @@ namespace MoreCollections
             {
                 if (TryGetValueInsideLock(key, out removedItem))
                 {
-                    State.Remove(key);
+                    State = State.Remove(key);
                     return true;
                 }
             
@@ -159,24 +159,28 @@ namespace MoreCollections
         {
             lock (Lock)
             {
-                var result = new DictionaryEx<TKey, TValue>();
-                removedItems = result;
+                var results = new DictionaryEx<TKey, TValue>();
+                removedItems = results;
             
                 foreach (var key in keysToRemove)
                 {
                     if (!TryGetValue(key, out var previousValue))
                     {
-                        result.Clear();
+                        results.Clear();
                         throw new KeyNotFoundException($"Key not found: {key}");
                     }
 
-                    result[key] = previousValue;
+                    results[key] = previousValue;
                 }
 
-                foreach (var key in result.Keys)
+                var state = State;
+                
+                foreach (var key in results.Keys)
                 {
-                    State.Remove(key);
+                    state = state.Remove(key);
                 }
+
+                State = state;
             }
         }
         
@@ -190,12 +194,12 @@ namespace MoreCollections
             return State.TryGetValue(key, out value);
         }
         
-        public override void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> result)
+        public override void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
             lock (Lock)
             {
                 var finalResult = new DictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>>();
-                result = finalResult;
+                results = finalResult;
             
                 foreach (var newItem in newItems)
                 {
@@ -223,12 +227,12 @@ namespace MoreCollections
             }
         }
 
-        public override void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> result)
+        public override void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
             lock (Lock)
             {
                 var finalResult = new DictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>>();
-                result = finalResult;
+                results = finalResult;
             
                 foreach (var newItem in newItems)
                 {
@@ -252,8 +256,8 @@ namespace MoreCollections
         {
             lock (Lock)
             {
-                var finalResult = new DictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>>();
-                previousValues = finalResult;
+                var finalResults = new DictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>>();
+                previousValues = finalResults;
 
                 var state = State;
                 
@@ -264,19 +268,19 @@ namespace MoreCollections
 
                     var previousValue = state[newKey];
                     state = state.SetItem(newKey, newValue);
-                    finalResult[newKey] = new DictionaryItemUpdateAttempt<TValue>(true, previousValue.ToMaybe(), newValue.ToMaybe());
+                    finalResults[newKey] = new DictionaryItemUpdateAttempt<TValue>(true, previousValue.ToMaybe(), newValue.ToMaybe());
                 }
 
                 State = state;
             }
         }
 
-        public override void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> result)
+        public override void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
         {
             lock (Lock)
             {
-                var finalResult = new DictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>>();
-                result = finalResult;
+                var finalResults = new DictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>>();
+                results = finalResults;
             
                 foreach (var newItem in newItems)
                 {
@@ -286,11 +290,11 @@ namespace MoreCollections
                     if (AddOrUpdate(newKey, () => newValue, _ => newValue, out var previousValue, out var _) ==
                         DictionaryItemAddOrUpdateResult.Update)
                     {
-                        finalResult[newKey] = new DictionaryItemAddOrUpdate<TValue>(DictionaryItemAddOrUpdateResult.Update, previousValue.ToMaybe(), newValue);
+                        finalResults[newKey] = new DictionaryItemAddOrUpdate<TValue>(DictionaryItemAddOrUpdateResult.Update, previousValue.ToMaybe(), newValue);
                     }
                     else
                     {
-                        finalResult[newKey] = new DictionaryItemAddOrUpdate<TValue>(DictionaryItemAddOrUpdateResult.Add, Maybe<TValue>.Nothing(), newValue);
+                        finalResults[newKey] = new DictionaryItemAddOrUpdate<TValue>(DictionaryItemAddOrUpdateResult.Add, Maybe<TValue>.Nothing(), newValue);
                     }
                 }
             }
@@ -301,14 +305,14 @@ namespace MoreCollections
         {
             lock (Lock)
             {
-                var result = new DictionaryEx<TKey, TValue>();
-                removedItems = result;
+                var results = new DictionaryEx<TKey, TValue>();
+                removedItems = results;
             
                 foreach (var key in keysToRemove)
                 {
                     if (TryRemove(key, out var removedItem))
                     {
-                        result[key] = removedItem;
+                        results[key] = removedItem;
                     }
                 }
             }

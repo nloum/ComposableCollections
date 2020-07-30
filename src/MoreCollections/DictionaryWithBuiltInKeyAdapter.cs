@@ -6,11 +6,11 @@ using SimpleMonads;
 
 namespace MoreCollections
 {
-    public abstract class DictionaryWithBuiltInKeyExBase<TKey, TValue> : IDictionaryWithBuiltInKey<TKey, TValue>
+    public abstract class DictionaryWithBuiltInKeyAdapter<TKey, TValue> : IDictionaryWithBuiltInKey<TKey, TValue>
     {
         private readonly IDictionaryEx<TKey, TValue> _wrapped;
 
-        public DictionaryWithBuiltInKeyExBase(IDictionaryEx<TKey, TValue> wrapped)
+        public DictionaryWithBuiltInKeyAdapter(IDictionaryEx<TKey, TValue> wrapped)
         {
             _wrapped = wrapped;
         }

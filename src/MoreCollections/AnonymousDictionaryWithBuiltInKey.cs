@@ -2,7 +2,7 @@ using System;
 
 namespace MoreCollections
 {
-    public class AnonymousDictionaryWithBuiltInKey<TKey, TValue> : DictionaryWithBuiltInKeyExBase<TKey, TValue>, IDictionaryWithBuiltInKey<TKey, TValue>
+    public class AnonymousDictionaryWithBuiltInKey<TKey, TValue> : DictionaryWithBuiltInKeyAdapter<TKey, TValue>, IDictionaryWithBuiltInKey<TKey, TValue>
     {
         private readonly Func<TValue, TKey> _getKey;
 

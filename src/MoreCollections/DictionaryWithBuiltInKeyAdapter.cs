@@ -8,9 +8,18 @@ namespace MoreCollections
 {
     public abstract class DictionaryWithBuiltInKeyAdapter<TKey, TValue> : IDictionaryWithBuiltInKey<TKey, TValue>
     {
-        private readonly IDictionaryEx<TKey, TValue> _wrapped;
+        private IDictionaryEx<TKey, TValue> _wrapped;
 
         public DictionaryWithBuiltInKeyAdapter(IDictionaryEx<TKey, TValue> wrapped)
+        {
+            _wrapped = wrapped;
+        }
+
+        protected DictionaryWithBuiltInKeyAdapter()
+        {
+        }
+
+        protected void Initialize(IDictionaryEx<TKey, TValue> wrapped)
         {
             _wrapped = wrapped;
         }

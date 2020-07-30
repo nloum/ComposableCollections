@@ -6,5 +6,9 @@ namespace MoreCollections
         public DelegateReadOnlyDictionaryWithBuiltInKey(IReadOnlyDictionaryEx<TKey, TValue> wrapped) : base(wrapped)
         {
         }
+        
+        protected DelegateReadOnlyDictionaryWithBuiltInKey()
+        {
+        }
     }
 }

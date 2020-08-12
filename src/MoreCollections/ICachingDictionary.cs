@@ -2,7 +2,8 @@ namespace MoreCollections
 {
     public interface ICachingDictionary<TKey, TValue> : IDictionaryEx<TKey, TValue>
     {
-        IDictionaryEx<TKey, TValue> BypassCache();
+        IReadOnlyDictionaryEx<TKey, TValue> AsBypassCache();
+        IDictionaryEx<TKey, TValue> AsNeverFlush();
         void FlushCache();
     }
 }

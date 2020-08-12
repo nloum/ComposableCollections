@@ -17,9 +17,14 @@ namespace MoreCollections
             _wrapped.AddRange(_flushCacheTo);
         }
 
-        public IDictionaryEx<TKey, TValue> BypassCache()
+        public IReadOnlyDictionaryEx<TKey, TValue> AsBypassCache()
         {
             return _flushCacheTo;
+        }
+
+        public IDictionaryEx<TKey, TValue> AsNeverFlush()
+        {
+            return _wrapped;
         }
 
         public void FlushCache()

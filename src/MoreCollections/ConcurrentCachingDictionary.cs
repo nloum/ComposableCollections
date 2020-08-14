@@ -17,6 +17,24 @@ namespace MoreCollections
             _wrapped.AddRange(_flushCacheTo);
         }
 
+        public IEnumerable<DictionaryMutation<TKey, TValue>> GetMutations(bool clear)
+        {
+            if (!clear)
+            {
+                return _mutations;
+            }
+            else
+            {
+                var mutationsToFlush = ImmutableList<DictionaryMutation<TKey, TValue>>.Empty;
+                lock (_lock)
+                {
+                    mutationsToFlush = _mutations;
+                    _mutations = ImmutableList<DictionaryMutation<TKey, TValue>>.Empty;
+                    return mutationsToFlush;
+                }
+            }
+        }
+        
         public IReadOnlyDictionaryEx<TKey, TValue> AsBypassCache()
         {
             return _flushCacheTo;

@@ -40,7 +40,7 @@ namespace MoreCollections
             return new DictionaryMutation<TKey, TValue>(DictionaryMutationType.TryRemove, key, Maybe<Func<TValue>>.Nothing(), Maybe<Func<TValue, TValue>>.Nothing());
         }
 
-        private DictionaryMutation(DictionaryMutationType type, TKey key, IMaybe<Func<TValue>> valueIfAdding, IMaybe<Func<TValue, TValue>> valueIfUpdating)
+        internal DictionaryMutation(DictionaryMutationType type, TKey key, IMaybe<Func<TValue>> valueIfAdding, IMaybe<Func<TValue, TValue>> valueIfUpdating)
         {
             Type = type;
             Key = key;

@@ -1,23 +1,23 @@
-using System.ComponentModel;
-using System.Linq;
+using System;
 
 namespace MoreCollections
 {
     /// <summary>
     /// Using two abstract Convert methods, converts an IDictionaryEx{TKey, TInnerValue} to an
-    /// IDictionaryEx{TKey, TValue} instance. This will convert objects in the underlying innerValues.
+    /// IDictionaryEx{TKey, TInnerValue} instance. This will convert objects in the underlying innerValues.
     /// This class assumes that innerValues will not change underneath it.
-    /// This class calls the Convert method as rarely as possible.
+    /// This class calls the Convert method only when Convert hasn't been called for that key yet, or it was called
+    /// for that key but the previously converted value has been garbage collected.
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     /// <typeparam name="TInnerValue"></typeparam>
-    public abstract class MapDictionary<TKey, TValue, TInnerValue> : MapDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
+    public abstract class WeakMapDictionaryBase<TKey, TValue, TInnerValue> : MapDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
     {
         private readonly IDictionaryEx<TKey, TInnerValue> _innerValues;
-        private readonly ConcurrentDictionaryEx<TKey, TValue> _alreadyConvertedValues = new ConcurrentDictionaryEx<TKey, TValue>();
+        private readonly ConcurrentDictionaryEx<TKey, WeakReference<TValue>> _alreadyConvertedValues = new ConcurrentDictionaryEx<TKey, WeakReference<TValue>>();
 
-        public MapDictionary(IDictionaryEx<TKey, TInnerValue> innerValues, bool proactivelyConvertAllValues) : base(innerValues)
+        public WeakMapDictionaryBase(IDictionaryEx<TKey, TInnerValue> innerValues, bool proactivelyConvertAllValues) : base(innerValues)
         {
             _innerValues = innerValues;
             if (proactivelyConvertAllValues)
@@ -45,11 +45,14 @@ namespace MoreCollections
         {
             if (_alreadyConvertedValues.TryGetValue(key, out var alreadyConvertedValue))
             {
-                return alreadyConvertedValue;
+                if (alreadyConvertedValue.TryGetTarget(out var result))
+                {
+                    return result;
+                }
             }
 
             var converted = StatelessConvert(key, innerValue);
-            _alreadyConvertedValues[key] = converted;
+            _alreadyConvertedValues[key] = new WeakReference<TValue>(converted);
             return converted;
         }
 

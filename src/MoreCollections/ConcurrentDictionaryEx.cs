@@ -86,7 +86,7 @@ namespace MoreCollections
                             }
                             else
                             {
-                                finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateAdd(mutation.Key, true, existingValue.ToMaybe(), Maybe<TValue>.Nothing()));
+                                finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateAdd(mutation.Key, false, existingValue.ToMaybe(), Maybe<TValue>.Nothing()));
                             }
                             break;
                         }

@@ -4,23 +4,23 @@ namespace MoreCollections
 {
     public class AnonymousWeakMapDictionary<TKey, TValue, TInnerValue> : WeakMapDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
     {
-        private Func<TKey, TValue, TInnerValue> _convert;
-        private Func<TKey, TInnerValue, TValue> _convertBack;
+        private Func<Func<TKey, TValue, TInnerValue>, TKey, TValue, TInnerValue> _convert;
+        private Func<Func<TKey, TInnerValue, TValue>, TKey, TInnerValue, TValue> _convertBack;
         
-        public AnonymousWeakMapDictionary(IDictionaryEx<TKey, TInnerValue> innerValues, Func<TKey, TValue, TInnerValue> convert, Func<TKey, TInnerValue, TValue> convertBack, bool proactivelyConvertAllValues) : base(innerValues, proactivelyConvertAllValues)
+        public AnonymousWeakMapDictionary(IDictionaryEx<TKey, TInnerValue> innerValues, Func<Func<TKey, TValue, TInnerValue>, TKey, TValue, TInnerValue> convert, Func<Func<TKey, TInnerValue, TValue>, TKey, TInnerValue, TValue> convertBack, bool proactivelyConvertAllValues) : base(innerValues, proactivelyConvertAllValues)
         {
             _convert = convert;
             _convertBack = convertBack;
         }
 
-        protected override TInnerValue StatelessConvert(TKey key, TValue value)
+        protected override TInnerValue StatelessConvert(Func<TKey, TValue, TInnerValue> convert, TKey key, TValue value)
         {
-            return _convert(key, value);
+            return _convert(convert, key, value);
         }
 
-        protected override TValue StatelessConvert(TKey key, TInnerValue innerValue)
+        protected override TValue StatelessConvert(Func<TKey, TInnerValue, TValue> convert, TKey key, TInnerValue innerValue)
         {
-            return _convertBack(key, innerValue);
+            return _convertBack(convert, key, innerValue);
         }
     }
 }

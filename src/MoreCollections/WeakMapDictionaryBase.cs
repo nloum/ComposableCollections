@@ -36,10 +36,10 @@ namespace MoreCollections
                 return alreadyConvertedValue;
             }
 
-            return StatelessConvert(key, value);
+            return StatelessConvert(Convert, key, value);
         }
 
-        protected abstract TInnerValue StatelessConvert(TKey key, TValue value);
+        protected abstract TInnerValue StatelessConvert(Func<TKey, TValue, TInnerValue> convert, TKey key, TValue value);
         
         protected override TValue Convert(TKey key, TInnerValue innerValue)
         {
@@ -51,11 +51,11 @@ namespace MoreCollections
                 }
             }
 
-            var converted = StatelessConvert(key, innerValue);
+            var converted = StatelessConvert(Convert, key, innerValue);
             _alreadyConvertedValues[key] = new WeakReference<TValue>(converted);
             return converted;
         }
 
-        protected abstract TValue StatelessConvert(TKey key, TInnerValue innerValue);
+        protected abstract TValue StatelessConvert(Func<TKey, TInnerValue, TValue> convert, TKey key, TInnerValue innerValue);
     }
 }

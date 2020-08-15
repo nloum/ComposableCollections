@@ -10,5 +10,10 @@ namespace MoreCollections
         }
 
         public IMaybe<TValue> RemovedValue { get; }
+
+        public override string ToString()
+        {
+            return RemovedValue.HasValue ? "remove succeeded" : "remove failed";
+        }
     }
 }

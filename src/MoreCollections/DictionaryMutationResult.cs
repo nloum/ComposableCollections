@@ -79,5 +79,10 @@ namespace MoreCollections
 
         public IMaybe<IDictionaryItemUpdateAttempt<TValue>> Update => _either.Item3;
         public IMaybe<IMaybe<TValue>> Remove => _either.Item4;
+
+        public override string ToString()
+        {
+            return $"{Key} {base.ToString()}";
+        }
     }
 }

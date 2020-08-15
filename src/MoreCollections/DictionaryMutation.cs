@@ -52,5 +52,13 @@ namespace MoreCollections
         public TKey Key { get; }
         public IMaybe<Func<TValue>> ValueIfAdding { get; }
         public IMaybe<Func<TValue, TValue>> ValueIfUpdating { get; }
+
+        public override string ToString()
+        {
+            var withWithoutValueIfAdding = ValueIfAdding.HasValue ? "with" : "without";
+            var withWithoutValueIfUpdating = ValueIfUpdating.HasValue ? "with" : "without";
+            return
+                $"{Type} {Key} {withWithoutValueIfAdding} ValueIfAdding and {withWithoutValueIfUpdating} ValueIfUpdating";
+        }
     }
 }

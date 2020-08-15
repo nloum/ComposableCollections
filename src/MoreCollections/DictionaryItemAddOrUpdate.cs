@@ -14,5 +14,11 @@ namespace MoreCollections
         public DictionaryItemAddOrUpdateResult Result { get; }
         public IMaybe<TValue> ExistingValue { get; }
         public TValue NewValue { get; }
+
+        public override string ToString()
+        {
+            var result = Result == DictionaryItemAddOrUpdateResult.Add ? "added the value" : "updated the value";
+            return result;
+        }
     }
 }

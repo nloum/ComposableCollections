@@ -14,5 +14,10 @@ namespace MoreCollections
         public bool Added { get; }
         public IMaybe<TValue> ExistingValue { get; }
         public IMaybe<TValue> NewValue { get; }
+
+        public override string ToString()
+        {
+            return Added ? "add succeeded" : "add failed";
+        }
     }
 }

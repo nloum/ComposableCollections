@@ -74,8 +74,8 @@ namespace MoreCollections
                             var value = mutation.ValueIfAdding.Value();
                             State = State.Add(mutation.Key, value);
                             finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateAdd(mutation.Key, true, Maybe<TValue>.Nothing(), value.ToMaybe()));
+                            break;
                         }
-                        break;
                         case DictionaryMutationType.TryAdd:
                         {
                             if (!State.TryGetValue(mutation.Key, out var existingValue))
@@ -88,8 +88,8 @@ namespace MoreCollections
                             {
                                 finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateAdd(mutation.Key, true, existingValue.ToMaybe(), Maybe<TValue>.Nothing()));
                             }
+                            break;
                         }
-                        break;
                         case DictionaryMutationType.Update:
                         {
                             if (State.TryGetValue(mutation.Key, out var previousValue))
@@ -102,8 +102,8 @@ namespace MoreCollections
                             {
                                 throw new KeyNotFoundException();
                             }
+                            break;
                         }
-                        break;
                         case DictionaryMutationType.TryUpdate:
                         {
                             if (State.TryGetValue(mutation.Key, out var previousValue))
@@ -116,8 +116,8 @@ namespace MoreCollections
                             {
                                 finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, false, Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing()));
                             }
+                            break;
                         }
-                        break;
                         case DictionaryMutationType.AddOrUpdate:
                         {
                             if (State.TryGetValue(mutation.Key, out var previousValue))
@@ -132,8 +132,34 @@ namespace MoreCollections
                                 State = State.SetItem(mutation.Key, newValue);
                                 finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, false, Maybe<TValue>.Nothing(), newValue.ToMaybe()));
                             }
+                            break;
                         }
-                        break;
+                        case DictionaryMutationType.Remove:
+                        {
+                            if (State.TryGetValue(mutation.Key, out var previousValue))
+                            {
+                                State.Remove(mutation.Key);
+                                finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateRemove(mutation.Key, previousValue.ToMaybe()));
+                            }
+                            else
+                            {
+                                throw new KeyNotFoundException();
+                            }
+                            break;
+                        }
+                        case DictionaryMutationType.TryRemove:
+                        {
+                            if (State.TryGetValue(mutation.Key, out var previousValue))
+                            {
+                                State.Remove(mutation.Key);
+                                finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateRemove(mutation.Key, previousValue.ToMaybe()));
+                            }
+                            else
+                            {
+                                finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateRemove(mutation.Key, Maybe<TValue>.Nothing()));
+                            }
+                            break;
+                        }
                         default:
                             throw new ArgumentException($"Unknown mutation type: {mutation.Type}");
                     }

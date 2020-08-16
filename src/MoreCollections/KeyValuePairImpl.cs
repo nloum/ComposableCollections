@@ -7,7 +7,7 @@ using GenericNumbers.Relational;
 
 namespace MoreCollections
 {
-    internal class KeyValuePairImpl<TKey, TValue> : IKeyValuePair<TKey, TValue>, IComparable<IKeyValuePair<TKey, TValue>>
+    public class KeyValuePairImpl<TKey, TValue> : IKeyValuePair<TKey, TValue>, IComparable<IKeyValuePair<TKey, TValue>>
     {
         public TKey Key { get; }
 

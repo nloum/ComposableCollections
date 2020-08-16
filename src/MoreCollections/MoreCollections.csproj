@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="GenericNumbers" Version="1.1.0-alpha0031" />
     <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
+    <PackageReference Include="System.Reactive" Version="4.4.1" />
   </ItemGroup>
 
 </Project>

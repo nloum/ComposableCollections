@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MoreCollections
 {
@@ -12,7 +14,7 @@ namespace MoreCollections
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     /// <typeparam name="TInnerValue"></typeparam>
-    public abstract class WeakMapDictionaryBase<TKey, TValue, TInnerValue> : MapDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
+    public abstract class WeakMapDictionaryBase<TKey, TValue, TInnerValue> : MapEnumerableDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
     {
         private readonly IDictionaryEx<TKey, TInnerValue> _innerValues;
         private readonly ConcurrentDictionaryEx<TKey, WeakReference<TValue>> _alreadyConvertedValues = new ConcurrentDictionaryEx<TKey, WeakReference<TValue>>();
@@ -22,40 +24,45 @@ namespace MoreCollections
             _innerValues = innerValues;
             if (proactivelyConvertAllValues)
             {
-                foreach (var innerValue in _innerValues)
-                {
-                    Convert(innerValue.Key, innerValue.Value);
-                }
+                Convert(_innerValues).ToList();
             }
         }
 
-        protected override TInnerValue Convert(TKey key, TValue value)
+        protected override IEnumerable<IKeyValuePair<TKey, TInnerValue>> Convert(IEnumerable<IKeyValuePair<TKey, TValue>> values)
         {
-            if (_innerValues.TryGetValue(key, out var alreadyConvertedValue))
+            foreach (var value in values)
             {
-                return alreadyConvertedValue;
-            }
+                if (_innerValues.TryGetValue(value.Key, out var alreadyConvertedValue))
+                {
+                    yield return Utility.KeyValuePair(value.Key, alreadyConvertedValue);
+                }
 
-            return StatelessConvert(Convert, key, value);
+                yield return Utility.KeyValuePair(value.Key, StatelessConvert(value.Key, value.Value));
+            }
         }
 
-        protected abstract TInnerValue StatelessConvert(Func<TKey, TValue, TInnerValue> convert, TKey key, TValue value);
+        protected abstract TInnerValue StatelessConvert(TKey key, TValue value);
         
-        protected override TValue Convert(TKey key, TInnerValue innerValue)
+        protected override IEnumerable<IKeyValuePair<TKey, TValue>> Convert(IEnumerable<IKeyValuePair<TKey, TInnerValue>> values)
         {
-            if (_alreadyConvertedValues.TryGetValue(key, out var alreadyConvertedValue))
+            foreach (var kvp in values)
             {
-                if (alreadyConvertedValue.TryGetTarget(out var result))
+                var innerValue = kvp.Value;
+                var key = kvp.Key;
+                if (_alreadyConvertedValues.TryGetValue(key, out var alreadyConvertedValue))
                 {
-                    return result;
+                    if (alreadyConvertedValue.TryGetTarget(out var result))
+                    {
+                        yield return Utility.KeyValuePair(key, result);
+                    }
                 }
-            }
 
-            var converted = StatelessConvert(Convert, key, innerValue);
-            _alreadyConvertedValues[key] = new WeakReference<TValue>(converted);
-            return converted;
+                var converted = StatelessConvert(key, innerValue);
+                _alreadyConvertedValues[key] = new WeakReference<TValue>(converted);
+                yield return Utility.KeyValuePair(key, converted);
+            }
         }
 
-        protected abstract TValue StatelessConvert(Func<TKey, TInnerValue, TValue> convert, TKey key, TInnerValue innerValue);
+        protected abstract TValue StatelessConvert(TKey key, TInnerValue innerValue);
     }
 }

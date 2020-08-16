@@ -4,4 +4,13 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="GenericNumbers" Version="1.1.0-alpha0031" />
+    <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0040" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="List\" />
+  </ItemGroup>
+
 </Project>

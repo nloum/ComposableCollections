@@ -40,7 +40,7 @@ namespace ComposableCollections.Dictionary
             return new DictionaryMutation<TKey, TValue>(DictionaryMutationType.TryRemove, key, Maybe<Func<TValue>>.Nothing(), Maybe<Func<TValue, TValue>>.Nothing());
         }
 
-        internal DictionaryMutation(DictionaryMutationType type, TKey key, IMaybe<Func<TValue>> valueIfAdding, IMaybe<Func<TValue, TValue>> valueIfUpdating)
+        public DictionaryMutation(DictionaryMutationType type, TKey key, IMaybe<Func<TValue>> valueIfAdding, IMaybe<Func<TValue, TValue>> valueIfUpdating)
         {
             Type = type;
             Key = key;

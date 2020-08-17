@@ -5,7 +5,7 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
 {
-    public class DictionaryEx<TKey, TValue> : DictionaryBaseEx<TKey, TValue>
+    public class ComposableDictionary<TKey, TValue> : ComposableDictionaryBase<TKey, TValue>
     {
         protected readonly Dictionary<TKey, TValue> State = new Dictionary<TKey, TValue>();
 
@@ -14,9 +14,9 @@ namespace ComposableCollections.Dictionary
             return State.TryGetValue(key, out value);
         }
 
-        public override IEnumerator<IKeyValuePair<TKey, TValue>> GetEnumerator()
+        public override IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
-            return State.Select(kvp => Utility.KeyValuePair(kvp.Key, kvp.Value)).GetEnumerator();
+            return State.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value)).GetEnumerator();
         }
 
         public override int Count => State.Count;
@@ -173,7 +173,7 @@ namespace ComposableCollections.Dictionary
 
         public override void RemoveRange(IEnumerable<TKey> keysToRemove, out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
         {
-            var results = new DictionaryEx<TKey, TValue>();
+            var results = new ComposableDictionary<TKey, TValue>();
             removedItems = results;
             
             foreach (var key in keysToRemove)

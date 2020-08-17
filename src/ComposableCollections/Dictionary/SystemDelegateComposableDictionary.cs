@@ -5,11 +5,11 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
 {
-    public class SystemDelegateDictionaryEx<TKey, TValue> : DictionaryBaseEx<TKey, TValue>
+    public class SystemDelegateComposableDictionary<TKey, TValue> : ComposableDictionaryBase<TKey, TValue>
     {
         private readonly IDictionary<TKey, TValue> _wrapped;
 
-        public SystemDelegateDictionaryEx(IDictionary<TKey, TValue> wrapped)
+        public SystemDelegateComposableDictionary(IDictionary<TKey, TValue> wrapped)
         {
             _wrapped = wrapped;
         }
@@ -153,7 +153,7 @@ namespace ComposableCollections.Dictionary
 
         public override void RemoveRange(IEnumerable<TKey> keysToRemove, out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
         {
-            var results = new DictionaryEx<TKey, TValue>();
+            var results = new ComposableDictionary<TKey, TValue>();
             removedItems = results;
             
             foreach (var key in keysToRemove)
@@ -173,9 +173,9 @@ namespace ComposableCollections.Dictionary
             }
         }
 
-        public override IEnumerator<IKeyValuePair<TKey, TValue>> GetEnumerator()
+        public override IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
-            return _wrapped.Select(kvp => Utility.KeyValuePair<TKey, TValue>(kvp.Key, kvp.Value)).GetEnumerator();
+            return _wrapped.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value)).GetEnumerator();
         }
 
         public override int Count => _wrapped.Count;
@@ -229,12 +229,12 @@ namespace ComposableCollections.Dictionary
             }
         }
 
-        public override void RemoveWhere(Func<IKeyValuePair<TKey, TValue>, bool> predicate)
+        public override void RemoveWhere(Func<IKeyValue<TKey, TValue>, bool> predicate)
         {
             var keysToRemove = new List<TKey>();
             foreach (var kvp in _wrapped)
             {
-                if (predicate(Utility.KeyValuePair(kvp.Key, kvp.Value)))
+                if (predicate(new KeyValue<TKey, TValue>(kvp.Key, kvp.Value)))
                 {
                     keysToRemove.Add(kvp.Key);
                 }

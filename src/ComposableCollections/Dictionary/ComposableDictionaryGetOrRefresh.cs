@@ -4,11 +4,11 @@ namespace ComposableCollections.Dictionary
 {
     public delegate void RefreshValue<TKey, TValue>(TKey key, TValue previousValue, out IMaybe<TValue> maybeValue, out bool persist);
     
-    public class DictionaryGetOrRefresh<TKey, TValue> : DictionaryEx<TKey, TValue>
+    public class ComposableDictionaryGetOrRefresh<TKey, TValue> : ComposableDictionary<TKey, TValue>
     {
         private readonly RefreshValue<TKey, TValue> _refreshValue;
 
-        public DictionaryGetOrRefresh(RefreshValue<TKey, TValue> refreshValue)
+        public ComposableDictionaryGetOrRefresh(RefreshValue<TKey, TValue> refreshValue)
         {
             _refreshValue = refreshValue;
         }

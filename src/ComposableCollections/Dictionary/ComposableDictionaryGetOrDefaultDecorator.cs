@@ -5,22 +5,22 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
 {
-    public class DictionaryGetOrDefaultDecorator<TKey, TValue> : IDictionaryEx<TKey, TValue>
+    public class ComposableDictionaryGetOrDefaultDecorator<TKey, TValue> : IComposableDictionary<TKey, TValue>
     {
-        private IDictionaryEx<TKey, TValue> _wrapped;
+        private IComposableDictionary<TKey, TValue> _wrapped;
         private GetDefaultValue<TKey, TValue> _getDefaultValue;
 
-        public DictionaryGetOrDefaultDecorator(IDictionaryEx<TKey, TValue> wrapped, GetDefaultValue<TKey, TValue> getDefaultValue)
+        public ComposableDictionaryGetOrDefaultDecorator(IComposableDictionary<TKey, TValue> wrapped, GetDefaultValue<TKey, TValue> getDefaultValue)
         {
             _wrapped = wrapped;
             _getDefaultValue = getDefaultValue;
         }
 
-        protected DictionaryGetOrDefaultDecorator()
+        protected ComposableDictionaryGetOrDefaultDecorator()
         {
         }
 
-        protected void Initialize(IDictionaryEx<TKey, TValue> wrapped, GetDefaultValue<TKey, TValue> getDefaultValue)
+        protected void Initialize(IComposableDictionary<TKey, TValue> wrapped, GetDefaultValue<TKey, TValue> getDefaultValue)
         {
             _wrapped = wrapped;
             _getDefaultValue = getDefaultValue;
@@ -86,7 +86,7 @@ namespace ComposableCollections.Dictionary
         }
 
 
-        public IEnumerator<IKeyValuePair<TKey, TValue>> GetEnumerator()
+        public IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
             return _wrapped.GetEnumerator();
         }
@@ -119,7 +119,7 @@ namespace ComposableCollections.Dictionary
             return _wrapped.TryAdd(key, value, out existingValue, out newValue);
         }
 
-        public void TryAddRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> results)
+        public void TryAddRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
             _wrapped.TryAddRange(newItems, out results);
         }
@@ -134,7 +134,7 @@ namespace ComposableCollections.Dictionary
             _wrapped.TryAddRange(newItems, key, value, out results);
         }
 
-        public void TryAddRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
+        public void TryAddRange(IEnumerable<IKeyValue<TKey, TValue>> newItems)
         {
             _wrapped.TryAddRange(newItems);
         }
@@ -149,7 +149,7 @@ namespace ComposableCollections.Dictionary
             _wrapped.TryAddRange(newItems, key, value);
         }
 
-        public void TryAddRange(params IKeyValuePair<TKey, TValue>[] newItems)
+        public void TryAddRange(params IKeyValue<TKey, TValue>[] newItems)
         {
             _wrapped.TryAddRange(newItems);
         }
@@ -164,7 +164,7 @@ namespace ComposableCollections.Dictionary
             _wrapped.Add(key, value);
         }
 
-        public void AddRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
+        public void AddRange(IEnumerable<IKeyValue<TKey, TValue>> newItems)
         {
             _wrapped.AddRange(newItems);
         }
@@ -179,7 +179,7 @@ namespace ComposableCollections.Dictionary
             _wrapped.AddRange(newItems, key, value);
         }
 
-        public void AddRange(params IKeyValuePair<TKey, TValue>[] newItems)
+        public void AddRange(params IKeyValue<TKey, TValue>[] newItems)
         {
             _wrapped.AddRange(newItems);
         }
@@ -204,7 +204,7 @@ namespace ComposableCollections.Dictionary
             return _wrapped.TryUpdate(key, value, out previousValue, out newValue);
         }
 
-        public void TryUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
+        public void TryUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems)
         {
             _wrapped.TryUpdateRange(newItems);
         }
@@ -219,7 +219,7 @@ namespace ComposableCollections.Dictionary
             _wrapped.TryUpdateRange(newItems, key, value);
         }
 
-        public void TryUpdateRange(params IKeyValuePair<TKey, TValue>[] newItems)
+        public void TryUpdateRange(params IKeyValue<TKey, TValue>[] newItems)
         {
             _wrapped.TryUpdateRange(newItems);
         }
@@ -229,7 +229,7 @@ namespace ComposableCollections.Dictionary
             _wrapped.TryUpdateRange(newItems);
         }
 
-        public void TryUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
+        public void TryUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
             _wrapped.TryUpdateRange(newItems, out results);
         }
@@ -249,7 +249,7 @@ namespace ComposableCollections.Dictionary
             _wrapped.Update(key, value);
         }
 
-        public void UpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
+        public void UpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems)
         {
             _wrapped.UpdateRange(newItems);
         }
@@ -269,7 +269,7 @@ namespace ComposableCollections.Dictionary
             _wrapped.Update(key, value, out previousValue);
         }
 
-        public void UpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
+        public void UpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
             _wrapped.UpdateRange(newItems, out results);
         }
@@ -284,7 +284,7 @@ namespace ComposableCollections.Dictionary
             _wrapped.UpdateRange(newItems, key, value, out results);
         }
 
-        public void UpdateRange(params IKeyValuePair<TKey, TValue>[] newItems)
+        public void UpdateRange(params IKeyValue<TKey, TValue>[] newItems)
         {
             _wrapped.UpdateRange(newItems);
         }
@@ -310,7 +310,7 @@ namespace ComposableCollections.Dictionary
             return _wrapped.AddOrUpdate(key, valueIfAdding, valueIfUpdating, out previousValue, out newValue);
         }
 
-        public void AddOrUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
+        public void AddOrUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
         {
             _wrapped.AddOrUpdateRange(newItems, out results);
         }
@@ -325,7 +325,7 @@ namespace ComposableCollections.Dictionary
             _wrapped.AddOrUpdateRange(newItems, key, value, out results);
         }
 
-        public void AddOrUpdateRange(IEnumerable<IKeyValuePair<TKey, TValue>> newItems)
+        public void AddOrUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems)
         {
             _wrapped.AddOrUpdateRange(newItems);
         }
@@ -340,7 +340,7 @@ namespace ComposableCollections.Dictionary
             _wrapped.AddOrUpdateRange(newItems, key, value);
         }
 
-        public void AddOrUpdateRange(params IKeyValuePair<TKey, TValue>[] newItems)
+        public void AddOrUpdateRange(params IKeyValue<TKey, TValue>[] newItems)
         {
             _wrapped.AddOrUpdateRange(newItems);
         }
@@ -365,7 +365,7 @@ namespace ComposableCollections.Dictionary
             _wrapped.RemoveWhere(predicate);
         }
 
-        public void RemoveWhere(Func<IKeyValuePair<TKey, TValue>, bool> predicate)
+        public void RemoveWhere(Func<IKeyValue<TKey, TValue>, bool> predicate)
         {
             _wrapped.RemoveWhere(predicate);
         }
@@ -400,7 +400,7 @@ namespace ComposableCollections.Dictionary
             _wrapped.RemoveWhere(predicate, out removedItems);
         }
 
-        public void RemoveWhere(Func<IKeyValuePair<TKey, TValue>, bool> predicate, out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+        public void RemoveWhere(Func<IKeyValue<TKey, TValue>, bool> predicate, out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
         {
             _wrapped.RemoveWhere(predicate, out removedItems);
         }

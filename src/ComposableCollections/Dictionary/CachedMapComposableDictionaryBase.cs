@@ -11,12 +11,12 @@ namespace ComposableCollections.Dictionary
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     /// <typeparam name="TInnerValue"></typeparam>
-    public abstract class CachedMapDictionaryBase<TKey, TValue, TInnerValue> : MapDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
+    public abstract class CachedMapComposableDictionaryBase<TKey, TValue, TInnerValue> : MapComposableDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
     {
-        private readonly IDictionaryEx<TKey, TInnerValue> _innerValues;
-        private readonly ConcurrentDictionaryEx<TKey, TValue> _alreadyConvertedValues = new ConcurrentDictionaryEx<TKey, TValue>();
+        private readonly IComposableDictionary<TKey, TInnerValue> _innerValues;
+        private readonly ConcurrentComposableDictionary<TKey, TValue> _alreadyConvertedValues = new ConcurrentComposableDictionary<TKey, TValue>();
 
-        public CachedMapDictionaryBase(IDictionaryEx<TKey, TInnerValue> innerValues, bool proactivelyConvertAllValues) : base(innerValues)
+        public CachedMapComposableDictionaryBase(IComposableDictionary<TKey, TInnerValue> innerValues, bool proactivelyConvertAllValues) : base(innerValues)
         {
             _innerValues = innerValues;
             if (proactivelyConvertAllValues)

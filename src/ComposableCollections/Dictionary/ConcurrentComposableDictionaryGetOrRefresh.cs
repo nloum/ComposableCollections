@@ -1,10 +1,10 @@
 namespace ComposableCollections.Dictionary
 {
-    public class ConcurrentDictionaryGetOrRefresh<TKey, TValue> : ConcurrentDictionaryEx<TKey, TValue>
+    public class ConcurrentComposableDictionaryGetOrRefresh<TKey, TValue> : ConcurrentComposableDictionary<TKey, TValue>
     {
         private readonly RefreshValue<TKey, TValue> _refreshValue;
 
-        public ConcurrentDictionaryGetOrRefresh(RefreshValue<TKey, TValue> refreshValue)
+        public ConcurrentComposableDictionaryGetOrRefresh(RefreshValue<TKey, TValue> refreshValue)
         {
             _refreshValue = refreshValue;
         }

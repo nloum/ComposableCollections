@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace ComposableCollections.Dictionary
 {
-    public class SystemDelegateReadOnlyDictionaryEx<TKey, TValue> : ReadOnlyDictionaryBaseEx<TKey, TValue>
+    public class SystemDelegateReadOnlyDictionaryEx<TKey, TValue> : ReadOnlyComposableDictionaryBase<TKey, TValue>
     {
         private IReadOnlyDictionary<TKey, TValue> _wrapped;
 
@@ -17,9 +17,9 @@ namespace ComposableCollections.Dictionary
             return _wrapped.TryGetValue(key, out value);
         }
 
-        public override IEnumerator<IKeyValuePair<TKey, TValue>> GetEnumerator()
+        public override IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
-            return _wrapped.Select(kvp => Utility.KeyValuePair(kvp.Key, kvp.Value)).GetEnumerator();
+            return _wrapped.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value)).GetEnumerator();
         }
 
         public override int Count => _wrapped.Count;

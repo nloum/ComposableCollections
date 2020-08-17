@@ -28,7 +28,7 @@ namespace ComposableCollections.Dictionary
             return GetEnumerator();
         }
 
-        public IEnumerator<IKeyValuePair<TKey, TValue>> GetEnumerator()
+        public IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
             return _wrapped.GetEnumerator();
         }
@@ -203,7 +203,7 @@ namespace ComposableCollections.Dictionary
             _wrapped.RemoveWhere(predicate);
         }
 
-        public void RemoveWhere(Func<IKeyValuePair<TKey, TValue>, bool> predicate)
+        public void RemoveWhere(Func<IKeyValue<TKey, TValue>, bool> predicate)
         {
             _wrapped.RemoveWhere(predicate);
         }
@@ -238,7 +238,7 @@ namespace ComposableCollections.Dictionary
             _wrapped.RemoveWhere(predicate, out removedItems);
         }
 
-        public void RemoveWhere(Func<IKeyValuePair<TKey, TValue>, bool> predicate, out IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> removedItems)
+        public void RemoveWhere(Func<IKeyValue<TKey, TValue>, bool> predicate, out IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> removedItems)
         {
             _wrapped.RemoveWhere(predicate, out removedItems);
         }

@@ -8,9 +8,9 @@ namespace ComposableCollections.Dictionary
 {
     public abstract class DictionaryWithBuiltInKeyAdapter<TKey, TValue> : IDictionaryWithBuiltInKey<TKey, TValue>
     {
-        private IDictionaryEx<TKey, TValue> _wrapped;
+        private IComposableDictionary<TKey, TValue> _wrapped;
 
-        public DictionaryWithBuiltInKeyAdapter(IDictionaryEx<TKey, TValue> wrapped)
+        public DictionaryWithBuiltInKeyAdapter(IComposableDictionary<TKey, TValue> wrapped)
         {
             _wrapped = wrapped;
         }
@@ -19,7 +19,7 @@ namespace ComposableCollections.Dictionary
         {
         }
 
-        protected void Initialize(IDictionaryEx<TKey, TValue> wrapped)
+        protected void Initialize(IComposableDictionary<TKey, TValue> wrapped)
         {
             _wrapped = wrapped;
         }
@@ -31,7 +31,7 @@ namespace ComposableCollections.Dictionary
             return GetEnumerator();
         }
 
-        public IEnumerator<IKeyValuePair<TKey, TValue>> GetEnumerator()
+        public IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
             return _wrapped.GetEnumerator();
         }
@@ -201,7 +201,7 @@ namespace ComposableCollections.Dictionary
             _wrapped.RemoveWhere(predicate);
         }
 
-        public void RemoveWhere(Func<IKeyValuePair<TKey, TValue>, bool> predicate)
+        public void RemoveWhere(Func<IKeyValue<TKey, TValue>, bool> predicate)
         {
             _wrapped.RemoveWhere(predicate);
         }
@@ -239,7 +239,7 @@ namespace ComposableCollections.Dictionary
             removedItems = new DelegateReadOnlyDictionaryWithBuiltInKey<TKey, TValue>(innerRemovedItems);
         }
 
-        public void RemoveWhere(Func<IKeyValuePair<TKey, TValue>, bool> predicate, out IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> removedItems)
+        public void RemoveWhere(Func<IKeyValue<TKey, TValue>, bool> predicate, out IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> removedItems)
         {
             _wrapped.RemoveWhere(predicate, out var innerRemovedItems);
             removedItems = new DelegateReadOnlyDictionaryWithBuiltInKey<TKey, TValue>(innerRemovedItems);

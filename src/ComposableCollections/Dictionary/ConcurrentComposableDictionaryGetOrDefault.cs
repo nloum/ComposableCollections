@@ -1,10 +1,10 @@
 namespace ComposableCollections.Dictionary
 {
-    public class ConcurrentDictionaryGetOrDefault<TKey, TValue> : ConcurrentDictionaryEx<TKey, TValue>
+    public class ConcurrentComposableDictionaryGetOrDefault<TKey, TValue> : ConcurrentComposableDictionary<TKey, TValue>
     {
         private readonly GetDefaultValue<TKey, TValue> _getDefaultValue;
 
-        public ConcurrentDictionaryGetOrDefault(GetDefaultValue<TKey, TValue> getDefaultValue)
+        public ConcurrentComposableDictionaryGetOrDefault(GetDefaultValue<TKey, TValue> getDefaultValue)
         {
             _getDefaultValue = getDefaultValue;
         }

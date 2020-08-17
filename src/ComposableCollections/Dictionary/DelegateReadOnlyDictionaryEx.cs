@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace ComposableCollections.Dictionary
 {
-    public class DelegateReadOnlyDictionaryEx<TKey, TValue> : ReadOnlyDictionaryBaseEx<TKey, TValue>
+    public class DelegateReadOnlyDictionaryEx<TKey, TValue> : ReadOnlyComposableDictionaryBase<TKey, TValue>
     {
         private IReadOnlyDictionaryEx<TKey, TValue> _wrapped;
 
@@ -33,13 +33,13 @@ namespace ComposableCollections.Dictionary
             return result.HasValue;
         }
 
-        public override IEnumerator<IKeyValuePair<TKey, TValue>> GetEnumerator()
+        public override IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
             if (_wrapped == null)
             {
                 throw new InvalidOperationException("Must called SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
             }
-            return _wrapped.Select(kvp => Utility.KeyValuePair<TKey, TValue>(kvp.Key, kvp.Value)).GetEnumerator();
+            return _wrapped.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value)).GetEnumerator();
         }
 
         public override int Count

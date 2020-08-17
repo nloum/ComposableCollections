@@ -13,11 +13,11 @@ namespace ComposableCollections.Dictionary
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     /// <typeparam name="TInnerValue"></typeparam>
-    public abstract class MapDictionaryBase<TKey, TValue, TInnerValue> : DictionaryBaseEx<TKey, TValue> where TValue : class
+    public abstract class MapComposableDictionaryBase<TKey, TValue, TInnerValue> : ComposableDictionaryBase<TKey, TValue> where TValue : class
     {
-        private readonly IDictionaryEx<TKey, TInnerValue> _innerValues;
+        private readonly IComposableDictionary<TKey, TInnerValue> _innerValues;
 
-        protected MapDictionaryBase(IDictionaryEx<TKey, TInnerValue> innerValues)
+        protected MapComposableDictionaryBase(IComposableDictionary<TKey, TInnerValue> innerValues)
         {
             _innerValues = innerValues;
         }
@@ -44,9 +44,9 @@ namespace ComposableCollections.Dictionary
             return true;
         }
 
-        public override IEnumerator<IKeyValuePair<TKey, TValue>> GetEnumerator()
+        public override IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
-            return _innerValues.Select(kvp => Utility.KeyValuePair<TKey, TValue>(kvp.Key, Convert(kvp.Key, kvp.Value))).GetEnumerator();
+            return _innerValues.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, Convert(kvp.Key, kvp.Value))).GetEnumerator();
         }
 
         public override int Count => _innerValues.Count;

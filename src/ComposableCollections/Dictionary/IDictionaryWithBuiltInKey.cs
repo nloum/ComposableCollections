@@ -55,14 +55,14 @@ namespace ComposableCollections.Dictionary
         void TryRemoveRange(IEnumerable<TKey> keysToRemove);
         void RemoveRange(IEnumerable<TKey> keysToRemove);
         void RemoveWhere(Func<TKey, TValue, bool> predicate);
-        void RemoveWhere(Func<IKeyValuePair<TKey, TValue>, bool> predicate);
+        void RemoveWhere(Func<IKeyValue<TKey, TValue>, bool> predicate);
         void Clear();
         bool TryRemove(TKey key);
         void Remove(TKey key);
         void TryRemoveRange(IEnumerable<TKey> keysToRemove, out IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> removedItems);
         void RemoveRange(IEnumerable<TKey> keysToRemove, out IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> removedItems);
         void RemoveWhere(Func<TKey, TValue, bool> predicate, out IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> removedItems);
-        void RemoveWhere(Func<IKeyValuePair<TKey, TValue>, bool> predicate, out IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> removedItems);
+        void RemoveWhere(Func<IKeyValue<TKey, TValue>, bool> predicate, out IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> removedItems);
         void Clear(out IReadOnlyDictionaryEx<TKey, TValue> removedItems);
         bool TryRemove(TKey key, out TValue removedItem);
         void Remove(TKey key, out TValue removedItem);

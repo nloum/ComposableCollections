@@ -6,7 +6,7 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
 {
-    public class ConcurrentWeakDictionaryEx<TKey, TValue> : DictionaryBaseEx<TKey, TValue> where TValue : class
+    public class ConcurrentWeakComposableDictionary<TKey, TValue> : ComposableDictionaryBase<TKey, TValue> where TValue : class
     {
         protected readonly object Lock = new object();
         protected ImmutableDictionary<TKey, WeakReference<TValue>> State = ImmutableDictionary<TKey, WeakReference<TValue>>.Empty;
@@ -28,18 +28,18 @@ namespace ComposableCollections.Dictionary
             }
         }
 
-        private IEnumerable<IKeyValuePair<TKey, TValue>> AsEnumerable()
+        private IEnumerable<IKeyValue<TKey, TValue>> AsEnumerable()
         {
             foreach (var item in State)
             {
                 if (item.Value.TryGetTarget(out var value))
                 {
-                    yield return Utility.KeyValuePair(item.Key, value);
+                    yield return new KeyValue<TKey, TValue>(item.Key, value);
                 }
             }
         }
 
-        public override IEnumerator<IKeyValuePair<TKey, TValue>> GetEnumerator()
+        public override IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
             return AsEnumerable().GetEnumerator();
         }

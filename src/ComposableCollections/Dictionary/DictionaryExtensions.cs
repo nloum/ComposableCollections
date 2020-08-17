@@ -5,54 +5,54 @@ namespace ComposableCollections.Dictionary
 {
     public static class DictionaryExtensions
     {
-        public static IDictionaryEx<TKey, TValue> ToDictionaryEx<TKey, TValue>(
+        public static IComposableDictionary<TKey, TValue> CopyToComposableDictionary<TKey, TValue>(
             this IEnumerable<KeyValuePair<TKey, TValue>> source)
         {
-            var results = new DictionaryEx<TKey, TValue>();
+            var results = new ComposableDictionary<TKey, TValue>();
             results.AddRange(source);
             return results;
         }
         
-        public static IDictionaryEx<TKey, TValue> ToDictionaryEx<TKeyValue, TKey, TValue>(
+        public static IComposableDictionary<TKey, TValue> CopyToComposableDictionary<TKeyValue, TKey, TValue>(
             this IEnumerable<TKeyValue> source, Func<TKeyValue, TKey> key, Func<TKeyValue, TValue> value)
         {
-            var results = new DictionaryEx<TKey, TValue>();
+            var results = new ComposableDictionary<TKey, TValue>();
             results.AddRange(source, key, value);
             return results;
         }
         
-        public static IReadOnlyDictionaryEx<TKey, TValue> ToReadOnlyDictionaryEx<TKey, TValue>(
+        public static IReadOnlyDictionaryEx<TKey, TValue> CopyToComposableReadOnlyDictionary<TKey, TValue>(
             this IEnumerable<KeyValuePair<TKey, TValue>> source)
         {
-            var results = new DictionaryEx<TKey, TValue>();
+            var results = new ComposableDictionary<TKey, TValue>();
             results.AddRange(source);
             return results;
         }
         
-        public static IReadOnlyDictionaryEx<TKey, TValue> ToReadOnlyDictionaryEx<TKeyValue, TKey, TValue>(
+        public static IReadOnlyDictionaryEx<TKey, TValue> CopyToComposableReadOnlyDictionary<TKeyValue, TKey, TValue>(
             this IEnumerable<TKeyValue> source, Func<TKeyValue, TKey> key, Func<TKeyValue, TValue> value)
         {
-            var results = new DictionaryEx<TKey, TValue>();
+            var results = new ComposableDictionary<TKey, TValue>();
             results.AddRange(source, key, value);
             return results;
         }
 
-        public static ICachingDictionary<TKey, TValue> WithCaching<TKey, TValue>(this IDictionaryEx<TKey, TValue> flushTo, IDictionaryEx<TKey, TValue> cache = null)
+        public static ICachingComposableDictionary<TKey, TValue> WithCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> flushTo, IComposableDictionary<TKey, TValue> cache = null)
         {
-            return new ConcurrentCachingDictionary<TKey, TValue>(flushTo, cache ?? new ConcurrentDictionaryEx<TKey, TValue>());
+            return new ConcurrentCachingComposableDictionary<TKey, TValue>(flushTo, cache ?? new ConcurrentComposableDictionary<TKey, TValue>());
         }
 
-        public static IDictionaryEx<TKey, TValue> WithDefaultValue<TKey, TValue>(this IDictionaryEx<TKey, TValue> source, GetDefaultValue<TKey, TValue> getDefaultValue)
+        public static IComposableDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(this IComposableDictionary<TKey, TValue> source, GetDefaultValue<TKey, TValue> getDefaultValue)
         {
-            return new DictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);
+            return new ComposableDictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);
         }
 
-        public static IDictionaryEx<TKey, TValue> WithRefreshing<TKey, TValue>(this IDictionaryEx<TKey, TValue> source, RefreshValue<TKey, TValue> refreshValue)
+        public static IComposableDictionary<TKey, TValue> WithRefreshing<TKey, TValue>(this IComposableDictionary<TKey, TValue> source, RefreshValue<TKey, TValue> refreshValue)
         {
-            return new DictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
+            return new ComposableDictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
         }
 
-        public static IDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IDictionaryEx<TKey, TValue> source, Func<TValue, TKey> key)
+        public static IDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IComposableDictionary<TKey, TValue> source, Func<TValue, TKey> key)
         {
             return new AnonymousDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, key);
         }

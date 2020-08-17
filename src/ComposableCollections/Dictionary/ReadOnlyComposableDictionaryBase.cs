@@ -4,13 +4,13 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
 {
-    public abstract class ReadOnlyDictionaryBaseEx<TKey, TValue> : IReadOnlyDictionaryEx<TKey, TValue>
+    public abstract class ReadOnlyComposableDictionaryBase<TKey, TValue> : IReadOnlyDictionaryEx<TKey, TValue>
     {
         #region Abstract members
 
         public abstract bool TryGetValue(TKey key, out TValue value);
 
-        public abstract IEnumerator<IKeyValuePair<TKey, TValue>> GetEnumerator();
+        public abstract IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator();
 
         public abstract int Count { get; }
 

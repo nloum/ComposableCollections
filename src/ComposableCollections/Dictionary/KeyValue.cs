@@ -4,19 +4,19 @@ using GenericNumbers.Relational;
 
 namespace ComposableCollections.Dictionary
 {
-    public class KeyValuePairImpl<TKey, TValue> : IKeyValuePair<TKey, TValue>, IComparable<IKeyValuePair<TKey, TValue>>
+    public class KeyValue<TKey, TValue> : IKeyValue<TKey, TValue>, IComparable<IKeyValue<TKey, TValue>>
     {
         public TKey Key { get; }
 
         public TValue Value { get; }
 
-        public KeyValuePairImpl(TKey key, TValue value)
+        public KeyValue(TKey key, TValue value)
         {
             Key = key;
             Value = value;
         }
 
-        public int CompareTo(IKeyValuePair<TKey, TValue> other)
+        public int CompareTo(IKeyValue<TKey, TValue> other)
         {
             var comparison = Key.CompareTo(other.Key);
             if (comparison != 0)
@@ -25,7 +25,7 @@ namespace ComposableCollections.Dictionary
             return comparison;
         }
 
-        protected bool Equals(KeyValuePairImpl<TKey, TValue> other)
+        protected bool Equals(KeyValue<TKey, TValue> other)
         {
             return EqualityComparer<TKey>.Default.Equals(Key, other.Key) && EqualityComparer<TValue>.Default.Equals(Value, other.Value);
         }
@@ -35,7 +35,7 @@ namespace ComposableCollections.Dictionary
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((KeyValuePairImpl<TKey, TValue>) obj);
+            return Equals((KeyValue<TKey, TValue>) obj);
         }
 
         public override int GetHashCode()

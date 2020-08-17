@@ -6,7 +6,7 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
 {
-    public class ConcurrentDictionaryEx<TKey, TValue> : DictionaryBaseEx<TKey, TValue>
+    public class ConcurrentComposableDictionary<TKey, TValue> : ComposableDictionaryBase<TKey, TValue>
     {
         protected ImmutableDictionary<TKey, TValue> State = ImmutableDictionary<TKey, TValue>.Empty;
         protected readonly object Lock = new object();
@@ -16,9 +16,9 @@ namespace ComposableCollections.Dictionary
             return State.TryGetValue(key, out value);
         }
 
-        public override IEnumerator<IKeyValuePair<TKey, TValue>> GetEnumerator()
+        public override IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
-            return State.Select(kvp => Utility.KeyValuePair<TKey, TValue>(kvp.Key, kvp.Value)).GetEnumerator();
+            return State.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value)).GetEnumerator();
         }
 
         public override int Count => State.Count;
@@ -185,7 +185,7 @@ namespace ComposableCollections.Dictionary
         {
             lock (Lock)
             {
-                var results = new DictionaryEx<TKey, TValue>();
+                var results = new ComposableDictionary<TKey, TValue>();
                 removedItems = results;
             
                 foreach (var key in keysToRemove)
@@ -224,7 +224,7 @@ namespace ComposableCollections.Dictionary
         {
             lock (Lock)
             {
-                var finalResult = new DictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>>();
+                var finalResult = new ComposableDictionary<TKey, IDictionaryItemAddAttempt<TValue>>();
                 results = finalResult;
             
                 foreach (var newItem in newItems)
@@ -257,7 +257,7 @@ namespace ComposableCollections.Dictionary
         {
             lock (Lock)
             {
-                var finalResult = new DictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>>();
+                var finalResult = new ComposableDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>>();
                 results = finalResult;
             
                 foreach (var newItem in newItems)
@@ -282,7 +282,7 @@ namespace ComposableCollections.Dictionary
         {
             lock (Lock)
             {
-                var finalResults = new DictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>>();
+                var finalResults = new ComposableDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>>();
                 previousValues = finalResults;
 
                 var state = State;
@@ -305,7 +305,7 @@ namespace ComposableCollections.Dictionary
         {
             lock (Lock)
             {
-                var finalResults = new DictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>>();
+                var finalResults = new ComposableDictionary<TKey, IDictionaryItemAddOrUpdate<TValue>>();
                 results = finalResults;
             
                 foreach (var newItem in newItems)
@@ -331,7 +331,7 @@ namespace ComposableCollections.Dictionary
         {
             lock (Lock)
             {
-                var results = new DictionaryEx<TKey, TValue>();
+                var results = new ComposableDictionary<TKey, TValue>();
                 removedItems = results;
             
                 foreach (var key in keysToRemove)
@@ -348,7 +348,7 @@ namespace ComposableCollections.Dictionary
         {
             lock (Lock)
             {
-                removedItems = State.ToDictionaryEx();
+                removedItems = State.CopyToComposableDictionary();
                 State = ImmutableDictionary<TKey, TValue>.Empty;
             }
         }

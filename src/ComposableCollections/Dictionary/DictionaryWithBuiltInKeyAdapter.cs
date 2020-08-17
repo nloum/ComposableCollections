@@ -77,7 +77,7 @@ namespace ComposableCollections.Dictionary
             return _wrapped.TryAdd(key, value, out existingValue, out newValue);
         }
 
-        public void TryAddRange(IEnumerable<TValue> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> results)
+        public void TryAddRange(IEnumerable<TValue> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
             _wrapped.TryAddRange(newItems, GetKey, x => x, out results);
         }
@@ -245,7 +245,7 @@ namespace ComposableCollections.Dictionary
             removedItems = new DelegateReadOnlyDictionaryWithBuiltInKey<TKey, TValue>(innerRemovedItems);
         }
 
-        public void Clear(out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+        public void Clear(out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
             _wrapped.Clear(out removedItems);
         }

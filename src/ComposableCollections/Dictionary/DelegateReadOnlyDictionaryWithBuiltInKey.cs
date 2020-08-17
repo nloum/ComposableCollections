@@ -1,9 +1,9 @@
 namespace ComposableCollections.Dictionary
 {
     public class DelegateReadOnlyDictionaryWithBuiltInKey<TKey, TValue> :
-        DelegateReadOnlyDictionaryEx<TKey, TValue>, IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>
+        DelegateReadOnlyDictionary<TKey, TValue>, IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>
     {
-        public DelegateReadOnlyDictionaryWithBuiltInKey(IReadOnlyDictionaryEx<TKey, TValue> wrapped) : base(wrapped)
+        public DelegateReadOnlyDictionaryWithBuiltInKey(IComposableReadOnlyDictionary<TKey, TValue> wrapped) : base(wrapped)
         {
         }
         

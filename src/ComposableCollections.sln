@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.30406.217
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "..\build\_build.csproj", "{F036F277-E094-4039-9400-A9247A6D2D21}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComposableCollections", "ComposableCollections\ComposableCollections.csproj", "{7A3EEC2A-B15D-4D92-A89E-1390FDFD0BF5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComposableCollections", "ComposableCollections\ComposableCollections.csproj", "{7A3EEC2A-B15D-4D92-A89E-1390FDFD0BF5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComposableCollections.Tests", "ComposableCollections.Tests\ComposableCollections.Tests.csproj", "{D61660E9-22E9-4A99-811F-4AE5D55F8AE0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,6 +21,10 @@ Global
 		{7A3EEC2A-B15D-4D92-A89E-1390FDFD0BF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A3EEC2A-B15D-4D92-A89E-1390FDFD0BF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A3EEC2A-B15D-4D92-A89E-1390FDFD0BF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D61660E9-22E9-4A99-811F-4AE5D55F8AE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D61660E9-22E9-4A99-811F-4AE5D55F8AE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D61660E9-22E9-4A99-811F-4AE5D55F8AE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D61660E9-22E9-4A99-811F-4AE5D55F8AE0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -43,7 +43,7 @@ namespace ComposableCollections.Dictionary
                 return false;
             }
 
-            value = Convert(new[]{new KeyValue<TKey, TInnerValue>(key, innerValue.Value)}).First().Value;
+            value = Convert(new[] { new KeyValue<TKey, TInnerValue>(key, innerValue.Value) }).First().Value;
             return true;
         }
 
@@ -56,10 +56,10 @@ namespace ComposableCollections.Dictionary
         public override IEqualityComparer<TKey> Comparer => _innerValues.Comparer;
         public override IEnumerable<TKey> Keys => _innerValues.Keys;
         public override IEnumerable<TValue> Values => this.AsEnumerable().Select(x => x.Value);
-        
+
         private class InternalEnumerable<TKey, TValue> : IEnumerable<IKeyValue<TKey, TValue>>
         {
-            public InternalEnumerator<TKey, TValue> Enumerator { get; private set; }
+            public InternalEnumerator<TKey, TValue> Enumerator { get; } = new InternalEnumerator<TKey, TValue>();
 
             IEnumerator IEnumerable.GetEnumerator()
             {
@@ -68,17 +68,18 @@ namespace ComposableCollections.Dictionary
 
             public IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
             {
-                Enumerator = new InternalEnumerator<TKey, TValue>();
                 return Enumerator;
             }
         }
 
-        private class InternalEnumerator<TKey, TValue> : IEnumerator<IKeyValue<TKey, TValue>> {
+        private class InternalEnumerator<TKey, TValue> : IEnumerator<IKeyValue<TKey, TValue>>
+        {
             public IKeyValue<TKey, TValue> Next { get; set; }
 
             public bool MoveNext()
             {
                 Current = Next;
+                Next = null;
                 return Current != null;
             }
 
@@ -100,13 +101,21 @@ namespace ComposableCollections.Dictionary
         {
             var objectsToBeConverted = new InternalEnumerable<TKey, TValue>();
             var objectsToBeConvertedBack = new InternalEnumerable<TKey, TInnerValue>();
-            
-            using (var convertedBackObjectsEnumerator = Convert(objectsToBeConvertedBack).GetEnumerator())
-            using (var convertedObjectsEnumerator = Convert(objectsToBeConverted).GetEnumerator())
+
+            IEnumerator<IKeyValue<TKey, TValue>> convertedBackObjectsEnumerator=null;
+            IEnumerator<IKeyValue<TKey, TInnerValue>> convertedObjectsEnumerator=null;
+
+            try
             {
                 TInnerValue convert(TKey key, TValue value)
                 {
                     objectsToBeConverted.Enumerator.Next = new KeyValue<TKey, TValue>(key, value);
+
+                    if (convertedObjectsEnumerator == null)
+                    {
+                        convertedObjectsEnumerator = Convert(objectsToBeConverted).GetEnumerator();
+                    }
+
                     convertedObjectsEnumerator.MoveNext();
                     return convertedObjectsEnumerator.Current.Value;
                 }
@@ -114,6 +123,12 @@ namespace ComposableCollections.Dictionary
                 TValue convertBack(TKey key, TInnerValue value)
                 {
                     objectsToBeConvertedBack.Enumerator.Next = new KeyValue<TKey, TInnerValue>(key, value);
+
+                    if (convertedBackObjectsEnumerator == null)
+                    {
+                        convertedBackObjectsEnumerator = Convert(objectsToBeConvertedBack).GetEnumerator();
+                    }
+
                     convertedBackObjectsEnumerator.MoveNext();
                     return convertedBackObjectsEnumerator.Current.Value;
                 }
@@ -130,8 +145,7 @@ namespace ComposableCollections.Dictionary
                         var result = mutation.ValueIfAdding.Value();
                         return convert(mutation.Key, result);
                     };
-                    return new DictionaryMutation<TKey, TInnerValue>(mutation.Type, mutation.Key, valueIfAdding.ToMaybe(),
-                        valueIfUpdating.ToMaybe());
+                    return new DictionaryMutation<TKey, TInnerValue>(mutation.Type, mutation.Key, valueIfAdding.ToMaybe(), valueIfUpdating.ToMaybe());
                 }), out var innerResults);
 
                 results = innerResults.Select(innerResult =>
@@ -167,6 +181,11 @@ namespace ComposableCollections.Dictionary
                         throw new InvalidOperationException("Unknown dictionary mutation type");
                     }
                 }).ToList();
+            }
+            finally
+            {
+                convertedObjectsEnumerator?.Dispose();
+                convertedBackObjectsEnumerator?.Dispose();
             }
         }
     }

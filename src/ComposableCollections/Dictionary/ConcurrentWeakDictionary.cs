@@ -6,7 +6,7 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
 {
-    public class ConcurrentWeakComposableDictionary<TKey, TValue> : ComposableDictionaryBase<TKey, TValue> where TValue : class
+    public class ConcurrentWeakDictionary<TKey, TValue> : DictionaryBase<TKey, TValue> where TValue : class
     {
         protected readonly object Lock = new object();
         protected ImmutableDictionary<TKey, WeakReference<TValue>> State = ImmutableDictionary<TKey, WeakReference<TValue>>.Empty;

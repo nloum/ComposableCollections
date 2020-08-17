@@ -4,17 +4,17 @@ using System.Linq;
 namespace ComposableCollections.Dictionary
 {
     /// <summary>
-    /// Using an abstract Convert method, converts an IReadOnlyDictionaryEx{TKey, TInnerValue} to an
-    /// IReadOnlyDictionaryEx{TKey, TValue} instance. This will lazily convert objects in the underlying innerValues.
+    /// Using an abstract Convert method, converts an IComposableReadOnlyDictionary{TKey, TInnerValue} to an
+    /// IComposableReadOnlyDictionary{TKey, TValue} instance. This will lazily convert objects in the underlying innerValues.
     /// This class works whether innerValues changes underneath it or not.
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     /// <typeparam name="TInnerValue"></typeparam>
-    public abstract class MapReadOnlyDictionaryBase<TKey, TValue, TInnerValue> : ReadOnlyComposableDictionaryBase<TKey, TValue> where TValue : class {
-        private readonly IReadOnlyDictionaryEx<TKey, TInnerValue> _innerValues;
+    public abstract class MapReadOnlyDictionaryBase<TKey, TValue, TInnerValue> : ReadOnlyDictionaryBase<TKey, TValue> where TValue : class {
+        private readonly IComposableReadOnlyDictionary<TKey, TInnerValue> _innerValues;
 
-        protected MapReadOnlyDictionaryBase(IReadOnlyDictionaryEx<TKey, TInnerValue> innerValues)
+        protected MapReadOnlyDictionaryBase(IComposableReadOnlyDictionary<TKey, TInnerValue> innerValues)
         {
             _innerValues = innerValues;
         }

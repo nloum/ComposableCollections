@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace ComposableCollections.Dictionary
 {
-    public abstract class ComposableDictionaryBase<TKey, TValue> : ReadOnlyComposableDictionaryBase<TKey, TValue>, IComposableDictionary<TKey, TValue>
+    public abstract class DictionaryBase<TKey, TValue> : ReadOnlyDictionaryBase<TKey, TValue>, IComposableDictionary<TKey, TValue>
     {
         public abstract void Mutate(IEnumerable<DictionaryMutation<TKey, TValue>> mutations,
             out IReadOnlyList<DictionaryMutationResult<TKey, TValue>> results);
@@ -59,7 +59,7 @@ namespace ComposableCollections.Dictionary
         #region Bulk mutation methods of only one type that call Mutate
 
         public virtual void RemoveRange(IEnumerable<TKey> keysToRemove,
-            out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+            out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
             Mutate(keysToRemove.Select(key => DictionaryMutation<TKey, TValue>.CreateTryRemove(key)), out var results);
             removedItems = results
@@ -75,28 +75,28 @@ namespace ComposableCollections.Dictionary
 
         public virtual void UpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems,
             Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value,
-            out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> previousValues)
+            out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> previousValues)
         {
             Mutate(newItems.Select(x => DictionaryMutation<TKey, TValue>.CreateUpdate(key(x), _ => value(x))), out var results);
             previousValues = results
                 .ToComposableDictionary(x => x.Key, x => x.Update.Value);
         }
 
-        public virtual void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> result)
+        public virtual void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> result)
         {
             Mutate(newItems.Select(x => DictionaryMutation<TKey, TValue>.CreateUpdate(key(x), _ => value(x))), out var results);
             result = results
                 .ToComposableDictionary(x => x.Key, x => x.Add.Value);
         }
 
-        public virtual void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> result)
+        public virtual void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> result)
         {
             Mutate(newItems.Select(x => DictionaryMutation<TKey, TValue>.CreateUpdate(key(x), _ => value(x))), out var results);
             result = results
                 .ToComposableDictionary(x => x.Key, x => x.Update.Value);
         }
 
-        public virtual void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> result)
+        public virtual void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddOrUpdate<TValue>> result)
         {
             Mutate(newItems.Select(x => DictionaryMutation<TKey, TValue>.CreateUpdate(key(x), _ => value(x))), out var results);
             result = results
@@ -104,7 +104,7 @@ namespace ComposableCollections.Dictionary
         }
 
         public virtual void TryRemoveRange(IEnumerable<TKey> keysToRemove,
-            out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+            out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
             Mutate(keysToRemove.Select(key => DictionaryMutation<TKey, TValue>.CreateTryRemove(key)), out var results);
             removedItems = results
@@ -186,19 +186,19 @@ namespace ComposableCollections.Dictionary
             RemoveRange(keysToRemove);
         }
 
-        public virtual void RemoveWhere(Func<TKey, TValue, bool> predicate, out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+        public virtual void RemoveWhere(Func<TKey, TValue, bool> predicate, out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
             var keysToRemove = this.Where(kvp => predicate(kvp.Key, kvp.Value)).Select(kvp => kvp.Key);
             RemoveRange(keysToRemove, out removedItems);
         }
 
-        public virtual void RemoveWhere(Func<IKeyValue<TKey, TValue>, bool> predicate, out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+        public virtual void RemoveWhere(Func<IKeyValue<TKey, TValue>, bool> predicate, out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
             var keysToRemove = this.Where(kvp => predicate(kvp)).Select(kvp => kvp.Key);
             RemoveRange(keysToRemove, out removedItems);
         }
 
-        public virtual void Clear(out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+        public virtual void Clear(out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
             RemoveRange(Keys, out removedItems);
         }
@@ -379,42 +379,42 @@ namespace ComposableCollections.Dictionary
             set => AddOrUpdate(key, value);
         }
         
-        public void TryAddRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> result)
+        public void TryAddRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> result)
         {
             TryAddRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
         }
 
-        public void TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> result)
+        public void TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> result)
         {
             TryAddRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
         }
 
-        public void TryUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> result)
+        public void TryUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> result)
         {
             TryUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
         }
 
-        public void TryUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> result)
+        public void TryUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> result)
         {
             TryUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
         }
 
-        public void UpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> previousValues)
+        public void UpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> previousValues)
         {
             UpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out previousValues);
         }
 
-        public void UpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> previousValues)
+        public void UpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> previousValues)
         {
             UpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out previousValues);
         }
 
-        public void AddOrUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> result)
+        public void AddOrUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddOrUpdate<TValue>> result)
         {
             AddOrUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
         }
 
-        public void AddOrUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> result)
+        public void AddOrUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddOrUpdate<TValue>> result)
         {
             AddOrUpdateRange(newItems, kvp => kvp.Key, kvp => kvp.Value, out result);
         }

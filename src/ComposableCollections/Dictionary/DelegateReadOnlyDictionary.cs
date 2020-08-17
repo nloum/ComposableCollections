@@ -4,20 +4,20 @@ using System.Linq;
 
 namespace ComposableCollections.Dictionary
 {
-    public class DelegateReadOnlyDictionaryEx<TKey, TValue> : ReadOnlyComposableDictionaryBase<TKey, TValue>
+    public class DelegateReadOnlyDictionary<TKey, TValue> : ReadOnlyDictionaryBase<TKey, TValue>
     {
-        private IReadOnlyDictionaryEx<TKey, TValue> _wrapped;
+        private IComposableReadOnlyDictionary<TKey, TValue> _wrapped;
 
-        public DelegateReadOnlyDictionaryEx(IReadOnlyDictionaryEx<TKey, TValue> wrapped)
+        public DelegateReadOnlyDictionary(IComposableReadOnlyDictionary<TKey, TValue> wrapped)
         {
             _wrapped = wrapped;
         }
 
-        protected DelegateReadOnlyDictionaryEx()
+        protected DelegateReadOnlyDictionary()
         {
         }
 
-        protected void Initialize(IReadOnlyDictionaryEx<TKey, TValue> wrapped)
+        protected void Initialize(IComposableReadOnlyDictionary<TKey, TValue> wrapped)
         {
             _wrapped = wrapped;
         }

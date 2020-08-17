@@ -4,11 +4,11 @@ namespace ComposableCollections.Dictionary
 {
     public delegate void GetDefaultValue<TKey, TValue>(TKey key, out IMaybe<TValue> maybeValue, out bool persist);
     
-    public class ComposableDictionaryGetOrDefault<TKey, TValue> : ComposableDictionary<TKey, TValue>
+    public class DictionaryGetOrDefault<TKey, TValue> : ComposableDictionary<TKey, TValue>
     {
         private readonly GetDefaultValue<TKey, TValue> _getDefaultValue;
 
-        public ComposableDictionaryGetOrDefault(GetDefaultValue<TKey, TValue> getDefaultValue)
+        public DictionaryGetOrDefault(GetDefaultValue<TKey, TValue> getDefaultValue)
         {
             _getDefaultValue = getDefaultValue;
         }

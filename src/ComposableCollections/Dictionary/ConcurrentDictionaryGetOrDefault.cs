@@ -1,27 +1,27 @@
 namespace ComposableCollections.Dictionary
 {
-    public class ConcurrentComposableDictionaryGetOrRefresh<TKey, TValue> : ConcurrentComposableDictionary<TKey, TValue>
+    public class ConcurrentDictionaryGetOrDefault<TKey, TValue> : ConcurrentDictionary<TKey, TValue>
     {
-        private readonly RefreshValue<TKey, TValue> _refreshValue;
+        private readonly GetDefaultValue<TKey, TValue> _getDefaultValue;
 
-        public ConcurrentComposableDictionaryGetOrRefresh(RefreshValue<TKey, TValue> refreshValue)
+        public ConcurrentDictionaryGetOrDefault(GetDefaultValue<TKey, TValue> getDefaultValue)
         {
-            _refreshValue = refreshValue;
+            _getDefaultValue = getDefaultValue;
         }
 
         public override bool TryGetValue(TKey key, out TValue value)
         {
             lock (Lock)
             {
-                if (base.TryGetValue(key, out value))
+                if (!base.TryGetValue(key, out value))
                 {
-                    _refreshValue(key, value, out var maybeValue, out var persist);
+                    _getDefaultValue(key, out var maybeValue, out var persist);
                 
                     if (maybeValue.HasValue)
                     {
                         if (persist)
                         {
-                            State = State.SetItem(key, maybeValue.Value);
+                            State = State.Add(key, maybeValue.Value);
                         }
 
                         value = maybeValue.Value;
@@ -29,37 +29,34 @@ namespace ComposableCollections.Dictionary
                     }
                     else
                     {
-                        return true;
+                        return false;
                     }
                 }
 
-                return false;
+                return true;
             }
         }
 
         protected override bool TryGetValueInsideLock(TKey key, out TValue value)
         {
-            if (base.TryGetValue(key, out value))
+            if (!State.TryGetValue(key, out value))
             {
-                _refreshValue(key, value, out var maybeValue, out var persist);
-                
+                _getDefaultValue(key, out var maybeValue, out var persist);
+
                 if (maybeValue.HasValue)
                 {
                     if (persist)
                     {
-                        State = State.SetItem(key, maybeValue.Value);
+                        State = State.Add(key, maybeValue.Value);
                     }
 
-                    value = maybeValue.Value;
                     return true;
                 }
-                else
-                {
-                    return true;
-                }
+
+                return false;
             }
 
-            return false;
+            return true;
         }
 
         protected override bool TryGetValueOutsideLock(TKey key, out TValue value)

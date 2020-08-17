@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ComposableCollections.Dictionary
 {
-    public class AnonymousWeakMapComposableDictionary<TKey, TValue, TInnerValue> : WeakMapComposableDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
+    public class AnonymousWeakBulkMapDictionary<TKey, TValue, TInnerValue> : WeakBulkMapDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
     {
         private Func<TKey, TValue, TInnerValue> _convert;
         private Func<TKey, TInnerValue, TValue> _convertBack;
@@ -11,13 +11,13 @@ namespace ComposableCollections.Dictionary
         private Func<IEnumerable<IKeyValue<TKey, TInnerValue>>, IEnumerable<IKeyValue<TKey, TValue>>> _bulkConvertBack;
 
 
-        public AnonymousWeakMapComposableDictionary(IComposableDictionary<TKey, TInnerValue> innerValues, Func<TKey, TValue, TInnerValue> convert, Func<TKey, TInnerValue, TValue> convertBack, bool proactivelyConvertAllValues) : base(innerValues, proactivelyConvertAllValues)
+        public AnonymousWeakBulkMapDictionary(IComposableDictionary<TKey, TInnerValue> innerValues, Func<TKey, TValue, TInnerValue> convert, Func<TKey, TInnerValue, TValue> convertBack, bool proactivelyConvertAllValues) : base(innerValues, proactivelyConvertAllValues)
         {
             _convert = convert;
             _convertBack = convertBack;
         }
 
-        public AnonymousWeakMapComposableDictionary(IComposableDictionary<TKey, TInnerValue> innerValues, Func<IEnumerable<IKeyValue<TKey, TValue>>, IEnumerable<IKeyValue<TKey, TInnerValue>>> convert, Func<IEnumerable<IKeyValue<TKey, TInnerValue>>, IEnumerable<IKeyValue<TKey, TValue>>> convertBack, bool proactivelyConvertAllValues) : base(innerValues, proactivelyConvertAllValues)
+        public AnonymousWeakBulkMapDictionary(IComposableDictionary<TKey, TInnerValue> innerValues, Func<IEnumerable<IKeyValue<TKey, TValue>>, IEnumerable<IKeyValue<TKey, TInnerValue>>> convert, Func<IEnumerable<IKeyValue<TKey, TInnerValue>>, IEnumerable<IKeyValue<TKey, TValue>>> convertBack, bool proactivelyConvertAllValues) : base(innerValues, proactivelyConvertAllValues)
         {
             _bulkConvert = convert;
             _bulkConvertBack = convertBack;

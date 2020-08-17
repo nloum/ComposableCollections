@@ -3,7 +3,7 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
 {
-    public interface IReadOnlyDictionaryEx<TKey, out TValue> : IReadOnlyCollection<IKeyValue<TKey, TValue>>
+    public interface IComposableReadOnlyDictionary<TKey, out TValue> : IReadOnlyCollection<IKeyValue<TKey, TValue>>
     {
         IEqualityComparer<TKey> Comparer { get; }
 

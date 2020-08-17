@@ -4,7 +4,7 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
 {
-    public abstract class ReadOnlyComposableDictionaryBase<TKey, TValue> : IReadOnlyDictionaryEx<TKey, TValue>
+    public abstract class ReadOnlyDictionaryBase<TKey, TValue> : IComposableReadOnlyDictionary<TKey, TValue>
     {
         #region Abstract members
 

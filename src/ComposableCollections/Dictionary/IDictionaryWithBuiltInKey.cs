@@ -14,7 +14,7 @@ namespace ComposableCollections.Dictionary
         bool TryAdd(TValue value);
         bool TryAdd(TKey key, Func<TValue> value);
         bool TryAdd(TKey key, Func<TValue> value, out TValue existingValue, out TValue newValue);
-        void TryAddRange(IEnumerable<TValue> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> results);
+        void TryAddRange(IEnumerable<TValue> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> results);
         void TryAddRange(params TValue[] newItems);
         void Add(TValue value);
         void AddRange(IEnumerable<TValue> newItems);
@@ -63,7 +63,7 @@ namespace ComposableCollections.Dictionary
         void RemoveRange(IEnumerable<TKey> keysToRemove, out IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> removedItems);
         void RemoveWhere(Func<TKey, TValue, bool> predicate, out IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> removedItems);
         void RemoveWhere(Func<IKeyValue<TKey, TValue>, bool> predicate, out IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> removedItems);
-        void Clear(out IReadOnlyDictionaryEx<TKey, TValue> removedItems);
+        void Clear(out IComposableReadOnlyDictionary<TKey, TValue> removedItems);
         bool TryRemove(TKey key, out TValue removedItem);
         void Remove(TKey key, out TValue removedItem);
         

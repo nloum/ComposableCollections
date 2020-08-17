@@ -82,7 +82,7 @@ namespace ComposableCollections.Dictionary
             return _wrapped.TryAdd(key, value, out existingValue, out newValue);
         }
 
-        public void TryAddRange(IEnumerable<TValue> newItems, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> results)
+        public void TryAddRange(IEnumerable<TValue> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
             _wrapped.TryAddRange(newItems, out results);
         }
@@ -243,7 +243,7 @@ namespace ComposableCollections.Dictionary
             _wrapped.RemoveWhere(predicate, out removedItems);
         }
 
-        public void Clear(out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+        public void Clear(out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
             _wrapped.Clear(out removedItems);
         }

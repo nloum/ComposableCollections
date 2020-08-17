@@ -2,12 +2,12 @@ using System;
 
 namespace ComposableCollections.Dictionary
 {
-    public class AnonymousCachedMapComposableDictionary<TKey, TValue, TInnerValue> : CachedMapComposableDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
+    public class AnonymousCacheMapDictionary<TKey, TValue, TInnerValue> : CacheMapDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
     {
         private Func<Func<TKey, TValue, TInnerValue>, TKey, TValue, TInnerValue> _convert;
         private Func<Func<TKey, TInnerValue, TValue>, TKey, TInnerValue, TValue> _convertBack;
         
-        public AnonymousCachedMapComposableDictionary(IComposableDictionary<TKey, TInnerValue> innerValues, Func<Func<TKey, TValue, TInnerValue>, TKey, TValue, TInnerValue> convert, Func<Func<TKey, TInnerValue, TValue>, TKey, TInnerValue, TValue> convertBack, bool proactivelyConvertAllValues) : base(innerValues, proactivelyConvertAllValues)
+        public AnonymousCacheMapDictionary(IComposableDictionary<TKey, TInnerValue> innerValues, Func<Func<TKey, TValue, TInnerValue>, TKey, TValue, TInnerValue> convert, Func<Func<TKey, TInnerValue, TValue>, TKey, TInnerValue, TValue> convertBack, bool proactivelyConvertAllValues) : base(innerValues, proactivelyConvertAllValues)
         {
             _convert = convert;
             _convertBack = convertBack;

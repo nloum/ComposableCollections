@@ -5,11 +5,16 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
 {
-    public class SystemDelegateComposableDictionary<TKey, TValue> : ComposableDictionaryBase<TKey, TValue>
+    /// <summary>
+    /// Exposes a system IDictionary as an IComposableDictionary.
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TValue"></typeparam>
+    public class SystemDelegateDictionary<TKey, TValue> : DictionaryBase<TKey, TValue>
     {
         private readonly IDictionary<TKey, TValue> _wrapped;
 
-        public SystemDelegateComposableDictionary(IDictionary<TKey, TValue> wrapped)
+        public SystemDelegateDictionary(IDictionary<TKey, TValue> wrapped)
         {
             _wrapped = wrapped;
         }
@@ -151,7 +156,7 @@ namespace ComposableCollections.Dictionary
             return false;
         }
 
-        public override void RemoveRange(IEnumerable<TKey> keysToRemove, out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+        public override void RemoveRange(IEnumerable<TKey> keysToRemove, out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
             var results = new ComposableDictionary<TKey, TValue>();
             removedItems = results;

@@ -13,11 +13,11 @@ namespace ComposableCollections.Dictionary
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     /// <typeparam name="TInnerValue"></typeparam>
-    public abstract class MapComposableDictionaryBase<TKey, TValue, TInnerValue> : ComposableDictionaryBase<TKey, TValue> where TValue : class
+    public abstract class MapDictionaryBase<TKey, TValue, TInnerValue> : DictionaryBase<TKey, TValue> where TValue : class
     {
         private readonly IComposableDictionary<TKey, TInnerValue> _innerValues;
 
-        protected MapComposableDictionaryBase(IComposableDictionary<TKey, TInnerValue> innerValues)
+        protected MapDictionaryBase(IComposableDictionary<TKey, TInnerValue> innerValues)
         {
             _innerValues = innerValues;
         }

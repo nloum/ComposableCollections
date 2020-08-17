@@ -3,14 +3,14 @@ using System.Collections.Immutable;
 
 namespace ComposableCollections.Dictionary
 {
-    public class ConcurrentCachingComposableDictionary<TKey, TValue> : ComposableDictionaryBase<TKey, TValue>, ICachingComposableDictionary<TKey, TValue>
+    public class ConcurrentCachingDictionary<TKey, TValue> : DictionaryBase<TKey, TValue>, ICacheDictionary<TKey, TValue>
     {
         private readonly IComposableDictionary<TKey, TValue> _wrapped;
         private readonly IComposableDictionary<TKey, TValue> _flushCacheTo;
         protected readonly object _lock = new object();
         private ImmutableList<DictionaryMutation<TKey, TValue>> _mutations = ImmutableList<DictionaryMutation<TKey, TValue>>.Empty;
 
-        public ConcurrentCachingComposableDictionary(IComposableDictionary<TKey, TValue> flushCacheTo, IComposableDictionary<TKey, TValue> wrapped)
+        public ConcurrentCachingDictionary(IComposableDictionary<TKey, TValue> flushCacheTo, IComposableDictionary<TKey, TValue> wrapped)
         {
             _wrapped = wrapped;
             _flushCacheTo = flushCacheTo;
@@ -39,7 +39,7 @@ namespace ComposableCollections.Dictionary
             return mutationsToFlush;
         }
 
-        public IReadOnlyDictionaryEx<TKey, TValue> AsBypassCache()
+        public IComposableReadOnlyDictionary<TKey, TValue> AsBypassCache()
         {
             return _flushCacheTo;
         }

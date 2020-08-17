@@ -21,7 +21,7 @@ namespace ComposableCollections.Dictionary
             return results;
         }
         
-        public static IReadOnlyDictionaryEx<TKey, TValue> ToComposableReadOnlyDictionary<TKey, TValue>(
+        public static IComposableReadOnlyDictionary<TKey, TValue> ToComposableReadOnlyDictionary<TKey, TValue>(
             this IEnumerable<KeyValuePair<TKey, TValue>> source)
         {
             var results = new ComposableDictionary<TKey, TValue>();
@@ -29,7 +29,7 @@ namespace ComposableCollections.Dictionary
             return results;
         }
         
-        public static IReadOnlyDictionaryEx<TKey, TValue> ToComposableReadOnlyDictionary<TKeyValue, TKey, TValue>(
+        public static IComposableReadOnlyDictionary<TKey, TValue> ToComposableReadOnlyDictionary<TKeyValue, TKey, TValue>(
             this IEnumerable<TKeyValue> source, Func<TKeyValue, TKey> key, Func<TKeyValue, TValue> value)
         {
             var results = new ComposableDictionary<TKey, TValue>();
@@ -37,19 +37,19 @@ namespace ComposableCollections.Dictionary
             return results;
         }
 
-        public static ICachingComposableDictionary<TKey, TValue> WithCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> flushTo, IComposableDictionary<TKey, TValue> cache = null)
+        public static ICacheDictionary<TKey, TValue> WithCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> flushTo, IComposableDictionary<TKey, TValue> cache = null)
         {
-            return new ConcurrentCachingComposableDictionary<TKey, TValue>(flushTo, cache ?? new ConcurrentComposableDictionary<TKey, TValue>());
+            return new ConcurrentCachingDictionary<TKey, TValue>(flushTo, cache ?? new ConcurrentDictionary<TKey, TValue>());
         }
 
         public static IComposableDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(this IComposableDictionary<TKey, TValue> source, GetDefaultValue<TKey, TValue> getDefaultValue)
         {
-            return new ComposableDictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);
+            return new DictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);
         }
 
         public static IComposableDictionary<TKey, TValue> WithRefreshing<TKey, TValue>(this IComposableDictionary<TKey, TValue> source, RefreshValue<TKey, TValue> refreshValue)
         {
-            return new ComposableDictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
+            return new DictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
         }
 
         public static IDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IComposableDictionary<TKey, TValue> source, Func<TValue, TKey> key)

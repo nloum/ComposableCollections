@@ -14,12 +14,12 @@ namespace ComposableCollections.Dictionary
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     /// <typeparam name="TInnerValue"></typeparam>
-    public abstract class WeakMapComposableDictionaryBase<TKey, TValue, TInnerValue> : MapEnumerableComposableDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
+    public abstract class WeakBulkMapDictionaryBase<TKey, TValue, TInnerValue> : BulkMapDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
     {
         private readonly IComposableDictionary<TKey, TInnerValue> _innerValues;
-        private readonly ConcurrentComposableDictionary<TKey, WeakReference<TValue>> _alreadyConvertedValues = new ConcurrentComposableDictionary<TKey, WeakReference<TValue>>();
+        private readonly ConcurrentDictionary<TKey, WeakReference<TValue>> _alreadyConvertedValues = new ConcurrentDictionary<TKey, WeakReference<TValue>>();
 
-        public WeakMapComposableDictionaryBase(IComposableDictionary<TKey, TInnerValue> innerValues, bool proactivelyConvertAllValues) : base(innerValues)
+        public WeakBulkMapDictionaryBase(IComposableDictionary<TKey, TInnerValue> innerValues, bool proactivelyConvertAllValues) : base(innerValues)
         {
             _innerValues = innerValues;
             if (proactivelyConvertAllValues)

@@ -3,11 +3,16 @@ using System.Linq;
 
 namespace ComposableCollections.Dictionary
 {
-    public class SystemDelegateReadOnlyDictionaryEx<TKey, TValue> : ReadOnlyComposableDictionaryBase<TKey, TValue>
+    /// <summary>
+    /// Exposes a system IReadOnlyDictionary as an IComposableReadOnlyDictionary.
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TValue"></typeparam>
+    public class SystemDelegateReadOnlyDictionary<TKey, TValue> : ReadOnlyDictionaryBase<TKey, TValue>
     {
         private IReadOnlyDictionary<TKey, TValue> _wrapped;
 
-        public SystemDelegateReadOnlyDictionaryEx(IReadOnlyDictionary<TKey, TValue> wrapped)
+        public SystemDelegateReadOnlyDictionary(IReadOnlyDictionary<TKey, TValue> wrapped)
         {
             _wrapped = wrapped;
         }

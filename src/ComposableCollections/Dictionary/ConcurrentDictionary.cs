@@ -6,7 +6,7 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
 {
-    public class ConcurrentComposableDictionary<TKey, TValue> : ComposableDictionaryBase<TKey, TValue>
+    public class ConcurrentDictionary<TKey, TValue> : DictionaryBase<TKey, TValue>
     {
         protected ImmutableDictionary<TKey, TValue> State = ImmutableDictionary<TKey, TValue>.Empty;
         protected readonly object Lock = new object();
@@ -181,7 +181,7 @@ namespace ComposableCollections.Dictionary
             }
         }
 
-        public override void RemoveRange(IEnumerable<TKey> keysToRemove, out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+        public override void RemoveRange(IEnumerable<TKey> keysToRemove, out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
             lock (Lock)
             {
@@ -220,7 +220,7 @@ namespace ComposableCollections.Dictionary
             return State.TryGetValue(key, out value);
         }
         
-        public override void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddAttempt<TValue>> results)
+        public override void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
             lock (Lock)
             {
@@ -253,7 +253,7 @@ namespace ComposableCollections.Dictionary
             }
         }
 
-        public override void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
+        public override void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
             lock (Lock)
             {
@@ -278,7 +278,7 @@ namespace ComposableCollections.Dictionary
             }
         }
 
-        public override void UpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemUpdateAttempt<TValue>> previousValues)
+        public override void UpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> previousValues)
         {
             lock (Lock)
             {
@@ -301,7 +301,7 @@ namespace ComposableCollections.Dictionary
             }
         }
 
-        public override void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IReadOnlyDictionaryEx<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
+        public override void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
         {
             lock (Lock)
             {
@@ -327,7 +327,7 @@ namespace ComposableCollections.Dictionary
         }
 
         public override void TryRemoveRange(IEnumerable<TKey> keysToRemove,
-            out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+            out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
             lock (Lock)
             {
@@ -344,7 +344,7 @@ namespace ComposableCollections.Dictionary
             }
         }
         
-        public override void Clear(out IReadOnlyDictionaryEx<TKey, TValue> removedItems)
+        public override void Clear(out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
             lock (Lock)
             {

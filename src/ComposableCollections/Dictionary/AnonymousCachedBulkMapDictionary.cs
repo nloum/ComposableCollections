@@ -3,21 +3,20 @@ using System.Collections.Generic;
 
 namespace ComposableCollections.Dictionary
 {
-    public class AnonymousWeakBulkMapDictionary<TKey, TValue, TInnerValue> : WeakBulkMapDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
+    public class AnonymousCachedBulkMapDictionary<TKey, TValue, TInnerValue> : CachedBulkMapDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
     {
         private Func<TKey, TValue, TInnerValue> _convert;
         private Func<TKey, TInnerValue, TValue> _convertBack;
         private Func<IEnumerable<IKeyValue<TKey, TValue>>, IEnumerable<IKeyValue<TKey, TInnerValue>>> _bulkConvert;
         private Func<IEnumerable<IKeyValue<TKey, TInnerValue>>, IEnumerable<IKeyValue<TKey, TValue>>> _bulkConvertBack;
-
-
-        public AnonymousWeakBulkMapDictionary(IComposableDictionary<TKey, TInnerValue> innerValues, Func<TKey, TValue, TInnerValue> convert, Func<TKey, TInnerValue, TValue> convertBack, bool proactivelyConvertAllValues) : base(innerValues, proactivelyConvertAllValues)
+        
+        public AnonymousCachedBulkMapDictionary(IComposableDictionary<TKey, TInnerValue> innerValues, Func<TKey, TValue, TInnerValue> convert, Func<TKey, TInnerValue, TValue> convertBack, IComposableDictionary<TKey, TValue> cache = null, bool proactivelyConvertAllValues = false) : base(innerValues, cache, proactivelyConvertAllValues)
         {
             _convert = convert;
             _convertBack = convertBack;
         }
 
-        public AnonymousWeakBulkMapDictionary(IComposableDictionary<TKey, TInnerValue> innerValues, Func<IEnumerable<IKeyValue<TKey, TValue>>, IEnumerable<IKeyValue<TKey, TInnerValue>>> convert, Func<IEnumerable<IKeyValue<TKey, TInnerValue>>, IEnumerable<IKeyValue<TKey, TValue>>> convertBack, bool proactivelyConvertAllValues) : base(innerValues, proactivelyConvertAllValues)
+        public AnonymousCachedBulkMapDictionary(IComposableDictionary<TKey, TInnerValue> innerValues, Func<IEnumerable<IKeyValue<TKey, TValue>>, IEnumerable<IKeyValue<TKey, TInnerValue>>> convert, Func<IEnumerable<IKeyValue<TKey, TInnerValue>>, IEnumerable<IKeyValue<TKey, TValue>>> convertBack, IComposableDictionary<TKey, TValue> cache = null, bool proactivelyConvertAllValues = false) : base(innerValues, cache, proactivelyConvertAllValues)
         {
             _bulkConvert = convert;
             _bulkConvertBack = convertBack;

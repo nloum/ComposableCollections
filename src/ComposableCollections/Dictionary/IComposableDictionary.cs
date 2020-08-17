@@ -3,6 +3,10 @@ using System.Collections.Generic;
 
 namespace ComposableCollections.Dictionary
 {
+    /// <summary>
+    /// An IDictionary equivalent that has lots of extension methods that let you add facades to it for various additional
+    /// behaviors. 
+    /// </summary>
     public interface IComposableDictionary<TKey, TValue> : IComposableReadOnlyDictionary<TKey, TValue>
     {
         bool TryGetValue(TKey key, out TValue value);

@@ -3,6 +3,10 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
 {
+    /// <summary>
+    /// An IReadOnlyDictionary equivalent that has lots of extension methods that let you add facades to it for various additional
+    /// behaviors. 
+    /// </summary>
     public interface IComposableReadOnlyDictionary<TKey, out TValue> : IReadOnlyCollection<IKeyValue<TKey, TValue>>
     {
         IEqualityComparer<TKey> Comparer { get; }

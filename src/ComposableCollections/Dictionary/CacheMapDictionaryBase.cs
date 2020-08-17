@@ -14,10 +14,11 @@ namespace ComposableCollections.Dictionary
     public abstract class CacheMapDictionaryBase<TKey, TValue, TInnerValue> : MapDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
     {
         private readonly IComposableDictionary<TKey, TInnerValue> _innerValues;
-        private readonly ConcurrentDictionary<TKey, TValue> _alreadyConvertedValues = new ConcurrentDictionary<TKey, TValue>();
+        private readonly IComposableDictionary<TKey, TValue> _cache;
 
-        public CacheMapDictionaryBase(IComposableDictionary<TKey, TInnerValue> innerValues, bool proactivelyConvertAllValues) : base(innerValues)
+        public CacheMapDictionaryBase(IComposableDictionary<TKey, TInnerValue> innerValues, IComposableDictionary<TKey, TValue> cache, bool proactivelyConvertAllValues = false) : base(innerValues)
         {
+            _cache = cache ?? new ConcurrentDictionary<TKey, TValue>();
             _innerValues = innerValues;
             if (proactivelyConvertAllValues)
             {
@@ -42,13 +43,13 @@ namespace ComposableCollections.Dictionary
         
         protected override TValue Convert(TKey key, TInnerValue innerValue)
         {
-            if (_alreadyConvertedValues.TryGetValue(key, out var alreadyConvertedValue))
+            if (_cache.TryGetValue(key, out var alreadyConvertedValue))
             {
                 return alreadyConvertedValue;
             }
 
             var converted = StatelessConvert(Convert, key, innerValue);
-            _alreadyConvertedValues[key] = converted;
+            _cache[key] = converted;
             return converted;
         }
 

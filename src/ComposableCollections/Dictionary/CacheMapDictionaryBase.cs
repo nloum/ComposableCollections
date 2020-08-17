@@ -13,7 +13,7 @@ namespace ComposableCollections.Dictionary
     /// <typeparam name="TInnerValue"></typeparam>
     public abstract class CacheMapDictionaryBase<TKey, TValue, TInnerValue> : MapDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
     {
-        private readonly IComposableDictionary<TKey, TInnerValue> _innerValues;
+        protected readonly IComposableDictionary<TKey, TInnerValue> _innerValues;
         private readonly IComposableDictionary<TKey, TValue> _cache;
 
         public CacheMapDictionaryBase(IComposableDictionary<TKey, TInnerValue> innerValues, IComposableDictionary<TKey, TValue> cache, bool proactivelyConvertAllValues = false) : base(innerValues)

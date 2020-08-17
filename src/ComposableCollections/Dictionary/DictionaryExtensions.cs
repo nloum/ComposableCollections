@@ -5,7 +5,7 @@ namespace ComposableCollections.Dictionary
 {
     public static class DictionaryExtensions
     {
-        public static IComposableDictionary<TKey, TValue> CopyToComposableDictionary<TKey, TValue>(
+        public static IComposableDictionary<TKey, TValue> ToComposableDictionary<TKey, TValue>(
             this IEnumerable<KeyValuePair<TKey, TValue>> source)
         {
             var results = new ComposableDictionary<TKey, TValue>();
@@ -13,7 +13,7 @@ namespace ComposableCollections.Dictionary
             return results;
         }
         
-        public static IComposableDictionary<TKey, TValue> CopyToComposableDictionary<TKeyValue, TKey, TValue>(
+        public static IComposableDictionary<TKey, TValue> ToComposableDictionary<TKeyValue, TKey, TValue>(
             this IEnumerable<TKeyValue> source, Func<TKeyValue, TKey> key, Func<TKeyValue, TValue> value)
         {
             var results = new ComposableDictionary<TKey, TValue>();
@@ -21,7 +21,7 @@ namespace ComposableCollections.Dictionary
             return results;
         }
         
-        public static IReadOnlyDictionaryEx<TKey, TValue> CopyToComposableReadOnlyDictionary<TKey, TValue>(
+        public static IReadOnlyDictionaryEx<TKey, TValue> ToComposableReadOnlyDictionary<TKey, TValue>(
             this IEnumerable<KeyValuePair<TKey, TValue>> source)
         {
             var results = new ComposableDictionary<TKey, TValue>();
@@ -29,7 +29,7 @@ namespace ComposableCollections.Dictionary
             return results;
         }
         
-        public static IReadOnlyDictionaryEx<TKey, TValue> CopyToComposableReadOnlyDictionary<TKeyValue, TKey, TValue>(
+        public static IReadOnlyDictionaryEx<TKey, TValue> ToComposableReadOnlyDictionary<TKeyValue, TKey, TValue>(
             this IEnumerable<TKeyValue> source, Func<TKeyValue, TKey> key, Func<TKeyValue, TValue> value)
         {
             var results = new ComposableDictionary<TKey, TValue>();

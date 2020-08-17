@@ -348,7 +348,7 @@ namespace ComposableCollections.Dictionary
         {
             lock (Lock)
             {
-                removedItems = State.CopyToComposableDictionary();
+                removedItems = State.ToComposableDictionary();
                 State = ImmutableDictionary<TKey, TValue>.Empty;
             }
         }

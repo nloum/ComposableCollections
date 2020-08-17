@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using ComposableCollections.Dictionary;
 using LiveLinq;
 using LiveLinq.Core;
 using LiveLinq.Dictionary;
@@ -109,8 +110,8 @@ namespace IoFluently
                                         state.State,
                                         LastEvents = new []
                                         {
-                                            LiveLinq.Utility.DictionaryRemove(MoreCollections.Utility.KeyValuePair(item, state.State[item])),
-                                            LiveLinq.Utility.DictionaryAdd(MoreCollections.Utility.KeyValuePair(item, item.GetPathType()))
+                                            LiveLinq.Utility.DictionaryRemove(new KeyValue<AbsolutePath, PathType>(item, state.State[item])),
+                                            LiveLinq.Utility.DictionaryAdd(new KeyValue<AbsolutePath, PathType>(item, item.GetPathType()))
                                         }
                                     };
                                 }
@@ -132,7 +133,7 @@ namespace IoFluently
                                     State = state.State.Remove(item),
                                     LastEvents = new IDictionaryChangeStrict<AbsolutePath, PathType>[]
                                     {
-                                        LiveLinq.Utility.DictionaryRemove(MoreCollections.Utility.KeyValuePair(item, state.State[item])),
+                                        LiveLinq.Utility.DictionaryRemove(new KeyValue<AbsolutePath, PathType>(item, state.State[item])),
                                     }
                                 };
                             }
@@ -144,7 +145,7 @@ namespace IoFluently
                                 State = state.State.Add(item, item.GetPathType()),
                                 LastEvents = new IDictionaryChangeStrict<AbsolutePath, PathType>[]
                                 {
-                                    LiveLinq.Utility.DictionaryAdd(MoreCollections.Utility.KeyValuePair(item, item.GetPathType())),
+                                    LiveLinq.Utility.DictionaryAdd(new KeyValue<AbsolutePath, PathType>(item, item.GetPathType())),
                                 }
                             };
                         }

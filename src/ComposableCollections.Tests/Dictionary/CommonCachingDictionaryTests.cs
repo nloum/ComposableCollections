@@ -106,6 +106,104 @@ namespace ComposableCollections.Tests
         [TestMethod]
         [DataRow(CachingDictionaryType.ConcurrentCachingDictionary)]
         [DataRow(CachingDictionaryType.ConcurrentCachingDictionaryWithMinimalState)]
+        public void FlushWithNoMutationsShouldWork(CachingDictionaryType cachingDictionaryType)
+        {
+            var flushCacheTo = new ComposableDictionary<string, int>();
+            flushCacheTo.Add("Hi", 2);
+            var uut = CreateUnitUnderTest<string, int>(cachingDictionaryType, flushCacheTo);
+
+            uut.FlushCache();
+            flushCacheTo.TryGetValue("Hi", out var value).Should().BeTrue();
+            value.Should().Be(2);
+            
+            uut.TryGetValue("Hi", out value).Should().BeTrue();
+            value.Should().Be(2);
+        }
+
+        [TestMethod]
+        [DataRow(CachingDictionaryType.ConcurrentCachingDictionary)]
+        [DataRow(CachingDictionaryType.ConcurrentCachingDictionaryWithMinimalState)]
+        public void RemoveThenAddShouldWork(CachingDictionaryType cachingDictionaryType)
+        {
+            var flushCacheTo = new ComposableDictionary<string, int>();
+            flushCacheTo.Add("Hi", 2);
+            var uut = CreateUnitUnderTest<string, int>(cachingDictionaryType, flushCacheTo);
+
+            uut.TryGetValue("Hi", out var result).Should().BeTrue();
+            result.Should().Be(2);
+
+            uut.Remove("Hi");
+            
+            uut.Add("Hi", 3);
+            
+            uut.FlushCache();
+
+            uut.TryGetValue("Hi", out result).Should().BeTrue();
+            result.Should().Be(3);
+
+            flushCacheTo.TryGetValue("Hi", out result).Should().BeTrue();
+            result.Should().Be(3);
+        }
+        
+        [TestMethod]
+        [DataRow(CachingDictionaryType.ConcurrentCachingDictionary)]
+        [DataRow(CachingDictionaryType.ConcurrentCachingDictionaryWithMinimalState)]
+        public void AddThenRemoveShouldWork(CachingDictionaryType cachingDictionaryType)
+        {
+            var flushCacheTo = new ComposableDictionary<string, int>();
+            var uut = CreateUnitUnderTest<string, int>(cachingDictionaryType, flushCacheTo);
+
+            uut.Add("Hi", 2);
+            
+            uut.TryGetValue("Hi", out var result).Should().BeTrue();
+            result.Should().Be(2);
+
+            uut.Remove("Hi");
+            
+            uut.Add("Hi", 3);
+
+            uut.TryGetValue("Hi", out result).Should().BeTrue();
+            result.Should().Be(3);
+
+            uut.FlushCache();
+
+            uut.TryGetValue("Hi", out result).Should().BeTrue();
+            result.Should().Be(3);
+
+            flushCacheTo.TryGetValue("Hi", out result).Should().BeTrue();
+            result.Should().Be(3);
+        }
+
+        [TestMethod]
+        [DataRow(CachingDictionaryType.ConcurrentCachingDictionary)]
+        [DataRow(CachingDictionaryType.ConcurrentCachingDictionaryWithMinimalState)]
+        public void AddThenUpdateShouldWork(CachingDictionaryType cachingDictionaryType)
+        {
+            var flushCacheTo = new ComposableDictionary<string, int>();
+            var uut = CreateUnitUnderTest<string, int>(cachingDictionaryType, flushCacheTo);
+
+            uut.Add("Hi", 2);
+            
+            uut.TryGetValue("Hi", out var result).Should().BeTrue();
+            result.Should().Be(2);
+
+            uut.Update("Hi", 3);
+
+            uut.TryGetValue("Hi", out result).Should().BeTrue();
+            result.Should().Be(3);
+
+            uut.FlushCache();
+
+            uut.TryGetValue("Hi", out result).Should().BeTrue();
+            result.Should().Be(3);
+
+            flushCacheTo.TryGetValue("Hi", out result).Should().BeTrue();
+            result.Should().Be(3);
+        }
+
+        [TestMethod]
+        [DataRow(CachingDictionaryType.ConcurrentCachingDictionary)]
+        [DataRow(CachingDictionaryType.ConcurrentCachingDictionaryWithMinimalState)]
         public void AddDuplicateUnderlyingValueShouldFail(CachingDictionaryType cachingDictionaryType)
         {
             var flushCacheTo = new ComposableDictionary<string, int>();

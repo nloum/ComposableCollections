@@ -27,6 +27,17 @@ namespace ComposableCollections
         /// Copies all the items into a new composable dictionary.
         /// </summary>
         public static IComposableDictionary<TKey, TValue> ToComposableDictionary<TKey, TValue>(
+            this IEnumerable<IKeyValue<TKey, TValue>> source)
+        {
+            var results = new ComposableDictionary<TKey, TValue>();
+            results.AddRange(source);
+            return results;
+        }
+
+        /// <summary>
+        /// Copies all the items into a new composable dictionary.
+        /// </summary>
+        public static IComposableDictionary<TKey, TValue> ToComposableDictionary<TKey, TValue>(
             this IEnumerable<KeyValuePair<TKey, TValue>> source)
         {
             var results = new ComposableDictionary<TKey, TValue>();

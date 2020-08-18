@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ComposableCollections.Dictionary.Exceptions;
 
 namespace ComposableCollections.Dictionary
 {
@@ -219,7 +220,7 @@ namespace ComposableCollections.Dictionary
         {
             if (!TryRemove(key, out removedItem))
             {
-                throw new InvalidOperationException("Cannot remove item from dictionary");
+                throw new RemoveFailedBecauseNoSuchKeyExistsException(key);
             }
         }
 
@@ -238,7 +239,7 @@ namespace ComposableCollections.Dictionary
         {
             if (!TryAdd(key, value))
             {
-                throw new InvalidOperationException("Cannot add an item to the dictionary because the key already exists");
+                throw new AddFailedBecauseKeyAlreadyExistsException(key);
             }
         }
 
@@ -256,7 +257,7 @@ namespace ComposableCollections.Dictionary
         {
             if (!TryUpdate(key, value))
             {
-                throw new KeyNotFoundException();
+                throw new UpdateFailedBecauseNoSuchKeyExistsException(key);
             }
         }
 

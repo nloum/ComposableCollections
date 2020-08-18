@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using ComposableCollections.Dictionary.Exceptions;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
@@ -64,7 +65,7 @@ namespace ComposableCollections.Dictionary
                             {
                                 if (preExistingValueRef.TryGetTarget(out var preExistingValue))
                                 {
-                                    throw new InvalidOperationException("Cannot add an item because an item with that key already exists");
+                                    throw new AddFailedBecauseKeyAlreadyExistsException(mutation.Key);
                                 }
                                 else
                                 {

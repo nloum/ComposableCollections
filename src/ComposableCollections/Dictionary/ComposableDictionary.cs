@@ -90,7 +90,7 @@ namespace ComposableCollections.Dictionary
                         if (State.TryGetValue(mutation.Key, out var previousValue))
                         {
                             var newValue = mutation.ValueIfUpdating.Value(previousValue);
-                            State.Add(mutation.Key, newValue);
+                            State[mutation.Key] = newValue;
                             finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, true,
                                 previousValue.ToMaybe(), newValue.ToMaybe()));
                         }
@@ -138,6 +138,12 @@ namespace ComposableCollections.Dictionary
                             finalResults.Add(
                                 DictionaryMutationResult<TKey, TValue>.CreateRemove(mutation.Key,
                                     removedValue.ToMaybe()));
+                        }
+                        else
+                        {
+                            finalResults.Add(
+                                DictionaryMutationResult<TKey, TValue>.CreateRemove(mutation.Key,
+                                    Maybe<TValue>.Nothing()));
                         }
                     }
                         break;

@@ -5,11 +5,11 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
 {
-    public abstract class LockedDictionaryDecoratorBase<TKey, TValue> : IComposableDictionary<TKey, TValue>
+    public abstract class LockedDictionaryBase<TKey, TValue> : IComposableDictionary<TKey, TValue>
     {
         private readonly IComposableDictionary<TKey, TValue> _wrapped;
 
-        public LockedDictionaryDecoratorBase(IComposableDictionary<TKey, TValue> wrapped)
+        public LockedDictionaryBase(IComposableDictionary<TKey, TValue> wrapped)
         {
             _wrapped = wrapped;
         }

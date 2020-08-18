@@ -37,8 +37,8 @@ namespace ComposableCollections.Dictionary
         {
             Mutate(new[] {DictionaryMutation<TKey, TValue>.CreateAddOrUpdate(key, valueIfAdding, valueIfUpdating)}, out var results);
             var firstResult = results.First();
-            newValue = firstResult.Update.Value.NewValue.ValueOrDefault;
-            previousValue = firstResult.Update.Value.ExistingValue.ValueOrDefault;
+            newValue = firstResult.AddOrUpdate.Value.NewValue;
+            previousValue = firstResult.AddOrUpdate.Value.ExistingValue.ValueOrDefault;
             if (firstResult.Update.Value.ExistingValue.HasValue)
             {
                 return DictionaryItemAddOrUpdateResult.Update;

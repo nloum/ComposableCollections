@@ -39,12 +39,7 @@ namespace ComposableCollections.Dictionary
             var firstResult = results.First();
             newValue = firstResult.AddOrUpdate.Value.NewValue;
             previousValue = firstResult.AddOrUpdate.Value.ExistingValue.ValueOrDefault;
-            if (firstResult.Update.Value.ExistingValue.HasValue)
-            {
-                return DictionaryItemAddOrUpdateResult.Update;
-            }
-
-            return DictionaryItemAddOrUpdateResult.Add;
+            return firstResult.AddOrUpdate.Value.Result;
         }
 
         public virtual bool TryRemove(TKey key, out TValue removedItem)

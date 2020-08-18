@@ -181,5 +181,24 @@ namespace ComposableCollections.Tests
             uut.TryGetValue("Hey", out result).Should().BeFalse();
             uut.ContainsKey("Hey").Should().BeFalse();
         }
+
+        [TestMethod]
+        [DataRow(DictionaryType.ConcurrentDictionary)]
+        [DataRow(DictionaryType.ConcurrentCachingDictionaryWithMinimalState)]
+        [DataRow(DictionaryType.ComposableDictionary)]
+        [DataRow(DictionaryType.ConcurrentCachingDictionary)]
+        public void ShouldAddOrUpdate(DictionaryType dictionaryType)
+        {
+            var uut = CreateUnitUnderTest<string, int>(dictionaryType);
+            uut["Hi"] = 2;
+            uut.TryGetValue("Hi", out var result).Should().BeTrue();
+            uut.ContainsKey("Hi").Should().BeTrue();
+            result.Should().Be(2);
+            
+            uut["Hi"] = 3;
+            uut.TryGetValue("Hi", out result).Should().BeTrue();
+            uut.ContainsKey("Hi").Should().BeTrue();
+            result.Should().Be(3);
+        }
     }
 }

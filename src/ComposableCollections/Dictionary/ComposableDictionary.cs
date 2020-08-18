@@ -106,16 +106,16 @@ namespace ComposableCollections.Dictionary
                         if (State.TryGetValue(mutation.Key, out var previousValue))
                         {
                             var newValue = mutation.ValueIfUpdating.Value(previousValue);
-                            State.Add(mutation.Key, newValue);
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, true,
-                                previousValue.ToMaybe(), newValue.ToMaybe()));
+                            State[mutation.Key] = newValue;
+                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateAddOrUpdate(mutation.Key, DictionaryItemAddOrUpdateResult.Update,
+                                previousValue.ToMaybe(), newValue));
                         }
                         else
                         {
                             var newValue = mutation.ValueIfAdding.Value();
-                            State[mutation.Key] = newValue;
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, false,
-                                Maybe<TValue>.Nothing(), newValue.ToMaybe()));
+                            State.Add(mutation.Key, newValue);
+                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateAddOrUpdate(mutation.Key, DictionaryItemAddOrUpdateResult.Add,
+                                Maybe<TValue>.Nothing(), newValue));
                         }
                     }
                         break;

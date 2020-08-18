@@ -118,9 +118,18 @@ namespace ComposableCollections
         /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
         /// flushes them to the specified IComposableDictionary.
         /// </summary>
-        public static ICacheDictionary<TKey, TValue> WithCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> flushTo, IComposableDictionary<TKey, TValue> cache = null)
+        public static ICacheDictionary<TKey, TValue> WithFullCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> flushTo, IComposableDictionary<TKey, TValue> cache = null)
         {
             return new ConcurrentCachingDictionary<TKey, TValue>(flushTo, cache);
+        }
+
+        /// <summary>
+        /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
+        /// flushes them to the specified IComposableDictionary.
+        /// </summary>
+        public static ICacheDictionary<TKey, TValue> WithMinimalCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> flushTo, IComposableDictionary<TKey, TValue> addedOrUpdated = null, IComposableDictionary<TKey, TValue> removed = null)
+        {
+            return new ConcurrentCachingDictionaryWithMinimalState<TKey, TValue>(flushTo, addedOrUpdated, removed);
         }
 
         /// <summary>

@@ -1,6 +1,6 @@
 namespace ComposableCollections.Dictionary
 {
-    public interface IReadOnlyTransactionalDictionary<TKey, TValue>
+    public interface IReadOnlyTransactionalDictionary<TKey, out TValue>
     {
         IDisposableReadOnlyDictionary<TKey, TValue> BeginRead();
     }

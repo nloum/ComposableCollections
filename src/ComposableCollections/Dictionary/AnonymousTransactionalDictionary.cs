@@ -6,6 +6,12 @@ namespace ComposableCollections.Dictionary
     {
         private Func<IDisposableDictionary<TKey, TValue>> _beginWrite;
         private Func<IDisposableReadOnlyDictionary<TKey, TValue>> _beginRead;
+        
+        public AnonymousTransactionalDictionary(Func<IDisposableDictionary<TKey, TValue>> beginReadOrWrite)
+        {
+            _beginRead = beginReadOrWrite;
+            _beginWrite = () => beginReadOrWrite();
+        }
 
         public AnonymousTransactionalDictionary(Func<IDisposableReadOnlyDictionary<TKey, TValue>> beginRead, Func<IDisposableDictionary<TKey, TValue>> beginWrite)
         {

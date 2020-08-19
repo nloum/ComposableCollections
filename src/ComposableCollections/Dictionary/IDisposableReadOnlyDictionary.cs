@@ -2,7 +2,7 @@ using System;
 
 namespace ComposableCollections.Dictionary
 {
-    public interface IDisposableReadOnlyDictionary<TKey, TValue> : IComposableReadOnlyDictionary<TKey, TValue>,
+    public interface IDisposableReadOnlyDictionary<TKey, out TValue> : IComposableReadOnlyDictionary<TKey, TValue>,
         IDisposable
     {
     }

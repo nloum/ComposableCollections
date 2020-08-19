@@ -2,7 +2,7 @@ using System;
 
 namespace ComposableCollections.Dictionary
 {
-    public class AnonymousMapDictionary<TKey, TValue, TInnerValue> : MapDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
+    public class AnonymousMapDictionary<TKey, TValue, TInnerValue> : MapDictionaryBase<TKey, TValue, TInnerValue>
     {
         private Func<TKey, TValue, TInnerValue> _convert;
         private Func<TKey, TInnerValue, TValue> _convertBack;

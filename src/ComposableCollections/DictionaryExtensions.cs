@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using ComposableCollections.Dictionary;
+using SimpleMonads;
 
 namespace ComposableCollections
 {
@@ -139,6 +140,20 @@ namespace ComposableCollections
         public static IComposableDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(this IComposableDictionary<TKey, TValue> source, GetDefaultValue<TKey, TValue> getDefaultValue)
         {
             return new DictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);
+        }
+
+        /// <summary>
+        /// Creates a facade on top of the specified IComposableDictionary that lets you optionally create values when
+        /// they're accessed, on demand.
+        /// </summary>
+        public static IComposableDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(this IComposableDictionary<TKey, TValue> source, Func<TKey, TValue> getDefaultValue, bool persist = true)
+        {
+            return new DictionaryGetOrDefaultDecorator<TKey, TValue>(source,
+                (TKey key, out IMaybe<TValue> value, out bool b) =>
+                {
+                    value = getDefaultValue(key).ToMaybe();
+                    b = persist;
+                });
         }
 
         /// <summary>

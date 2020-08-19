@@ -207,6 +207,17 @@ namespace ComposableCollections
         }
 
         /// <summary>
+        /// Adds locks around the read/write transactions
+        /// that ensures that when the dictionary is being modified, nobody else is modifying it or even reading from it
+        /// but reads can happen simultaneously.
+        /// </summary>
+        public static ITransactionalDictionary<TKey, TValue> WithReadWriteLockConcurrency<TKey, TValue>(
+            this ITransactionalDictionary<TKey, TValue> wrapped)
+        {
+            return new AtomicTransactionalDecorator<TKey, TValue>(wrapped);
+        }
+
+        /// <summary>
         /// Converts the dictionary into an object that lets you access the dictionary in a transactional API,
         /// that ensures that when the dictionary is being modified, nobody else is modifying it or even reading from it
         /// but reads can happen simultaneously.

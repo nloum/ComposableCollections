@@ -120,7 +120,7 @@ namespace ComposableCollections
         /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
         /// flushes them to the specified IComposableDictionary.
         /// </summary>
-        public static ICacheDictionary<TKey, TValue> WithFullCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> flushTo, IComposableDictionary<TKey, TValue> cache = null)
+        public static ICacheDictionary<TKey, TValue> WithReadWriteCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> flushTo, IComposableDictionary<TKey, TValue> cache = null)
         {
             return new ConcurrentCachingDictionary<TKey, TValue>(flushTo, cache);
         }
@@ -129,7 +129,7 @@ namespace ComposableCollections
         /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
         /// flushes them to the specified IComposableDictionary.
         /// </summary>
-        public static ICacheDictionary<TKey, TValue> WithMinimalCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> flushTo, IComposableDictionary<TKey, TValue> addedOrUpdated = null, IComposableDictionary<TKey, TValue> removed = null)
+        public static ICacheDictionary<TKey, TValue> WithWriteCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> flushTo, IComposableDictionary<TKey, TValue> addedOrUpdated = null, IComposableDictionary<TKey, TValue> removed = null)
         {
             return new ConcurrentCachingDictionaryWithMinimalState<TKey, TValue>(flushTo, addedOrUpdated, removed);
         }
@@ -180,7 +180,7 @@ namespace ComposableCollections
         /// Converts a transactional read-only dictionary into a non-transactional one by making each method call
         /// a separate transaction.
         /// </summary>
-        public static IComposableDictionary<TKey, TValue> WithoutTransactionality<TKey, TValue>(
+        public static IComposableDictionary<TKey, TValue> WithEachMethodAsSeparateTransaction<TKey, TValue>(
             this ITransactionalDictionary<TKey, TValue> source)
         {
             return new DetransactionalDictionary<TKey, TValue>(source);
@@ -190,7 +190,7 @@ namespace ComposableCollections
         /// Converts a transactional read-only dictionary into a non-transactional one by making each method call
         /// a separate transaction.
         /// </summary>
-        public static IComposableReadOnlyDictionary<TKey, TValue> WithoutTransactionality<TKey, TValue>(
+        public static IComposableReadOnlyDictionary<TKey, TValue> WithEachMethodAsSeparateTransaction<TKey, TValue>(
             this IReadOnlyTransactionalDictionary<TKey, TValue> source)
         {
             return new ReadOnlyDetransactionalDictionary<TKey, TValue>(source);
@@ -199,14 +199,14 @@ namespace ComposableCollections
         /// <summary>
         /// Converts the source to a transactional dictionary that keeps all mutations pending until the transaction is completed.
         /// </summary>
-        public static ITransactionalDictionary<TKey, TValue> WithTransactionalCache<TKey, TValue>(this IComposableDictionary<TKey, TValue> source)
+        public static ITransactionalDictionary<TKey, TValue> WithCachingUntilTransactionEnds<TKey, TValue>(this IComposableDictionary<TKey, TValue> source)
         {
             return new AnonymousTransactionalDictionary<TKey, TValue>(() =>
             {
                 return new DisposableReadOnlyDictionaryDecorator<TKey, TValue>(source, EmptyDisposable.Default);
             }, () =>
             {
-                var cache = source.WithMinimalCaching();
+                var cache = source.WithWriteCaching();
                 return new DisposableDictionaryDecorator<TKey, TValue>(cache, new AnonymousDisposable(() => cache.FlushCache()));
             });
         }
@@ -214,12 +214,12 @@ namespace ComposableCollections
         /// <summary>
         /// Converts the source to a transactional dictionary that keeps all mutations pending until the transaction is completed.
         /// </summary>
-        public static ITransactionalDictionary<TKey, TValue> WithTransactionalCache<TKey, TValue>(this ITransactionalDictionary<TKey, TValue> source)
+        public static ITransactionalDictionary<TKey, TValue> WithCachingUntilTransactionEnds<TKey, TValue>(this ITransactionalDictionary<TKey, TValue> source)
         {
             return new AnonymousTransactionalDictionary<TKey, TValue>(source.BeginRead, () =>
             {
                 var disposableDictionary = source.BeginWrite();
-                var cache = disposableDictionary.WithMinimalCaching();
+                var cache = disposableDictionary.WithWriteCaching();
                 return new DisposableDictionaryDecorator<TKey, TValue>(cache, new AnonymousDisposable(() =>
                 {
                     cache.FlushCache();
@@ -233,7 +233,7 @@ namespace ComposableCollections
         /// that ensures that when the dictionary is being modified, nobody else is modifying it or even reading from it
         /// but reads can happen simultaneously.
         /// </summary>
-        public static ITransactionalDictionary<TKey, TValue> WithReadWriteLockConcurrency<TKey, TValue>(
+        public static ITransactionalDictionary<TKey, TValue> WithReadWriteLock<TKey, TValue>(
             this IComposableDictionary<TKey, TValue> wrapped)
         {
             return new AtomicDictionaryAdapter<TKey, TValue>(wrapped);
@@ -244,7 +244,7 @@ namespace ComposableCollections
         /// that ensures that when the dictionary is being modified, nobody else is modifying it or even reading from it
         /// but reads can happen simultaneously.
         /// </summary>
-        public static ITransactionalDictionary<TKey, TValue> WithReadWriteLockConcurrency<TKey, TValue>(
+        public static ITransactionalDictionary<TKey, TValue> WithReadWriteLock<TKey, TValue>(
             this ITransactionalDictionary<TKey, TValue> wrapped)
         {
             return new AtomicTransactionalDecorator<TKey, TValue>(wrapped);
@@ -255,7 +255,7 @@ namespace ComposableCollections
         /// that ensures that when the dictionary is being modified, nobody else is modifying it or even reading from it
         /// but reads can happen simultaneously.
         /// </summary>
-        public static IReadOnlyTransactionalDictionary<TKey, TValue> WithReadWriteLockConcurrency<TKey, TValue>(
+        public static IReadOnlyTransactionalDictionary<TKey, TValue> WithReadWriteLock<TKey, TValue>(
             this IComposableReadOnlyDictionary<TKey, TValue> wrapped)
         {
             return new AtomicReadOnlyDictionaryAdapter<TKey, TValue>(wrapped);

@@ -176,11 +176,31 @@ namespace ComposableCollections
         }
 
         /// <summary>
+        /// Converts a transactional read-only dictionary into a non-transactional one by making each method call
+        /// a separate transaction.
+        /// </summary>
+        public static IComposableDictionary<TKey, TValue> WithoutTransactionality<TKey, TValue>(
+            this ITransactionalDictionary<TKey, TValue> source)
+        {
+            return new DetransactionalDictionary<TKey, TValue>(source);
+        }
+
+        /// <summary>
+        /// Converts a transactional read-only dictionary into a non-transactional one by making each method call
+        /// a separate transaction.
+        /// </summary>
+        public static IComposableReadOnlyDictionary<TKey, TValue> WithoutTransactionality<TKey, TValue>(
+            this IReadOnlyTransactionalDictionary<TKey, TValue> source)
+        {
+            return new ReadOnlyDetransactionalDictionary<TKey, TValue>(source);
+        }
+        
+        /// <summary>
         /// Converts the dictionary into an object that lets you access the dictionary in a transactional API,
         /// that ensures that when the dictionary is being modified, nobody else is modifying it or even reading from it
         /// but reads can happen simultaneously.
         /// </summary>
-        public static ITransactionalDictionary<TKey, TValue> WithTransactionalConcurrency<TKey, TValue>(
+        public static ITransactionalDictionary<TKey, TValue> WithReadWriteLockConcurrency<TKey, TValue>(
             this IComposableDictionary<TKey, TValue> wrapped)
         {
             return new AtomicDictionaryAdapter<TKey, TValue>(wrapped);
@@ -191,7 +211,7 @@ namespace ComposableCollections
         /// that ensures that when the dictionary is being modified, nobody else is modifying it or even reading from it
         /// but reads can happen simultaneously.
         /// </summary>
-        public static IReadOnlyTransactionalDictionary<TKey, TValue> WithTransactionalConcurrency<TKey, TValue>(
+        public static IReadOnlyTransactionalDictionary<TKey, TValue> WithReadWriteLockConcurrency<TKey, TValue>(
             this IComposableReadOnlyDictionary<TKey, TValue> wrapped)
         {
             return new AtomicReadOnlyDictionaryAdapter<TKey, TValue>(wrapped);

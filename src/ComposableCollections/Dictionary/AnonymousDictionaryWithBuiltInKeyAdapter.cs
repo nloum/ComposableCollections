@@ -15,7 +15,7 @@ namespace ComposableCollections.Dictionary
         {
             _getKey = getKey;
         }
-
+        
         public override TKey GetKey(TValue value)
         {
             return _getKey(value);

@@ -1,9 +1,6 @@
-using System.Linq;
-
 namespace ComposableCollections.Dictionary
 {
-    public interface IQueryableDictionary<TKey, TValue> : IComposableDictionary<TKey, TValue>
+    public interface IQueryableDictionary<TKey, TValue> : IComposableDictionary<TKey, TValue>, IQueryableReadOnlyDictionary<TKey, TValue>
     {
-        new IQueryable<TValue> Values { get; }
     }
 }

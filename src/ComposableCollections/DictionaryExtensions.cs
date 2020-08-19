@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using ComposableCollections.Dictionary;
 using SimpleMonads;
+using UtilityDisposables;
 
 namespace ComposableCollections
 {
@@ -194,7 +195,39 @@ namespace ComposableCollections
         {
             return new ReadOnlyDetransactionalDictionary<TKey, TValue>(source);
         }
+
+        /// <summary>
+        /// Converts the source to a transactional dictionary that keeps all mutations pending until the transaction is completed.
+        /// </summary>
+        public static ITransactionalDictionary<TKey, TValue> WithTransactionalCache<TKey, TValue>(this IComposableDictionary<TKey, TValue> source)
+        {
+            return new AnonymousTransactionalDictionary<TKey, TValue>(() =>
+            {
+                return new DisposableReadOnlyDictionaryDecorator<TKey, TValue>(source, EmptyDisposable.Default);
+            }, () =>
+            {
+                var cache = source.WithMinimalCaching();
+                return new DisposableDictionaryDecorator<TKey, TValue>(cache, new AnonymousDisposable(() => cache.FlushCache()));
+            });
+        }
         
+        /// <summary>
+        /// Converts the source to a transactional dictionary that keeps all mutations pending until the transaction is completed.
+        /// </summary>
+        public static ITransactionalDictionary<TKey, TValue> WithTransactionalCache<TKey, TValue>(this ITransactionalDictionary<TKey, TValue> source)
+        {
+            return new AnonymousTransactionalDictionary<TKey, TValue>(source.BeginRead, () =>
+            {
+                var disposableDictionary = source.BeginWrite();
+                var cache = disposableDictionary.WithMinimalCaching();
+                return new DisposableDictionaryDecorator<TKey, TValue>(cache, new AnonymousDisposable(() =>
+                {
+                    cache.FlushCache();
+                    disposableDictionary.Dispose();
+                }));
+            });
+        }
+
         /// <summary>
         /// Converts the dictionary into an object that lets you access the dictionary in a transactional API,
         /// that ensures that when the dictionary is being modified, nobody else is modifying it or even reading from it

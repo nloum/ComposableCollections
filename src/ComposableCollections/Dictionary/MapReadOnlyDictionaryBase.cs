@@ -11,7 +11,7 @@ namespace ComposableCollections.Dictionary
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     /// <typeparam name="TInnerValue"></typeparam>
-    public abstract class MapReadOnlyDictionaryBase<TKey, TValue, TInnerValue> : ReadOnlyDictionaryBase<TKey, TValue> where TValue : class {
+    public abstract class MapReadOnlyDictionaryBase<TKey, TValue, TInnerValue> : ReadOnlyDictionaryBase<TKey, TValue> {
         private readonly IComposableReadOnlyDictionary<TKey, TInnerValue> _innerValues;
 
         protected MapReadOnlyDictionaryBase(IComposableReadOnlyDictionary<TKey, TInnerValue> innerValues)

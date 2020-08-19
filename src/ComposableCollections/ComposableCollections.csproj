@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="GenericNumbers" Version="1.1.0-alpha0031" />
     <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0040" />
+    <PackageReference Include="UtilityDisposables" Version="1.1.0-alpha0006" />
   </ItemGroup>
 
   <ItemGroup>

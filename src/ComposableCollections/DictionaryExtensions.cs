@@ -174,5 +174,27 @@ namespace ComposableCollections
         {
             return new AnonymousDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, key);
         }
+
+        /// <summary>
+        /// Converts the dictionary into an object that lets you access the dictionary in a transactional API,
+        /// that ensures that when the dictionary is being modified, nobody else is modifying it or even reading from it
+        /// but reads can happen simultaneously.
+        /// </summary>
+        public static ITransactionalDictionary<TKey, TValue> WithTransactionalConcurrency<TKey, TValue>(
+            this IComposableDictionary<TKey, TValue> wrapped)
+        {
+            return new AtomicDictionaryAdapter<TKey, TValue>(wrapped);
+        }
+
+        /// <summary>
+        /// Converts the dictionary into an object that lets you access the dictionary in a transactional API,
+        /// that ensures that when the dictionary is being modified, nobody else is modifying it or even reading from it
+        /// but reads can happen simultaneously.
+        /// </summary>
+        public static IReadOnlyTransactionalDictionary<TKey, TValue> WithTransactionalConcurrency<TKey, TValue>(
+            this IComposableReadOnlyDictionary<TKey, TValue> wrapped)
+        {
+            return new AtomicReadOnlyDictionaryAdapter<TKey, TValue>(wrapped);
+        }
     }
 }

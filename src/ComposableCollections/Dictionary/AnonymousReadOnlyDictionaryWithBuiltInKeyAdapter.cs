@@ -6,7 +6,7 @@ namespace ComposableCollections.Dictionary
     {
         private readonly Func<TValue, TKey> _getKey;
         
-        public AnonymousReadOnlyDictionaryWithBuiltInKeyAdapter(IComposableDictionary<TKey, TValue> wrapped, Func<TValue, TKey> getKey) : base(wrapped)
+        public AnonymousReadOnlyDictionaryWithBuiltInKeyAdapter(IComposableReadOnlyDictionary<TKey, TValue> wrapped, Func<TValue, TKey> getKey) : base(wrapped)
         {
             _getKey = getKey;
         }

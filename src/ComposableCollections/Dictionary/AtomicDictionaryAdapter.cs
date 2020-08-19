@@ -3,7 +3,7 @@ using UtilityDisposables;
 
 namespace ComposableCollections.Dictionary
 {
-    public class AtomicDictionaryAdapter<TKey, TValue> : ITransactionalDictionary<TKey, TValue>
+    public class AtomicDictionaryAdapter<TKey, TValue> : ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>
     {
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
         private readonly IComposableDictionary<TKey, TValue> _wrapped;

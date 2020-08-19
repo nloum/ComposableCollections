@@ -165,6 +165,40 @@ namespace ComposableCollections
         {
             return new DictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
         }
+        
+        /// <summary>
+        /// Creates a facade on top of the specified ITransactionalDictionary that lets you optionally create values when
+        /// they're accessed, on demand.
+        /// </summary>
+        public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithDefaultValue<TKey, TValue>(this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source, Func<TKey, TValue> getDefaultValue, bool persist = true)
+        {
+            return new AnonymousTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>(() =>
+            {
+                var writer = source.BeginWrite();
+                return new DisposableDictionaryDecorator<TKey, TValue>(writer.WithDefaultValue(getDefaultValue), writer);
+            }, () =>
+            {
+                var writer = source.BeginWrite();
+                return new DisposableDictionaryDecorator<TKey, TValue>(writer.WithDefaultValue(getDefaultValue), writer);
+            });
+        }
+
+        /// <summary>
+        /// Creates a facade on top of the specified ITransactionalDictionary that lets you optionally update values when
+        /// they're accessed, on demand.
+        /// </summary>
+        public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithRefreshing<TKey, TValue>(this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source, RefreshValue<TKey, TValue> refreshValue)
+        {
+            return new AnonymousTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>(() =>
+            {
+                var writer = source.BeginWrite();
+                return new DisposableDictionaryDecorator<TKey, TValue>(writer.WithRefreshing(refreshValue), writer);
+            }, () =>
+            {
+                var writer = source.BeginWrite();
+                return new DisposableDictionaryDecorator<TKey, TValue>(writer.WithRefreshing(refreshValue), writer);
+            });
+        }
 
         /// <summary>
         /// Creates a facade on top of the specified IComposableDictionary that has a built-in key, which means you're telling
@@ -177,11 +211,44 @@ namespace ComposableCollections
         }
 
         /// <summary>
+        /// Creates a facade on top of the specified IComposableDictionary that has a built-in key, which means you're telling
+        /// the object how to get the key from a value. That means any API where you pass in a TValue, you
+        /// won't have to tell the API what the key is.
+        /// </summary>
+        public static IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IComposableReadOnlyDictionary<TKey, TValue> source, Func<TValue, TKey> key)
+        {
+            return new AnonymousReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, key);
+        }
+
+        /// <summary>
+        /// Creates an adapter on top of the specified ITransactionalCollection that has a built-in key, which means you're telling
+        /// the object how to get the key from a value. That means any API where you pass in a TValue, you
+        /// won't have to tell the API what the key is.
+        /// </summary>
+        public static ITransactionalCollection<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, IDisposableDictionaryWithBuiltInKey<TKey, TValue>> WithBuiltInKey<TKey, TValue>(this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source, Func<TValue, TKey> key)
+        {
+            return source.Select(x =>
+                new DisposableReadOnlyDictionaryWithBuiltInKeyDecorator<TKey, TValue>(x.WithBuiltInKey(key), x), x =>
+                new DisposableDictionaryWithBuiltInKeyDecorator<TKey, TValue>(x.WithBuiltInKey(key), x));
+        }
+
+        /// <summary>
+        /// Creates an adapter on top of the specified IReadOnlyTransactionalCollection that has a built-in key, which means you're telling
+        /// the object how to get the key from a value. That means any API where you pass in a TValue, you
+        /// won't have to tell the API what the key is.
+        /// </summary>
+        public static IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>> WithBuiltInKey<TKey, TValue>(this IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>> source, Func<TValue, TKey> key)
+        {
+            return source.Select(x =>
+                new DisposableReadOnlyDictionaryWithBuiltInKeyDecorator<TKey, TValue>(x.WithBuiltInKey(key), x));
+        }
+
+        /// <summary>
         /// Converts a transactional read-only dictionary into a non-transactional one by making each method call
         /// a separate transaction.
         /// </summary>
         public static IComposableDictionary<TKey, TValue> WithEachMethodAsSeparateTransaction<TKey, TValue>(
-            this ITransactionalDictionary<TKey, TValue> source)
+            this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source)
         {
             return new DetransactionalDictionary<TKey, TValue>(source);
         }
@@ -191,17 +258,38 @@ namespace ComposableCollections
         /// a separate transaction.
         /// </summary>
         public static IComposableReadOnlyDictionary<TKey, TValue> WithEachMethodAsSeparateTransaction<TKey, TValue>(
-            this IReadOnlyTransactionalDictionary<TKey, TValue> source)
+            this IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>> source)
         {
             return new ReadOnlyDetransactionalDictionary<TKey, TValue>(source);
         }
 
         /// <summary>
+        /// Converts the read-only and read/write objects
+        /// </summary>
+        public static ITransactionalCollection<TReadOnly2, TReadWrite2>
+            Select<TReadOnly1, TReadWrite1, TReadOnly2, TReadWrite2>(
+                this ITransactionalCollection<TReadOnly1, TReadWrite1> source, Func<TReadOnly1, TReadOnly2> readOnly,
+                Func<TReadWrite1, TReadWrite2> readWrite) where TReadOnly1 : IDisposable where TReadOnly2 : IDisposable where TReadWrite1 : IDisposable where TReadWrite2 : IDisposable
+        {
+            return new AnonymousTransactionalCollection<TReadOnly2, TReadWrite2>(() => readOnly(source.BeginRead()), () => readWrite(source.BeginWrite()));
+        }
+        
+        /// <summary>
+        /// Converts the read-only object
+        /// </summary>
+        public static IReadOnlyTransactionalCollection<TReadOnly2>
+            Select<TReadOnly1, TReadOnly2>(
+                this IReadOnlyTransactionalCollection<TReadOnly1> source, Func<TReadOnly1, TReadOnly2> readOnly) where TReadOnly1 : IDisposable where TReadOnly2 : IDisposable
+        {
+            return new AnonymousReadOnlyTransactionalCollection<TReadOnly2>(() => readOnly(source.BeginRead()));
+        }
+
+        /// <summary>
         /// Converts the source to a transactional dictionary that keeps all mutations pending until the transaction is completed.
         /// </summary>
-        public static ITransactionalDictionary<TKey, TValue> WithCachingUntilTransactionEnds<TKey, TValue>(this IComposableDictionary<TKey, TValue> source)
+        public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithCachingUntilTransactionEnds<TKey, TValue>(this IComposableDictionary<TKey, TValue> source)
         {
-            return new AnonymousTransactionalDictionary<TKey, TValue>(() =>
+            return new AnonymousTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>(() =>
             {
                 return new DisposableReadOnlyDictionaryDecorator<TKey, TValue>(source, EmptyDisposable.Default);
             }, () =>
@@ -214,9 +302,9 @@ namespace ComposableCollections
         /// <summary>
         /// Converts the source to a transactional dictionary that keeps all mutations pending until the transaction is completed.
         /// </summary>
-        public static ITransactionalDictionary<TKey, TValue> WithCachingUntilTransactionEnds<TKey, TValue>(this ITransactionalDictionary<TKey, TValue> source)
+        public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithCachingUntilTransactionEnds<TKey, TValue>(this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source)
         {
-            return new AnonymousTransactionalDictionary<TKey, TValue>(source.BeginRead, () =>
+            return new AnonymousTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>(source.BeginRead, () =>
             {
                 var disposableDictionary = source.BeginWrite();
                 var cache = disposableDictionary.WithWriteCaching();
@@ -233,7 +321,7 @@ namespace ComposableCollections
         /// that ensures that when the dictionary is being modified, nobody else is modifying it or even reading from it
         /// but reads can happen simultaneously.
         /// </summary>
-        public static ITransactionalDictionary<TKey, TValue> WithReadWriteLock<TKey, TValue>(
+        public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithReadWriteLock<TKey, TValue>(
             this IComposableDictionary<TKey, TValue> wrapped)
         {
             return new AtomicDictionaryAdapter<TKey, TValue>(wrapped);
@@ -244,8 +332,8 @@ namespace ComposableCollections
         /// that ensures that when the dictionary is being modified, nobody else is modifying it or even reading from it
         /// but reads can happen simultaneously.
         /// </summary>
-        public static ITransactionalDictionary<TKey, TValue> WithReadWriteLock<TKey, TValue>(
-            this ITransactionalDictionary<TKey, TValue> wrapped)
+        public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithReadWriteLock<TKey, TValue>(
+            this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> wrapped)
         {
             return new AtomicTransactionalDecorator<TKey, TValue>(wrapped);
         }
@@ -255,7 +343,7 @@ namespace ComposableCollections
         /// that ensures that when the dictionary is being modified, nobody else is modifying it or even reading from it
         /// but reads can happen simultaneously.
         /// </summary>
-        public static IReadOnlyTransactionalDictionary<TKey, TValue> WithReadWriteLock<TKey, TValue>(
+        public static IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>> WithReadWriteLock<TKey, TValue>(
             this IComposableReadOnlyDictionary<TKey, TValue> wrapped)
         {
             return new AtomicReadOnlyDictionaryAdapter<TKey, TValue>(wrapped);

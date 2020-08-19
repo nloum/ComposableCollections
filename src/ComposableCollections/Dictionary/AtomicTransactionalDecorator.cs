@@ -3,12 +3,12 @@ using UtilityDisposables;
 
 namespace ComposableCollections.Dictionary
 {
-    public class AtomicTransactionalDecorator<TKey, TValue> : ITransactionalDictionary<TKey, TValue>
+    public class AtomicTransactionalDecorator<TKey, TValue> : ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>
     {
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
-        private readonly ITransactionalDictionary<TKey, TValue> _transactionalDictionary;
+        private readonly ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> _transactionalDictionary;
 
-        public AtomicTransactionalDecorator(ITransactionalDictionary<TKey, TValue> transactionalDictionary)
+        public AtomicTransactionalDecorator(ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> transactionalDictionary)
         {
             _transactionalDictionary = transactionalDictionary;
         }

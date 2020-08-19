@@ -7,9 +7,9 @@ namespace ComposableCollections.Dictionary
 {
     public class ReadOnlyDetransactionalDictionary<TKey, TValue> : IComposableReadOnlyDictionary<TKey, TValue>
     {
-        private readonly IReadOnlyTransactionalDictionary<TKey, TValue> _wrapped;
+        private readonly IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>> _wrapped;
 
-        public ReadOnlyDetransactionalDictionary(IReadOnlyTransactionalDictionary<TKey, TValue> dictionary)
+        public ReadOnlyDetransactionalDictionary(IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>> dictionary)
         {
             _wrapped = dictionary;
         }

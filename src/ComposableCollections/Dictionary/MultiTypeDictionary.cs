@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace ComposableCollections.Dictionary
 {
-    public class MultiTypeDictionary<TValue>
+    public class MultiTypeDictionary<TValue> : IMultiTypeDictionary<TValue>
     {
         private readonly IComposableDictionary<Type, TValue> _values;
 

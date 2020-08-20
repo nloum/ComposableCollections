@@ -7,7 +7,7 @@ namespace ComposableCollections.Dictionary
     {
         private readonly IComposableDictionary<Type, TValue> _values;
 
-        protected MultiTypeDictionary(IComposableDictionary<Type, TValue> values)
+        public MultiTypeDictionary(IComposableDictionary<Type, TValue> values)
         {
             _values = values;
         }

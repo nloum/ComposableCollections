@@ -305,6 +305,51 @@ namespace ComposableCollections
         }
 
         /// <summary>
+        /// Converts the read-only and read/write objects
+        /// </summary>
+        public static ITransactionalCollection<TReadOnly2, TReadWrite2>
+            SelectMany<TReadOnly1, TReadWrite1, TReadOnly2, TReadWrite2>(
+                this ITransactionalCollection<TReadOnly1, TReadWrite1> source, Func<TReadOnly1, TReadOnly2> readOnly,
+                Func<TReadWrite1, TReadWrite2> readWrite) where TReadOnly1 : IDisposable where TReadOnly2 : IDisposable where TReadWrite1 : IDisposable where TReadWrite2 : IDisposable
+        {
+            return new AnonymousTransactionalCollection<TReadOnly2, TReadWrite2>(() => readOnly(source.BeginRead()), () => readWrite(source.BeginWrite()));
+        }
+        
+        /// <summary>
+        /// Flattens a nested transaction. Note that the readOnly parameter must ensure that the TReadOnly1 gets disposed
+        /// when its return value is disposed. The same is true of readWrite.
+        /// </summary>
+        public static ITransactionalCollection<TReadOnly2, TReadWrite2>
+            SelectMany<TReadOnly1, TReadWrite1, TReadOnly2, TReadWrite2>(
+                this ITransactionalCollection<TReadOnly1, TReadWrite1> source, Func<TReadOnly1, IDisposableReadOnlyTransactionalCollection<TReadOnly2>> readOnly, Func<TReadWrite1, IDisposableTransactionalCollection<TReadOnly2, TReadWrite2>> readWrite) where TReadOnly1 : IDisposable where TReadOnly2 : IDisposable where TReadWrite1 : IDisposable where TReadWrite2 : IDisposable
+        {
+            return new AnonymousTransactionalCollection<TReadOnly2, TReadWrite2>(() =>
+            {
+                var it = readOnly(source.BeginRead());
+                return it.BeginRead();
+            }, () =>
+            {
+                var it = readWrite(source.BeginWrite());
+                return it.BeginWrite();
+            });
+        }
+
+        /// <summary>
+        /// Flattens a nested transaction. Note that the readOnly parameter must ensure that the TReadOnly1 gets disposed
+        /// when its return value is disposed.
+        /// </summary>
+        public static IReadOnlyTransactionalCollection<TReadOnly2>
+            SelectMany<TReadOnly1, TReadOnly2>(
+                this IReadOnlyTransactionalCollection<TReadOnly1> source, Func<TReadOnly1, IDisposableReadOnlyTransactionalCollection<TReadOnly2>> readOnly) where TReadOnly1 : IDisposable where TReadOnly2 : IDisposable
+        {
+            return new AnonymousReadOnlyTransactionalCollection<TReadOnly2>(() =>
+            {
+                var it = readOnly(source.BeginRead());
+                return it.BeginRead();
+            });
+        }
+
+        /// <summary>
         /// Converts the source to a transactional dictionary that keeps all mutations pending until the transaction is completed.
         /// </summary>
         public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithWritesCombinedAtEndOfTransaction<TKey, TValue>(this IComposableDictionary<TKey, TValue> source)

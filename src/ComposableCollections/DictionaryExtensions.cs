@@ -282,7 +282,7 @@ namespace ComposableCollections
         {
             return new ReadOnlyDetransactionalQueryableDictionary<TKey, TValue>(source);
         }
-
+        
         /// <summary>
         /// Converts the read-only and read/write objects
         /// </summary>

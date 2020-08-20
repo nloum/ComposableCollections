@@ -264,6 +264,26 @@ namespace ComposableCollections
         }
 
         /// <summary>
+        /// Converts a transactional read-only queryable dictionary into a non-transactional one by making each method call
+        /// a separate transaction.
+        /// </summary>
+        public static IQueryableDictionary<TKey, TValue> WithEachMethodAsSeparateTransaction<TKey, TValue>(
+            this ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue>, IDisposableQueryableDictionary<TKey, TValue>> source)
+        {
+            return new DetransactionalQueryableDictionary<TKey, TValue>(source);
+        }
+
+        /// <summary>
+        /// Converts a transactional read-only queryable dictionary into a non-transactional one by making each method call
+        /// a separate transaction.
+        /// </summary>
+        public static IQueryableReadOnlyDictionary<TKey, TValue> WithEachMethodAsSeparateTransaction<TKey, TValue>(
+            this IReadOnlyTransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue>> source)
+        {
+            return new ReadOnlyDetransactionalQueryableDictionary<TKey, TValue>(source);
+        }
+
+        /// <summary>
         /// Converts the read-only and read/write objects
         /// </summary>
         public static ITransactionalCollection<TReadOnly2, TReadWrite2>

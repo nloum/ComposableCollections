@@ -110,7 +110,7 @@ namespace ComposableCollections.Dictionary
             }
         }
 
-        private class Enumerator<T> : IEnumerator<T>
+        protected class Enumerator<T> : IEnumerator<T>
         {
             private readonly IEnumerator<T> _wrapped;
             private readonly IDisposable _disposable;
@@ -142,7 +142,7 @@ namespace ComposableCollections.Dictionary
             public T Current => _wrapped.Current;
         }
 
-        private class Enumerable<T> : IEnumerable<T>
+        protected class Enumerable<T> : IEnumerable<T>
         {
             private readonly Func<IEnumerator<T>> _getEnumerator;
 

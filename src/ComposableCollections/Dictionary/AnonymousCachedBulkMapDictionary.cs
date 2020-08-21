@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ComposableCollections.Dictionary
 {
-    public class AnonymousCachedBulkMapDictionary<TKey, TValue, TInnerValue> : CachedBulkMapDictionaryBase<TKey, TValue, TInnerValue> where TValue : class
+    public class AnonymousCachedBulkMapDictionary<TKey, TValue, TInnerValue> : CachedBulkMapDictionaryBase<TKey, TValue, TInnerValue>
     {
         private Func<TKey, TValue, TInnerValue> _convert;
         private Func<TKey, TInnerValue, TValue> _convertBack;

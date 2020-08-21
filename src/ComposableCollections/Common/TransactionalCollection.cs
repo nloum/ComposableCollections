@@ -9,5 +9,11 @@ namespace ComposableCollections.Dictionary
         {
             return new AnonymousTransactionalCollection<TReadOnly, TReadWrite>(readOnly, readWrite);
         }
+        
+        public static ITransactionalCollection<T, T> Create<T>(Func<T> readOrWrite)
+            where T : IDisposable
+        {
+            return new AnonymousTransactionalCollection<T, T>(readOrWrite, readOrWrite);
+        }
     }
 }

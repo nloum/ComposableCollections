@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Humanizer" Version="2.8.26" />
+      <PackageReference Include="MoreCollections" Version="1.1.0-alpha0091" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ComposableCollections\ComposableCollections.csproj" />
+    </ItemGroup>
+
+</Project>

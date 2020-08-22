@@ -19,6 +19,11 @@ namespace ComposableCollections.Dictionary
         {
         }
 
+        public IComposableDictionary<TKey, TValue> AsComposableDictionary()
+        {
+            return _wrapped;
+        }
+
         protected void Initialize(IComposableDictionary<TKey, TValue> wrapped)
         {
             _wrapped = wrapped;

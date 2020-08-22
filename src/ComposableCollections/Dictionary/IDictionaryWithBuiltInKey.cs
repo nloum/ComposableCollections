@@ -5,6 +5,8 @@ namespace ComposableCollections.Dictionary
 {
     public interface IDictionaryWithBuiltInKey<TKey, TValue> : IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>
     {
+        IComposableDictionary<TKey, TValue> AsComposableDictionary();
+        
         bool TryGetValue(TKey key, out TValue value);
         new TValue this[TKey key] { get; set; }
         TKey GetKey(TValue value);

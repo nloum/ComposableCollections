@@ -23,6 +23,11 @@ namespace ComposableCollections.Dictionary
             _wrapped = wrapped;
         }
 
+        public IComposableDictionary<TKey, TValue> AsComposableDictionary()
+        {
+            return _wrapped.AsComposableDictionary();
+        }
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();

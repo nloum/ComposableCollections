@@ -15,14 +15,14 @@ namespace ComposableCollections.Tests
             ConcurrentCachingDictionary,
         }
         
-        private ICacheDictionary<TKey, TValue> CreateUnitUnderTest<TKey, TValue>(CachingDictionaryType cachingDictionaryType, IComposableDictionary<TKey, TValue> flushCacheTo)
+        private ICachedDictionary<TKey, TValue> CreateUnitUnderTest<TKey, TValue>(CachingDictionaryType cachingDictionaryType, IComposableDictionary<TKey, TValue> flushCacheTo)
         {
             switch (cachingDictionaryType)
             {
                 case CachingDictionaryType.ConcurrentCachingDictionaryWithMinimalState:
-                    return new ConcurrentCachingDictionaryWithMinimalState<TKey, TValue>(flushCacheTo);
+                    return new ConcurrentCachedDictionaryWithMinimalState<TKey, TValue>(flushCacheTo);
                 case CachingDictionaryType.ConcurrentCachingDictionary:
-                    return new ConcurrentCachingDictionary<TKey, TValue>(flushCacheTo, new ComposableDictionary<TKey, TValue>());
+                    return new ConcurrentCachedDictionary<TKey, TValue>(flushCacheTo, new ComposableDictionary<TKey, TValue>());
                 default:
                     throw new NotImplementedException();
             }

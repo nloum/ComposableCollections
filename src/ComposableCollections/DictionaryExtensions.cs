@@ -9,6 +9,8 @@ namespace ComposableCollections
 {
     public static class DictionaryExtensions
     {
+        #region To and from IKeyValue
+        
         /// <summary>
         /// Converts from a ComposableCollections IKeyValue object to a normal .NET KeyValuePair object.
         /// </summary>
@@ -24,6 +26,10 @@ namespace ComposableCollections
         {
             return new KeyValue<TKey, TValue>(source.Key, source.Value);
         }
+        
+        #endregion
+        
+        #region Creating a new Composable Dictionary
         
         /// <summary>
         /// Copies all the items into a new composable dictionary.
@@ -80,6 +86,10 @@ namespace ComposableCollections
             return results;
         }
 
+        #endregion
+        
+        #region WithMapping
+        
         /// <summary>
         /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
         /// flushes them to the specified IComposableDictionary.
@@ -87,15 +97,6 @@ namespace ComposableCollections
         public static IComposableDictionary<TKey, TValue> WithMapping<TKey, TValue, TInnerValue>(this IComposableDictionary<TKey, TInnerValue> source, Func<TKey, TValue, TInnerValue> convert, Func<TKey, TInnerValue, TValue> convertBack)
         {
             return new AnonymousMapDictionary<TKey, TValue, TInnerValue>(source, convert, convertBack);
-        }
-
-        /// <summary>
-        /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
-        /// flushes them to the specified IComposableDictionary. Also this caches the converted values.
-        /// </summary>
-        public static IComposableDictionary<TKey, TValue> WithCachedMapping<TKey, TValue, TInnerValue>(this IComposableDictionary<TKey, TInnerValue> source, Func<TKey, TValue, TInnerValue> convert, Func<TKey, TInnerValue, TValue> convertBack, IComposableDictionary<TKey, TValue> cache = null, bool proactivelyConvertAllValues = false)
-        {
-            return new AnonymousCachedMapDictionary<TKey, TValue, TInnerValue>(source, convert, convertBack, cache, proactivelyConvertAllValues);
         }
 
         /// <summary>
@@ -109,29 +110,11 @@ namespace ComposableCollections
 
         /// <summary>
         /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
-        /// flushes them to the specified IComposableDictionary. Also this caches the converted values.
-        /// </summary>
-        public static IComposableDictionary<TKey, TValue> WithCachedMapping<TKey, TValue, TInnerValue>(this IComposableDictionary<TKey, TInnerValue> source, Func<IEnumerable<IKeyValue<TKey, TValue>>, IEnumerable<IKeyValue<TKey, TInnerValue>>> convert, Func<IEnumerable<IKeyValue<TKey, TInnerValue>>, IEnumerable<IKeyValue<TKey, TValue>>> convertBack, IComposableDictionary<TKey, TValue> cache = null, bool proactivelyConvertAllValues = false)
-        {
-            return new AnonymousCachedBulkMapDictionary<TKey, TValue, TInnerValue>(source, convert, convertBack, cache, proactivelyConvertAllValues);
-        }
-        
-        /// <summary>
-        /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
         /// flushes them to the specified IComposableDictionary.
         /// </summary>
         public static IComposableReadOnlyDictionary<TKey, TValue> WithMapping<TKey, TValue, TInnerValue>(this IComposableReadOnlyDictionary<TKey, TInnerValue> source, Func<TKey, TInnerValue, TValue> convertBack)
         {
             return new AnonymousReadOnlyMapDictionary<TKey, TValue, TInnerValue>(source, convertBack);
-        }
-
-        /// <summary>
-        /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
-        /// flushes them to the specified IComposableDictionary. Also this caches the converted values.
-        /// </summary>
-        public static IComposableReadOnlyDictionary<TKey, TValue> WithCachedMapping<TKey, TValue, TInnerValue>(this IComposableReadOnlyDictionary<TKey, TInnerValue> source, Func<TKey, TInnerValue, TValue> convertBack, IComposableDictionary<TKey, TValue> cache = null, bool proactivelyConvertAllValues = false)
-        {
-            return new AnonymousCachedReadOnlyMapDictionary<TKey, TValue, TInnerValue>(source, convertBack, cache, proactivelyConvertAllValues);
         }
 
         /// <summary>
@@ -143,6 +126,37 @@ namespace ComposableCollections
             return new AnonymousBulkReadOnlyMapDictionary<TKey, TValue, TInnerValue>(source, convertBack);
         }
 
+        #endregion
+        
+        #region WithCachedMapping
+        
+        /// <summary>
+        /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
+        /// flushes them to the specified IComposableDictionary. Also this caches the converted values.
+        /// </summary>
+        public static IComposableDictionary<TKey, TValue> WithCachedMapping<TKey, TValue, TInnerValue>(this IComposableDictionary<TKey, TInnerValue> source, Func<TKey, TValue, TInnerValue> convert, Func<TKey, TInnerValue, TValue> convertBack, IComposableDictionary<TKey, TValue> cache = null, bool proactivelyConvertAllValues = false)
+        {
+            return new AnonymousCachedMapDictionary<TKey, TValue, TInnerValue>(source, convert, convertBack, cache, proactivelyConvertAllValues);
+        }
+
+        /// <summary>
+        /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
+        /// flushes them to the specified IComposableDictionary. Also this caches the converted values.
+        /// </summary>
+        public static IComposableDictionary<TKey, TValue> WithCachedMapping<TKey, TValue, TInnerValue>(this IComposableDictionary<TKey, TInnerValue> source, Func<IEnumerable<IKeyValue<TKey, TValue>>, IEnumerable<IKeyValue<TKey, TInnerValue>>> convert, Func<IEnumerable<IKeyValue<TKey, TInnerValue>>, IEnumerable<IKeyValue<TKey, TValue>>> convertBack, IComposableDictionary<TKey, TValue> cache = null, bool proactivelyConvertAllValues = false)
+        {
+            return new AnonymousCachedBulkMapDictionary<TKey, TValue, TInnerValue>(source, convert, convertBack, cache, proactivelyConvertAllValues);
+        }
+        
+        /// <summary>
+        /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
+        /// flushes them to the specified IComposableDictionary. Also this caches the converted values.
+        /// </summary>
+        public static IComposableReadOnlyDictionary<TKey, TValue> WithCachedMapping<TKey, TValue, TInnerValue>(this IComposableReadOnlyDictionary<TKey, TInnerValue> source, Func<TKey, TInnerValue, TValue> convertBack, IComposableDictionary<TKey, TValue> cache = null, bool proactivelyConvertAllValues = false)
+        {
+            return new AnonymousCachedReadOnlyMapDictionary<TKey, TValue, TInnerValue>(source, convertBack, cache, proactivelyConvertAllValues);
+        }
+
         /// <summary>
         /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
         /// flushes them to the specified IComposableDictionary. Also this caches the converted values.
@@ -151,25 +165,33 @@ namespace ComposableCollections
         {
             return new AnonymousCachedBulkReadOnlyMapDictionary<TKey, TValue, TInnerValue>(source, convertBack, cache, proactivelyConvertAllValues);
         }
-
+        
+        #endregion
+        
+        #region WithCaching
+        
         /// <summary>
         /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
         /// flushes them to the specified IComposableDictionary.
         /// </summary>
-        public static ICacheDictionary<TKey, TValue> WithReadWriteCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> flushTo, IComposableDictionary<TKey, TValue> cache = null)
+        public static ICachedDictionary<TKey, TValue> WithReadWriteCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> flushTo, IComposableDictionary<TKey, TValue> cache = null)
         {
-            return new ConcurrentCachingDictionary<TKey, TValue>(flushTo, cache);
+            return new ConcurrentCachedDictionary<TKey, TValue>(flushTo, cache);
         }
 
         /// <summary>
         /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
         /// flushes them to the specified IComposableDictionary.
         /// </summary>
-        public static ICacheDictionary<TKey, TValue> WithWriteCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> flushTo, IComposableDictionary<TKey, TValue> addedOrUpdated = null, IComposableDictionary<TKey, TValue> removed = null)
+        public static ICachedDictionary<TKey, TValue> WithWriteCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> flushTo, IComposableDictionary<TKey, TValue> addedOrUpdated = null, IComposableDictionary<TKey, TValue> removed = null)
         {
-            return new ConcurrentCachingDictionaryWithMinimalState<TKey, TValue>(flushTo, addedOrUpdated, removed);
+            return new ConcurrentCachedDictionaryWithMinimalState<TKey, TValue>(flushTo, addedOrUpdated, removed);
         }
-
+        
+        #endregion
+        
+        #region WithDefaultValue
+        
         /// <summary>
         /// Creates a facade on top of the specified IComposableDictionary that lets you optionally create values when
         /// they're accessed, on demand.
@@ -194,15 +216,6 @@ namespace ComposableCollections
         }
 
         /// <summary>
-        /// Creates a facade on top of the specified IComposableDictionary that lets you optionally update values when
-        /// they're accessed, on demand.
-        /// </summary>
-        public static IComposableDictionary<TKey, TValue> WithRefreshing<TKey, TValue>(this IComposableDictionary<TKey, TValue> source, RefreshValue<TKey, TValue> refreshValue)
-        {
-            return new DictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
-        }
-        
-        /// <summary>
         /// Creates a facade on top of the specified ITransactionalDictionary that lets you optionally create values when
         /// they're accessed, on demand.
         /// </summary>
@@ -219,6 +232,19 @@ namespace ComposableCollections
             });
         }
 
+        #endregion
+        
+        #region WithRefreshing
+        
+        /// <summary>
+        /// Creates a facade on top of the specified IComposableDictionary that lets you optionally update values when
+        /// they're accessed, on demand.
+        /// </summary>
+        public static IComposableDictionary<TKey, TValue> WithRefreshing<TKey, TValue>(this IComposableDictionary<TKey, TValue> source, RefreshValue<TKey, TValue> refreshValue)
+        {
+            return new DictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
+        }
+        
         /// <summary>
         /// Creates a facade on top of the specified ITransactionalDictionary that lets you optionally update values when
         /// they're accessed, on demand.
@@ -236,6 +262,10 @@ namespace ComposableCollections
             });
         }
 
+        #endregion
+
+        #region WithBuiltInKey
+        
         /// <summary>
         /// Creates a facade on top of the specified IComposableDictionary that has a built-in key, which means you're telling
         /// the object how to get the key from a value. That means any API where you pass in a TValue, you
@@ -279,6 +309,10 @@ namespace ComposableCollections
                 new DisposableReadOnlyDictionaryWithBuiltInKeyDecorator<TKey, TValue>(x.WithBuiltInKey(key), x));
         }
 
+        #endregion
+        
+        #region WithEachMethodAsSeparateTransaction
+        
         /// <summary>
         /// Converts a transactional read-only dictionary into a non-transactional one by making each method call
         /// a separate transaction.
@@ -319,6 +353,10 @@ namespace ComposableCollections
             return new ReadOnlyDetransactionalQueryableDictionary<TKey, TValue>(source);
         }
         
+        #endregion
+        
+        #region Select
+        
         /// <summary>
         /// Converts the read-only and read/write objects
         /// </summary>
@@ -340,6 +378,10 @@ namespace ComposableCollections
             return new AnonymousReadOnlyTransactionalCollection<TReadOnly2>(() => readOnly(source.BeginRead()));
         }
 
+        #endregion
+        
+        #region SelectMany
+        
         /// <summary>
         /// Converts the read-only and read/write objects
         /// </summary>
@@ -384,7 +426,11 @@ namespace ComposableCollections
                 return it.BeginRead();
             });
         }
-
+        
+        #endregion
+        
+        #region WithWritesCombinedAtEndOfTransaction
+        
         /// <summary>
         /// Converts the source to a transactional dictionary that keeps all mutations pending until the transaction is completed.
         /// </summary>
@@ -417,6 +463,10 @@ namespace ComposableCollections
             });
         }
 
+        #endregion
+        
+        #region WithReadWriteLock
+        
         /// <summary>
         /// Converts the dictionary into an object that lets you access the dictionary in a transactional API,
         /// that ensures that when the dictionary is being modified, nobody else is modifying it or even reading from it
@@ -449,5 +499,7 @@ namespace ComposableCollections
         {
             return new AtomicReadOnlyDictionaryAdapter<TKey, TValue>(wrapped);
         }
+        
+        #endregion
     }
 }

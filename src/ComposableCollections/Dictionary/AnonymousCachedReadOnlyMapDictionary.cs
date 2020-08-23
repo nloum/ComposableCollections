@@ -2,7 +2,7 @@ using System;
 
 namespace ComposableCollections.Dictionary
 {
-    public class AnonymousCachedReadOnlyMapDictionary<TKey, TValue, TInnerValue> : CacheReadOnlyMapDictionaryBase<TKey, TValue, TInnerValue>
+    public class AnonymousCachedReadOnlyMapDictionary<TKey, TValue, TInnerValue> : CachedReadOnlyMapDictionaryBase<TKey, TValue, TInnerValue>
     {
         private Func<TKey, TInnerValue, TValue> _convertBack;
         

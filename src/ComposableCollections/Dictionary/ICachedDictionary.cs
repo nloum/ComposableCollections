@@ -6,7 +6,7 @@ namespace ComposableCollections.Dictionary
     /// A dictionary that will keep track of the changes you make to it, and then allows you to flush those changes
     /// to another dictionary.
     /// </summary>
-    public interface ICacheDictionary<TKey, TValue> : IComposableDictionary<TKey, TValue>
+    public interface ICachedDictionary<TKey, TValue> : IComposableDictionary<TKey, TValue>
     {
         IComposableReadOnlyDictionary<TKey, TValue> AsBypassCache();
         IComposableDictionary<TKey, TValue> AsNeverFlush();

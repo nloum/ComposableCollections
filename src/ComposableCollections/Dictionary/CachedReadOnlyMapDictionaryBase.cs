@@ -15,12 +15,12 @@ namespace ComposableCollections.Dictionary
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     /// <typeparam name="TInnerValue"></typeparam>
-    public abstract class CacheReadOnlyMapDictionaryBase<TKey, TValue, TInnerValue> : IComposableReadOnlyDictionary<TKey, TValue>
+    public abstract class CachedReadOnlyMapDictionaryBase<TKey, TValue, TInnerValue> : IComposableReadOnlyDictionary<TKey, TValue>
     {
         protected readonly IComposableReadOnlyDictionary<TKey, TInnerValue> _innerValues;
         private readonly IComposableDictionary<TKey, TValue> _cache;
 
-        public CacheReadOnlyMapDictionaryBase(IComposableReadOnlyDictionary<TKey, TInnerValue> innerValues, IComposableDictionary<TKey, TValue> cache, bool proactivelyConvertAllValues = false)
+        public CachedReadOnlyMapDictionaryBase(IComposableReadOnlyDictionary<TKey, TInnerValue> innerValues, IComposableDictionary<TKey, TValue> cache, bool proactivelyConvertAllValues = false)
         {
             _cache = cache ?? new ConcurrentDictionary<TKey, TValue>();
             _innerValues = innerValues;

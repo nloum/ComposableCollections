@@ -25,11 +25,11 @@ namespace ComposableCollections.Tests
                 case DictionaryType.ConcurrentDictionary:
                     return new ConcurrentDictionary<TKey, TValue>();
                 case DictionaryType.ConcurrentCachingDictionaryWithMinimalState:
-                    return new ConcurrentCachingDictionaryWithMinimalState<TKey, TValue>(new ComposableDictionary<TKey, TValue>());
+                    return new ConcurrentCachedDictionaryWithMinimalState<TKey, TValue>(new ComposableDictionary<TKey, TValue>());
                 case DictionaryType.ComposableDictionary:
                     return new ComposableDictionary<TKey, TValue>();
                 case DictionaryType.ConcurrentCachingDictionary:
-                    return new ConcurrentCachingDictionary<TKey, TValue>(new ComposableDictionary<TKey, TValue>(), new ComposableDictionary<TKey, TValue>());
+                    return new ConcurrentCachedDictionary<TKey, TValue>(new ComposableDictionary<TKey, TValue>(), new ComposableDictionary<TKey, TValue>());
                 default:
                     throw new NotImplementedException();
             }

@@ -7,7 +7,7 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
 {
-    public class ConcurrentCachingDictionaryWithMinimalState<TKey, TValue> : DictionaryBase<TKey, TValue>, ICacheDictionary<TKey, TValue>
+    public class ConcurrentCachedDictionaryWithMinimalState<TKey, TValue> : DictionaryBase<TKey, TValue>, ICachedDictionary<TKey, TValue>
     {
         private readonly IComposableDictionary<TKey, TValue> _addedOrUpdated;
         private readonly IComposableDictionary<TKey, TValue> _removed;
@@ -15,7 +15,7 @@ namespace ComposableCollections.Dictionary
         protected readonly object _lock = new object();
         private ImmutableList<DictionaryMutation<TKey, TValue>> _mutations = ImmutableList<DictionaryMutation<TKey, TValue>>.Empty;
 
-        public ConcurrentCachingDictionaryWithMinimalState(IComposableDictionary<TKey, TValue> flushCacheTo, IComposableDictionary<TKey, TValue> addedOrUpdated = null, IComposableDictionary<TKey, TValue> removed = null)
+        public ConcurrentCachedDictionaryWithMinimalState(IComposableDictionary<TKey, TValue> flushCacheTo, IComposableDictionary<TKey, TValue> addedOrUpdated = null, IComposableDictionary<TKey, TValue> removed = null)
         {
             _addedOrUpdated = addedOrUpdated ?? new ComposableDictionary<TKey, TValue>();
             _removed = removed ?? new ComposableDictionary<TKey, TValue>();

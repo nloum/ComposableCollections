@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using ComposableCollections.Dictionary.Mutations;
+using ComposableCollections.Dictionary.Write;
 
-namespace ComposableCollections.Dictionary
+namespace ComposableCollections.Dictionary.WithBuiltInKey
 {
     public interface IDictionaryWithBuiltInKey<TKey, TValue> : IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>
     {

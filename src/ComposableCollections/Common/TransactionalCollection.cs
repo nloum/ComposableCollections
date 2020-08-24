@@ -1,6 +1,6 @@
 using System;
 
-namespace ComposableCollections.Dictionary
+namespace ComposableCollections.Common
 {
     public static class TransactionalCollection
     {

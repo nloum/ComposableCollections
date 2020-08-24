@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using ComposableCollections.Dictionary.Mutations;
+using ComposableCollections.Dictionary.Write;
 
 namespace ComposableCollections.Dictionary
 {
@@ -9,7 +9,7 @@ namespace ComposableCollections.Dictionary
         private readonly IComposableDictionary<TKey, TValue> _cache;
         private readonly IComposableDictionary<TKey, TValue> _flushCacheTo;
         protected readonly object _lock = new object();
-        private ImmutableList<DictionaryMutation<TKey, TValue>> _mutations = ImmutableList<DictionaryMutation<TKey, TValue>>.Empty;
+        private ImmutableList<DictionaryWrite<TKey, TValue>> _writes = ImmutableList<DictionaryWrite<TKey, TValue>>.Empty;
 
         public ConcurrentCachedDictionary(IComposableDictionary<TKey, TValue> flushCacheTo, IComposableDictionary<TKey, TValue> cache)
         {
@@ -18,26 +18,26 @@ namespace ComposableCollections.Dictionary
             _cache.AddRange(_flushCacheTo);
         }
 
-        public IEnumerable<DictionaryMutation<TKey, TValue>> GetMutations(bool clear)
+        public IEnumerable<DictionaryWrite<TKey, TValue>> GetWrites(bool clear)
         {
             if (!clear)
             {
-                return _mutations;
+                return _writes;
             }
             else
             {
                 lock (_lock)
                 {
-                    return GetMutationsAndClear();
+                    return GetWritesAndClear();
                 }
             }
         }
 
-        protected IEnumerable<DictionaryMutation<TKey, TValue>> GetMutationsAndClear()
+        protected IEnumerable<DictionaryWrite<TKey, TValue>> GetWritesAndClear()
         {
-            var mutationsToFlush = _mutations;
-            _mutations = ImmutableList<DictionaryMutation<TKey, TValue>>.Empty;
-            return mutationsToFlush;
+            var writesToFlush = _writes;
+            _writes = ImmutableList<DictionaryWrite<TKey, TValue>>.Empty;
+            return writesToFlush;
         }
 
         public IComposableReadOnlyDictionary<TKey, TValue> AsBypassCache()
@@ -52,7 +52,7 @@ namespace ComposableCollections.Dictionary
 
         public virtual void FlushCache()
         {
-            _flushCacheTo.Mutate(GetMutations(true), out var _);
+            _flushCacheTo.Write(GetWrites(true), out var _);
         }
         
         public override bool TryGetValue(TKey key, out TValue value)
@@ -69,14 +69,14 @@ namespace ComposableCollections.Dictionary
         public override IEqualityComparer<TKey> Comparer => _cache.Comparer;
         public override IEnumerable<TKey> Keys => _cache.Keys;
         public override IEnumerable<TValue> Values => _cache.Values;
-        public override void Mutate(IEnumerable<DictionaryMutation<TKey, TValue>> mutations, out IReadOnlyList<DictionaryMutationResult<TKey, TValue>> results)
+        public override void Write(IEnumerable<DictionaryWrite<TKey, TValue>> writes, out IReadOnlyList<DictionaryWriteResult<TKey, TValue>> results)
         {
-            var mutationsList = mutations.ToImmutableList();
+            var writesList = writes.ToImmutableList();
             lock (_lock)
             {
-                _mutations = _mutations.AddRange(mutationsList);
+                _writes = _writes.AddRange(writesList);
             }
-            _cache.Mutate(mutationsList, out results);
+            _cache.Write(writesList, out results);
         }
     }
 }

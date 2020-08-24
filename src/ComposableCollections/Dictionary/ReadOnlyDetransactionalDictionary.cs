@@ -1,17 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using ComposableCollections.Common;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
 {
     public class ReadOnlyDetransactionalDictionary<TKey, TValue> : IComposableReadOnlyDictionary<TKey, TValue>
     {
-        private readonly IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>> _wrapped;
+        private readonly IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>> _source;
 
         public ReadOnlyDetransactionalDictionary(IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>> dictionary)
         {
-            _wrapped = dictionary;
+            _source = dictionary;
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -21,7 +22,7 @@ namespace ComposableCollections.Dictionary
 
         public IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
-            var dictionary = _wrapped.BeginRead();
+            var dictionary = _source.BeginRead();
             return new Enumerator<IKeyValue<TKey, TValue>>(dictionary.GetEnumerator(), dictionary);
         }
 
@@ -29,7 +30,7 @@ namespace ComposableCollections.Dictionary
         {
             get
             {
-                using (var dictionary = _wrapped.BeginRead())
+                using (var dictionary = _source.BeginRead())
                 {
                     return dictionary.Count;
                 }
@@ -40,7 +41,7 @@ namespace ComposableCollections.Dictionary
         {
             get
             {
-                using (var dictionary = _wrapped.BeginRead())
+                using (var dictionary = _source.BeginRead())
                 {
                     return dictionary.Comparer;
                 }
@@ -51,7 +52,7 @@ namespace ComposableCollections.Dictionary
         {
             get
             {
-                var dictionary = _wrapped.BeginRead();
+                var dictionary = _source.BeginRead();
                 return new Enumerable<TKey>(() => new Enumerator<TKey>(dictionary.Keys.GetEnumerator(), dictionary));
             }
         }
@@ -60,14 +61,14 @@ namespace ComposableCollections.Dictionary
         {
             get
             {
-                var dictionary = _wrapped.BeginRead();
+                var dictionary = _source.BeginRead();
                 return new Enumerable<TValue>(() => new Enumerator<TValue>(dictionary.Values.GetEnumerator(), dictionary));
             }
         }
 
         public bool ContainsKey(TKey key)
         {
-            using (var dictionary = _wrapped.BeginRead())
+            using (var dictionary = _source.BeginRead())
             {
                 return dictionary.ContainsKey(key);
             }
@@ -75,7 +76,7 @@ namespace ComposableCollections.Dictionary
 
         public IMaybe<TValue> TryGetValue(TKey key)
         {
-            using (var dictionary = _wrapped.BeginRead())
+            using (var dictionary = _source.BeginRead())
             {
                 return dictionary.TryGetValue(key);
             }
@@ -83,7 +84,7 @@ namespace ComposableCollections.Dictionary
 
         public bool TryGetValue(TKey key, out TValue value)
         {
-            using (var dictionary = _wrapped.BeginRead())
+            using (var dictionary = _source.BeginRead())
             {
                 var result = dictionary.TryGetValue(key);
                 if (result.HasValue)
@@ -103,7 +104,7 @@ namespace ComposableCollections.Dictionary
         {
             get
             {
-                using (var dictionary = _wrapped.BeginRead())
+                using (var dictionary = _source.BeginRead())
                 {
                     return dictionary[key];
                 }
@@ -112,34 +113,34 @@ namespace ComposableCollections.Dictionary
 
         protected class Enumerator<T> : IEnumerator<T>
         {
-            private readonly IEnumerator<T> _wrapped;
+            private readonly IEnumerator<T> _source;
             private readonly IDisposable _disposable;
 
-            public Enumerator(IEnumerator<T> wrapped, IDisposable disposable)
+            public Enumerator(IEnumerator<T> source, IDisposable disposable)
             {
-                _wrapped = wrapped;
+                _source = source;
                 _disposable = disposable;
             }
 
             public bool MoveNext()
             {
-                return _wrapped.MoveNext();
+                return _source.MoveNext();
             }
 
             public void Reset()
             {
-                _wrapped.Reset();
+                _source.Reset();
             }
 
             public void Dispose()
             {
-                _wrapped.Dispose();
+                _source.Dispose();
                 _disposable.Dispose();
             }
 
             object IEnumerator.Current => Current;
 
-            public T Current => _wrapped.Current;
+            public T Current => _source.Current;
         }
 
         protected class Enumerable<T> : IEnumerable<T>

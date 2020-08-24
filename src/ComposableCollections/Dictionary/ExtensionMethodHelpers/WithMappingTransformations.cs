@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using ComposableCollections.Dictionary.Mutations;
+using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
@@ -38,12 +38,12 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
             throw new NotImplementedException();
         }
 
-        protected override IEnumerable<DictionaryMutation<TKey2, TValue2>> MapMutations(IEnumerable<DictionaryMutation<TKey1, TValue1>> mutations, Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>> p)
+        protected override IEnumerable<DictionaryWrite<TKey2, TValue2>> MapWrites(IEnumerable<DictionaryWrite<TKey1, TValue1>> writes, Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>> p)
         {
-            foreach (var mutation in mutations)
+            foreach (var write in writes)
             {
-                yield return new DictionaryMutation<TKey2, TValue2>(mutation.Type, p.Item3(mutation.Key),
-                    mutation.ValueIfAdding.Select(valueIfAdding =>
+                yield return new DictionaryWrite<TKey2, TValue2>(write.Type, p.Item3(write.Key),
+                    write.ValueIfAdding.Select(valueIfAdding =>
                     {
                         Func<TValue2> result = () =>
                         {
@@ -51,7 +51,7 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
                         };
                         return result;
                     }),
-                    mutation.ValueIfUpdating.Select(valueIfUpdating =>
+                    write.ValueIfUpdating.Select(valueIfUpdating =>
                     {
                         Func<TValue2, TValue2> result = value => p.Item2(valueIfUpdating(p.Item1(value)));
                         return result;

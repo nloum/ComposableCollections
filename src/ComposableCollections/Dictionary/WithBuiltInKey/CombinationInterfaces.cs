@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace ComposableCollections.Dictionary
+namespace ComposableCollections.Dictionary.WithBuiltInKey
 {
     public interface IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue> :
         IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>,

@@ -15,9 +15,9 @@ namespace ComposableCollections.Dictionary
         {
         }
 
-        protected void Initialize(IComposableReadOnlyDictionary<TKey, TValue> wrapped, IDisposable disposable)
+        protected void Initialize(IComposableReadOnlyDictionary<TKey, TValue> source, IDisposable disposable)
         {
-            base.Initialize(wrapped);
+            base.Initialize(source);
             _disposable = disposable;
         }
         

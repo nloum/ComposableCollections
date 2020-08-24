@@ -1,18 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using ComposableCollections.Dictionary.Mutations;
+using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
 {
     public abstract class LockedDictionaryBase<TKey, TValue> : IComposableDictionary<TKey, TValue>
     {
-        private readonly IComposableDictionary<TKey, TValue> _wrapped;
+        private readonly IComposableDictionary<TKey, TValue> _source;
 
-        public LockedDictionaryBase(IComposableDictionary<TKey, TValue> wrapped)
+        public LockedDictionaryBase(IComposableDictionary<TKey, TValue> source)
         {
-            _wrapped = wrapped;
+            _source = source;
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -39,7 +39,7 @@ namespace ComposableCollections.Dictionary
                 BeginRead();
                 try
                 {
-                    return _wrapped.Count;
+                    return _source.Count;
                 }
                 finally
                 {
@@ -48,14 +48,14 @@ namespace ComposableCollections.Dictionary
             }
         }
 
-        public IEqualityComparer<TKey> Comparer => _wrapped.Comparer;
+        public IEqualityComparer<TKey> Comparer => _source.Comparer;
 
         public bool ContainsKey(TKey key)
         {
             BeginRead();
             try
             {
-                return _wrapped.ContainsKey(key);
+                return _source.ContainsKey(key);
             }
             finally
             {
@@ -68,7 +68,7 @@ namespace ComposableCollections.Dictionary
             BeginRead();
             try
             {
-                return _wrapped.TryGetValue(key);
+                return _source.TryGetValue(key);
             }
             finally
             {
@@ -81,7 +81,7 @@ namespace ComposableCollections.Dictionary
             BeginRead();
             try
             {
-                return _wrapped.TryGetValue(key, out value);
+                return _source.TryGetValue(key, out value);
             }
             finally
             {
@@ -96,7 +96,7 @@ namespace ComposableCollections.Dictionary
                 BeginRead();
                 try
                 {
-                    return _wrapped[key];
+                    return _source[key];
                 }
                 finally
                 {
@@ -108,7 +108,7 @@ namespace ComposableCollections.Dictionary
                 BeginWrite();
                 try
                 {
-                    _wrapped[key] = value;
+                    _source[key] = value;
                 }
                 finally
                 {
@@ -117,12 +117,12 @@ namespace ComposableCollections.Dictionary
             }
         }
 
-        public void Mutate(IEnumerable<DictionaryMutation<TKey, TValue>> mutations, out IReadOnlyList<DictionaryMutationResult<TKey, TValue>> results)
+        public void Write(IEnumerable<DictionaryWrite<TKey, TValue>> writes, out IReadOnlyList<DictionaryWriteResult<TKey, TValue>> results)
         {
             BeginWrite();
             try
             {
-                _wrapped.Mutate(mutations, out results);
+                _source.Write(writes, out results);
             }
             finally
             {
@@ -135,7 +135,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                return _wrapped.TryAdd(key, value);
+                return _source.TryAdd(key, value);
             }
             finally
             {
@@ -148,7 +148,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                return _wrapped.TryAdd(key, value);
+                return _source.TryAdd(key, value);
             }
             finally
             {
@@ -161,7 +161,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                return _wrapped.TryAdd(key, value, out existingValue, out newValue);
+                return _source.TryAdd(key, value, out existingValue, out newValue);
             }
             finally
             {
@@ -174,7 +174,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryAddRange(newItems, out results);
+                _source.TryAddRange(newItems, out results);
             }
             finally
             {
@@ -187,7 +187,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryAddRange(newItems, out results);
+                _source.TryAddRange(newItems, out results);
             }
             finally
             {
@@ -200,7 +200,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryAddRange(newItems, key, value, out results);
+                _source.TryAddRange(newItems, key, value, out results);
             }
             finally
             {
@@ -213,7 +213,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryAddRange(newItems);
+                _source.TryAddRange(newItems);
             }
             finally
             {
@@ -226,7 +226,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryAddRange(newItems);
+                _source.TryAddRange(newItems);
             }
             finally
             {
@@ -239,7 +239,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryAddRange(newItems, key, value);
+                _source.TryAddRange(newItems, key, value);
             }
             finally
             {
@@ -252,7 +252,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryAddRange(newItems);
+                _source.TryAddRange(newItems);
             }
             finally
             {
@@ -265,7 +265,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryAddRange(newItems);
+                _source.TryAddRange(newItems);
             }
             finally
             {
@@ -278,7 +278,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.Add(key, value);
+                _source.Add(key, value);
             }
             finally
             {
@@ -291,7 +291,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.AddRange(newItems);
+                _source.AddRange(newItems);
             }
             finally
             {
@@ -304,7 +304,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.AddRange(newItems);
+                _source.AddRange(newItems);
             }
             finally
             {
@@ -317,7 +317,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.AddRange(newItems, key, value);
+                _source.AddRange(newItems, key, value);
             }
             finally
             {
@@ -330,7 +330,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.AddRange(newItems);
+                _source.AddRange(newItems);
             }
             finally
             {
@@ -343,7 +343,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.AddRange(newItems);
+                _source.AddRange(newItems);
             }
             finally
             {
@@ -356,7 +356,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                return _wrapped.TryUpdate(key, value);
+                return _source.TryUpdate(key, value);
             }
             finally
             {
@@ -369,7 +369,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                return _wrapped.TryUpdate(key, value, out previousValue);
+                return _source.TryUpdate(key, value, out previousValue);
             }
             finally
             {
@@ -382,7 +382,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                return _wrapped.TryUpdate(key, value, out previousValue, out newValue);
+                return _source.TryUpdate(key, value, out previousValue, out newValue);
             }
             finally
             {
@@ -395,7 +395,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryUpdateRange(newItems);
+                _source.TryUpdateRange(newItems);
             }
             finally
             {
@@ -408,7 +408,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryUpdateRange(newItems);
+                _source.TryUpdateRange(newItems);
             }
             finally
             {
@@ -421,7 +421,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryUpdateRange(newItems, key, value);
+                _source.TryUpdateRange(newItems, key, value);
             }
             finally
             {
@@ -434,7 +434,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryUpdateRange(newItems);
+                _source.TryUpdateRange(newItems);
             }
             finally
             {
@@ -447,7 +447,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryUpdateRange(newItems);
+                _source.TryUpdateRange(newItems);
             }
             finally
             {
@@ -460,7 +460,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryUpdateRange(newItems, out results);
+                _source.TryUpdateRange(newItems, out results);
             }
             finally
             {
@@ -473,7 +473,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryUpdateRange(newItems, out results);
+                _source.TryUpdateRange(newItems, out results);
             }
             finally
             {
@@ -487,7 +487,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryUpdateRange(newItems, key, value, out results);
+                _source.TryUpdateRange(newItems, key, value, out results);
             }
             finally
             {
@@ -500,7 +500,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.Update(key, value);
+                _source.Update(key, value);
             }
             finally
             {
@@ -513,7 +513,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.UpdateRange(newItems);
+                _source.UpdateRange(newItems);
             }
             finally
             {
@@ -526,7 +526,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.UpdateRange(newItems);
+                _source.UpdateRange(newItems);
             }
             finally
             {
@@ -539,7 +539,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.UpdateRange(newItems, key, value);
+                _source.UpdateRange(newItems, key, value);
             }
             finally
             {
@@ -552,7 +552,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.Update(key, value, out previousValue);
+                _source.Update(key, value, out previousValue);
             }
             finally
             {
@@ -565,7 +565,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.UpdateRange(newItems, out results);
+                _source.UpdateRange(newItems, out results);
             }
             finally
             {
@@ -578,7 +578,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.UpdateRange(newItems, out results);
+                _source.UpdateRange(newItems, out results);
             }
             finally
             {
@@ -591,7 +591,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.UpdateRange(newItems, key, value, out results);
+                _source.UpdateRange(newItems, key, value, out results);
             }
             finally
             {
@@ -604,7 +604,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.UpdateRange(newItems);
+                _source.UpdateRange(newItems);
             }
             finally
             {
@@ -617,7 +617,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.UpdateRange(newItems);
+                _source.UpdateRange(newItems);
             }
             finally
             {
@@ -630,7 +630,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                return _wrapped.AddOrUpdate(key, value);
+                return _source.AddOrUpdate(key, value);
             }
             finally
             {
@@ -643,7 +643,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                return _wrapped.AddOrUpdate(key, valueIfAdding, valueIfUpdating);
+                return _source.AddOrUpdate(key, valueIfAdding, valueIfUpdating);
             }
             finally
             {
@@ -657,7 +657,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                return _wrapped.AddOrUpdate(key, valueIfAdding, valueIfUpdating, out previousValue, out newValue);
+                return _source.AddOrUpdate(key, valueIfAdding, valueIfUpdating, out previousValue, out newValue);
             }
             finally
             {
@@ -670,7 +670,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.AddOrUpdateRange(newItems, out results);
+                _source.AddOrUpdateRange(newItems, out results);
             }
             finally
             {
@@ -683,7 +683,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.AddOrUpdateRange(newItems, out results);
+                _source.AddOrUpdateRange(newItems, out results);
             }
             finally
             {
@@ -697,7 +697,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.AddOrUpdateRange(newItems, key, value, out results);
+                _source.AddOrUpdateRange(newItems, key, value, out results);
             }
             finally
             {
@@ -710,7 +710,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.AddOrUpdateRange(newItems);
+                _source.AddOrUpdateRange(newItems);
             }
             finally
             {
@@ -723,7 +723,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.AddOrUpdateRange(newItems);
+                _source.AddOrUpdateRange(newItems);
             }
             finally
             {
@@ -736,7 +736,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.AddOrUpdateRange(newItems, key, value);
+                _source.AddOrUpdateRange(newItems, key, value);
             }
             finally
             {
@@ -749,7 +749,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.AddOrUpdateRange(newItems);
+                _source.AddOrUpdateRange(newItems);
             }
             finally
             {
@@ -762,7 +762,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.AddOrUpdateRange(newItems);
+                _source.AddOrUpdateRange(newItems);
             }
             finally
             {
@@ -775,7 +775,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryRemoveRange(keysToRemove);
+                _source.TryRemoveRange(keysToRemove);
             }
             finally
             {
@@ -788,7 +788,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.RemoveRange(keysToRemove);
+                _source.RemoveRange(keysToRemove);
             }
             finally
             {
@@ -801,7 +801,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.RemoveWhere(predicate);
+                _source.RemoveWhere(predicate);
             }
             finally
             {
@@ -814,7 +814,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.RemoveWhere(predicate);
+                _source.RemoveWhere(predicate);
             }
             finally
             {
@@ -827,7 +827,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.Clear();
+                _source.Clear();
             }
             finally
             {
@@ -840,7 +840,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                return _wrapped.TryRemove(key);
+                return _source.TryRemove(key);
             }
             finally
             {
@@ -853,7 +853,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.Remove(key);
+                _source.Remove(key);
             }
             finally
             {
@@ -866,7 +866,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.TryRemoveRange(keysToRemove, out removedItems);
+                _source.TryRemoveRange(keysToRemove, out removedItems);
             }
             finally
             {
@@ -879,7 +879,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.RemoveRange(keysToRemove, out removedItems);
+                _source.RemoveRange(keysToRemove, out removedItems);
             }
             finally
             {
@@ -892,7 +892,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.RemoveWhere(predicate, out removedItems);
+                _source.RemoveWhere(predicate, out removedItems);
             }
             finally
             {
@@ -905,7 +905,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.RemoveWhere(predicate, out removedItems);
+                _source.RemoveWhere(predicate, out removedItems);
             }
             finally
             {
@@ -918,7 +918,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.Clear(out removedItems);
+                _source.Clear(out removedItems);
             }
             finally
             {
@@ -931,7 +931,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                return _wrapped.TryRemove(key, out removedItem);
+                return _source.TryRemove(key, out removedItem);
             }
             finally
             {
@@ -944,7 +944,7 @@ namespace ComposableCollections.Dictionary
             BeginWrite();
             try
             {
-                _wrapped.Remove(key, out removedItem);
+                _source.Remove(key, out removedItem);
             }
             finally
             {

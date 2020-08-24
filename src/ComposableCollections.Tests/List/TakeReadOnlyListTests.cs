@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using ComposableCollections;
 using ComposableCollections.Dictionary;
 using ComposableCollections.List;
 using FluentAssertions;

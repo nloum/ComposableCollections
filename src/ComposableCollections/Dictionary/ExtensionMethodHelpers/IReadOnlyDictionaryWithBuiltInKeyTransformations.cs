@@ -1,3 +1,5 @@
+using ComposableCollections.Dictionary.WithBuiltInKey;
+
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 {
     public interface IReadOnlyDictionaryWithBuiltInKeyTransformations<TKey1, TValue1, TKey2, TValue2, TReadOnlyParameter>

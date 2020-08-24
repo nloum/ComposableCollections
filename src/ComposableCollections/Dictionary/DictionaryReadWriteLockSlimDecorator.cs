@@ -6,12 +6,12 @@ namespace ComposableCollections.Dictionary
 {
     public class DictionaryReadWriteLockSlimDecorator<TKey, TValue> : LockedDictionaryBase<TKey, TValue>
     {
-        private readonly IComposableDictionary<TKey, TValue> _wrapped;
+        private readonly IComposableDictionary<TKey, TValue> _source;
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
         
-        public DictionaryReadWriteLockSlimDecorator(IComposableDictionary<TKey, TValue> wrapped) : base(wrapped)
+        public DictionaryReadWriteLockSlimDecorator(IComposableDictionary<TKey, TValue> source) : base(source)
         {
-            _wrapped = wrapped;
+            _source = source;
         }
 
         protected override void BeginWrite()
@@ -39,7 +39,7 @@ namespace ComposableCollections.Dictionary
             BeginRead();
             try
             {
-                var result = _wrapped.ToImmutableList().GetEnumerator();
+                var result = _source.ToImmutableList().GetEnumerator();
                 return result;
             }
             finally
@@ -55,7 +55,7 @@ namespace ComposableCollections.Dictionary
                 BeginRead();
                 try
                 {
-                    var result = _wrapped.Keys.ToImmutableList();
+                    var result = _source.Keys.ToImmutableList();
                     return result;
                 }
                 finally
@@ -72,7 +72,7 @@ namespace ComposableCollections.Dictionary
                 BeginRead();
                 try
                 {
-                    var result = _wrapped.Values.ToImmutableList();
+                    var result = _source.Values.ToImmutableList();
                     return result;
                 }
                 finally

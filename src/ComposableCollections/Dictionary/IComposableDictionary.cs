@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using ComposableCollections.Dictionary.Mutations;
+using ComposableCollections.Dictionary.Write;
 
 namespace ComposableCollections.Dictionary
 {
@@ -12,7 +12,7 @@ namespace ComposableCollections.Dictionary
     {
         bool TryGetValue(TKey key, out TValue value);
         new TValue this[TKey key] { get; set; }
-        void Mutate(IEnumerable<DictionaryMutation<TKey, TValue>> mutations, out IReadOnlyList<DictionaryMutationResult<TKey, TValue>> results);
+        void Write(IEnumerable<DictionaryWrite<TKey, TValue>> writes, out IReadOnlyList<DictionaryWriteResult<TKey, TValue>> results);
         
         #region Add
         

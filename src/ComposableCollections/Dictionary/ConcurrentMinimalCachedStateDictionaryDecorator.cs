@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using ComposableCollections.Dictionary.Exceptions;
-using ComposableCollections.Dictionary.Mutations;
+using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
@@ -14,7 +14,7 @@ namespace ComposableCollections.Dictionary
         private readonly IComposableDictionary<TKey, TValue> _removed;
         private readonly IComposableDictionary<TKey, TValue> _flushCacheTo;
         protected readonly object _lock = new object();
-        private ImmutableList<DictionaryMutation<TKey, TValue>> _mutations = ImmutableList<DictionaryMutation<TKey, TValue>>.Empty;
+        private ImmutableList<DictionaryWrite<TKey, TValue>> _writes = ImmutableList<DictionaryWrite<TKey, TValue>>.Empty;
 
         public ConcurrentMinimalCachedStateDictionaryDecorator(IComposableDictionary<TKey, TValue> flushCacheTo, IComposableDictionary<TKey, TValue> addedOrUpdated = null, IComposableDictionary<TKey, TValue> removed = null)
         {
@@ -23,26 +23,26 @@ namespace ComposableCollections.Dictionary
             _flushCacheTo = flushCacheTo;
         }
 
-        public IEnumerable<DictionaryMutation<TKey, TValue>> GetMutations(bool clear)
+        public IEnumerable<DictionaryWrite<TKey, TValue>> GetWrites(bool clear)
         {
             if (!clear)
             {
-                return _mutations;
+                return _writes;
             }
             else
             {
                 lock (_lock)
                 {
-                    return GetMutationsAndClear();
+                    return GetWritesAndClear();
                 }
             }
         }
 
-        protected IEnumerable<DictionaryMutation<TKey, TValue>> GetMutationsAndClear()
+        protected IEnumerable<DictionaryWrite<TKey, TValue>> GetWritesAndClear()
         {
-            var mutationsToFlush = _mutations;
-            _mutations = ImmutableList<DictionaryMutation<TKey, TValue>>.Empty;
-            return mutationsToFlush;
+            var writesToFlush = _writes;
+            _writes = ImmutableList<DictionaryWrite<TKey, TValue>>.Empty;
+            return writesToFlush;
         }
 
         public IComposableReadOnlyDictionary<TKey, TValue> AsBypassCache()
@@ -57,7 +57,7 @@ namespace ComposableCollections.Dictionary
 
         public virtual void FlushCache()
         {
-            _flushCacheTo.Mutate(GetMutations(true), out var _);
+            _flushCacheTo.Write(GetWrites(true), out var _);
         }
         
         public override bool TryGetValue(TKey key, out TValue value)
@@ -84,128 +84,128 @@ namespace ComposableCollections.Dictionary
         public override IEqualityComparer<TKey> Comparer => _flushCacheTo.Comparer;
         public override IEnumerable<TKey> Keys => _addedOrUpdated.Keys.Concat(_flushCacheTo.Keys.Where(key => !_removed.ContainsKey(key)));
         public override IEnumerable<TValue> Values => this.Select(x => x.Value);
-        public override void Mutate(IEnumerable<DictionaryMutation<TKey, TValue>> mutations, out IReadOnlyList<DictionaryMutationResult<TKey, TValue>> results)
+        public override void Write(IEnumerable<DictionaryWrite<TKey, TValue>> writes, out IReadOnlyList<DictionaryWriteResult<TKey, TValue>> results)
         {
-            var mutationsList = mutations.ToImmutableList();
+            var writesList = writes.ToImmutableList();
             lock (_lock)
             {
-                var finalResults = new List<DictionaryMutationResult<TKey, TValue>>();
+                var finalResults = new List<DictionaryWriteResult<TKey, TValue>>();
                 results = finalResults;
 
-                _mutations = _mutations.AddRange(mutationsList);
-                foreach (var mutation in mutationsList)
+                _writes = _writes.AddRange(writesList);
+                foreach (var write in writesList)
                 {
-                    if (mutation.Type == DictionaryMutationType.Remove)
+                    if (write.Type == DictionaryWriteType.Remove)
                     {
-                        if (_addedOrUpdated.TryRemove(mutation.Key, out var removedValue))
+                        if (_addedOrUpdated.TryRemove(write.Key, out var removedValue))
                         {
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateRemove(mutation.Key, removedValue.ToMaybe()));
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, removedValue.ToMaybe()));
                         }
                         else
                         {
-                            removedValue = _flushCacheTo[mutation.Key];
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateRemove(mutation.Key, removedValue.ToMaybe()));
-                            _removed.Add(mutation.Key, removedValue);
+                            removedValue = _flushCacheTo[write.Key];
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, removedValue.ToMaybe()));
+                            _removed.Add(write.Key, removedValue);
                         }
                     }
-                    else if (mutation.Type == DictionaryMutationType.TryRemove)
+                    else if (write.Type == DictionaryWriteType.TryRemove)
                     {
-                        if (_addedOrUpdated.TryRemove(mutation.Key, out var removedValue))
+                        if (_addedOrUpdated.TryRemove(write.Key, out var removedValue))
                         {
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateRemove(mutation.Key, removedValue.ToMaybe()));
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, removedValue.ToMaybe()));
                         }
                         else
                         {
-                            if (_flushCacheTo.TryGetValue(mutation.Key, out removedValue))
+                            if (_flushCacheTo.TryGetValue(write.Key, out removedValue))
                             {
-                                finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateRemove(mutation.Key, removedValue.ToMaybe()));
-                                _removed.Add(mutation.Key, removedValue);
+                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, removedValue.ToMaybe()));
+                                _removed.Add(write.Key, removedValue);
                             }
                             else
                             {
-                                finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateRemove(mutation.Key, Maybe<TValue>.Nothing()));
+                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, Maybe<TValue>.Nothing()));
                             }
                         }
                     }
-                    else if (mutation.Type == DictionaryMutationType.Add)
+                    else if (write.Type == DictionaryWriteType.Add)
                     {
-                        if (_addedOrUpdated.ContainsKey(mutation.Key) || (_flushCacheTo.ContainsKey(mutation.Key) &&
-                                                                          !_removed.ContainsKey(mutation.Key)))
+                        if (_addedOrUpdated.ContainsKey(write.Key) || (_flushCacheTo.ContainsKey(write.Key) &&
+                                                                          !_removed.ContainsKey(write.Key)))
                         {
-                            throw new AddFailedBecauseKeyAlreadyExistsException(mutation.Key);
+                            throw new AddFailedBecauseKeyAlreadyExistsException(write.Key);
                         }
                         
-                        _addedOrUpdated.Mutate(new[]{mutation}, out var tmpResults);
+                        _addedOrUpdated.Write(new[]{write}, out var tmpResults);
                         finalResults.AddRange(tmpResults);
                     }
-                    else if (mutation.Type == DictionaryMutationType.TryAdd)
+                    else if (write.Type == DictionaryWriteType.TryAdd)
                     {
-                        if (_addedOrUpdated.TryGetValue(mutation.Key, out var preExistingValue))
+                        if (_addedOrUpdated.TryGetValue(write.Key, out var preExistingValue))
                         {
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateTryAdd(mutation.Key, false, preExistingValue.ToMaybe(), Maybe<TValue>.Nothing()));
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateTryAdd(write.Key, false, preExistingValue.ToMaybe(), Maybe<TValue>.Nothing()));
                         }
-                        else if (!_removed.ContainsKey(mutation.Key) && _flushCacheTo.TryGetValue(mutation.Key, out preExistingValue))
+                        else if (!_removed.ContainsKey(write.Key) && _flushCacheTo.TryGetValue(write.Key, out preExistingValue))
                         {
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateTryAdd(mutation.Key, false, preExistingValue.ToMaybe(), Maybe<TValue>.Nothing()));
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateTryAdd(write.Key, false, preExistingValue.ToMaybe(), Maybe<TValue>.Nothing()));
                         }
                         else
                         {
-                            _addedOrUpdated.Mutate(new[]{mutation}, out var tmpResults);
+                            _addedOrUpdated.Write(new[]{write}, out var tmpResults);
                             finalResults.AddRange(tmpResults);
                         }
                     }
-                    else if (mutation.Type == DictionaryMutationType.Update)
+                    else if (write.Type == DictionaryWriteType.Update)
                     {
-                        if (_addedOrUpdated.TryGetValue(mutation.Key, out var preExistingValue))
+                        if (_addedOrUpdated.TryGetValue(write.Key, out var preExistingValue))
                         {
-                            _addedOrUpdated.Mutate(new[]{mutation}, out var tmpResults);
+                            _addedOrUpdated.Write(new[]{write}, out var tmpResults);
                             finalResults.AddRange(tmpResults);
                         }
-                        else if (!_removed.ContainsKey(mutation.Key) && _flushCacheTo.TryGetValue(mutation.Key, out preExistingValue))
+                        else if (!_removed.ContainsKey(write.Key) && _flushCacheTo.TryGetValue(write.Key, out preExistingValue))
                         {
-                            var newValue = mutation.ValueIfUpdating.Value(preExistingValue);
-                            _addedOrUpdated.Add(mutation.Key, newValue);
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, true, preExistingValue.ToMaybe(), newValue.ToMaybe()));
+                            var newValue = write.ValueIfUpdating.Value(preExistingValue);
+                            _addedOrUpdated.Add(write.Key, newValue);
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true, preExistingValue.ToMaybe(), newValue.ToMaybe()));
                         }
                         else
                         {
                             throw new KeyNotFoundException();
                         }
                     }
-                    else if (mutation.Type == DictionaryMutationType.TryUpdate)
+                    else if (write.Type == DictionaryWriteType.TryUpdate)
                     {
-                        if (_addedOrUpdated.TryGetValue(mutation.Key, out var preExistingValue))
+                        if (_addedOrUpdated.TryGetValue(write.Key, out var preExistingValue))
                         {
-                            _addedOrUpdated.Mutate(new[]{mutation}, out var tmpResults);
+                            _addedOrUpdated.Write(new[]{write}, out var tmpResults);
                             finalResults.AddRange(tmpResults);
                         }
-                        else if (!_removed.ContainsKey(mutation.Key) && _flushCacheTo.TryGetValue(mutation.Key, out preExistingValue))
+                        else if (!_removed.ContainsKey(write.Key) && _flushCacheTo.TryGetValue(write.Key, out preExistingValue))
                         {
-                            var newValue = mutation.ValueIfUpdating.Value(preExistingValue);
-                            _addedOrUpdated.Add(mutation.Key, newValue);
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, true, preExistingValue.ToMaybe(), newValue.ToMaybe()));
+                            var newValue = write.ValueIfUpdating.Value(preExistingValue);
+                            _addedOrUpdated.Add(write.Key, newValue);
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true, preExistingValue.ToMaybe(), newValue.ToMaybe()));
                         }
                         else
                         {
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, false, Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing()));
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, false, Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing()));
                         }
                     }
-                    else if (mutation.Type == DictionaryMutationType.AddOrUpdate)
+                    else if (write.Type == DictionaryWriteType.AddOrUpdate)
                     {
-                        if (_addedOrUpdated.TryGetValue(mutation.Key, out var preExistingValue))
+                        if (_addedOrUpdated.TryGetValue(write.Key, out var preExistingValue))
                         {
-                            _addedOrUpdated.Mutate(new[]{mutation}, out var tmpResults);
+                            _addedOrUpdated.Write(new[]{write}, out var tmpResults);
                             finalResults.AddRange(tmpResults);
                         }
-                        else if (!_removed.ContainsKey(mutation.Key) && _flushCacheTo.TryGetValue(mutation.Key, out preExistingValue))
+                        else if (!_removed.ContainsKey(write.Key) && _flushCacheTo.TryGetValue(write.Key, out preExistingValue))
                         {
-                            var newValue = mutation.ValueIfUpdating.Value(preExistingValue);
-                            _addedOrUpdated.Add(mutation.Key, newValue);
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, true, preExistingValue.ToMaybe(), newValue.ToMaybe()));
+                            var newValue = write.ValueIfUpdating.Value(preExistingValue);
+                            _addedOrUpdated.Add(write.Key, newValue);
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true, preExistingValue.ToMaybe(), newValue.ToMaybe()));
                         }
                         else
                         {
-                            _addedOrUpdated.Mutate(new[]{mutation}, out var tmpResults);
+                            _addedOrUpdated.Write(new[]{write}, out var tmpResults);
                             finalResults.AddRange(tmpResults);
                         }
                     }

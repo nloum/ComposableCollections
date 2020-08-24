@@ -1,18 +1,19 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using ComposableCollections.Dictionary.Mutations;
+using ComposableCollections.Common;
+using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
 {
     public class DetransactionalDictionary<TKey, TValue> : IComposableDictionary<TKey, TValue>
     {
-        private readonly ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> _wrapped;
+        private readonly ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> _source;
 
         public DetransactionalDictionary(ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> dictionary)
         {
-            _wrapped = dictionary;
+            _source = dictionary;
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -22,7 +23,7 @@ namespace ComposableCollections.Dictionary
 
         public IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
-            var dictionary = _wrapped.BeginRead();
+            var dictionary = _source.BeginRead();
             return new Enumerator<IKeyValue<TKey, TValue>>(dictionary.GetEnumerator(), dictionary);
         }
 
@@ -30,7 +31,7 @@ namespace ComposableCollections.Dictionary
         {
             get
             {
-                using (var dictionary = _wrapped.BeginRead())
+                using (var dictionary = _source.BeginRead())
                 {
                     return dictionary.Count;
                 }
@@ -41,7 +42,7 @@ namespace ComposableCollections.Dictionary
         {
             get
             {
-                using (var dictionary = _wrapped.BeginRead())
+                using (var dictionary = _source.BeginRead())
                 {
                     return dictionary.Comparer;
                 }
@@ -52,7 +53,7 @@ namespace ComposableCollections.Dictionary
         {
             get
             {
-                var dictionary = _wrapped.BeginRead();
+                var dictionary = _source.BeginRead();
                 return new Enumerable<TKey>(() => new Enumerator<TKey>(dictionary.Keys.GetEnumerator(), dictionary));
             }
         }
@@ -61,14 +62,14 @@ namespace ComposableCollections.Dictionary
         {
             get
             {
-                var dictionary = _wrapped.BeginRead();
+                var dictionary = _source.BeginRead();
                 return new Enumerable<TValue>(() => new Enumerator<TValue>(dictionary.Values.GetEnumerator(), dictionary));
             }
         }
 
         public bool ContainsKey(TKey key)
         {
-            using (var dictionary = _wrapped.BeginRead())
+            using (var dictionary = _source.BeginRead())
             {
                 return dictionary.ContainsKey(key);
             }
@@ -76,7 +77,7 @@ namespace ComposableCollections.Dictionary
 
         public IMaybe<TValue> TryGetValue(TKey key)
         {
-            using (var dictionary = _wrapped.BeginRead())
+            using (var dictionary = _source.BeginRead())
             {
                 return dictionary.TryGetValue(key);
             }
@@ -84,7 +85,7 @@ namespace ComposableCollections.Dictionary
 
         public bool TryGetValue(TKey key, out TValue value)
         {
-            using (var dictionary = _wrapped.BeginRead())
+            using (var dictionary = _source.BeginRead())
             {
                 var result = dictionary.TryGetValue(key);
                 if (result.HasValue)
@@ -104,31 +105,31 @@ namespace ComposableCollections.Dictionary
         {
             get
             {
-                using (var dictionary = _wrapped.BeginRead())
+                using (var dictionary = _source.BeginRead())
                 {
                     return dictionary[key];
                 }
             }
             set
             {
-                using (var dictionary = _wrapped.BeginWrite())
+                using (var dictionary = _source.BeginWrite())
                 {
                     dictionary[key] = value;
                 }
             }
         }
 
-        public void Mutate(IEnumerable<DictionaryMutation<TKey, TValue>> mutations, out IReadOnlyList<DictionaryMutationResult<TKey, TValue>> results)
+        public void Write(IEnumerable<DictionaryWrite<TKey, TValue>> writes, out IReadOnlyList<DictionaryWriteResult<TKey, TValue>> results)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
-                dictionary.Mutate(mutations, out results);
+                dictionary.Write(writes, out results);
             }
         }
 
         public bool TryAdd(TKey key, TValue value)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 return dictionary.TryAdd(key, value);
             }
@@ -136,7 +137,7 @@ namespace ComposableCollections.Dictionary
 
         public bool TryAdd(TKey key, Func<TValue> value)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 return dictionary.TryAdd(key, value);
             }
@@ -144,7 +145,7 @@ namespace ComposableCollections.Dictionary
 
         public bool TryAdd(TKey key, Func<TValue> value, out TValue existingValue, out TValue newValue)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 return dictionary.TryAdd(key, value, out existingValue, out newValue);
             }
@@ -152,7 +153,7 @@ namespace ComposableCollections.Dictionary
 
         public void TryAddRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryAddRange(newItems, out results);
             }
@@ -160,7 +161,7 @@ namespace ComposableCollections.Dictionary
 
         public void TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryAddRange(newItems, out results);
             }
@@ -168,7 +169,7 @@ namespace ComposableCollections.Dictionary
 
         public void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryAddRange(newItems, key, value, out results);
             }
@@ -176,7 +177,7 @@ namespace ComposableCollections.Dictionary
 
         public void TryAddRange(IEnumerable<IKeyValue<TKey, TValue>> newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryAddRange(newItems);
             }
@@ -184,7 +185,7 @@ namespace ComposableCollections.Dictionary
 
         public void TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryAddRange(newItems);
             }
@@ -192,7 +193,7 @@ namespace ComposableCollections.Dictionary
 
         public void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryAddRange(newItems, key, value);
             }
@@ -200,7 +201,7 @@ namespace ComposableCollections.Dictionary
 
         public void TryAddRange(params IKeyValue<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryAddRange(newItems);
             }
@@ -208,7 +209,7 @@ namespace ComposableCollections.Dictionary
 
         public void TryAddRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryAddRange(newItems);
             }
@@ -216,7 +217,7 @@ namespace ComposableCollections.Dictionary
 
         public void Add(TKey key, TValue value)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.Add(key, value);
             }
@@ -224,7 +225,7 @@ namespace ComposableCollections.Dictionary
 
         public void AddRange(IEnumerable<IKeyValue<TKey, TValue>> newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.AddRange(newItems);
             }
@@ -232,7 +233,7 @@ namespace ComposableCollections.Dictionary
 
         public void AddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.AddRange(newItems);
             }
@@ -240,7 +241,7 @@ namespace ComposableCollections.Dictionary
 
         public void AddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.AddRange(newItems, key, value);
             }
@@ -248,7 +249,7 @@ namespace ComposableCollections.Dictionary
 
         public void AddRange(params IKeyValue<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.AddRange(newItems);
             }
@@ -256,7 +257,7 @@ namespace ComposableCollections.Dictionary
 
         public void AddRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.AddRange(newItems);
             }
@@ -264,7 +265,7 @@ namespace ComposableCollections.Dictionary
 
         public bool TryUpdate(TKey key, TValue value)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 return dictionary.TryUpdate(key, value);
             }
@@ -272,7 +273,7 @@ namespace ComposableCollections.Dictionary
 
         public bool TryUpdate(TKey key, TValue value, out TValue previousValue)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 return dictionary.TryUpdate(key, value, out previousValue);
             }
@@ -280,7 +281,7 @@ namespace ComposableCollections.Dictionary
 
         public bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue, out TValue newValue)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 return dictionary.TryUpdate(key, value, out previousValue, out newValue);
             }
@@ -288,7 +289,7 @@ namespace ComposableCollections.Dictionary
 
         public void TryUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryUpdateRange(newItems);
             }
@@ -296,7 +297,7 @@ namespace ComposableCollections.Dictionary
 
         public void TryUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryUpdateRange(newItems);
             }
@@ -304,7 +305,7 @@ namespace ComposableCollections.Dictionary
 
         public void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryUpdateRange(newItems, key, value);
             }
@@ -312,7 +313,7 @@ namespace ComposableCollections.Dictionary
 
         public void TryUpdateRange(params IKeyValue<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryUpdateRange(newItems);
             }
@@ -320,7 +321,7 @@ namespace ComposableCollections.Dictionary
 
         public void TryUpdateRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryUpdateRange(newItems);
             }
@@ -328,7 +329,7 @@ namespace ComposableCollections.Dictionary
 
         public void TryUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryUpdateRange(newItems, out results);
             }
@@ -336,7 +337,7 @@ namespace ComposableCollections.Dictionary
 
         public void TryUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryUpdateRange(newItems, out results);
             }
@@ -345,7 +346,7 @@ namespace ComposableCollections.Dictionary
         public void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value,
             out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryUpdateRange(newItems, key, value, out results);
             }
@@ -353,7 +354,7 @@ namespace ComposableCollections.Dictionary
 
         public void Update(TKey key, TValue value)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.Update(key, value);
             }
@@ -361,7 +362,7 @@ namespace ComposableCollections.Dictionary
 
         public void UpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.UpdateRange(newItems);
             }
@@ -369,7 +370,7 @@ namespace ComposableCollections.Dictionary
 
         public void UpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.UpdateRange(newItems);
             }
@@ -377,7 +378,7 @@ namespace ComposableCollections.Dictionary
 
         public void UpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.UpdateRange(newItems, key, value);
             }
@@ -385,7 +386,7 @@ namespace ComposableCollections.Dictionary
 
         public void Update(TKey key, TValue value, out TValue previousValue)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.Update(key, value, out previousValue);
             }
@@ -393,7 +394,7 @@ namespace ComposableCollections.Dictionary
 
         public void UpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.UpdateRange(newItems, out results);
             }
@@ -401,7 +402,7 @@ namespace ComposableCollections.Dictionary
 
         public void UpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.UpdateRange(newItems, out results);
             }
@@ -409,7 +410,7 @@ namespace ComposableCollections.Dictionary
 
         public void UpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.UpdateRange(newItems, key, value, out results);
             }
@@ -417,7 +418,7 @@ namespace ComposableCollections.Dictionary
 
         public void UpdateRange(params IKeyValue<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.UpdateRange(newItems);
             }
@@ -425,7 +426,7 @@ namespace ComposableCollections.Dictionary
 
         public void UpdateRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.UpdateRange(newItems);
             }
@@ -433,7 +434,7 @@ namespace ComposableCollections.Dictionary
 
         public DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, TValue value)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 return dictionary.AddOrUpdate(key, value);
             }
@@ -441,7 +442,7 @@ namespace ComposableCollections.Dictionary
 
         public DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 return dictionary.AddOrUpdate(key, valueIfAdding, valueIfUpdating);
             }
@@ -450,7 +451,7 @@ namespace ComposableCollections.Dictionary
         public DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating,
             out TValue previousValue, out TValue newValue)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 return dictionary.AddOrUpdate(key, valueIfAdding, valueIfUpdating, out previousValue, out newValue);
             }
@@ -458,7 +459,7 @@ namespace ComposableCollections.Dictionary
 
         public void AddOrUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.AddOrUpdateRange(newItems, out results);
             }
@@ -466,7 +467,7 @@ namespace ComposableCollections.Dictionary
 
         public void AddOrUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.AddOrUpdateRange(newItems, out results);
             }
@@ -475,7 +476,7 @@ namespace ComposableCollections.Dictionary
         public void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value,
             out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.AddOrUpdateRange(newItems, key, value, out results);
             }
@@ -483,7 +484,7 @@ namespace ComposableCollections.Dictionary
 
         public void AddOrUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.AddOrUpdateRange(newItems);
             }
@@ -491,7 +492,7 @@ namespace ComposableCollections.Dictionary
 
         public void AddOrUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.AddOrUpdateRange(newItems);
             }
@@ -499,7 +500,7 @@ namespace ComposableCollections.Dictionary
 
         public void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.AddOrUpdateRange(newItems, key, value);
             }
@@ -507,7 +508,7 @@ namespace ComposableCollections.Dictionary
 
         public void AddOrUpdateRange(params IKeyValue<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.AddOrUpdateRange(newItems);
             }
@@ -515,7 +516,7 @@ namespace ComposableCollections.Dictionary
 
         public void AddOrUpdateRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.AddOrUpdateRange(newItems);
             }
@@ -523,7 +524,7 @@ namespace ComposableCollections.Dictionary
 
         public void TryRemoveRange(IEnumerable<TKey> keysToRemove)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryRemoveRange(keysToRemove);
             }
@@ -531,7 +532,7 @@ namespace ComposableCollections.Dictionary
 
         public void RemoveRange(IEnumerable<TKey> keysToRemove)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.RemoveRange(keysToRemove);
             }
@@ -539,7 +540,7 @@ namespace ComposableCollections.Dictionary
 
         public void RemoveWhere(Func<TKey, TValue, bool> predicate)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.RemoveWhere(predicate);
             }
@@ -547,7 +548,7 @@ namespace ComposableCollections.Dictionary
 
         public void RemoveWhere(Func<IKeyValue<TKey, TValue>, bool> predicate)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.RemoveWhere(predicate);
             }
@@ -555,7 +556,7 @@ namespace ComposableCollections.Dictionary
 
         public void Clear()
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.Clear();
             }
@@ -563,7 +564,7 @@ namespace ComposableCollections.Dictionary
 
         public bool TryRemove(TKey key)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 return dictionary.TryRemove(key);
             }
@@ -571,7 +572,7 @@ namespace ComposableCollections.Dictionary
 
         public void Remove(TKey key)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.Remove(key);
             }
@@ -579,7 +580,7 @@ namespace ComposableCollections.Dictionary
 
         public void TryRemoveRange(IEnumerable<TKey> keysToRemove, out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.TryRemoveRange(keysToRemove, out removedItems);
             }
@@ -587,7 +588,7 @@ namespace ComposableCollections.Dictionary
 
         public void RemoveRange(IEnumerable<TKey> keysToRemove, out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.RemoveRange(keysToRemove, out removedItems);
             }
@@ -595,7 +596,7 @@ namespace ComposableCollections.Dictionary
 
         public void RemoveWhere(Func<TKey, TValue, bool> predicate, out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.RemoveWhere(predicate, out removedItems);
             }
@@ -603,7 +604,7 @@ namespace ComposableCollections.Dictionary
 
         public void RemoveWhere(Func<IKeyValue<TKey, TValue>, bool> predicate, out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.RemoveWhere(predicate, out removedItems);
             }
@@ -611,7 +612,7 @@ namespace ComposableCollections.Dictionary
 
         public void Clear(out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.Clear(out removedItems);
             }
@@ -619,7 +620,7 @@ namespace ComposableCollections.Dictionary
 
         public bool TryRemove(TKey key, out TValue removedItem)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 return dictionary.TryRemove(key, out removedItem);
             }
@@ -627,7 +628,7 @@ namespace ComposableCollections.Dictionary
 
         public void Remove(TKey key, out TValue removedItem)
         {
-            using (var dictionary = _wrapped.BeginWrite())
+            using (var dictionary = _source.BeginWrite())
             {
                 dictionary.Remove(key, out removedItem);
             }
@@ -635,34 +636,34 @@ namespace ComposableCollections.Dictionary
         
         protected class Enumerator<T> : IEnumerator<T>
         {
-            private readonly IEnumerator<T> _wrapped;
+            private readonly IEnumerator<T> _source;
             private readonly IDisposable _disposable;
 
-            public Enumerator(IEnumerator<T> wrapped, IDisposable disposable)
+            public Enumerator(IEnumerator<T> source, IDisposable disposable)
             {
-                _wrapped = wrapped;
+                _source = source;
                 _disposable = disposable;
             }
 
             public bool MoveNext()
             {
-                return _wrapped.MoveNext();
+                return _source.MoveNext();
             }
 
             public void Reset()
             {
-                _wrapped.Reset();
+                _source.Reset();
             }
 
             public void Dispose()
             {
-                _wrapped.Dispose();
+                _source.Dispose();
                 _disposable.Dispose();
             }
 
             object IEnumerator.Current => Current;
 
-            public T Current => _wrapped.Current;
+            public T Current => _source.Current;
         }
 
         protected class Enumerable<T> : IEnumerable<T>

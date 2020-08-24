@@ -1,6 +1,6 @@
 using SimpleMonads;
 
-namespace ComposableCollections.Dictionary.Mutations
+namespace ComposableCollections.Dictionary.Write
 {
     public interface IDictionaryItemAddAttempt<out TValue>
     {

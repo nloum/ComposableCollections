@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace ComposableCollections.Dictionary
+namespace ComposableCollections.Dictionary.WithBuiltInKey
 {
     public class DisposableQueryableDictionaryWithBuiltInKeyAdapter<TKey, TValue> :
         DictionaryWithBuiltInKeyAdapter<TKey, TValue>, IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>

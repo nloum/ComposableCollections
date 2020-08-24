@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ComposableCollections.Dictionary.Mutations;
+using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
@@ -13,50 +13,50 @@ namespace ComposableCollections.Dictionary
     /// <typeparam name="TValue"></typeparam>
     public class SystemDelegateDictionary<TKey, TValue> : DictionaryBase<TKey, TValue>
     {
-        private readonly IDictionary<TKey, TValue> _wrapped;
+        private readonly IDictionary<TKey, TValue> _source;
 
-        public SystemDelegateDictionary(IDictionary<TKey, TValue> wrapped)
+        public SystemDelegateDictionary(IDictionary<TKey, TValue> source)
         {
-            _wrapped = wrapped;
+            _source = source;
         }
 
-        public override void Mutate(IEnumerable<DictionaryMutation<TKey, TValue>> mutations, out IReadOnlyList<DictionaryMutationResult<TKey, TValue>> results)
+        public override void Write(IEnumerable<DictionaryWrite<TKey, TValue>> writes, out IReadOnlyList<DictionaryWriteResult<TKey, TValue>> results)
         {
-            var finalResults = new List<DictionaryMutationResult<TKey, TValue>>();
+            var finalResults = new List<DictionaryWriteResult<TKey, TValue>>();
             results = finalResults;
             
-            foreach (var mutation in mutations)
+            foreach (var write in writes)
             {
-                switch (mutation.Type)
+                switch (write.Type)
                 {
-                    case DictionaryMutationType.Add:
+                    case DictionaryWriteType.Add:
                     {
-                        var value = mutation.ValueIfAdding.Value();
-                        _wrapped.Add(mutation.Key, value);
-                        finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateAdd(mutation.Key, true, Maybe<TValue>.Nothing(), value.ToMaybe()));
+                        var value = write.ValueIfAdding.Value();
+                        _source.Add(write.Key, value);
+                        finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true, Maybe<TValue>.Nothing(), value.ToMaybe()));
                     }
                     break;
-                    case DictionaryMutationType.TryAdd:
+                    case DictionaryWriteType.TryAdd:
                     {
-                        if (!_wrapped.TryGetValue(mutation.Key, out var existingValue))
+                        if (!_source.TryGetValue(write.Key, out var existingValue))
                         {
-                            var newValue = mutation.ValueIfAdding.Value();
-                            _wrapped.Add(mutation.Key, newValue);
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateTryAdd(mutation.Key, true, Maybe<TValue>.Nothing(), newValue.ToMaybe()));
+                            var newValue = write.ValueIfAdding.Value();
+                            _source.Add(write.Key, newValue);
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateTryAdd(write.Key, true, Maybe<TValue>.Nothing(), newValue.ToMaybe()));
                         }
                         else
                         {
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateAdd(mutation.Key, true, existingValue.ToMaybe(), Maybe<TValue>.Nothing()));
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true, existingValue.ToMaybe(), Maybe<TValue>.Nothing()));
                         }
                     }
                     break;
-                    case DictionaryMutationType.Update:
+                    case DictionaryWriteType.Update:
                     {
-                        if (_wrapped.TryGetValue(mutation.Key, out var previousValue))
+                        if (_source.TryGetValue(write.Key, out var previousValue))
                         {
-                            var newValue = mutation.ValueIfUpdating.Value(previousValue);
-                            _wrapped.Add(mutation.Key, newValue);
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, true, previousValue.ToMaybe(), newValue.ToMaybe()));
+                            var newValue = write.ValueIfUpdating.Value(previousValue);
+                            _source.Add(write.Key, newValue);
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true, previousValue.ToMaybe(), newValue.ToMaybe()));
                         }
                         else
                         {
@@ -64,83 +64,83 @@ namespace ComposableCollections.Dictionary
                         }
                     }
                     break;
-                    case DictionaryMutationType.TryUpdate:
+                    case DictionaryWriteType.TryUpdate:
                     {
-                        if (_wrapped.TryGetValue(mutation.Key, out var previousValue))
+                        if (_source.TryGetValue(write.Key, out var previousValue))
                         {
-                            var newValue = mutation.ValueIfUpdating.Value(previousValue);
-                            _wrapped.Add(mutation.Key, newValue);
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, true, previousValue.ToMaybe(), newValue.ToMaybe()));
+                            var newValue = write.ValueIfUpdating.Value(previousValue);
+                            _source.Add(write.Key, newValue);
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true, previousValue.ToMaybe(), newValue.ToMaybe()));
                         }
                         else
                         {
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, false, Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing()));
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, false, Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing()));
                         }
                     }
                     break;
-                    case DictionaryMutationType.AddOrUpdate:
+                    case DictionaryWriteType.AddOrUpdate:
                     {
-                        if (_wrapped.TryGetValue(mutation.Key, out var previousValue))
+                        if (_source.TryGetValue(write.Key, out var previousValue))
                         {
-                            var newValue = mutation.ValueIfUpdating.Value(previousValue);
-                            _wrapped.Add(mutation.Key, newValue);
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, true, previousValue.ToMaybe(), newValue.ToMaybe()));
+                            var newValue = write.ValueIfUpdating.Value(previousValue);
+                            _source.Add(write.Key, newValue);
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true, previousValue.ToMaybe(), newValue.ToMaybe()));
                         }
                         else
                         {
-                            var newValue = mutation.ValueIfAdding.Value();
-                            _wrapped[mutation.Key] = newValue;
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, false, Maybe<TValue>.Nothing(), newValue.ToMaybe()));
+                            var newValue = write.ValueIfAdding.Value();
+                            _source[write.Key] = newValue;
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, false, Maybe<TValue>.Nothing(), newValue.ToMaybe()));
                         }
                     }
                     break;
-                    case DictionaryMutationType.Remove:
+                    case DictionaryWriteType.Remove:
                     {
-                        if (_wrapped.TryGetValue(mutation.Key, out var removedValue))
+                        if (_source.TryGetValue(write.Key, out var removedValue))
                         {
-                            _wrapped.Remove(mutation.Key);
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateRemove(mutation.Key, removedValue.ToMaybe()));
+                            _source.Remove(write.Key);
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, removedValue.ToMaybe()));
                         }
                     }
                     break;
-                    case DictionaryMutationType.TryRemove:
+                    case DictionaryWriteType.TryRemove:
                     {
-                        if (_wrapped.TryGetValue(mutation.Key, out var removedValue))
+                        if (_source.TryGetValue(write.Key, out var removedValue))
                         {
-                            _wrapped.Remove(mutation.Key);
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateRemove(mutation.Key, removedValue.ToMaybe()));
+                            _source.Remove(write.Key);
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, removedValue.ToMaybe()));
                         }
                     }
                     break;
                     default:
-                        throw new ArgumentException($"Unknown mutation type: {mutation.Type}");
+                        throw new ArgumentException($"Unknown mutation type: {write.Type}");
                 }
             }
         }
         
         public override bool TryAdd(TKey key, Func<TValue> value, out TValue existingValue, out TValue newValue)
         {
-            if (_wrapped.TryGetValue(key, out existingValue))
+            if (_source.TryGetValue(key, out existingValue))
             {
                 newValue = default;
                 return false;
             }
 
             newValue = value();
-            _wrapped.Add(key, newValue);
+            _source.Add(key, newValue);
             return true;
         }
 
         public override bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue, out TValue newValue)
         {
-            if (!_wrapped.TryGetValue(key, out previousValue))
+            if (!_source.TryGetValue(key, out previousValue))
             {
                 newValue = default;
                 return false;
             }
 
             newValue = value(previousValue);
-            _wrapped[key] = newValue;
+            _source[key] = newValue;
             return true;
         }
 
@@ -148,9 +148,9 @@ namespace ComposableCollections.Dictionary
         
         public override bool TryRemove(TKey key, out TValue removedItem)
         {
-            if (_wrapped.TryGetValue(key, out removedItem))
+            if (_source.TryGetValue(key, out removedItem))
             {
-                _wrapped.Remove(key);
+                _source.Remove(key);
                 return true;
             }
 
@@ -175,38 +175,38 @@ namespace ComposableCollections.Dictionary
 
             foreach (var key in results.Keys)
             {
-                _wrapped.Remove(key);
+                _source.Remove(key);
             }
         }
 
         public override IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
-            return _wrapped.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value)).GetEnumerator();
+            return _source.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value)).GetEnumerator();
         }
 
-        public override int Count => _wrapped.Count;
+        public override int Count => _source.Count;
 
         public override IEqualityComparer<TKey> Comparer => EqualityComparer<TKey>.Default;
 
-        public override IEnumerable<TKey> Keys => _wrapped.Keys;
+        public override IEnumerable<TKey> Keys => _source.Keys;
 
-        public override IEnumerable<TValue> Values => _wrapped.Values;
+        public override IEnumerable<TValue> Values => _source.Values;
 
         public override bool ContainsKey(TKey key)
         {
-            return _wrapped.ContainsKey(key);
+            return _source.ContainsKey(key);
         }
 
         public override bool TryGetValue(TKey key, out TValue value)
         {
-            return _wrapped.TryGetValue(key, out value);
+            return _source.TryGetValue(key, out value);
         }
 
         public override void AddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
             foreach (var item in newItems)
             {
-                _wrapped.Add(key(item), value(item));
+                _source.Add(key(item), value(item));
             }
         }
 
@@ -214,14 +214,14 @@ namespace ComposableCollections.Dictionary
         {
             foreach (var key in keysToRemove)
             {
-                _wrapped.Remove(key);
+                _source.Remove(key);
             }
         }
 
         public override void RemoveWhere(Func<TKey, TValue, bool> predicate)
         {
             var keysToRemove = new List<TKey>();
-            foreach (var kvp in _wrapped)
+            foreach (var kvp in _source)
             {
                 if (predicate(kvp.Key, kvp.Value))
                 {
@@ -231,14 +231,14 @@ namespace ComposableCollections.Dictionary
 
             foreach (var key in keysToRemove)
             {
-                _wrapped.Remove(key);
+                _source.Remove(key);
             }
         }
 
         public override void RemoveWhere(Func<IKeyValue<TKey, TValue>, bool> predicate)
         {
             var keysToRemove = new List<TKey>();
-            foreach (var kvp in _wrapped)
+            foreach (var kvp in _source)
             {
                 if (predicate(new KeyValue<TKey, TValue>(kvp.Key, kvp.Value)))
                 {
@@ -248,20 +248,20 @@ namespace ComposableCollections.Dictionary
 
             foreach (var key in keysToRemove)
             {
-                _wrapped.Remove(key);
+                _source.Remove(key);
             }
         }
 
         public override void Clear()
         {
-            _wrapped.Clear();
+            _source.Clear();
         }
 
         public override bool TryRemove(TKey key)
         {
-            if (_wrapped.ContainsKey(key))
+            if (_source.ContainsKey(key))
             {
-                _wrapped.Remove(key);
+                _source.Remove(key);
                 return true;
             }
 

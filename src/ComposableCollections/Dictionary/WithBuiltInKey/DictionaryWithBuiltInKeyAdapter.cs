@@ -2,10 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using ComposableCollections.Dictionary.Mutations;
+using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
 
-namespace ComposableCollections.Dictionary
+namespace ComposableCollections.Dictionary.WithBuiltInKey
 {
     public class DictionaryWithBuiltInKeyAdapter<TKey, TValue> : ReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue>, IDictionaryWithBuiltInKey<TKey, TValue>
     {
@@ -25,10 +25,10 @@ namespace ComposableCollections.Dictionary
             return _source;
         }
 
-        protected void Initialize(IComposableDictionary<TKey, TValue> wrapped, Func<TValue, TKey> getKey)
+        protected void Initialize(IComposableDictionary<TKey, TValue> source, Func<TValue, TKey> getKey)
         {
-            _source = wrapped;
-            base.Initialize(wrapped, getKey);
+            _source = source;
+            base.Initialize(source, getKey);
         }
 
         IEnumerator IEnumerable.GetEnumerator()

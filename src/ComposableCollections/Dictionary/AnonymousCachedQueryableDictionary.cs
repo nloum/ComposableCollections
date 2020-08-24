@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ComposableCollections.Dictionary.Mutations;
+using ComposableCollections.Dictionary.Write;
 
 namespace ComposableCollections.Dictionary
 {
@@ -10,14 +10,14 @@ namespace ComposableCollections.Dictionary
         private Func<IComposableReadOnlyDictionary<TKey, TValue>> _asBypassCache;
         private Func<IComposableDictionary<TKey, TValue>> _asNeverFlush;
         private Action _flushCache;
-        private Func<bool, IEnumerable<DictionaryMutation<TKey, TValue>>> _getMutations;
+        private Func<bool, IEnumerable<DictionaryWrite<TKey, TValue>>> _getWrites;
 
-        public AnonymousCachedQueryableDictionary(IComposableDictionary<TKey, TValue> source, Func<IComposableReadOnlyDictionary<TKey, TValue>> asBypassCache, Func<IComposableDictionary<TKey, TValue>> asNeverFlush, Action flushCache, Func<bool, IEnumerable<DictionaryMutation<TKey, TValue>>> getMutations, IQueryable<TValue> values) : base(source)
+        public AnonymousCachedQueryableDictionary(IComposableDictionary<TKey, TValue> source, Func<IComposableReadOnlyDictionary<TKey, TValue>> asBypassCache, Func<IComposableDictionary<TKey, TValue>> asNeverFlush, Action flushCache, Func<bool, IEnumerable<DictionaryWrite<TKey, TValue>>> getWrites, IQueryable<TValue> values) : base(source)
         {
             _asBypassCache = asBypassCache;
             _asNeverFlush = asNeverFlush;
             _flushCache = flushCache;
-            _getMutations = getMutations;
+            _getWrites = getWrites;
             Values = values;
         }
 
@@ -25,14 +25,14 @@ namespace ComposableCollections.Dictionary
         {
         }
 
-        protected void Initialize(IComposableDictionary<TKey, TValue> wrapped, Func<IComposableReadOnlyDictionary<TKey, TValue>> asBypassCache, Func<IComposableDictionary<TKey, TValue>> asNeverFlush, Action flushCache, Func<bool, IEnumerable<DictionaryMutation<TKey, TValue>>> getMutations, IQueryable<TValue> values)
+        protected void Initialize(IComposableDictionary<TKey, TValue> source, Func<IComposableReadOnlyDictionary<TKey, TValue>> asBypassCache, Func<IComposableDictionary<TKey, TValue>> asNeverFlush, Action flushCache, Func<bool, IEnumerable<DictionaryWrite<TKey, TValue>>> getWrites, IQueryable<TValue> values)
         {
             _asBypassCache = asBypassCache;
             _asNeverFlush = asNeverFlush;
             _flushCache = flushCache;
-            _getMutations = getMutations;
+            _getWrites = getWrites;
             Values = values;
-            base.Initialize(wrapped);
+            base.Initialize(source);
         }
         
         public IComposableReadOnlyDictionary<TKey, TValue> AsBypassCache()
@@ -50,9 +50,9 @@ namespace ComposableCollections.Dictionary
             _flushCache();
         }
 
-        public IEnumerable<DictionaryMutation<TKey, TValue>> GetMutations(bool clear)
+        public IEnumerable<DictionaryWrite<TKey, TValue>> GetWrites(bool clear)
         {
-            return _getMutations(clear);
+            return _getWrites(clear);
         }
 
         public new IQueryable<TValue> Values { get; private set; }

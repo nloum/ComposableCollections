@@ -1,3 +1,5 @@
+using ComposableCollections.Dictionary.WithBuiltInKey;
+
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 {
     public abstract class

@@ -1,3 +1,6 @@
+using ComposableCollections.Common;
+using ComposableCollections.Dictionary.WithBuiltInKey;
+
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 {
     public class CachedTransactionalDictionaryTransformationsBase<TKey, TValue, TParameter>

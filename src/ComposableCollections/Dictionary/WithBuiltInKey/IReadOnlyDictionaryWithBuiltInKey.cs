@@ -1,4 +1,4 @@
-namespace ComposableCollections.Dictionary
+namespace ComposableCollections.Dictionary.WithBuiltInKey
 {
     public interface IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> : IComposableReadOnlyDictionary<TKey, TValue>
     {

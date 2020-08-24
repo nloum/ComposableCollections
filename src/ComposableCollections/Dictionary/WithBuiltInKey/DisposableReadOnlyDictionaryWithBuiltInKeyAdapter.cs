@@ -1,6 +1,6 @@
 using System;
 
-namespace ComposableCollections.Dictionary
+namespace ComposableCollections.Dictionary.WithBuiltInKey
 {
     public class DisposableReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue> :
         ReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue>, IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>

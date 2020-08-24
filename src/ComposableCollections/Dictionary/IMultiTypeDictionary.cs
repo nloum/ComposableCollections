@@ -1,5 +1,5 @@
 using System;
-using ComposableCollections.Dictionary.Mutations;
+using ComposableCollections.Dictionary.Write;
 
 namespace ComposableCollections.Dictionary
 {

@@ -1,3 +1,5 @@
+using ComposableCollections.Dictionary.WithBuiltInKey;
+
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 {
     public abstract class CachedDictionaryTransformationsBase<TKey, TValue, TParameter> : ICachedDictionaryTransformations<TKey, TValue, TKey, TValue, TParameter>
@@ -12,7 +14,7 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
                 result.AsBypassCache,
                 result.AsNeverFlush,
                 result.FlushCache,
-                result.GetMutations,
+                result.GetWrites,
                 source.Values );
         }
 
@@ -24,7 +26,7 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
                 result.AsBypassCache,
                 result.AsNeverFlush,
                 result.FlushCache,
-                result.GetMutations,
+                result.GetWrites,
                 source,
                 source.Values );
         }
@@ -37,7 +39,7 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
                 result.AsBypassCache,
                 result.AsNeverFlush,
                 result.FlushCache,
-                result.GetMutations,
+                result.GetWrites,
                 source );
         }
 
@@ -53,21 +55,21 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
         public ICachedQueryableDictionaryWithBuiltInKey<TKey, TValue> Transform(IQueryableDictionaryWithBuiltInKey<TKey, TValue> source, TParameter p)
         {
             var x = Transform(source.AsComposableDictionary(), p);
-            var result = new AnonymousCachedQueryableDictionary<TKey, TValue>(x, x.AsBypassCache, x.AsNeverFlush, x.FlushCache, x.GetMutations, source.Values);
+            var result = new AnonymousCachedQueryableDictionary<TKey, TValue>(x, x.AsBypassCache, x.AsNeverFlush, x.FlushCache, x.GetWrites, source.Values);
             return new CachedQueryableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(result, source.GetKey);
         }
 
         public ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> Transform(IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> source, TParameter p)
         {
             var x = Transform(source.AsComposableDictionary(), p);
-            var result = new AnonymousCachedDisposableQueryableDictionary<TKey, TValue>(x, x.AsBypassCache, x.AsNeverFlush, x.FlushCache, x.GetMutations, source, source.Values);
+            var result = new AnonymousCachedDisposableQueryableDictionary<TKey, TValue>(x, x.AsBypassCache, x.AsNeverFlush, x.FlushCache, x.GetWrites, source, source.Values);
             return new CachedDisposableQueryableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(result, source.GetKey);
         }
 
         public ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue> Transform(IDisposableDictionaryWithBuiltInKey<TKey, TValue> source, TParameter p)
         {
             var x = Transform(source.AsComposableDictionary(), p);
-            var result = new AnonymousCachedDisposableDictionary<TKey, TValue>(x, x.AsBypassCache, x.AsNeverFlush, x.FlushCache, x.GetMutations, source);
+            var result = new AnonymousCachedDisposableDictionary<TKey, TValue>(x, x.AsBypassCache, x.AsNeverFlush, x.FlushCache, x.GetWrites, source);
             return new CachedDisposableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(result, source.GetKey);
         }
     }

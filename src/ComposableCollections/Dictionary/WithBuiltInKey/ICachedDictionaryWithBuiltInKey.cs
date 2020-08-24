@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using ComposableCollections.Dictionary.Mutations;
+using ComposableCollections.Dictionary.Write;
 
-namespace ComposableCollections.Dictionary
+namespace ComposableCollections.Dictionary.WithBuiltInKey
 {
     /// <summary>
     /// A dictionary with a built-in key that will keep track of the changes you make to it, and then allows you to flush
@@ -13,6 +13,6 @@ namespace ComposableCollections.Dictionary
         IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> AsBypassCache();
         IDictionaryWithBuiltInKey<TKey, TValue> AsNeverFlush();
         void FlushCache();
-        IEnumerable<DictionaryMutation<TKey, TValue>> GetMutations(bool clear);
+        IEnumerable<DictionaryWrite<TKey, TValue>> GetWrites(bool clear);
     }
 }

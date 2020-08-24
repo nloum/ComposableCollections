@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using ComposableCollections.Common;
 using ComposableCollections.Dictionary;
 using ComposableCollections.Dictionary.ExtensionMethodHelpers;
+using ComposableCollections.Dictionary.WithBuiltInKey;
 using SimpleMonads;
 using UtilityDisposables;
 
@@ -556,7 +558,7 @@ namespace ComposableCollections
         #region WithWritesCombinedAtEndOfTransaction
         
         /// <summary>
-        /// Converts the source to a transactional dictionary that keeps all mutations pending until the transaction is completed.
+        /// Converts the source to a transactional dictionary that keeps all writes pending until the transaction is completed.
         /// </summary>
         public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithWritesCombinedAtEndOfTransaction<TKey, TValue>(this IComposableDictionary<TKey, TValue> source)
         {
@@ -571,7 +573,7 @@ namespace ComposableCollections
         }
         
         /// <summary>
-        /// Converts the source to a transactional dictionary that keeps all mutations pending until the transaction is completed.
+        /// Converts the source to a transactional dictionary that keeps all writes pending until the transaction is completed.
         /// </summary>
         public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithWritesCombinedAtEndOfTransaction<TKey, TValue>(this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source)
         {
@@ -597,9 +599,9 @@ namespace ComposableCollections
         /// but reads can happen simultaneously.
         /// </summary>
         public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithReadWriteLock<TKey, TValue>(
-            this IComposableDictionary<TKey, TValue> wrapped)
+            this IComposableDictionary<TKey, TValue> source)
         {
-            return new AtomicDictionaryAdapter<TKey, TValue>(wrapped);
+            return new AtomicDictionaryAdapter<TKey, TValue>(source);
         }
 
         /// <summary>
@@ -608,9 +610,9 @@ namespace ComposableCollections
         /// but reads can happen simultaneously.
         /// </summary>
         public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithReadWriteLock<TKey, TValue>(
-            this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> wrapped)
+            this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source)
         {
-            return new AtomicTransactionalDecorator<TKey, TValue>(wrapped);
+            return new AtomicTransactionalDecorator<TKey, TValue>(source);
         }
 
         /// <summary>
@@ -619,9 +621,9 @@ namespace ComposableCollections
         /// but reads can happen simultaneously.
         /// </summary>
         public static IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>> WithReadWriteLock<TKey, TValue>(
-            this IComposableReadOnlyDictionary<TKey, TValue> wrapped)
+            this IComposableReadOnlyDictionary<TKey, TValue> source)
         {
-            return new AtomicReadOnlyDictionaryAdapter<TKey, TValue>(wrapped);
+            return new AtomicReadOnlyDictionaryAdapter<TKey, TValue>(source);
         }
         
         #endregion

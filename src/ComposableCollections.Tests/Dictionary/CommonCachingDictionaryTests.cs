@@ -106,7 +106,7 @@ namespace ComposableCollections.Tests
         [TestMethod]
         [DataRow(CachingDictionaryType.ConcurrentCachingDictionary)]
         [DataRow(CachingDictionaryType.ConcurrentCachingDictionaryWithMinimalState)]
-        public void FlushWithNoMutationsShouldWork(CachingDictionaryType cachingDictionaryType)
+        public void FlushWithNoWritesShouldWork(CachingDictionaryType cachingDictionaryType)
         {
             var flushCacheTo = new ComposableDictionary<string, int>();
             flushCacheTo.Add("Hi", 2);

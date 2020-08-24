@@ -18,10 +18,10 @@ namespace ComposableCollections.Dictionary
         {
         }
 
-        protected void Initialize(IQueryableDictionary<TKey, TValue> wrapped, IDisposable disposable)
+        protected void Initialize(IQueryableDictionary<TKey, TValue> source, IDisposable disposable)
         {
-            base.Initialize(wrapped);
-            _source = wrapped;
+            base.Initialize(source);
+            _source = source;
             _disposable = disposable;
         }
         

@@ -1,4 +1,4 @@
-namespace ComposableCollections.Dictionary.Mutations
+namespace ComposableCollections.Dictionary.Write
 {
     public enum DictionaryItemUpdateResult
     {

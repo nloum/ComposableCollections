@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ComposableCollections.Dictionary.Mutations;
+using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
@@ -109,52 +109,52 @@ namespace ComposableCollections.Dictionary
         public override IEnumerable<TKey2> Keys => _innerValues.Keys.Select(ConvertToKey2);
         public override IEnumerable<TValue2> Values => _innerValues.Select(kvp => Convert(kvp.Key, kvp.Value).Value);
 
-        public override void Mutate(IEnumerable<DictionaryMutation<TKey2, TValue2>> mutations,
-            out IReadOnlyList<DictionaryMutationResult<TKey2, TValue2>> results)
+        public override void Write(IEnumerable<DictionaryWrite<TKey2, TValue2>> writes,
+            out IReadOnlyList<DictionaryWriteResult<TKey2, TValue2>> results)
         {
-            _innerValues.Mutate(mutations.Select(mutation =>
+            _innerValues.Write(writes.Select(write =>
             {
                 Func<TValue1> valueIfAdding = () =>
                 {
-                    var result = mutation.ValueIfAdding.Value();
-                    return Convert(mutation.Key, result).Value;
+                    var result = write.ValueIfAdding.Value();
+                    return Convert(write.Key, result).Value;
                 };
                 Func<TValue1, TValue1> valueIfUpdating = previousValue =>
                 {
-                    var result = mutation.ValueIfAdding.Value();
-                    return Convert(mutation.Key, result).Value;
+                    var result = write.ValueIfAdding.Value();
+                    return Convert(write.Key, result).Value;
                 };
-                return new DictionaryMutation<TKey1, TValue1>(mutation.Type, ConvertToKey1(mutation.Key),
+                return new DictionaryWrite<TKey1, TValue1>(write.Type, ConvertToKey1(write.Key),
                     valueIfAdding.ToMaybe(),
                     valueIfUpdating.ToMaybe());
             }), out var innerResults);
 
             results = innerResults.Select(innerResult =>
             {
-                if (innerResult.Type == DictionaryMutationType.Add || innerResult.Type == DictionaryMutationType.TryAdd)
+                if (innerResult.Type == DictionaryWriteType.Add || innerResult.Type == DictionaryWriteType.TryAdd)
                 {
-                    return DictionaryMutationResult<TKey2, TValue2>.CreateAdd(ConvertToKey2(innerResult.Key),
+                    return DictionaryWriteResult<TKey2, TValue2>.CreateAdd(ConvertToKey2(innerResult.Key),
                         innerResult.Add.Value.Added,
                         innerResult.Add.Value.ExistingValue.Select(value => Convert(innerResult.Key, value).Value),
                         innerResult.Add.Value.NewValue.Select(value => Convert(innerResult.Key, value).Value));
                 }
-                else if (innerResult.Type == DictionaryMutationType.Remove ||
-                         innerResult.Type == DictionaryMutationType.TryRemove)
+                else if (innerResult.Type == DictionaryWriteType.Remove ||
+                         innerResult.Type == DictionaryWriteType.TryRemove)
                 {
-                    return DictionaryMutationResult<TKey2, TValue2>.CreateRemove(ConvertToKey2(innerResult.Key),
+                    return DictionaryWriteResult<TKey2, TValue2>.CreateRemove(ConvertToKey2(innerResult.Key),
                         innerResult.Remove.Value.Select(value => Convert(innerResult.Key, value).Value));
                 }
-                else if (innerResult.Type == DictionaryMutationType.Update ||
-                         innerResult.Type == DictionaryMutationType.TryUpdate)
+                else if (innerResult.Type == DictionaryWriteType.Update ||
+                         innerResult.Type == DictionaryWriteType.TryUpdate)
                 {
-                    return DictionaryMutationResult<TKey2, TValue2>.CreateUpdate(ConvertToKey2(innerResult.Key),
+                    return DictionaryWriteResult<TKey2, TValue2>.CreateUpdate(ConvertToKey2(innerResult.Key),
                         innerResult.Update.Value.Updated,
                         innerResult.Update.Value.ExistingValue.Select(value => Convert(innerResult.Key, value).Value),
                         innerResult.Update.Value.NewValue.Select(value => Convert(innerResult.Key, value).Value));
                 }
-                else if (innerResult.Type == DictionaryMutationType.AddOrUpdate)
+                else if (innerResult.Type == DictionaryWriteType.AddOrUpdate)
                 {
-                    return DictionaryMutationResult<TKey2, TValue2>.CreateAddOrUpdate(ConvertToKey2(innerResult.Key),
+                    return DictionaryWriteResult<TKey2, TValue2>.CreateAddOrUpdate(ConvertToKey2(innerResult.Key),
                         innerResult.AddOrUpdate.Value.Result,
                         innerResult.AddOrUpdate.Value.ExistingValue.Select(value =>
                             Convert(innerResult.Key, value).Value),
@@ -162,7 +162,7 @@ namespace ComposableCollections.Dictionary
                 }
                 else
                 {
-                    throw new InvalidOperationException("Unknown dictionary mutation type");
+                    throw new InvalidOperationException("Unknown dictionary write type");
                 }
             }).ToList();
         }

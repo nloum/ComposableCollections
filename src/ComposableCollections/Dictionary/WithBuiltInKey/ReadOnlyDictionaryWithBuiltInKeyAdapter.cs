@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using SimpleMonads;
 
-namespace ComposableCollections.Dictionary
+namespace ComposableCollections.Dictionary.WithBuiltInKey
 {
     public class ReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue> : IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>
     {
@@ -20,9 +20,9 @@ namespace ComposableCollections.Dictionary
         {
         }
 
-        protected void Initialize(IComposableReadOnlyDictionary<TKey, TValue> wrapped, Func<TValue, TKey> getKey)
+        protected void Initialize(IComposableReadOnlyDictionary<TKey, TValue> source, Func<TValue, TKey> getKey)
         {
-            _source = wrapped;
+            _source = source;
             _getKey = getKey;
         }
 

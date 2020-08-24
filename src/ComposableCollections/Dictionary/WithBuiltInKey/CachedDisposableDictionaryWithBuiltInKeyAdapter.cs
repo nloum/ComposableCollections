@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using ComposableCollections.Dictionary.Mutations;
+using ComposableCollections.Dictionary.Write;
 
-namespace ComposableCollections.Dictionary
+namespace ComposableCollections.Dictionary.WithBuiltInKey
 {
     public class CachedDisposableDictionaryWithBuiltInKeyAdapter<TKey, TValue> :
         DictionaryWithBuiltInKeyAdapter<TKey, TValue>, ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue>
@@ -45,9 +45,9 @@ namespace ComposableCollections.Dictionary
             _source.FlushCache();
         }
 
-        public IEnumerable<DictionaryMutation<TKey, TValue>> GetMutations(bool clear)
+        public IEnumerable<DictionaryWrite<TKey, TValue>> GetWrites(bool clear)
         {
-            return _source.GetMutations(clear);
+            return _source.GetWrites(clear);
         }
 
         public void Dispose()

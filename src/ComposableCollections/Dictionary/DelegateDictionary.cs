@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using ComposableCollections.Dictionary.Mutations;
+using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
@@ -20,9 +20,9 @@ namespace ComposableCollections.Dictionary
             _source = null;
         }
 
-        protected void Initialize(IComposableDictionary<TKey, TValue> wrapped)
+        protected void Initialize(IComposableDictionary<TKey, TValue> source)
         {
-            _source = wrapped;
+            _source = source;
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -34,7 +34,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             return _source.GetEnumerator();
         }
@@ -45,7 +45,7 @@ namespace ComposableCollections.Dictionary
             {
                 if (_source == null)
                 {
-                    throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                    throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
                 }
                 return _source.Count;
             }
@@ -57,7 +57,7 @@ namespace ComposableCollections.Dictionary
             {
                 if (_source == null)
                 {
-                    throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                    throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
                 }
                 return _source.Comparer;
             }
@@ -68,7 +68,7 @@ namespace ComposableCollections.Dictionary
             get {       
                 if (_source == null)
                 {
-                    throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                    throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
                 }
                 return _source.Keys;
             }
@@ -80,7 +80,7 @@ namespace ComposableCollections.Dictionary
             {
                 if (_source == null)
                 {
-                    throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                    throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
                 }
                 return _source.Values;
             }
@@ -90,21 +90,21 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             return _source.ContainsKey(key);
         }
 
-        public void Mutate(IEnumerable<DictionaryMutation<TKey, TValue>> mutations, out IReadOnlyList<DictionaryMutationResult<TKey, TValue>> results)
+        public void Write(IEnumerable<DictionaryWrite<TKey, TValue>> writes, out IReadOnlyList<DictionaryWriteResult<TKey, TValue>> results)
         {
-            _source.Mutate(mutations, out results);
+            _source.Write(writes, out results);
         }
 
         public IMaybe<TValue> TryGetValue(TKey key)
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             return _source.TryGetValue(key);
         }
@@ -113,7 +113,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             return _source.TryGetValue(key, out value);
         }
@@ -124,7 +124,7 @@ namespace ComposableCollections.Dictionary
             {
                 if (_source == null)
                 {
-                    throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                    throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
                 }
                 return _source[key];
             }
@@ -132,7 +132,7 @@ namespace ComposableCollections.Dictionary
             {
                 if (_source == null)
                 {
-                    throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                    throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
                 }
                 _source[key] = value;
             }
@@ -142,7 +142,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             return _source.TryAdd(key, value);
         }
@@ -151,7 +151,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             return _source.TryAdd(key, value);
         }
@@ -160,7 +160,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             return _source.TryAdd(key, value, out existingValue, out newValue);
         }
@@ -169,7 +169,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryAddRange(newItems, out results);
         }
@@ -178,7 +178,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryAddRange(newItems, out results);
         }
@@ -187,7 +187,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryAddRange(newItems, key, value, out results);
         }
@@ -196,7 +196,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryAddRange(newItems);
         }
@@ -205,7 +205,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryAddRange(newItems);
         }
@@ -214,7 +214,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryAddRange(newItems, key, value);
         }
@@ -223,7 +223,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryAddRange(newItems);
         }
@@ -232,7 +232,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryAddRange(newItems);
         }
@@ -241,7 +241,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.Add(key, value);
         }
@@ -250,7 +250,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.AddRange(newItems);
         }
@@ -259,7 +259,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.AddRange(newItems);
         }
@@ -268,7 +268,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.AddRange(newItems, key, value);
         }
@@ -277,7 +277,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.AddRange(newItems);
         }
@@ -286,7 +286,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.AddRange(newItems);
         }
@@ -295,7 +295,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             return _source.TryUpdate(key, value);
         }
@@ -304,7 +304,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             return _source.TryUpdate(key, value, out previousValue);
         }
@@ -313,7 +313,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             return _source.TryUpdate(key, value, out previousValue, out newValue);
         }
@@ -322,7 +322,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryUpdateRange(newItems);
         }
@@ -331,7 +331,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryUpdateRange(newItems);
         }
@@ -340,7 +340,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryUpdateRange(newItems, key, value);
         }
@@ -349,7 +349,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryUpdateRange(newItems);
         }
@@ -358,7 +358,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryUpdateRange(newItems);
         }
@@ -367,7 +367,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryUpdateRange(newItems, out results);
         }
@@ -376,7 +376,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryUpdateRange(newItems, out results);
         }
@@ -385,7 +385,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryUpdateRange(newItems, key, value, out results);
         }
@@ -394,7 +394,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.Update(key, value);
         }
@@ -403,7 +403,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.UpdateRange(newItems);
         }
@@ -412,7 +412,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.UpdateRange(newItems);
         }
@@ -421,7 +421,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.UpdateRange(newItems, key, value);
         }
@@ -430,7 +430,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.Update(key, value, out previousValue);
         }
@@ -439,7 +439,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.UpdateRange(newItems, out results);
         }
@@ -448,7 +448,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.UpdateRange(newItems, out results);
         }
@@ -457,7 +457,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.UpdateRange(newItems, key, value, out results);
         }
@@ -466,7 +466,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.UpdateRange(newItems);
         }
@@ -475,7 +475,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.UpdateRange(newItems);
         }
@@ -484,7 +484,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             return _source.AddOrUpdate(key, value);
         }
@@ -493,7 +493,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             return _source.AddOrUpdate(key, valueIfAdding, valueIfUpdating);
         }
@@ -503,7 +503,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             return _source.AddOrUpdate(key, valueIfAdding, valueIfUpdating, out previousValue, out newValue);
         }
@@ -512,7 +512,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.AddOrUpdateRange(newItems, out results);
         }
@@ -521,7 +521,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.AddOrUpdateRange(newItems, out results);
         }
@@ -530,7 +530,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.AddOrUpdateRange(newItems, key, value, out results);
         }
@@ -539,7 +539,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.AddOrUpdateRange(newItems);
         }
@@ -548,7 +548,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.AddOrUpdateRange(newItems);
         }
@@ -557,7 +557,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.AddOrUpdateRange(newItems, key, value);
         }
@@ -566,7 +566,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.AddOrUpdateRange(newItems);
         }
@@ -575,7 +575,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.AddOrUpdateRange(newItems);
         }
@@ -584,7 +584,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryRemoveRange(keysToRemove);
         }
@@ -593,7 +593,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.RemoveRange(keysToRemove);
         }
@@ -602,7 +602,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.RemoveWhere(predicate);
         }
@@ -611,7 +611,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.RemoveWhere(predicate);
         }
@@ -620,7 +620,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.Clear();
         }
@@ -629,7 +629,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             return _source.TryRemove(key);
         }
@@ -638,7 +638,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.Remove(key);
         }
@@ -647,7 +647,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.TryRemoveRange(keysToRemove, out removedItems);
         }
@@ -656,7 +656,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.RemoveRange(keysToRemove, out removedItems);
         }
@@ -665,7 +665,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.RemoveWhere(predicate, out removedItems);
         }
@@ -674,7 +674,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.RemoveWhere(predicate, out removedItems);
         }
@@ -683,7 +683,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.Clear(out removedItems);
         }
@@ -692,7 +692,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             return _source.TryRemove(key, out removedItem);
         }
@@ -701,7 +701,7 @@ namespace ComposableCollections.Dictionary
         {
             if (_source == null)
             {
-                throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
+                throw new InvalidOperationException("Must call SetWrapped or pass the source value in via constructor before performing any calls on the dictionary");
             }
             _source.Remove(key, out removedItem);
         }

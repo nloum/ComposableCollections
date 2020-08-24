@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using ComposableCollections.Dictionary.Mutations;
+using ComposableCollections.Dictionary.Write;
 
 namespace ComposableCollections.Dictionary
 {
@@ -12,6 +12,6 @@ namespace ComposableCollections.Dictionary
         IComposableReadOnlyDictionary<TKey, TValue> AsBypassCache();
         IComposableDictionary<TKey, TValue> AsNeverFlush();
         void FlushCache();
-        IEnumerable<DictionaryMutation<TKey, TValue>> GetMutations(bool clear);
+        IEnumerable<DictionaryWrite<TKey, TValue>> GetWrites(bool clear);
     }
 }

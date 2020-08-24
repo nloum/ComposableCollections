@@ -10,26 +10,26 @@ namespace ComposableCollections.Dictionary
     /// <typeparam name="TValue"></typeparam>
     public class SystemDelegateReadOnlyDictionary<TKey, TValue> : ReadOnlyDictionaryBase<TKey, TValue>
     {
-        private IReadOnlyDictionary<TKey, TValue> _wrapped;
+        private IReadOnlyDictionary<TKey, TValue> _source;
 
-        public SystemDelegateReadOnlyDictionary(IReadOnlyDictionary<TKey, TValue> wrapped)
+        public SystemDelegateReadOnlyDictionary(IReadOnlyDictionary<TKey, TValue> source)
         {
-            _wrapped = wrapped;
+            _source = source;
         }
 
         public override bool TryGetValue(TKey key, out TValue value)
         {
-            return _wrapped.TryGetValue(key, out value);
+            return _source.TryGetValue(key, out value);
         }
 
         public override IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
-            return _wrapped.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value)).GetEnumerator();
+            return _source.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value)).GetEnumerator();
         }
 
-        public override int Count => _wrapped.Count;
+        public override int Count => _source.Count;
         public override IEqualityComparer<TKey> Comparer => EqualityComparer<TKey>.Default;
-        public override IEnumerable<TKey> Keys => _wrapped.Keys;
-        public override IEnumerable<TValue> Values => _wrapped.Values;
+        public override IEnumerable<TKey> Keys => _source.Keys;
+        public override IEnumerable<TValue> Values => _source.Values;
     }
 }

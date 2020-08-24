@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using ComposableCollections.List;
 using GenericNumbers;
 
-namespace ComposableCollections.Dictionary
+namespace ComposableCollections
 {
     public static class ListExtensions
     {

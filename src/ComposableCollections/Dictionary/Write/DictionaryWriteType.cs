@@ -1,6 +1,6 @@
-namespace ComposableCollections.Dictionary.Mutations
+namespace ComposableCollections.Dictionary.Write
 {
-    public enum DictionaryMutationType
+    public enum DictionaryWriteType
     {
         Add,
         TryAdd,

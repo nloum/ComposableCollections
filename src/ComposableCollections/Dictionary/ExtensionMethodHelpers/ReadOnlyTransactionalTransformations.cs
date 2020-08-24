@@ -1,3 +1,6 @@
+using ComposableCollections.Common;
+using ComposableCollections.Dictionary.WithBuiltInKey;
+
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 {
     public class ReadOnlyTransactionalTransformations<TKey1, TValue1, TKey2, TValue2, TParameter> : IReadOnlyTransactionalTransformations<TKey1, TValue1, TKey2, TValue2, TParameter>

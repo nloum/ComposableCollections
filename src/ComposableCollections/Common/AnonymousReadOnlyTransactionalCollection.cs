@@ -1,6 +1,6 @@
 using System;
 
-namespace ComposableCollections.Dictionary
+namespace ComposableCollections.Common
 {
     public class AnonymousReadOnlyTransactionalCollection<TReadOnly> : IReadOnlyTransactionalCollection<TReadOnly> where TReadOnly : IDisposable
     {

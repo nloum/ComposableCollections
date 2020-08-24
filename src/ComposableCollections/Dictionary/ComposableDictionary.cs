@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ComposableCollections.Dictionary.Mutations;
+using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary
@@ -37,47 +37,47 @@ namespace ComposableCollections.Dictionary
             return true;
         }
 
-        public override void Mutate(IEnumerable<DictionaryMutation<TKey, TValue>> mutations,
-            out IReadOnlyList<DictionaryMutationResult<TKey, TValue>> results)
+        public override void Write(IEnumerable<DictionaryWrite<TKey, TValue>> writes,
+            out IReadOnlyList<DictionaryWriteResult<TKey, TValue>> results)
         {
-            var finalResults = new List<DictionaryMutationResult<TKey, TValue>>();
+            var finalResults = new List<DictionaryWriteResult<TKey, TValue>>();
             results = finalResults;
 
-            foreach (var mutation in mutations)
+            foreach (var write in writes)
             {
-                switch (mutation.Type)
+                switch (write.Type)
                 {
-                    case DictionaryMutationType.Add:
+                    case DictionaryWriteType.Add:
                     {
-                        var value = mutation.ValueIfAdding.Value();
-                        State.Add(mutation.Key, value);
-                        finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateAdd(mutation.Key, true,
+                        var value = write.ValueIfAdding.Value();
+                        State.Add(write.Key, value);
+                        finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true,
                             Maybe<TValue>.Nothing(), value.ToMaybe()));
                     }
                         break;
-                    case DictionaryMutationType.TryAdd:
+                    case DictionaryWriteType.TryAdd:
                     {
-                        if (!State.TryGetValue(mutation.Key, out var existingValue))
+                        if (!State.TryGetValue(write.Key, out var existingValue))
                         {
-                            var newValue = mutation.ValueIfAdding.Value();
-                            State.Add(mutation.Key, newValue);
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateTryAdd(mutation.Key, true,
+                            var newValue = write.ValueIfAdding.Value();
+                            State.Add(write.Key, newValue);
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateTryAdd(write.Key, true,
                                 Maybe<TValue>.Nothing(), newValue.ToMaybe()));
                         }
                         else
                         {
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateAdd(mutation.Key, true,
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true,
                                 existingValue.ToMaybe(), Maybe<TValue>.Nothing()));
                         }
                     }
                         break;
-                    case DictionaryMutationType.Update:
+                    case DictionaryWriteType.Update:
                     {
-                        if (State.TryGetValue(mutation.Key, out var previousValue))
+                        if (State.TryGetValue(write.Key, out var previousValue))
                         {
-                            var newValue = mutation.ValueIfUpdating.Value(previousValue);
-                            State.Add(mutation.Key, newValue);
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, true,
+                            var newValue = write.ValueIfUpdating.Value(previousValue);
+                            State.Add(write.Key, newValue);
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true,
                                 previousValue.ToMaybe(), newValue.ToMaybe()));
                         }
                         else
@@ -86,70 +86,70 @@ namespace ComposableCollections.Dictionary
                         }
                     }
                         break;
-                    case DictionaryMutationType.TryUpdate:
+                    case DictionaryWriteType.TryUpdate:
                     {
-                        if (State.TryGetValue(mutation.Key, out var previousValue))
+                        if (State.TryGetValue(write.Key, out var previousValue))
                         {
-                            var newValue = mutation.ValueIfUpdating.Value(previousValue);
-                            State[mutation.Key] = newValue;
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, true,
+                            var newValue = write.ValueIfUpdating.Value(previousValue);
+                            State[write.Key] = newValue;
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true,
                                 previousValue.ToMaybe(), newValue.ToMaybe()));
                         }
                         else
                         {
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateUpdate(mutation.Key, false,
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, false,
                                 Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing()));
                         }
                     }
                         break;
-                    case DictionaryMutationType.AddOrUpdate:
+                    case DictionaryWriteType.AddOrUpdate:
                     {
-                        if (State.TryGetValue(mutation.Key, out var previousValue))
+                        if (State.TryGetValue(write.Key, out var previousValue))
                         {
-                            var newValue = mutation.ValueIfUpdating.Value(previousValue);
-                            State[mutation.Key] = newValue;
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateAddOrUpdate(mutation.Key, DictionaryItemAddOrUpdateResult.Update,
+                            var newValue = write.ValueIfUpdating.Value(previousValue);
+                            State[write.Key] = newValue;
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAddOrUpdate(write.Key, DictionaryItemAddOrUpdateResult.Update,
                                 previousValue.ToMaybe(), newValue));
                         }
                         else
                         {
-                            var newValue = mutation.ValueIfAdding.Value();
-                            State.Add(mutation.Key, newValue);
-                            finalResults.Add(DictionaryMutationResult<TKey, TValue>.CreateAddOrUpdate(mutation.Key, DictionaryItemAddOrUpdateResult.Add,
+                            var newValue = write.ValueIfAdding.Value();
+                            State.Add(write.Key, newValue);
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAddOrUpdate(write.Key, DictionaryItemAddOrUpdateResult.Add,
                                 Maybe<TValue>.Nothing(), newValue));
                         }
                     }
                         break;
-                    case DictionaryMutationType.Remove:
+                    case DictionaryWriteType.Remove:
                     {
-                        if (State.TryGetValue(mutation.Key, out var removedValue))
+                        if (State.TryGetValue(write.Key, out var removedValue))
                         {
-                            State.Remove(mutation.Key);
+                            State.Remove(write.Key);
                             finalResults.Add(
-                                DictionaryMutationResult<TKey, TValue>.CreateRemove(mutation.Key,
+                                DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key,
                                     removedValue.ToMaybe()));
                         }
                     }
                         break;
-                    case DictionaryMutationType.TryRemove:
+                    case DictionaryWriteType.TryRemove:
                     {
-                        if (State.TryGetValue(mutation.Key, out var removedValue))
+                        if (State.TryGetValue(write.Key, out var removedValue))
                         {
-                            State.Remove(mutation.Key);
+                            State.Remove(write.Key);
                             finalResults.Add(
-                                DictionaryMutationResult<TKey, TValue>.CreateRemove(mutation.Key,
+                                DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key,
                                     removedValue.ToMaybe()));
                         }
                         else
                         {
                             finalResults.Add(
-                                DictionaryMutationResult<TKey, TValue>.CreateRemove(mutation.Key,
+                                DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key,
                                     Maybe<TValue>.Nothing()));
                         }
                     }
                         break;
                     default:
-                        throw new ArgumentException($"Unknown mutation type: {mutation.Type}");
+                        throw new ArgumentException($"Unknown mutation type: {write.Type}");
                 }
             }
         }

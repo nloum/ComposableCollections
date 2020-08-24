@@ -20,7 +20,7 @@ namespace ComposableCollections.Tests
             switch (cachingDictionaryType)
             {
                 case CachingDictionaryType.ConcurrentCachingDictionaryWithMinimalState:
-                    return new ConcurrentCachedDictionaryWithMinimalState<TKey, TValue>(flushCacheTo);
+                    return new ConcurrentMinimalCachedStateDictionaryDecorator<TKey, TValue>(flushCacheTo);
                 case CachingDictionaryType.ConcurrentCachingDictionary:
                     return new ConcurrentCachedDictionary<TKey, TValue>(flushCacheTo, new ComposableDictionary<TKey, TValue>());
                 default:

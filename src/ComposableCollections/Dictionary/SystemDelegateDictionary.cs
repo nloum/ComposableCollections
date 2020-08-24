@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ComposableCollections.Dictionary.Mutations;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary

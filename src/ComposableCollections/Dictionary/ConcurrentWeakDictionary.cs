@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using ComposableCollections.Dictionary.Exceptions;
+using ComposableCollections.Dictionary.Mutations;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary

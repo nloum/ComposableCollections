@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using ComposableCollections.Dictionary.Mutations;
 
 namespace ComposableCollections.Dictionary
 {

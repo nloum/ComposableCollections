@@ -6,7 +6,7 @@ namespace ComposableCollections.Dictionary
     {
         private IDisposable _disposable;
 
-        public DisposableReadOnlyDictionaryDecorator(IComposableReadOnlyDictionary<TKey, TValue> wrapped, IDisposable disposable) : base(wrapped)
+        public DisposableReadOnlyDictionaryDecorator(IComposableReadOnlyDictionary<TKey, TValue> source, IDisposable disposable) : base(source)
         {
             _disposable = disposable;
         }

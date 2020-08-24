@@ -3,33 +3,33 @@ using System.Linq;
 
 namespace ComposableCollections.Dictionary
 {
-    public class DisposableQueryableReadOnlyDictionaryDecorator<TKey, TValue> : DelegateReadOnlyDictionary<TKey, TValue>, IDisposableQueryableReadOnlyDictionary<TKey, TValue>
+    public class AnonymousDisposableQueryableReadOnlyDictionary<TKey, TValue> : DelegateReadOnlyDictionary<TKey, TValue>, IDisposableQueryableReadOnlyDictionary<TKey, TValue>
     {
-        private IQueryableReadOnlyDictionary<TKey, TValue> _wrapped;
         private IDisposable _disposable;
 
-        public DisposableQueryableReadOnlyDictionaryDecorator(IQueryableReadOnlyDictionary<TKey, TValue> wrapped, IDisposable disposable) : base(wrapped)
+        public AnonymousDisposableQueryableReadOnlyDictionary(IComposableReadOnlyDictionary<TKey, TValue> source, IDisposable disposable, IQueryable<TValue> values) : base(source)
         {
-            _wrapped = wrapped;
             _disposable = disposable;
+            Values = values;
         }
 
-        protected DisposableQueryableReadOnlyDictionaryDecorator()
+        protected AnonymousDisposableQueryableReadOnlyDictionary()
         {
         }
 
-        protected void Initialize(IQueryableReadOnlyDictionary<TKey, TValue> wrapped, IDisposable disposable)
+        protected void Initialize(IComposableReadOnlyDictionary<TKey, TValue> source, IDisposable disposable,
+            IQueryable<TValue> values)
         {
-            base.Initialize(wrapped);
-            _wrapped = wrapped;
             _disposable = disposable;
+            Values = values;
+            base.Initialize(source);
         }
-        
+
         public void Dispose()
         {
             _disposable.Dispose();
         }
 
-        public new IQueryable<TValue> Values => _wrapped.Values;
+        public IQueryable<TValue> Values { get; private set; }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ComposableCollections.Dictionary.Mutations;
 
 namespace ComposableCollections.Dictionary
 {
@@ -11,7 +12,7 @@ namespace ComposableCollections.Dictionary
         private Action _flushCache;
         private Func<bool, IEnumerable<DictionaryMutation<TKey, TValue>>> _getMutations;
 
-        public AnonymousCachedQueryableDictionary(IComposableDictionary<TKey, TValue> wrapped, Func<IComposableReadOnlyDictionary<TKey, TValue>> asBypassCache, Func<IComposableDictionary<TKey, TValue>> asNeverFlush, Action flushCache, Func<bool, IEnumerable<DictionaryMutation<TKey, TValue>>> getMutations, IQueryable<TValue> values) : base(wrapped)
+        public AnonymousCachedQueryableDictionary(IComposableDictionary<TKey, TValue> source, Func<IComposableReadOnlyDictionary<TKey, TValue>> asBypassCache, Func<IComposableDictionary<TKey, TValue>> asNeverFlush, Action flushCache, Func<bool, IEnumerable<DictionaryMutation<TKey, TValue>>> getMutations, IQueryable<TValue> values) : base(source)
         {
             _asBypassCache = asBypassCache;
             _asNeverFlush = asNeverFlush;

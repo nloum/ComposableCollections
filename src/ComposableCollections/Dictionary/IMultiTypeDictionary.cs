@@ -1,4 +1,5 @@
 using System;
+using ComposableCollections.Dictionary.Mutations;
 
 namespace ComposableCollections.Dictionary
 {

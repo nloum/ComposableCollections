@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using ComposableCollections.Dictionary;
+using ComposableCollections.Dictionary.ExtensionMethodHelpers;
 using SimpleMonads;
 using UtilityDisposables;
 
@@ -90,80 +92,69 @@ namespace ComposableCollections
         
         #region WithMapping
         
-        /// <summary>
-        /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
-        /// flushes them to the specified IComposableDictionary.
-        /// </summary>
-        public static IComposableDictionary<TKey, TValue> WithMapping<TKey, TValue, TInnerValue>(this IComposableDictionary<TKey, TInnerValue> source, Func<TKey, TValue, TInnerValue> convert, Func<TKey, TInnerValue, TValue> convertBack)
-        {
-            return new AnonymousMapDictionary<TKey, TValue, TInnerValue>(source, convert, convertBack);
-        }
-
-        /// <summary>
-        /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
-        /// flushes them to the specified IComposableDictionary.
-        /// </summary>
-        public static IComposableDictionary<TKey, TValue> WithMapping<TKey, TValue, TInnerValue>(this IComposableDictionary<TKey, TInnerValue> source, Func<IEnumerable<IKeyValue<TKey, TValue>>, IEnumerable<IKeyValue<TKey, TInnerValue>>> convert, Func<IEnumerable<IKeyValue<TKey, TInnerValue>>, IEnumerable<IKeyValue<TKey, TValue>>> convertBack)
-        {
-            return new AnonymousBulkMapDictionary<TKey, TValue, TInnerValue>(source, convert, convertBack);
-        }
-
-        /// <summary>
-        /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
-        /// flushes them to the specified IComposableDictionary.
-        /// </summary>
-        public static IComposableReadOnlyDictionary<TKey, TValue> WithMapping<TKey, TValue, TInnerValue>(this IComposableReadOnlyDictionary<TKey, TInnerValue> source, Func<TKey, TInnerValue, TValue> convertBack)
-        {
-            return new AnonymousReadOnlyMapDictionary<TKey, TValue, TInnerValue>(source, convertBack);
-        }
-
-        /// <summary>
-        /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
-        /// flushes them to the specified IComposableDictionary.
-        /// </summary>
-        public static IComposableReadOnlyDictionary<TKey, TValue> WithMapping<TKey, TValue, TInnerValue>(this IComposableReadOnlyDictionary<TKey, TInnerValue> source, Func<IEnumerable<IKeyValue<TKey, TInnerValue>>, IEnumerable<IKeyValue<TKey, TValue>>> convertBack)
-        {
-            return new AnonymousBulkReadOnlyMapDictionary<TKey, TValue, TInnerValue>(source, convertBack);
-        }
-
         #endregion
         
-        #region WithCachedMapping
+        #region WithMutationCaching
         
-        /// <summary>
-        /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
-        /// flushes them to the specified IComposableDictionary. Also this caches the converted values.
-        /// </summary>
-        public static IComposableDictionary<TKey, TValue> WithCachedMapping<TKey, TValue, TInnerValue>(this IComposableDictionary<TKey, TInnerValue> source, Func<TKey, TValue, TInnerValue> convert, Func<TKey, TInnerValue, TValue> convertBack, IComposableDictionary<TKey, TValue> cache = null, bool proactivelyConvertAllValues = false)
+        public static ICachedQueryableDictionary<TKey, TValue> WithChangeCaching<TKey, TValue>(this IQueryableDictionary<TKey, TValue> source, object p)
         {
-            return new AnonymousCachedMapDictionary<TKey, TValue, TInnerValue>(source, convert, convertBack, cache, proactivelyConvertAllValues);
+            return WithChangeCachingTransformations<TKey, TValue>.CachedDictionaryTransformations.Transform(source, p);
         }
 
-        /// <summary>
-        /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
-        /// flushes them to the specified IComposableDictionary. Also this caches the converted values.
-        /// </summary>
-        public static IComposableDictionary<TKey, TValue> WithCachedMapping<TKey, TValue, TInnerValue>(this IComposableDictionary<TKey, TInnerValue> source, Func<IEnumerable<IKeyValue<TKey, TValue>>, IEnumerable<IKeyValue<TKey, TInnerValue>>> convert, Func<IEnumerable<IKeyValue<TKey, TInnerValue>>, IEnumerable<IKeyValue<TKey, TValue>>> convertBack, IComposableDictionary<TKey, TValue> cache = null, bool proactivelyConvertAllValues = false)
+        public static ICachedDisposableQueryableDictionary<TKey, TValue> WithChangeCaching<TKey, TValue>(this IDisposableQueryableDictionary<TKey, TValue> source, object p)
         {
-            return new AnonymousCachedBulkMapDictionary<TKey, TValue, TInnerValue>(source, convert, convertBack, cache, proactivelyConvertAllValues);
-        }
-        
-        /// <summary>
-        /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
-        /// flushes them to the specified IComposableDictionary. Also this caches the converted values.
-        /// </summary>
-        public static IComposableReadOnlyDictionary<TKey, TValue> WithCachedMapping<TKey, TValue, TInnerValue>(this IComposableReadOnlyDictionary<TKey, TInnerValue> source, Func<TKey, TInnerValue, TValue> convertBack, IComposableDictionary<TKey, TValue> cache = null, bool proactivelyConvertAllValues = false)
-        {
-            return new AnonymousCachedReadOnlyMapDictionary<TKey, TValue, TInnerValue>(source, convertBack, cache, proactivelyConvertAllValues);
+            return WithChangeCachingTransformations<TKey, TValue>.CachedDictionaryTransformations.Transform(source, p);
         }
 
-        /// <summary>
-        /// Creates a facade on top of the specified IComposableDictionary that keeps tracks of changes and occasionally
-        /// flushes them to the specified IComposableDictionary. Also this caches the converted values.
-        /// </summary>
-        public static IComposableReadOnlyDictionary<TKey, TValue> WithCachedMapping<TKey, TValue, TInnerValue>(this IComposableReadOnlyDictionary<TKey, TInnerValue> source, Func<IEnumerable<IKeyValue<TKey, TInnerValue>>, IEnumerable<IKeyValue<TKey, TValue>>> convertBack, IComposableDictionary<TKey, TValue> cache = null, bool proactivelyConvertAllValues = false)
+        public static ICachedDisposableDictionary<TKey, TValue> WithChangeCaching<TKey, TValue>(this IDisposableDictionary<TKey, TValue> source, object p)
         {
-            return new AnonymousCachedBulkReadOnlyMapDictionary<TKey, TValue, TInnerValue>(source, convertBack, cache, proactivelyConvertAllValues);
+            return WithChangeCachingTransformations<TKey, TValue>.CachedDictionaryTransformations.Transform(source, p);
+        }
+
+        public static ICachedDictionaryWithBuiltInKey<TKey, TValue> WithChangeCaching<TKey, TValue>(this IDictionaryWithBuiltInKey<TKey, TValue> source, object p)
+        {
+            return WithChangeCachingTransformations<TKey, TValue>.CachedDictionaryTransformations.Transform(source, p);
+        }
+
+        public static ICachedQueryableDictionaryWithBuiltInKey<TKey, TValue> WithChangeCaching<TKey, TValue>(this IQueryableDictionaryWithBuiltInKey<TKey, TValue> source, object p)
+        {
+            return WithChangeCachingTransformations<TKey, TValue>.CachedDictionaryTransformations.Transform(source, p);
+        }
+
+        public static ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> WithChangeCaching<TKey, TValue>(this IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> source,
+            object p)
+        {
+            return WithChangeCachingTransformations<TKey, TValue>.CachedDictionaryTransformations.Transform(source, p);
+        }
+
+        public static ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue> WithChangeCaching<TKey, TValue>(this IDisposableDictionaryWithBuiltInKey<TKey, TValue> source, object p)
+        {
+            return WithChangeCachingTransformations<TKey, TValue>.CachedDictionaryTransformations.Transform(source, p);
+        }
+
+        public static ICachedDictionary<TKey, TValue> WithChangeCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> source, object p)
+        {
+            return WithChangeCachingTransformations<TKey, TValue>.CachedDictionaryTransformations.Transform(source, p);
+        }
+        
+        public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithChangeCaching<TKey, TValue>(this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source, object parameter)
+        {
+            return WithChangeCachingTransformations<TKey, TValue>.TransactionalTransformations.Transform(source, parameter);
+        }
+
+        public static ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue>, ICachedDisposableQueryableDictionary<TKey, TValue>> WithChangeCaching<TKey, TValue>(this ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue>, IDisposableQueryableDictionary<TKey, TValue>> source, object parameter)
+        {
+            return WithChangeCachingTransformations<TKey, TValue>.TransactionalTransformations.Transform(source, parameter);
+        }
+
+        public static ITransactionalCollection<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue>> WithChangeCaching<TKey, TValue>(this ITransactionalCollection<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, IDisposableDictionaryWithBuiltInKey<TKey, TValue>> source, object parameter)
+        {
+            return WithChangeCachingTransformations<TKey, TValue>.TransactionalTransformations.Transform(source, parameter);
+        }
+
+        public static ITransactionalCollection<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>> WithChangeCaching<TKey, TValue>(this ITransactionalCollection<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>> source, object parameter)
+        {
+            return WithChangeCachingTransformations<TKey, TValue>.TransactionalTransformations.Transform(source, parameter);
         }
         
         #endregion
@@ -185,7 +176,7 @@ namespace ComposableCollections
         /// </summary>
         public static ICachedDictionary<TKey, TValue> WithWriteCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> flushTo, IComposableDictionary<TKey, TValue> addedOrUpdated = null, IComposableDictionary<TKey, TValue> removed = null)
         {
-            return new ConcurrentCachedDictionaryWithMinimalState<TKey, TValue>(flushTo, addedOrUpdated, removed);
+            return new ConcurrentMinimalCachedStateDictionaryDecorator<TKey, TValue>(flushTo, addedOrUpdated, removed);
         }
         
         #endregion
@@ -266,47 +257,29 @@ namespace ComposableCollections
 
         #region WithBuiltInKey
         
-        /// <summary>
-        /// Creates a facade on top of the specified IComposableDictionary that has a built-in key, which means you're telling
-        /// the object how to get the key from a value. That means any API where you pass in a TValue, you
-        /// won't have to tell the API what the key is.
-        /// </summary>
-        public static IDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IComposableDictionary<TKey, TValue> source, Func<TValue, TKey> key)
-        {
-            return new AnonymousDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, key);
+        public static IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IDisposableQueryableReadOnlyDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
+            return new DisposableQueryableReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
         }
-
-        /// <summary>
-        /// Creates a facade on top of the specified IComposableDictionary that has a built-in key, which means you're telling
-        /// the object how to get the key from a value. That means any API where you pass in a TValue, you
-        /// won't have to tell the API what the key is.
-        /// </summary>
-        public static IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IComposableReadOnlyDictionary<TKey, TValue> source, Func<TValue, TKey> key)
-        {
-            return new AnonymousReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, key);
+        public static IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IQueryableReadOnlyDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
+            return new QueryableReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
         }
-
-        /// <summary>
-        /// Creates an adapter on top of the specified ITransactionalCollection that has a built-in key, which means you're telling
-        /// the object how to get the key from a value. That means any API where you pass in a TValue, you
-        /// won't have to tell the API what the key is.
-        /// </summary>
-        public static ITransactionalCollection<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, IDisposableDictionaryWithBuiltInKey<TKey, TValue>> WithBuiltInKey<TKey, TValue>(this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source, Func<TValue, TKey> key)
-        {
-            return source.Select(x =>
-                new DisposableReadOnlyDictionaryWithBuiltInKeyDecorator<TKey, TValue>(x.WithBuiltInKey(key), x), x =>
-                new DisposableDictionaryWithBuiltInKeyDecorator<TKey, TValue>(x.WithBuiltInKey(key), x));
+        public static ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this ICachedDisposableQueryableDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
+            return new CachedDisposableQueryableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
         }
-
-        /// <summary>
-        /// Creates an adapter on top of the specified IReadOnlyTransactionalCollection that has a built-in key, which means you're telling
-        /// the object how to get the key from a value. That means any API where you pass in a TValue, you
-        /// won't have to tell the API what the key is.
-        /// </summary>
-        public static IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>> WithBuiltInKey<TKey, TValue>(this IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>> source, Func<TValue, TKey> key)
-        {
-            return source.Select(x =>
-                new DisposableReadOnlyDictionaryWithBuiltInKeyDecorator<TKey, TValue>(x.WithBuiltInKey(key), x));
+        public static IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IDisposableQueryableDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
+            return new DisposableQueryableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
+        }
+        public static IQueryableDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IQueryableDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
+            return new QueryableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
+        }
+        public static ICachedQueryableDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this ICachedQueryableDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
+            return new CachedQueryableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
+        }
+        public static ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this ICachedDisposableDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
+            return new CachedDisposableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
+        }
+        public static IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IDisposableReadOnlyDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
+            return new DisposableReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
         }
 
         #endregion

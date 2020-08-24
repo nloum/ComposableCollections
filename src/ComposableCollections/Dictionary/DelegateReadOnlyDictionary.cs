@@ -6,11 +6,11 @@ namespace ComposableCollections.Dictionary
 {
     public class DelegateReadOnlyDictionary<TKey, TValue> : ReadOnlyDictionaryBase<TKey, TValue>
     {
-        private IComposableReadOnlyDictionary<TKey, TValue> _wrapped;
+        private IComposableReadOnlyDictionary<TKey, TValue> _source;
 
-        public DelegateReadOnlyDictionary(IComposableReadOnlyDictionary<TKey, TValue> wrapped)
+        public DelegateReadOnlyDictionary(IComposableReadOnlyDictionary<TKey, TValue> source)
         {
-            _wrapped = wrapped;
+            _source = source;
         }
 
         protected DelegateReadOnlyDictionary()
@@ -19,38 +19,38 @@ namespace ComposableCollections.Dictionary
 
         protected void Initialize(IComposableReadOnlyDictionary<TKey, TValue> wrapped)
         {
-            _wrapped = wrapped;
+            _source = wrapped;
         }
 
         public override bool TryGetValue(TKey key, out TValue value)
         {
-            if (_wrapped == null)
+            if (_source == null)
             {
                 throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
             }
-            var result = _wrapped.TryGetValue(key);
+            var result = _source.TryGetValue(key);
             value = result.ValueOrDefault;
             return result.HasValue;
         }
 
         public override IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
-            if (_wrapped == null)
+            if (_source == null)
             {
                 throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
             }
-            return _wrapped.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value)).GetEnumerator();
+            return _source.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value)).GetEnumerator();
         }
 
         public override int Count
         {
             get
             {
-                if (_wrapped == null)
+                if (_source == null)
                 {
                     throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
                 }
-                return _wrapped.Count;
+                return _source.Count;
             }
         }
 
@@ -59,11 +59,11 @@ namespace ComposableCollections.Dictionary
         {
             get
             {
-                if (_wrapped == null)
+                if (_source == null)
                 {
                     throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
                 }
-                return _wrapped.Keys;
+                return _source.Keys;
             }
         }
 
@@ -71,11 +71,11 @@ namespace ComposableCollections.Dictionary
         {
             get
             {
-                if (_wrapped == null)
+                if (_source == null)
                 {
                     throw new InvalidOperationException("Must call SetWrapped or pass the wrapped value in via constructor before performing any calls on the dictionary");
                 }
-                return _wrapped.Values;
+                return _source.Values;
             }
         }
     }

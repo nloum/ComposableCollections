@@ -1,11 +1,11 @@
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 {
-    public class WithChangeCachingTransformations<TKey, TValue>
+    public class WithWriteCachingTransformations<TKey, TValue>
     {
         public static CachedDictionaryTransformationsImpl CachedDictionaryTransformations;
         public static CachedTransactionalDictionaryTransformationsImpl TransactionalTransformations;
 
-        static WithChangeCachingTransformations()
+        static WithWriteCachingTransformations()
         {
             CachedDictionaryTransformations = new CachedDictionaryTransformationsImpl();
             TransactionalTransformations = new CachedTransactionalDictionaryTransformationsImpl(CachedDictionaryTransformations);

@@ -33,6 +33,11 @@ namespace ComposableCollections.Dictionary
             return _source;
         }
 
+        public IDisposableQueryableReadOnlyDictionary<TKey, TValue> AsDisposableQueryableReadOnlyDictionary()
+        {
+            return _source;
+        }
+
         public IDisposableReadOnlyDictionary<TKey, TValue> AsDisposableReadOnlyDictionary()
         {
             return _source;

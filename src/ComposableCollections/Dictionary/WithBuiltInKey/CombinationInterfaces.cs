@@ -17,13 +17,15 @@ namespace ComposableCollections.Dictionary
 
     public interface ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> :
         ICachedDictionaryWithBuiltInKey<TKey, TValue>, IDisposableDictionaryWithBuiltInKey<TKey, TValue>,
-        IQueryableDictionaryWithBuiltInKey<TKey, TValue>
+        IQueryableDictionaryWithBuiltInKey<TKey, TValue>, IDisposableQueryableReadOnlyDictionary<TKey, TValue>,
+        IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>
     {
         ICachedDisposableQueryableDictionary<TKey, TValue> AsCachedDisposableQueryableDictionary();
     }
 
     public interface IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> :
-        IDisposableDictionaryWithBuiltInKey<TKey, TValue>, IQueryableDictionaryWithBuiltInKey<TKey, TValue>
+        IDisposableDictionaryWithBuiltInKey<TKey, TValue>, IQueryableDictionaryWithBuiltInKey<TKey, TValue>,
+        IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>
     {
         IDisposableQueryableDictionary<TKey, TValue> AsDisposableQueryableDictionary();
     }

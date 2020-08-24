@@ -49,6 +49,11 @@ namespace ComposableCollections.Dictionary
             return _source;
         }
 
+        public IDisposableQueryableReadOnlyDictionary<TKey, TValue> AsDisposableQueryableReadOnlyDictionary()
+        {
+            return _source;
+        }
+
         public new IQueryable<TValue> Values => _source.Values;
     }
 }

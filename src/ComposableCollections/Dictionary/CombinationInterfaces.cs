@@ -8,8 +8,8 @@ namespace ComposableCollections.Dictionary
     {
         new IQueryable<TValue> Values { get; }
     }
-    public interface ICachedDisposableQueryableDictionary<TKey, TValue> : ICachedDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>, IQueryableDictionary<TKey, TValue> { }
-    public interface IDisposableQueryableDictionary<TKey, TValue> : IDisposableDictionary<TKey, TValue>, IQueryableDictionary<TKey, TValue> { }
+    public interface ICachedDisposableQueryableDictionary<TKey, TValue> : ICachedDictionary<TKey, TValue>, IDisposableQueryableDictionary<TKey, TValue> { }
+    public interface IDisposableQueryableDictionary<TKey, TValue> : IDisposableDictionary<TKey, TValue>, IQueryableDictionary<TKey, TValue>, IDisposableQueryableReadOnlyDictionary<TKey, TValue> { }
     public interface ICachedQueryableDictionary<TKey, TValue> : ICachedDictionary<TKey, TValue>, IQueryableDictionary<TKey, TValue> { }
     public interface ICachedDisposableDictionary<TKey, TValue> : ICachedDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue> { }
     public interface IDisposableReadOnlyDictionary<TKey, out TValue> : IComposableReadOnlyDictionary<TKey, TValue>, IDisposable { }

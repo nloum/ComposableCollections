@@ -1,9 +1,8 @@
 using ComposableCollections.Common;
 using ComposableCollections.Dictionary.Interfaces;
-using ComposableCollections.Dictionary.WithBuiltInKey;
 using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 
-namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
+namespace ComposableCollections.Dictionary.ExtensionMethodHelpers.Interfaces
 {
     public interface IReadOnlyTransactionalTransformations<TKey1, TValue1, TKey2, TValue2, TParameter>
     {

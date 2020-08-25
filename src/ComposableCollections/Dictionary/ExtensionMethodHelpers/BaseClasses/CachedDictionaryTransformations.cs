@@ -1,13 +1,26 @@
+using System;
 using ComposableCollections.Dictionary.Adapters;
+using ComposableCollections.Dictionary.ExtensionMethodHelpers.Interfaces;
 using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.WithBuiltInKey;
 using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 
-namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
+namespace ComposableCollections.Dictionary.ExtensionMethodHelpers.BaseClasses
 {
-    public abstract class CachedDictionaryTransformationsBase<TKey, TValue, TParameter> : ICachedDictionaryTransformations<TKey, TValue, TKey, TValue, TParameter>
+    public class CachedDictionaryTransformations<TKey, TValue, TParameter> : ICachedDictionaryTransformations<TKey, TValue, TKey, TValue, TParameter>
     {
-        public abstract ICachedDictionary<TKey, TValue> Transform(IComposableDictionary<TKey, TValue> source, TParameter p);
+        private readonly Func<IComposableDictionary<TKey, TValue>, TParameter, ICachedDictionary<TKey, TValue>>
+            _transform;
+
+        public CachedDictionaryTransformations(Func<IComposableDictionary<TKey, TValue>, TParameter, ICachedDictionary<TKey, TValue>> transform)
+        {
+            _transform = transform;
+        }
+
+        public ICachedDictionary<TKey, TValue> Transform(IComposableDictionary<TKey, TValue> source, TParameter p)
+        {
+            return _transform(source, p);
+        }
 
         public ICachedQueryableDictionary<TKey, TValue> Transform(IQueryableDictionary<TKey, TValue> source, TParameter p)
         {
@@ -45,8 +58,6 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
                 result.GetWrites,
                 source );
         }
-
-
 
         public ICachedDictionaryWithBuiltInKey<TKey, TValue> Transform(IDictionaryWithBuiltInKey<TKey, TValue> source,
             TParameter p)

@@ -1,11 +1,11 @@
 using ComposableCollections.Common;
+using ComposableCollections.Dictionary.ExtensionMethodHelpers.Interfaces;
 using ComposableCollections.Dictionary.Interfaces;
-using ComposableCollections.Dictionary.WithBuiltInKey;
 using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 
-namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
+namespace ComposableCollections.Dictionary.ExtensionMethodHelpers.BaseClasses
 {
-    public class TransactionalTransformationsWriteWrite<TKey1, TValue1, TKey2, TValue2, TParameter> : ITransactionalTransformations<TKey1, TValue1, TKey2, TValue2, TParameter>
+    public class TransactionalTransformationsWriteWrite<TKey1, TValue1, TKey2, TValue2, TParameter> : ITransactionalTransformations<TKey1, TValue1, TKey2, TValue2, TParameter>, ITransactionalTransformationsWithBuiltInKey<TKey1, TValue1, TKey2, TValue2, TParameter>
     {
         private readonly IComposableDictionaryTransformations<TKey1, TValue1, TKey2, TValue2, TParameter>
             _readWriteTransformations;

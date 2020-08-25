@@ -1,6 +1,8 @@
 using ComposableCollections.Common;
 using ComposableCollections.Dictionary.Adapters;
 using ComposableCollections.Dictionary.Decorators;
+using ComposableCollections.Dictionary.ExtensionMethodHelpers.BaseClasses;
+using ComposableCollections.Dictionary.ExtensionMethodHelpers.Interfaces;
 using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Sources;
 using ComposableCollections.Dictionary.Transactional;
@@ -167,7 +169,7 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
             }
         }
         
-        public class ComposableDictionaryTransformationsImpl : ComposableDictionaryTransformationsBase<TKey, TValue, object>
+        public class ComposableDictionaryTransformationsImpl : ComposableDictionaryTransformations<TKey, TValue, object>
         {
             public override IComposableDictionary<TKey, TValue> Transform(IComposableDictionary<TKey, TValue> source, object p)
             {

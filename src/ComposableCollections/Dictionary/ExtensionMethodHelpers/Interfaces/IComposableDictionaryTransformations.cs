@@ -1,6 +1,6 @@
 using ComposableCollections.Dictionary.Interfaces;
 
-namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
+namespace ComposableCollections.Dictionary.ExtensionMethodHelpers.Interfaces
 {
     public interface IComposableDictionaryTransformations<TKey1, TValue1, TKey2, TValue2, TParameter>
     {

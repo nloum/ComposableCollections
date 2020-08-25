@@ -3,54 +3,68 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using ComposableCollections.Dictionary.Adapters;
+using ComposableCollections.Dictionary.ExtensionMethodHelpers.BaseClasses;
 using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 {
-    public class WithMappingTransformations<TKey1, TValue1, TKey2, TValue2> :
-        ComposableDictionaryTransformationsBase<TKey1, TValue1, TKey2, TValue2, Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>>
-    {
-        public static WithMappingTransformations<TKey1, TValue1, TKey2, TValue2> Default { get; } = new WithMappingTransformations<TKey1, TValue1, TKey2, TValue2>();
-        
-        private WithMappingTransformations()
+    public class WithMappingTransformations<TKey1, TValue1, TKey2, TValue2> {
+        public static ComposableDictionaryTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<Func<TValue2, TValue1>,
+            Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>> ComposableDictionaryTransformations { get; }
+        public static ComposableReadOnlyDictionaryTransformations ComposableReadOnlyDictionaryTransformations { get; }
+        public static TransactionalTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<Func<TValue2, TValue1>,
+            Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>> TransactionalTransformations { get; }
+        public static TransactionalTransformationsWithBuiltInKey<TKey1, TValue1, TKey2, TValue2, Tuple<Func<TValue2, TValue1>,
+            Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>, Func<TValue2, TKey2>>> TransactionalTransformationsWithBuiltInKey { get; }
+
+        static WithMappingTransformations()
         {
+            ComposableDictionaryTransformations = new WithReadWriteLockTransformations<,>.ComposableDictionaryTransformationsImpl();
+            DictionaryWithBuiltInKeyTransformations = new WithReadWriteLockTransformations<,>.ComposableDictionaryTransformationsImpl();
+            TransactionalTransformations = new TransactionalTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<Func<TValue2, TValue1>,
+                Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>>(ComposableDictionaryTransformations);
+            TransactionalTransformationsWithBuiltInKey = new TransactionalTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<Func<TValue2, TValue1>,
+                Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>>(ComposableDictionaryTransformations);
         }
 
-        public override IComposableDictionary<TKey2, TValue2> Transform(IComposableDictionary<TKey1, TValue1> source, Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>> p)
+        private static IComposableDictionary<TKey2, TValue2> Transform(IComposableDictionary<TKey1, TValue1> source,
+            Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>> p)
         {
-            return new MappingDictionaryAdapter<TKey1,TValue1,TKey2,TValue2>(
-                source, 
+            return new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(
+                source,
                 (key1, value1) => new KeyValue<TKey2, TValue2>(p.Item3(key1), p.Item2(value1)),
                 (key2, value2) => new KeyValue<TKey1, TValue1>(p.Item4(key2), p.Item1(value2)),
                 p.Item4, p.Item3);
         }
 
-        protected override IComposableReadOnlyDictionary<TKey2, TValue2> Transform(IComposableReadOnlyDictionary<TKey1, TValue1> source, Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>> p)
+        private static IComposableReadOnlyDictionary<TKey2, TValue2> Transform(
+            IComposableReadOnlyDictionary<TKey1, TValue1> source,
+            Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>> p)
         {
-            return new ReadOnlyMappingDictionaryAdapter<TKey1,TValue1,TKey2,TValue2>(
-                source, 
+            return new ReadOnlyMappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(
+                source,
                 (key1, value1) => new KeyValue<TKey2, TValue2>(p.Item3(key1), p.Item2(value1)),
                 p.Item4, p.Item3);
         }
 
-        protected override IQueryable<TValue2> MapQuery(IQueryable<TValue1> query, Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>> p)
+        private static IQueryable<TValue2> MapQuery(IQueryable<TValue1> query,
+            Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>> p)
         {
             throw new NotImplementedException();
         }
 
-        protected override IEnumerable<DictionaryWrite<TKey2, TValue2>> MapWrites(IEnumerable<DictionaryWrite<TKey1, TValue1>> writes, Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>> p)
+        private static IEnumerable<DictionaryWrite<TKey2, TValue2>> MapWrites(
+            IEnumerable<DictionaryWrite<TKey1, TValue1>> writes,
+            Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>> p)
         {
             foreach (var write in writes)
             {
                 yield return new DictionaryWrite<TKey2, TValue2>(write.Type, p.Item3(write.Key),
                     write.ValueIfAdding.Select(valueIfAdding =>
                     {
-                        Func<TValue2> result = () =>
-                        {
-                            return p.Item2(valueIfAdding());
-                        };
+                        Func<TValue2> result = () => { return p.Item2(valueIfAdding()); };
                         return result;
                     }),
                     write.ValueIfUpdating.Select(valueIfUpdating =>

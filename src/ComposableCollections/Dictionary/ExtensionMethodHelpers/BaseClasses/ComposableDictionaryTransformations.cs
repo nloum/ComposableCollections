@@ -2,16 +2,28 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ComposableCollections.Dictionary.Adapters;
+using ComposableCollections.Dictionary.ExtensionMethodHelpers.Interfaces;
 using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.WithBuiltInKey;
 using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 using ComposableCollections.Dictionary.Write;
 
-namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
+namespace ComposableCollections.Dictionary.ExtensionMethodHelpers.BaseClasses
 {
-    public abstract class ComposableDictionaryTransformationsBase<TKey, TValue, TParameter> : IComposableDictionaryTransformations<TKey, TValue, TKey, TValue, TParameter>, IDictionaryWithBuiltInKeyTransformations<TKey, TValue, TKey, TValue, TParameter>
+    public class ComposableDictionaryTransformations<TKey, TValue, TParameter> : IComposableDictionaryTransformations<TKey, TValue, TKey, TValue, TParameter>, IDictionaryWithBuiltInKeyTransformations<TKey, TValue, TKey, TValue, TParameter>
     {
-        public abstract IComposableDictionary<TKey, TValue> Transform(IComposableDictionary<TKey, TValue> source, TParameter p);
+        private readonly Func<IComposableDictionary<TKey, TValue>, TParameter, IComposableDictionary<TKey, TValue>>
+            _transform;
+
+        public ComposableDictionaryTransformations(Func<IComposableDictionary<TKey, TValue>, TParameter, IComposableDictionary<TKey, TValue>> transform)
+        {
+            _transform = transform;
+        }
+
+        public IComposableDictionary<TKey, TValue> Transform(IComposableDictionary<TKey, TValue> source, TParameter p)
+        {
+            return _transform(source, p);
+        }
 
         public ICachedDictionary<TKey, TValue> Transform(ICachedDictionary<TKey, TValue> source, TParameter p)
         {

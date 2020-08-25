@@ -1,16 +1,16 @@
 using ComposableCollections.Common;
+using ComposableCollections.Dictionary.ExtensionMethodHelpers.Interfaces;
 using ComposableCollections.Dictionary.Interfaces;
-using ComposableCollections.Dictionary.WithBuiltInKey;
 using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 
-namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
+namespace ComposableCollections.Dictionary.ExtensionMethodHelpers.BaseClasses
 {
-    public class CachedTransactionalDictionaryTransformationsBase<TKey, TValue, TParameter>
+    public class CachedTransactionalDictionaryTransformations<TKey, TValue, TParameter>
     {
         private readonly ICachedDictionaryTransformations<TKey, TValue, TKey, TValue, TParameter>
             _cachedDictionaryTransformations;
 
-        public CachedTransactionalDictionaryTransformationsBase(ICachedDictionaryTransformations<TKey, TValue, TKey, TValue, TParameter> cachedDictionaryTransformations)
+        public CachedTransactionalDictionaryTransformations(ICachedDictionaryTransformations<TKey, TValue, TKey, TValue, TParameter> cachedDictionaryTransformations)
         {
             _cachedDictionaryTransformations = cachedDictionaryTransformations;
         }

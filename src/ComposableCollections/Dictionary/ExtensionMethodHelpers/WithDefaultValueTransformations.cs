@@ -1,4 +1,6 @@
 using ComposableCollections.Dictionary.Decorators;
+using ComposableCollections.Dictionary.ExtensionMethodHelpers.BaseClasses;
+using ComposableCollections.Dictionary.ExtensionMethodHelpers.Interfaces;
 using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Sources;
 
@@ -6,29 +8,18 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 {
     public static class WithDefaultValueTransformations<TKey, TValue>
     {
-        public static ComposableDictionaryTransformationsImpl ComposableDictionaryTransformations { get; }
-        public static TransactionalTransformationsImpl TransactionalTransformations { get; }
+        public static ComposableDictionaryTransformations<TKey, TValue, GetDefaultValue<TKey, TValue>> ComposableDictionaryTransformations { get; }
+        public static TransactionalTransformationsWriteWrite<TKey, TValue, TKey, TValue, GetDefaultValue<TKey, TValue>> TransactionalTransformations { get; }
 
         static WithDefaultValueTransformations()
         {
-            ComposableDictionaryTransformations = new ComposableDictionaryTransformationsImpl();
-            TransactionalTransformations = new TransactionalTransformationsImpl(ComposableDictionaryTransformations, ComposableDictionaryTransformations);
+            ComposableDictionaryTransformations = new ComposableDictionaryTransformations<TKey, TValue, GetDefaultValue<TKey, TValue>>(Transform);
+            TransactionalTransformations = new TransactionalTransformationsWriteWrite<TKey, TValue, TKey, TValue, GetDefaultValue<TKey, TValue>>(ComposableDictionaryTransformations, ComposableDictionaryTransformations);
         }
 
-        public class TransactionalTransformationsImpl : TransactionalTransformationsWriteWrite<TKey, TValue, TKey, TValue,
-            GetDefaultValue<TKey, TValue>>
+        private static IComposableDictionary<TKey, TValue> Transform(IComposableDictionary<TKey, TValue> source, GetDefaultValue<TKey, TValue> p)
         {
-            public TransactionalTransformationsImpl(IComposableDictionaryTransformations<TKey, TValue, TKey, TValue, GetDefaultValue<TKey, TValue>> readWriteTransformations, IDictionaryWithBuiltInKeyTransformations<TKey, TValue, TKey, TValue, GetDefaultValue<TKey, TValue>> readWriteTransformationsWithBuiltInKey) : base(readWriteTransformations, readWriteTransformationsWithBuiltInKey)
-            {
-            }
-        }
-        
-        public class ComposableDictionaryTransformationsImpl : ComposableDictionaryTransformationsBase<TKey, TValue, GetDefaultValue<TKey, TValue>>
-        {
-            public override IComposableDictionary<TKey, TValue> Transform(IComposableDictionary<TKey, TValue> source, GetDefaultValue<TKey, TValue> p)
-            {
-                return new DictionaryGetOrDefaultDecorator<TKey, TValue>(source, p);
-            }
+            return new DictionaryGetOrDefaultDecorator<TKey, TValue>(source, p);
         }
     }
 }

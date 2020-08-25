@@ -38,16 +38,15 @@ namespace ComposableCollections.Dictionary.Decorators
         {
             if (_source.TryGetValue(key, out value))
             {
-                _refreshValue(key, value, out var maybeValue, out var persist);
+                var hasValue = _refreshValue(key, value, out value, out var persist);
                 
-                if (maybeValue.HasValue)
+                if (hasValue)
                 {
                     if (persist)
                     {
-                        _source.Update(key, maybeValue.Value);
+                        _source.Update(key, value);
                     }
 
-                    value = maybeValue.Value;
                     return true;
                 }
                 else

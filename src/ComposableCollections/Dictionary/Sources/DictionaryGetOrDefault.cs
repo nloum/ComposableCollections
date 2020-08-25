@@ -2,7 +2,7 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary.Sources
 {
-    public delegate void GetDefaultValue<TKey, TValue>(TKey key, out IMaybe<TValue> maybeValue, out bool persist);
+    public delegate bool GetDefaultValue<TKey, TValue>(TKey key, out TValue value, out bool persist);
     
     public class DictionaryGetOrDefault<TKey, TValue> : ComposableDictionary<TKey, TValue>
     {
@@ -17,16 +17,15 @@ namespace ComposableCollections.Dictionary.Sources
         {
             if (!base.TryGetValue(key, out value))
             {
-                _getDefaultValue(key, out var maybeValue, out var persist);
+                var hasValue = _getDefaultValue(key, out value, out var persist);
                 
-                if (maybeValue.HasValue)
+                if (hasValue)
                 {
                     if (persist)
                     {
-                        State.Add(key, maybeValue.Value);
+                        State.Add(key, value);
                     }
 
-                    value = maybeValue.Value;
                     return true;
                 }
                 else

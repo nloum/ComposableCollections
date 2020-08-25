@@ -6,6 +6,20 @@ using ComposableCollections.Dictionary.Interfaces;
 
 namespace ComposableCollections.Dictionary.Adapters
 {
+
+    public class
+        ReadOnlyMappingDictionaryAdapter<TKey, TValue1, TValue2> : ReadOnlyMappingDictionaryAdapter<TKey, TValue1, TKey,
+            TValue2>
+    {
+        protected ReadOnlyMappingDictionaryAdapter(IComposableReadOnlyDictionary<TKey, TValue1> innerValues) : base(innerValues)
+        {
+        }
+
+        public ReadOnlyMappingDictionaryAdapter(IComposableReadOnlyDictionary<TKey, TValue1> innerValues, Func<TKey, TValue1, IKeyValue<TKey, TValue2>> convertTo2) : base(innerValues, convertTo2, x => x, x => x)
+        {
+        }
+    }
+    
     /// <summary>
     /// Using two abstract Convert methods, converts an IComposableReadOnlyDictionary{TKey1, TValue1} to an
     /// IComposableReadOnlyDictionary{TKey2, TValue2} instance. This will lazily convert objects in the underlying innerValues.

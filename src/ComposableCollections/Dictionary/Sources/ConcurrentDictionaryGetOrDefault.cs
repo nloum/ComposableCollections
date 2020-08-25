@@ -15,16 +15,15 @@ namespace ComposableCollections.Dictionary.Sources
             {
                 if (!base.TryGetValue(key, out value))
                 {
-                    _getDefaultValue(key, out var maybeValue, out var persist);
+                    var hasValue = _getDefaultValue(key, out value, out var persist);
                 
-                    if (maybeValue.HasValue)
+                    if (hasValue)
                     {
                         if (persist)
                         {
-                            State = State.Add(key, maybeValue.Value);
+                            State = State.Add(key, value);
                         }
 
-                        value = maybeValue.Value;
                         return true;
                     }
                     else
@@ -41,13 +40,13 @@ namespace ComposableCollections.Dictionary.Sources
         {
             if (!State.TryGetValue(key, out value))
             {
-                _getDefaultValue(key, out var maybeValue, out var persist);
+                var hasValue = _getDefaultValue(key, out value, out var persist);
 
-                if (maybeValue.HasValue)
+                if (hasValue)
                 {
                     if (persist)
                     {
-                        State = State.Add(key, maybeValue.Value);
+                        State = State.Add(key, value);
                     }
 
                     return true;

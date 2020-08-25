@@ -2,7 +2,7 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary.Sources
 {
-    public delegate void RefreshValue<TKey, TValue>(TKey key, TValue previousValue, out IMaybe<TValue> maybeValue, out bool persist);
+    public delegate bool RefreshValue<TKey, TValue>(TKey key, TValue previousValue, out TValue refreshedValue, out bool persist);
     
     public class DictionaryGetOrRefresh<TKey, TValue> : ComposableDictionary<TKey, TValue>
     {
@@ -17,16 +17,15 @@ namespace ComposableCollections.Dictionary.Sources
         {
             if (base.TryGetValue(key, out value))
             {
-                _refreshValue(key, value, out var maybeValue, out var persist);
+                var hasValue = _refreshValue(key, value, out value, out var persist);
                 
-                if (maybeValue.HasValue)
+                if (hasValue)
                 {
                     if (persist)
                     {
-                        State[key] = maybeValue.Value;
+                        State[key] = value;
                     }
 
-                    value = maybeValue.Value;
                     return true;
                 }
                 else

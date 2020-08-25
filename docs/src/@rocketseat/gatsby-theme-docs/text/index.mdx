@@ -1,21 +1,130 @@
+import ReactDiffViewer from 'react-diff-viewer'
+
 # Introduction
 
-A complete and awesome Gatsby Theme for documentation websites.
+ComposableCollections is a [NuGet package](https://www.nuget.org/packages/ComposableCollections/) containing decorator and adapter classes that can be used to supercharge collection objects. Here are some examples:
 
-Forget about other things and focus on what matters: **writing docs.**
+If you want to make a dictionary be concurrent using a `ReadWriteLockSlim`:
 
-## Features
+```csharp lineNumbers=true
+var dictionary = new ComposableDictionary<int, string>();
+// We want a concurrent dictionary that wraps this dictionary.
+// To do this, we use ReadWriteLockDictionaryDecorator:
+var concurrentDictionary = new ReadWriteLockDictionaryDecorator<int, string>(
+    dictionary);
+```
 
-- 📝 MDX for docs;
-- 🛣 Yaml-based sidebar navigation;
-- 📱 Responsive and mobile friendly;
-- 🖥 Code highlighting with [prism-react-renderer](https://github.com/FormidableLabs/prism-react-renderer) and [react-live](https://github.com/FormidableLabs/react-live) support;
-- 🥇 SEO (Sitemap, schema.org data, Open Graph and Twitter tags).
-- 📈 Google Analytics support;
-- 📄 Custom docs schema;
-- ⚡️ Offline Support & WebApp Manifest;
-- and much more 🔥
+If you want a dictionary to transparently create missing items when they're accessed:
 
-<br />
+```cs lineNumbers=true
+var dictionary = new ComposableDictionary<int, string>();
+// We want a dictionary that wraps this dictionary, and when a non-existent key
+// is accessed we want to create the item behind the scenes and return it.
+// To do this, we use DictionaryGetOrDefaultDecorator:
+var concurrentDictionary = new DictionaryGetOrDefaultDecorator<int, string>(
+    dictionary, (int key, out string value, out bool persist) => {
+        value = key.ToString();
+        // Setting persist to true means that the new value will be
+        // persisted to the underlying dictionary
+        persist = true;
+        // Returning true indicates that we are opting to return a valid
+        // value instead of saying we have no such item in the dictionary.
+        return true;
+    });
+```
+
+A quick review on design patterns:
+
+- Decorators wrap a collection in a new collection object that exposes the same interface, but adds some functionality.
+- Adapters convert an object with one interface to an object of another interface.
+
+ComposableCollections uses both these patterns. The above two examples were decorators.
+
+Let's use the adapter pattern to convert a dictionary with `string` values to a dictionary with `int` values:
+
+```c# lineNumbers=true
+var stringDictionary = new ComposableDictionary<int, string>();
+var intDictionary = new MappingDictionaryAdapter<int, int, string>(
+    stringDictionary,
+    (key, i) => i.ToString(),
+    (key, str) => int.Parse(str));
+```
+
+## Constructor syntax vs. extension methods
+
+The syntax we're showing here is ComposableCollection's constructor syntax. There's an alternative fluent syntax that uses extension methods to decorate and adapt collections to have the exact functionality you're looking for in a dictionary.
+
+Here's the read-write lock decorator code converted to extension method syntax instead of constructor syntax:
+
+<ReactDiffViewer
+oldValue={
+`var dictionary = new ComposableDictionary<int, string>();
+// We want a concurrent dictionary that wraps this dictionary.
+// To do this, we use ReadWriteLockDictionaryDecorator:
+var concurrentDictionary = new ReadWriteLockDictionaryDecorator<int, string>(
+    dictionary);`}
+newValue={
+`var dictionary = new ComposableDictionary<int, string>();
+// We want a concurrent dictionary that wraps this dictionary.
+// To do this, we use ReadWriteLockDictionaryDecorator:
+var concurrentDictionary = dictionary.WithReadWriteLock();`}
+splitView={true}
+disableWordDiff={true}
+/>
+
+Here's the default value decorator code converted to use extension method syntax instead of constructor syntax:
+
+<ReactDiffViewer
+oldValue={
+`var dictionary = new ComposableDictionary<int, string>();
+// We want a dictionary that wraps this dictionary, and when a non-existent key
+// is accessed we want to create the item behind the scenes and return it.
+// To do this, we use DictionaryGetOrDefaultDecorator:
+var concurrentDictionary = new DictionaryGetOrDefaultDecorator<int, string>(
+    dictionary, (int key, out string value, out bool persist) => {
+        value = key.ToString();
+        // Setting persist to true means that the new value will be
+        // persisted to the underlying dictionary
+        persist = true;
+        // Returning true indicates that we are opting to return a valid
+        // value instead of saying we have no such item in the dictionary.
+        return true;
+    });`}
+newValue={
+`var dictionary = new ComposableDictionary<int, string>();
+// We want a dictionary that wraps this dictionary, and when a non-existent key
+// is accessed we want to create the item behind the scenes and return it.
+// To do this, we use DictionaryGetOrDefaultDecorator:
+var concurrentDictionary = dictionary.WithDefaultValue(
+    (int key, out string value, out bool persist) => {
+        value = key.ToString();
+        // Setting persist to true means that the new value will be
+        // persisted to the underlying dictionary
+        persist = true;
+        // Returning true indicates that we are opting to return a valid
+        // value instead of saying we have no such item in the dictionary.
+        return true;
+    });`}
+splitView={true}
+disableWordDiff={true}
+/>
+
+Here's the mapping adapter code converted to use extension method syntax instead of constructor syntax:
+
+<ReactDiffViewer
+oldValue={
+`var stringDictionary = new ComposableDictionary<int, string>();
+var intDictionary = new MappingDictionaryAdapter<int, int, string>(
+    stringDictionary,
+    (key, i) => i.ToString(),
+    (key, str) => int.Parse(str));`}
+newValue={
+`var stringDictionary = new ComposableDictionary<int, string>();
+var intDictionary = stringDictionary.WithMapping<int, int, string>(
+    (key, i) => i.ToString(),
+    (key, str) => int.Parse(str));`}
+splitView={true}
+disableWordDiff={true}
+/>
 
 [Get started now!](/getting-started)

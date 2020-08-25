@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using ComposableCollections.Dictionary.Interfaces;
+using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
 

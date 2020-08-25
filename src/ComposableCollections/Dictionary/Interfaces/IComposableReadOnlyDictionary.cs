@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using SimpleMonads;
 
-namespace ComposableCollections.Dictionary
+namespace ComposableCollections.Dictionary.Interfaces
 {
     /// <summary>
     /// An IReadOnlyDictionary equivalent that has lots of extension methods that let you add facades to it for various additional

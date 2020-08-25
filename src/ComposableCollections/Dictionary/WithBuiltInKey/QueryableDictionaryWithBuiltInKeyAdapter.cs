@@ -1,5 +1,7 @@
 using System;
 using System.Linq;
+using ComposableCollections.Dictionary.Interfaces;
+using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 
 namespace ComposableCollections.Dictionary.WithBuiltInKey
 {

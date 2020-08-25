@@ -1,4 +1,6 @@
+using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.WithBuiltInKey;
+using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 {

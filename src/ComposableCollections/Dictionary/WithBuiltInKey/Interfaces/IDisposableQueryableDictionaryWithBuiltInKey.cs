@@ -1,4 +1,6 @@
-namespace ComposableCollections.Dictionary.WithBuiltInKey
+using ComposableCollections.Dictionary.Interfaces;
+
+namespace ComposableCollections.Dictionary.WithBuiltInKey.Interfaces
 {
     public interface IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> :
         IDisposableDictionaryWithBuiltInKey<TKey, TValue>, IQueryableDictionaryWithBuiltInKey<TKey, TValue>,

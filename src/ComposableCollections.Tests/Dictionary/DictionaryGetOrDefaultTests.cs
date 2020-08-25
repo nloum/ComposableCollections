@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ComposableCollections.Dictionary;
+using ComposableCollections.Dictionary.Sources;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SimpleMonads;

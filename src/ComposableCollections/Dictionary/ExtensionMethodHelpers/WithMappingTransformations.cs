@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using ComposableCollections.Dictionary.Adapters;
+using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
 
@@ -18,7 +20,7 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 
         public override IComposableDictionary<TKey2, TValue2> Transform(IComposableDictionary<TKey1, TValue1> source, Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>> p)
         {
-            return new MapDictionary<TKey1,TValue1,TKey2,TValue2>(
+            return new MappingDictionaryAdapter<TKey1,TValue1,TKey2,TValue2>(
                 source, 
                 (key1, value1) => new KeyValue<TKey2, TValue2>(p.Item3(key1), p.Item2(value1)),
                 (key2, value2) => new KeyValue<TKey1, TValue1>(p.Item4(key2), p.Item1(value2)),
@@ -27,7 +29,7 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 
         protected override IComposableReadOnlyDictionary<TKey2, TValue2> Transform(IComposableReadOnlyDictionary<TKey1, TValue1> source, Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>> p)
         {
-            return new ReadOnlyMapDictionary<TKey1,TValue1,TKey2,TValue2>(
+            return new ReadOnlyMappingDictionaryAdapter<TKey1,TValue1,TKey2,TValue2>(
                 source, 
                 (key1, value1) => new KeyValue<TKey2, TValue2>(p.Item3(key1), p.Item2(value1)),
                 p.Item4, p.Item3);

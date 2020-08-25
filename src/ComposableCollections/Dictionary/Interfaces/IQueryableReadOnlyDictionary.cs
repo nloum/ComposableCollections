@@ -1,6 +1,6 @@
 using System.Linq;
 
-namespace ComposableCollections.Dictionary
+namespace ComposableCollections.Dictionary.Interfaces
 {
     public interface IQueryableReadOnlyDictionary<TKey, out TValue> : IComposableReadOnlyDictionary<TKey, TValue>
     {

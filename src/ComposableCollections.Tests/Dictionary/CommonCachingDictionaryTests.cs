@@ -1,6 +1,9 @@
 using System;
 using ComposableCollections.Dictionary;
+using ComposableCollections.Dictionary.Adapters;
 using ComposableCollections.Dictionary.Exceptions;
+using ComposableCollections.Dictionary.Interfaces;
+using ComposableCollections.Dictionary.Sources;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -20,7 +23,7 @@ namespace ComposableCollections.Tests
             switch (cachingDictionaryType)
             {
                 case CachingDictionaryType.ConcurrentCachingDictionaryWithMinimalState:
-                    return new ConcurrentMinimalCachedStateDictionaryDecorator<TKey, TValue>(flushCacheTo);
+                    return new ConcurrentCachedWriteDictionaryAdapter<TKey, TValue>(flushCacheTo);
                 case CachingDictionaryType.ConcurrentCachingDictionary:
                     return new ConcurrentCachedDictionary<TKey, TValue>(flushCacheTo, new ComposableDictionary<TKey, TValue>());
                 default:

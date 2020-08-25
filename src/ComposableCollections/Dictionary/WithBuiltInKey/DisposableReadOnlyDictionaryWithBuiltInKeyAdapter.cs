@@ -1,4 +1,6 @@
 using System;
+using ComposableCollections.Dictionary.Interfaces;
+using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 
 namespace ComposableCollections.Dictionary.WithBuiltInKey
 {

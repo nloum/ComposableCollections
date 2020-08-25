@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using ComposableCollections.Dictionary.Write;
 
-namespace ComposableCollections.Dictionary
+namespace ComposableCollections.Dictionary.Interfaces
 {
     /// <summary>
     /// A dictionary that will keep track of the changes you make to it, and then allows you to flush those changes

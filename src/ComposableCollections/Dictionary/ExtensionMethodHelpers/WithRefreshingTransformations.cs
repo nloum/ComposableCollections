@@ -1,3 +1,7 @@
+using ComposableCollections.Dictionary.Decorators;
+using ComposableCollections.Dictionary.Interfaces;
+using ComposableCollections.Dictionary.Sources;
+
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 {
     public class WithRefreshingTransformations<TKey, TValue>

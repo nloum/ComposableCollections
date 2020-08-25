@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using ComposableCollections.Dictionary.Interfaces;
+using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary.WithBuiltInKey

@@ -1,4 +1,7 @@
+using ComposableCollections.Dictionary.Adapters;
+using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.WithBuiltInKey;
+using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 {
@@ -9,7 +12,7 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
         public ICachedQueryableDictionary<TKey, TValue> Transform(IQueryableDictionary<TKey, TValue> source, TParameter p)
         {
             var result = Transform((IComposableDictionary<TKey, TValue>) source, p);
-            return new AnonymousCachedQueryableDictionary<TKey, TValue>(
+            return new CachedQueryableDictionaryAdapter<TKey, TValue>(
                 result,
                 result.AsBypassCache,
                 result.AsNeverFlush,
@@ -21,7 +24,7 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
         public ICachedDisposableQueryableDictionary<TKey, TValue> Transform(IDisposableQueryableDictionary<TKey, TValue> source, TParameter p)
         {
             var result = Transform((IComposableDictionary<TKey, TValue>) source, p);
-            return new AnonymousCachedDisposableQueryableDictionary<TKey, TValue>(
+            return new CachedDisposableQueryableDictionaryAdapter<TKey, TValue>(
                 result,
                 result.AsBypassCache,
                 result.AsNeverFlush,
@@ -34,7 +37,7 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
         public ICachedDisposableDictionary<TKey, TValue> Transform(IDisposableDictionary<TKey, TValue> source, TParameter p)
         {
             var result = Transform((IComposableDictionary<TKey, TValue>) source, p);
-            return new AnonymousCachedDisposableDictionary<TKey, TValue>(
+            return new CachedDisposableDictionaryAdapter<TKey, TValue>(
                 result,
                 result.AsBypassCache,
                 result.AsNeverFlush,
@@ -55,21 +58,21 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
         public ICachedQueryableDictionaryWithBuiltInKey<TKey, TValue> Transform(IQueryableDictionaryWithBuiltInKey<TKey, TValue> source, TParameter p)
         {
             var x = Transform(source.AsComposableDictionary(), p);
-            var result = new AnonymousCachedQueryableDictionary<TKey, TValue>(x, x.AsBypassCache, x.AsNeverFlush, x.FlushCache, x.GetWrites, source.Values);
+            var result = new CachedQueryableDictionaryAdapter<TKey, TValue>(x, x.AsBypassCache, x.AsNeverFlush, x.FlushCache, x.GetWrites, source.Values);
             return new CachedQueryableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(result, source.GetKey);
         }
 
         public ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> Transform(IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> source, TParameter p)
         {
             var x = Transform(source.AsComposableDictionary(), p);
-            var result = new AnonymousCachedDisposableQueryableDictionary<TKey, TValue>(x, x.AsBypassCache, x.AsNeverFlush, x.FlushCache, x.GetWrites, source, source.Values);
+            var result = new CachedDisposableQueryableDictionaryAdapter<TKey, TValue>(x, x.AsBypassCache, x.AsNeverFlush, x.FlushCache, x.GetWrites, source, source.Values);
             return new CachedDisposableQueryableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(result, source.GetKey);
         }
 
         public ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue> Transform(IDisposableDictionaryWithBuiltInKey<TKey, TValue> source, TParameter p)
         {
             var x = Transform(source.AsComposableDictionary(), p);
-            var result = new AnonymousCachedDisposableDictionary<TKey, TValue>(x, x.AsBypassCache, x.AsNeverFlush, x.FlushCache, x.GetWrites, source);
+            var result = new CachedDisposableDictionaryAdapter<TKey, TValue>(x, x.AsBypassCache, x.AsNeverFlush, x.FlushCache, x.GetWrites, source);
             return new CachedDisposableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(result, source.GetKey);
         }
     }

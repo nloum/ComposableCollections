@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ComposableCollections.Dictionary.Adapters;
+using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.WithBuiltInKey;
+using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 using ComposableCollections.Dictionary.Write;
 
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
@@ -12,40 +15,40 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 
         public ICachedDictionary<TKey, TValue> Transform(ICachedDictionary<TKey, TValue> source, TParameter p)
         {
-            return new AnonymousCachedDictionary<TKey, TValue>(
+            return new CachedDictionaryAdapter<TKey, TValue>(
                 Transform((IComposableDictionary<TKey, TValue>)source, p), source.AsBypassCache, source.AsNeverFlush, source.FlushCache, source.GetWrites);
         }
 
         public IQueryableDictionary<TKey, TValue> Transform(IQueryableDictionary<TKey, TValue> source, TParameter p)
         {
-            return new AnonymousQueryableDictionary<TKey, TValue>(Transform((IComposableDictionary<TKey, TValue>)source, p), source.Values);
+            return new QueryableDictionaryAdapter<TKey, TValue>(Transform((IComposableDictionary<TKey, TValue>)source, p), source.Values);
         }
 
         public ICachedDisposableQueryableDictionary<TKey, TValue> Transform(ICachedDisposableQueryableDictionary<TKey, TValue> source, TParameter p)
         {
-            return new AnonymousCachedDisposableQueryableDictionary<TKey, TValue>(Transform((IComposableDictionary<TKey, TValue>)source, p), source.AsBypassCache, source.AsNeverFlush, source.FlushCache, source.GetWrites, source, source.Values);
+            return new CachedDisposableQueryableDictionaryAdapter<TKey, TValue>(Transform((IComposableDictionary<TKey, TValue>)source, p), source.AsBypassCache, source.AsNeverFlush, source.FlushCache, source.GetWrites, source, source.Values);
         }
 
         public IDisposableQueryableDictionary<TKey, TValue> Transform(IDisposableQueryableDictionary<TKey, TValue> source, TParameter p)
         {
-            return new AnonymousDisposableQueryableDictionary<TKey, TValue>(
+            return new DisposableQueryableDictionaryAdapter<TKey, TValue>(
                 Transform((IComposableDictionary<TKey, TValue>) source, p), source, source.Values);
         }
 
         public ICachedQueryableDictionary<TKey, TValue> Transform(ICachedQueryableDictionary<TKey, TValue> source, TParameter p)
         {
-            return new AnonymousCachedQueryableDictionary<TKey, TValue>(
+            return new CachedQueryableDictionaryAdapter<TKey, TValue>(
                 Transform((IComposableDictionary<TKey, TValue>) source, p), source.AsBypassCache, source.AsNeverFlush, source.FlushCache, source.GetWrites, source.Values);
         }
 
         public ICachedDisposableDictionary<TKey, TValue> Transform(ICachedDisposableDictionary<TKey, TValue> source, TParameter p)
         {
-            return new AnonymousCachedDisposableDictionary<TKey, TValue>(Transform((IComposableDictionary<TKey, TValue>)source, p), source.AsBypassCache, source.AsNeverFlush, source.FlushCache, source.GetWrites, source);
+            return new CachedDisposableDictionaryAdapter<TKey, TValue>(Transform((IComposableDictionary<TKey, TValue>)source, p), source.AsBypassCache, source.AsNeverFlush, source.FlushCache, source.GetWrites, source);
         }
 
         public IDisposableDictionary<TKey, TValue> Transform(IDisposableDictionary<TKey, TValue> source, TParameter p)
         {
-            return new AnonymousDisposableDictionary<TKey, TValue>(Transform((IComposableDictionary<TKey, TValue>)source, p), source);
+            return new DisposableDictionaryAdapter<TKey, TValue>(Transform((IComposableDictionary<TKey, TValue>)source, p), source);
         }
         
         public ICachedDictionaryWithBuiltInKey<TKey, TValue> Transform(ICachedDictionaryWithBuiltInKey<TKey, TValue> source, TParameter p)
@@ -104,14 +107,14 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
         public virtual IQueryableDictionary<TKey2, TValue2> Transform(IQueryableDictionary<TKey1, TValue1> source,
             TParameter p)
         {
-            return new AnonymousQueryableDictionary<TKey2, TValue2>(
+            return new QueryableDictionaryAdapter<TKey2, TValue2>(
                 Transform((IComposableDictionary<TKey1, TValue1>) source, p), MapQuery(source.Values, p));
         }
 
         public virtual ICachedDictionary<TKey2, TValue2> Transform(ICachedDictionary<TKey1, TValue1> source,
             TParameter p)
         {
-            return new AnonymousCachedDictionary<TKey2, TValue2>(
+            return new CachedDictionaryAdapter<TKey2, TValue2>(
                 Transform((IComposableDictionary<TKey1, TValue1>) source, p), 
                 () => Transform(source.AsBypassCache(), p),
                 () => Transform(source.AsNeverFlush(), p),
@@ -122,7 +125,7 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
         public virtual ICachedDisposableQueryableDictionary<TKey2, TValue2> Transform(
             ICachedDisposableQueryableDictionary<TKey1, TValue1> source, TParameter p)
         {
-            return new AnonymousCachedDisposableQueryableDictionary<TKey2, TValue2>(
+            return new CachedDisposableQueryableDictionaryAdapter<TKey2, TValue2>(
                 Transform((IComposableDictionary<TKey1, TValue1>) source, p), 
                 () => Transform(source.AsBypassCache(), p),
                 () => Transform(source.AsNeverFlush(), p),
@@ -134,7 +137,7 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
         public virtual IDisposableQueryableDictionary<TKey2, TValue2> Transform(
             IDisposableQueryableDictionary<TKey1, TValue1> source, TParameter p)
         {
-            return new AnonymousDisposableQueryableDictionary<TKey2, TValue2>(
+            return new DisposableQueryableDictionaryAdapter<TKey2, TValue2>(
                 Transform((IComposableDictionary<TKey1, TValue1>) source, p), 
                 source, MapQuery(source.Values, p));
         }
@@ -142,7 +145,7 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
         public virtual ICachedQueryableDictionary<TKey2, TValue2> Transform(
             ICachedQueryableDictionary<TKey1, TValue1> source, TParameter p)
         {
-            return new AnonymousCachedQueryableDictionary<TKey2, TValue2>(
+            return new CachedQueryableDictionaryAdapter<TKey2, TValue2>(
                 Transform((IComposableDictionary<TKey1, TValue1>) source, p), 
                 () => Transform(source.AsBypassCache(), p),
                 () => Transform(source.AsNeverFlush(), p),
@@ -154,7 +157,7 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
         public virtual ICachedDisposableDictionary<TKey2, TValue2> Transform(
             ICachedDisposableDictionary<TKey1, TValue1> source, TParameter p)
         {
-            return new AnonymousCachedDisposableDictionary<TKey2, TValue2>(
+            return new CachedDisposableDictionaryAdapter<TKey2, TValue2>(
                 Transform((IComposableDictionary<TKey1, TValue1>) source, p), 
                 () => Transform(source.AsBypassCache(), p),
                 () => Transform(source.AsNeverFlush(), p),
@@ -166,7 +169,7 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
         public virtual IDisposableDictionary<TKey2, TValue2> Transform(IDisposableDictionary<TKey1, TValue1> source,
             TParameter p)
         {
-            return new AnonymousDisposableDictionary<TKey2, TValue2>(
+            return new DisposableDictionaryAdapter<TKey2, TValue2>(
                 Transform((IComposableDictionary<TKey1, TValue1>) source, p), source);
         }
 

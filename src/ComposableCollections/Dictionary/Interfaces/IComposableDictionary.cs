@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using ComposableCollections.Dictionary.Write;
 
-namespace ComposableCollections.Dictionary
+namespace ComposableCollections.Dictionary.Interfaces
 {
     /// <summary>
     /// An IDictionary equivalent that has lots of extension methods that let you add facades to it for various additional

@@ -1,3 +1,6 @@
+using ComposableCollections.Dictionary.Adapters;
+using ComposableCollections.Dictionary.Interfaces;
+
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 {
     public class WithWriteCachingTransformations<TKey, TValue>
@@ -15,7 +18,7 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
         {
             public override ICachedDictionary<TKey, TValue> Transform(IComposableDictionary<TKey, TValue> source, object p)
             {
-                return new ConcurrentMinimalCachedStateDictionaryDecorator<TKey, TValue>(source);
+                return new ConcurrentCachedWriteDictionaryAdapter<TKey, TValue>(source);
             }
         }
 

@@ -1,4 +1,6 @@
-namespace ComposableCollections.Dictionary.WithBuiltInKey
+using ComposableCollections.Dictionary.Interfaces;
+
+namespace ComposableCollections.Dictionary.WithBuiltInKey.Interfaces
 {
     public interface ICachedQueryableDictionaryWithBuiltInKey<TKey, TValue> :
         ICachedDictionaryWithBuiltInKey<TKey, TValue>, IQueryableDictionaryWithBuiltInKey<TKey, TValue>

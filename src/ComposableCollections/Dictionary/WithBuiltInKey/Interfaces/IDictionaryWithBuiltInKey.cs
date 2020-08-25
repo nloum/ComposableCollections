@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Write;
 
-namespace ComposableCollections.Dictionary.WithBuiltInKey
+namespace ComposableCollections.Dictionary.WithBuiltInKey.Interfaces
 {
     public interface IDictionaryWithBuiltInKey<TKey, TValue> : IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>
     {

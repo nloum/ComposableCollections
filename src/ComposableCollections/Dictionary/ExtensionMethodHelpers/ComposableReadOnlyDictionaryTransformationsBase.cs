@@ -1,4 +1,7 @@
+using ComposableCollections.Dictionary.Adapters;
+using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.WithBuiltInKey;
+using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 {
@@ -12,20 +15,20 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
         public IQueryableReadOnlyDictionary<TKey, TValue> Transform(IQueryableReadOnlyDictionary<TKey, TValue> source,
             TParameter p1)
         {
-            return new AnonymousQueryableReadOnlyDictionary<TKey, TValue>(
+            return new QueryableReadOnlyDictionaryAdapter<TKey, TValue>(
                 Transform((IComposableReadOnlyDictionary<TKey, TValue>) source, p1), source.Values);
         }
 
         public IDisposableQueryableReadOnlyDictionary<TKey, TValue> Transform(
             IDisposableQueryableReadOnlyDictionary<TKey, TValue> source, TParameter parameter)
         {
-            return new AnonymousDisposableQueryableReadOnlyDictionary<TKey, TValue>(Transform((IComposableReadOnlyDictionary<TKey, TValue>)source, parameter), source, source.Values);
+            return new DisposableQueryableReadOnlyDictionaryAdapter<TKey, TValue>(Transform((IComposableReadOnlyDictionary<TKey, TValue>)source, parameter), source, source.Values);
         }
 
         public IDisposableReadOnlyDictionary<TKey, TValue> Transform(IDisposableReadOnlyDictionary<TKey, TValue> source,
             TParameter parameter)
         {
-            return new AnonymousDisposableReadOnlyDictionary<TKey, TValue>(
+            return new DisposableReadOnlyDictionaryAdapter<TKey, TValue>(
                 Transform((IComposableReadOnlyDictionary<TKey, TValue>) source, parameter), source);
         }
 

@@ -4,8 +4,13 @@ using System.Linq;
 using System.Reflection;
 using ComposableCollections.Common;
 using ComposableCollections.Dictionary;
+using ComposableCollections.Dictionary.Adapters;
 using ComposableCollections.Dictionary.ExtensionMethodHelpers;
+using ComposableCollections.Dictionary.Interfaces;
+using ComposableCollections.Dictionary.Sources;
+using ComposableCollections.Dictionary.Transactional;
 using ComposableCollections.Dictionary.WithBuiltInKey;
+using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 using SimpleMonads;
 using UtilityDisposables;
 
@@ -564,11 +569,11 @@ namespace ComposableCollections
         {
             return new AnonymousTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>(() =>
             {
-                return new DisposableReadOnlyDictionaryDecorator<TKey, TValue>(source, EmptyDisposable.Default);
+                return new DisposableReadOnlyDictionaryAdapter<TKey, TValue>(source, EmptyDisposable.Default);
             }, () =>
             {
                 var cache = source.WithWriteCaching();
-                return new DisposableDictionaryDecorator<TKey, TValue>(cache, new AnonymousDisposable(() => cache.FlushCache()));
+                return new DisposableDictionaryAdapter<TKey, TValue>(cache, new AnonymousDisposable(() => cache.FlushCache()));
             });
         }
         
@@ -581,7 +586,7 @@ namespace ComposableCollections
             {
                 var disposableDictionary = source.BeginWrite();
                 var cache = disposableDictionary.WithWriteCaching();
-                return new DisposableDictionaryDecorator<TKey, TValue>(cache, new AnonymousDisposable(() =>
+                return new DisposableDictionaryAdapter<TKey, TValue>(cache, new AnonymousDisposable(() =>
                 {
                     cache.FlushCache();
                     disposableDictionary.Dispose();
@@ -601,7 +606,7 @@ namespace ComposableCollections
         public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithReadWriteLock<TKey, TValue>(
             this IComposableDictionary<TKey, TValue> source)
         {
-            return new AtomicDictionaryAdapter<TKey, TValue>(source);
+            return new LockedTransactionalDictionaryAdapter<TKey, TValue>(source);
         }
 
         /// <summary>
@@ -612,7 +617,7 @@ namespace ComposableCollections
         public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithReadWriteLock<TKey, TValue>(
             this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source)
         {
-            return new AtomicTransactionalDecorator<TKey, TValue>(source);
+            return new LockedTransactionalDecorator<TKey, TValue>(source);
         }
 
         /// <summary>
@@ -623,7 +628,7 @@ namespace ComposableCollections
         public static IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>> WithReadWriteLock<TKey, TValue>(
             this IComposableReadOnlyDictionary<TKey, TValue> source)
         {
-            return new AtomicReadOnlyDictionaryAdapter<TKey, TValue>(source);
+            return new LockedReadOnlyTransactionalDictionaryAdapter<TKey, TValue>(source);
         }
         
         #endregion

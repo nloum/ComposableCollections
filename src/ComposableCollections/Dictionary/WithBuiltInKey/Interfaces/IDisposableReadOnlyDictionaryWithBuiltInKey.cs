@@ -1,6 +1,7 @@
 using System;
+using ComposableCollections.Dictionary.Interfaces;
 
-namespace ComposableCollections.Dictionary.WithBuiltInKey
+namespace ComposableCollections.Dictionary.WithBuiltInKey.Interfaces
 {
     public interface
         IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue> : IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>,

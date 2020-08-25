@@ -9,6 +9,12 @@ namespace ComposableCollections.Dictionary.Adapters
     {
         private IDisposable _disposable;
 
+        public DisposableQueryableReadOnlyDictionaryAdapter(IQueryableReadOnlyDictionary<TKey, TValue> source, IDisposable disposable) : base(source)
+        {
+            _disposable = disposable;
+            Values = source.Values;
+        }
+
         public DisposableQueryableReadOnlyDictionaryAdapter(IComposableReadOnlyDictionary<TKey, TValue> source, IDisposable disposable, IQueryable<TValue> values) : base(source)
         {
             _disposable = disposable;

@@ -18,4 +18,8 @@
     <ProjectReference Include="..\ComposableCollections\ComposableCollections.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Dictionary\Adapters" />
+  </ItemGroup>
+
 </Project>

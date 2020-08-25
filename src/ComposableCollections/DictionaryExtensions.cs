@@ -415,6 +415,12 @@ namespace ComposableCollections
 
         #region WithBuiltInKey
         
+        public static ICachedDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this ICachedDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
+            return new CachedDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
+        }
+        public static IDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IComposableDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
+            return new DictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
+        }
         public static IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IDisposableQueryableReadOnlyDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
             return new DisposableQueryableReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
         }
@@ -439,7 +445,138 @@ namespace ComposableCollections
         public static IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IDisposableReadOnlyDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
             return new DisposableReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
         }
+        public static IDisposableDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IDisposableDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
+            return new DisposableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
+        }
+        public static IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IComposableReadOnlyDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
+            return new ReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
+        }
 
+        #endregion
+        
+        #region WithReadWriteLock
+        
+        public static ICachedDictionary<TKey, TValue> WithReadWriteLock<TKey, TValue>(this ICachedDictionary<TKey, TValue> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.ComposableDictionaryTransformations.Transform(source, null);
+        }
+
+        public static IQueryableDictionary<TKey, TValue> WithReadWriteLock<TKey, TValue>(this IQueryableDictionary<TKey, TValue> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.ComposableDictionaryTransformations.Transform(source, null);
+        }
+
+        public static ICachedDisposableQueryableDictionary<TKey, TValue> WithReadWriteLock<TKey, TValue>(this ICachedDisposableQueryableDictionary<TKey, TValue> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.ComposableDictionaryTransformations.Transform(source, null);
+        }
+
+        public static IDisposableQueryableDictionary<TKey, TValue> WithReadWriteLock<TKey, TValue>(this IDisposableQueryableDictionary<TKey, TValue> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.ComposableDictionaryTransformations.Transform(source, null);
+        }
+
+        public static ICachedQueryableDictionary<TKey, TValue> WithReadWriteLock<TKey, TValue>(this ICachedQueryableDictionary<TKey, TValue> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.ComposableDictionaryTransformations.Transform(source, null);
+        }
+
+        public static ICachedDisposableDictionary<TKey, TValue> WithReadWriteLock<TKey, TValue>(this ICachedDisposableDictionary<TKey, TValue> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.ComposableDictionaryTransformations.Transform(source, null);
+        }
+
+        public static IDisposableDictionary<TKey, TValue> WithReadWriteLock<TKey, TValue>(this IDisposableDictionary<TKey, TValue> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.ComposableDictionaryTransformations.Transform(source, null);
+        }
+
+        public static ICachedDictionaryWithBuiltInKey<TKey, TValue> WithReadWriteLock<TKey, TValue>(this ICachedDictionaryWithBuiltInKey<TKey, TValue> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.ComposableDictionaryTransformations.Transform(source, null);
+        }
+
+        public static ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> WithReadWriteLock<TKey, TValue>(this ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> source,
+            object p)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.ComposableDictionaryTransformations.Transform(source, null);
+        }
+
+        public static IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> WithReadWriteLock<TKey, TValue>(this IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.ComposableDictionaryTransformations.Transform(source, null);
+        }
+
+        public static IQueryableDictionaryWithBuiltInKey<TKey, TValue> WithReadWriteLock<TKey, TValue>(this IQueryableDictionaryWithBuiltInKey<TKey, TValue> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.ComposableDictionaryTransformations.Transform(source, null);
+        }
+
+        public static ICachedQueryableDictionaryWithBuiltInKey<TKey, TValue> WithReadWriteLock<TKey, TValue>(this ICachedQueryableDictionaryWithBuiltInKey<TKey, TValue> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.ComposableDictionaryTransformations.Transform(source, null);
+        }
+
+        public static ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue> WithReadWriteLock<TKey, TValue>(this ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.ComposableDictionaryTransformations.Transform(source, null);
+        }
+
+        public static IDisposableDictionaryWithBuiltInKey<TKey, TValue> WithReadWriteLock<TKey, TValue>(this IDisposableDictionaryWithBuiltInKey<TKey, TValue> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.ComposableDictionaryTransformations.Transform(source, null);
+        }
+
+        public static IDictionaryWithBuiltInKey<TKey, TValue> WithReadWriteLock<TKey, TValue>(this IDictionaryWithBuiltInKey<TKey, TValue> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.ComposableDictionaryTransformations.Transform(source, null);
+        }
+
+        public static IComposableDictionary<TKey, TValue> WithReadWriteLock<TKey, TValue>(this IComposableDictionary<TKey, TValue> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.ComposableDictionaryTransformations.Transform(source, null);
+        }
+
+        public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithReadWriteLock<TKey, TValue>(this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.TransactionalTransformations.Transform(source, null);
+        }
+
+        public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, ICachedDisposableDictionary<TKey, TValue>> WithReadWriteLock<TKey, TValue>(this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, ICachedDisposableDictionary<TKey, TValue>> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.TransactionalTransformations.Transform(source, null);
+        }
+
+        public static ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue>, IDisposableQueryableDictionary<TKey, TValue>> WithReadWriteLock<TKey, TValue>(this ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue>, IDisposableQueryableDictionary<TKey, TValue>> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.TransactionalTransformations.Transform(source, null);
+        }
+
+        public static ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue>, ICachedDisposableQueryableDictionary<TKey, TValue>> WithReadWriteLock<TKey, TValue>(this ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue>, ICachedDisposableQueryableDictionary<TKey, TValue>> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.TransactionalTransformations.Transform(source, null);
+        }
+
+        public static ITransactionalCollection<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, IDisposableDictionaryWithBuiltInKey<TKey, TValue>> WithReadWriteLock<TKey, TValue>(this ITransactionalCollection<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, IDisposableDictionaryWithBuiltInKey<TKey, TValue>> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.TransactionalTransformations.Transform(source, null);
+        }
+
+        public static ITransactionalCollection<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue>> WithReadWriteLock<TKey, TValue>(this ITransactionalCollection<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue>> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.TransactionalTransformations.Transform(source, null);
+        }
+
+        public static ITransactionalCollection<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>> WithReadWriteLock<TKey, TValue>(this ITransactionalCollection<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.TransactionalTransformations.Transform(source, null);
+        }
+
+        public static ITransactionalCollection<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>> WithReadWriteLock<TKey, TValue>(this ITransactionalCollection<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>> source)
+        {
+            return WithReadWriteLockTransformations<TKey, TValue>.TransactionalTransformations.Transform(source, null);
+        }
+        
         #endregion
         
         #region WithEachMethodAsSeparateTransaction
@@ -594,43 +731,6 @@ namespace ComposableCollections
             });
         }
 
-        #endregion
-        
-        #region WithReadWriteLock
-        
-        /// <summary>
-        /// Converts the dictionary into an object that lets you access the dictionary in a transactional API,
-        /// that ensures that when the dictionary is being modified, nobody else is modifying it or even reading from it
-        /// but reads can happen simultaneously.
-        /// </summary>
-        public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithReadWriteLock<TKey, TValue>(
-            this IComposableDictionary<TKey, TValue> source)
-        {
-            return new LockedTransactionalDictionaryAdapter<TKey, TValue>(source);
-        }
-
-        /// <summary>
-        /// Adds locks around the read/write transactions
-        /// that ensures that when the dictionary is being modified, nobody else is modifying it or even reading from it
-        /// but reads can happen simultaneously.
-        /// </summary>
-        public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithReadWriteLock<TKey, TValue>(
-            this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source)
-        {
-            return new LockedTransactionalDecorator<TKey, TValue>(source);
-        }
-
-        /// <summary>
-        /// Converts the dictionary into an object that lets you access the dictionary in a transactional API,
-        /// that ensures that when the dictionary is being modified, nobody else is modifying it or even reading from it
-        /// but reads can happen simultaneously.
-        /// </summary>
-        public static IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>> WithReadWriteLock<TKey, TValue>(
-            this IComposableReadOnlyDictionary<TKey, TValue> source)
-        {
-            return new LockedReadOnlyTransactionalDictionaryAdapter<TKey, TValue>(source);
-        }
-        
         #endregion
     }
 }

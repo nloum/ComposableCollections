@@ -6,12 +6,12 @@ using UtilityDisposables;
 
 namespace ComposableCollections.Dictionary.Transactional
 {
-    public class LockedReadOnlyTransactionalDictionaryAdapter<TKey, TValue> : IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>>
+    public class ReadLockReadOnlyTransactionalDictionaryAdapter<TKey, TValue> : IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>>
     {
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
         private readonly IComposableReadOnlyDictionary<TKey, TValue> _source;
 
-        public LockedReadOnlyTransactionalDictionaryAdapter(IComposableReadOnlyDictionary<TKey, TValue> source)
+        public ReadLockReadOnlyTransactionalDictionaryAdapter(IComposableReadOnlyDictionary<TKey, TValue> source)
         {
             _source = source;
         }

@@ -14,6 +14,15 @@ namespace ComposableCollections.Dictionary.Adapters
         private Func<bool, IEnumerable<DictionaryWrite<TKey, TValue>>> _getWrites;
         private IDisposable _disposable;
 
+        public CachedDisposableDictionaryAdapter(ICachedDictionary<TKey, TValue> source, IDisposable disposable) : base(source)
+        {
+            _asBypassCache = source.AsBypassCache;
+            _asNeverFlush = source.AsNeverFlush;
+            _flushCache = source.FlushCache;
+            _getWrites = source.GetWrites;
+            _disposable = disposable;
+        }
+
         public CachedDisposableDictionaryAdapter(IComposableDictionary<TKey, TValue> source, Func<IComposableReadOnlyDictionary<TKey, TValue>> asBypassCache, Func<IComposableDictionary<TKey, TValue>> asNeverFlush, Action flushCache, Func<bool, IEnumerable<DictionaryWrite<TKey, TValue>>> getWrites, IDisposable disposable) : base(source)
         {
             _asBypassCache = asBypassCache;

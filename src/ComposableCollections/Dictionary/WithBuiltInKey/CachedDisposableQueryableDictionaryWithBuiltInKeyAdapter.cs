@@ -48,6 +48,21 @@ namespace ComposableCollections.Dictionary.WithBuiltInKey
             return _source;
         }
 
+        public ICachedDisposableDictionary<TKey, TValue> AsCachedDisposableDictionary()
+        {
+            return _source;
+        }
+
+        public ICachedQueryableDictionary<TKey, TValue> AsCachedQueryableDictionary()
+        {
+            return _source;
+        }
+
+        public IDisposableQueryableDictionary<TKey, TValue> AsDisposableQueryableDictionary()
+        {
+            return _source;
+        }
+
         public IQueryableDictionary<TKey, TValue> AsQueryableDictionary()
         {
             return _source;

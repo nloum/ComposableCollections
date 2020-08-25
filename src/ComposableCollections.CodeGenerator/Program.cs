@@ -28,7 +28,7 @@ namespace ComposableCollections.CodeGenerator
             };
             dictionaryInterfacePostfixes.Sort();
 
-            var results = GenerateTypeNames("Dictionary", dictionaryInterfacePrefixes, dictionaryInterfacePostfixes);
+            //var results = GenerateTypeNames("Dictionary", dictionaryInterfacePrefixes, dictionaryInterfacePostfixes);
 
             // foreach (var result in results)
             // {
@@ -75,7 +75,7 @@ namespace ComposableCollections.CodeGenerator
 
 	        foreach (var combinationInterface in combinationInterfaces)
 	        {
-		        if (combinationInterface.Count(x => !string.IsNullOrEmpty(x)) < 2)
+		        if (combinationInterface.Count(x => !string.IsNullOrEmpty(x)) == 0)
 		        {
 			        continue;
 		        }

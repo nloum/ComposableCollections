@@ -159,7 +159,7 @@ namespace ComposableCollections
         
         #endregion
         
-        #region WithMapping
+        #region WithMapping - two types of keys
         
         public static IComposableDictionary<TKey2, TValue2> WithMapping<TKey1, TValue1, TKey2, TValue2>(this IComposableDictionary<TKey1, TValue1> source, Func<TKey1, TKey2> convertKeyTo2, Func<TValue1, TValue2> convertValueTo2, Func<TKey2, TKey1> convertKeyTo1, Func<TValue2, TValue1> convertValueTo1)
         {
@@ -352,6 +352,201 @@ namespace ComposableCollections
             Func<TKey1, TKey2> convertKeyTo2, Func<TValue1, TValue2> convertValueTo2, Func<TKey2, TKey1> convertKeyTo1, Func<TValue2, TValue1> convertValueTo1, Func<TValue2, TKey2> getKey)
         {
             return WithMappingTransformations<TKey1, TValue1, TKey2, TValue2>.TransactionalTransformationsWithBuiltInKey.Transform(source, Tuple.Create(Tuple.Create(convertValueTo1, convertValueTo2, convertKeyTo2, convertKeyTo1), getKey));
+        }
+        
+        #endregion
+        
+        #region WithMapping - one type of key
+        
+        public static IComposableDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this IComposableDictionary<TKey, TValue1> source, Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.ComposableDictionaryTransformations.Transform(source, Tuple.Create(convertValueTo1, convertValueTo2));
+        }
+
+        public static IQueryableDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this IQueryableDictionary<TKey, TValue1> source, Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.ComposableDictionaryTransformations.Transform(source, Tuple.Create(convertValueTo1, convertValueTo2));
+        }
+
+        public static ICachedDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this ICachedDictionary<TKey, TValue1> source, Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.ComposableDictionaryTransformations.Transform(source, Tuple.Create(convertValueTo1, convertValueTo2));
+        }
+
+        public static ICachedDisposableQueryableDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this ICachedDisposableQueryableDictionary<TKey, TValue1> source, Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.ComposableDictionaryTransformations.Transform(source, Tuple.Create(convertValueTo1, convertValueTo2));
+        }
+
+        public static IDisposableQueryableDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this IDisposableQueryableDictionary<TKey, TValue1> source, Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.ComposableDictionaryTransformations.Transform(source, Tuple.Create(convertValueTo1, convertValueTo2));
+        }
+
+        public static ICachedQueryableDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this ICachedQueryableDictionary<TKey, TValue1> source, Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.ComposableDictionaryTransformations.Transform(source, Tuple.Create(convertValueTo1, convertValueTo2));
+        }
+
+        public static ICachedDisposableDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this ICachedDisposableDictionary<TKey, TValue1> source, Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.ComposableDictionaryTransformations.Transform(source, Tuple.Create(convertValueTo1, convertValueTo2));
+        }
+
+        public static IDisposableDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this IDisposableDictionary<TKey, TValue1> source, Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.ComposableDictionaryTransformations.Transform(source, Tuple.Create(convertValueTo1, convertValueTo2));
+        }
+
+        public static ICachedDictionaryWithBuiltInKey<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this ICachedDictionaryWithBuiltInKey<TKey, TValue1> source, Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1, Func<TValue2, TKey> getKey)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.DictionaryWithBuiltInKeyTransformations.Transform(source, Tuple.Create(Tuple.Create(convertValueTo1, convertValueTo2), getKey));
+        }
+
+        public static ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue1> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1, Func<TValue2, TKey> getKey)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.DictionaryWithBuiltInKeyTransformations.Transform(source, Tuple.Create(Tuple.Create(convertValueTo1, convertValueTo2), getKey));
+        }
+
+        public static IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue1> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1, Func<TValue2, TKey> getKey)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.DictionaryWithBuiltInKeyTransformations.Transform(source, Tuple.Create(Tuple.Create(convertValueTo1, convertValueTo2), getKey));
+        }
+
+        public static IQueryableDictionaryWithBuiltInKey<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this IQueryableDictionaryWithBuiltInKey<TKey, TValue1> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1, Func<TValue2, TKey> getKey)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.DictionaryWithBuiltInKeyTransformations.Transform(source, Tuple.Create(Tuple.Create(convertValueTo1, convertValueTo2), getKey));
+        }
+
+        public static ICachedQueryableDictionaryWithBuiltInKey<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this ICachedQueryableDictionaryWithBuiltInKey<TKey, TValue1> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1, Func<TValue2, TKey> getKey)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.DictionaryWithBuiltInKeyTransformations.Transform(source, Tuple.Create(Tuple.Create(convertValueTo1, convertValueTo2), getKey));
+        }
+
+        public static ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue1> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1, Func<TValue2, TKey> getKey)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.DictionaryWithBuiltInKeyTransformations.Transform(source, Tuple.Create(Tuple.Create(convertValueTo1, convertValueTo2), getKey));
+        }
+
+        public static IDisposableDictionaryWithBuiltInKey<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this IDisposableDictionaryWithBuiltInKey<TKey, TValue1> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1, Func<TValue2, TKey> getKey)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.DictionaryWithBuiltInKeyTransformations.Transform(source, Tuple.Create(Tuple.Create(convertValueTo1, convertValueTo2), getKey));
+        }
+
+        public static IDictionaryWithBuiltInKey<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this IDictionaryWithBuiltInKey<TKey, TValue1> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1, Func<TValue2, TKey> getKey)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.DictionaryWithBuiltInKeyTransformations.Transform(source, Tuple.Create(Tuple.Create(convertValueTo1, convertValueTo2), getKey));
+        }
+
+        public static IQueryableReadOnlyDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this IQueryableReadOnlyDictionary<TKey, TValue1> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.ComposableReadOnlyDictionaryTransformations.Transform(source, Tuple.Create(convertValueTo1, convertValueTo2));
+        }
+
+        public static IComposableReadOnlyDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this IComposableReadOnlyDictionary<TKey, TValue1> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.ComposableReadOnlyDictionaryTransformations.Transform(source, Tuple.Create(convertValueTo1, convertValueTo2));
+        }
+
+        public static IDisposableQueryableReadOnlyDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this IDisposableQueryableReadOnlyDictionary<TKey, TValue1> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.ComposableReadOnlyDictionaryTransformations.Transform(source, Tuple.Create(convertValueTo1, convertValueTo2));
+        }
+
+        public static IDisposableReadOnlyDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this IDisposableReadOnlyDictionary<TKey, TValue1> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.ComposableReadOnlyDictionaryTransformations.Transform(source, Tuple.Create(convertValueTo1, convertValueTo2));
+        }
+
+        public static IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this 
+            IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue1> source, Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1, Func<TValue2, TKey> getKey)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.ReadOnlyDictionaryWithBuiltInKeyTransformations.Transform(source, Tuple.Create(Tuple.Create(convertValueTo1, convertValueTo2), getKey));
+        }
+
+        public static IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue1> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1, Func<TValue2, TKey> getKey)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.ReadOnlyDictionaryWithBuiltInKeyTransformations.Transform(source, Tuple.Create(Tuple.Create(convertValueTo1, convertValueTo2), getKey));
+        }
+
+        public static IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue1> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1, Func<TValue2, TKey> getKey)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.ReadOnlyDictionaryWithBuiltInKeyTransformations.Transform(source, Tuple.Create(Tuple.Create(convertValueTo1, convertValueTo2), getKey));
+        }
+
+        public static IReadOnlyDictionaryWithBuiltInKey<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this IReadOnlyDictionaryWithBuiltInKey<TKey, TValue1> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1, Func<TValue2, TKey> getKey)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.ReadOnlyDictionaryWithBuiltInKeyTransformations.Transform(source, Tuple.Create(Tuple.Create(convertValueTo1, convertValueTo2), getKey));
+        }
+
+        public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue2>, IDisposableDictionary<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(
+            this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue1>, IDisposableDictionary<TKey, TValue1>> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.TransactionalTransformations.Transform(source, Tuple.Create(convertValueTo1, convertValueTo2));
+        }
+
+        public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue2>, ICachedDisposableDictionary<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(
+            this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue1>, ICachedDisposableDictionary<TKey, TValue1>> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.TransactionalTransformations.Transform(source, Tuple.Create(convertValueTo1, convertValueTo2));
+        }
+
+        public static ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue2>, IDisposableQueryableDictionary<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(
+            this ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue1>, IDisposableQueryableDictionary<TKey, TValue1>> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.TransactionalTransformations.Transform(source, Tuple.Create(convertValueTo1, convertValueTo2));
+        }
+
+        public static ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue2>, ICachedDisposableQueryableDictionary<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(
+            this ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue1>, ICachedDisposableQueryableDictionary<TKey, TValue1>> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.TransactionalTransformations.Transform(source, Tuple.Create(convertValueTo1, convertValueTo2));
+        }
+
+        public static ITransactionalCollection<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue2>, IDisposableDictionaryWithBuiltInKey<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(
+            this ITransactionalCollection<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue1>, IDisposableDictionaryWithBuiltInKey<TKey, TValue1>> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1, Func<TValue2, TKey> getKey)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.TransactionalTransformationsWithBuiltInKey.Transform(source, Tuple.Create(Tuple.Create(convertValueTo1, convertValueTo2), getKey));
+        }
+
+        public static ITransactionalCollection<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue2>, ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(
+            this ITransactionalCollection<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue1>, ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue1>> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1, Func<TValue2, TKey> getKey)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.TransactionalTransformationsWithBuiltInKey.Transform(source, Tuple.Create(Tuple.Create(convertValueTo1, convertValueTo2), getKey));
+        }
+
+        public static ITransactionalCollection<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue2>, IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(
+            this ITransactionalCollection<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue1>, IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue1>> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1, Func<TValue2, TKey> getKey)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.TransactionalTransformationsWithBuiltInKey.Transform(source, Tuple.Create(Tuple.Create(convertValueTo1, convertValueTo2), getKey));
+        }
+
+        public static ITransactionalCollection<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue2>, ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(
+            this ITransactionalCollection<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue1>, ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue1>> source,
+            Func<TValue1, TValue2> convertValueTo2, Func<TValue2, TValue1> convertValueTo1, Func<TValue2, TKey> getKey)
+        {
+            return WithMappingTransformations<TKey, TValue1, TValue2>.TransactionalTransformationsWithBuiltInKey.Transform(source, Tuple.Create(Tuple.Create(convertValueTo1, convertValueTo2), getKey));
         }
         
         #endregion

@@ -14,6 +14,110 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 {
+    public class WithMappingTransformations<TKey, TValue1, TValue2> {
+        public static IComposableDictionaryTransformations<TKey, TValue1, TKey, TValue2, Tuple<Func<TValue2, TValue1>,
+            Func<TValue1, TValue2>>> ComposableDictionaryTransformations { get; }
+        public static IDictionaryWithBuiltInKeyTransformations<TKey, TValue1, TKey, TValue2, Tuple<Tuple<Func<TValue2, TValue1>,
+            Func<TValue1, TValue2>>, Func<TValue2, TKey>>> DictionaryWithBuiltInKeyTransformations { get; }
+        public static IComposableReadOnlyDictionaryTransformations<TKey, TValue1, TKey, TValue2, Tuple<Func<TValue2, TValue1>,
+            Func<TValue1, TValue2>>> ComposableReadOnlyDictionaryTransformations { get; }
+        public static IReadOnlyDictionaryWithBuiltInKeyTransformations<TKey, TValue1, TKey, TValue2, Tuple<Tuple<Func<TValue2, TValue1>,
+            Func<TValue1, TValue2>>, Func<TValue2, TKey>>> ReadOnlyDictionaryWithBuiltInKeyTransformations { get; }
+        public static ITransactionalTransformations<TKey, TValue1, TKey, TValue2, Tuple<Func<TValue2, TValue1>,
+            Func<TValue1, TValue2>>> TransactionalTransformations { get; }
+        public static ITransactionalTransformationsWithBuiltInKey<TKey, TValue1, TKey, TValue2, Tuple<Tuple<Func<TValue2, TValue1>,
+            Func<TValue1, TValue2>>, Func<TValue2, TKey>>> TransactionalTransformationsWithBuiltInKey { get; }
+
+        static WithMappingTransformations()
+        {
+            var composableDictionaryTransformation = new ComposableDictionaryTransformations<TKey, TValue1, TKey, TValue2, Tuple<Func<TValue2, TValue1>,
+                Func<TValue1, TValue2>>>(Transform, Transform, MapQuery, MapWrites);
+            ComposableDictionaryTransformations = composableDictionaryTransformation;
+            DictionaryWithBuiltInKeyTransformations = composableDictionaryTransformation;
+            ComposableReadOnlyDictionaryTransformations =
+                new ComposableReadOnlyDictionaryTransformations<TKey, TValue1, TKey, TValue2, Tuple<
+                    Func<TValue2, TValue1>,
+                    Func<TValue1, TValue2>>>(Transform,
+                    ConvertQueryable);
+            ReadOnlyDictionaryWithBuiltInKeyTransformations =
+                new ReadOnlyDictionaryWithBuiltInKeyTransformations<TKey, TValue1, TKey, TValue2, Tuple<Tuple<
+                    Func<TValue2, TValue1>,
+                    Func<TValue1, TValue2>>, Func<TValue2, TKey>>>(Transform,
+                    ConvertGetKey, ConvertQueryable);
+            TransactionalTransformations = new TransactionalTransformations<TKey, TValue1, TKey, TValue2, Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>>>(
+                ComposableReadOnlyDictionaryTransformations, ComposableDictionaryTransformations);
+            TransactionalTransformationsWithBuiltInKey = new TransactionalTransformationsWithBuiltInKey<TKey, TValue1, TKey, TValue2, Tuple<Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>>, Func<TValue2, TKey>>>(
+                ReadOnlyDictionaryWithBuiltInKeyTransformations, DictionaryWithBuiltInKeyTransformations);
+        }
+
+        private static IComposableReadOnlyDictionary<TKey, TValue2> Transform(IComposableReadOnlyDictionary<TKey, TValue1> arg1, Tuple<Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>>, Func<TValue2, TKey>> arg2)
+        {
+            return Transform(arg1, arg2.Item1);
+        }
+
+        private static IQueryable<TValue2> ConvertQueryable(IQueryable<TValue1> arg1, Tuple<Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>>, Func<TValue2, TKey>> arg2)
+        {
+            return ConvertQueryable(arg1, arg2.Item1);
+        }
+
+        private static Func<TValue2, TKey> ConvertGetKey(Func<TValue1, TKey> arg1, Tuple<Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>>, Func<TValue2, TKey>> arg2)
+        {
+            return arg2.Item2;
+        }
+
+        private static IQueryable<TValue2> ConvertQueryable(IQueryable<TValue1> arg1, Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>> arg2)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static IComposableDictionary<TKey, TValue2> Transform(IComposableDictionary<TKey, TValue1> source,
+            Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>> p)
+        {
+            return new MappingDictionaryAdapter<TKey, TValue1, TKey, TValue2>(
+                source,
+                (key1, value1) => new KeyValue<TKey, TValue2>(key1, p.Item2(value1)),
+                (key2, value2) => new KeyValue<TKey, TValue1>(key2, p.Item1(value2)),
+                x => x, x => x);
+        }
+
+        private static IComposableReadOnlyDictionary<TKey, TValue2> Transform(
+            IComposableReadOnlyDictionary<TKey, TValue1> source,
+            Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>> p)
+        {
+            return new ReadOnlyMappingDictionaryAdapter<TKey, TValue1, TKey, TValue2>(
+                source,
+                (key1, value1) => new KeyValue<TKey, TValue2>(key1, p.Item2(value1)),
+                x => x, x => x);
+        }
+
+        private static IQueryable<TValue2> MapQuery(IQueryable<TValue1> query,
+            Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>> p)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static IEnumerable<DictionaryWrite<TKey, TValue2>> MapWrites(
+            IEnumerable<DictionaryWrite<TKey, TValue1>> writes,
+            Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>> p)
+        {
+            foreach (var write in writes)
+            {
+                yield return new DictionaryWrite<TKey, TValue2>(write.Type, write.Key,
+                    write.ValueIfAdding.Select(valueIfAdding =>
+                    {
+                        Func<TValue2> result = () => { return p.Item2(valueIfAdding()); };
+                        return result;
+                    }),
+                    write.ValueIfUpdating.Select(valueIfUpdating =>
+                    {
+                        Func<TValue2, TValue2> result = value => p.Item2(valueIfUpdating(p.Item1(value)));
+                        return result;
+                    }));
+            }
+        }
+    }
+    
+    
     public class WithMappingTransformations<TKey1, TValue1, TKey2, TValue2> {
         public static IComposableDictionaryTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<Func<TValue2, TValue1>,
             Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>> ComposableDictionaryTransformations { get; }

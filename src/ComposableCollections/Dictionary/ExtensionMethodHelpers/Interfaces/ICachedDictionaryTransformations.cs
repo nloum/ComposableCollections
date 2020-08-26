@@ -1,5 +1,4 @@
 using ComposableCollections.Dictionary.Interfaces;
-using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers.Interfaces
 {
@@ -11,11 +10,5 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers.Interfaces
             TParameter p);
         ICachedDisposableQueryableDictionary<TKey2, TValue2> Transform(IDisposableQueryableDictionary<TKey1, TValue1> source, TParameter p);
         ICachedDisposableDictionary<TKey2, TValue2> Transform(IDisposableDictionary<TKey1, TValue1> source, TParameter p);
-        ICachedDictionaryWithBuiltInKey<TKey2, TValue2> Transform(IDictionaryWithBuiltInKey<TKey1, TValue1> source,
-            TParameter p);
-        ICachedQueryableDictionaryWithBuiltInKey<TKey2, TValue2> Transform(IQueryableDictionaryWithBuiltInKey<TKey1, TValue1> source,
-            TParameter p);
-        ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey2, TValue2> Transform(IDisposableQueryableDictionaryWithBuiltInKey<TKey1, TValue1> source, TParameter p);
-        ICachedDisposableDictionaryWithBuiltInKey<TKey2, TValue2> Transform(IDisposableDictionaryWithBuiltInKey<TKey1, TValue1> source, TParameter p);
     }
 }

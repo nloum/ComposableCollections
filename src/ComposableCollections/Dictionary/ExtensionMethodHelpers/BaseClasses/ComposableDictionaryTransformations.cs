@@ -106,15 +106,45 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers.BaseClasses
         }
     }
     
-    public abstract class ComposableDictionaryTransformationsBase<TKey1, TValue1, TKey2, TValue2, TParameter> :
+    public class ComposableDictionaryTransformations<TKey1, TValue1, TKey2, TValue2, TParameter> :
         IComposableDictionaryTransformations<TKey1, TValue1, TKey2, TValue2, TParameter>,
         IDictionaryWithBuiltInKeyTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<TParameter, Func<TValue2, TKey2>>>
     {
-        public abstract IComposableDictionary<TKey2, TValue2> Transform(IComposableDictionary<TKey1, TValue1> source, TParameter p);
-        protected abstract IComposableReadOnlyDictionary<TKey2, TValue2> Transform(IComposableReadOnlyDictionary<TKey1, TValue1> source, TParameter p);
-        protected abstract IQueryable<TValue2> MapQuery(IQueryable<TValue1> query, TParameter parameter);
-        protected abstract IEnumerable<DictionaryWrite<TKey2, TValue2>> MapWrites(
-            IEnumerable<DictionaryWrite<TKey1, TValue1>> writes, TParameter p);
+        private readonly Func<IComposableDictionary<TKey1, TValue1>, TParameter, IComposableDictionary<TKey2, TValue2>> _transform1;
+        private readonly Func<IComposableReadOnlyDictionary<TKey1, TValue1>, TParameter, IComposableReadOnlyDictionary<TKey2, TValue2>> _transform2;
+        private readonly Func<IQueryable<TValue1>, TParameter, IQueryable<TValue2>> _mapQuery;
+        private readonly Func<IEnumerable<DictionaryWrite<TKey1, TValue1>>, TParameter, IEnumerable<DictionaryWrite<TKey2, TValue2>>> _mapWrites;
+
+        public ComposableDictionaryTransformations(Func<IComposableDictionary<TKey1, TValue1>, TParameter, IComposableDictionary<TKey2, TValue2>> transform1, Func<IComposableReadOnlyDictionary<TKey1, TValue1>, TParameter, IComposableReadOnlyDictionary<TKey2, TValue2>> transform2, Func<IQueryable<TValue1>, TParameter, IQueryable<TValue2>> mapQuery, Func<IEnumerable<DictionaryWrite<TKey1, TValue1>>, TParameter, IEnumerable<DictionaryWrite<TKey2, TValue2>>> mapWrites)
+        {
+            _transform1 = transform1;
+            _transform2 = transform2;
+            _mapQuery = mapQuery;
+            _mapWrites = mapWrites;
+        }
+
+        public IComposableDictionary<TKey2, TValue2> Transform(IComposableDictionary<TKey1, TValue1> source,
+            TParameter p)
+        {
+            return _transform1(source, p);
+        }
+
+        protected IComposableReadOnlyDictionary<TKey2, TValue2> Transform(
+            IComposableReadOnlyDictionary<TKey1, TValue1> source, TParameter p)
+        {
+            return _transform2(source, p);
+        }
+
+        protected IQueryable<TValue2> MapQuery(IQueryable<TValue1> query, TParameter parameter)
+        {
+            return _mapQuery(query, parameter);
+        }
+
+        protected IEnumerable<DictionaryWrite<TKey2, TValue2>> MapWrites(
+            IEnumerable<DictionaryWrite<TKey1, TValue1>> writes, TParameter p)
+        {
+            return _mapWrites(writes, p);
+        }
         
         public virtual IQueryableDictionary<TKey2, TValue2> Transform(IQueryableDictionary<TKey1, TValue1> source,
             TParameter p)

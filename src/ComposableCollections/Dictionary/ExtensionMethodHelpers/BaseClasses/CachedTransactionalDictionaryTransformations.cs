@@ -5,14 +5,17 @@ using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers.BaseClasses
 {
-    public class CachedTransactionalDictionaryTransformations<TKey, TValue, TParameter>
+    public class CachedTransactionalDictionaryTransformations<TKey, TValue, TParameter> : ICachedTransactionalDictionaryTransformations<TKey, TValue, TKey, TValue, TParameter>, ICachedTransactionalDictionaryWithBuiltInKeyTransformations<TKey, TValue, TKey, TValue, TParameter>
     {
         private readonly ICachedDictionaryTransformations<TKey, TValue, TKey, TValue, TParameter>
             _cachedDictionaryTransformations;
+        private readonly ICachedDictionaryWithBuiltInKeyTransformations<TKey, TValue, TKey, TValue, TParameter>
+            _cachedDictionaryWithBuiltInKeyTransformations;
 
-        public CachedTransactionalDictionaryTransformations(ICachedDictionaryTransformations<TKey, TValue, TKey, TValue, TParameter> cachedDictionaryTransformations)
+        public CachedTransactionalDictionaryTransformations(ICachedDictionaryTransformations<TKey, TValue, TKey, TValue, TParameter> cachedDictionaryTransformations, ICachedDictionaryWithBuiltInKeyTransformations<TKey, TValue, TKey, TValue, TParameter> cachedDictionaryWithBuiltInKeyTransformations)
         {
             _cachedDictionaryTransformations = cachedDictionaryTransformations;
+            _cachedDictionaryWithBuiltInKeyTransformations = cachedDictionaryWithBuiltInKeyTransformations;
         }
 
         public ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> Transform(ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source, TParameter parameter)
@@ -33,14 +36,14 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers.BaseClasses
         {
             return new AnonymousTransactionalCollection<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue>>(
                 () => source.BeginRead(),
-                () => _cachedDictionaryTransformations.Transform(source.BeginWrite(), parameter));
+                () => _cachedDictionaryWithBuiltInKeyTransformations.Transform(source.BeginWrite(), parameter));
         }
 
         public ITransactionalCollection<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>> Transform(ITransactionalCollection<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>> source, TParameter parameter)
         {
             return new AnonymousTransactionalCollection<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>>(
                 () => source.BeginRead(),
-                () => _cachedDictionaryTransformations.Transform(source.BeginWrite(), parameter));
+                () => _cachedDictionaryWithBuiltInKeyTransformations.Transform(source.BeginWrite(), parameter));
         }
     }
 }

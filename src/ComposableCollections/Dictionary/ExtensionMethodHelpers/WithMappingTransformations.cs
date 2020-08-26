@@ -2,31 +2,72 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using ComposableCollections.Common;
 using ComposableCollections.Dictionary.Adapters;
 using ComposableCollections.Dictionary.ExtensionMethodHelpers.BaseClasses;
+using ComposableCollections.Dictionary.ExtensionMethodHelpers.Interfaces;
 using ComposableCollections.Dictionary.Interfaces;
+using ComposableCollections.Dictionary.Sources;
+using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 {
     public class WithMappingTransformations<TKey1, TValue1, TKey2, TValue2> {
-        public static ComposableDictionaryTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<Func<TValue2, TValue1>,
+        public static IComposableDictionaryTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<Func<TValue2, TValue1>,
             Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>> ComposableDictionaryTransformations { get; }
-        public static ComposableReadOnlyDictionaryTransformations ComposableReadOnlyDictionaryTransformations { get; }
-        public static TransactionalTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<Func<TValue2, TValue1>,
+        public static IDictionaryWithBuiltInKeyTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<Tuple<Func<TValue2, TValue1>,
+            Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>, Func<TValue2, TKey2>>> DictionaryWithBuiltInKeyTransformations { get; }
+        public static IComposableReadOnlyDictionaryTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<Func<TValue2, TValue1>,
+            Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>> ComposableReadOnlyDictionaryTransformations { get; }
+        public static IReadOnlyDictionaryWithBuiltInKeyTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<Tuple<Func<TValue2, TValue1>,
+            Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>, Func<TValue2, TKey2>>> ReadOnlyDictionaryWithBuiltInKeyTransformations { get; }
+        public static ITransactionalTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<Func<TValue2, TValue1>,
             Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>> TransactionalTransformations { get; }
-        public static TransactionalTransformationsWithBuiltInKey<TKey1, TValue1, TKey2, TValue2, Tuple<Func<TValue2, TValue1>,
-            Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>, Func<TValue2, TKey2>>> TransactionalTransformationsWithBuiltInKey { get; }
+        public static ITransactionalTransformationsWithBuiltInKey<TKey1, TValue1, TKey2, TValue2, Tuple<Tuple<Func<TValue2, TValue1>,
+            Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>, Func<TValue2, TKey2>>> TransactionalTransformationsWithBuiltInKey { get; }
 
         static WithMappingTransformations()
         {
-            ComposableDictionaryTransformations = new WithReadWriteLockTransformations<,>.ComposableDictionaryTransformationsImpl();
-            DictionaryWithBuiltInKeyTransformations = new WithReadWriteLockTransformations<,>.ComposableDictionaryTransformationsImpl();
-            TransactionalTransformations = new TransactionalTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<Func<TValue2, TValue1>,
-                Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>>(ComposableDictionaryTransformations);
-            TransactionalTransformationsWithBuiltInKey = new TransactionalTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<Func<TValue2, TValue1>,
-                Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>>(ComposableDictionaryTransformations);
+            var composableDictionaryTransformation = new ComposableDictionaryTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<Func<TValue2, TValue1>,
+                Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>>(Transform, Transform, MapQuery, MapWrites);
+            ComposableDictionaryTransformations = composableDictionaryTransformation;
+            DictionaryWithBuiltInKeyTransformations = composableDictionaryTransformation;
+            ComposableReadOnlyDictionaryTransformations =
+                new ComposableReadOnlyDictionaryTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<
+                    Func<TValue2, TValue1>,
+                    Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>>(Transform,
+                    ConvertQueryable);
+            ReadOnlyDictionaryWithBuiltInKeyTransformations =
+                new ReadOnlyDictionaryWithBuiltInKeyTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<Tuple<
+                    Func<TValue2, TValue1>,
+                    Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>, Func<TValue2, TKey2>>>(Transform,
+                    ConvertGetKey, ConvertQueryable);
+            TransactionalTransformations = new TransactionalTransformations<TKey1, TValue1, TKey2, TValue2, Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>>(
+                ComposableReadOnlyDictionaryTransformations, ComposableDictionaryTransformations);
+            TransactionalTransformationsWithBuiltInKey = new TransactionalTransformationsWithBuiltInKey<TKey1, TValue1, TKey2, TValue2, Tuple<Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>, Func<TValue2, TKey2>>>(
+                ReadOnlyDictionaryWithBuiltInKeyTransformations, DictionaryWithBuiltInKeyTransformations);
+        }
+
+        private static IComposableReadOnlyDictionary<TKey2, TValue2> Transform(IComposableReadOnlyDictionary<TKey1, TValue1> arg1, Tuple<Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>, Func<TValue2, TKey2>> arg2)
+        {
+            return Transform(arg1, arg2.Item1);
+        }
+
+        private static IQueryable<TValue2> ConvertQueryable(IQueryable<TValue1> arg1, Tuple<Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>, Func<TValue2, TKey2>> arg2)
+        {
+            return ConvertQueryable(arg1, arg2.Item1);
+        }
+
+        private static Func<TValue2, TKey2> ConvertGetKey(Func<TValue1, TKey1> arg1, Tuple<Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>>, Func<TValue2, TKey2>> arg2)
+        {
+            return arg2.Item2;
+        }
+
+        private static IQueryable<TValue2> ConvertQueryable(IQueryable<TValue1> arg1, Tuple<Func<TValue2, TValue1>, Func<TValue1, TValue2>, Func<TKey1, TKey2>, Func<TKey2, TKey1>> arg2)
+        {
+            throw new NotImplementedException();
         }
 
         private static IComposableDictionary<TKey2, TValue2> Transform(IComposableDictionary<TKey1, TValue1> source,

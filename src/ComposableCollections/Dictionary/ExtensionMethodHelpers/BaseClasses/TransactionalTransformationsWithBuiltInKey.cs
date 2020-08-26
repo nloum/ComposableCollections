@@ -12,7 +12,7 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers.BaseClasses
         private readonly IDictionaryWithBuiltInKeyTransformations<TKey1, TValue1, TKey2, TValue2, TParameter>
             _readWriteTransformationsWithBuiltInKey;
 
-        public TransactionalTransformationsWithBuiltInKey(IComposableReadOnlyDictionaryTransformations<TKey1, TValue1, TKey2, TValue2, TParameter> readOnlyTransformations, IComposableDictionaryTransformations<TKey1, TValue1, TKey2, TValue2, TParameter> readWriteTransformations, IReadOnlyDictionaryWithBuiltInKeyTransformations<TKey1, TValue1, TKey2, TValue2, TParameter> readOnlyTransformationsWithBuiltInKey, IDictionaryWithBuiltInKeyTransformations<TKey1, TValue1, TKey2, TValue2, TParameter> readWriteTransformationsWithBuiltInKey)
+        public TransactionalTransformationsWithBuiltInKey(IReadOnlyDictionaryWithBuiltInKeyTransformations<TKey1, TValue1, TKey2, TValue2, TParameter> readOnlyTransformationsWithBuiltInKey, IDictionaryWithBuiltInKeyTransformations<TKey1, TValue1, TKey2, TValue2, TParameter> readWriteTransformationsWithBuiltInKey)
         {
             _readOnlyTransformationsWithBuiltInKey = readOnlyTransformationsWithBuiltInKey;
             _readWriteTransformationsWithBuiltInKey = readWriteTransformationsWithBuiltInKey;

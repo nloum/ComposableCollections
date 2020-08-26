@@ -7,7 +7,7 @@ using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers.BaseClasses
 {
-    public class CachedDictionaryTransformations<TKey, TValue, TParameter> : ICachedDictionaryTransformations<TKey, TValue, TKey, TValue, TParameter>
+    public class CachedDictionaryTransformations<TKey, TValue, TParameter> : ICachedDictionaryTransformations<TKey, TValue, TKey, TValue, TParameter>, ICachedDictionaryWithBuiltInKeyTransformations<TKey, TValue, TKey, TValue, TParameter>
     {
         private readonly Func<IComposableDictionary<TKey, TValue>, TParameter, ICachedDictionary<TKey, TValue>>
             _transform;

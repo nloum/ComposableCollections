@@ -405,12 +405,12 @@ namespace ComposableCollections.CodeGenerator
 			    }
 			    else
 			    {
-				    parameters.Add("Func<TValue1, TValue2> convertToValue2");
+				    parameters.Add("Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertToValue2");
 			    }
 			    parameters.Add("Func<TKey1, TKey2> convertToKey2");
 			    if (!iface.Contains("ReadOnly"))
 			    {
-				    parameters.Add("Func<TValue2, TValue1> convertToValue1");
+				    parameters.Add("Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertToValue1");
 			    }
 			    parameters.Add("Func<TKey2, TKey1> convertToKey1");
 			    
@@ -428,7 +428,7 @@ namespace ComposableCollections.CodeGenerator
 				    }
 				    else
 				    {
-					    textWriter.WriteLine("var mappedSource = new MappingReadOnlyDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source, (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2(value)), convertToKey2, convertToKey1);");
+					    textWriter.WriteLine("var mappedSource = new MappingReadOnlyDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source, convertToValue2, convertToKey2, convertToKey1);");
 				    }
 			    }
 			    else
@@ -436,10 +436,10 @@ namespace ComposableCollections.CodeGenerator
 				    if (iface.Contains("Queryable"))
 				    {
 					    textWriter.WriteLine(
-						    "var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source, (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2Compiled(value)), (key, value) => new KeyValue<TKey1, TValue1>(convertToKey1(key), convertToValue1(value)), convertToKey2, convertToKey1);");
+						    "var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source, (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2Compiled(value)), convertToValue1, convertToKey2, convertToKey1);");
 				    } else {
 					    textWriter.WriteLine(
-						    "var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source, (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2(value)), (key, value) => new KeyValue<TKey1, TValue1>(convertToKey1(key), convertToValue1(value)), convertToKey2, convertToKey1);");
+						    "var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source, convertToValue2, convertToValue1, convertToKey2, convertToKey1);");
 				    }
 			    }
 
@@ -489,19 +489,21 @@ namespace ComposableCollections.CodeGenerator
 			    if (iface.Contains("Queryable"))
 			    {
 				    parameters.Add("Expression<Func<TValue1, TValue2>> convertToValue2");
+				    //arguments.Add("(key, value) => new KeyValue<TKey, TValue2>(key, convertToValue2Compiled(key, value))");
+				    arguments.Add("convertToValue2");
 			    }
 			    else
 			    {
-				    parameters.Add("Func<TValue1, TValue2> convertToValue2");
+				    parameters.Add("Func<TKey, TValue1, TValue2> convertToValue2");
+				    arguments.Add("(key, value) => new KeyValue<TKey, TValue2>(key, convertToValue2(key, value))");
 			    }
-			    arguments.Add("convertToValue2");
 
 			    arguments.Add("x => x");
 
 			    if (!iface.Contains("ReadOnly"))
 			    {
-				    parameters.Add("Func<TValue2, TValue1> convertToValue1");
-				    arguments.Add("convertToValue1");
+				    parameters.Add("Func<TKey, TValue2, TValue1> convertToValue1");
+				    arguments.Add("(key, value) => new KeyValue<TKey, TValue1>(key, convertToValue1(key, value))");
 			    }
 			    
 			    arguments.Add("x => x");
@@ -533,7 +535,7 @@ namespace ComposableCollections.CodeGenerator
 			    }
 			    else
 			    {
-				    parameters.Add("Func<TValue1, TValue2> convertToValue2");
+				    parameters.Add("Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertToValue2");
 			    }
 			    readOnlyArguments.Add("convertToValue2");
 			    readWriteArguments.Add("convertToValue2");
@@ -542,7 +544,7 @@ namespace ComposableCollections.CodeGenerator
 			    readOnlyArguments.Add("convertToKey2");
 			    readWriteArguments.Add("convertToKey2");
 			    
-			    parameters.Add("Func<TValue2, TValue1> convertToValue1");
+			    parameters.Add("Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertToValue1");
 			    readWriteArguments.Add("convertToValue1");
 			    
 			    parameters.Add("Func<TKey2, TKey1> convertToKey1");
@@ -584,12 +586,12 @@ namespace ComposableCollections.CodeGenerator
 			    }
 			    else
 			    {
-				    parameters.Add("Func<TValue1, TValue2> convertToValue2");
+				    parameters.Add("Func<TKey, TValue1, TValue2> convertToValue2");
 			    }
 			    readOnlyArguments.Add("convertToValue2");
 			    readWriteArguments.Add("convertToValue2");
 
-			    parameters.Add("Func<TValue2, TValue1> convertToValue1");
+			    parameters.Add("Func<TKey, TValue2, TValue1> convertToValue1");
 			    readWriteArguments.Add("convertToValue1");
 
 			    var readOnlyInterface = iface.Replace("Dictionary", "ReadOnlyDictionary").Replace("Cached", "");
@@ -627,7 +629,7 @@ namespace ComposableCollections.CodeGenerator
 			    }
 			    else
 			    {
-				    parameters.Add("Func<TValue1, TValue2> convertToValue2");
+				    parameters.Add("Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertToValue2");
 			    }
 			    readOnlyArguments.Add("convertToValue2");
 			    readWriteArguments.Add("convertToValue2");
@@ -636,7 +638,7 @@ namespace ComposableCollections.CodeGenerator
 			    readOnlyArguments.Add("convertToKey2");
 			    readWriteArguments.Add("convertToKey2");
 			    
-			    parameters.Add("Func<TValue2, TValue1> convertToValue1");
+			    parameters.Add("Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertToValue1");
 			    readWriteArguments.Add("convertToValue1");
 			    
 			    parameters.Add("Func<TKey2, TKey1> convertToKey1");
@@ -676,12 +678,12 @@ namespace ComposableCollections.CodeGenerator
 			    }
 			    else
 			    {
-				    parameters.Add("Func<TValue1, TValue2> convertToValue2");
+				    parameters.Add("Func<TKey, TValue1, TValue2> convertToValue2");
 			    }
 			    readOnlyArguments.Add("convertToValue2");
 			    readWriteArguments.Add("convertToValue2");
 
-			    parameters.Add("Func<TValue2, TValue1> convertToValue1");
+			    parameters.Add("Func<TKey, TValue2, TValue1> convertToValue1");
 			    readWriteArguments.Add("convertToValue1");
 
 			    var readOnlyInterface = iface.Replace("Dictionary", "ReadOnlyDictionary").Replace("Cached", "");

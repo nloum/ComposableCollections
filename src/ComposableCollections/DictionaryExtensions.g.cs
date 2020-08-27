@@ -452,13 +452,12 @@ namespace ComposableCollections
         #region WithMapping - different key types
 
         public static ICachedDictionary<TKey2, TValue2> WithMapping<TKey1, TValue1, TKey2, TValue2>(
-            this ICachedDictionary<TKey1, TValue1> source, Func<TValue1, TValue2> convertToValue2,
-            Func<TKey1, TKey2> convertToKey2, Func<TValue2, TValue1> convertToValue1, Func<TKey2, TKey1> convertToKey1)
+            this ICachedDictionary<TKey1, TValue1> source,
+            Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertToValue2, Func<TKey1, TKey2> convertToKey2,
+            Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertToValue1, Func<TKey2, TKey1> convertToKey1)
         {
-            var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source,
-                (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2(value)),
-                (key, value) => new KeyValue<TKey1, TValue1>(convertToKey1(key), convertToValue1(value)), convertToKey2,
-                convertToKey1);
+            var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source, convertToValue2,
+                convertToValue1, convertToKey2, convertToKey1);
             var cachedMapSource = new ConcurrentCachedWriteDictionaryAdapter<TKey2, TValue2>(mappedSource);
             return new CachedDictionaryAdapter<TKey2, TValue2>(mappedSource, cachedMapSource.AsBypassCache,
                 cachedMapSource.AsNeverFlush, () =>
@@ -469,13 +468,12 @@ namespace ComposableCollections
         }
 
         public static ICachedDisposableDictionary<TKey2, TValue2> WithMapping<TKey1, TValue1, TKey2, TValue2>(
-            this ICachedDisposableDictionary<TKey1, TValue1> source, Func<TValue1, TValue2> convertToValue2,
-            Func<TKey1, TKey2> convertToKey2, Func<TValue2, TValue1> convertToValue1, Func<TKey2, TKey1> convertToKey1)
+            this ICachedDisposableDictionary<TKey1, TValue1> source,
+            Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertToValue2, Func<TKey1, TKey2> convertToKey2,
+            Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertToValue1, Func<TKey2, TKey1> convertToKey1)
         {
-            var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source,
-                (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2(value)),
-                (key, value) => new KeyValue<TKey1, TValue1>(convertToKey1(key), convertToValue1(value)), convertToKey2,
-                convertToKey1);
+            var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source, convertToValue2,
+                convertToValue1, convertToKey2, convertToKey1);
             var cachedMapSource = new ConcurrentCachedWriteDictionaryAdapter<TKey2, TValue2>(mappedSource);
             return new CachedDisposableDictionaryAdapter<TKey2, TValue2>(mappedSource, cachedMapSource.AsBypassCache,
                 cachedMapSource.AsNeverFlush, () =>
@@ -488,13 +486,12 @@ namespace ComposableCollections
         public static ICachedDisposableQueryableDictionary<TKey2, TValue2> WithMapping<TKey1, TValue1, TKey2, TValue2>(
             this ICachedDisposableQueryableDictionary<TKey1, TValue1> source,
             Expression<Func<TValue1, TValue2>> convertToValue2, Func<TKey1, TKey2> convertToKey2,
-            Func<TValue2, TValue1> convertToValue1, Func<TKey2, TKey1> convertToKey1)
+            Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertToValue1, Func<TKey2, TKey1> convertToKey1)
         {
             var convertToValue2Compiled = convertToValue2.Compile();
             var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source,
                 (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2Compiled(value)),
-                (key, value) => new KeyValue<TKey1, TValue1>(convertToKey1(key), convertToValue1(value)), convertToKey2,
-                convertToKey1);
+                convertToValue1, convertToKey2, convertToKey1);
             var cachedMapSource = new ConcurrentCachedWriteDictionaryAdapter<TKey2, TValue2>(mappedSource);
             return new CachedDisposableQueryableDictionaryAdapter<TKey2, TValue2>(mappedSource,
                 cachedMapSource.AsBypassCache, cachedMapSource.AsNeverFlush, () =>
@@ -506,13 +503,13 @@ namespace ComposableCollections
 
         public static ICachedQueryableDictionary<TKey2, TValue2> WithMapping<TKey1, TValue1, TKey2, TValue2>(
             this ICachedQueryableDictionary<TKey1, TValue1> source, Expression<Func<TValue1, TValue2>> convertToValue2,
-            Func<TKey1, TKey2> convertToKey2, Func<TValue2, TValue1> convertToValue1, Func<TKey2, TKey1> convertToKey1)
+            Func<TKey1, TKey2> convertToKey2, Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertToValue1,
+            Func<TKey2, TKey1> convertToKey1)
         {
             var convertToValue2Compiled = convertToValue2.Compile();
             var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source,
                 (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2Compiled(value)),
-                (key, value) => new KeyValue<TKey1, TValue1>(convertToKey1(key), convertToValue1(value)), convertToKey2,
-                convertToKey1);
+                convertToValue1, convertToKey2, convertToKey1);
             var cachedMapSource = new ConcurrentCachedWriteDictionaryAdapter<TKey2, TValue2>(mappedSource);
             return new CachedQueryableDictionaryAdapter<TKey2, TValue2>(mappedSource, cachedMapSource.AsBypassCache,
                 cachedMapSource.AsNeverFlush, () =>
@@ -523,47 +520,45 @@ namespace ComposableCollections
         }
 
         public static IComposableDictionary<TKey2, TValue2> WithMapping<TKey1, TValue1, TKey2, TValue2>(
-            this IComposableDictionary<TKey1, TValue1> source, Func<TValue1, TValue2> convertToValue2,
-            Func<TKey1, TKey2> convertToKey2, Func<TValue2, TValue1> convertToValue1, Func<TKey2, TKey1> convertToKey1)
+            this IComposableDictionary<TKey1, TValue1> source,
+            Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertToValue2, Func<TKey1, TKey2> convertToKey2,
+            Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertToValue1, Func<TKey2, TKey1> convertToKey1)
         {
-            var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source,
-                (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2(value)),
-                (key, value) => new KeyValue<TKey1, TValue1>(convertToKey1(key), convertToValue1(value)), convertToKey2,
-                convertToKey1);
+            var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source, convertToValue2,
+                convertToValue1, convertToKey2, convertToKey1);
             return mappedSource;
         }
 
         public static IComposableReadOnlyDictionary<TKey2, TValue2> WithMapping<TKey1, TValue1, TKey2, TValue2>(
-            this IComposableReadOnlyDictionary<TKey1, TValue1> source, Func<TValue1, TValue2> convertToValue2,
-            Func<TKey1, TKey2> convertToKey2, Func<TKey2, TKey1> convertToKey1)
+            this IComposableReadOnlyDictionary<TKey1, TValue1> source,
+            Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertToValue2, Func<TKey1, TKey2> convertToKey2,
+            Func<TKey2, TKey1> convertToKey1)
         {
-            var mappedSource = new MappingReadOnlyDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source,
-                (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2(value)), convertToKey2,
-                convertToKey1);
+            var mappedSource =
+                new MappingReadOnlyDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source, convertToValue2,
+                    convertToKey2, convertToKey1);
             return mappedSource;
         }
 
         public static IDisposableDictionary<TKey2, TValue2> WithMapping<TKey1, TValue1, TKey2, TValue2>(
-            this IDisposableDictionary<TKey1, TValue1> source, Func<TValue1, TValue2> convertToValue2,
-            Func<TKey1, TKey2> convertToKey2, Func<TValue2, TValue1> convertToValue1, Func<TKey2, TKey1> convertToKey1)
+            this IDisposableDictionary<TKey1, TValue1> source,
+            Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertToValue2, Func<TKey1, TKey2> convertToKey2,
+            Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertToValue1, Func<TKey2, TKey1> convertToKey1)
         {
-            var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source,
-                (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2(value)),
-                (key, value) => new KeyValue<TKey1, TValue1>(convertToKey1(key), convertToValue1(value)), convertToKey2,
-                convertToKey1);
+            var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source, convertToValue2,
+                convertToValue1, convertToKey2, convertToKey1);
             return new DisposableDictionaryAdapter<TKey2, TValue2>(mappedSource, source);
         }
 
         public static IDisposableQueryableDictionary<TKey2, TValue2> WithMapping<TKey1, TValue1, TKey2, TValue2>(
             this IDisposableQueryableDictionary<TKey1, TValue1> source,
             Expression<Func<TValue1, TValue2>> convertToValue2, Func<TKey1, TKey2> convertToKey2,
-            Func<TValue2, TValue1> convertToValue1, Func<TKey2, TKey1> convertToKey1)
+            Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertToValue1, Func<TKey2, TKey1> convertToKey1)
         {
             var convertToValue2Compiled = convertToValue2.Compile();
             var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source,
                 (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2Compiled(value)),
-                (key, value) => new KeyValue<TKey1, TValue1>(convertToKey1(key), convertToValue1(value)), convertToKey2,
-                convertToKey1);
+                convertToValue1, convertToKey2, convertToKey1);
             return new DisposableQueryableDictionaryAdapter<TKey2, TValue2>(mappedSource, source,
                 source.Values.Select(convertToValue2));
         }
@@ -583,24 +578,25 @@ namespace ComposableCollections
         }
 
         public static IDisposableReadOnlyDictionary<TKey2, TValue2> WithMapping<TKey1, TValue1, TKey2, TValue2>(
-            this IDisposableReadOnlyDictionary<TKey1, TValue1> source, Func<TValue1, TValue2> convertToValue2,
-            Func<TKey1, TKey2> convertToKey2, Func<TKey2, TKey1> convertToKey1)
+            this IDisposableReadOnlyDictionary<TKey1, TValue1> source,
+            Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertToValue2, Func<TKey1, TKey2> convertToKey2,
+            Func<TKey2, TKey1> convertToKey1)
         {
-            var mappedSource = new MappingReadOnlyDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source,
-                (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2(value)), convertToKey2,
-                convertToKey1);
+            var mappedSource =
+                new MappingReadOnlyDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source, convertToValue2,
+                    convertToKey2, convertToKey1);
             return new DisposableReadOnlyDictionaryAdapter<TKey2, TValue2>(mappedSource, source);
         }
 
         public static IQueryableDictionary<TKey2, TValue2> WithMapping<TKey1, TValue1, TKey2, TValue2>(
             this IQueryableDictionary<TKey1, TValue1> source, Expression<Func<TValue1, TValue2>> convertToValue2,
-            Func<TKey1, TKey2> convertToKey2, Func<TValue2, TValue1> convertToValue1, Func<TKey2, TKey1> convertToKey1)
+            Func<TKey1, TKey2> convertToKey2, Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertToValue1,
+            Func<TKey2, TKey1> convertToKey1)
         {
             var convertToValue2Compiled = convertToValue2.Compile();
             var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source,
                 (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2Compiled(value)),
-                (key, value) => new KeyValue<TKey1, TValue1>(convertToKey1(key), convertToValue1(value)), convertToKey2,
-                convertToKey1);
+                convertToValue1, convertToKey2, convertToKey1);
             return new QueryableDictionaryAdapter<TKey2, TValue2>(mappedSource, source.Values.Select(convertToValue2));
         }
 
@@ -622,58 +618,70 @@ namespace ComposableCollections
         #region WithMapping - one key type
 
         public static ICachedDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(
-            this ICachedDictionary<TKey, TValue1> source, Func<TValue1, TValue2> convertToValue2,
-            Func<TValue2, TValue1> convertToValue1)
+            this ICachedDictionary<TKey, TValue1> source, Func<TKey, TValue1, TValue2> convertToValue2,
+            Func<TKey, TValue2, TValue1> convertToValue1)
         {
-            return source.WithMapping<TKey, TValue1, TKey, TValue2>(convertToValue2, x => x, convertToValue1, x => x);
+            return source.WithMapping<TKey, TValue1, TKey, TValue2>(
+                (key, value) => new KeyValue<TKey, TValue2>(key, convertToValue2(key, value)), x => x,
+                (key, value) => new KeyValue<TKey, TValue1>(key, convertToValue1(key, value)), x => x);
         }
 
         public static ICachedDisposableDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(
-            this ICachedDisposableDictionary<TKey, TValue1> source, Func<TValue1, TValue2> convertToValue2,
-            Func<TValue2, TValue1> convertToValue1)
+            this ICachedDisposableDictionary<TKey, TValue1> source, Func<TKey, TValue1, TValue2> convertToValue2,
+            Func<TKey, TValue2, TValue1> convertToValue1)
         {
-            return source.WithMapping<TKey, TValue1, TKey, TValue2>(convertToValue2, x => x, convertToValue1, x => x);
+            return source.WithMapping<TKey, TValue1, TKey, TValue2>(
+                (key, value) => new KeyValue<TKey, TValue2>(key, convertToValue2(key, value)), x => x,
+                (key, value) => new KeyValue<TKey, TValue1>(key, convertToValue1(key, value)), x => x);
         }
 
         public static ICachedDisposableQueryableDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(
             this ICachedDisposableQueryableDictionary<TKey, TValue1> source,
-            Expression<Func<TValue1, TValue2>> convertToValue2, Func<TValue2, TValue1> convertToValue1)
+            Expression<Func<TValue1, TValue2>> convertToValue2, Func<TKey, TValue2, TValue1> convertToValue1)
         {
-            return source.WithMapping<TKey, TValue1, TKey, TValue2>(convertToValue2, x => x, convertToValue1, x => x);
+            return source.WithMapping<TKey, TValue1, TKey, TValue2>(convertToValue2, x => x,
+                (key, value) => new KeyValue<TKey, TValue1>(key, convertToValue1(key, value)), x => x);
         }
 
         public static ICachedQueryableDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(
             this ICachedQueryableDictionary<TKey, TValue1> source, Expression<Func<TValue1, TValue2>> convertToValue2,
-            Func<TValue2, TValue1> convertToValue1)
+            Func<TKey, TValue2, TValue1> convertToValue1)
         {
-            return source.WithMapping<TKey, TValue1, TKey, TValue2>(convertToValue2, x => x, convertToValue1, x => x);
+            return source.WithMapping<TKey, TValue1, TKey, TValue2>(convertToValue2, x => x,
+                (key, value) => new KeyValue<TKey, TValue1>(key, convertToValue1(key, value)), x => x);
         }
 
         public static IComposableDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(
-            this IComposableDictionary<TKey, TValue1> source, Func<TValue1, TValue2> convertToValue2,
-            Func<TValue2, TValue1> convertToValue1)
+            this IComposableDictionary<TKey, TValue1> source, Func<TKey, TValue1, TValue2> convertToValue2,
+            Func<TKey, TValue2, TValue1> convertToValue1)
         {
-            return source.WithMapping<TKey, TValue1, TKey, TValue2>(convertToValue2, x => x, convertToValue1, x => x);
+            return source.WithMapping<TKey, TValue1, TKey, TValue2>(
+                (key, value) => new KeyValue<TKey, TValue2>(key, convertToValue2(key, value)), x => x,
+                (key, value) => new KeyValue<TKey, TValue1>(key, convertToValue1(key, value)), x => x);
         }
 
         public static IComposableReadOnlyDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(
-            this IComposableReadOnlyDictionary<TKey, TValue1> source, Func<TValue1, TValue2> convertToValue2)
+            this IComposableReadOnlyDictionary<TKey, TValue1> source, Func<TKey, TValue1, TValue2> convertToValue2)
         {
-            return source.WithMapping<TKey, TValue1, TKey, TValue2>(convertToValue2, x => x, x => x);
+            return source.WithMapping<TKey, TValue1, TKey, TValue2>(
+                (key, value) => new KeyValue<TKey, TValue2>(key, convertToValue2(key, value)), x => x, x => x);
         }
 
         public static IDisposableDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(
-            this IDisposableDictionary<TKey, TValue1> source, Func<TValue1, TValue2> convertToValue2,
-            Func<TValue2, TValue1> convertToValue1)
+            this IDisposableDictionary<TKey, TValue1> source, Func<TKey, TValue1, TValue2> convertToValue2,
+            Func<TKey, TValue2, TValue1> convertToValue1)
         {
-            return source.WithMapping<TKey, TValue1, TKey, TValue2>(convertToValue2, x => x, convertToValue1, x => x);
+            return source.WithMapping<TKey, TValue1, TKey, TValue2>(
+                (key, value) => new KeyValue<TKey, TValue2>(key, convertToValue2(key, value)), x => x,
+                (key, value) => new KeyValue<TKey, TValue1>(key, convertToValue1(key, value)), x => x);
         }
 
         public static IDisposableQueryableDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(
             this IDisposableQueryableDictionary<TKey, TValue1> source,
-            Expression<Func<TValue1, TValue2>> convertToValue2, Func<TValue2, TValue1> convertToValue1)
+            Expression<Func<TValue1, TValue2>> convertToValue2, Func<TKey, TValue2, TValue1> convertToValue1)
         {
-            return source.WithMapping<TKey, TValue1, TKey, TValue2>(convertToValue2, x => x, convertToValue1, x => x);
+            return source.WithMapping<TKey, TValue1, TKey, TValue2>(convertToValue2, x => x,
+                (key, value) => new KeyValue<TKey, TValue1>(key, convertToValue1(key, value)), x => x);
         }
 
         public static IDisposableQueryableReadOnlyDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(
@@ -684,16 +692,18 @@ namespace ComposableCollections
         }
 
         public static IDisposableReadOnlyDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(
-            this IDisposableReadOnlyDictionary<TKey, TValue1> source, Func<TValue1, TValue2> convertToValue2)
+            this IDisposableReadOnlyDictionary<TKey, TValue1> source, Func<TKey, TValue1, TValue2> convertToValue2)
         {
-            return source.WithMapping<TKey, TValue1, TKey, TValue2>(convertToValue2, x => x, x => x);
+            return source.WithMapping<TKey, TValue1, TKey, TValue2>(
+                (key, value) => new KeyValue<TKey, TValue2>(key, convertToValue2(key, value)), x => x, x => x);
         }
 
         public static IQueryableDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(
             this IQueryableDictionary<TKey, TValue1> source, Expression<Func<TValue1, TValue2>> convertToValue2,
-            Func<TValue2, TValue1> convertToValue1)
+            Func<TKey, TValue2, TValue1> convertToValue1)
         {
-            return source.WithMapping<TKey, TValue1, TKey, TValue2>(convertToValue2, x => x, convertToValue1, x => x);
+            return source.WithMapping<TKey, TValue1, TKey, TValue2>(convertToValue2, x => x,
+                (key, value) => new KeyValue<TKey, TValue1>(key, convertToValue1(key, value)), x => x);
         }
 
         public static IQueryableReadOnlyDictionary<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(
@@ -710,9 +720,9 @@ namespace ComposableCollections
             ITransactionalCollection<IDisposableReadOnlyDictionary<TKey2, TValue2>,
                 ICachedDisposableDictionary<TKey2, TValue2>> WithMapping<TKey1, TValue1, TKey2, TValue2>(
                 this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey1, TValue1>,
-                    ICachedDisposableDictionary<TKey1, TValue1>> source, Func<TValue1, TValue2> convertToValue2,
-                Func<TKey1, TKey2> convertToKey2, Func<TValue2, TValue1> convertToValue1,
-                Func<TKey2, TKey1> convertToKey1)
+                    ICachedDisposableDictionary<TKey1, TValue1>> source,
+                Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertToValue2, Func<TKey1, TKey2> convertToKey2,
+                Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertToValue1, Func<TKey2, TKey1> convertToKey1)
         {
             return new AnonymousTransactionalCollection<IDisposableReadOnlyDictionary<TKey2, TValue2>,
                 ICachedDisposableDictionary<TKey2, TValue2>>(
@@ -728,7 +738,7 @@ namespace ComposableCollections
                 this ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey1, TValue1>,
                     ICachedDisposableQueryableDictionary<TKey1, TValue1>> source,
                 Expression<Func<TValue1, TValue2>> convertToValue2, Func<TKey1, TKey2> convertToKey2,
-                Func<TValue2, TValue1> convertToValue1, Func<TKey2, TKey1> convertToKey1)
+                Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertToValue1, Func<TKey2, TKey1> convertToKey1)
         {
             return new AnonymousTransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey2, TValue2>,
                 ICachedDisposableQueryableDictionary<TKey2, TValue2>>(
@@ -742,9 +752,9 @@ namespace ComposableCollections
             ITransactionalCollection<IDisposableReadOnlyDictionary<TKey2, TValue2>,
                 IDisposableDictionary<TKey2, TValue2>> WithMapping<TKey1, TValue1, TKey2, TValue2>(
                 this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey1, TValue1>,
-                    IDisposableDictionary<TKey1, TValue1>> source, Func<TValue1, TValue2> convertToValue2,
-                Func<TKey1, TKey2> convertToKey2, Func<TValue2, TValue1> convertToValue1,
-                Func<TKey2, TKey1> convertToKey1)
+                    IDisposableDictionary<TKey1, TValue1>> source,
+                Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertToValue2, Func<TKey1, TKey2> convertToKey2,
+                Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertToValue1, Func<TKey2, TKey1> convertToKey1)
         {
             return new AnonymousTransactionalCollection<IDisposableReadOnlyDictionary<TKey2, TValue2>,
                 IDisposableDictionary<TKey2, TValue2>>(
@@ -760,7 +770,7 @@ namespace ComposableCollections
                 this ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey1, TValue1>,
                     IDisposableQueryableDictionary<TKey1, TValue1>> source,
                 Expression<Func<TValue1, TValue2>> convertToValue2, Func<TKey1, TKey2> convertToKey2,
-                Func<TValue2, TValue1> convertToValue1, Func<TKey2, TKey1> convertToKey1)
+                Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertToValue1, Func<TKey2, TKey1> convertToKey1)
         {
             return new AnonymousTransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey2, TValue2>,
                 IDisposableQueryableDictionary<TKey2, TValue2>>(
@@ -778,8 +788,8 @@ namespace ComposableCollections
             ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue2>,
                 ICachedDisposableDictionary<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(
                 this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue1>,
-                    ICachedDisposableDictionary<TKey, TValue1>> source, Func<TValue1, TValue2> convertToValue2,
-                Func<TValue2, TValue1> convertToValue1)
+                    ICachedDisposableDictionary<TKey, TValue1>> source, Func<TKey, TValue1, TValue2> convertToValue2,
+                Func<TKey, TValue2, TValue1> convertToValue1)
         {
             return new AnonymousTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue2>,
                 ICachedDisposableDictionary<TKey, TValue2>>(
@@ -792,7 +802,7 @@ namespace ComposableCollections
                 ICachedDisposableQueryableDictionary<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(
                 this ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue1>,
                     ICachedDisposableQueryableDictionary<TKey, TValue1>> source,
-                Expression<Func<TValue1, TValue2>> convertToValue2, Func<TValue2, TValue1> convertToValue1)
+                Expression<Func<TValue1, TValue2>> convertToValue2, Func<TKey, TValue2, TValue1> convertToValue1)
         {
             return new AnonymousTransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue2>,
                 ICachedDisposableQueryableDictionary<TKey, TValue2>>(
@@ -804,8 +814,8 @@ namespace ComposableCollections
             ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue2>, IDisposableDictionary<TKey, TValue2>>
             WithMapping<TKey, TValue1, TValue2>(
                 this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue1>,
-                    IDisposableDictionary<TKey, TValue1>> source, Func<TValue1, TValue2> convertToValue2,
-                Func<TValue2, TValue1> convertToValue1)
+                    IDisposableDictionary<TKey, TValue1>> source, Func<TKey, TValue1, TValue2> convertToValue2,
+                Func<TKey, TValue2, TValue1> convertToValue1)
         {
             return new AnonymousTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue2>,
                 IDisposableDictionary<TKey, TValue2>>(
@@ -818,7 +828,7 @@ namespace ComposableCollections
                 IDisposableQueryableDictionary<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(
                 this ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue1>,
                     IDisposableQueryableDictionary<TKey, TValue1>> source,
-                Expression<Func<TValue1, TValue2>> convertToValue2, Func<TValue2, TValue1> convertToValue1)
+                Expression<Func<TValue1, TValue2>> convertToValue2, Func<TKey, TValue2, TValue1> convertToValue1)
         {
             return new AnonymousTransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue2>,
                 IDisposableQueryableDictionary<TKey, TValue2>>(
@@ -833,8 +843,8 @@ namespace ComposableCollections
         public static IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey2, TValue2>>
             WithMapping<TKey1, TValue1, TKey2, TValue2>(
                 this IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey1, TValue1>> source,
-                Func<TValue1, TValue2> convertToValue2, Func<TKey1, TKey2> convertToKey2,
-                Func<TValue2, TValue1> convertToValue1, Func<TKey2, TKey1> convertToKey1)
+                Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertToValue2, Func<TKey1, TKey2> convertToKey2,
+                Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertToValue1, Func<TKey2, TKey1> convertToKey1)
         {
             return new AnonymousReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey2, TValue2>>(
                 () => source.BeginRead()
@@ -845,7 +855,7 @@ namespace ComposableCollections
             WithMapping<TKey1, TValue1, TKey2, TValue2>(
                 this IReadOnlyTransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey1, TValue1>> source,
                 Expression<Func<TValue1, TValue2>> convertToValue2, Func<TKey1, TKey2> convertToKey2,
-                Func<TValue2, TValue1> convertToValue1, Func<TKey2, TKey1> convertToKey1)
+                Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertToValue1, Func<TKey2, TKey1> convertToKey1)
         {
             return new AnonymousReadOnlyTransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey2, TValue2>>(
                 () => source.BeginRead()
@@ -859,7 +869,7 @@ namespace ComposableCollections
         public static IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue2>>
             WithMapping<TKey, TValue1, TValue2>(
                 this IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue1>> source,
-                Func<TValue1, TValue2> convertToValue2, Func<TValue2, TValue1> convertToValue1)
+                Func<TKey, TValue1, TValue2> convertToValue2, Func<TKey, TValue2, TValue1> convertToValue1)
         {
             return new AnonymousReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue2>>(
                 () => source.BeginRead().WithMapping<TKey, TValue1, TValue2>(convertToValue2));
@@ -868,7 +878,7 @@ namespace ComposableCollections
         public static IReadOnlyTransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue2>>
             WithMapping<TKey, TValue1, TValue2>(
                 this IReadOnlyTransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue1>> source,
-                Expression<Func<TValue1, TValue2>> convertToValue2, Func<TValue2, TValue1> convertToValue1)
+                Expression<Func<TValue1, TValue2>> convertToValue2, Func<TKey, TValue2, TValue1> convertToValue1)
         {
             return new AnonymousReadOnlyTransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue2>>(
                 () => source.BeginRead().WithMapping<TKey, TValue1, TValue2>(convertToValue2));

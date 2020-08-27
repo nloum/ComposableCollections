@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageReference Include="LiveLinq" Version="1.1.0-alpha0119" />
     <PackageReference Include="MoreCollections" Version="1.1.0-alpha0091" />
-    <PackageReference Include="ReactiveProcesses" Version="1.0.0-alpha003" />
+    <PackageReference Include="ReactiveProcesses" Version="1.0.0-alpha0012" />
     <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0040" />
     <PackageReference Include="TreeLinq" Version="1.0.0-alpha0018" />
     <PackageReference Include="UnitsNet" Version="4.67.0" />

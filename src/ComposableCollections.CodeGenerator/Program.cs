@@ -716,7 +716,6 @@ namespace ComposableCollections.CodeGenerator
 		        using ComposableCollections.Dictionary;
 		        using ComposableCollections.Dictionary.Adapters;
 		        using ComposableCollections.Dictionary.Decorators;
-		        using ComposableCollections.Dictionary.ExtensionMethodHelpers;
 		        using ComposableCollections.Dictionary.Interfaces;
 		        using ComposableCollections.Dictionary.Sources;
 		        using ComposableCollections.Dictionary.Transactional;

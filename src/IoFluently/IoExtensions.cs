@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Reactive;
 using System.Text;
 using LiveLinq.Dictionary;
@@ -14,6 +15,15 @@ namespace IoFluently
 {
     public static class IoExtensions
     {
+        /// <summary>
+        /// Equivalent to Path.Combine. You can also use the / operator to build paths, like this:
+        /// _ioService.CurrentDirectory / "folder1" / "folder2" / "file.txt"
+        /// </summary>
+        public static AbsolutePath Combine(this AbsolutePath path, params string[] subsequentPathParts)
+        {
+            return path.Descendant(subsequentPathParts);
+        }
+    
         public static AbsolutePath WithoutExtension(this AbsolutePath path)
         {
             if (!path.HasExtension())

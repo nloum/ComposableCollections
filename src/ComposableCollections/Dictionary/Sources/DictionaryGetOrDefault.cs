@@ -2,13 +2,14 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary.Sources
 {
-    public delegate bool GetDefaultValue<TKey, TValue>(TKey key, out TValue value, out bool persist);
+    public delegate bool GetDefaultValueWithOptionalPersistence<TKey, TValue>(TKey key, out TValue value, out bool persist);
+    public delegate bool GetDefaultValue<TKey, TValue>(TKey key, out TValue value);
     
     public class DictionaryGetOrDefault<TKey, TValue> : ComposableDictionary<TKey, TValue>
     {
-        private readonly GetDefaultValue<TKey, TValue> _getDefaultValue;
+        private readonly GetDefaultValueWithOptionalPersistence<TKey, TValue> _getDefaultValue;
 
-        public DictionaryGetOrDefault(GetDefaultValue<TKey, TValue> getDefaultValue)
+        public DictionaryGetOrDefault(GetDefaultValueWithOptionalPersistence<TKey, TValue> getDefaultValue)
         {
             _getDefaultValue = getDefaultValue;
         }

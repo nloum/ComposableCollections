@@ -1,158 +1,740 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Humanizer;
+using IoFluently;
+using ReactiveProcesses;
 
 namespace ComposableCollections.CodeGenerator
 {
     class Program
     {
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Hello World!");
+	    private static void GenerateWithReadWriteLockExtensionMethods(TextWriter textWriter)
+	    {
+		    var interfaces = new List<string>
+		    {
+			    "ICachedDictionary",
+			    "ICachedDisposableDictionary",
+			    "ICachedDisposableQueryableDictionary",
+			    "ICachedQueryableDictionary",
+			    "IComposableDictionary",
+			    "IComposableReadOnlyDictionary",
+			    "IDisposableDictionary",
+			    "IDisposableQueryableDictionary",
+			    "IDisposableQueryableReadOnlyDictionary",
+			    "IDisposableReadOnlyDictionary",
+			    "IQueryableDictionary",
+			    "IQueryableReadOnlyDictionary"
+		    };
 
-            var dictionaryInterfacePrefixes = new List<string>
-            {
-                "ReadOnly",
-                "Cached",
-                "Disposable",
-                "Queryable",
-            };
-            dictionaryInterfacePrefixes.Sort();
-
-            var dictionaryInterfacePostfixes = new List<string>
-            {
-                //"WithBuiltInKey",
-            };
-            dictionaryInterfacePostfixes.Sort();
-
-            //var results = GenerateTypeNames("Dictionary", dictionaryInterfacePrefixes, dictionaryInterfacePostfixes);
-
-            // foreach (var result in results)
-            // {
-            //     Console.WriteLine(result);
-            // }
-            
-            GenerateCombinationInterfaces(dictionaryInterfacePrefixes, "Dictionary");
-            //GenerateCombinationClasses(dictionaryInterfacePrefixes, "Dictionary");
-        }
-
-        private static void GenerateCombinationClasses(IEnumerable<string> baseInterfaces, string basicName)
-        {
-	        var combinationInterfaces =
-		        CalcCombinationsOfOneFromEach(baseInterfaces.Select(x => new[] {x, string.Empty}));
-
-	        foreach (var combinationInterface in combinationInterfaces)
-	        {
-		        var validCombinationInterface = combinationInterface.Where(x => !string.IsNullOrEmpty(x)).ToImmutableList();
-		        if (validCombinationInterface.Count < 2)
-		        {
-			        continue;
-		        }
-		        
-		        var className = $"{string.Join(string.Empty, combinationInterface)}{basicName}";
-		        Console.WriteLine(
-			        $"public class {className} : I{className}<TKey, TValue> {{ ");
-		        foreach (var wrapped in validCombinationInterface)
-		        {
-			        Console.WriteLine($"private readonly I{wrapped}Dictionary<TKey, TValue> _{wrapped.Camelize()}Dictionary;");
-		        }
-		        Console.WriteLine($"public {className}({string.Join(", ", validCombinationInterface.Select(x => $"I{x}{basicName}<TKey, TValue> {x.Camelize()}Dictionary"))}) {{");
-		        foreach (var wrapped in validCombinationInterface)
-		        {
-			        Console.WriteLine($"_{wrapped.Camelize()}Dictionary = {wrapped.Camelize()}Dictionary;");
-		        }
-		        Console.WriteLine("}\n}");
-	        }
-        }
-
-        private static void GenerateCombinationInterfaces(IEnumerable<string> baseInterfaces, string basicName)
-        {
-	        var combinationInterfaces =
-		        CalcCombinationsOfOneFromEach(baseInterfaces.Select(x => new[] {x, string.Empty}));
-
-	        foreach (var combinationInterface in combinationInterfaces)
-	        {
-		        if (combinationInterface.Count(x => !string.IsNullOrEmpty(x)) == 0)
-		        {
-			        continue;
-		        }
-		        
-		        var interfaceName = $"I{string.Join(string.Empty, combinationInterface)}{basicName}";
-		        Console.WriteLine(
-			        $"public interface {interfaceName}<TKey, TValue> : {string.Join(", ", combinationInterface.Select(x => string.IsNullOrEmpty(x) ? string.Empty : $"I{x}{basicName}<TKey, TValue>").Where(x => !string.IsNullOrEmpty(x)))} {{ }}");
-	        }
-        }
-
-        private static IEnumerable<string> GenerateTypeNames(string basicName, IEnumerable<string> prefixes,
-            IEnumerable<string> postfixes)
-        {
-	        var prefixCombinations =
-		        CalcCombinationsOfOneFromEach(prefixes.Select(prefix => new[] {prefix, string.Empty}));
-	        return prefixCombinations
-		        .SelectMany(prefixes => CalcCombinationsOfOneFromEach(postfixes.Select(postfix => new []{postfix, string.Empty})).Select(postfixes => new { prefixes, postfixes}))
-		        .Select(x => $"{string.Join(string.Empty, x.prefixes)}{basicName}{string.Join(string.Empty, x.postfixes)}");
-        }
-        
-        /// <summary>
-		/// If you pass in new[]{0, 1} and new[]{0, 1} you'll get new[]{0, 0}, new[]{0, 1}, new[]{1, 0}, new[]{1, 1} out.
-		/// </summary>
-		/// <typeparam name="TItem">The type of item in the enumerables.</typeparam>
-		/// <param name="enumerables">The enumerables that will be used to calculate combinations</param>
-		/// <returns>A lazily-computed enumerable where each return item is a combination</returns>
-	    public static IEnumerable<ImmutableList<TItem>> CalcCombinationsOfOneFromEach<TItem>(
-		    IEnumerable<IEnumerable<TItem>> enumerables ) {
-		    var enumerators = enumerables.Select( enumerable => Tuple.Create( enumerable, enumerable.GetEnumerator() ) ).ToList();
-
-		    foreach ( var enumerator in enumerators ) {
-			    if ( !enumerator.Item2.MoveNext() ) {
-				    throw new ArgumentException( "An empty enumerable was specified" );
+		    textWriter.WriteLine("#region WithReadWriteLock");
+		    
+		    foreach (var iface in interfaces)
+		    {
+			    if (iface.Contains("ReadOnly"))
+			    {
+				    continue;
 			    }
-			}
 
-		    yield return enumerators.Select( t => t.Item2.Current ).ToImmutableList();
+			    textWriter.WriteLine($"public static {iface}<TKey, TValue> WithReadWriteLock<TKey, TValue>(this {iface}<TKey, TValue> source) {{");
+			    if (iface.Contains("Queryable"))
+			    {
+				    textWriter.WriteLine("var decorator = new ReadWriteLockQueryableDictionaryDecorator<TKey, TValue>(source);");
+			    }
+			    else
+			    {
+				    textWriter.WriteLine("var decorator = new ReadWriteLockDictionaryDecorator<TKey, TValue>(source);");
+			    }
+			    var arguments = new List<string>();
 
-			while (true) {
-				var i = 0;
-				while(true) {
-					if ( i == enumerators.Count ) {
-						yield break;
-					}
+			    arguments.Add("decorator");
+			    if (iface.Contains("Cached"))
+			    {
+				    arguments.Add("source.AsBypassCache");
+				    arguments.Add("source.AsNeverFlush");
+				    arguments.Add("source.FlushCache");
+				    arguments.Add("source.GetWrites");
+			    }
 
-					if ( !enumerators[i].Item2.MoveNext() ) {
-						enumerators[i] = Tuple.Create( enumerators[i].Item1,
-							enumerators[i].Item1.GetEnumerator() );
-						enumerators[i].Item2.MoveNext();
-					} else {
-						break;
-					}
+			    if (iface.Contains("Disposable"))
+			    {
+				    arguments.Add("source");
+			    }
+			    if (iface.Contains("Queryable"))
+			    {
+				    arguments.Add("((IQueryableReadOnlyDictionary<TKey, TValue>)decorator).Values");
+			    }
 
-					i++;
-				}
+			    if (iface.Contains("Composable"))
+			    {
+				    textWriter.WriteLine($"    return decorator;");
+			    }
+			    else
+			    {
+				    textWriter.WriteLine($"    return new {iface.Substring(1)}Adapter<TKey, TValue>({string.Join(", ", arguments)});");
+			    }
 
-				yield return enumerators.Select( t => t.Item2.Current ).ToImmutableList();
-			}
+			    textWriter.WriteLine("}");
+		    }
+		    
+		    textWriter.WriteLine("#endregion");
+	    }
+	    
+	    private static void GenerateWithWriteCachingExtensionMethods(TextWriter textWriter)
+	    {
+		    var interfaces = new List<string>
+		    {
+			    "ICachedDictionary",
+			    "ICachedDisposableDictionary",
+			    "ICachedDisposableQueryableDictionary",
+			    "ICachedQueryableDictionary",
+			    "IComposableDictionary",
+			    "IComposableReadOnlyDictionary",
+			    "IDisposableDictionary",
+			    "IDisposableQueryableDictionary",
+			    "IDisposableQueryableReadOnlyDictionary",
+			    "IDisposableReadOnlyDictionary",
+			    "IQueryableDictionary",
+			    "IQueryableReadOnlyDictionary"
+		    };
+
+		    textWriter.WriteLine("#region WithWriteCaching");
+		    
+		    foreach (var iface in interfaces)
+		    {
+			    if (iface.Contains("Cached") || iface.Contains("ReadOnly"))
+			    {
+				    continue;
+			    }
+
+			    var cachedInterface = "ICached" + iface.Substring(1).Replace("Composable", "");
+			    
+			    textWriter.WriteLine($"public static {cachedInterface}<TKey, TValue> WithWriteCaching<TKey, TValue>(this {iface}<TKey, TValue> source) {{");
+				textWriter.WriteLine("var adapter = new ConcurrentCachedWriteDictionaryAdapter<TKey, TValue>(source);");
+			    var arguments = new List<string>();
+
+			    arguments.Add("adapter");
+			    arguments.Add("adapter.AsBypassCache");
+			    arguments.Add("adapter.AsNeverFlush");
+			    arguments.Add("adapter.FlushCache");
+			    arguments.Add("adapter.GetWrites");
+
+			    if (iface.Contains("Disposable"))
+			    {
+				    arguments.Add("source");
+			    }
+			    if (iface.Contains("Queryable"))
+			    {
+				    arguments.Add("source.Values");
+			    }
+
+			    if (iface.Contains("Composable"))
+			    {
+				    textWriter.WriteLine($"    return adapter;");
+			    }
+			    else
+			    {
+				    textWriter.WriteLine($"    return new {cachedInterface.Substring(1)}Adapter<TKey, TValue>({string.Join(", ", arguments)});");
+			    }
+
+			    textWriter.WriteLine("}");
+		    }
+		    
+		    textWriter.WriteLine("#endregion");
+	    }
+	    
+	    private static void GenerateWithDefaultValueExtensionMethods(TextWriter textWriter)
+	    {
+		    var interfaces = new List<string>
+		    {
+			    "ICachedDictionary",
+			    "ICachedDisposableDictionary",
+			    "ICachedDisposableQueryableDictionary",
+			    "ICachedQueryableDictionary",
+			    "IComposableDictionary",
+			    "IComposableReadOnlyDictionary",
+			    "IDisposableDictionary",
+			    "IDisposableQueryableDictionary",
+			    "IDisposableQueryableReadOnlyDictionary",
+			    "IDisposableReadOnlyDictionary",
+			    "IQueryableDictionary",
+			    "IQueryableReadOnlyDictionary"
+		    };
+
+		    textWriter.WriteLine("#region WithDefaultValue");
+		    
+		    foreach (var iface in interfaces)
+		    {
+			    textWriter.WriteLine($"public static {iface}<TKey, TValue> WithDefaultValue<TKey, TValue>(this {iface}<TKey, TValue> source, GetDefaultValue<TKey, TValue> getDefaultValue) {{");
+			    if (iface.Contains("ReadOnly"))
+			    {
+				    textWriter.WriteLine("var decorator = new ReadOnlyDictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);");
+			    }
+			    else
+			    {
+				    textWriter.WriteLine("var decorator = new DictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);");
+			    }
+			    var arguments = new List<string>();
+
+			    arguments.Add("decorator");
+			    if (iface.Contains("Cached"))
+			    {
+				    arguments.Add("source.AsBypassCache");
+				    arguments.Add("source.AsNeverFlush");
+				    arguments.Add("source.FlushCache");
+				    arguments.Add("source.GetWrites");
+			    }
+
+			    if (iface.Contains("Disposable"))
+			    {
+				    arguments.Add("source");
+			    }
+			    if (iface.Contains("Queryable"))
+			    {
+				    arguments.Add("source.Values");
+			    }
+
+			    if (iface.Contains("Composable"))
+			    {
+				    textWriter.WriteLine($"    return decorator;");
+			    }
+			    else
+			    {
+				    textWriter.WriteLine($"    return new {iface.Substring(1)}Adapter<TKey, TValue>({string.Join(", ", arguments)});");
+			    }
+
+			    textWriter.WriteLine("}");
+		    }
+		    
+		    textWriter.WriteLine("#endregion");
+		    
+		    
+		    textWriter.WriteLine("#region WithDefaultValue - optional persistence");
+		    
+		    foreach (var iface in interfaces)
+		    {
+			    if (iface.Contains("ReadOnly"))
+			    {
+				    continue;
+			    }
+			    else
+			    {
+				    textWriter.WriteLine($"public static {iface}<TKey, TValue> WithDefaultValue<TKey, TValue>(this {iface}<TKey, TValue> source, GetDefaultValueWithOptionalPersistence<TKey, TValue> getDefaultValue) {{");
+				    textWriter.WriteLine("var decorator = new DictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);");
+			    }
+			    var arguments = new List<string>();
+
+			    arguments.Add("decorator");
+			    if (iface.Contains("Cached"))
+			    {
+				    arguments.Add("source.AsBypassCache");
+				    arguments.Add("source.AsNeverFlush");
+				    arguments.Add("source.FlushCache");
+				    arguments.Add("source.GetWrites");
+			    }
+
+			    if (iface.Contains("Disposable"))
+			    {
+				    arguments.Add("source");
+			    }
+			    if (iface.Contains("Queryable"))
+			    {
+				    arguments.Add("source.Values");
+			    }
+
+			    if (iface.Contains("Composable"))
+			    {
+				    textWriter.WriteLine($"    return decorator;");
+			    }
+			    else
+			    {
+				    textWriter.WriteLine($"    return new {iface.Substring(1)}Adapter<TKey, TValue>({string.Join(", ", arguments)});");
+			    }
+
+			    textWriter.WriteLine("}");
+		    }
+		    
+		    textWriter.WriteLine("#endregion");
+	    }
+	    
+	    private static void GenerateWithRefreshingExtensionMethods(TextWriter textWriter)
+	    {
+		    var interfaces = new List<string>
+		    {
+			    "ICachedDictionary",
+			    "ICachedDisposableDictionary",
+			    "ICachedDisposableQueryableDictionary",
+			    "ICachedQueryableDictionary",
+			    "IComposableDictionary",
+			    "IComposableReadOnlyDictionary",
+			    "IDisposableDictionary",
+			    "IDisposableQueryableDictionary",
+			    "IDisposableQueryableReadOnlyDictionary",
+			    "IDisposableReadOnlyDictionary",
+			    "IQueryableDictionary",
+			    "IQueryableReadOnlyDictionary"
+		    };
+
+		    textWriter.WriteLine("#region WithRefreshing");
+		    
+		    foreach (var iface in interfaces)
+		    {
+			    textWriter.WriteLine($"public static {iface}<TKey, TValue> WithRefreshing<TKey, TValue>(this {iface}<TKey, TValue> source, RefreshValue<TKey, TValue> refreshValue) {{");
+			    if (iface.Contains("ReadOnly"))
+			    {
+				    textWriter.WriteLine("var decorator = new ReadOnlyDictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);");
+			    }
+			    else
+			    {
+				    textWriter.WriteLine("var decorator = new DictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);");
+			    }
+			    var arguments = new List<string>();
+
+			    arguments.Add("decorator");
+			    if (iface.Contains("Cached"))
+			    {
+				    arguments.Add("source.AsBypassCache");
+				    arguments.Add("source.AsNeverFlush");
+				    arguments.Add("source.FlushCache");
+				    arguments.Add("source.GetWrites");
+			    }
+
+			    if (iface.Contains("Disposable"))
+			    {
+				    arguments.Add("source");
+			    }
+			    if (iface.Contains("Queryable"))
+			    {
+				    arguments.Add("source.Values");
+			    }
+
+			    if (iface.Contains("Composable"))
+			    {
+				    textWriter.WriteLine($"    return decorator;");
+			    }
+			    else
+			    {
+				    textWriter.WriteLine($"    return new {iface.Substring(1)}Adapter<TKey, TValue>({string.Join(", ", arguments)});");
+			    }
+
+			    textWriter.WriteLine("}");
+		    }
+		    
+		    textWriter.WriteLine("#endregion");
+		    
+		    
+		    textWriter.WriteLine("#region WithRefreshing - optional persistence");
+		    
+		    foreach (var iface in interfaces)
+		    {
+			    if (iface.Contains("ReadOnly"))
+			    {
+				    continue;
+			    }
+			    else
+			    {
+				    textWriter.WriteLine($"public static {iface}<TKey, TValue> WithRefreshing<TKey, TValue>(this {iface}<TKey, TValue> source, RefreshValueWithOptionalPersistence<TKey, TValue> refreshValue) {{");
+				    textWriter.WriteLine("var decorator = new DictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);");
+			    }
+			    var arguments = new List<string>();
+
+			    arguments.Add("decorator");
+			    if (iface.Contains("Cached"))
+			    {
+				    arguments.Add("source.AsBypassCache");
+				    arguments.Add("source.AsNeverFlush");
+				    arguments.Add("source.FlushCache");
+				    arguments.Add("source.GetWrites");
+			    }
+
+			    if (iface.Contains("Disposable"))
+			    {
+				    arguments.Add("source");
+			    }
+			    if (iface.Contains("Queryable"))
+			    {
+				    arguments.Add("source.Values");
+			    }
+
+			    if (iface.Contains("Composable"))
+			    {
+				    textWriter.WriteLine($"    return decorator;");
+			    }
+			    else
+			    {
+				    textWriter.WriteLine($"    return new {iface.Substring(1)}Adapter<TKey, TValue>({string.Join(", ", arguments)});");
+			    }
+
+			    textWriter.WriteLine("}");
+		    }
+		    
+		    textWriter.WriteLine("#endregion");
 	    }
 
-        public static IEnumerable<IReadOnlyList<T>> CalcCombination<T>(IReadOnlyList<T> list, int sizeOfCombination, int indexInList = 0)
+	    private static void GenerateWithMappingExtensionMethods(TextWriter textWriter)
+	    {
+		    var interfaces = new List<string>
+		    {
+			    "ICachedDictionary",
+			    "ICachedDisposableDictionary",
+			    "ICachedDisposableQueryableDictionary",
+			    "ICachedQueryableDictionary",
+			    "IComposableDictionary",
+			    "IComposableReadOnlyDictionary",
+			    "IDisposableDictionary",
+			    "IDisposableQueryableDictionary",
+			    "IDisposableQueryableReadOnlyDictionary",
+			    "IDisposableReadOnlyDictionary",
+			    "IQueryableDictionary",
+			    "IQueryableReadOnlyDictionary"
+		    };
+
+		    var interfacesWithBuiltInKeys = interfaces.Select(x => $"{x}WithBuiltInKey").ToList();
+
+		    textWriter.WriteLine("#region WithMapping - different key types");
+		    
+		    foreach (var iface in interfaces)
+		    {
+			    var parameters = new List<string>();
+			    if (iface.Contains("Queryable"))
+			    {
+				    parameters.Add("Expression<Func<TValue1, TValue2>> convertToValue2");
+			    }
+			    else
+			    {
+				    parameters.Add("Func<TValue1, TValue2> convertToValue2");
+			    }
+			    parameters.Add("Func<TKey1, TKey2> convertToKey2");
+			    if (!iface.Contains("ReadOnly"))
+			    {
+				    parameters.Add("Func<TValue2, TValue1> convertToValue1");
+			    }
+			    parameters.Add("Func<TKey2, TKey1> convertToKey1");
+			    
+			    textWriter.WriteLine(
+				    $"public static {iface}<TKey2, TValue2> WithMapping<TKey1, TValue1, TKey2, TValue2>(this {iface}<TKey1, TValue1> source, {string.Join(", ", parameters)}) {{");
+			    if (iface.Contains("Queryable"))
+			    {
+				    textWriter.WriteLine("var convertToValue2Compiled = convertToValue2.Compile();");
+			    }
+			    if (iface.Contains("ReadOnly"))
+			    {
+				    if (iface.Contains("Queryable"))
+				    {
+					    textWriter.WriteLine("var mappedSource = new MappingReadOnlyDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source, (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2Compiled(value)), convertToKey2, convertToKey1);");
+				    }
+				    else
+				    {
+					    textWriter.WriteLine("var mappedSource = new MappingReadOnlyDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source, (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2(value)), convertToKey2, convertToKey1);");
+				    }
+			    }
+			    else
+			    {
+				    if (iface.Contains("Queryable"))
+				    {
+					    textWriter.WriteLine(
+						    "var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source, (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2Compiled(value)), (key, value) => new KeyValue<TKey1, TValue1>(convertToKey1(key), convertToValue1(value)), convertToKey2, convertToKey1);");
+				    } else {
+					    textWriter.WriteLine(
+						    "var mappedSource = new MappingDictionaryAdapter<TKey1, TValue1, TKey2, TValue2>(source, (key, value) => new KeyValue<TKey2, TValue2>(convertToKey2(key), convertToValue2(value)), (key, value) => new KeyValue<TKey1, TValue1>(convertToKey1(key), convertToValue1(value)), convertToKey2, convertToKey1);");
+				    }
+			    }
+
+			    if (iface.Contains("Cached"))
+			    {
+				    textWriter.WriteLine("var cachedMapSource = new ConcurrentCachedWriteDictionaryAdapter<TKey2, TValue2>(mappedSource);");
+			    }
+			    var arguments = new List<string>();
+
+			    arguments.Add("mappedSource");
+			    if (iface.Contains("Cached"))
+			    {
+				    arguments.Add("cachedMapSource.AsBypassCache");
+				    arguments.Add("cachedMapSource.AsNeverFlush");
+				    arguments.Add("() => {  cachedMapSource.FlushCache(); source.FlushCache(); }");
+				    arguments.Add("cachedMapSource.GetWrites");
+			    }
+
+			    if (iface.Contains("Disposable"))
+			    {
+				    arguments.Add("source");
+			    }
+			    if (iface.Contains("Queryable"))
+			    {
+				    arguments.Add("source.Values.Select(convertToValue2)");
+			    }
+
+			    if (iface.Contains("Composable"))
+			    {
+				    textWriter.WriteLine($"    return mappedSource;");
+			    }
+			    else
+			    {
+				    textWriter.WriteLine($"    return new {iface.Substring(1)}Adapter<TKey2, TValue2>({string.Join(", ", arguments)});");
+			    }
+
+			    textWriter.WriteLine("}");
+		    }
+
+ 		    textWriter.WriteLine("#endregion\n");
+		    textWriter.WriteLine("#region WithMapping - one key type");
+		    
+		    foreach (var iface in interfaces)
+		    {
+			    var parameters = new List<string>();
+			    var arguments = new List<string>();
+			    if (iface.Contains("Queryable"))
+			    {
+				    parameters.Add("Expression<Func<TValue1, TValue2>> convertToValue2");
+			    }
+			    else
+			    {
+				    parameters.Add("Func<TValue1, TValue2> convertToValue2");
+			    }
+			    arguments.Add("convertToValue2");
+
+			    arguments.Add("x => x");
+
+			    if (!iface.Contains("ReadOnly"))
+			    {
+				    parameters.Add("Func<TValue2, TValue1> convertToValue1");
+				    arguments.Add("convertToValue1");
+			    }
+			    
+			    arguments.Add("x => x");
+
+			    textWriter.WriteLine(
+				    $"public static {iface}<TKey, TValue2> WithMapping<TKey, TValue1, TValue2>(this {iface}<TKey, TValue1> source, {string.Join(", ", parameters)}) {{");
+			    textWriter.WriteLine(
+				    $"return source.WithMapping<TKey, TValue1, TKey, TValue2>({string.Join(", ", arguments)});");
+			    textWriter.WriteLine("}");
+		    }
+
+		    textWriter.WriteLine("#endregion\n");
+		    
+		    textWriter.WriteLine("#region WithMapping - transactional different key types");
+		    
+		    foreach (var iface in interfaces)
+		    {
+			    if (!iface.Contains("Disposable") || iface.Contains("ReadOnly"))
+			    {
+				    continue;
+			    }
+			    
+			    var parameters = new List<string>();
+			    var readOnlyArguments = new List<string>();
+			    var readWriteArguments = new List<string>();
+			    if (iface.Contains("Queryable"))
+			    {
+				    parameters.Add("Expression<Func<TValue1, TValue2>> convertToValue2");
+			    }
+			    else
+			    {
+				    parameters.Add("Func<TValue1, TValue2> convertToValue2");
+			    }
+			    readOnlyArguments.Add("convertToValue2");
+			    readWriteArguments.Add("convertToValue2");
+
+			    parameters.Add("Func<TKey1, TKey2> convertToKey2");
+			    readOnlyArguments.Add("convertToKey2");
+			    readWriteArguments.Add("convertToKey2");
+			    
+			    parameters.Add("Func<TValue2, TValue1> convertToValue1");
+			    readWriteArguments.Add("convertToValue1");
+			    
+			    parameters.Add("Func<TKey2, TKey1> convertToKey1");
+			    readOnlyArguments.Add("convertToKey1");
+			    readWriteArguments.Add("convertToKey1");
+
+			    var readOnlyInterface = iface.Replace("Dictionary", "ReadOnlyDictionary").Replace("Cached", "");
+			    
+			    textWriter.WriteLine(
+				    $"public static ITransactionalCollection<{readOnlyInterface}<TKey2, TValue2>, {iface}<TKey2, TValue2>> WithMapping<TKey1, TValue1, TKey2, TValue2>(this ITransactionalCollection<{readOnlyInterface}<TKey1, TValue1>, {iface}<TKey1, TValue1>> source, {string.Join(", ", parameters)}) {{");
+
+			    textWriter.WriteLine(
+				    $"return new AnonymousTransactionalCollection<{readOnlyInterface}<TKey2, TValue2>, {iface}<TKey2, TValue2>>(");
+			    textWriter.WriteLine(
+				    $"() => source.BeginRead().WithMapping<TKey1, TValue1, TKey2, TValue2>({string.Join(", ", readOnlyArguments)}),");
+			    textWriter.WriteLine(
+				    $"() => source.BeginWrite().WithMapping<TKey1, TValue1, TKey2, TValue2>({string.Join(", ", readWriteArguments)}));");
+			    
+			    textWriter.WriteLine("}");
+		    }
+
+		    textWriter.WriteLine("#endregion");
+		    
+		    textWriter.WriteLine("#region WithMapping - transactional same key type");
+		    
+		    foreach (var iface in interfaces)
+		    {
+			    if (!iface.Contains("Disposable") || iface.Contains("ReadOnly"))
+			    {
+				    continue;
+			    }
+			    
+			    var parameters = new List<string>();
+			    var readOnlyArguments = new List<string>();
+			    var readWriteArguments = new List<string>();
+			    if (iface.Contains("Queryable"))
+			    {
+				    parameters.Add("Expression<Func<TValue1, TValue2>> convertToValue2");
+			    }
+			    else
+			    {
+				    parameters.Add("Func<TValue1, TValue2> convertToValue2");
+			    }
+			    readOnlyArguments.Add("convertToValue2");
+			    readWriteArguments.Add("convertToValue2");
+
+			    parameters.Add("Func<TValue2, TValue1> convertToValue1");
+			    readWriteArguments.Add("convertToValue1");
+
+			    var readOnlyInterface = iface.Replace("Dictionary", "ReadOnlyDictionary").Replace("Cached", "");
+
+			    textWriter.WriteLine(
+				    $"public static ITransactionalCollection<{readOnlyInterface}<TKey, TValue2>, {iface}<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(this ITransactionalCollection<{readOnlyInterface}<TKey, TValue1>, {iface}<TKey, TValue1>> source, {string.Join(", ", parameters)}) {{");
+
+			    textWriter.WriteLine(
+				    $"return new AnonymousTransactionalCollection<{readOnlyInterface}<TKey, TValue2>, {iface}<TKey, TValue2>>(");
+			    textWriter.WriteLine(
+				    $"() => source.BeginRead().WithMapping<TKey, TValue1, TValue2>({string.Join(", ", readOnlyArguments)}),");
+			    textWriter.WriteLine(
+				    $"() => source.BeginWrite().WithMapping<TKey, TValue1, TValue2>({string.Join(", ", readWriteArguments)}));");
+			    
+			    textWriter.WriteLine("}");
+		    }
+
+		    textWriter.WriteLine("#endregion");
+		    
+		    textWriter.WriteLine("#region WithMapping - read-only transactional different key types");
+		    
+		    foreach (var iface in interfaces)
+		    {
+			    if (!iface.Contains("Disposable") || iface.Contains("ReadOnly") || iface.Contains("Cached"))
+			    {
+				    continue;
+			    }
+			    
+			    var parameters = new List<string>();
+			    var readOnlyArguments = new List<string>();
+			    var readWriteArguments = new List<string>();
+			    if (iface.Contains("Queryable"))
+			    {
+				    parameters.Add("Expression<Func<TValue1, TValue2>> convertToValue2");
+			    }
+			    else
+			    {
+				    parameters.Add("Func<TValue1, TValue2> convertToValue2");
+			    }
+			    readOnlyArguments.Add("convertToValue2");
+			    readWriteArguments.Add("convertToValue2");
+
+			    parameters.Add("Func<TKey1, TKey2> convertToKey2");
+			    readOnlyArguments.Add("convertToKey2");
+			    readWriteArguments.Add("convertToKey2");
+			    
+			    parameters.Add("Func<TValue2, TValue1> convertToValue1");
+			    readWriteArguments.Add("convertToValue1");
+			    
+			    parameters.Add("Func<TKey2, TKey1> convertToKey1");
+			    readOnlyArguments.Add("convertToKey1");
+			    readWriteArguments.Add("convertToKey1");
+
+			    var readOnlyInterface = iface.Replace("Dictionary", "ReadOnlyDictionary").Replace("Cached", "");
+			    
+			    textWriter.WriteLine(
+				    $"public static IReadOnlyTransactionalCollection<{readOnlyInterface}<TKey2, TValue2>> WithMapping<TKey1, TValue1, TKey2, TValue2>(this IReadOnlyTransactionalCollection<{readOnlyInterface}<TKey1, TValue1>> source, {string.Join(", ", parameters)}) {{");
+
+			    textWriter.WriteLine(
+				    $"return new AnonymousReadOnlyTransactionalCollection<{readOnlyInterface}<TKey2, TValue2>>(");
+			    textWriter.WriteLine(
+				    $"() => source.BeginRead().WithMapping<TKey1, TValue1, TKey2, TValue2>({string.Join(", ", readOnlyArguments)}));");
+			    
+			    textWriter.WriteLine("}");
+		    }
+
+		    textWriter.WriteLine("#endregion");
+		    
+		    textWriter.WriteLine("#region WithMapping - read-only transactional same key type");
+		    
+		    foreach (var iface in interfaces)
+		    {
+			    if (!iface.Contains("Disposable") || iface.Contains("ReadOnly") || iface.Contains("Cached"))
+			    {
+				    continue;
+			    }
+			    
+			    var parameters = new List<string>();
+			    var readOnlyArguments = new List<string>();
+			    var readWriteArguments = new List<string>();
+			    if (iface.Contains("Queryable"))
+			    {
+				    parameters.Add("Expression<Func<TValue1, TValue2>> convertToValue2");
+			    }
+			    else
+			    {
+				    parameters.Add("Func<TValue1, TValue2> convertToValue2");
+			    }
+			    readOnlyArguments.Add("convertToValue2");
+			    readWriteArguments.Add("convertToValue2");
+
+			    parameters.Add("Func<TValue2, TValue1> convertToValue1");
+			    readWriteArguments.Add("convertToValue1");
+
+			    var readOnlyInterface = iface.Replace("Dictionary", "ReadOnlyDictionary").Replace("Cached", "");
+
+			    textWriter.WriteLine(
+				    $"public static IReadOnlyTransactionalCollection<{readOnlyInterface}<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(this IReadOnlyTransactionalCollection<{readOnlyInterface}<TKey, TValue1>> source, {string.Join(", ", parameters)}) {{");
+
+			    textWriter.WriteLine(
+				    $"return new AnonymousReadOnlyTransactionalCollection<{readOnlyInterface}<TKey, TValue2>>(");
+			    textWriter.WriteLine(
+				    $"() => source.BeginRead().WithMapping<TKey, TValue1, TValue2>({string.Join(", ", readOnlyArguments)}));");
+			    
+			    textWriter.WriteLine("}");
+		    }
+
+		    textWriter.WriteLine("#endregion");
+	    }
+	    
+        static void Main(string[] args)
         {
-            for (var i = indexInList; i < list.Count; i++)
-            {
-                var item = list[i];
-                var itemArray = new[] { item };
-                if (sizeOfCombination == 1) {
-	                yield return itemArray;
-                }
-                else
-                {
-                    foreach (var subsequentList in CalcCombination<T>(list, sizeOfCombination - 1, i + 1))
-                    {
-                        yield return itemArray.Concat(subsequentList).ToList();
-                    }
-                }
-            }
+	        var ioService = new IoService(new ReactiveProcessFactory());
+	        var repoRoot = ioService.CurrentDirectory.Ancestors().First(ancestor => (ancestor / ".git").IsFolder());
+
+	        var dictionaryExtensionsFilePath = repoRoot / "src" / "ComposableCollections" / "DictionaryExtensions.g.cs";
+	        using (var streamWriter = dictionaryExtensionsFilePath.OpenWriter())
+	        {
+		        streamWriter.WriteLine(@"using System;
+		        using System.Collections.Generic;
+		        using System.Linq;
+		        using System.Linq.Expressions;
+		        using ComposableCollections.Common;
+		        using ComposableCollections.Dictionary;
+		        using ComposableCollections.Dictionary.Adapters;
+		        using ComposableCollections.Dictionary.Decorators;
+		        using ComposableCollections.Dictionary.ExtensionMethodHelpers;
+		        using ComposableCollections.Dictionary.Interfaces;
+		        using ComposableCollections.Dictionary.Sources;
+		        using ComposableCollections.Dictionary.Transactional;
+		        using ComposableCollections.Dictionary.WithBuiltInKey;
+		        using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
+		        using UtilityDisposables;
+
+			        namespace ComposableCollections
+		        {
+        public static partial class DictionaryExtensions
+        {");
+		        GenerateWithReadWriteLockExtensionMethods(streamWriter);
+		        GenerateWithDefaultValueExtensionMethods(streamWriter);
+		        GenerateWithWriteCachingExtensionMethods(streamWriter);
+		        GenerateWithRefreshingExtensionMethods(streamWriter);
+		        GenerateWithMappingExtensionMethods(streamWriter);
+		        streamWriter.WriteLine("}\n}");
+	        }
         }
     }
 }

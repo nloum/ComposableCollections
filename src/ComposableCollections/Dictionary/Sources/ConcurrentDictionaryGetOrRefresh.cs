@@ -2,9 +2,9 @@ namespace ComposableCollections.Dictionary.Sources
 {
     public class ConcurrentDictionaryGetOrRefresh<TKey, TValue> : ConcurrentDictionary<TKey, TValue>
     {
-        private readonly RefreshValue<TKey, TValue> _refreshValue;
+        private readonly RefreshValueWithOptionalPersistence<TKey, TValue> _refreshValue;
 
-        public ConcurrentDictionaryGetOrRefresh(RefreshValue<TKey, TValue> refreshValue)
+        public ConcurrentDictionaryGetOrRefresh(RefreshValueWithOptionalPersistence<TKey, TValue> refreshValue)
         {
             _refreshValue = refreshValue;
         }

@@ -11,19 +11,29 @@ namespace ComposableCollections.Dictionary.Decorators
     public class DictionaryGetOrRefreshDecorator<TKey, TValue> : IComposableDictionary<TKey, TValue>
     {
         private IComposableDictionary<TKey, TValue> _source;
-        private RefreshValue<TKey, TValue> _refreshValue;
+        private RefreshValueWithOptionalPersistence<TKey, TValue> _refreshValue;
+
+        public DictionaryGetOrRefreshDecorator(IComposableDictionary<TKey, TValue> source, RefreshValueWithOptionalPersistence<TKey, TValue> refreshValue)
+        {
+            _source = source;
+            _refreshValue = refreshValue;
+        }
 
         public DictionaryGetOrRefreshDecorator(IComposableDictionary<TKey, TValue> source, RefreshValue<TKey, TValue> refreshValue)
         {
             _source = source;
-            _refreshValue = refreshValue;
+            _refreshValue = (TKey key, TValue value, out TValue refreshedValue, out bool persist) =>
+            {
+                persist = true;
+                return refreshValue(key, value, out refreshedValue);
+            };
         }
 
         protected DictionaryGetOrRefreshDecorator()
         {
         }
 
-        protected void Initialize(IComposableDictionary<TKey, TValue> source, RefreshValue<TKey, TValue> getDefaultValue)
+        protected void Initialize(IComposableDictionary<TKey, TValue> source, RefreshValueWithOptionalPersistence<TKey, TValue> getDefaultValue)
         {
             _source = source;
             _refreshValue = getDefaultValue;

@@ -10,7 +10,8 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers.BaseClasses
 {
     public class
         ReadOnlyDictionaryWithBuiltInKeyTransformations<TKey1, TValue1, TKey2, TValue2, TParameter> :
-            IReadOnlyDictionaryWithBuiltInKeyTransformations<TKey1, TValue1, TKey2, TValue2, TParameter>
+            IReadOnlyDictionaryWithBuiltInKeyTransformations<TKey1, TValue1, TKey2, TValue2, TParameter>,
+            IQueryableReadOnlyDictionaryWithBuiltInKeyTransformations<TKey1, TValue1, TKey2, TValue2, TParameter>
     {
         private readonly Func<IComposableReadOnlyDictionary<TKey1, TValue1>, TParameter,
             IComposableReadOnlyDictionary<TKey2, TValue2>> _transform1;

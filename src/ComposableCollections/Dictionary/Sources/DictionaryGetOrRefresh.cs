@@ -2,13 +2,14 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary.Sources
 {
-    public delegate bool RefreshValue<TKey, TValue>(TKey key, TValue previousValue, out TValue refreshedValue, out bool persist);
+    public delegate bool RefreshValueWithOptionalPersistence<TKey, TValue>(TKey key, TValue previousValue, out TValue refreshedValue, out bool persist);
+    public delegate bool RefreshValue<TKey, TValue>(TKey key, TValue previousValue, out TValue refreshedValue);
     
     public class DictionaryGetOrRefresh<TKey, TValue> : ComposableDictionary<TKey, TValue>
     {
-        private readonly RefreshValue<TKey, TValue> _refreshValue;
+        private readonly RefreshValueWithOptionalPersistence<TKey, TValue> _refreshValue;
 
-        public DictionaryGetOrRefresh(RefreshValue<TKey, TValue> refreshValue)
+        public DictionaryGetOrRefresh(RefreshValueWithOptionalPersistence<TKey, TValue> refreshValue)
         {
             _refreshValue = refreshValue;
         }

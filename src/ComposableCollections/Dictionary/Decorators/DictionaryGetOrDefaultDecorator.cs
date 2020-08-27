@@ -11,19 +11,29 @@ namespace ComposableCollections.Dictionary.Decorators
     public class DictionaryGetOrDefaultDecorator<TKey, TValue> : IComposableDictionary<TKey, TValue>
     {
         private IComposableDictionary<TKey, TValue> _source;
-        private GetDefaultValue<TKey, TValue> _getDefaultValue;
+        private GetDefaultValueWithOptionalPersistence<TKey, TValue> _getDefaultValue;
+
+        public DictionaryGetOrDefaultDecorator(IComposableDictionary<TKey, TValue> source, GetDefaultValueWithOptionalPersistence<TKey, TValue> getDefaultValue)
+        {
+            _source = source;
+            _getDefaultValue = getDefaultValue;
+        }
 
         public DictionaryGetOrDefaultDecorator(IComposableDictionary<TKey, TValue> source, GetDefaultValue<TKey, TValue> getDefaultValue)
         {
             _source = source;
-            _getDefaultValue = getDefaultValue;
+            _getDefaultValue = (TKey key, out TValue value, out bool persist) =>
+            {
+                persist = true;
+                return getDefaultValue(key, out value);
+            };
         }
 
         protected DictionaryGetOrDefaultDecorator()
         {
         }
 
-        protected void Initialize(IComposableDictionary<TKey, TValue> source, GetDefaultValue<TKey, TValue> getDefaultValue)
+        protected void Initialize(IComposableDictionary<TKey, TValue> source, GetDefaultValueWithOptionalPersistence<TKey, TValue> getDefaultValue)
         {
             _source = source;
             _getDefaultValue = getDefaultValue;

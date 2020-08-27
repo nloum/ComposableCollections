@@ -17,8 +17,11 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
             var composableDictionaryTransformations = new ComposableDictionaryTransformations<TKey, TValue, object>(Transform);
             ComposableDictionaryTransformations = composableDictionaryTransformations;
             DictionaryWithBuiltInKeyTransformations = composableDictionaryTransformations;
-            TransactionalTransformations = new TransactionalTransformations<TKey, TValue, TKey, TValue, object>(new ComposableReadOnlyDictionaryPassThroughTransformations<TKey, TValue, object>(), composableDictionaryTransformations);
-            TransactionalTransformationsWithBuiltInKey = new TransactionalTransformationsWithBuiltInKey<TKey, TValue, TKey, TValue, object>(new ReadOnlyDictionaryWithBuiltInKeyPassThroughTransformations<TKey, TValue, object>(), DictionaryWithBuiltInKeyTransformations);
+            var passThrough = new ComposableReadOnlyDictionaryPassThroughTransformations<TKey, TValue, object>();
+            TransactionalTransformations = new TransactionalTransformations<TKey, TValue, TKey, TValue, object>(passThrough, composableDictionaryTransformations, passThrough, composableDictionaryTransformations);
+            var readOnlyPassThrough =
+                new ReadOnlyDictionaryWithBuiltInKeyPassThroughTransformations<TKey, TValue, object>();
+            TransactionalTransformationsWithBuiltInKey = new TransactionalTransformationsWithBuiltInKey<TKey, TValue, TKey, TValue, object>(readOnlyPassThrough, DictionaryWithBuiltInKeyTransformations, readOnlyPassThrough, DictionaryWithBuiltInKeyTransformations);
         }
         
         private static IComposableDictionary<TKey, TValue> Transform(IComposableDictionary<TKey, TValue> source, object p)

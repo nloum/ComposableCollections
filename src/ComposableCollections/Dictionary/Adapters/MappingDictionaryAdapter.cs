@@ -56,7 +56,7 @@ namespace ComposableCollections.Dictionary.Adapters
             _innerValues = innerValues;
         }
 
-        public MappingDictionaryAdapter(IComposableDictionary<TKey1, TValue1> innerValues, Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertTo2, Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertTo1, Func<TKey2, TKey1> convertToKey1, Func<TKey1, TKey2> convertToKey2)
+        public MappingDictionaryAdapter(IComposableDictionary<TKey1, TValue1> innerValues, Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertTo2, Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertTo1, Func<TKey1, TKey2> convertToKey2, Func<TKey2, TKey1> convertToKey1)
         {
             _innerValues = innerValues;
             _convertTo2 = convertTo2;

@@ -10,23 +10,23 @@ namespace ComposableCollections.Dictionary.ExtensionMethodHelpers
 {
     public static class WithDefaultValueTransformations<TKey, TValue>
     {
-        public static IComposableDictionaryTransformations<TKey, TValue, TKey, TValue, GetDefaultValue<TKey, TValue>> ComposableDictionaryTransformations { get; }
-        public static IDictionaryWithBuiltInKeyTransformations<TKey, TValue, TKey, TValue, GetDefaultValue<TKey, TValue>> DictionaryWithBuiltInKeyTransformations { get; }
-        public static ITransactionalTransformations<TKey, TValue, TKey, TValue, GetDefaultValue<TKey, TValue>> TransactionalTransformations { get; }
-        public static ITransactionalTransformationsWithBuiltInKey<TKey, TValue, TKey, TValue, GetDefaultValue<TKey, TValue>> TransactionalTransformationsWithBuiltInKey { get; }
+        public static IComposableDictionaryTransformations<TKey, TValue, TKey, TValue, GetDefaultValueWithOptionalPersistence<TKey, TValue>> ComposableDictionaryTransformations { get; }
+        public static IDictionaryWithBuiltInKeyTransformations<TKey, TValue, TKey, TValue, GetDefaultValueWithOptionalPersistence<TKey, TValue>> DictionaryWithBuiltInKeyTransformations { get; }
+        public static ITransactionalTransformations<TKey, TValue, TKey, TValue, GetDefaultValueWithOptionalPersistence<TKey, TValue>> TransactionalTransformations { get; }
+        public static ITransactionalTransformationsWithBuiltInKey<TKey, TValue, TKey, TValue, GetDefaultValueWithOptionalPersistence<TKey, TValue>> TransactionalTransformationsWithBuiltInKey { get; }
 
         static WithDefaultValueTransformations()
         {
-            var composableDictionaryTransformations = new ComposableDictionaryTransformations<TKey, TValue, GetDefaultValue<TKey, TValue>>(Transform);
+            var composableDictionaryTransformations = new ComposableDictionaryTransformations<TKey, TValue, GetDefaultValueWithOptionalPersistence<TKey, TValue>>(Transform);
             ComposableDictionaryTransformations = composableDictionaryTransformations;
             DictionaryWithBuiltInKeyTransformations = composableDictionaryTransformations;
-            var transactionalTransformations = new TransactionalTransformationsWriteWrite<TKey, TValue, TKey, TValue, GetDefaultValue<TKey, TValue>>(composableDictionaryTransformations, composableDictionaryTransformations);
+            var transactionalTransformations = new TransactionalTransformationsWriteWrite<TKey, TValue, TKey, TValue, GetDefaultValueWithOptionalPersistence<TKey, TValue>>(composableDictionaryTransformations, composableDictionaryTransformations);
             TransactionalTransformations = transactionalTransformations;
             TransactionalTransformationsWithBuiltInKey = transactionalTransformations;
         }
 
         private static IComposableDictionary<TKey, TValue> Transform(IComposableDictionary<TKey, TValue> source,
-            GetDefaultValue<TKey, TValue> p)
+            GetDefaultValueWithOptionalPersistence<TKey, TValue> p)
         {
             return new DictionaryGetOrDefaultDecorator<TKey, TValue>(source, p);
         }

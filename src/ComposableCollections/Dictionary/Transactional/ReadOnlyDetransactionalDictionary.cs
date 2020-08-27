@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using ComposableCollections.Common;
 using ComposableCollections.Dictionary.Interfaces;
+using ComposableCollections.Utilities;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary.Transactional
@@ -109,58 +110,6 @@ namespace ComposableCollections.Dictionary.Transactional
                 {
                     return dictionary[key];
                 }
-            }
-        }
-
-        protected class Enumerator<T> : IEnumerator<T>
-        {
-            private readonly IEnumerator<T> _source;
-            private readonly IDisposable _disposable;
-
-            public Enumerator(IEnumerator<T> source, IDisposable disposable)
-            {
-                _source = source;
-                _disposable = disposable;
-            }
-
-            public bool MoveNext()
-            {
-                return _source.MoveNext();
-            }
-
-            public void Reset()
-            {
-                _source.Reset();
-            }
-
-            public void Dispose()
-            {
-                _source.Dispose();
-                _disposable.Dispose();
-            }
-
-            object IEnumerator.Current => Current;
-
-            public T Current => _source.Current;
-        }
-
-        protected class Enumerable<T> : IEnumerable<T>
-        {
-            private readonly Func<IEnumerator<T>> _getEnumerator;
-
-            public Enumerable(Func<IEnumerator<T>> getEnumerator)
-            {
-                _getEnumerator = getEnumerator;
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
-
-            public IEnumerator<T> GetEnumerator()
-            {
-                return _getEnumerator();
             }
         }
     }

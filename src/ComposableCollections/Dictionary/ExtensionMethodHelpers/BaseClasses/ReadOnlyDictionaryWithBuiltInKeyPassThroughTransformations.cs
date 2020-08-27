@@ -3,7 +3,8 @@ using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 
 namespace ComposableCollections.Dictionary.ExtensionMethodHelpers.BaseClasses
 {
-    public class ReadOnlyDictionaryWithBuiltInKeyPassThroughTransformations<TKey, TValue, TParameter> : IReadOnlyDictionaryWithBuiltInKeyTransformations<TKey, TValue, TKey, TValue, TParameter>
+    public class ReadOnlyDictionaryWithBuiltInKeyPassThroughTransformations<TKey, TValue, TParameter> : IReadOnlyDictionaryWithBuiltInKeyTransformations<TKey, TValue, TKey, TValue, TParameter>,
+        IQueryableReadOnlyDictionaryWithBuiltInKeyTransformations<TKey, TValue, TKey, TValue, TParameter>
     {
         public IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue> Transform(
             IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue> source, TParameter parameter)

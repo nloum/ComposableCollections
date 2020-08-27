@@ -7,11 +7,8 @@
 
     <ItemGroup>
       <PackageReference Include="Humanizer" Version="2.8.26" />
+      <PackageReference Include="IoFluently" Version="1.2.0-alpha0138" />
       <PackageReference Include="MoreCollections" Version="1.1.0-alpha0091" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\ComposableCollections\ComposableCollections.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using ComposableCollections.Dictionary.Base;
 using ComposableCollections.Dictionary.Interfaces;
@@ -8,12 +8,13 @@ using UtilityDisposables;
 
 namespace ComposableCollections.Dictionary.Decorators
 {
-    public class ReadWriteLockDictionaryDecorator<TKey, TValue> : LockedDictionaryBase<TKey, TValue>
+    public class ReadWriteLockQueryableDictionaryDecorator<TKey, TValue> : LockedDictionaryBase<TKey, TValue>, IQueryableDictionary<TKey, TValue>
     {
-        private readonly IComposableDictionary<TKey, TValue> _source;
+        private readonly IQueryableDictionary<TKey, TValue> _source;
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
-        
-        public ReadWriteLockDictionaryDecorator(IComposableDictionary<TKey, TValue> source) : base(source)
+        private IQueryable<TValue> _values;
+
+        public ReadWriteLockQueryableDictionaryDecorator(IQueryableDictionary<TKey, TValue> source) : base(source)
         {
             _source = source;
         }
@@ -74,6 +75,18 @@ namespace ComposableCollections.Dictionary.Decorators
                         EndRead();
                     }));
                 });
+            }
+        }
+
+        IQueryable<TValue> IQueryableReadOnlyDictionary<TKey, TValue>.Values
+        {
+            get
+            {
+                BeginRead();
+                return new Queryable<TValue>(_source.Values, new AnonymousDisposable(() =>
+                {
+                    EndRead();
+                }));
             }
         }
     }

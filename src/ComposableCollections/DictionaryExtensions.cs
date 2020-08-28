@@ -8,6 +8,7 @@ using ComposableCollections.Dictionary.Sources;
 using ComposableCollections.Dictionary.Transactional;
 using ComposableCollections.Dictionary.WithBuiltInKey;
 using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
+using ComposableCollections.Utilities;
 using UtilityDisposables;
 
 namespace ComposableCollections
@@ -202,6 +203,39 @@ namespace ComposableCollections
         
         #region Select
         
+        /// <summary>
+        /// Converts the read-only and read/write objects
+        /// </summary>
+        public static ITransactionalCollection<Disposable<TReadOnly2>, Disposable<TReadWrite2>>
+            SelectWithDisposable<TReadOnly1, TReadWrite1, TReadOnly2, TReadWrite2>(
+                this ITransactionalCollection<TReadOnly1, TReadWrite1> source, Func<TReadOnly1, TReadOnly2> readOnly,
+                Func<TReadWrite1, TReadWrite2> readWrite) where TReadOnly1 : IDisposable where TReadWrite1 : IDisposable
+        {
+            return new AnonymousTransactionalCollection<Disposable<TReadOnly2>, Disposable<TReadWrite2>>(() =>
+            {
+                var sourceReadOnly = source.BeginRead();
+                return new Disposable<TReadOnly2>(sourceReadOnly, readOnly(sourceReadOnly));
+            }, () =>
+            {
+                var sourceReadWrite = source.BeginWrite();
+                return new Disposable<TReadWrite2>(sourceReadWrite, readWrite(sourceReadWrite));
+            });
+        }
+        
+        /// <summary>
+        /// Converts the read-only object
+        /// </summary>
+        public static IReadOnlyTransactionalCollection<Disposable<TReadOnly2>>
+            SelectWithDisposable<TReadOnly1, TReadOnly2>(
+                this IReadOnlyTransactionalCollection<TReadOnly1> source, Func<TReadOnly1, TReadOnly2> readOnly) where TReadOnly1 : IDisposable
+        {
+            return new AnonymousReadOnlyTransactionalCollection<Disposable<TReadOnly2>>(() =>
+            {
+                var sourceReadOnly = source.BeginRead();
+                return new Disposable<TReadOnly2>(sourceReadOnly, readOnly(sourceReadOnly));
+            });
+        }
+
         /// <summary>
         /// Converts the read-only and read/write objects
         /// </summary>

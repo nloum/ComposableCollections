@@ -14,7 +14,7 @@ namespace ComposableCollections.Tests.Adapters
             var source = new List<string>();
             source.Add("Hi");
             source.Add("Hello");
-            var uut = source.AsQueryable().ToQueryableReadOnlyDictionary(x => x.Length);
+            var uut = source.AsQueryable().AsQueryableReadOnlyDictionary(x => x.Length);
             var keyValues = uut.ToList();
             keyValues.Count.Should().Be(2);
             keyValues[0].Key.Should().Be(2);

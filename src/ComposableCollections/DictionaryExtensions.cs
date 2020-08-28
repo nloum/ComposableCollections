@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using ComposableCollections.Common;
 using ComposableCollections.Dictionary;
 using ComposableCollections.Dictionary.Adapters;
@@ -15,6 +18,12 @@ namespace ComposableCollections
 {
     public static partial class DictionaryExtensions
     {
+        public static IQueryableReadOnlyDictionary<TKey, TValue> ToQueryableReadOnlyDictionary<TKey, TValue>(
+            this IQueryable<TValue> queryable, Expression<Func<TValue, TKey>> getKey)
+        {
+            return new QueryableToQueryableReadOnlyDictionaryAdapter<TKey, TValue>(queryable, getKey);
+        }
+        
         #region To and from IKeyValue
         
         /// <summary>

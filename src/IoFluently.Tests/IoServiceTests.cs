@@ -85,7 +85,23 @@ namespace IoFluently.Tests
 
             result.ToString().Should().Be("..\\test3\\test.csproj");
         }
+
+        [TestMethod]
+        public void ShouldParseWithComplexMixedDirectorySeparators()
+        {
+            var ioService = CreateUnitUnderTest();
+            var result = ioService.ParseAbsolutePath("C:\\test1\\./test2\\");
+            result.ToString().Should().Be("C:\\test1\\test2");
+        }
         
+        [TestMethod]
+        public void ShouldParseWithMixedDirectorySeparators()
+        {
+            var ioService = CreateUnitUnderTest();
+            var result = ioService.ParseAbsolutePath("C:\\test1/test2\\");
+            result.ToString().Should().Be("C:\\test1\\test2");
+        }
+
         [TestMethod]
         public void MovingShouldWork()
         {

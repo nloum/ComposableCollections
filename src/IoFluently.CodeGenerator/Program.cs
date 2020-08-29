@@ -74,6 +74,12 @@ using UnitsNet;
 
 namespace IoFluently
 {
+    /// <summary>
+    /// Contains extension methods on AbsolutePath, RelativePath, and IAbsolutePathTranslation that essentially wrap
+    /// methods on the object's IoService property. That is, myAbsolutePath.RelativeTo(parameter1) is equivalent to
+    /// myAbsolutePath.IoService.RelativeTo(myAbsolutePath, parameter1). This shorthand makes the syntax be fluent
+    /// while allowing the IIoService to be dependency injectable.
+    /// </summary>
     public static partial class IoExtensions
     {");
                 
@@ -87,11 +93,7 @@ namespace IoFluently
         
         private static void GenerateIoExtensions(AbsolutePath repoRoot, TextWriter textWriter)
         {
-            var xmlDoc = (repoRoot / "src/IoFluently/bin/Debug/IoFluently.xml").AsXmlFile();
-            var csharpDocumentation = xmlDoc.Read();
             var ioServiceType = typeof(IIoService);
-            // var memberDocs = csharpDocumentation.Members.Where(member => member.Name == "M:IoFluently.IIoService")
-            //     .ToImmutableDictionary(GetMember, x => x);
             
             var methods = ioServiceType.GetMethods();
             foreach (var method in methods.OrderBy(method => method.Name).ThenBy(method => method.GetParameters().Length).ThenBy(method => method.GetHashCode()))

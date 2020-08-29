@@ -14,111 +14,46 @@ namespace IoFluently.Documentation
     {
         static void Main(string[] args)
         {
-            var service = new IoService(new ReactiveProcessFactory());
-            var readme = (service.CurrentDirectory / "readme.md").AsSmallTextFile();
-            var text = readme.Read();
-            Console.WriteLine(text);
+            var ioService = new IoService(new ReactiveProcessFactory());
+
+            var repoRoot = ioService.CurrentDirectory.Ancestors().First(ancestor => ioService.IsFolder(ancestor / ".git"));
+            var xmlDoc = (repoRoot / "src/IoFluently/bin/Debug/IoFluently.xml").AsXmlFile();
+            var csharpDocumentation = xmlDoc.Read();
+
+            var memberNodes = csharpDocumentation.SelectNodes("/doc/members/member").Cast<XmlElement>();
             
-            var repositoryRoot = service.CurrentDirectory.Ancestors().First(ancestor => (ancestor / ".git").Exists());
-            var documentationRoot = repositoryRoot / "docs";
+            var types = memberNodes.Where(memberNode => memberNode.Attributes["name"].Value[0] == 'T')
+                //.Select(memberNode => memberNode.Attributes["name"].Value.Substring(2))
+                .ToImmutableHashSet();
 
-            var markdownFiles = documentationRoot.Descendants()
-                .ToLiveLinq()
-                .Where(x => x.HasExtension(".md") && x.GetPathType() == PathType.File)
-                .Select(x => x.AsSmallTextFile());
-
-            var htmls = markdownFiles
-                .Select(markdownFile =>
-                {
-                    var markdown = markdownFile.Read();
-                    var html = "<html>" + Markdig.Markdown.ToHtml(markdown) + "</html>";
-                    var document = new XmlDocument();
-                    document.LoadXml(html);
-                    return new {markdownFile.Path, Html = document};
-                });
-
-            var backLinks = htmls.SelectMany(html =>
-                {
-                    var links = html.Html.SelectNodes("//a");
-                    var backLinksForThisFile = new List<Tuple<AbsolutePath, AbsolutePath, string>>();
-                    foreach (var link in links)
-                    {
-                        var linkEl = link as XmlElement;
-                        var href = linkEl.Attributes["href"].InnerText;
-                        var text = linkEl.InnerText;
-                        if (href.Contains(":"))
-                        {
-                            continue;
-                        }
-
-                        var maybePath = service.TryParseRelativePath(href);
-                        if (!maybePath.HasValue)
-                        {
-                            continue;
-                        }
-
-                        var linkTo = (html.Path.Parent() / maybePath.Value).Simplify();
-                        backLinksForThisFile.Add(Tuple.Create(html.Path, linkTo, text));
-                    }
-
-                    return backLinksForThisFile.AsEnumerable();
-                })
-                .GroupBy(x => x.Item2)
-                .SelectValue(x => x.Select(y => Tuple.Create(y.Item1, y.Item3)))
-                .ToReadOnlyObservableDictionary();
-            
-            var transformedHtmls = htmls.Select(html => backLinks.ToLiveLinq()[html.Path]
-                .SelectLatest(x =>
-                {
-                    return x.Select(y => y.ToLiveLinq().ToObservableState()).Otherwise(() =>
-                            Observable.Return(ImmutableHashSet<Tuple<AbsolutePath, string>>.Empty));
-                })
-                .Select(backLinksForThisHtml =>
+            foreach (var typeElement in types)
             {
-                var links = html.Html.SelectNodes("//a");
-                foreach (var link in links)
+                var typeName = typeElement.Attributes["name"].Value.Substring(2);
+                var typeDocumentationFile = repoRoot / "docs" / "src" / "docs" / "api" / $"{typeName}.mdx";    
+                
+                using (var writer = typeDocumentationFile.OpenWriter())
                 {
-                    var linkEl = link as XmlElement;
-                    var href = linkEl.Attributes["href"].InnerText;
-                    var text = linkEl.InnerText;
-                    if (href.Contains(":"))
+                    writer.WriteLine("---");
+                    writer.WriteLine($"title: '{typeName}'");
+                    writer.WriteLine("---\n");
+                
+                    foreach (var memberNode in memberNodes)
                     {
-                        continue;
-                    }
+                        var name = (XmlAttribute)memberNode.SelectSingleNode("@name");
+                        if (!name.Value.Substring(2).StartsWith(typeName + "."))
+                        {
+                            continue;
+                        }
+                    
+                        var summary = (XmlElement)memberNode.SelectSingleNode("summary");
+                        var parameters = memberNode.SelectNodes("param").Cast<XmlElement>();
+                        var returns = (XmlElement) memberNode.SelectSingleNode("returns");
 
-                    var maybePath = service.TryParseRelativePath(href);
-                    if (!maybePath.HasValue)
-                    {
-                        continue;
-                    }
-
-                    if (linkEl.Attributes["href"].InnerText.EndsWith(".md"))
-                    {
-                        linkEl.Attributes["href"].InnerText =
-                            linkEl.Attributes["href"].InnerText
-                                .Substring(0, linkEl.Attributes["href"].InnerText.Length - 3) + ".html";
+                        writer.WriteLine($"## {name.Value.Substring(3 + typeName.Length)}\n");
+                        writer.WriteLine(string.Join("\n", summary.InnerXml.Split("\n").Select(line => line.Trim())));
                     }
                 }
-                
-                var backLinkHtml =
-                    "<ul>" + string.Join("\n",
-                        backLinksForThisHtml.Select(x =>
-                        {
-                            var relativePath = x.Item1.WithExtension(".html").RelativeTo(documentationRoot);
-                            return
-                                    $"<li>This page is \"{x.Item2}\" of - <a href=\"{relativePath}\">{relativePath}</a></li>";
-                        })) + "</ul>";
-                return new {html.Path, Html = html.Html.OuterXml + backLinkHtml};
-            }));
-            
-            transformedHtmls
-                .Subscribe(addedHtml => {
-                    Console.WriteLine($"Adding a markdown file: {addedHtml.Path}");
-                    addedHtml.Path.WithExtension(".html").WriteAllText(addedHtml.Html);
-                }, (removedHtml, removalMode) => {
-                    Console.WriteLine($"Removing a markdown file: {removedHtml.Path}");
-                    removedHtml.Path.WithExtension(".html").Delete();
-                });
+            }
         }
     }
 }

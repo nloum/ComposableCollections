@@ -13,6 +13,12 @@ using UnitsNet;
 
 namespace IoFluently
 {
+    /// <summary>
+    /// Contains extension methods on AbsolutePath, RelativePath, and IAbsolutePathTranslation that essentially wrap
+    /// methods on the object's IoService property. That is, myAbsolutePath.RelativeTo(parameter1) is equivalent to
+    /// myAbsolutePath.IoService.RelativeTo(myAbsolutePath, parameter1). This shorthand makes the syntax be fluent
+    /// while allowing the IIoService to be dependency injectable.
+    /// </summary>
     public static partial class IoExtensions
     {
         public static AbsolutePath Ancestor(this AbsolutePath path, int level)
@@ -118,12 +124,12 @@ namespace IoFluently
             return path.IoService.DeleteFolder(path, recursive);
         }
 
-        public static AbsolutePath Descendant(this AbsolutePath path, String[] paths)
+        public static AbsolutePath Descendant(this AbsolutePath path, AbsolutePath[] paths)
         {
             return path.IoService.Descendant(path, paths);
         }
 
-        public static AbsolutePath Descendant(this AbsolutePath path, AbsolutePath[] paths)
+        public static AbsolutePath Descendant(this AbsolutePath path, String[] paths)
         {
             return path.IoService.Descendant(path, paths);
         }
@@ -409,12 +415,12 @@ namespace IoFluently
             return attributes.IoService.TryCreationTime(attributes);
         }
 
-        public static IMaybe<AbsolutePath> TryDescendant(this AbsolutePath path, AbsolutePath[] paths)
+        public static IMaybe<AbsolutePath> TryDescendant(this AbsolutePath path, String[] paths)
         {
             return path.IoService.TryDescendant(path, paths);
         }
 
-        public static IMaybe<AbsolutePath> TryDescendant(this AbsolutePath path, String[] paths)
+        public static IMaybe<AbsolutePath> TryDescendant(this AbsolutePath path, AbsolutePath[] paths)
         {
             return path.IoService.TryDescendant(path, paths);
         }
@@ -533,20 +539,20 @@ namespace IoFluently
             path.IoService.WriteAllText(path, text);
         }
 
-        public static void WriteText(this AbsolutePath absolutePath, string text, FileMode fileMode = FileMode.Create,
-            FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None, Encoding encoding = null,
-            int bufferSize = 4096, Boolean leaveOpen = false)
-        {
-            absolutePath.IoService.WriteText(absolutePath, text, fileMode, fileAccess, fileShare, encoding, bufferSize,
-                leaveOpen);
-        }
-
         public static void WriteText(this AbsolutePath absolutePath, IEnumerable<string> lines,
             FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write,
             FileShare fileShare = FileShare.None, Encoding encoding = null, int bufferSize = 4096,
             Boolean leaveOpen = false)
         {
             absolutePath.IoService.WriteText(absolutePath, lines, fileMode, fileAccess, fileShare, encoding, bufferSize,
+                leaveOpen);
+        }
+
+        public static void WriteText(this AbsolutePath absolutePath, string text, FileMode fileMode = FileMode.Create,
+            FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None, Encoding encoding = null,
+            int bufferSize = 4096, Boolean leaveOpen = false)
+        {
+            absolutePath.IoService.WriteText(absolutePath, text, fileMode, fileAccess, fileShare, encoding, bufferSize,
                 leaveOpen);
         }
     }

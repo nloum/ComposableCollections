@@ -27,7 +27,9 @@ namespace IoFluently
         protected readonly object _lock = new object();
         protected string defaultDirectorySeparatorForThisEnvironment;
         protected PathFlags? defaultFlagsForThisEnvironment;
-        
+
+        public IOpenFilesTrackingService OpenFilesTrackingService { get; } = new OpenFilesTrackingService();
+
         public virtual IReactiveProcessFactory ReactiveProcessFactory { get; }
 
         public virtual AbsolutePath CurrentDirectory => TryParseAbsolutePath(Environment.CurrentDirectory).Value;

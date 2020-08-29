@@ -70,7 +70,7 @@ namespace IoFluently.Documentation
             var transformedHtmls = htmls.Select(html => backLinks.ToLiveLinq()[html.Path]
                 .SelectLatest(x =>
                 {
-                    return x.Select(y => y.ToObservableState()).Otherwise(() =>
+                    return x.Select(y => y.ToLiveLinq().ToObservableState()).Otherwise(() =>
                             Observable.Return(ImmutableHashSet<Tuple<AbsolutePath, string>>.Empty));
                 })
                 .Select(backLinksForThisHtml =>

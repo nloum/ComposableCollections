@@ -21,6 +21,8 @@ namespace IoFluently
         PathFlags GetDefaultFlagsForThisEnvironment();
         string GetDefaultDirectorySeparatorForThisEnvironment();
 
+        IOpenFilesTrackingService OpenFilesTrackingService { get; }
+        
         /// <summary>
         ///     Returns a regex that filters files the same as the specified pattern.
         ///     From here: http://www.java2s.com/Code/CSharp/Regular-Expressions/Checksifnamematchespatternwithandwildcards.htm

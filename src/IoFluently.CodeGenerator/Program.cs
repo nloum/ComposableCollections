@@ -1,19 +1,63 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Xml.Serialization;
+using ReactiveProcesses;
 
 namespace IoFluently.CodeGenerator
 {
+    // [XmlRoot("doc")]
+    // public class CSharpDocumentationXmlDto
+    // {
+    //     [XmlElement("assembly")]
+    //     public AssemblyXmlDto Assembly { get; set; }
+    //     [XmlArray( "members" )]
+    //     [XmlArrayItem(typeof( MemberXmlDto), ElementName = "member" )]
+    //     public List<MemberXmlDto> Members { get; set; }
+    // }
+    //
+    // public class MemberXmlDto
+    // {
+    //     [XmlAttribute("name")]
+    //     public string Name { get; set; }
+    //     [XmlElement("summary")]
+    //     public string Summary { get; set; }
+    //     [XmlElement("remarks")]
+    //     public string Remarks { get; set; }
+    //     [XmlArray]
+    //     [XmlArrayItem("param", typeof(ParameterXmlDto))]
+    //     public List<ParameterXmlDto> Parameters { get; set; }
+    //     [XmlElement("returns")]
+    //     public string Returns { get; set; }
+    // }
+    //
+    // public class ParameterXmlDto
+    // {
+    //     [XmlAttribute("name")]
+    //     public string Name { get; set; }
+    //     [XmlText]
+    //     public string Content { get; set; }
+    // }
+    //
+    // public class AssemblyXmlDto
+    // {
+    //     [XmlElement("name")]
+    //     public string Name { get; set; }
+    // }
+    
     class Program
     {
         static void Main(string[] args)
         {
-            var ioService = new IoService();
-            var repoRoot = ioService.CurrentDirectory.Ancestors().First(ancestor => (ancestor / ".git").IsFolder());
+            var ioService = new IoService(new ReactiveProcessFactory());
+            var repoRoot = ioService.CurrentDirectory.Ancestors().First(ancestor => ioService.IsFolder(ancestor / ".git"));
 
-            using (var ioExtensionsWriter = (repoRoot / "src" / "IoFluently" / "IoExtensions.g.cs").OpenWriter())
+            using (var ioExtensionsWriter = ioService.OpenWriter(repoRoot / "src" / "IoFluently" / "IoExtensions.g.cs"))
             {
                 ioExtensionsWriter.WriteLine(@"using System;
 using System.Collections.Generic;
@@ -33,16 +77,24 @@ namespace IoFluently
     public static partial class IoExtensions
     {");
                 
-                GenerateIoExtensions(ioExtensionsWriter);
+                GenerateIoExtensions(repoRoot, ioExtensionsWriter);
                 
                 ioExtensionsWriter.WriteLine("    }\n}");
             }
         }
+
+        private static Regex _memberRegex = new Regex(@"M\:(?<type_name>[0-9][a-z][A-Z]\.)\.(?<member_name>[0-9][a-z][A-Z])(\((?<parameters>.+)\))?");
         
-        private static void GenerateIoExtensions(TextWriter textWriter)
+        private static void GenerateIoExtensions(AbsolutePath repoRoot, TextWriter textWriter)
         {
-            var methods = typeof(IIoService).GetMethods();
-            foreach (var method in methods)
+            var xmlDoc = (repoRoot / "src/IoFluently/bin/Debug/IoFluently.xml").AsXmlFile();
+            var csharpDocumentation = xmlDoc.Read();
+            var ioServiceType = typeof(IIoService);
+            // var memberDocs = csharpDocumentation.Members.Where(member => member.Name == "M:IoFluently.IIoService")
+            //     .ToImmutableDictionary(GetMember, x => x);
+            
+            var methods = ioServiceType.GetMethods();
+            foreach (var method in methods.OrderBy(method => method.Name).ThenBy(method => method.GetParameters().Length).ThenBy(method => method.GetHashCode()))
             {
                 if (method.IsStatic || !method.IsPublic)
                 {
@@ -56,7 +108,8 @@ namespace IoFluently
 
                 var firstParameter = method.GetParameters()[0];
                 if (firstParameter.ParameterType != typeof(AbsolutePath) &&
-                    firstParameter.ParameterType != typeof(RelativePath))
+                    firstParameter.ParameterType != typeof(RelativePath) &&
+                    firstParameter.ParameterType != typeof(IAbsolutePathTranslation))
                 {
                     continue;
                 }
@@ -83,14 +136,14 @@ namespace IoFluently
                         }
                     }
 
-                    parameterString += $" {ConvertToCSharpTypeName(parameter.ParameterType)} {parameter.Name}";
+                    parameterString += $"{ConvertToCSharpTypeName(parameter.ParameterType)} {parameter.Name}";
 
                     if (parameter.HasDefaultValue)
                     {
                         parameterString += $" = {ConvertToCSharpValue(parameter.DefaultValue)}";
                     }
                     
-                    parameters.Add(parameterString);
+                    parameters.Add(parameterString.Trim());
 
                     if (parameter.IsOut)
                     {
@@ -105,7 +158,7 @@ namespace IoFluently
                         arguments.Add(parameter.Name);
                     }
                 }
-                
+
                 textWriter.WriteLine($"public static {ConvertToCSharpTypeName(method.ReturnType)} {method.Name}({string.Join(", ",  parameters)}) {{");
                 if (method.ReturnType != typeof(void))
                 {

@@ -217,5 +217,87 @@ namespace IoFluently
         string TryReadText(Stream stream, Encoding encoding = null,
             bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false);
+        
+        /// <summary>
+        /// Equivalent to Path.Combine. You can also use the / operator to build paths, like this:
+        /// _ioService.CurrentDirectory / "folder1" / "folder2" / "file.txt"
+        /// </summary>
+        AbsolutePath Combine(AbsolutePath path, params string[] subsequentPathParts);
+
+        AbsolutePath WithoutExtension(AbsolutePath path);
+
+        bool HasExtension(AbsolutePath path);
+
+        AbsolutePath Descendant(AbsolutePath path, params AbsolutePath[] paths);
+
+        AbsolutePath Descendant(AbsolutePath path, params string[] paths);
+
+        AbsolutePath Ancestor(AbsolutePath path, int level);
+
+        AbsolutePath WithExtension(AbsolutePath path, string differentExtension);
+
+        AbsolutePath WithExtension(AbsolutePath path, Func<string, string> differentExtension);
+
+        AbsolutePath GetCommonAncestry(AbsolutePath path1, AbsolutePath path2);
+
+        Uri GetCommonDescendants(AbsolutePath path1, AbsolutePath path2);
+
+        Tuple<Uri, Uri> GetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2);
+
+        Tuple<Uri, Uri> GetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2);
+
+        bool IsReadOnly(AbsolutePath path);
+
+        Information FileSize(AbsolutePath path);
+
+        FileAttributes Attributes(AbsolutePath attributes);
+
+        DateTimeOffset CreationTime(AbsolutePath attributes);
+
+        DateTimeOffset LastAccessTime(AbsolutePath attributes);
+
+        DateTimeOffset LastWriteTime(AbsolutePath attributes);
+
+        string FullName(AbsolutePath attributes);
+
+        AbsolutePaths GlobFiles(AbsolutePath path, string pattern);
+
+        AbsolutePath EnsureIsFolder(AbsolutePath path);
+
+        AbsolutePath EnsureIsNotFolder(AbsolutePath path, bool recursive = false);
+
+        AbsolutePath EnsureIsFile(AbsolutePath path);
+
+        AbsolutePath EnsureIsNotFile(AbsolutePath path);
+
+        AbsolutePath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = false);
+
+        AbsolutePath EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = false);
+
+        Stream Open(AbsolutePath path, FileMode fileMode);
+
+        Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess);
+
+        Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess,
+            FileShare fileShare);
+
+        AbsolutePath CommonWith(AbsolutePath path, AbsolutePath that);
+
+        AbsolutePath Parent(AbsolutePath path);
+
+        StreamWriter OpenWriter(AbsolutePath absolutePath);
+
+        IMaybe<StreamReader> TryOpenReader(AbsolutePath path);
+
+        StreamReader OpenReader(AbsolutePath path);
+
+        string ReadText(AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
+            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
+            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            bool leaveOpen = false);
+
+        bool IsFile(AbsolutePath absolutePath);
+
+        bool IsFolder(AbsolutePath absolutePath);
     }
 }

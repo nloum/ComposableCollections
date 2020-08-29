@@ -22,7 +22,7 @@ namespace IoFluently
 {
     public class IoService : IoServiceBase
     {
-        public IoService(IReactiveProcessFactory reactiveProcessFactory) : base(reactiveProcessFactory, Environment.NewLine)
+        public IoService(IReactiveProcessFactory reactiveProcessFactory = null, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), reactiveProcessFactory, Environment.NewLine)
         {
             PathObservationMethod = GetDefaultPathObservationMethod();
         }
@@ -406,7 +406,7 @@ namespace IoFluently
 
         public override IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, bool includeFolders = true, bool includeFiles = true)
         {
-            if (!path.IsFolder()) return ImmutableArray<AbsolutePath>.Empty;
+            if (!IsFolder(path)) return ImmutableArray<AbsolutePath>.Empty;
 
             var fullName = AsDirectoryInfo(path).FullName;
 
@@ -480,20 +480,20 @@ namespace IoFluently
 
         public override PathFlags GetDefaultFlagsForThisEnvironment()
         {
-            lock (_lock)
+            lock (Lock)
             {
-                if (defaultFlagsForThisEnvironment == null)
+                if (DefaultFlagsForThisEnvironment == null)
                 {
                     var file = Path.GetTempFileName();
                     var caseSensitive = File.Exists(file.ToLower()) && File.Exists(file.ToUpper());
                     File.Delete(file);
                     if (caseSensitive)
-                        defaultFlagsForThisEnvironment = PathFlags.CaseSensitive;
+                        DefaultFlagsForThisEnvironment = PathFlags.CaseSensitive;
                     else
-                        defaultFlagsForThisEnvironment = PathFlags.None;
+                        DefaultFlagsForThisEnvironment = PathFlags.None;
                 }
 
-                return defaultFlagsForThisEnvironment.Value;
+                return DefaultFlagsForThisEnvironment.Value;
             }
         }
         

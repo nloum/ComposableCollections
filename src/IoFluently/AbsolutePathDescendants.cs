@@ -19,8 +19,7 @@ namespace IoFluently
                 return childrenNames;
             }, (AbsolutePath node, string name, out AbsolutePath child) =>
             {
-                var maybeChild = node.TryDescendant(name);
-                child = maybeChild.Value;
+                child = node / name;
                 var result = child.Exists();
                 return result;
             });

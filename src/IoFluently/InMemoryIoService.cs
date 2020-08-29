@@ -40,7 +40,7 @@ namespace IoFluently
         private readonly PathFlags _defaultPathFlags;
         public ObservableDictionary<string, Folder> RootFolders { get; } = new ObservableDictionary<string, Folder>();
 
-        public InMemoryIoService(IReactiveProcessFactory reactiveProcessFactory, string newline, PathFlags defaultPathFlags) : base(reactiveProcessFactory, newline)
+        public InMemoryIoService(string newline, PathFlags defaultPathFlags, bool enableOpenFilesTracking = false, IReactiveProcessFactory reactiveProcessFactory = null) : base(new OpenFilesTrackingService(enableOpenFilesTracking), reactiveProcessFactory ?? new ReactiveProcessFactory(), newline)
         {
             _newline = newline;
             _defaultPathFlags = defaultPathFlags;

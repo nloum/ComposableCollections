@@ -24,11 +24,11 @@ namespace IoFluently
 {
     public abstract class IoServiceBase : IIoService
     {
-        protected readonly object _lock = new object();
-        protected string defaultDirectorySeparatorForThisEnvironment;
-        protected PathFlags? defaultFlagsForThisEnvironment;
+        protected readonly object Lock = new object();
+        protected string DefaultDirectorySeparatorForThisEnvironment;
+        protected PathFlags? DefaultFlagsForThisEnvironment;
 
-        public IOpenFilesTrackingService OpenFilesTrackingService { get; } = new OpenFilesTrackingService();
+        public IOpenFilesTrackingService OpenFilesTrackingService { get; }
 
         public virtual IReactiveProcessFactory ReactiveProcessFactory { get; }
 
@@ -40,6 +40,18 @@ namespace IoFluently
             bool includeSubFolders, string pattern);
 
         public abstract IMaybe<StreamWriter> TryOpenWriter(AbsolutePath pathSpec);
+
+        protected IoServiceBase(IOpenFilesTrackingService openFilesTrackingService)
+        {
+            OpenFilesTrackingService = openFilesTrackingService;
+        }
+
+        protected IoServiceBase(IOpenFilesTrackingService openFilesTrackingService, IReactiveProcessFactory reactiveProcessFactory, string newline)
+        {
+            OpenFilesTrackingService = openFilesTrackingService;
+            ReactiveProcessFactory = reactiveProcessFactory;
+            _newline = newline;
+        }
 
         public virtual IEnumerable<string> ReadLines(AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
@@ -183,15 +195,15 @@ namespace IoFluently
 
         public virtual string GetDefaultDirectorySeparatorForThisEnvironment()
         {
-            lock (_lock)
+            lock (Lock)
             {
-                if (defaultDirectorySeparatorForThisEnvironment == null)
+                if (DefaultDirectorySeparatorForThisEnvironment == null)
                 {
                     var path = Path.Combine("a", "b");
-                    defaultDirectorySeparatorForThisEnvironment = path.Substring(1, path.Length - 2);
+                    DefaultDirectorySeparatorForThisEnvironment = path.Substring(1, path.Length - 2);
                 }
 
-                return defaultDirectorySeparatorForThisEnvironment;
+                return DefaultDirectorySeparatorForThisEnvironment;
             }
         }
 
@@ -1031,10 +1043,10 @@ namespace IoFluently
             switch (translation.Source.GetPathType())
             {
                 case PathType.File:
-                    translation.CopyFile(overwrite);
+                    CopyFile(translation, overwrite);
                     break;
                 case PathType.Folder:
-                    translation.CopyFolder(overwrite);
+                    CopyFolder(translation, overwrite);
                     break;
                 case PathType.None:
                     throw new IOException(
@@ -1086,10 +1098,10 @@ namespace IoFluently
             switch (translation.Source.GetPathType())
             {
                 case PathType.File:
-                    translation.MoveFile(overwrite);
+                    MoveFile(translation, overwrite);
                     break;
                 case PathType.Folder:
-                    translation.MoveFolder(overwrite);
+                    MoveFolder(translation, overwrite);
                     break;
                 case PathType.None:
                     throw new IOException(
@@ -1102,7 +1114,7 @@ namespace IoFluently
 
         public virtual IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation, bool overwrite = false)
         {
-            translation.Copy(overwrite);
+            Copy(translation, overwrite);
             translation.Source.Delete();
             return translation;
         }
@@ -1347,12 +1359,6 @@ namespace IoFluently
 
         protected string _newline;
 
-        protected IoServiceBase(IReactiveProcessFactory reactiveProcessFactory, string newline)
-        {
-            ReactiveProcessFactory = reactiveProcessFactory;
-            _newline = newline;
-        }
-
         public abstract IMaybe<bool> TryIsReadOnly(AbsolutePath path);
 
         public abstract IMaybe<Information> TryFileSize(AbsolutePath path);
@@ -1410,7 +1416,7 @@ namespace IoFluently
 
         public virtual void RenameTo(AbsolutePath source, AbsolutePath target)
         {
-            source.Translate(target).Move();
+            Move(source.Translate(target));
         }
 
         public virtual bool Exists(AbsolutePath path)
@@ -1768,5 +1774,253 @@ namespace IoFluently
         }
 
         #endregion
+        
+        
+        
+        
+        
+        
+        
+        /// <summary>
+        /// Equivalent to Path.Combine. You can also use the / operator to build paths, like this:
+        /// _ioService.CurrentDirectory / "folder1" / "folder2" / "file.txt"
+        /// </summary>
+        public AbsolutePath Combine(AbsolutePath path, params string[] subsequentPathParts)
+        {
+            return Descendant(path, subsequentPathParts);
+        }
+    
+        public AbsolutePath WithoutExtension(AbsolutePath path)
+        {
+            if (!HasExtension(path))
+            {
+                return path;
+            }
+
+            var newComponents = new List<string>();
+
+            for (var i = 0; i < path.Path.Components.Count - 1; i++)
+            {
+                newComponents.Add(path.Path.Components[i]);
+            }
+
+            var name = path.Name;
+            newComponents.Add(name.Substring(0, name.LastIndexOf('.')));
+            
+            return new AbsolutePath(path.Flags, path.DirectorySeparator, path.IoService, newComponents);
+        }
+
+        public bool HasExtension(AbsolutePath path)
+        {
+            return path.Extension.HasValue;
+        }
+
+        public AbsolutePath Descendant(AbsolutePath path, params AbsolutePath[] paths)
+        {
+            return path.IoService.TryDescendant(path, paths).Value;
+        }
+
+        public AbsolutePath Descendant(AbsolutePath path, params string[] paths)
+        {
+            return path.IoService.TryDescendant(path, paths).Value;
+        }
+
+        public AbsolutePath Ancestor(AbsolutePath path, int level)
+        {
+            return path.IoService.TryAncestor(path, level).Value;
+        }
+
+        public AbsolutePath WithExtension(AbsolutePath path, string differentExtension)
+        {
+            return path.IoService.TryWithExtension(path, differentExtension).Value;
+        }
+
+        public AbsolutePath WithExtension(AbsolutePath path, Func<string, string> differentExtension)
+        {
+            return path.IoService.TryWithExtension(path, differentExtension(path.Extension.ValueOrDefault ?? string.Empty)).Value;
+        }
+
+        public AbsolutePath GetCommonAncestry(AbsolutePath path1, AbsolutePath path2)
+        {
+            return path1.IoService.TryGetCommonAncestry(path1, path2).Value;
+        }
+
+        public Uri GetCommonDescendants(AbsolutePath path1, AbsolutePath path2)
+        {
+            return path1.IoService.TryGetCommonDescendants(path1, path2).Value;
+        }
+
+        public Tuple<Uri, Uri> GetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2)
+        {
+            return path1.IoService.TryGetNonCommonDescendants(path1, path2).Value;
+        }
+
+        public Tuple<Uri, Uri> GetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2)
+        {
+            return path1.IoService.TryGetNonCommonAncestry(path1, path2).Value;
+        }
+
+        public bool IsReadOnly(AbsolutePath path)
+        {
+            return path.IoService.TryIsReadOnly(path).Value;
+        }
+
+        public Information FileSize(AbsolutePath path)
+        {
+            return path.IoService.TryFileSize(path).Value;
+        }
+
+        public FileAttributes Attributes(AbsolutePath attributes)
+        {
+            return attributes.IoService.TryAttributes(attributes).Value;
+        }
+
+        public DateTimeOffset CreationTime(AbsolutePath attributes)
+        {
+            return attributes.IoService.TryCreationTime(attributes).Value;
+        }
+
+        public DateTimeOffset LastAccessTime(AbsolutePath attributes)
+        {
+            return attributes.IoService.TryLastAccessTime(attributes).Value;
+        }
+
+        public DateTimeOffset LastWriteTime(AbsolutePath attributes)
+        {
+            return attributes.IoService.TryLastWriteTime(attributes).Value;
+        }
+
+        public string FullName(AbsolutePath attributes)
+        {
+            return attributes.IoService.TryFullName(attributes).Value;
+        }
+
+        public AbsolutePaths GlobFiles(AbsolutePath path, string pattern)
+        {
+            Func<AbsolutePath, IEnumerable<RelativePath>> patternFunc = absPath => absPath.Children(pattern).Select(x => new RelativePath(x.Flags, x.DirectorySeparator, x.IoService, new[]{x.Name}));
+            return path / patternFunc;
+        }
+        
+        public AbsolutePath EnsureIsFolder(AbsolutePath path)
+        {
+            if (!IsFolder(path))
+            {
+                path.CreateFolder();
+            }
+
+            return path;
+        }
+
+        public AbsolutePath EnsureIsNotFolder(AbsolutePath path, bool recursive = false)
+        {
+            if (IsFolder(path))
+            {
+                path.DeleteFolder(recursive);
+            }
+
+            return path;
+        }
+
+        public AbsolutePath EnsureIsFile(AbsolutePath path)
+        {
+            if (!IsFile(path))
+            {
+                path.CreateEmptyFile();
+            }
+
+            return path;
+        }
+
+        public AbsolutePath EnsureIsNotFile(AbsolutePath path)
+        {
+            if (IsFile(path))
+            {
+                path.DeleteFile();
+            }
+
+            return path;
+        }
+
+        public AbsolutePath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = false)
+        {
+            if (path.Exists())
+            {
+                path.Delete(recursiveDeleteIfFolder);
+            }
+
+            return path;
+        }
+
+        public AbsolutePath EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = false)
+        {
+            if (path.Exists())
+            {
+                path.Delete(recursiveDeleteIfFolder);
+            }
+
+            path.CreateFolder();
+
+            return path;
+        }
+
+        public Stream Open(AbsolutePath path, FileMode fileMode)
+        {
+            return path.IoService.TryOpen(path, fileMode).Value;
+        }
+
+        public Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess)
+        {
+            return path.IoService.TryOpen(path, fileMode, fileAccess).Value;
+        }
+
+        public Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess,
+            FileShare fileShare)
+        {
+            return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare).Value;
+        }
+
+        public AbsolutePath CommonWith(AbsolutePath path, AbsolutePath that)
+        {
+            return path.IoService.TryCommonWith(path, that).Value;
+        }
+
+        public AbsolutePath Parent(AbsolutePath path)
+        {
+            return path.IoService.TryParent(path).Value;
+        }
+
+        public StreamWriter OpenWriter(AbsolutePath absolutePath)
+        {
+            return absolutePath.IoService.TryOpenWriter(absolutePath).Value;
+        }
+
+        public IMaybe<StreamReader> TryOpenReader(AbsolutePath path)
+        {
+            return path.TryOpen(FileMode.Open, FileAccess.Read, FileShare.Read).Select(stream => new StreamReader(stream));
+        }
+
+        public StreamReader OpenReader(AbsolutePath path)
+        {
+            return TryOpenReader(path).Value;
+        }
+
+        public string ReadText(AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
+            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
+            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            bool leaveOpen = false)
+        {
+            return absolutePath.IoService.TryReadText(absolutePath, fileMode, fileAccess, fileShare, encoding,
+                detectEncodingFromByteOrderMarks, bufferSize, leaveOpen).Value;
+        }
+
+        public bool IsFile(AbsolutePath absolutePath)
+        {
+            return absolutePath.GetPathType() == PathType.File;
+        }
+
+        public bool IsFolder(AbsolutePath absolutePath)
+        {
+            return absolutePath.GetPathType() == PathType.Folder;
+        }
     }
 }

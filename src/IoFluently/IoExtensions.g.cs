@@ -178,11 +178,6 @@ namespace IoFluently
             return path.IoService.FolderContainsFiles(path);
         }
 
-        public static string FullName(this AbsolutePath attributes)
-        {
-            return attributes.IoService.FullName(attributes);
-        }
-
         public static AbsolutePath GetCommonAncestry(this AbsolutePath path1, AbsolutePath path2)
         {
             return path1.IoService.GetCommonAncestry(path1, path2);
@@ -377,11 +372,6 @@ namespace IoFluently
             return path.IoService.Simplify(path);
         }
 
-        public static IEnumerable<string> Split(this AbsolutePath path)
-        {
-            return path.IoService.Split(path);
-        }
-
         public static ISetChanges<AbsolutePath> ToLiveLinq(this AbsolutePath path, Boolean includeFileContentChanges,
             Boolean includeSubFolders, string pattern)
         {
@@ -432,11 +422,6 @@ namespace IoFluently
         public static IMaybe<Information> TryFileSize(this AbsolutePath path)
         {
             return path.IoService.TryFileSize(path);
-        }
-
-        public static IMaybe<string> TryFullName(this AbsolutePath attributes)
-        {
-            return attributes.IoService.TryFullName(attributes);
         }
 
         public static IMaybe<AbsolutePath> TryGetCommonAncestry(this AbsolutePath path1, AbsolutePath path2)

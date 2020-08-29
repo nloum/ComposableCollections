@@ -322,18 +322,6 @@ namespace IoFluently
             }
         }
 
-        public override IMaybe<string> TryFullName(AbsolutePath attributes)
-        {
-            try
-            {
-                return Something(AsFileInfo(attributes).FullName);
-            }
-            catch (Exception ex)
-            {
-                return Nothing<string>(() => throw ex);
-            }
-        }
-        
         public override IMaybe<Information> TryFileSize(AbsolutePath path)
         {
             try

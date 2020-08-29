@@ -5,13 +5,23 @@ using System.Threading.Tasks;
 
 namespace IoFluently
 {
-    public class StreamCloseDisposeEx : Stream
+    /// <summary>
+    /// A Stream class that takes another Stream object in its constructor and calls the onClose and onDispose callbacks
+    /// when Close and Dispose are called on this object. This makes it easy to know when the file is closed.
+    /// </summary>
+    public class StreamCloseDisposeDecorator : Stream
     {
         private readonly Stream _stream;
         private readonly Action _onClose;
         private readonly Action _onDispose;
 
-        public StreamCloseDisposeEx(Stream stream, Action onClose, Action onDispose)
+        /// <summary>
+        /// Create a StreamCloseDisposeDecorator object.
+        /// </summary>
+        /// <param name="stream">The stream to be decorated</param>
+        /// <param name="onClose">The callback that is called when this Stream object is closed</param>
+        /// <param name="onDispose">The callback that is called when this Stream object is disposed</param>
+        public StreamCloseDisposeDecorator(Stream stream, Action onClose, Action onDispose)
         {
             _stream = stream;
             _onClose = onClose;

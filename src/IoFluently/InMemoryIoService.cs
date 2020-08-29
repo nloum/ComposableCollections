@@ -195,12 +195,6 @@ namespace IoFluently
 
         }
 
-        public override IMaybe<string> TryFullName(AbsolutePath path)
-        {
-            var result = path.Simplify().ToString();
-            return result.ToMaybe();
-        }
-
         public override PathType GetPathType(AbsolutePath path)
         {
             path = path.Simplify();
@@ -273,7 +267,7 @@ namespace IoFluently
             file.Lock.AcquireReaderLock(0);
             var memoryStream = new MemoryStream(file.Contents);
 
-            return ((Stream)new StreamCloseDisposeEx(memoryStream, () =>
+            return ((Stream)new StreamCloseDisposeDecorator(memoryStream, () =>
             {
                 //file.Lock.ReleaseReaderLock();
             }, () =>

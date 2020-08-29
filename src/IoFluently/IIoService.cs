@@ -15,14 +15,53 @@ namespace IoFluently
 {
     public interface IIoService
     {
-        ISetChanges<AbsolutePath> ToLiveLinq(AbsolutePath path, bool includeFileContentChanges,
-            bool includeSubFolders, string pattern);
-        AbsolutePath CreateTemporaryPath(PathType type);
+        #region Environmental stuff
+        
         PathFlags GetDefaultFlagsForThisEnvironment();
         string GetDefaultDirectorySeparatorForThisEnvironment();
 
-        IOpenFilesTrackingService OpenFilesTrackingService { get; }
+        #endregion
         
+        #region Creating and deleting
+        
+        AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false);
+        AbsolutePath Create(AbsolutePath path, PathType pathType);
+        AbsolutePath CreateFolder(AbsolutePath path);
+        AbsolutePath CreateTemporaryPath(PathType type);
+        AbsolutePath CreateEmptyFile(AbsolutePath path);
+        Stream CreateFile(AbsolutePath path);
+        AbsolutePath DeleteFile(AbsolutePath path);
+        AbsolutePath ClearFolder(AbsolutePath path);
+        AbsolutePath Delete(AbsolutePath path, bool recursiveDeleteIfFolder = false);
+        AbsolutePath EnsureIsFolder(AbsolutePath path);
+
+        AbsolutePath EnsureIsNotFolder(AbsolutePath path, bool recursive = false);
+
+        AbsolutePath EnsureIsFile(AbsolutePath path);
+
+        AbsolutePath EnsureIsNotFile(AbsolutePath path);
+
+        AbsolutePath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = false);
+
+        AbsolutePath EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = false);
+
+        #endregion
+        
+        #region Utilities
+        
+        void UpdateStorage();
+        IReactiveProcessFactory ReactiveProcessFactory { get; }
+        bool HasExtension(AbsolutePath path, string extension);
+        bool ContainsFiles(AbsolutePath path);
+        bool FolderContainsFiles(AbsolutePath path);
+        bool MayCreateFile(FileMode fileMode);
+        bool IsImageUri(Uri uri);
+        bool IsVideoUri(Uri uri);
+        string StripQuotes(string str);
+        AbsolutePath Decrypt(AbsolutePath path);
+        AbsolutePath Encrypt(AbsolutePath path);
+        string SurroundWithDoubleQuotesIfNecessary(string str);
+
         /// <summary>
         ///     Returns a regex that filters files the same as the specified pattern.
         ///     From here: http://www.java2s.com/Code/CSharp/Regular-Expressions/Checksifnamematchespatternwithandwildcards.htm
@@ -51,6 +90,30 @@ namespace IoFluently
         ///     <c>true</c> if name matches pattern, otherwise <c>false</c>.
         /// </returns>
         Regex FileNamePatternToRegex(string pattern);
+        
+        IOpenFilesTrackingService OpenFilesTrackingService { get; }
+        
+        /// <summary>
+        ///     Given a bunch of files or folders in different places that may have the same name,
+        ///     create unique names for those files and folders based on their original name and the
+        ///     paths to those files and folders.
+        /// </summary>
+        /// <param name="paths">
+        ///     The paths to the files and folders that may have the same name but
+        ///     be in different locations.
+        /// </param>
+        /// <returns>A mapping from the original file path to the new suggested file name.</returns>
+        IEnumerable<KeyValuePair<AbsolutePath, string>> ProposeUniqueNamesForMovingPathsToSameFolder(
+            IEnumerable<AbsolutePath> paths);
+
+        #endregion
+        
+        #region Parsing paths
+        
+        bool IsAbsoluteWindowsPath(string path);
+        bool IsAbsoluteUnixPath(string path);
+        StringComparison ToStringComparison(PathFlags pathFlags);
+        StringComparison ToStringComparison(PathFlags pathFlags, PathFlags otherPathFlags);
 
         bool ComponentsAreAbsolute(IReadOnlyList<string> path);
         RelativePath ParseRelativePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
@@ -69,34 +132,51 @@ namespace IoFluently
             PathFlags flags = PathFlags.UseDefaultsForGivenPath);
         bool TryParseAbsolutePath(string path, out AbsolutePath absolutePath, out string error,
             PathFlags flags = PathFlags.UseDefaultsForGivenPath);
-        void UpdateStorage();
-        IReactiveProcessFactory ReactiveProcessFactory { get; }
-        AbsolutePath CurrentDirectory { get; }
         
-        /// <summary>
-        ///     Given a bunch of files or folders in different places that may have the same name,
-        ///     create unique names for those files and folders based on their original name and the
-        ///     paths to those files and folders.
-        /// </summary>
-        /// <param name="paths">
-        ///     The paths to the files and folders that may have the same name but
-        ///     be in different locations.
-        /// </param>
-        /// <returns>A mapping from the original file path to the new suggested file name.</returns>
-        IEnumerable<KeyValuePair<AbsolutePath, string>> ProposeUniqueNamesForMovingPathsToSameFolder(
-            IEnumerable<AbsolutePath> paths);
+        #endregion
+        
+        #region Translation stuff
+        
+        IAbsolutePathTranslation Translate(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination);
+        IAbsolutePathTranslation Translate(AbsolutePath source, AbsolutePath destination);
+        void RenameTo(AbsolutePath source, AbsolutePath target);
+        IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation, bool overwrite = false);
+        IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation, bool overwrite = false);
+        IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation, bool overwrite = false);
+        IAbsolutePathTranslation Move(IAbsolutePathTranslation translation, bool overwrite = false);
+        IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation, bool overwrite = false);
+        IAbsolutePathTranslation MoveFolder(IAbsolutePathTranslation translation, bool overwrite = false);
+        
+        #endregion
 
-        AbsolutePath CreateEmptyFile(AbsolutePath path);
-        Stream CreateFile(AbsolutePath path);
-        AbsolutePath DeleteFile(AbsolutePath path);
-        AbsolutePath ClearFolder(AbsolutePath path);
-        AbsolutePath Decrypt(AbsolutePath path);
-        AbsolutePath Encrypt(AbsolutePath path);
-        AbsolutePath Delete(AbsolutePath path, bool recursiveDeleteIfFolder = false);
-        string SurroundWithDoubleQuotesIfNecessary(string str);
-        bool IsAncestorOf(AbsolutePath path, AbsolutePath possibleDescendant);
-        bool IsDescendantOf(AbsolutePath path, AbsolutePath possibleAncestor);
-        IEnumerable<string> Split(AbsolutePath path);
+        #region Path building
+        
+        bool CanBeSimplified(AbsolutePath path);
+        AbsolutePath CurrentDirectory { get; }
+        AbsolutePath Root(AbsolutePath path);
+        RelativePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo);
+        IMaybe<AbsolutePath> TryCommonWith(AbsolutePath path, AbsolutePath that);
+        AbsolutePath Simplify(AbsolutePath path);
+        RelativePath Simplify(RelativePath path);
+        IMaybe<AbsolutePath> TryParent(AbsolutePath path);
+
+        /// <summary>
+        /// Equivalent to Path.Combine. You can also use the / operator to build paths, like this:
+        /// _ioService.CurrentDirectory / "folder1" / "folder2" / "file.txt"
+        /// </summary>
+        AbsolutePath Combine(AbsolutePath path, params string[] subsequentPathParts);
+        AbsolutePath WithoutExtension(AbsolutePath path);
+        AbsolutePath Descendant(AbsolutePath path, params AbsolutePath[] paths);
+        AbsolutePath Descendant(AbsolutePath path, params string[] paths);
+        AbsolutePath Ancestor(AbsolutePath path, int level);
+        AbsolutePath WithExtension(AbsolutePath path, string differentExtension);
+        AbsolutePath WithExtension(AbsolutePath path, Func<string, string> differentExtension);
+        AbsolutePath GetCommonAncestry(AbsolutePath path1, AbsolutePath path2);
+        Uri GetCommonDescendants(AbsolutePath path1, AbsolutePath path2);
+        Tuple<Uri, Uri> GetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2);
+        Tuple<Uri, Uri> GetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2);
+        Uri Child(Uri parent, Uri child);
+        AbsolutePaths GlobFiles(AbsolutePath path, string pattern);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -113,7 +193,14 @@ namespace IoFluently
         IMaybe<AbsolutePath> TryDescendant(AbsolutePath path, params AbsolutePath[] paths);
         IMaybe<AbsolutePath> TryDescendant(AbsolutePath path, params string[] paths);
         IMaybe<AbsolutePath> TryAncestor(AbsolutePath path, int level);
-        bool HasExtension(AbsolutePath path, string extension);
+        bool IsAncestorOf(AbsolutePath path, AbsolutePath possibleDescendant);
+        bool IsDescendantOf(AbsolutePath path, AbsolutePath possibleAncestor);
+        IMaybe<AbsolutePath> TryGetCommonAncestry(AbsolutePath path1, AbsolutePath path2);
+        IMaybe<Uri> TryGetCommonDescendants(AbsolutePath path1, AbsolutePath path2);
+        IMaybe<Tuple<Uri, Uri>> TryGetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2);
+        IMaybe<Tuple<Uri, Uri>> TryGetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2);
+        AbsolutePath CommonWith(AbsolutePath path, AbsolutePath that);
+        AbsolutePath Parent(AbsolutePath path);
 
         /// <summary>
         /// </summary>
@@ -122,182 +209,90 @@ namespace IoFluently
         /// <returns></returns>
         IMaybe<AbsolutePath> TryWithExtension(AbsolutePath path, string differentExtension);
 
-        IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation, bool overwrite = false);
-        IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation, bool overwrite = false);
-        IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation, bool overwrite = false);
-        IAbsolutePathTranslation Move(IAbsolutePathTranslation translation, bool overwrite = false);
-        IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation, bool overwrite = false);
-        IAbsolutePathTranslation MoveFolder(IAbsolutePathTranslation translation, bool overwrite = false);
-        bool ContainsFiles(AbsolutePath path);
-        bool FolderContainsFiles(AbsolutePath path);
-        IMaybe<AbsolutePath> TryGetCommonAncestry(AbsolutePath path1, AbsolutePath path2);
-        IMaybe<Uri> TryGetCommonDescendants(AbsolutePath path1, AbsolutePath path2);
-        IMaybe<Tuple<Uri, Uri>> TryGetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2);
-        IMaybe<Tuple<Uri, Uri>> TryGetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2);
-        IAbsolutePathTranslation Translate(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination);
-        IAbsolutePathTranslation Translate(AbsolutePath source, AbsolutePath destination);
-        Uri Child(Uri parent, Uri child);
+        #endregion
 
+        #region File metadata
+        
+        bool Exists(AbsolutePath path);
+        PathType GetPathType(AbsolutePath path);
+        bool HasExtension(AbsolutePath path);
+        bool IsReadOnly(AbsolutePath path);
+        Information FileSize(AbsolutePath path);
+        FileAttributes Attributes(AbsolutePath attributes);
+        DateTimeOffset CreationTime(AbsolutePath attributes);
+        DateTimeOffset LastAccessTime(AbsolutePath attributes);
+        DateTimeOffset LastWriteTime(AbsolutePath attributes);
+        bool IsFile(AbsolutePath absolutePath);
+        bool IsFolder(AbsolutePath absolutePath);
         IMaybe<bool> TryIsReadOnly(AbsolutePath path);
         IMaybe<Information> TryFileSize(AbsolutePath path);
         IMaybe<FileAttributes> TryAttributes(AbsolutePath attributes);
         IMaybe<DateTimeOffset> TryCreationTime(AbsolutePath attributes);
         IMaybe<DateTimeOffset> TryLastAccessTime(AbsolutePath attributes);
         IMaybe<DateTimeOffset> TryLastWriteTime(AbsolutePath attributes);
-        IMaybe<string> TryFullName(AbsolutePath attributes);
 
-        bool IsImageUri(Uri uri);
-        bool IsVideoUri(Uri uri);
-        string StripQuotes(string str);
-        AbsolutePath Root(AbsolutePath path);
-        void RenameTo(AbsolutePath source, AbsolutePath target);
-        bool Exists(AbsolutePath path);
-        PathType GetPathType(AbsolutePath path);
-        AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false);
-        bool MayCreateFile(FileMode fileMode);
-        AbsolutePath Create(AbsolutePath path, PathType pathType);
+        #endregion
+        
+        #region File open, write, and read
+
         IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode);
-
         IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
             FileAccess fileAccess);
-
         IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
             FileAccess fileAccess, FileShare fileShare);
-
-        AbsolutePath CreateFolder(AbsolutePath path);
         void WriteAllText(AbsolutePath path, string text);
         void WriteAllLines(AbsolutePath path, IEnumerable<string> lines);
         void WriteAllBytes(AbsolutePath path, byte[] bytes);
         IEnumerable<string> ReadLines(AbsolutePath path);
         string ReadAllText(AbsolutePath path);
-        IObservable<Unit> ObserveChanges(AbsolutePath path);
-        IObservable<Unit> ObserveChanges(AbsolutePath path, NotifyFilters filters);
-        IObservable<PathType> ObservePathType(AbsolutePath path);
-        IObservable<AbsolutePath> Renamings(AbsolutePath path);
-        RelativePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo);
-        IMaybe<AbsolutePath> TryCommonWith(AbsolutePath path, AbsolutePath that);
-        bool CanBeSimplified(AbsolutePath path);
-        AbsolutePath Simplify(AbsolutePath path);
-        RelativePath Simplify(RelativePath path);
-        IMaybe<AbsolutePath> TryParent(AbsolutePath path);
-        bool IsAbsoluteWindowsPath(string path);
-        bool IsAbsoluteUnixPath(string path);
-        StringComparison ToStringComparison(PathFlags pathFlags);
-        StringComparison ToStringComparison(PathFlags pathFlags, PathFlags otherPathFlags);
-
         IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath);
-
         IEnumerable<string> ReadLines(AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false);
-
         IMaybe<string> TryReadText(AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
             int bufferSize = 4096, bool leaveOpen = false);
-
         void WriteText(AbsolutePath absolutePath, IEnumerable<string> lines,
             FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write,
             FileShare fileShare = FileShare.None,
             Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false);
-
         void WriteText(AbsolutePath absolutePath, string text, FileMode fileMode = FileMode.Create,
             FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
             Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false);
-
         IEnumerable<string> ReadLines(Stream stream, Encoding encoding = null,
             bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false);
-
         IEnumerable<string> ReadLinesBackwards(Stream stream, Encoding encoding = null,
             bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false);
-
         string TryReadText(Stream stream, Encoding encoding = null,
             bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false);
-        
-        /// <summary>
-        /// Equivalent to Path.Combine. You can also use the / operator to build paths, like this:
-        /// _ioService.CurrentDirectory / "folder1" / "folder2" / "file.txt"
-        /// </summary>
-        AbsolutePath Combine(AbsolutePath path, params string[] subsequentPathParts);
-
-        AbsolutePath WithoutExtension(AbsolutePath path);
-
-        bool HasExtension(AbsolutePath path);
-
-        AbsolutePath Descendant(AbsolutePath path, params AbsolutePath[] paths);
-
-        AbsolutePath Descendant(AbsolutePath path, params string[] paths);
-
-        AbsolutePath Ancestor(AbsolutePath path, int level);
-
-        AbsolutePath WithExtension(AbsolutePath path, string differentExtension);
-
-        AbsolutePath WithExtension(AbsolutePath path, Func<string, string> differentExtension);
-
-        AbsolutePath GetCommonAncestry(AbsolutePath path1, AbsolutePath path2);
-
-        Uri GetCommonDescendants(AbsolutePath path1, AbsolutePath path2);
-
-        Tuple<Uri, Uri> GetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2);
-
-        Tuple<Uri, Uri> GetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2);
-
-        bool IsReadOnly(AbsolutePath path);
-
-        Information FileSize(AbsolutePath path);
-
-        FileAttributes Attributes(AbsolutePath attributes);
-
-        DateTimeOffset CreationTime(AbsolutePath attributes);
-
-        DateTimeOffset LastAccessTime(AbsolutePath attributes);
-
-        DateTimeOffset LastWriteTime(AbsolutePath attributes);
-
-        string FullName(AbsolutePath attributes);
-
-        AbsolutePaths GlobFiles(AbsolutePath path, string pattern);
-
-        AbsolutePath EnsureIsFolder(AbsolutePath path);
-
-        AbsolutePath EnsureIsNotFolder(AbsolutePath path, bool recursive = false);
-
-        AbsolutePath EnsureIsFile(AbsolutePath path);
-
-        AbsolutePath EnsureIsNotFile(AbsolutePath path);
-
-        AbsolutePath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = false);
-
-        AbsolutePath EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = false);
-
         Stream Open(AbsolutePath path, FileMode fileMode);
-
         Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess);
-
         Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess,
             FileShare fileShare);
-
-        AbsolutePath CommonWith(AbsolutePath path, AbsolutePath that);
-
-        AbsolutePath Parent(AbsolutePath path);
-
         StreamWriter OpenWriter(AbsolutePath absolutePath);
-
         IMaybe<StreamReader> TryOpenReader(AbsolutePath path);
-
         StreamReader OpenReader(AbsolutePath path);
-
         string ReadText(AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false);
 
-        bool IsFile(AbsolutePath absolutePath);
-
-        bool IsFolder(AbsolutePath absolutePath);
+        #endregion
+        
+        #region Observable changes
+        
+        ISetChanges<AbsolutePath> ToLiveLinq(AbsolutePath path, bool includeFileContentChanges,
+            bool includeSubFolders, string pattern);
+        IObservable<Unit> ObserveChanges(AbsolutePath path);
+        IObservable<Unit> ObserveChanges(AbsolutePath path, NotifyFilters filters);
+        IObservable<PathType> ObservePathType(AbsolutePath path);
+        IObservable<AbsolutePath> Renamings(AbsolutePath path);
+        
+        #endregion
     }
 }

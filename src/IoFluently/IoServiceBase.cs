@@ -949,11 +949,6 @@ namespace IoFluently
             return possibleDescendantStr.StartsWith(possibleAncestorStr);
         }
 
-        public virtual IEnumerable<string> Split(AbsolutePath path)
-        {
-            return Ancestors(path, true).Select(pathName => Path.GetFileName(pathName.ToString())).Reverse();
-        }
-
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
         ///     For example, the ancestors of the path C:\Users\myusername\Documents would be these, in order:
@@ -1370,8 +1365,6 @@ namespace IoFluently
         public abstract IMaybe<DateTimeOffset> TryLastAccessTime(AbsolutePath attributes);
 
         public abstract IMaybe<DateTimeOffset> TryLastWriteTime(AbsolutePath attributes);
-
-        public abstract IMaybe<string> TryFullName(AbsolutePath attributes);
 
         public virtual bool IsImageUri(Uri uri)
         {
@@ -1888,11 +1881,6 @@ namespace IoFluently
         public DateTimeOffset LastWriteTime(AbsolutePath attributes)
         {
             return attributes.IoService.TryLastWriteTime(attributes).Value;
-        }
-
-        public string FullName(AbsolutePath attributes)
-        {
-            return attributes.IoService.TryFullName(attributes).Value;
         }
 
         public AbsolutePaths GlobFiles(AbsolutePath path, string pattern)

@@ -37,6 +37,11 @@ namespace IoFluently
             public Dictionary<string, Folder> Folders { get; } = new Dictionary<string, Folder>();
         }
 
+        public override IQueryable<AbsolutePath> Query()
+        {
+            throw new NotImplementedException();
+        }
+
         private readonly bool _isCaseSensitiveByDefault;
         public ObservableDictionary<string, Folder> RootFolders { get; } = new ObservableDictionary<string, Folder>();
 

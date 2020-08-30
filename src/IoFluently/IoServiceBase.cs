@@ -35,6 +35,8 @@ namespace IoFluently
 
         public abstract IReadOnlyObservableSet<AbsolutePath> Storage { get; }
 
+        public abstract IQueryable<AbsolutePath> Query();
+
         public abstract ISetChanges<AbsolutePath> ToLiveLinq(AbsolutePath path, bool includeFileContentChanges,
             bool includeSubFolders, string pattern);
 
@@ -43,6 +45,11 @@ namespace IoFluently
         protected IoServiceBase(IOpenFilesTrackingService openFilesTrackingService)
         {
             OpenFilesTrackingService = openFilesTrackingService;
+        }
+
+        public IEnumerable<AbsolutePath> Ancestors(AbsolutePath path)
+        {
+            return Ancestors(path, false);
         }
 
         protected IoServiceBase(IOpenFilesTrackingService openFilesTrackingService, IReactiveProcessFactory reactiveProcessFactory, string newline)

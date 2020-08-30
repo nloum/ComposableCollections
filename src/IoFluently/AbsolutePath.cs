@@ -81,12 +81,7 @@ namespace IoFluently
 
         public override int GetHashCode()
         {
-            if (IsCaseSensitive)
-            {
-                return ToString().GetHashCode();
-            }
-            
-            return ToString().ToLower().GetHashCode();
+            return (Path != null ? Path.GetHashCode() : 0);
         }
 
         public int CompareTo(AbsolutePath other)
@@ -104,9 +99,9 @@ namespace IoFluently
             return 0;
         }
 
-        public bool Equals(AbsolutePath other)
+        protected bool Equals(AbsolutePath other)
         {
-            return GetHashCode().Equals(other.GetHashCode());
+            return Equals(Path, other.Path);
         }
 
         public override string ToString()
@@ -126,31 +121,8 @@ namespace IoFluently
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (obj.GetType() != this.GetType()) return false;
             return Equals((AbsolutePath) obj);
-        }
-
-        public IMaybe<AbsolutePath> TryAncestor(int generations)
-        {
-            if (Path.Count > generations)
-                return Something(new AbsolutePath(IsCaseSensitive, DirectorySeparator, IoService,
-                    Path.Subset(0, -1 - generations)));
-            return Nothing<AbsolutePath>();
-        }
-
-        public AbsolutePath Ancestor(int generations)
-        {
-            return TryAncestor(generations).Value;
-        }
-
-        public IMaybe<AbsolutePath> TryParent()
-        {
-            return TryAncestor(1);
-        }
-
-        public AbsolutePath Parent()
-        {
-            return TryParent().Value;
         }
 
         public static AbsolutePath operator / (AbsolutePath absPath, string whatToAdd)
@@ -176,6 +148,16 @@ namespace IoFluently
         public static AbsolutePaths operator / (AbsolutePath absPath, IEnumerable<string> whatToAdd)
         {
             return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd);
+        }
+
+        public static bool operator ==(AbsolutePath left, AbsolutePath right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(AbsolutePath left, AbsolutePath right)
+        {
+            return !Equals(left, right);
         }
     }
 }

@@ -54,7 +54,7 @@ namespace IoFluently.CodeGenerator
     {
         static void Main(string[] args)
         {
-            var ioService = new IoService(new ReactiveProcessFactory());
+            var ioService = new IoService();
             var repoRoot = ioService.CurrentDirectory.Ancestors().First(ancestor => ioService.IsFolder(ancestor / ".git"));
 
             using (var ioExtensionsWriter = ioService.OpenWriter(repoRoot / "src" / "IoFluently" / "IoExtensions.g.cs"))

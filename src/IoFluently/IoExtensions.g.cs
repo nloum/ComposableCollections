@@ -26,7 +26,12 @@ namespace IoFluently
             return path.IoService.Ancestor(path, level);
         }
 
-        public static IEnumerable<AbsolutePath> Ancestors(this AbsolutePath path, Boolean includeItself = false)
+        public static IEnumerable<AbsolutePath> Ancestors(this AbsolutePath path)
+        {
+            return path.IoService.Ancestors(path);
+        }
+
+        public static IEnumerable<AbsolutePath> Ancestors(this AbsolutePath path, Boolean includeItself)
         {
             return path.IoService.Ancestors(path, includeItself);
         }

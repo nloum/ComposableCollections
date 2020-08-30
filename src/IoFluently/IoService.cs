@@ -23,7 +23,12 @@ namespace IoFluently
     public class IoService : IoServiceBase
     {
         private bool? _isCaseSensitiveByDefault = null;
-        
+
+        public override IQueryable<AbsolutePath> Query()
+        {
+            return new Queryable<AbsolutePath>(new QueryContext());
+        }
+
         public IoService(bool enableOpenFilesTracking = false, IReactiveProcessFactory reactiveProcessFactory = null) : base(new OpenFilesTrackingService(enableOpenFilesTracking), reactiveProcessFactory, Environment.NewLine)
         {
             PathObservationMethod = GetDefaultPathObservationMethod();

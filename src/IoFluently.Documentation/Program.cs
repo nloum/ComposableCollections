@@ -14,7 +14,7 @@ namespace IoFluently.Documentation
     {
         static void Main(string[] args)
         {
-            var ioService = new IoService(new ReactiveProcessFactory());
+            var ioService = new IoService();
 
             var repoRoot = ioService.CurrentDirectory.Ancestors().First(ancestor => ioService.IsFolder(ancestor / ".git"));
             var xmlDoc = (repoRoot / "src/IoFluently/bin/Debug/IoFluently.xml").AsXmlFile();

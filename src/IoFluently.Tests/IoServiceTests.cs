@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Immutable;
+using System.Linq;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ReactiveProcesses;
@@ -166,6 +168,38 @@ namespace IoFluently.Tests
             var ioService = CreateUnitUnderTest(type, false);
             var result = ioService.ParseAbsolutePath("C:\\test1/test2\\");
             result.ToString().Should().Be("C:\\test1\\test2");
+        }
+
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        public void ShouldBeAbleToExecuteParentQuery(IoServiceType type)
+        {
+            var ioService = CreateUnitUnderTest(type, false);
+
+            var repoRoot = ioService.CurrentDirectory.Ancestors().First(ancestor => (ancestor / ".git").IsFolder());
+            var testFolder = repoRoot / "test_folder";
+            var results = ioService.Query().Where(path => path.Parent() == testFolder).AsEnumerable().ToImmutableList();
+            results.Count.Should().BeGreaterThan(0);
+            results.Count.Should().BeLessThan(10);
+            results.Any(result => result.Name == "readme.md").Should().BeTrue();
+            results.Any(result => result.Name == "test_folder").Should().BeFalse();
+            results.Any(result => result.Name == "subfolder_readme.md").Should().BeFalse();
+        }
+        
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        public void ShouldBeAbleToExecuteAncestorQuery(IoServiceType type)
+        {
+            var ioService = CreateUnitUnderTest(type, false);
+
+            var repoRoot = ioService.CurrentDirectory.Ancestors().First(ancestor => (ancestor / ".git").IsFolder());
+            var testFolder = repoRoot / "test_folder";
+            var results = ioService.Query().Where(path => path.Ancestors().Contains(testFolder)).AsEnumerable().ToImmutableHashSet();
+            results.Count.Should().BeGreaterThan(0);
+            results.Count.Should().BeLessThan(10);
+            results.Any(result => result.Name == "readme.md").Should().BeTrue();
+            results.Any(result => result.Name == "test_folder").Should().BeFalse();
+            results.Any(result => result.Name == "subfolder_readme.md").Should().BeTrue();
         }
 
         [TestMethod]

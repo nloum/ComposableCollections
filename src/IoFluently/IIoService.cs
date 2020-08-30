@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reactive;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -15,6 +16,8 @@ namespace IoFluently
 {
     public interface IIoService
     {
+        IQueryable<AbsolutePath> Query();
+        
         #region Environmental stuff
         
         /// <summary>
@@ -192,7 +195,18 @@ namespace IoFluently
         /// <param name="path"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        IEnumerable<AbsolutePath> Ancestors(AbsolutePath path, bool includeItself = false);
+        IEnumerable<AbsolutePath> Ancestors(AbsolutePath path, bool includeItself);
+
+        /// <summary>
+        ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
+        ///     For example, the ancestors of the path C:\Users\myusername\Documents would be these, in order:
+        ///     C:\Users\myusername
+        ///     C:\Users
+        ///     C:
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        IEnumerable<AbsolutePath> Ancestors(AbsolutePath path);
 
         IMaybe<AbsolutePath> TryDescendant(AbsolutePath path, params AbsolutePath[] paths);
         IMaybe<AbsolutePath> TryDescendant(AbsolutePath path, params string[] paths);

@@ -1,3 +1,4 @@
+using System;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ReactiveProcesses;
@@ -7,40 +8,87 @@ namespace IoFluently.Tests
     [TestClass]
     public class IoServiceTests
     {
-        [TestMethod]
-        public void SimplifyShouldNotChangeSimplePath()
+        public enum IoServiceType
         {
-            var uut = CreateUnitUnderTest();
+            IoService,
+            InMemoryWindowsIoService,
+            InMemoryUnixIoService
+        }
+        
+        private void CreateUnitsUnderTest(bool sameInstance, IoServiceType type1, bool enableOpenFilesTracking1, out IIoService unitUnderTest1, IoServiceType type2, bool enableOpenFilesTracking2, out IIoService unitUnderTest2)
+        {
+            unitUnderTest1 = CreateUnitUnderTest(type1, enableOpenFilesTracking1);
+            
+            if (type2 == type1 && sameInstance)
+            {
+                unitUnderTest2 = unitUnderTest1;
+                return;
+            }
+
+            unitUnderTest2 = CreateUnitUnderTest(type2, enableOpenFilesTracking2);
+        }
+
+        private IIoService CreateUnitUnderTest(IoServiceType type, bool enableOpenFilesTracking)
+        {
+            if (type == IoServiceType.IoService)
+            {
+                return new IoService(enableOpenFilesTracking);
+            }
+            else if (type == IoServiceType.InMemoryWindowsIoService)
+            {
+                return new InMemoryIoService("\r\n", false, enableOpenFilesTracking);
+            }
+            else if (type == IoServiceType.InMemoryUnixIoService)
+            {
+                return new InMemoryIoService("\n", true, enableOpenFilesTracking);
+            }
+            else
+            {
+                throw new ArgumentException($"Unknown IoServiceType {type}");
+            }
+        }
+        
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryWindowsIoService)]
+        [DataRow(IoServiceType.InMemoryUnixIoService)]
+        public void SimplifyShouldNotChangeSimplePath(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, true);
             var simplified = uut.CurrentDirectory.Simplify();
             uut.CurrentDirectory.ToString().Should().Be(simplified.ToString());
         }
-        
-        private IIoService CreateUnitUnderTest()
-        {
-            return new IoService(new ReactiveProcessFactory());
-        }
 
         [TestMethod]
-        public void HasExtensionShouldWorkWithAndWithoutTheDot() {
-            var uut = CreateUnitUnderTest();
+        [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryWindowsIoService)]
+        [DataRow(IoServiceType.InMemoryUnixIoService)]
+        public void HasExtensionShouldWorkWithAndWithoutTheDot(IoServiceType type) {
+            var uut = CreateUnitUnderTest(type, false);
             var testTxt = uut.ParseAbsolutePath("/test.txt");
             testTxt.HasExtension(".txt").Should().BeTrue();
             testTxt.HasExtension("txt").Should().BeTrue();
         }
 
         [TestMethod]
-        public void WithoutExtensionsShouldWork()
+        [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryWindowsIoService)]
+        [DataRow(IoServiceType.InMemoryUnixIoService)]
+        public void WithoutExtensionsShouldWork(IoServiceType type)
         {
-            var uut = CreateUnitUnderTest();
+            var uut = CreateUnitUnderTest(type, false);
             var testTxt = uut.ParseAbsolutePath("/test.test.txt");
             var test = testTxt.WithoutExtension();
             test.ToString().Should().Be("/test.test");
         }
 
         [TestMethod]
-        public void CommonShouldOnlyReturnFullFolderNames()
+        [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryWindowsIoService)]
+        [DataRow(IoServiceType.InMemoryUnixIoService)]
+        public void CommonShouldOnlyReturnFullFolderNames(IoServiceType type)
         {
-            var ioService = CreateUnitUnderTest();
+            var ioService = CreateUnitUnderTest(type, false);
 
             var parent = ioService.ParseAbsolutePath("C:\\test1\\test2");
             var item1 = parent / "test3" / "test.csproj";
@@ -52,30 +100,42 @@ namespace IoFluently.Tests
         }
 
         [TestMethod]
-        public void ShouldNotParseWindowsAbsolutePathAsRelativePath()
+        [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryWindowsIoService)]
+        [DataRow(IoServiceType.InMemoryUnixIoService)]
+        public void ShouldNotParseWindowsAbsolutePathAsRelativePath(IoServiceType type)
         {
-            var ioService = CreateUnitUnderTest();
+            var ioService = CreateUnitUnderTest(type, false);
             ioService.TryParseRelativePath("C:\\test1").HasValue.Should().BeFalse();
         }
 
         [TestMethod]
-        public void ShouldNotParseUnixAbsolutePathAsRelativePath()
+        [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryWindowsIoService)]
+        [DataRow(IoServiceType.InMemoryUnixIoService)]
+        public void ShouldNotParseUnixAbsolutePathAsRelativePath(IoServiceType type)
         {
-            var ioService = CreateUnitUnderTest();
+            var ioService = CreateUnitUnderTest(type, false);
             ioService.TryParseRelativePath("/test1").HasValue.Should().BeFalse();
         }
 
         [TestMethod]
-        public void ShouldNotParseRelativePathAsAbsolutePath()
+        [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryWindowsIoService)]
+        [DataRow(IoServiceType.InMemoryUnixIoService)]
+        public void ShouldNotParseRelativePathAsAbsolutePath(IoServiceType type)
         {
-            var ioService = CreateUnitUnderTest();
+            var ioService = CreateUnitUnderTest(type, false);
             ioService.TryParseAbsolutePath("test1").HasValue.Should().BeFalse();
         }
 
         [TestMethod]
-        public void RelativePathShouldWork()
+        [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryWindowsIoService)]
+        [DataRow(IoServiceType.InMemoryUnixIoService)]
+        public void RelativePathShouldWork(IoServiceType type)
         {
-            var ioService = CreateUnitUnderTest();
+            var ioService = CreateUnitUnderTest(type, false);
 
             var parent = ioService.ParseAbsolutePath("C:\\test1\\test2");
             var item1 = parent / "test3" / "test.csproj";
@@ -87,25 +147,58 @@ namespace IoFluently.Tests
         }
 
         [TestMethod]
-        public void ShouldParseWithComplexMixedDirectorySeparators()
+        [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryWindowsIoService)]
+        [DataRow(IoServiceType.InMemoryUnixIoService)]
+        public void ShouldParseWithComplexMixedDirectorySeparators(IoServiceType type)
         {
-            var ioService = CreateUnitUnderTest();
+            var ioService = CreateUnitUnderTest(type, false);
             var result = ioService.ParseAbsolutePath("C:\\test1\\./test2\\");
             result.ToString().Should().Be("C:\\test1\\test2");
         }
         
         [TestMethod]
-        public void ShouldParseWithMixedDirectorySeparators()
+        [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryWindowsIoService)]
+        [DataRow(IoServiceType.InMemoryUnixIoService)]
+        public void ShouldParseWithMixedDirectorySeparators(IoServiceType type)
         {
-            var ioService = CreateUnitUnderTest();
+            var ioService = CreateUnitUnderTest(type, false);
             var result = ioService.ParseAbsolutePath("C:\\test1/test2\\");
             result.ToString().Should().Be("C:\\test1\\test2");
         }
 
         [TestMethod]
-        public void MovingShouldWork()
+        [DataRow(false, IoServiceType.IoService, true, IoServiceType.IoService, true)]
+        [DataRow(false, IoServiceType.InMemoryWindowsIoService, true, IoServiceType.InMemoryWindowsIoService, true)]
+        [DataRow(false, IoServiceType.InMemoryUnixIoService, true, IoServiceType.InMemoryUnixIoService, true)]
+        [DataRow(true, IoServiceType.IoService, true, IoServiceType.IoService, true)]
+        [DataRow(true, IoServiceType.InMemoryWindowsIoService, true, IoServiceType.InMemoryWindowsIoService, true)]
+        [DataRow(true, IoServiceType.InMemoryUnixIoService, true, IoServiceType.InMemoryUnixIoService, true)]
+        
+        [DataRow(false, IoServiceType.IoService, false, IoServiceType.IoService, true)]
+        [DataRow(false, IoServiceType.InMemoryWindowsIoService, false, IoServiceType.InMemoryWindowsIoService, true)]
+        [DataRow(false, IoServiceType.InMemoryUnixIoService, false, IoServiceType.InMemoryUnixIoService, true)]
+        [DataRow(true, IoServiceType.IoService, false, IoServiceType.IoService, true)]
+        [DataRow(true, IoServiceType.InMemoryWindowsIoService, false, IoServiceType.InMemoryWindowsIoService, true)]
+        [DataRow(true, IoServiceType.InMemoryUnixIoService, false, IoServiceType.InMemoryUnixIoService, true)]
+
+        [DataRow(false, IoServiceType.IoService, true, IoServiceType.IoService, false)]
+        [DataRow(false, IoServiceType.InMemoryWindowsIoService, true, IoServiceType.InMemoryWindowsIoService, false)]
+        [DataRow(false, IoServiceType.InMemoryUnixIoService, true, IoServiceType.InMemoryUnixIoService, false)]
+        [DataRow(true, IoServiceType.IoService, true, IoServiceType.IoService, false)]
+        [DataRow(true, IoServiceType.InMemoryWindowsIoService, true, IoServiceType.InMemoryWindowsIoService, false)]
+        [DataRow(true, IoServiceType.InMemoryUnixIoService, true, IoServiceType.InMemoryUnixIoService, false)]
+
+        [DataRow(false, IoServiceType.IoService, false, IoServiceType.IoService, false)]
+        [DataRow(false, IoServiceType.InMemoryWindowsIoService, false, IoServiceType.InMemoryWindowsIoService, false)]
+        [DataRow(false, IoServiceType.InMemoryUnixIoService, false, IoServiceType.InMemoryUnixIoService, false)]
+        [DataRow(true, IoServiceType.IoService, false, IoServiceType.IoService, false)]
+        [DataRow(true, IoServiceType.InMemoryWindowsIoService, false, IoServiceType.InMemoryWindowsIoService, false)]
+        [DataRow(true, IoServiceType.InMemoryUnixIoService, false, IoServiceType.InMemoryUnixIoService, false)]
+        public void MovingShouldWork(bool sameInstance, IoServiceType type1, bool enableOpenFileTracking1, IoServiceType type2, bool enableOpenFileTracking2)
         {
-            var ioService = CreateUnitUnderTest();
+            var ioService = CreateUnitUnderTest(type1, false);
 
             var sourceFolder = ioService.CurrentDirectory / "test1";
 

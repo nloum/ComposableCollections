@@ -278,9 +278,8 @@ namespace IoFluently
 
         public override AbsolutePath CreateFolder(AbsolutePath path)
         {
-            var components = path.Path.Components;
-            var rootFolder = RootFolders[components[0]];
-            EnsureFolderExists(rootFolder, components.Skip(1).ToList());
+            var folder = GetFolder(path.Parent()).Value;
+            EnsureFolderExists(folder, new[]{path.Name});
             return path;
         }
 

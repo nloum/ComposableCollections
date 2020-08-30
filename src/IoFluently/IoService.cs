@@ -24,7 +24,7 @@ namespace IoFluently
     {
         private bool? _isCaseSensitiveByDefault = null;
         
-        public IoService(IReactiveProcessFactory reactiveProcessFactory = null, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), reactiveProcessFactory, Environment.NewLine)
+        public IoService(bool enableOpenFilesTracking = false, IReactiveProcessFactory reactiveProcessFactory = null) : base(new OpenFilesTrackingService(enableOpenFilesTracking), reactiveProcessFactory, Environment.NewLine)
         {
             PathObservationMethod = GetDefaultPathObservationMethod();
         }

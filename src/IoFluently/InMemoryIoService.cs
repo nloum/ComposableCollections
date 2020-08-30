@@ -37,13 +37,13 @@ namespace IoFluently
             public Dictionary<string, Folder> Folders { get; } = new Dictionary<string, Folder>();
         }
 
-        private readonly PathFlags _defaultPathFlags;
+        private readonly bool _isCaseSensitiveByDefault;
         public ObservableDictionary<string, Folder> RootFolders { get; } = new ObservableDictionary<string, Folder>();
 
-        public InMemoryIoService(string newline, PathFlags defaultPathFlags, bool enableOpenFilesTracking = false, IReactiveProcessFactory reactiveProcessFactory = null) : base(new OpenFilesTrackingService(enableOpenFilesTracking), reactiveProcessFactory ?? new ReactiveProcessFactory(), newline)
+        public InMemoryIoService(string newline, bool isCaseSensitiveByDefault, bool enableOpenFilesTracking = false, IReactiveProcessFactory reactiveProcessFactory = null) : base(new OpenFilesTrackingService(enableOpenFilesTracking), reactiveProcessFactory ?? new ReactiveProcessFactory(), newline)
         {
             _newline = newline;
-            _defaultPathFlags = defaultPathFlags;
+            _isCaseSensitiveByDefault = isCaseSensitiveByDefault;
         }
 
         public override ISetChanges<AbsolutePath> ToLiveLinq(AbsolutePath path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
@@ -125,9 +125,9 @@ namespace IoFluently
             throw new NotImplementedException();
         }
 
-        public override PathFlags GetDefaultFlagsForThisEnvironment()
+        public override bool IsCaseSensitiveByDefault()
         {
-            return _defaultPathFlags;
+            return _isCaseSensitiveByDefault;
         }
 
         public override void UpdateStorage()

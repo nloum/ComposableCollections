@@ -56,7 +56,7 @@ namespace IoFluently
             var parentString = parent.ToString();
             if (Directory.Exists(parentString))
             {
-                return Directory.GetFileSystemEntries(parentString).Select(x => IoService.ParseAbsolutePath(x, _path.Flags));
+                return Directory.GetFileSystemEntries(parentString).Select(x => IoService.ParseAbsolutePath(x, _path.IsCaseSensitive ? CaseSensitivityMode.CaseSensitive : CaseSensitivityMode.CaseInsensitive));
             }
             
             return Enumerable.Empty<AbsolutePath>();

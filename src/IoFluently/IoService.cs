@@ -22,6 +22,8 @@ namespace IoFluently
 {
     public class IoService : IoServiceBase
     {
+        private bool? _isCaseSensitiveByDefault = null;
+        
         public IoService(IReactiveProcessFactory reactiveProcessFactory = null, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), reactiveProcessFactory, Environment.NewLine)
         {
             PathObservationMethod = GetDefaultPathObservationMethod();
@@ -449,7 +451,7 @@ namespace IoFluently
 
                         RenamedEventHandler handler = (_, args) =>
                         {
-                            tcs.SetResult(new AbsolutePath(path.Flags, path.DirectorySeparator, this, new[]{args.FullPath}));
+                            tcs.SetResult(new AbsolutePath(path.IsCaseSensitive, path.DirectorySeparator, this, new[]{args.FullPath}));
                         };
 
                         watcher.EnableRaisingEvents = true;
@@ -466,22 +468,22 @@ namespace IoFluently
                 });
         }
 
-        public override PathFlags GetDefaultFlagsForThisEnvironment()
+        public override bool IsCaseSensitiveByDefault()
         {
             lock (Lock)
             {
-                if (DefaultFlagsForThisEnvironment == null)
+                if (_isCaseSensitiveByDefault == null)
                 {
                     var file = Path.GetTempFileName();
                     var caseSensitive = File.Exists(file.ToLower()) && File.Exists(file.ToUpper());
                     File.Delete(file);
                     if (caseSensitive)
-                        DefaultFlagsForThisEnvironment = PathFlags.CaseSensitive;
+                        _isCaseSensitiveByDefault = true;
                     else
-                        DefaultFlagsForThisEnvironment = PathFlags.None;
+                        _isCaseSensitiveByDefault = false;
                 }
 
-                return DefaultFlagsForThisEnvironment.Value;
+                return _isCaseSensitiveByDefault.Value;
             }
         }
         

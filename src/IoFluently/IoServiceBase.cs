@@ -26,7 +26,6 @@ namespace IoFluently
     {
         protected readonly object Lock = new object();
         protected string DefaultDirectorySeparatorForThisEnvironment;
-        protected PathFlags? DefaultFlagsForThisEnvironment;
 
         public IOpenFilesTrackingService OpenFilesTrackingService { get; }
 
@@ -191,7 +190,7 @@ namespace IoFluently
             return spec;
         }
 
-        public abstract PathFlags GetDefaultFlagsForThisEnvironment();
+        public abstract bool IsCaseSensitiveByDefault();
 
         public virtual string GetDefaultDirectorySeparatorForThisEnvironment()
         {
@@ -269,7 +268,7 @@ namespace IoFluently
             return regex;
         }
 
-        public virtual RelativePath ParseRelativePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+        public virtual RelativePath ParseRelativePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             var error = string.Empty;
             RelativePath pathSpec;
@@ -278,7 +277,7 @@ namespace IoFluently
             return pathSpec;
         }
 
-        public virtual IMaybe<RelativePath> TryParseRelativePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+        public virtual IMaybe<RelativePath> TryParseRelativePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             var error = string.Empty;
             RelativePath pathSpec;
@@ -288,20 +287,20 @@ namespace IoFluently
         }
 
         public virtual bool TryParseRelativePath(string path, out RelativePath relativePath,
-            PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             var error = string.Empty;
             return TryParseRelativePath(path, out relativePath, out error, flags);
         }
 
         public virtual bool TryParseRelativePath(string path, out RelativePath relativePath, out string error,
-            PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
-            if (flags.HasFlag(PathFlags.UseDefaultsFromUtility) && flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
+            if (flags == CaseSensitivityMode.UseDefaultsFromEnvironment && flags.HasFlag(CaseSensitivityMode.UseDefaultsForGivenPath))
                 throw new ArgumentException(
                     "Cannot specify both PathFlags.UseDefaultsFromUtility and PathFlags.UseDefaultsForGivenPath");
-            if (flags.HasFlag(PathFlags.UseDefaultsFromUtility))
-                flags = GetDefaultFlagsForThisEnvironment();
+            if (flags == CaseSensitivityMode.UseDefaultsFromEnvironment)
+                flags = IsCaseSensitiveByDefault() ? CaseSensitivityMode.CaseSensitive : CaseSensitivityMode.CaseInsensitive;
             error = string.Empty;
             relativePath = null;
             if (path.Contains(":") && path.Contains("/"))
@@ -318,8 +317,8 @@ namespace IoFluently
 
             if (isWindowsStyle)
             {
-                if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
-                    flags = PathFlags.None;
+                if (flags.HasFlag(CaseSensitivityMode.UseDefaultsForGivenPath))
+                    flags = CaseSensitivityMode.CaseInsensitive;
                 if (path.Length > 1 && path.EndsWith("\\"))
                     path = path.Substring(0, path.Length - 1);
                 var colonIdx = path.LastIndexOf(':');
@@ -351,7 +350,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    relativePath = new RelativePath(flags, "\\", this, components);
+                    relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, "\\", this, components);
                 }
                 else if (path.StartsWith("."))
                 {
@@ -374,7 +373,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    relativePath = new RelativePath(flags, "\\", this, components);
+                    relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, "\\", this, components);
                 }
                 else if (path.StartsWith("\\\\"))
                 {
@@ -397,7 +396,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    relativePath = new RelativePath(flags, "\\", this, components);
+                    relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, "\\", this, components);
                 }
                 else if (path.StartsWith("\\"))
                 {
@@ -420,7 +419,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    relativePath = new RelativePath(flags, "\\", this, components);
+                    relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, "\\", this, components);
                 }
                 else
                 {
@@ -443,7 +442,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    relativePath = new RelativePath(flags, "\\", this, components);
+                    relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, "\\", this, components);
                 }
 
                 return true;
@@ -451,8 +450,8 @@ namespace IoFluently
 
             if (isUnixStyle)
             {
-                if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
-                    flags = PathFlags.CaseSensitive;
+                if (flags.HasFlag(CaseSensitivityMode.UseDefaultsForGivenPath))
+                    flags = CaseSensitivityMode.CaseSensitive;
                 if (path.Length > 1 && path.EndsWith("/"))
                     path = path.Substring(0, path.Length - 1);
                 if (path.Contains(":"))
@@ -483,7 +482,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    relativePath = new RelativePath(flags, "/", this, components);
+                    relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, "/", this, components);
                 }
                 else if (path.StartsWith("."))
                 {
@@ -506,7 +505,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    relativePath = new RelativePath(flags, "/", this, components);
+                    relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, "/", this, components);
                 }
                 else
                 {
@@ -529,7 +528,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    relativePath = new RelativePath(flags, "/", this, components);
+                    relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, "/", this, components);
                 }
 
                 return true;
@@ -537,16 +536,16 @@ namespace IoFluently
 
             // If we reach this point, there are no backslashes or slashes in the path, meaning that it's a
             // path with one element.
-            if (flags.HasFlag(PathFlags.UseDefaultsFromUtility))
-                flags = GetDefaultFlagsForThisEnvironment();
+            if (flags.HasFlag(CaseSensitivityMode.UseDefaultsFromEnvironment))
+                flags = IsCaseSensitiveByDefault() ? CaseSensitivityMode.CaseSensitive : CaseSensitivityMode.CaseInsensitive;
             if (path == ".." || path == ".")
-                relativePath = new RelativePath(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, new[]{path});
+                relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, GetDefaultDirectorySeparatorForThisEnvironment(), this, new[]{path});
             else
-                relativePath = new RelativePath(flags, GetDefaultDirectorySeparatorForThisEnvironment(), this, new[]{".", path});
+                relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, GetDefaultDirectorySeparatorForThisEnvironment(), this, new[]{".", path});
             return true;
         }
 
-        public virtual AbsolutePath ParseAbsolutePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+        public virtual AbsolutePath ParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             var error = string.Empty;
             AbsolutePath pathSpec;
@@ -555,7 +554,7 @@ namespace IoFluently
             return pathSpec;
         }
 
-        public virtual IMaybe<AbsolutePath> TryParseAbsolutePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+        public virtual IMaybe<AbsolutePath> TryParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             var error = string.Empty;
             AbsolutePath pathSpec;
@@ -565,20 +564,20 @@ namespace IoFluently
         }
 
         public virtual bool TryParseAbsolutePath(string path, out AbsolutePath pathSpec,
-            PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             var error = string.Empty;
             return TryParseAbsolutePath(path, out pathSpec, out error, flags);
         }
 
         public virtual bool TryParseAbsolutePath(string path, out AbsolutePath pathSpec, out string error,
-            PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
-            if (flags.HasFlag(PathFlags.UseDefaultsFromUtility) && flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
+            if (flags.HasFlag(CaseSensitivityMode.UseDefaultsFromEnvironment) && flags.HasFlag(CaseSensitivityMode.UseDefaultsForGivenPath))
                 throw new ArgumentException(
                     "Cannot specify both PathFlags.UseDefaultsFromUtility and PathFlags.UseDefaultsForGivenPath");
-            if (flags.HasFlag(PathFlags.UseDefaultsFromUtility))
-                flags = GetDefaultFlagsForThisEnvironment();
+            if (flags.HasFlag(CaseSensitivityMode.UseDefaultsFromEnvironment))
+                flags = IsCaseSensitiveByDefault() ? CaseSensitivityMode.CaseSensitive : CaseSensitivityMode.CaseInsensitive;
             error = string.Empty;
             pathSpec = null;
             if (path.Contains(":") && path.Contains("/"))
@@ -595,8 +594,8 @@ namespace IoFluently
 
             if (isWindowsStyle)
             {
-                if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
-                    flags = PathFlags.None;
+                if (flags.HasFlag(CaseSensitivityMode.UseDefaultsForGivenPath))
+                    flags = CaseSensitivityMode.CaseInsensitive;
                 if (path.Length > 1 && path.EndsWith("\\"))
                     path = path.Substring(0, path.Length - 1);
                 var colonIdx = path.LastIndexOf(':');
@@ -623,7 +622,7 @@ namespace IoFluently
                         return false;
                     }
 
-                    pathSpec = new AbsolutePath(flags, "\\", this, components);
+                    pathSpec = new AbsolutePath(false, "\\", this, components);
                 }
                 else if (path.StartsWith("."))
                 {
@@ -646,7 +645,7 @@ namespace IoFluently
                         error = "Must be an absolute path";
                         return false;
                     }
-                    pathSpec = new AbsolutePath(flags, "\\", this, components);
+                    pathSpec = new AbsolutePath(false, "\\", this, components);
                 }
                 else if (path.StartsWith("\\\\"))
                 {
@@ -669,7 +668,7 @@ namespace IoFluently
                         error = "Must be an absolute path";
                         return false;
                     }
-                    pathSpec = new AbsolutePath(flags, "\\", this, components);
+                    pathSpec = new AbsolutePath(false, "\\", this, components);
                 }
                 else if (path.StartsWith("\\"))
                 {
@@ -692,7 +691,7 @@ namespace IoFluently
                         error = "Must be an absolute path";
                         return false;
                     }
-                    pathSpec = new AbsolutePath(flags, "\\", this, components);
+                    pathSpec = new AbsolutePath(false, "\\", this, components);
                 }
                 else
                 {
@@ -715,7 +714,7 @@ namespace IoFluently
                         error = "Must be an absolute path";
                         return false;
                     }
-                    pathSpec = new AbsolutePath(flags, "\\", this, components);
+                    pathSpec = new AbsolutePath(false, "\\", this, components);
                 }
 
                 return true;
@@ -723,8 +722,8 @@ namespace IoFluently
 
             if (isUnixStyle)
             {
-                if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
-                    flags = PathFlags.CaseSensitive;
+                if (flags.HasFlag(CaseSensitivityMode.UseDefaultsForGivenPath))
+                    flags = CaseSensitivityMode.CaseSensitive;
                 if (path.Length > 1 && path.EndsWith("/"))
                     path = path.Substring(0, path.Length - 1);
                 if (path.Contains(":"))
@@ -755,7 +754,7 @@ namespace IoFluently
                         error = "Must be an absolute path";
                         return false;
                     }
-                    pathSpec = new AbsolutePath(flags, "/", this, components);
+                    pathSpec = new AbsolutePath(true, "/", this, components);
                 }
                 else if (path.StartsWith("."))
                 {
@@ -778,7 +777,7 @@ namespace IoFluently
                         error = "Must be an absolute path";
                         return false;
                     }
-                    pathSpec = new AbsolutePath(flags, "/", this, components);
+                    pathSpec = new AbsolutePath(true, "/", this, components);
                 }
                 else
                 {
@@ -801,7 +800,7 @@ namespace IoFluently
                         error = "Must be an absolute path";
                         return false;
                     }
-                    pathSpec = new AbsolutePath(flags, "/", this, components);
+                    pathSpec = new AbsolutePath(true, "/", this, components);
                 }
 
                 return true;
@@ -1205,7 +1204,7 @@ namespace IoFluently
         }
 
         public AbsolutePath ParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo,
-            PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             var relativePath = TryParseRelativePath(path, flags);
             if (relativePath.HasValue)
@@ -1216,7 +1215,7 @@ namespace IoFluently
             return ParseAbsolutePath(path, flags);
         }
 
-        public IEither<AbsolutePath, RelativePath> ParsePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath)
+        public IEither<AbsolutePath, RelativePath> ParsePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             var relativePath = TryParseRelativePath(path, flags);
             if (relativePath.HasValue)
@@ -1229,12 +1228,12 @@ namespace IoFluently
 
         public bool IsRelativePath(string path)
         {
-            return TryParseRelativePath(path, PathFlags.UseDefaultsForGivenPath).HasValue;
+            return TryParseRelativePath(path, CaseSensitivityMode.UseDefaultsForGivenPath).HasValue;
         }
 
         public bool IsAbsolutePath(string path)
         {
-            return TryParseAbsolutePath(path, PathFlags.UseDefaultsForGivenPath).HasValue;
+            return TryParseAbsolutePath(path, CaseSensitivityMode.UseDefaultsForGivenPath).HasValue;
         }
 
         public virtual Uri Child(Uri parent, Uri child)
@@ -1554,16 +1553,16 @@ namespace IoFluently
 
         #region Internal extension methods
 
-        public virtual StringComparison ToStringComparison(PathFlags pathFlags)
+        public virtual StringComparison ToStringComparison(CaseSensitivityMode caseSensitivityMode)
         {
-            if (pathFlags.HasFlag(PathFlags.CaseSensitive))
+            if (caseSensitivityMode.HasFlag(CaseSensitivityMode.CaseSensitive))
                 return StringComparison.Ordinal;
             return StringComparison.OrdinalIgnoreCase;
         }
 
-        public virtual StringComparison ToStringComparison(PathFlags pathFlags, PathFlags otherPathFlags)
+        public virtual StringComparison ToStringComparison(CaseSensitivityMode caseSensitivityMode, CaseSensitivityMode otherCaseSensitivityMode)
         {
-            if (pathFlags.HasFlag(PathFlags.CaseSensitive) && otherPathFlags.HasFlag(PathFlags.CaseSensitive))
+            if (caseSensitivityMode.HasFlag(CaseSensitivityMode.CaseSensitive) && otherCaseSensitivityMode.HasFlag(CaseSensitivityMode.CaseSensitive))
                 return StringComparison.Ordinal;
             return StringComparison.OrdinalIgnoreCase;
         }
@@ -1614,14 +1613,14 @@ namespace IoFluently
             var path1Str = path.ToString();
             var path2Str = that.ToString();
 
-            if (!path.Flags.HasFlag(PathFlags.CaseSensitive) || !that.Flags.HasFlag(PathFlags.CaseSensitive))
+            if (!path.IsCaseSensitive || !that.IsCaseSensitive)
             {
                 path1Str = path1Str.ToUpper();
                 path2Str = path2Str.ToUpper();
             }
 
-            var caseSensitive = path.Flags.HasFlag(PathFlags.CaseSensitive) ||
-                                that.Flags.HasFlag(PathFlags.CaseSensitive);
+            var caseSensitive = path.IsCaseSensitive ||
+                                that.IsCaseSensitive;
             var zippedComponents = path.Path.Components.SkipWhile(x => x == path.DirectorySeparator).Zip(that.Path.Components.SkipWhile(x => x == path.DirectorySeparator), (comp1, comp2) => 
                 new
                 {
@@ -1667,7 +1666,7 @@ namespace IoFluently
                 result.Add(".");
             }
             
-            return new RelativePath(path.Flags, path.DirectorySeparator, path.IoService, result);
+            return new RelativePath(path.IsCaseSensitive, path.DirectorySeparator, path.IoService, result);
         }
 
         public virtual AbsolutePath Simplify(AbsolutePath path)
@@ -1702,14 +1701,14 @@ namespace IoFluently
             var str = sb.ToString();
             if (str.Length == 0)
                 str = ".";
-            return TryParseAbsolutePath(str, path.Flags).Value;
+            return TryParseAbsolutePath(str, path.IsCaseSensitive ? CaseSensitivityMode.CaseSensitive : CaseSensitivityMode.CaseInsensitive).Value;
         }
 
         public virtual IMaybe<AbsolutePath> TryParent(AbsolutePath path)
         {
             if (path.Path.Components.Count > 1)
             {
-                return new AbsolutePath(path.Flags, path.DirectorySeparator, path.IoService,
+                return new AbsolutePath(path.IsCaseSensitive, path.DirectorySeparator, path.IoService,
                     path.Path.Components.Take(path.Path.Components.Count - 1)).ToMaybe();
             }
             else
@@ -1768,12 +1767,6 @@ namespace IoFluently
 
         #endregion
         
-        
-        
-        
-        
-        
-        
         /// <summary>
         /// Equivalent to Path.Combine. You can also use the / operator to build paths, like this:
         /// _ioService.CurrentDirectory / "folder1" / "folder2" / "file.txt"
@@ -1800,7 +1793,7 @@ namespace IoFluently
             var name = path.Name;
             newComponents.Add(name.Substring(0, name.LastIndexOf('.')));
             
-            return new AbsolutePath(path.Flags, path.DirectorySeparator, path.IoService, newComponents);
+            return new AbsolutePath(path.IsCaseSensitive, path.DirectorySeparator, path.IoService, newComponents);
         }
 
         public bool HasExtension(AbsolutePath path)
@@ -1885,7 +1878,7 @@ namespace IoFluently
 
         public AbsolutePaths GlobFiles(AbsolutePath path, string pattern)
         {
-            Func<AbsolutePath, IEnumerable<RelativePath>> patternFunc = absPath => absPath.Children(pattern).Select(x => new RelativePath(x.Flags, x.DirectorySeparator, x.IoService, new[]{x.Name}));
+            Func<AbsolutePath, IEnumerable<RelativePath>> patternFunc = absPath => absPath.Children(pattern).Select(x => new RelativePath(x.IsCaseSensitive, x.DirectorySeparator, x.IoService, new[]{x.Name}));
             return path / patternFunc;
         }
         

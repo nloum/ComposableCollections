@@ -12,14 +12,14 @@ namespace IoFluently
 {
     public class RelativePath : IComparable
     {
-        public PathFlags Flags { get; }
+        public bool IsCaseSensitive { get; }
         public string DirectorySeparator { get; }
         public IIoService IoService { get; }
         public RelativePath<string> Path { get; }
 
-        internal RelativePath(PathFlags flags, string directorySeparator, IIoService ioService, IEnumerable<string> path)
+        internal RelativePath(bool isCaseSensitive, string directorySeparator, IIoService ioService, IEnumerable<string> path)
         {
-            Flags = flags;
+            IsCaseSensitive = isCaseSensitive;
             DirectorySeparator = directorySeparator;
             IoService = ioService;
             Path = new RelativePath<string>(path);
@@ -78,17 +78,17 @@ namespace IoFluently
             }
         }
 
-        private static void ValidateFlags(PathFlags flags)
+        private static void ValidateFlags(CaseSensitivityMode flags)
         {
-            if (flags.HasFlag(PathFlags.UseDefaultsForGivenPath))
+            if (flags.HasFlag(CaseSensitivityMode.UseDefaultsForGivenPath))
                 throw new ArgumentException("A path cannot have the UseDefaultsForGivenPath flag set.");
-            if (flags.HasFlag(PathFlags.UseDefaultsFromUtility))
+            if (flags.HasFlag(CaseSensitivityMode.UseDefaultsFromEnvironment))
                 throw new ArgumentException("A path cannot have the UseDefaultsFromUtility flag set.");
         }
 
         public override int GetHashCode()
         {
-            if (Flags.HasFlag(PathFlags.CaseSensitive))
+            if (IsCaseSensitive)
             {
                 return ToString().GetHashCode();
             }
@@ -130,7 +130,7 @@ namespace IoFluently
         public IMaybe<RelativePath> Ancestor(int generations)
         {
             if (Path.Count > generations)
-                return Something(new RelativePath(Flags, DirectorySeparator, IoService,
+                return Something(new RelativePath(IsCaseSensitive, DirectorySeparator, IoService,
                     Path.Subset(0, -1 - generations)));
             return Nothing<RelativePath>();
         }
@@ -142,27 +142,27 @@ namespace IoFluently
         
         public static RelativePath operator / (RelativePath relPath, string whatToAdd)
         {
-            return new RelativePath(relPath.Flags, relPath.DirectorySeparator, relPath.IoService, relPath.Path / whatToAdd);
+            return new RelativePath(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, relPath.Path / whatToAdd);
         }
 
         public static RelativePaths operator / (RelativePath relPath, IEnumerable<RelativePath> whatToAdd)
         {
-            return new RelativePaths(relPath.Flags, relPath.DirectorySeparator, relPath.IoService, relPath.Path / whatToAdd.Select(x => x.Path));
+            return new RelativePaths(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, relPath.Path / whatToAdd.Select(x => x.Path));
         }
 
         public static RelativePaths operator / (RelativePath relPath, Func<RelativePath, IEnumerable<RelativePath>> whatToAdd)
         {
-            return new RelativePaths(relPath.Flags, relPath.DirectorySeparator, relPath.IoService, relPath.Path / (rel => whatToAdd(new RelativePath(relPath.Flags, relPath.DirectorySeparator, relPath.IoService, rel)).Select(x => x.Path)));
+            return new RelativePaths(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, relPath.Path / (rel => whatToAdd(new RelativePath(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, rel)).Select(x => x.Path)));
         }
 
         public static RelativePath operator / (RelativePath relPath, RelativePath whatToAdd)
         {
-            return new RelativePath(relPath.Flags, relPath.DirectorySeparator, relPath.IoService, relPath.Path / whatToAdd.Path);
+            return new RelativePath(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, relPath.Path / whatToAdd.Path);
         }
 
         public static RelativePaths operator / (RelativePath relPath, IEnumerable<string> whatToAdd)
         {
-            return new RelativePaths(relPath.Flags, relPath.DirectorySeparator, relPath.IoService, relPath.Path / whatToAdd);
+            return new RelativePaths(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, relPath.Path / whatToAdd);
         }
     }
 }

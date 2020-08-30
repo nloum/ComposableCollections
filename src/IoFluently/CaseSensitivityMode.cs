@@ -3,15 +3,15 @@ using System;
 namespace IoFluently
 {
     [Flags]
-    public enum PathFlags : ulong
+    public enum CaseSensitivityMode
     {
-        None = 0,
+        CaseInsensitive,
 
         /// <summary>
         ///     If set, makes the path case-sensitive.
         ///     If not set, implies case-insensitivity.
         /// </summary>
-        CaseSensitive = 0x1,
+        CaseSensitive,
 
         /// <summary>
         ///     This is used to tell APIs that create AbsolutePath objects to calculate
@@ -20,7 +20,7 @@ namespace IoFluently
         ///     is only used by the APIs that create AbsolutePaths to calculate the actual
         ///     value of AbsolutePath.Flags.
         /// </summary>
-        UseDefaultsForGivenPath = 0x2,
+        UseDefaultsForGivenPath,
 
         /// <summary>
         ///     This is used to tell the APIs that create AbsolutePath objects to get
@@ -29,6 +29,6 @@ namespace IoFluently
         ///     is only used by the APIs that create AbsolutePaths to calculate the actual
         ///     value of AbsolutePath.Flags.
         /// </summary>
-        UseDefaultsFromUtility = 0x4
+        UseDefaultsFromEnvironment
     }
 }

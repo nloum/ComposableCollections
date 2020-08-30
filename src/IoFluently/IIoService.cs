@@ -17,7 +17,11 @@ namespace IoFluently
     {
         #region Environmental stuff
         
-        PathFlags GetDefaultFlagsForThisEnvironment();
+        /// <summary>
+        /// Determines whether the environment that this IIoService is for is case sensitive by default. 
+        /// </summary>
+        bool IsCaseSensitiveByDefault();
+        
         string GetDefaultDirectorySeparatorForThisEnvironment();
 
         #endregion
@@ -112,26 +116,26 @@ namespace IoFluently
         
         bool IsAbsoluteWindowsPath(string path);
         bool IsAbsoluteUnixPath(string path);
-        StringComparison ToStringComparison(PathFlags pathFlags);
-        StringComparison ToStringComparison(PathFlags pathFlags, PathFlags otherPathFlags);
+        StringComparison ToStringComparison(CaseSensitivityMode caseSensitivityMode);
+        StringComparison ToStringComparison(CaseSensitivityMode caseSensitivityMode, CaseSensitivityMode otherCaseSensitivityMode);
 
         bool ComponentsAreAbsolute(IReadOnlyList<string> path);
-        RelativePath ParseRelativePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
-        IMaybe<RelativePath> TryParseRelativePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
+        RelativePath ParseRelativePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
+        IMaybe<RelativePath> TryParseRelativePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         bool TryParseRelativePath(string path, out RelativePath relativePath,
-            PathFlags flags = PathFlags.UseDefaultsForGivenPath);
+            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         bool TryParseRelativePath(string path, out RelativePath relativePath, out string error,
-            PathFlags flags = PathFlags.UseDefaultsForGivenPath);
-        AbsolutePath ParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
-        IEither<AbsolutePath, RelativePath> ParsePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
+            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
+        AbsolutePath ParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
+        IEither<AbsolutePath, RelativePath> ParsePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         bool IsRelativePath(string path);
         bool IsAbsolutePath(string path);
-        AbsolutePath ParseAbsolutePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
-        IMaybe<AbsolutePath> TryParseAbsolutePath(string path, PathFlags flags = PathFlags.UseDefaultsForGivenPath);
+        AbsolutePath ParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
+        IMaybe<AbsolutePath> TryParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         bool TryParseAbsolutePath(string path, out AbsolutePath absolutePath,
-            PathFlags flags = PathFlags.UseDefaultsForGivenPath);
+            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         bool TryParseAbsolutePath(string path, out AbsolutePath absolutePath, out string error,
-            PathFlags flags = PathFlags.UseDefaultsForGivenPath);
+            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         
         #endregion
         

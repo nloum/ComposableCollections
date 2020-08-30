@@ -9,14 +9,15 @@ namespace IoFluently
 {
     public class AbsolutePaths : IComparable, IEnumerable<AbsolutePath>
     {
-        public PathFlags Flags { get; }
+        public bool IsCaseSensitive { get; }
         public string DirectorySeparator { get; }
         public IIoService IoService { get; }
         public AbsolutePaths<string> Paths { get; }
 
-        internal AbsolutePaths(PathFlags flags, string directorySeparator, IIoService ioService, AbsolutePaths<string> paths)
+        internal AbsolutePaths(bool isCaseSensitive, string directorySeparator, IIoService ioService, AbsolutePaths<string> paths)
         {
-            Flags = flags;
+            IsCaseSensitive = isCaseSensitive;
+            IsCaseSensitive = isCaseSensitive;
             DirectorySeparator = directorySeparator;
             IoService = ioService;
             Paths = paths;
@@ -41,34 +42,34 @@ namespace IoFluently
         {
             foreach (var path in Paths)
             {
-                yield return new AbsolutePath(Flags, DirectorySeparator, IoService, path);
+                yield return new AbsolutePath(IsCaseSensitive, DirectorySeparator, IoService, path);
             }
         }
 
         public static AbsolutePaths operator / (AbsolutePaths absPath, string whatToAdd)
         {
-            return new AbsolutePaths(absPath.Flags, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / whatToAdd);
+            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / whatToAdd);
         }
 
         public static AbsolutePaths operator / (AbsolutePaths absPath, IEnumerable<RelativePath> whatToAdd)
         {
-            return new AbsolutePaths(absPath.Flags, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / whatToAdd.Select(x => x.Path));
+            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / whatToAdd.Select(x => x.Path));
         }
 
         public static AbsolutePaths operator / (AbsolutePaths absPath, RelativePath whatToAdd)
         {
-            return new AbsolutePaths(absPath.Flags, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / whatToAdd.Path);
+            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / whatToAdd.Path);
         }
 
         public static AbsolutePaths operator / (AbsolutePaths absPath, IEnumerable<string> whatToAdd)
         {
-            return new AbsolutePaths(absPath.Flags, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / whatToAdd);
+            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / whatToAdd);
         }
 
         public static AbsolutePaths operator / (AbsolutePaths absPath,
             Func<AbsolutePath, IEnumerable<RelativePath>> whatToAdd)
         {
-            return new AbsolutePaths(absPath.Flags, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / (abs => whatToAdd(new AbsolutePath(absPath.Flags, absPath.DirectorySeparator, absPath.IoService, abs)).Select(x => x.Path)));
+            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / (abs => whatToAdd(new AbsolutePath(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, abs)).Select(x => x.Path)));
         }
     }
 }

@@ -10,9 +10,9 @@ namespace ComposableCollections.Dictionary.Transactional
 {
     public class ReadOnlyDetransactionalDictionary<TKey, TValue> : IComposableReadOnlyDictionary<TKey, TValue>
     {
-        private readonly IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>> _source;
+        private readonly IReadOnlyFactory<IDisposableReadOnlyDictionary<TKey, TValue>> _source;
 
-        public ReadOnlyDetransactionalDictionary(IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>> dictionary)
+        public ReadOnlyDetransactionalDictionary(IReadOnlyFactory<IDisposableReadOnlyDictionary<TKey, TValue>> dictionary)
         {
             _source = dictionary;
         }
@@ -24,7 +24,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
-            var dictionary = _source.BeginRead();
+            var dictionary = _source.CreateReader();
             return new Enumerator<IKeyValue<TKey, TValue>>(dictionary.GetEnumerator(), dictionary);
         }
 
@@ -32,7 +32,7 @@ namespace ComposableCollections.Dictionary.Transactional
         {
             get
             {
-                using (var dictionary = _source.BeginRead())
+                using (var dictionary = _source.CreateReader())
                 {
                     return dictionary.Count;
                 }
@@ -43,7 +43,7 @@ namespace ComposableCollections.Dictionary.Transactional
         {
             get
             {
-                using (var dictionary = _source.BeginRead())
+                using (var dictionary = _source.CreateReader())
                 {
                     return dictionary.Comparer;
                 }
@@ -54,7 +54,7 @@ namespace ComposableCollections.Dictionary.Transactional
         {
             get
             {
-                var dictionary = _source.BeginRead();
+                var dictionary = _source.CreateReader();
                 return new Enumerable<TKey>(() => new Enumerator<TKey>(dictionary.Keys.GetEnumerator(), dictionary));
             }
         }
@@ -63,14 +63,14 @@ namespace ComposableCollections.Dictionary.Transactional
         {
             get
             {
-                var dictionary = _source.BeginRead();
+                var dictionary = _source.CreateReader();
                 return new Enumerable<TValue>(() => new Enumerator<TValue>(dictionary.Values.GetEnumerator(), dictionary));
             }
         }
 
         public bool ContainsKey(TKey key)
         {
-            using (var dictionary = _source.BeginRead())
+            using (var dictionary = _source.CreateReader())
             {
                 return dictionary.ContainsKey(key);
             }
@@ -78,7 +78,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public IMaybe<TValue> TryGetValue(TKey key)
         {
-            using (var dictionary = _source.BeginRead())
+            using (var dictionary = _source.CreateReader())
             {
                 return dictionary.TryGetValue(key);
             }
@@ -86,7 +86,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public bool TryGetValue(TKey key, out TValue value)
         {
-            using (var dictionary = _source.BeginRead())
+            using (var dictionary = _source.CreateReader())
             {
                 var result = dictionary.TryGetValue(key);
                 if (result.HasValue)
@@ -106,7 +106,7 @@ namespace ComposableCollections.Dictionary.Transactional
         {
             get
             {
-                using (var dictionary = _source.BeginRead())
+                using (var dictionary = _source.CreateReader())
                 {
                     return dictionary[key];
                 }

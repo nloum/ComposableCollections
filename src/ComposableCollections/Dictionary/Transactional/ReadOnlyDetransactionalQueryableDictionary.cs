@@ -11,9 +11,9 @@ namespace ComposableCollections.Dictionary.Transactional
 {
     public class ReadOnlyDetransactionalQueryableDictionary<TKey, TValue> : ReadOnlyDetransactionalDictionary<TKey, TValue>, IQueryableReadOnlyDictionary<TKey, TValue>
     {
-        private readonly IReadOnlyTransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue>> _source;
+        private readonly IReadOnlyFactory<IDisposableQueryableReadOnlyDictionary<TKey, TValue>> _source;
 
-        public ReadOnlyDetransactionalQueryableDictionary(IReadOnlyTransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue>> dictionary) : base(dictionary)
+        public ReadOnlyDetransactionalQueryableDictionary(IReadOnlyFactory<IDisposableQueryableReadOnlyDictionary<TKey, TValue>> dictionary) : base(dictionary)
         {
             _source = dictionary;
         }
@@ -22,7 +22,7 @@ namespace ComposableCollections.Dictionary.Transactional
         {
             get
             {
-                var result = _source.BeginRead();
+                var result = _source.CreateReader();
                 return new Queryable<TValue>(result.Values, result);
             }
         }

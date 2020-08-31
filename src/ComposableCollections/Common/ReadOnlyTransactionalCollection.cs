@@ -4,10 +4,10 @@ namespace ComposableCollections.Common
 {
     public static class ReadOnlyTransactionalCollection
     {
-        public static IReadOnlyTransactionalCollection<TReadOnly> Create<TReadOnly>(Func<TReadOnly> readOnly)
+        public static IReadOnlyFactory<TReadOnly> Create<TReadOnly>(Func<TReadOnly> readOnly)
             where TReadOnly : IDisposable
         {
-            return new AnonymousReadOnlyTransactionalCollection<TReadOnly>(readOnly);
+            return new AnonymousReadOnlyFactory<TReadOnly>(readOnly);
         }
     }
 }

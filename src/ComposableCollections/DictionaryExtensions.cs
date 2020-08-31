@@ -142,24 +142,24 @@ namespace ComposableCollections
             return new ReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
         }
 
-        public static ITransactionalCollection<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>> WithBuiltInKey<TKey, TValue>(
-            this ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue>, ICachedDisposableQueryableDictionary<TKey, TValue>> source, Func<TValue, TKey> getKey)
+        public static IReadWriteFactory<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>> WithBuiltInKey<TKey, TValue>(
+            this IReadWriteFactory<IDisposableQueryableReadOnlyDictionary<TKey, TValue>, ICachedDisposableQueryableDictionary<TKey, TValue>> source, Func<TValue, TKey> getKey)
         {
             return source.Select(readOnly => readOnly.WithBuiltInKey(getKey),
                 readWrite => readWrite.WithBuiltInKey(getKey));
         }
-        public static ITransactionalCollection<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>> WithBuiltInKey<TKey, TValue>(
-            this ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue>, IDisposableQueryableDictionary<TKey, TValue>> source, Func<TValue, TKey> getKey) {
+        public static IReadWriteFactory<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>> WithBuiltInKey<TKey, TValue>(
+            this IReadWriteFactory<IDisposableQueryableReadOnlyDictionary<TKey, TValue>, IDisposableQueryableDictionary<TKey, TValue>> source, Func<TValue, TKey> getKey) {
             return source.Select(readOnly => readOnly.WithBuiltInKey(getKey),
                 readWrite => readWrite.WithBuiltInKey(getKey));
         }
-        public static ITransactionalCollection<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue>> WithBuiltInKey<TKey, TValue>(
-            this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, ICachedDisposableDictionary<TKey, TValue>> source, Func<TValue, TKey> getKey) {
+        public static IReadWriteFactory<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue>> WithBuiltInKey<TKey, TValue>(
+            this IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, ICachedDisposableDictionary<TKey, TValue>> source, Func<TValue, TKey> getKey) {
             return source.Select(readOnly => readOnly.WithBuiltInKey(getKey),
                 readWrite => readWrite.WithBuiltInKey(getKey));
         }
-        public static ITransactionalCollection<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, IDisposableDictionaryWithBuiltInKey<TKey, TValue>> WithBuiltInKey<TKey, TValue>(
-            this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source, Func<TValue, TKey> getKey) {
+        public static IReadWriteFactory<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, IDisposableDictionaryWithBuiltInKey<TKey, TValue>> WithBuiltInKey<TKey, TValue>(
+            this IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source, Func<TValue, TKey> getKey) {
             return source.Select(readOnly => readOnly.WithBuiltInKey(getKey),
                 readWrite => readWrite.WithBuiltInKey(getKey));
         }
@@ -173,7 +173,7 @@ namespace ComposableCollections
         /// a separate transaction.
         /// </summary>
         public static IComposableDictionary<TKey, TValue> WithEachMethodAsSeparateTransaction<TKey, TValue>(
-            this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source)
+            this IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source)
         {
             return new DetransactionalDictionary<TKey, TValue>(source);
         }
@@ -183,7 +183,7 @@ namespace ComposableCollections
         /// a separate transaction.
         /// </summary>
         public static IComposableReadOnlyDictionary<TKey, TValue> WithEachMethodAsSeparateTransaction<TKey, TValue>(
-            this IReadOnlyTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>> source)
+            this IReadOnlyFactory<IDisposableReadOnlyDictionary<TKey, TValue>> source)
         {
             return new ReadOnlyDetransactionalDictionary<TKey, TValue>(source);
         }
@@ -193,7 +193,7 @@ namespace ComposableCollections
         /// a separate transaction.
         /// </summary>
         public static IQueryableDictionary<TKey, TValue> WithEachMethodAsSeparateTransaction<TKey, TValue>(
-            this ITransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue>, IDisposableQueryableDictionary<TKey, TValue>> source)
+            this IReadWriteFactory<IDisposableQueryableReadOnlyDictionary<TKey, TValue>, IDisposableQueryableDictionary<TKey, TValue>> source)
         {
             return new DetransactionalQueryableDictionary<TKey, TValue>(source);
         }
@@ -203,7 +203,7 @@ namespace ComposableCollections
         /// a separate transaction.
         /// </summary>
         public static IQueryableReadOnlyDictionary<TKey, TValue> WithEachMethodAsSeparateTransaction<TKey, TValue>(
-            this IReadOnlyTransactionalCollection<IDisposableQueryableReadOnlyDictionary<TKey, TValue>> source)
+            this IReadOnlyFactory<IDisposableQueryableReadOnlyDictionary<TKey, TValue>> source)
         {
             return new ReadOnlyDetransactionalQueryableDictionary<TKey, TValue>(source);
         }
@@ -215,22 +215,22 @@ namespace ComposableCollections
         /// <summary>
         /// Converts the read-only and read/write objects
         /// </summary>
-        public static ITransactionalCollection<TReadOnly2, TReadWrite2>
+        public static IReadWriteFactory<TReadOnly2, TReadWrite2>
             Select<TReadOnly1, TReadWrite1, TReadOnly2, TReadWrite2>(
-                this ITransactionalCollection<TReadOnly1, TReadWrite1> source, Func<TReadOnly1, TReadOnly2> readOnly,
+                this IReadWriteFactory<TReadOnly1, TReadWrite1> source, Func<TReadOnly1, TReadOnly2> readOnly,
                 Func<TReadWrite1, TReadWrite2> readWrite) where TReadOnly1 : IDisposable where TReadOnly2 : IDisposable where TReadWrite1 : IDisposable where TReadWrite2 : IDisposable
         {
-            return new AnonymousTransactionalCollection<TReadOnly2, TReadWrite2>(() => readOnly(source.BeginRead()), () => readWrite(source.BeginWrite()));
+            return new AnonymousReadWriteFactory<TReadOnly2, TReadWrite2>(() => readOnly(source.CreateReader()), () => readWrite(source.CreateWriter()));
         }
         
         /// <summary>
         /// Converts the read-only object
         /// </summary>
-        public static IReadOnlyTransactionalCollection<TReadOnly2>
+        public static IReadOnlyFactory<TReadOnly2>
             Select<TReadOnly1, TReadOnly2>(
-                this IReadOnlyTransactionalCollection<TReadOnly1> source, Func<TReadOnly1, TReadOnly2> readOnly) where TReadOnly1 : IDisposable where TReadOnly2 : IDisposable
+                this IReadOnlyFactory<TReadOnly1> source, Func<TReadOnly1, TReadOnly2> readOnly) where TReadOnly1 : IDisposable where TReadOnly2 : IDisposable
         {
-            return new AnonymousReadOnlyTransactionalCollection<TReadOnly2>(() => readOnly(source.BeginRead()));
+            return new AnonymousReadOnlyFactory<TReadOnly2>(() => readOnly(source.CreateReader()));
         }
 
         #endregion
@@ -240,30 +240,30 @@ namespace ComposableCollections
         /// <summary>
         /// Converts the read-only and read/write objects
         /// </summary>
-        public static ITransactionalCollection<TReadOnly2, TReadWrite2>
+        public static IReadWriteFactory<TReadOnly2, TReadWrite2>
             SelectMany<TReadOnly1, TReadWrite1, TReadOnly2, TReadWrite2>(
-                this ITransactionalCollection<TReadOnly1, TReadWrite1> source, Func<TReadOnly1, TReadOnly2> readOnly,
+                this IReadWriteFactory<TReadOnly1, TReadWrite1> source, Func<TReadOnly1, TReadOnly2> readOnly,
                 Func<TReadWrite1, TReadWrite2> readWrite) where TReadOnly1 : IDisposable where TReadOnly2 : IDisposable where TReadWrite1 : IDisposable where TReadWrite2 : IDisposable
         {
-            return new AnonymousTransactionalCollection<TReadOnly2, TReadWrite2>(() => readOnly(source.BeginRead()), () => readWrite(source.BeginWrite()));
+            return new AnonymousReadWriteFactory<TReadOnly2, TReadWrite2>(() => readOnly(source.CreateReader()), () => readWrite(source.CreateWriter()));
         }
         
         /// <summary>
         /// Flattens a nested transaction. Note that the readOnly parameter must ensure that the TReadOnly1 gets disposed
         /// when its return value is disposed. The same is true of readWrite.
         /// </summary>
-        public static ITransactionalCollection<TReadOnly2, TReadWrite2>
+        public static IReadWriteFactory<TReadOnly2, TReadWrite2>
             SelectMany<TReadOnly1, TReadWrite1, TReadOnly2, TReadWrite2>(
-                this ITransactionalCollection<TReadOnly1, TReadWrite1> source, Func<TReadOnly1, IDisposableReadOnlyTransactionalCollection<TReadOnly2>> readOnly, Func<TReadWrite1, IDisposableTransactionalCollection<TReadOnly2, TReadWrite2>> readWrite) where TReadOnly1 : IDisposable where TReadOnly2 : IDisposable where TReadWrite1 : IDisposable where TReadWrite2 : IDisposable
+                this IReadWriteFactory<TReadOnly1, TReadWrite1> source, Func<TReadOnly1, IDisposableReadOnlyFactory<TReadOnly2>> readOnly, Func<TReadWrite1, IDisposableReadWriteFactory<TReadOnly2, TReadWrite2>> readWrite) where TReadOnly1 : IDisposable where TReadOnly2 : IDisposable where TReadWrite1 : IDisposable where TReadWrite2 : IDisposable
         {
-            return new AnonymousTransactionalCollection<TReadOnly2, TReadWrite2>(() =>
+            return new AnonymousReadWriteFactory<TReadOnly2, TReadWrite2>(() =>
             {
-                var it = readOnly(source.BeginRead());
-                return it.BeginRead();
+                var it = readOnly(source.CreateReader());
+                return it.CreateReader();
             }, () =>
             {
-                var it = readWrite(source.BeginWrite());
-                return it.BeginWrite();
+                var it = readWrite(source.CreateWriter());
+                return it.CreateWriter();
             });
         }
 
@@ -271,14 +271,14 @@ namespace ComposableCollections
         /// Flattens a nested transaction. Note that the readOnly parameter must ensure that the TReadOnly1 gets disposed
         /// when its return value is disposed.
         /// </summary>
-        public static IReadOnlyTransactionalCollection<TReadOnly2>
+        public static IReadOnlyFactory<TReadOnly2>
             SelectMany<TReadOnly1, TReadOnly2>(
-                this IReadOnlyTransactionalCollection<TReadOnly1> source, Func<TReadOnly1, IDisposableReadOnlyTransactionalCollection<TReadOnly2>> readOnly) where TReadOnly1 : IDisposable where TReadOnly2 : IDisposable
+                this IReadOnlyFactory<TReadOnly1> source, Func<TReadOnly1, IDisposableReadOnlyFactory<TReadOnly2>> readOnly) where TReadOnly1 : IDisposable where TReadOnly2 : IDisposable
         {
-            return new AnonymousReadOnlyTransactionalCollection<TReadOnly2>(() =>
+            return new AnonymousReadOnlyFactory<TReadOnly2>(() =>
             {
-                var it = readOnly(source.BeginRead());
-                return it.BeginRead();
+                var it = readOnly(source.CreateReader());
+                return it.CreateReader();
             });
         }
         
@@ -289,9 +289,9 @@ namespace ComposableCollections
         /// <summary>
         /// Converts the source to a transactional dictionary that keeps all writes pending until the transaction is completed.
         /// </summary>
-        public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithWritesCombinedAtEndOfTransaction<TKey, TValue>(this IComposableDictionary<TKey, TValue> source)
+        public static IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithWritesCombinedAtEndOfTransaction<TKey, TValue>(this IComposableDictionary<TKey, TValue> source)
         {
-            return new AnonymousTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>(() =>
+            return new AnonymousReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>(() =>
             {
                 return new DisposableReadOnlyDictionaryAdapter<TKey, TValue>(source, EmptyDisposable.Default);
             }, () =>
@@ -304,11 +304,11 @@ namespace ComposableCollections
         /// <summary>
         /// Converts the source to a transactional dictionary that keeps all writes pending until the transaction is completed.
         /// </summary>
-        public static ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithWritesCombinedAtEndOfTransaction<TKey, TValue>(this ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source)
+        public static IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithWritesCombinedAtEndOfTransaction<TKey, TValue>(this IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source)
         {
-            return new AnonymousTransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>(source.BeginRead, () =>
+            return new AnonymousReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>(source.CreateReader, () =>
             {
-                var disposableDictionary = source.BeginWrite();
+                var disposableDictionary = source.CreateWriter();
                 var cache = disposableDictionary.WithWriteCaching();
                 return new DisposableDictionaryAdapter<TKey, TValue>(cache, new AnonymousDisposable(() =>
                 {

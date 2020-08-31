@@ -11,9 +11,9 @@ namespace ComposableCollections.Dictionary.Transactional
 {
     public class DetransactionalDictionary<TKey, TValue> : IComposableDictionary<TKey, TValue>
     {
-        private readonly ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> _source;
+        private readonly IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> _source;
 
-        public DetransactionalDictionary(ITransactionalCollection<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> dictionary)
+        public DetransactionalDictionary(IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> dictionary)
         {
             _source = dictionary;
         }
@@ -25,7 +25,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
-            var dictionary = _source.BeginRead();
+            var dictionary = _source.CreateReader();
             return new Enumerator<IKeyValue<TKey, TValue>>(dictionary.GetEnumerator(), dictionary);
         }
 
@@ -33,7 +33,7 @@ namespace ComposableCollections.Dictionary.Transactional
         {
             get
             {
-                using (var dictionary = _source.BeginRead())
+                using (var dictionary = _source.CreateReader())
                 {
                     return dictionary.Count;
                 }
@@ -44,7 +44,7 @@ namespace ComposableCollections.Dictionary.Transactional
         {
             get
             {
-                using (var dictionary = _source.BeginRead())
+                using (var dictionary = _source.CreateReader())
                 {
                     return dictionary.Comparer;
                 }
@@ -55,7 +55,7 @@ namespace ComposableCollections.Dictionary.Transactional
         {
             get
             {
-                var dictionary = _source.BeginRead();
+                var dictionary = _source.CreateReader();
                 return new Enumerable<TKey>(() => new Enumerator<TKey>(dictionary.Keys.GetEnumerator(), dictionary));
             }
         }
@@ -64,14 +64,14 @@ namespace ComposableCollections.Dictionary.Transactional
         {
             get
             {
-                var dictionary = _source.BeginRead();
+                var dictionary = _source.CreateReader();
                 return new Enumerable<TValue>(() => new Enumerator<TValue>(dictionary.Values.GetEnumerator(), dictionary));
             }
         }
 
         public bool ContainsKey(TKey key)
         {
-            using (var dictionary = _source.BeginRead())
+            using (var dictionary = _source.CreateReader())
             {
                 return dictionary.ContainsKey(key);
             }
@@ -79,7 +79,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public IMaybe<TValue> TryGetValue(TKey key)
         {
-            using (var dictionary = _source.BeginRead())
+            using (var dictionary = _source.CreateReader())
             {
                 return dictionary.TryGetValue(key);
             }
@@ -87,7 +87,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public bool TryGetValue(TKey key, out TValue value)
         {
-            using (var dictionary = _source.BeginRead())
+            using (var dictionary = _source.CreateReader())
             {
                 var result = dictionary.TryGetValue(key);
                 if (result.HasValue)
@@ -107,14 +107,14 @@ namespace ComposableCollections.Dictionary.Transactional
         {
             get
             {
-                using (var dictionary = _source.BeginRead())
+                using (var dictionary = _source.CreateReader())
                 {
                     return dictionary[key];
                 }
             }
             set
             {
-                using (var dictionary = _source.BeginWrite())
+                using (var dictionary = _source.CreateWriter())
                 {
                     dictionary[key] = value;
                 }
@@ -123,7 +123,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void Write(IEnumerable<DictionaryWrite<TKey, TValue>> writes, out IReadOnlyList<DictionaryWriteResult<TKey, TValue>> results)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.Write(writes, out results);
             }
@@ -131,7 +131,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public bool TryAdd(TKey key, TValue value)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 return dictionary.TryAdd(key, value);
             }
@@ -139,7 +139,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public bool TryAdd(TKey key, Func<TValue> value)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 return dictionary.TryAdd(key, value);
             }
@@ -147,7 +147,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public bool TryAdd(TKey key, Func<TValue> value, out TValue existingValue, out TValue newValue)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 return dictionary.TryAdd(key, value, out existingValue, out newValue);
             }
@@ -155,7 +155,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void TryAddRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryAddRange(newItems, out results);
             }
@@ -163,7 +163,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryAddRange(newItems, out results);
             }
@@ -171,7 +171,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryAddRange(newItems, key, value, out results);
             }
@@ -179,7 +179,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void TryAddRange(IEnumerable<IKeyValue<TKey, TValue>> newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryAddRange(newItems);
             }
@@ -187,7 +187,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryAddRange(newItems);
             }
@@ -195,7 +195,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryAddRange(newItems, key, value);
             }
@@ -203,7 +203,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void TryAddRange(params IKeyValue<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryAddRange(newItems);
             }
@@ -211,7 +211,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void TryAddRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryAddRange(newItems);
             }
@@ -219,7 +219,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void Add(TKey key, TValue value)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.Add(key, value);
             }
@@ -227,7 +227,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void AddRange(IEnumerable<IKeyValue<TKey, TValue>> newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.AddRange(newItems);
             }
@@ -235,7 +235,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void AddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.AddRange(newItems);
             }
@@ -243,7 +243,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void AddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.AddRange(newItems, key, value);
             }
@@ -251,7 +251,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void AddRange(params IKeyValue<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.AddRange(newItems);
             }
@@ -259,7 +259,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void AddRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.AddRange(newItems);
             }
@@ -267,7 +267,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public bool TryUpdate(TKey key, TValue value)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 return dictionary.TryUpdate(key, value);
             }
@@ -275,7 +275,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public bool TryUpdate(TKey key, TValue value, out TValue previousValue)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 return dictionary.TryUpdate(key, value, out previousValue);
             }
@@ -283,7 +283,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue, out TValue newValue)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 return dictionary.TryUpdate(key, value, out previousValue, out newValue);
             }
@@ -291,7 +291,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void TryUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryUpdateRange(newItems);
             }
@@ -299,7 +299,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void TryUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryUpdateRange(newItems);
             }
@@ -307,7 +307,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryUpdateRange(newItems, key, value);
             }
@@ -315,7 +315,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void TryUpdateRange(params IKeyValue<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryUpdateRange(newItems);
             }
@@ -323,7 +323,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void TryUpdateRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryUpdateRange(newItems);
             }
@@ -331,7 +331,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void TryUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryUpdateRange(newItems, out results);
             }
@@ -339,7 +339,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void TryUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryUpdateRange(newItems, out results);
             }
@@ -348,7 +348,7 @@ namespace ComposableCollections.Dictionary.Transactional
         public void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value,
             out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryUpdateRange(newItems, key, value, out results);
             }
@@ -356,7 +356,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void Update(TKey key, TValue value)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.Update(key, value);
             }
@@ -364,7 +364,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void UpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.UpdateRange(newItems);
             }
@@ -372,7 +372,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void UpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.UpdateRange(newItems);
             }
@@ -380,7 +380,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void UpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.UpdateRange(newItems, key, value);
             }
@@ -388,7 +388,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void Update(TKey key, TValue value, out TValue previousValue)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.Update(key, value, out previousValue);
             }
@@ -396,7 +396,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void UpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.UpdateRange(newItems, out results);
             }
@@ -404,7 +404,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void UpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.UpdateRange(newItems, out results);
             }
@@ -412,7 +412,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void UpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.UpdateRange(newItems, key, value, out results);
             }
@@ -420,7 +420,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void UpdateRange(params IKeyValue<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.UpdateRange(newItems);
             }
@@ -428,7 +428,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void UpdateRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.UpdateRange(newItems);
             }
@@ -436,7 +436,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, TValue value)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 return dictionary.AddOrUpdate(key, value);
             }
@@ -444,7 +444,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 return dictionary.AddOrUpdate(key, valueIfAdding, valueIfUpdating);
             }
@@ -453,7 +453,7 @@ namespace ComposableCollections.Dictionary.Transactional
         public DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating,
             out TValue previousValue, out TValue newValue)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 return dictionary.AddOrUpdate(key, valueIfAdding, valueIfUpdating, out previousValue, out newValue);
             }
@@ -461,7 +461,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void AddOrUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.AddOrUpdateRange(newItems, out results);
             }
@@ -469,7 +469,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void AddOrUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.AddOrUpdateRange(newItems, out results);
             }
@@ -478,7 +478,7 @@ namespace ComposableCollections.Dictionary.Transactional
         public void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value,
             out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddOrUpdate<TValue>> results)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.AddOrUpdateRange(newItems, key, value, out results);
             }
@@ -486,7 +486,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void AddOrUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.AddOrUpdateRange(newItems);
             }
@@ -494,7 +494,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void AddOrUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.AddOrUpdateRange(newItems);
             }
@@ -502,7 +502,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.AddOrUpdateRange(newItems, key, value);
             }
@@ -510,7 +510,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void AddOrUpdateRange(params IKeyValue<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.AddOrUpdateRange(newItems);
             }
@@ -518,7 +518,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void AddOrUpdateRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.AddOrUpdateRange(newItems);
             }
@@ -526,7 +526,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void TryRemoveRange(IEnumerable<TKey> keysToRemove)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryRemoveRange(keysToRemove);
             }
@@ -534,7 +534,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void RemoveRange(IEnumerable<TKey> keysToRemove)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.RemoveRange(keysToRemove);
             }
@@ -542,7 +542,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void RemoveWhere(Func<TKey, TValue, bool> predicate)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.RemoveWhere(predicate);
             }
@@ -550,7 +550,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void RemoveWhere(Func<IKeyValue<TKey, TValue>, bool> predicate)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.RemoveWhere(predicate);
             }
@@ -558,7 +558,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void Clear()
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.Clear();
             }
@@ -566,7 +566,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public bool TryRemove(TKey key)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 return dictionary.TryRemove(key);
             }
@@ -574,7 +574,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void Remove(TKey key)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.Remove(key);
             }
@@ -582,7 +582,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void TryRemoveRange(IEnumerable<TKey> keysToRemove, out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.TryRemoveRange(keysToRemove, out removedItems);
             }
@@ -590,7 +590,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void RemoveRange(IEnumerable<TKey> keysToRemove, out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.RemoveRange(keysToRemove, out removedItems);
             }
@@ -598,7 +598,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void RemoveWhere(Func<TKey, TValue, bool> predicate, out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.RemoveWhere(predicate, out removedItems);
             }
@@ -606,7 +606,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void RemoveWhere(Func<IKeyValue<TKey, TValue>, bool> predicate, out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.RemoveWhere(predicate, out removedItems);
             }
@@ -614,7 +614,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void Clear(out IComposableReadOnlyDictionary<TKey, TValue> removedItems)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.Clear(out removedItems);
             }
@@ -622,7 +622,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public bool TryRemove(TKey key, out TValue removedItem)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 return dictionary.TryRemove(key, out removedItem);
             }
@@ -630,7 +630,7 @@ namespace ComposableCollections.Dictionary.Transactional
 
         public void Remove(TKey key, out TValue removedItem)
         {
-            using (var dictionary = _source.BeginWrite())
+            using (var dictionary = _source.CreateWriter())
             {
                 dictionary.Remove(key, out removedItem);
             }

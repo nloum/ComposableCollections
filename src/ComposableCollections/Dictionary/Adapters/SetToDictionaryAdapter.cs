@@ -16,9 +16,9 @@ namespace ComposableCollections.Dictionary.Adapters
 {
     public class SetToDictionaryAdapter<TKey> : ReadOnlySetToReadOnlyDictionaryAdapter<TKey>, IComposableDictionary<TKey, TKey>
     {
-        private readonly Set.ISet<TKey> _set;
+        private readonly Set.IComposableSet<TKey> _set;
 
-        public SetToDictionaryAdapter(Set.ISet<TKey> set) : base(set)
+        public SetToDictionaryAdapter(Set.IComposableSet<TKey> set) : base(set)
         {
             _set = set;
         }

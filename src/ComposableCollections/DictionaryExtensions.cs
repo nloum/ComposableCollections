@@ -43,7 +43,7 @@ namespace ComposableCollections
             return new QueryableReadOnlyDictionaryAdapter<TKey, TKey>(new ReadOnlySetToReadOnlyDictionaryAdapter<TKey>(source), source);
         }
 
-        public static IComposableDictionary<TKey, TKey> ToDictionary<TKey>(this Set.ISet<TKey> source) {
+        public static IComposableDictionary<TKey, TKey> ToDictionary<TKey>(this Set.IComposableSet<TKey> source) {
             return new SetToDictionaryAdapter<TKey>(source);
         }
         

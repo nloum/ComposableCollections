@@ -9,7 +9,7 @@ using SimpleMonads;
 
 namespace ComposableCollections.Set
 {
-    public class ConcurrentSet<TValue> : ISet<TValue>
+    public class ConcurrentSet<TValue> : IComposableSet<TValue>
     {
         private ImmutableHashSet<TValue> _state = ImmutableHashSet<TValue>.Empty;
         private readonly object _lock = new object();

@@ -10,7 +10,7 @@ namespace ComposableCollections.Set.Adapters
         private readonly IDisposable _disposable;
         private readonly IQueryable<TValue> _queryable;
 
-        public DisposableQueryableSetAdapter(ISet<TValue> state, IDisposable disposable, IQueryable<TValue> queryable) : base(state)
+        public DisposableQueryableSetAdapter(IComposableSet<TValue> state, IDisposable disposable, IQueryable<TValue> queryable) : base(state)
         {
             _disposable = disposable;
             _queryable = queryable;

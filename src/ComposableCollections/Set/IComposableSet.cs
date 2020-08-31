@@ -4,7 +4,7 @@ using ComposableCollections.Set.Write;
 
 namespace ComposableCollections.Set
 {
-    public interface ISet<TValue> : IReadOnlySet<TValue>
+    public interface IComposableSet<TValue> : IReadOnlySet<TValue>
     {
         void Write(IEnumerable<SetWrite<TValue>> writes, out IReadOnlyList<SetWriteResult<TValue>> results);
 

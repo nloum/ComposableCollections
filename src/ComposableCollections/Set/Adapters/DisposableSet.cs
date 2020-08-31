@@ -7,7 +7,7 @@ namespace ComposableCollections.Set.Adapters
     {
         private readonly IDisposable _disposable;
 
-        public DisposableSet(ISet<TValue> state, IDisposable disposable) : base(state)
+        public DisposableSet(IComposableSet<TValue> state, IDisposable disposable) : base(state)
         {
             _disposable = disposable;
         }

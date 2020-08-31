@@ -5,11 +5,11 @@ using ComposableCollections.Set.Write;
 
 namespace ComposableCollections.Set.Base
 {
-    public class DelegateSet<TValue> : DelegateReadOnlySet<TValue>, ISet<TValue>
+    public class DelegateSet<TValue> : DelegateReadOnlySet<TValue>, IComposableSet<TValue>
     {
-        private readonly ISet<TValue> _set;
+        private readonly IComposableSet<TValue> _set;
 
-        public DelegateSet(ISet<TValue> set) : base(set)
+        public DelegateSet(IComposableSet<TValue> set) : base(set)
         {
             _set = set;
         }

@@ -9,7 +9,7 @@ namespace ComposableCollections.Set.Adapters
     {
         private readonly IQueryable<TValue> _queryable;
 
-        public QueryableSetAdapter(ISet<TValue> state, IQueryable<TValue> queryable) : base(state)
+        public QueryableSetAdapter(IComposableSet<TValue> state, IQueryable<TValue> queryable) : base(state)
         {
             _queryable = queryable;
         }

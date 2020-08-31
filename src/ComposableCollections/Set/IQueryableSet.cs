@@ -1,5 +1,5 @@
 namespace ComposableCollections.Set
 {
-    public interface IQueryableSet<TValue> : ISet<TValue>, IQueryableReadOnlySet<TValue> {
+    public interface IQueryableSet<TValue> : IComposableSet<TValue>, IQueryableReadOnlySet<TValue> {
     }
 }

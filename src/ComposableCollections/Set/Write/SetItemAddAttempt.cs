@@ -4,16 +4,14 @@ namespace ComposableCollections.Set.Write
 {
     public class SetItemAddAttempt<TValue> : ISetItemAddAttempt<TValue>
     {
-        public SetItemAddAttempt(bool added, IMaybe<TValue> existingValue, IMaybe<TValue> newValue)
+        public SetItemAddAttempt(bool added, TValue newValue)
         {
             Added = added;
-            ExistingValue = existingValue;
             NewValue = newValue;
         }
 
         public bool Added { get; }
-        public IMaybe<TValue> ExistingValue { get; }
-        public IMaybe<TValue> NewValue { get; }
+        public TValue NewValue { get; }
 
         public override string ToString()
         {

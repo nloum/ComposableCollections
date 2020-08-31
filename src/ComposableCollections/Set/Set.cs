@@ -161,7 +161,7 @@ namespace ComposableCollections.Set
             }
         }
 
-        public void TryAddRange(params TValue[] newItems)
+        public void TryAddRange(IEnumerable<TValue> newItems)
         {
             lock (_lock)
             {
@@ -177,6 +177,11 @@ namespace ComposableCollections.Set
 
                 _state = tmpState;
             }
+        }
+
+        public void TryAddRange(params TValue[] newItems)
+        {
+            TryAddRange(newItems.AsEnumerable());
         }
 
         public void AddRange(IEnumerable<TValue> newItems)

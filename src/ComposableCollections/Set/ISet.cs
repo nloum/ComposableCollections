@@ -13,6 +13,7 @@ namespace ComposableCollections.Set
         void Add(TValue value);
         bool TryAdd(TValue value);
         void TryAddRange(IEnumerable<TValue> newItems, out IReadOnlySet<ISetItemAddAttempt<TValue>> results);
+        void TryAddRange(IEnumerable<TValue> newItems);
         void TryAddRange(params TValue[] newItems);
         void AddRange(IEnumerable<TValue> newItems);
         void AddRange(params TValue[] newItems);

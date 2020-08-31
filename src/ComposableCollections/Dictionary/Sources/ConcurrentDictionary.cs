@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using ComposableCollections.Common;
 using ComposableCollections.Dictionary.Base;
 using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Write;
@@ -72,14 +73,14 @@ namespace ComposableCollections.Dictionary.Sources
                 {
                     switch (write.Type)
                     {
-                        case DictionaryWriteType.Add:
+                        case CollectionWriteType.Add:
                         {
                             var value = write.ValueIfAdding.Value();
                             State = State.Add(write.Key, value);
                             finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true, Maybe<TValue>.Nothing(), value.ToMaybe()));
                             break;
                         }
-                        case DictionaryWriteType.TryAdd:
+                        case CollectionWriteType.TryAdd:
                         {
                             if (!State.TryGetValue(write.Key, out var existingValue))
                             {
@@ -93,7 +94,7 @@ namespace ComposableCollections.Dictionary.Sources
                             }
                             break;
                         }
-                        case DictionaryWriteType.Update:
+                        case CollectionWriteType.Update:
                         {
                             if (State.TryGetValue(write.Key, out var previousValue))
                             {
@@ -107,7 +108,7 @@ namespace ComposableCollections.Dictionary.Sources
                             }
                             break;
                         }
-                        case DictionaryWriteType.TryUpdate:
+                        case CollectionWriteType.TryUpdate:
                         {
                             if (State.TryGetValue(write.Key, out var previousValue))
                             {
@@ -121,7 +122,7 @@ namespace ComposableCollections.Dictionary.Sources
                             }
                             break;
                         }
-                        case DictionaryWriteType.AddOrUpdate:
+                        case CollectionWriteType.AddOrUpdate:
                         {
                             if (State.TryGetValue(write.Key, out var previousValue))
                             {
@@ -137,7 +138,7 @@ namespace ComposableCollections.Dictionary.Sources
                             }
                             break;
                         }
-                        case DictionaryWriteType.Remove:
+                        case CollectionWriteType.Remove:
                         {
                             if (State.TryGetValue(write.Key, out var previousValue))
                             {
@@ -150,7 +151,7 @@ namespace ComposableCollections.Dictionary.Sources
                             }
                             break;
                         }
-                        case DictionaryWriteType.TryRemove:
+                        case CollectionWriteType.TryRemove:
                         {
                             if (State.TryGetValue(write.Key, out var previousValue))
                             {

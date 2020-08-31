@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using ComposableCollections.Common;
 using ComposableCollections.Dictionary.Base;
 using ComposableCollections.Dictionary.Exceptions;
 using ComposableCollections.Dictionary.Interfaces;
@@ -98,7 +99,7 @@ namespace ComposableCollections.Dictionary.Adapters
                 _writes = _writes.AddRange(writesList);
                 foreach (var write in writesList)
                 {
-                    if (write.Type == DictionaryWriteType.Remove)
+                    if (write.Type == CollectionWriteType.Remove)
                     {
                         if (_addedOrUpdated.TryRemove(write.Key, out var removedValue))
                         {
@@ -111,7 +112,7 @@ namespace ComposableCollections.Dictionary.Adapters
                             _removed.Add(write.Key, removedValue);
                         }
                     }
-                    else if (write.Type == DictionaryWriteType.TryRemove)
+                    else if (write.Type == CollectionWriteType.TryRemove)
                     {
                         if (_addedOrUpdated.TryRemove(write.Key, out var removedValue))
                         {
@@ -130,7 +131,7 @@ namespace ComposableCollections.Dictionary.Adapters
                             }
                         }
                     }
-                    else if (write.Type == DictionaryWriteType.Add)
+                    else if (write.Type == CollectionWriteType.Add)
                     {
                         if (_addedOrUpdated.ContainsKey(write.Key) || (_flushCacheTo.ContainsKey(write.Key) &&
                                                                           !_removed.ContainsKey(write.Key)))
@@ -141,7 +142,7 @@ namespace ComposableCollections.Dictionary.Adapters
                         _addedOrUpdated.Write(new[]{write}, out var tmpResults);
                         finalResults.AddRange(tmpResults);
                     }
-                    else if (write.Type == DictionaryWriteType.TryAdd)
+                    else if (write.Type == CollectionWriteType.TryAdd)
                     {
                         if (_addedOrUpdated.TryGetValue(write.Key, out var preExistingValue))
                         {
@@ -157,7 +158,7 @@ namespace ComposableCollections.Dictionary.Adapters
                             finalResults.AddRange(tmpResults);
                         }
                     }
-                    else if (write.Type == DictionaryWriteType.Update)
+                    else if (write.Type == CollectionWriteType.Update)
                     {
                         if (_addedOrUpdated.TryGetValue(write.Key, out var preExistingValue))
                         {
@@ -175,7 +176,7 @@ namespace ComposableCollections.Dictionary.Adapters
                             throw new KeyNotFoundException();
                         }
                     }
-                    else if (write.Type == DictionaryWriteType.TryUpdate)
+                    else if (write.Type == CollectionWriteType.TryUpdate)
                     {
                         if (_addedOrUpdated.TryGetValue(write.Key, out var preExistingValue))
                         {
@@ -193,7 +194,7 @@ namespace ComposableCollections.Dictionary.Adapters
                             finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, false, Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing()));
                         }
                     }
-                    else if (write.Type == DictionaryWriteType.AddOrUpdate)
+                    else if (write.Type == CollectionWriteType.AddOrUpdate)
                     {
                         if (_addedOrUpdated.TryGetValue(write.Key, out var preExistingValue))
                         {

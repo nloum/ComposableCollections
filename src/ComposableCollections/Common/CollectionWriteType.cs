@@ -1,6 +1,6 @@
-namespace ComposableCollections.Dictionary.Write
+namespace ComposableCollections.Common
 {
-    public enum DictionaryWriteType
+    public enum CollectionWriteType
     {
         Add,
         TryAdd,

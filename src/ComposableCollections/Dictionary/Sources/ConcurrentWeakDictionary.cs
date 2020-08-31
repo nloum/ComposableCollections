@@ -62,7 +62,7 @@ namespace ComposableCollections.Dictionary.Sources
                 {
                     switch (write.Type)
                     {
-                        case CollectionWriteType.Add:
+                        case DictionaryWriteType.Add:
                         {
                             if (State.TryGetValue(write.Key, out var preExistingValueRef))
                             {
@@ -81,7 +81,7 @@ namespace ComposableCollections.Dictionary.Sources
                             finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true, Maybe<TValue>.Nothing(), value.ToMaybe()));
                             break;
                         }
-                        case CollectionWriteType.TryAdd:
+                        case DictionaryWriteType.TryAdd:
                         {
                             if (State.TryGetValue(write.Key, out var preExistingValueRef))
                             {
@@ -100,7 +100,7 @@ namespace ComposableCollections.Dictionary.Sources
                             finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true, Maybe<TValue>.Nothing(), value.ToMaybe()));
                             break;
                         }
-                        case CollectionWriteType.Update:
+                        case DictionaryWriteType.Update:
                         {
                             if (State.TryGetValue(write.Key, out var preExistingValue))
                             {
@@ -117,7 +117,7 @@ namespace ComposableCollections.Dictionary.Sources
                             }
                             break;
                         }
-                        case CollectionWriteType.TryUpdate:
+                        case DictionaryWriteType.TryUpdate:
                         {
                             if (State.TryGetValue(write.Key, out var preExistingValue))
                             {
@@ -134,7 +134,7 @@ namespace ComposableCollections.Dictionary.Sources
                             }
                             break;
                         }
-                        case CollectionWriteType.AddOrUpdate:
+                        case DictionaryWriteType.AddOrUpdate:
                         {
                             if (State.TryGetValue(write.Key, out var preExistingValue))
                             {
@@ -157,7 +157,7 @@ namespace ComposableCollections.Dictionary.Sources
                             
                             break;
                         }
-                        case CollectionWriteType.Remove:
+                        case DictionaryWriteType.Remove:
                         {
                             if (State.TryGetValue(write.Key, out var previousValueRef))
                             {
@@ -176,7 +176,7 @@ namespace ComposableCollections.Dictionary.Sources
                             throw new KeyNotFoundException();
                             break;
                         }
-                        case CollectionWriteType.TryRemove:
+                        case DictionaryWriteType.TryRemove:
                         {
                             if (State.TryGetValue(write.Key, out var previousValueRef))
                             {

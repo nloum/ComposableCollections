@@ -1,65 +1,44 @@
 using System;
 using ComposableCollections.Common;
+using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
 
 namespace ComposableCollections.Set.Write
 {
-    public class SetWrite<TKey, TValue>
+    public class SetWrite<TValue>
     {
-        public static SetWrite<TKey, TValue> CreateAdd(TKey key, Func<TValue> value)
+        public static SetWrite<TValue> CreateAdd(TValue value)
         {
-            return new SetWrite<TKey, TValue>(CollectionWriteType.Add, key, value.ToMaybe(), Maybe<Func<TValue, TValue>>.Nothing());
+            return new SetWrite<TValue>(SetWriteType.Add, value);
         }
 
-        public static SetWrite<TKey, TValue> CreateTryAdd(TKey key, Func<TValue> value)
+        public static SetWrite<TValue> CreateTryAdd(TValue value)
         {
-            return new SetWrite<TKey, TValue>(CollectionWriteType.TryAdd, key, value.ToMaybe(), Maybe<Func<TValue, TValue>>.Nothing());
+            return new SetWrite<TValue>(SetWriteType.TryAdd, value);
         }
 
-        public static SetWrite<TKey, TValue> CreateUpdate(TKey key, Func<TValue, TValue> value)
+        public static SetWrite<TValue> CreateRemove(TValue value)
         {
-            return new SetWrite<TKey, TValue>(CollectionWriteType.Update, key, Maybe<Func<TValue>>.Nothing(), value.ToMaybe());
+            return new SetWrite<TValue>(SetWriteType.Remove, value);
         }
 
-        public static SetWrite<TKey, TValue> CreateTryUpdate(TKey key, Func<TValue, TValue> value)
+        public static SetWrite<TValue> CreateTryRemove(TValue value)
         {
-            return new SetWrite<TKey, TValue>(CollectionWriteType.TryUpdate, key, Maybe<Func<TValue>>.Nothing(), value.ToMaybe());
+            return new SetWrite<TValue>(SetWriteType.TryRemove, value);
         }
 
-        public static SetWrite<TKey, TValue> CreateAddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating)
-        {
-            return new SetWrite<TKey, TValue>(CollectionWriteType.AddOrUpdate, key, valueIfAdding.ToMaybe(), valueIfUpdating.ToMaybe());
-        }
-
-        public static SetWrite<TKey, TValue> CreateRemove(TKey key)
-        {
-            return new SetWrite<TKey, TValue>(CollectionWriteType.Remove, key, Maybe<Func<TValue>>.Nothing(), Maybe<Func<TValue, TValue>>.Nothing());
-        }
-
-        public static SetWrite<TKey, TValue> CreateTryRemove(TKey key)
-        {
-            return new SetWrite<TKey, TValue>(CollectionWriteType.TryRemove, key, Maybe<Func<TValue>>.Nothing(), Maybe<Func<TValue, TValue>>.Nothing());
-        }
-
-        public SetWrite(CollectionWriteType type, TKey key, IMaybe<Func<TValue>> valueIfAdding, IMaybe<Func<TValue, TValue>> valueIfUpdating)
+        public SetWrite(SetWriteType type, TValue value)
         {
             Type = type;
-            Key = key;
-            ValueIfAdding = valueIfAdding;
-            ValueIfUpdating = valueIfUpdating;
+            Value = value;
         }
 
-        public CollectionWriteType Type { get; }
-        public TKey Key { get; }
-        public IMaybe<Func<TValue>> ValueIfAdding { get; }
-        public IMaybe<Func<TValue, TValue>> ValueIfUpdating { get; }
+        public SetWriteType Type { get; }
+        public TValue Value { get; }
 
         public override string ToString()
         {
-            var withWithoutValueIfAdding = ValueIfAdding.HasValue ? "with" : "without";
-            var withWithoutValueIfUpdating = ValueIfUpdating.HasValue ? "with" : "without";
-            return
-                $"{Type} {Key} {withWithoutValueIfAdding} ValueIfAdding and {withWithoutValueIfUpdating} ValueIfUpdating";
+            return $"{Type} {Value}";
         }
     }
 }

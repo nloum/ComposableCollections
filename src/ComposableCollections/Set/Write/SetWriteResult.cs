@@ -1,56 +1,25 @@
-using ComposableCollections.Common;
-using SimpleMonads;
+using ComposableCollections.Dictionary.Write;
 
 namespace ComposableCollections.Set.Write
 {
-    public class SetWriteResult<TKey, TValue>
+    public class SetWriteResult<TValue>
     {
-        private readonly IEither<ISetItemAddAttempt<TValue>, IMaybe<TValue>> _either;
-
-        public static SetWriteResult<TKey, TValue> CreateAdd(TKey key, bool added, TValue newValue)
+        public SetWriteResult(SetWriteType type, bool successful, TValue value)
         {
-            return new SetWriteResult<TKey, TValue>(key, new SetItemAddAttempt<TValue>(added, newValue), CollectionWriteType.Add);
-        }
-
-        public static SetWriteResult<TKey, TValue> CreateTryAdd(TKey key, bool added, TValue newValue)
-        {
-            return new SetWriteResult<TKey, TValue>(key, new SetItemAddAttempt<TValue>(added, newValue), CollectionWriteType.TryAdd);
-        }
-
-        public static SetWriteResult<TKey, TValue> CreateRemove(TKey key, IMaybe<TValue> removedValue)
-        {
-            return new SetWriteResult<TKey, TValue>(key, removedValue, CollectionWriteType.Remove);
-        }
-        
-        public static SetWriteResult<TKey, TValue> CreateTryRemove(TKey key, IMaybe<TValue> removedValue)
-        {
-            return new SetWriteResult<TKey, TValue>(key, removedValue, CollectionWriteType.TryRemove);
-        }
-
-        protected SetWriteResult(TKey key, ISetItemAddAttempt<TValue> add, CollectionWriteType type)
-        {
-            Key = key;
             Type = type;
-            _either = new Either<ISetItemAddAttempt<TValue>, IMaybe<TValue>>(add);
-        }
-        
-        protected SetWriteResult(TKey key, IMaybe<TValue> remove, CollectionWriteType type)
-        {
-            Key = key;
-            Type = type;
-            _either = new Either<ISetItemAddAttempt<TValue>, IMaybe<TValue>>(remove);
+            Successful = successful;
+            Value = value;
         }
 
-        public CollectionWriteType Type { get; }
-        
-        public TKey Key { get; }
-        public IMaybe<ISetItemAddAttempt<TValue>> Add => _either.Item1;
-
-        public IMaybe<IMaybe<TValue>> Remove => _either.Item2;
+        public SetWriteType Type { get; }
+        public bool Successful { get; }
+        public TValue Value { get; }
 
         public override string ToString()
         {
-            return $"{Key} {base.ToString()}";
+            var adverbly = Successful ? "successfully" : "unsuccessfully";
+            var typePastTense = (Type == SetWriteType.Add || Type == SetWriteType.TryAdd) ? "added" : "removed";
+            return $"{Value} was {adverbly} {typePastTense}";
         }
     }
 }

@@ -10,68 +10,68 @@ namespace ComposableCollections.Dictionary.Write
 
         public static DictionaryWriteResult<TKey, TValue> CreateAdd(TKey key, bool added, IMaybe<TValue> existingValue, IMaybe<TValue> newValue)
         {
-            return new DictionaryWriteResult<TKey, TValue>(key, new DictionaryItemAddAttempt<TValue>(added, existingValue, newValue), CollectionWriteType.Add);
+            return new DictionaryWriteResult<TKey, TValue>(key, new DictionaryItemAddAttempt<TValue>(added, existingValue, newValue), DictionaryWriteType.Add);
         }
 
         public static DictionaryWriteResult<TKey, TValue> CreateTryAdd(TKey key, bool added, IMaybe<TValue> existingValue, IMaybe<TValue> newValue)
         {
-            return new DictionaryWriteResult<TKey, TValue>(key, new DictionaryItemAddAttempt<TValue>(added, existingValue, newValue), CollectionWriteType.TryAdd);
+            return new DictionaryWriteResult<TKey, TValue>(key, new DictionaryItemAddAttempt<TValue>(added, existingValue, newValue), DictionaryWriteType.TryAdd);
         }
 
         public static DictionaryWriteResult<TKey, TValue> CreateUpdate(TKey key, bool updated, IMaybe<TValue> existingValue, IMaybe<TValue> newValue)
         {
-            return new DictionaryWriteResult<TKey, TValue>(key, new DictionaryItemUpdateAttempt<TValue>(updated, existingValue, newValue), CollectionWriteType.Update);
+            return new DictionaryWriteResult<TKey, TValue>(key, new DictionaryItemUpdateAttempt<TValue>(updated, existingValue, newValue), DictionaryWriteType.Update);
         }
 
         public static DictionaryWriteResult<TKey, TValue> CreateTryUpdate(TKey key, bool updated, IMaybe<TValue> existingValue, IMaybe<TValue> newValue)
         {
-            return new DictionaryWriteResult<TKey, TValue>(key, new DictionaryItemUpdateAttempt<TValue>(updated, existingValue, newValue), CollectionWriteType.TryUpdate);
+            return new DictionaryWriteResult<TKey, TValue>(key, new DictionaryItemUpdateAttempt<TValue>(updated, existingValue, newValue), DictionaryWriteType.TryUpdate);
         }
 
         public static DictionaryWriteResult<TKey, TValue> CreateAddOrUpdate(TKey key, DictionaryItemAddOrUpdateResult result, IMaybe<TValue> existingValue, TValue newValue)
         {
-            return new DictionaryWriteResult<TKey, TValue>(key, new DictionaryItemAddOrUpdate<TValue>(result, existingValue, newValue), CollectionWriteType.TryUpdate);
+            return new DictionaryWriteResult<TKey, TValue>(key, new DictionaryItemAddOrUpdate<TValue>(result, existingValue, newValue), DictionaryWriteType.TryUpdate);
         }
         
         public static DictionaryWriteResult<TKey, TValue> CreateRemove(TKey key, IMaybe<TValue> removedValue)
         {
-            return new DictionaryWriteResult<TKey, TValue>(key, removedValue, CollectionWriteType.Remove);
+            return new DictionaryWriteResult<TKey, TValue>(key, removedValue, DictionaryWriteType.Remove);
         }
         
         public static DictionaryWriteResult<TKey, TValue> CreateTryRemove(TKey key, IMaybe<TValue> removedValue)
         {
-            return new DictionaryWriteResult<TKey, TValue>(key, removedValue, CollectionWriteType.TryRemove);
+            return new DictionaryWriteResult<TKey, TValue>(key, removedValue, DictionaryWriteType.TryRemove);
         }
 
-        protected DictionaryWriteResult(TKey key, IDictionaryItemAddAttempt<TValue> add, CollectionWriteType type)
+        protected DictionaryWriteResult(TKey key, IDictionaryItemAddAttempt<TValue> add, DictionaryWriteType type)
         {
             Key = key;
             Type = type;
             _either = new Either<IDictionaryItemAddAttempt<TValue>, IDictionaryItemAddOrUpdate<TValue>, IDictionaryItemUpdateAttempt<TValue>, IMaybe<TValue>>(add);
         }
         
-        protected DictionaryWriteResult(TKey key, IDictionaryItemAddOrUpdate<TValue> addOrUpdate, CollectionWriteType type)
+        protected DictionaryWriteResult(TKey key, IDictionaryItemAddOrUpdate<TValue> addOrUpdate, DictionaryWriteType type)
         {
             Key = key;
             Type = type;
             _either = new Either<IDictionaryItemAddAttempt<TValue>, IDictionaryItemAddOrUpdate<TValue>, IDictionaryItemUpdateAttempt<TValue>, IMaybe<TValue>>(addOrUpdate);
         }
 
-        protected DictionaryWriteResult(TKey key, IDictionaryItemUpdateAttempt<TValue> update, CollectionWriteType type)
+        protected DictionaryWriteResult(TKey key, IDictionaryItemUpdateAttempt<TValue> update, DictionaryWriteType type)
         {
             Key = key;
             Type = type;
             _either = new Either<IDictionaryItemAddAttempt<TValue>, IDictionaryItemAddOrUpdate<TValue>, IDictionaryItemUpdateAttempt<TValue>, IMaybe<TValue>>(update);
         }
 
-        protected DictionaryWriteResult(TKey key, IMaybe<TValue> remove, CollectionWriteType type)
+        protected DictionaryWriteResult(TKey key, IMaybe<TValue> remove, DictionaryWriteType type)
         {
             Key = key;
             Type = type;
             _either = new Either<IDictionaryItemAddAttempt<TValue>, IDictionaryItemAddOrUpdate<TValue>, IDictionaryItemUpdateAttempt<TValue>, IMaybe<TValue>>(remove);
         }
 
-        public CollectionWriteType Type { get; }
+        public DictionaryWriteType Type { get; }
         
         public TKey Key { get; }
         public IMaybe<IDictionaryItemAddAttempt<TValue>> Add => _either.Item1;

@@ -138,28 +138,28 @@ namespace ComposableCollections.Dictionary.Adapters
 
             results = innerResults.Select(innerResult =>
             {
-                if (innerResult.Type == CollectionWriteType.Add || innerResult.Type == CollectionWriteType.TryAdd)
+                if (innerResult.Type == DictionaryWriteType.Add || innerResult.Type == DictionaryWriteType.TryAdd)
                 {
                     return DictionaryWriteResult<TKey2, TValue2>.CreateAdd(ConvertToKey2(innerResult.Key),
                         innerResult.Add.Value.Added,
                         innerResult.Add.Value.ExistingValue.Select(value => Convert(innerResult.Key, value).Value),
                         innerResult.Add.Value.NewValue.Select(value => Convert(innerResult.Key, value).Value));
                 }
-                else if (innerResult.Type == CollectionWriteType.Remove ||
-                         innerResult.Type == CollectionWriteType.TryRemove)
+                else if (innerResult.Type == DictionaryWriteType.Remove ||
+                         innerResult.Type == DictionaryWriteType.TryRemove)
                 {
                     return DictionaryWriteResult<TKey2, TValue2>.CreateRemove(ConvertToKey2(innerResult.Key),
                         innerResult.Remove.Value.Select(value => Convert(innerResult.Key, value).Value));
                 }
-                else if (innerResult.Type == CollectionWriteType.Update ||
-                         innerResult.Type == CollectionWriteType.TryUpdate)
+                else if (innerResult.Type == DictionaryWriteType.Update ||
+                         innerResult.Type == DictionaryWriteType.TryUpdate)
                 {
                     return DictionaryWriteResult<TKey2, TValue2>.CreateUpdate(ConvertToKey2(innerResult.Key),
                         innerResult.Update.Value.Updated,
                         innerResult.Update.Value.ExistingValue.Select(value => Convert(innerResult.Key, value).Value),
                         innerResult.Update.Value.NewValue.Select(value => Convert(innerResult.Key, value).Value));
                 }
-                else if (innerResult.Type == CollectionWriteType.AddOrUpdate)
+                else if (innerResult.Type == DictionaryWriteType.AddOrUpdate)
                 {
                     return DictionaryWriteResult<TKey2, TValue2>.CreateAddOrUpdate(ConvertToKey2(innerResult.Key),
                         innerResult.AddOrUpdate.Value.Result,

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using ComposableCollections.Set.Exceptions;
 using ComposableCollections.Set.Write;
 using SimpleMonads;
 
@@ -21,6 +22,61 @@ namespace ComposableCollections.Set
         public IEnumerator<TValue> GetEnumerator()
         {
             return _state.GetEnumerator();
+        }
+
+        public void Write(IEnumerable<SetWrite<TValue>> writes, out IReadOnlyList<SetWriteResult<TValue>> results)
+        {
+            lock (_lock)
+            {
+                var finalResults = new List<SetWriteResult<TValue>>();
+                results = finalResults;
+                var tmpState = _state;
+                foreach(var write in writes)
+                {
+                    if (write.Type == SetWriteType.Add)
+                    {
+                        if (!tmpState.Contains(write.Value))
+                        {
+                            tmpState = tmpState.Add(write.Value);
+                        }
+                        else 
+                        {
+                            throw new AddFailedBecauseValueAlreadyExistsException(write.Value);
+                        }
+                    }
+                    else if (write.Type == SetWriteType.TryAdd)
+                    {
+                        if (!tmpState.Contains(write.Value))
+                        {
+                            tmpState = tmpState.Add(write.Value);
+                        }
+                    }
+                    else if (write.Type == SetWriteType.Remove)
+                    {
+                        if (tmpState.Contains(write.Value))
+                        {
+                            tmpState = tmpState.Remove(write.Value);
+                        }
+                        else 
+                        {
+                            throw new RemoveFailedBecauseNoSuchValueExistsException(write.Value);
+                        }
+                    }
+                    else if (write.Type == SetWriteType.TryRemove)
+                    {
+                        if (tmpState.Contains(write.Value))
+                        {
+                            tmpState = tmpState.Remove(write.Value);
+                        }
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Unknown write type {write.Type}");
+                    }
+                }
+
+                _state = tmpState;
+            }
         }
 
         public void Add(TValue item)

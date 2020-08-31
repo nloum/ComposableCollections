@@ -99,7 +99,7 @@ namespace ComposableCollections.Dictionary.Adapters
                 _writes = _writes.AddRange(writesList);
                 foreach (var write in writesList)
                 {
-                    if (write.Type == CollectionWriteType.Remove)
+                    if (write.Type == DictionaryWriteType.Remove)
                     {
                         if (_addedOrUpdated.TryRemove(write.Key, out var removedValue))
                         {
@@ -112,7 +112,7 @@ namespace ComposableCollections.Dictionary.Adapters
                             _removed.Add(write.Key, removedValue);
                         }
                     }
-                    else if (write.Type == CollectionWriteType.TryRemove)
+                    else if (write.Type == DictionaryWriteType.TryRemove)
                     {
                         if (_addedOrUpdated.TryRemove(write.Key, out var removedValue))
                         {
@@ -131,7 +131,7 @@ namespace ComposableCollections.Dictionary.Adapters
                             }
                         }
                     }
-                    else if (write.Type == CollectionWriteType.Add)
+                    else if (write.Type == DictionaryWriteType.Add)
                     {
                         if (_addedOrUpdated.ContainsKey(write.Key) || (_flushCacheTo.ContainsKey(write.Key) &&
                                                                           !_removed.ContainsKey(write.Key)))
@@ -142,7 +142,7 @@ namespace ComposableCollections.Dictionary.Adapters
                         _addedOrUpdated.Write(new[]{write}, out var tmpResults);
                         finalResults.AddRange(tmpResults);
                     }
-                    else if (write.Type == CollectionWriteType.TryAdd)
+                    else if (write.Type == DictionaryWriteType.TryAdd)
                     {
                         if (_addedOrUpdated.TryGetValue(write.Key, out var preExistingValue))
                         {
@@ -158,7 +158,7 @@ namespace ComposableCollections.Dictionary.Adapters
                             finalResults.AddRange(tmpResults);
                         }
                     }
-                    else if (write.Type == CollectionWriteType.Update)
+                    else if (write.Type == DictionaryWriteType.Update)
                     {
                         if (_addedOrUpdated.TryGetValue(write.Key, out var preExistingValue))
                         {
@@ -176,7 +176,7 @@ namespace ComposableCollections.Dictionary.Adapters
                             throw new KeyNotFoundException();
                         }
                     }
-                    else if (write.Type == CollectionWriteType.TryUpdate)
+                    else if (write.Type == DictionaryWriteType.TryUpdate)
                     {
                         if (_addedOrUpdated.TryGetValue(write.Key, out var preExistingValue))
                         {
@@ -194,7 +194,7 @@ namespace ComposableCollections.Dictionary.Adapters
                             finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, false, Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing()));
                         }
                     }
-                    else if (write.Type == CollectionWriteType.AddOrUpdate)
+                    else if (write.Type == DictionaryWriteType.AddOrUpdate)
                     {
                         if (_addedOrUpdated.TryGetValue(write.Key, out var preExistingValue))
                         {

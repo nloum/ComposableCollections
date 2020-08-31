@@ -33,14 +33,14 @@ namespace ComposableCollections.Dictionary.Adapters
             {
                 switch (write.Type)
                 {
-                    case CollectionWriteType.Add:
+                    case DictionaryWriteType.Add:
                     {
                         var value = write.ValueIfAdding.Value();
                         _source.Add(write.Key, value);
                         finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true, Maybe<TValue>.Nothing(), value.ToMaybe()));
                     }
                     break;
-                    case CollectionWriteType.TryAdd:
+                    case DictionaryWriteType.TryAdd:
                     {
                         if (!_source.TryGetValue(write.Key, out var existingValue))
                         {
@@ -54,7 +54,7 @@ namespace ComposableCollections.Dictionary.Adapters
                         }
                     }
                     break;
-                    case CollectionWriteType.Update:
+                    case DictionaryWriteType.Update:
                     {
                         if (_source.TryGetValue(write.Key, out var previousValue))
                         {
@@ -68,7 +68,7 @@ namespace ComposableCollections.Dictionary.Adapters
                         }
                     }
                     break;
-                    case CollectionWriteType.TryUpdate:
+                    case DictionaryWriteType.TryUpdate:
                     {
                         if (_source.TryGetValue(write.Key, out var previousValue))
                         {
@@ -82,7 +82,7 @@ namespace ComposableCollections.Dictionary.Adapters
                         }
                     }
                     break;
-                    case CollectionWriteType.AddOrUpdate:
+                    case DictionaryWriteType.AddOrUpdate:
                     {
                         if (_source.TryGetValue(write.Key, out var previousValue))
                         {
@@ -98,7 +98,7 @@ namespace ComposableCollections.Dictionary.Adapters
                         }
                     }
                     break;
-                    case CollectionWriteType.Remove:
+                    case DictionaryWriteType.Remove:
                     {
                         if (_source.TryGetValue(write.Key, out var removedValue))
                         {
@@ -107,7 +107,7 @@ namespace ComposableCollections.Dictionary.Adapters
                         }
                     }
                     break;
-                    case CollectionWriteType.TryRemove:
+                    case DictionaryWriteType.TryRemove:
                     {
                         if (_source.TryGetValue(write.Key, out var removedValue))
                         {

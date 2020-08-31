@@ -11,6 +11,7 @@ using ComposableCollections.Dictionary.Sources;
 using ComposableCollections.Dictionary.Transactional;
 using ComposableCollections.Dictionary.WithBuiltInKey;
 using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
+using ComposableCollections.Set;
 using ComposableCollections.Utilities;
 using UtilityDisposables;
 
@@ -23,6 +24,34 @@ namespace ComposableCollections
         {
             return new QueryableToQueryableReadOnlyDictionaryAdapter<TKey, TValue>(queryable, getKey);
         }
+
+        #region Set to dictionary
+        
+        public static IDisposableQueryableDictionary<TKey, TKey> ToDictionary<TKey>(this IDisposableQueryableSet<TKey> source) {
+            return new DisposableQueryableDictionaryAdapter<TKey, TKey>(new SetToDictionaryAdapter<TKey>(source), source, source);
+        }
+        
+        public static IDisposableQueryableReadOnlyDictionary<TKey, TKey> ToDictionary<TKey>(this IDisposableQueryableReadOnlySet<TKey> source) {
+            return new DisposableQueryableReadOnlyDictionaryAdapter<TKey, TKey>(new ReadOnlySetToReadOnlyDictionaryAdapter<TKey>(source), source, source);
+        }
+
+        public static IQueryableDictionary<TKey, TKey> ToDictionary<TKey>(this IQueryableSet<TKey> source) {
+            return new QueryableDictionaryAdapter<TKey, TKey>(new SetToDictionaryAdapter<TKey>(source), source);
+        }
+        
+        public static IQueryableReadOnlyDictionary<TKey, TKey> ToDictionary<TKey>(this IQueryableReadOnlySet<TKey> source) {
+            return new QueryableReadOnlyDictionaryAdapter<TKey, TKey>(new ReadOnlySetToReadOnlyDictionaryAdapter<TKey>(source), source);
+        }
+
+        public static IComposableDictionary<TKey, TKey> ToDictionary<TKey>(this Set.ISet<TKey> source) {
+            return new SetToDictionaryAdapter<TKey>(source);
+        }
+        
+        public static IComposableReadOnlyDictionary<TKey, TKey> ToDictionary<TKey>(this IReadOnlySet<TKey> source) {
+            return new ReadOnlySetToReadOnlyDictionaryAdapter<TKey>(source);
+        }
+
+        #endregion
         
         #region To and from IKeyValue
         

@@ -2,7 +2,7 @@ using System;
 
 namespace ComposableCollections.Common
 {
-    public class AnonymousReadWriteFactory<TReadOnly, TReadWrite> : IReadWriteFactory<TReadOnly, TReadWrite> where TReadOnly : IDisposable where TReadWrite : IDisposable
+    public class AnonymousReadWriteFactory<TReadOnly, TReadWrite> : IReadWriteFactory<TReadOnly, TReadWrite>  
     {
         private Func<TReadOnly> _beginRead;
         private Func<TReadWrite> _beginWrite;

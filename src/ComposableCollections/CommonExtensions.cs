@@ -7,7 +7,7 @@ namespace ComposableCollections
     public static class CommonExtensions
     {
         public static IReadOnlyFactory<TReadOnly> AsReadOnlyFactory<TReadOnly>(
-            this IReadOnlyFactory<TReadOnly> source) where TReadOnly : IDisposable
+            this IReadOnlyFactory<TReadOnly> source) 
         {
             return source;
         }

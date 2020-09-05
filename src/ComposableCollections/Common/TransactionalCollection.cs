@@ -5,7 +5,7 @@ namespace ComposableCollections.Common
     public static class TransactionalCollection
     {
         public static IReadWriteFactory<TReadOnly, TReadWrite> Create<TReadOnly, TReadWrite>(Func<TReadOnly> readOnly, Func<TReadWrite> readWrite)
-            where TReadOnly : IDisposable where TReadWrite : IDisposable
+             
         {
             return new AnonymousReadWriteFactory<TReadOnly, TReadWrite>(readOnly, readWrite);
         }

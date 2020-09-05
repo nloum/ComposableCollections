@@ -2,7 +2,7 @@ using System;
 
 namespace ComposableCollections.Common
 {
-    public interface IReadOnlyFactory<out TReadOnly> where TReadOnly : IDisposable
+    public interface IReadOnlyFactory<out TReadOnly>
     {
         TReadOnly CreateReader();
     }

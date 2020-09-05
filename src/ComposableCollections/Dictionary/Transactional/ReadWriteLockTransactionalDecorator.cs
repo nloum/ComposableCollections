@@ -5,7 +5,7 @@ using UtilityDisposables;
 
 namespace ComposableCollections.Dictionary.Transactional
 {
-    public class ReadWriteLockTransactionalDecorator<TReadOnly, TReadWrite> : IReadWriteFactory<TReadOnly, TReadWrite> where TReadOnly : IDisposable where TReadWrite : IDisposable
+    public class ReadWriteLockTransactionalDecorator<TReadOnly, TReadWrite> : IReadWriteFactory<TReadOnly, TReadWrite>  
     {
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
         private readonly IReadWriteFactory<TReadOnly, TReadWrite> _transactionalDictionary;

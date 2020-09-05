@@ -1,22 +1,12 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using LiveLinq;
-using LiveLinq.Core;
-using LiveLinq.Dictionary;
 using LiveLinq.Set;
-using ReactiveProcesses;
-using UtilityDisposables;
 
 namespace IoFluently
 {
-    public abstract class AbsolutePathDescendantsOrChildren : IReadOnlyObservableSet<AbsolutePath>
+    public abstract class AbsolutePathDescendantsOrChildren : IObservableReadOnlySet<AbsolutePath>
     {
         protected readonly AbsolutePath _path;
         protected readonly string _pattern;

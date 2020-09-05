@@ -56,7 +56,7 @@ namespace IoFluently
             throw new NotImplementedException();
         }
 
-        public override IReadOnlyObservableSet<AbsolutePath> Storage => RootFolders.ToLiveLinq().KeysAsSet().Select(x => ParseAbsolutePath(x)).ToReadOnlyObservableSet();
+        public override IObservableReadOnlySet<AbsolutePath> Storage => RootFolders.ToLiveLinq().KeysAsSet().Select(x => ParseAbsolutePath(x)).ToReadOnlyObservableSet();
 
         private IMaybe<File> GetFile(AbsolutePath path)
         {

@@ -33,7 +33,7 @@ namespace IoFluently
 
         public virtual AbsolutePath CurrentDirectory => TryParseAbsolutePath(Environment.CurrentDirectory).Value;
 
-        public abstract IReadOnlyObservableSet<AbsolutePath> Storage { get; }
+        public abstract IObservableReadOnlySet<AbsolutePath> Storage { get; }
 
         public abstract IQueryable<AbsolutePath> Query();
 

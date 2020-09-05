@@ -395,7 +395,7 @@ namespace IoFluently
             return path;
         }
 
-        public override IReadOnlyObservableSet<AbsolutePath> Storage => _storage;
+        public override IObservableReadOnlySet<AbsolutePath> Storage => _storage;
 
         private readonly ObservableSet<AbsolutePath> _storage = new ObservableSet<AbsolutePath>();
 

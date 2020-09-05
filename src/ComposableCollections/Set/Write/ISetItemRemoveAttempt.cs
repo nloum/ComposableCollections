@@ -4,6 +4,7 @@ namespace ComposableCollections.Set.Write
 {
     public interface ISetItemRemoveAttempt<out TValue>
     {
-        IMaybe<TValue> RemovedValue { get; }
+        bool Successful { get; }
+        TValue Value { get; }
     }
 }

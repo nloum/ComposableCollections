@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using ComposableCollections.Set.Base;
+using GenericNumbers;
 
 namespace ComposableCollections.Set.Adapters
 {

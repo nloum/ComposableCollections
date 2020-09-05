@@ -19,7 +19,7 @@ namespace ComposableCollections.Set.Write
         {
             var adverbly = Successful ? "successfully" : "unsuccessfully";
             var typePastTense = (Type == SetWriteType.Add || Type == SetWriteType.TryAdd) ? "added" : "removed";
-            return $"{Value} was {adverbly} {typePastTense}";
+            return $"{adverbly} {typePastTense} {Value}";
         }
     }
 }

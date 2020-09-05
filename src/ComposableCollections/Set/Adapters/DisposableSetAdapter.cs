@@ -3,11 +3,11 @@ using ComposableCollections.Set.Base;
 
 namespace ComposableCollections.Set.Adapters
 {
-    public class DisposableSet<TValue> : DelegateSet<TValue>, IDisposableReadOnlySet<TValue>
+    public class DisposableSetAdapter<TValue> : DelegateSet<TValue>, IDisposableReadOnlySet<TValue>
     {
         private readonly IDisposable _disposable;
 
-        public DisposableSet(IComposableSet<TValue> state, IDisposable disposable) : base(state)
+        public DisposableSetAdapter(IComposableSet<TValue> state, IDisposable disposable) : base(state)
         {
             _disposable = disposable;
         }

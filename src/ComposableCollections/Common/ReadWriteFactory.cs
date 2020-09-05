@@ -2,7 +2,7 @@ using System;
 
 namespace ComposableCollections.Common
 {
-    public static class TransactionalCollection
+    public static class ReadWriteFactory
     {
         public static IReadWriteFactory<TReadOnly, TReadWrite> Create<TReadOnly, TReadWrite>(Func<TReadOnly> readOnly, Func<TReadWrite> readWrite)
              

@@ -69,6 +69,16 @@ namespace ComposableCollections.Dictionary.WithBuiltInKey
             return _source.TryGetValue(key, out value);
         }
 
+        public TValue GetValue(TKey key)
+        {
+            return this[key];
+        }
+
+        public void SetValue(TValue value)
+        {
+            this[GetKey(value)] = value;
+        }
+
         public TValue this[TKey key]
         {
             get => _source[key];

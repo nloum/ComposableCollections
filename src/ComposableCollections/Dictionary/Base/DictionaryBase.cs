@@ -12,6 +12,16 @@ namespace ComposableCollections.Dictionary.Base
         public abstract void Write(IEnumerable<DictionaryWrite<TKey, TValue>> writes,
             out IReadOnlyList<DictionaryWriteResult<TKey, TValue>> results);
         
+        public TValue GetValue(TKey key)
+        {
+            return this[key];
+        }
+
+        public void SetValue(TKey key, TValue value)
+        {
+            this[key] = value;
+        }
+
         #region Stuff that may need to be overridden for atomicity or performance reasons
 
         #region Individual write methods that call bulk write methods

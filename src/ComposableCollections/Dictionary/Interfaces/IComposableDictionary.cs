@@ -10,6 +10,7 @@ namespace ComposableCollections.Dictionary.Interfaces
     /// </summary>
     public interface IComposableDictionary<TKey, TValue> : IComposableReadOnlyDictionary<TKey, TValue>
     {
+        void SetValue(TKey key, TValue value);
         bool TryGetValue(TKey key, out TValue value);
         new TValue this[TKey key] { get; set; }
         void Write(IEnumerable<DictionaryWrite<TKey, TValue>> writes, out IReadOnlyList<DictionaryWriteResult<TKey, TValue>> results);

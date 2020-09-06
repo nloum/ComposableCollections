@@ -119,6 +119,16 @@ namespace ComposableCollections.Dictionary.Base
             return _source.TryGetValue(key, out value);
         }
 
+        public TValue GetValue(TKey key)
+        {
+            return _source.GetValue(key);
+        }
+
+        public void SetValue(TKey key, TValue value)
+        {
+            _source.SetValue(key, value);
+        }
+
         public TValue this[TKey key]
         {
             get

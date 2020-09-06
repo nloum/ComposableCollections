@@ -10,6 +10,7 @@ namespace ComposableCollections.Dictionary.WithBuiltInKey.Interfaces
         IComposableDictionary<TKey, TValue> AsComposableDictionary();
         
         bool TryGetValue(TKey key, out TValue value);
+        void SetValue(TValue value);
         new TValue this[TKey key] { get; set; }
 
         #region Add

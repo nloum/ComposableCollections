@@ -66,6 +66,11 @@ namespace ComposableCollections.Dictionary.Decorators
         {
             return TryGetValue(key, out var value);
         }
+        
+        public TValue GetValue(TKey key)
+        {
+            return this[key];
+        }
 
         public TValue this[TKey key]
         {

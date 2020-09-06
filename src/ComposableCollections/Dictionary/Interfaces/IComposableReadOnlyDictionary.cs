@@ -11,6 +11,8 @@ namespace ComposableCollections.Dictionary.Interfaces
     {
         IEqualityComparer<TKey> Comparer { get; }
 
+        TValue GetValue(TKey key);
+
         /// <summary>Gets the element that has the specified key in the read-only dictionary.</summary>
         /// <param name="key">The key to locate.</param>
         /// <returns>The element that has the specified key in the read-only dictionary.</returns>

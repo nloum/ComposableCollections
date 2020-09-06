@@ -37,6 +37,11 @@ namespace ComposableCollections.Dictionary.Base
             
             return Maybe<TValue>.Nothing();
         }
+        
+        public TValue GetValue(TKey key)
+        {
+            return this[key];
+        }
 
         public TValue this[TKey key]
         {

@@ -33,6 +33,11 @@ namespace ComposableCollections.Dictionary.WithBuiltInKey
             return _source;
         }
 
+        public TValue GetValue(TKey key)
+        {
+            return _source[key];
+        }
+
         public virtual TKey GetKey(TValue value)
         {
             return _getKey(value);

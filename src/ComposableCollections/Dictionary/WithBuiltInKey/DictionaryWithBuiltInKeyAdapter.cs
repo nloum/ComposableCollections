@@ -38,6 +38,11 @@ namespace ComposableCollections.Dictionary.WithBuiltInKey
             return GetEnumerator();
         }
 
+        public void SetValue(TValue value)
+        {
+            _source.SetValue(GetKey(value), value);
+        }
+
         public new TValue this[TKey key]
         {
             get => _source[key];

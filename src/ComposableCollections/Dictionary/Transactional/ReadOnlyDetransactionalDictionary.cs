@@ -84,6 +84,11 @@ namespace ComposableCollections.Dictionary.Transactional
             }
         }
 
+        public TValue GetValue(TKey key)
+        {
+            return this[key];
+        }
+
         public bool TryGetValue(TKey key, out TValue value)
         {
             using (var dictionary = _source.CreateReader())

@@ -49,6 +49,11 @@ namespace ComposableCollections.Dictionary.Adapters
         public int Count => _queryable.Count();
         public IEqualityComparer<TKey> Comparer => EqualityComparer<TKey>.Default;
 
+        public TValue GetValue(TKey key)
+        {
+            return this[key];
+        }
+
         public TValue this[TKey key] => _queryable.Where(_compareKey(key)).Single();
 
         public IEnumerable<TKey> Keys => _queryable.Select(_getKey);

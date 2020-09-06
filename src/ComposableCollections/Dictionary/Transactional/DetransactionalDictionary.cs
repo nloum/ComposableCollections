@@ -76,6 +76,15 @@ namespace ComposableCollections.Dictionary.Transactional
                 return dictionary.ContainsKey(key);
             }
         }
+        public TValue GetValue(TKey key)
+        {
+            return this[key];
+        }
+
+        public void SetValue(TKey key, TValue value)
+        {
+            this[key] = value;
+        }
 
         public IMaybe<TValue> TryGetValue(TKey key)
         {

@@ -89,6 +89,15 @@ namespace ComposableCollections.Dictionary.Base
                 EndRead();
             }
         }
+        public TValue GetValue(TKey key)
+        {
+            return this[key];
+        }
+
+        public void SetValue(TKey key, TValue value)
+        {
+            this[key] = value;
+        }
 
         public TValue this[TKey key]
         {

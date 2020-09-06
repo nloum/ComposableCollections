@@ -164,6 +164,53 @@ namespace ComposableCollections.CodeGenerator
 			    "IQueryableReadOnlyDictionary"
 		    };
 
+		    textWriter.WriteLine("#region WithDefaultValue that always returns a value");
+		    
+		    foreach (var iface in interfaces)
+		    {
+			    textWriter.WriteLine($"public static {iface}<TKey, TValue> WithDefaultValue<TKey, TValue>(this {iface}<TKey, TValue> source, AlwaysGetDefaultValue<TKey, TValue> getDefaultValue) {{");
+			    if (iface.Contains("ReadOnly"))
+			    {
+				    textWriter.WriteLine("var decorator = new ReadOnlyDictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);");
+			    }
+			    else
+			    {
+				    textWriter.WriteLine("var decorator = new DictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);");
+			    }
+			    var arguments = new List<string>();
+
+			    arguments.Add("decorator");
+			    if (iface.Contains("Cached"))
+			    {
+				    arguments.Add("source.AsBypassCache");
+				    arguments.Add("source.AsNeverFlush");
+				    arguments.Add("source.FlushCache");
+				    arguments.Add("source.GetWrites");
+			    }
+
+			    if (iface.Contains("Disposable"))
+			    {
+				    arguments.Add("source");
+			    }
+			    if (iface.Contains("Queryable"))
+			    {
+				    arguments.Add("source.Values");
+			    }
+
+			    if (iface.Contains("Composable"))
+			    {
+				    textWriter.WriteLine($"    return decorator;");
+			    }
+			    else
+			    {
+				    textWriter.WriteLine($"    return new {iface.Substring(1)}Adapter<TKey, TValue>({string.Join(", ", arguments)});");
+			    }
+
+			    textWriter.WriteLine("}");
+		    }
+		    
+		    textWriter.WriteLine("#endregion");
+		    
 		    textWriter.WriteLine("#region WithDefaultValue");
 		    
 		    foreach (var iface in interfaces)
@@ -277,6 +324,53 @@ namespace ComposableCollections.CodeGenerator
 			    "IQueryableDictionary",
 			    "IQueryableReadOnlyDictionary"
 		    };
+
+		    textWriter.WriteLine("#region WithRefreshing that always refreshes the value");
+		    
+		    foreach (var iface in interfaces)
+		    {
+			    textWriter.WriteLine($"public static {iface}<TKey, TValue> WithRefreshing<TKey, TValue>(this {iface}<TKey, TValue> source, AlwaysRefreshValue<TKey, TValue> refreshValue) {{");
+			    if (iface.Contains("ReadOnly"))
+			    {
+				    textWriter.WriteLine("var decorator = new ReadOnlyDictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);");
+			    }
+			    else
+			    {
+				    textWriter.WriteLine("var decorator = new DictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);");
+			    }
+			    var arguments = new List<string>();
+
+			    arguments.Add("decorator");
+			    if (iface.Contains("Cached"))
+			    {
+				    arguments.Add("source.AsBypassCache");
+				    arguments.Add("source.AsNeverFlush");
+				    arguments.Add("source.FlushCache");
+				    arguments.Add("source.GetWrites");
+			    }
+
+			    if (iface.Contains("Disposable"))
+			    {
+				    arguments.Add("source");
+			    }
+			    if (iface.Contains("Queryable"))
+			    {
+				    arguments.Add("source.Values");
+			    }
+
+			    if (iface.Contains("Composable"))
+			    {
+				    textWriter.WriteLine($"    return decorator;");
+			    }
+			    else
+			    {
+				    textWriter.WriteLine($"    return new {iface.Substring(1)}Adapter<TKey, TValue>({string.Join(", ", arguments)});");
+			    }
+
+			    textWriter.WriteLine("}");
+		    }
+		    
+		    textWriter.WriteLine("#endregion");
 
 		    textWriter.WriteLine("#region WithRefreshing");
 		    
@@ -554,14 +648,14 @@ namespace ComposableCollections.CodeGenerator
 			    var readOnlyInterface = iface.Replace("Dictionary", "ReadOnlyDictionary").Replace("Cached", "");
 			    
 			    textWriter.WriteLine(
-				    $"public static ITransactionalCollection<{readOnlyInterface}<TKey2, TValue2>, {iface}<TKey2, TValue2>> WithMapping<TKey1, TValue1, TKey2, TValue2>(this ITransactionalCollection<{readOnlyInterface}<TKey1, TValue1>, {iface}<TKey1, TValue1>> source, {string.Join(", ", parameters)}) {{");
+				    $"public static IReadWriteFactory<{readOnlyInterface}<TKey2, TValue2>, {iface}<TKey2, TValue2>> WithMapping<TKey1, TValue1, TKey2, TValue2>(this IReadWriteFactory<{readOnlyInterface}<TKey1, TValue1>, {iface}<TKey1, TValue1>> source, {string.Join(", ", parameters)}) {{");
 
 			    textWriter.WriteLine(
-				    $"return new AnonymousTransactionalCollection<{readOnlyInterface}<TKey2, TValue2>, {iface}<TKey2, TValue2>>(");
+				    $"return new AnonymousReadWriteFactory<{readOnlyInterface}<TKey2, TValue2>, {iface}<TKey2, TValue2>>(");
 			    textWriter.WriteLine(
-				    $"() => source.BeginRead().WithMapping<TKey1, TValue1, TKey2, TValue2>({string.Join(", ", readOnlyArguments)}),");
+				    $"() => source.CreateReader().WithMapping<TKey1, TValue1, TKey2, TValue2>({string.Join(", ", readOnlyArguments)}),");
 			    textWriter.WriteLine(
-				    $"() => source.BeginWrite().WithMapping<TKey1, TValue1, TKey2, TValue2>({string.Join(", ", readWriteArguments)}));");
+				    $"() => source.CreateWriter().WithMapping<TKey1, TValue1, TKey2, TValue2>({string.Join(", ", readWriteArguments)}));");
 			    
 			    textWriter.WriteLine("}");
 		    }
@@ -597,14 +691,14 @@ namespace ComposableCollections.CodeGenerator
 			    var readOnlyInterface = iface.Replace("Dictionary", "ReadOnlyDictionary").Replace("Cached", "");
 
 			    textWriter.WriteLine(
-				    $"public static ITransactionalCollection<{readOnlyInterface}<TKey, TValue2>, {iface}<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(this ITransactionalCollection<{readOnlyInterface}<TKey, TValue1>, {iface}<TKey, TValue1>> source, {string.Join(", ", parameters)}) {{");
+				    $"public static IReadWriteFactory<{readOnlyInterface}<TKey, TValue2>, {iface}<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(this IReadWriteFactory<{readOnlyInterface}<TKey, TValue1>, {iface}<TKey, TValue1>> source, {string.Join(", ", parameters)}) {{");
 
 			    textWriter.WriteLine(
-				    $"return new AnonymousTransactionalCollection<{readOnlyInterface}<TKey, TValue2>, {iface}<TKey, TValue2>>(");
+				    $"return new AnonymousReadWriteFactory<{readOnlyInterface}<TKey, TValue2>, {iface}<TKey, TValue2>>(");
 			    textWriter.WriteLine(
-				    $"() => source.BeginRead().WithMapping<TKey, TValue1, TValue2>({string.Join(", ", readOnlyArguments)}),");
+				    $"() => source.CreateReader().WithMapping<TKey, TValue1, TValue2>({string.Join(", ", readOnlyArguments)}),");
 			    textWriter.WriteLine(
-				    $"() => source.BeginWrite().WithMapping<TKey, TValue1, TValue2>({string.Join(", ", readWriteArguments)}));");
+				    $"() => source.CreateWriter().WithMapping<TKey, TValue1, TValue2>({string.Join(", ", readWriteArguments)}));");
 			    
 			    textWriter.WriteLine("}");
 		    }
@@ -648,12 +742,12 @@ namespace ComposableCollections.CodeGenerator
 			    var readOnlyInterface = iface.Replace("Dictionary", "ReadOnlyDictionary").Replace("Cached", "");
 			    
 			    textWriter.WriteLine(
-				    $"public static IReadOnlyTransactionalCollection<{readOnlyInterface}<TKey2, TValue2>> WithMapping<TKey1, TValue1, TKey2, TValue2>(this IReadOnlyTransactionalCollection<{readOnlyInterface}<TKey1, TValue1>> source, {string.Join(", ", parameters)}) {{");
+				    $"public static IReadOnlyFactory<{readOnlyInterface}<TKey2, TValue2>> WithMapping<TKey1, TValue1, TKey2, TValue2>(this IReadOnlyFactory<{readOnlyInterface}<TKey1, TValue1>> source, {string.Join(", ", parameters)}) {{");
 
 			    textWriter.WriteLine(
-				    $"return new AnonymousReadOnlyTransactionalCollection<{readOnlyInterface}<TKey2, TValue2>>(");
+				    $"return new AnonymousReadOnlyFactory<{readOnlyInterface}<TKey2, TValue2>>(");
 			    textWriter.WriteLine(
-				    $"() => source.BeginRead().WithMapping<TKey1, TValue1, TKey2, TValue2>({string.Join(", ", readOnlyArguments)}));");
+				    $"() => source.CreateReader().WithMapping<TKey1, TValue1, TKey2, TValue2>({string.Join(", ", readOnlyArguments)}));");
 			    
 			    textWriter.WriteLine("}");
 		    }
@@ -689,12 +783,12 @@ namespace ComposableCollections.CodeGenerator
 			    var readOnlyInterface = iface.Replace("Dictionary", "ReadOnlyDictionary").Replace("Cached", "");
 
 			    textWriter.WriteLine(
-				    $"public static IReadOnlyTransactionalCollection<{readOnlyInterface}<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(this IReadOnlyTransactionalCollection<{readOnlyInterface}<TKey, TValue1>> source, {string.Join(", ", parameters)}) {{");
+				    $"public static IReadOnlyFactory<{readOnlyInterface}<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(this IReadOnlyFactory<{readOnlyInterface}<TKey, TValue1>> source, {string.Join(", ", parameters)}) {{");
 
 			    textWriter.WriteLine(
-				    $"return new AnonymousReadOnlyTransactionalCollection<{readOnlyInterface}<TKey, TValue2>>(");
+				    $"return new AnonymousReadOnlyFactory<{readOnlyInterface}<TKey, TValue2>>(");
 			    textWriter.WriteLine(
-				    $"() => source.BeginRead().WithMapping<TKey, TValue1, TValue2>({string.Join(", ", readOnlyArguments)}));");
+				    $"() => source.CreateReader().WithMapping<TKey, TValue1, TValue2>({string.Join(", ", readOnlyArguments)}));");
 			    
 			    textWriter.WriteLine("}");
 		    }

@@ -85,6 +85,103 @@ namespace ComposableCollections
 
         #endregion
 
+        #region WithDefaultValue that always returns a value
+
+        public static ICachedDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(
+            this ICachedDictionary<TKey, TValue> source, AlwaysGetDefaultValue<TKey, TValue> getDefaultValue)
+        {
+            var decorator = new DictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);
+            return new CachedDictionaryAdapter<TKey, TValue>(decorator, source.AsBypassCache, source.AsNeverFlush,
+                source.FlushCache, source.GetWrites);
+        }
+
+        public static ICachedDisposableDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(
+            this ICachedDisposableDictionary<TKey, TValue> source, AlwaysGetDefaultValue<TKey, TValue> getDefaultValue)
+        {
+            var decorator = new DictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);
+            return new CachedDisposableDictionaryAdapter<TKey, TValue>(decorator, source.AsBypassCache,
+                source.AsNeverFlush, source.FlushCache, source.GetWrites, source);
+        }
+
+        public static ICachedDisposableQueryableDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(
+            this ICachedDisposableQueryableDictionary<TKey, TValue> source,
+            AlwaysGetDefaultValue<TKey, TValue> getDefaultValue)
+        {
+            var decorator = new DictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);
+            return new CachedDisposableQueryableDictionaryAdapter<TKey, TValue>(decorator, source.AsBypassCache,
+                source.AsNeverFlush, source.FlushCache, source.GetWrites, source, source.Values);
+        }
+
+        public static ICachedQueryableDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(
+            this ICachedQueryableDictionary<TKey, TValue> source, AlwaysGetDefaultValue<TKey, TValue> getDefaultValue)
+        {
+            var decorator = new DictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);
+            return new CachedQueryableDictionaryAdapter<TKey, TValue>(decorator, source.AsBypassCache,
+                source.AsNeverFlush, source.FlushCache, source.GetWrites, source.Values);
+        }
+
+        public static IComposableDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(
+            this IComposableDictionary<TKey, TValue> source, AlwaysGetDefaultValue<TKey, TValue> getDefaultValue)
+        {
+            var decorator = new DictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);
+            return decorator;
+        }
+
+        public static IComposableReadOnlyDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(
+            this IComposableReadOnlyDictionary<TKey, TValue> source,
+            AlwaysGetDefaultValue<TKey, TValue> getDefaultValue)
+        {
+            var decorator = new ReadOnlyDictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);
+            return decorator;
+        }
+
+        public static IDisposableDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(
+            this IDisposableDictionary<TKey, TValue> source, AlwaysGetDefaultValue<TKey, TValue> getDefaultValue)
+        {
+            var decorator = new DictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);
+            return new DisposableDictionaryAdapter<TKey, TValue>(decorator, source);
+        }
+
+        public static IDisposableQueryableDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(
+            this IDisposableQueryableDictionary<TKey, TValue> source,
+            AlwaysGetDefaultValue<TKey, TValue> getDefaultValue)
+        {
+            var decorator = new DictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);
+            return new DisposableQueryableDictionaryAdapter<TKey, TValue>(decorator, source, source.Values);
+        }
+
+        public static IDisposableQueryableReadOnlyDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(
+            this IDisposableQueryableReadOnlyDictionary<TKey, TValue> source,
+            AlwaysGetDefaultValue<TKey, TValue> getDefaultValue)
+        {
+            var decorator = new ReadOnlyDictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);
+            return new DisposableQueryableReadOnlyDictionaryAdapter<TKey, TValue>(decorator, source, source.Values);
+        }
+
+        public static IDisposableReadOnlyDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(
+            this IDisposableReadOnlyDictionary<TKey, TValue> source,
+            AlwaysGetDefaultValue<TKey, TValue> getDefaultValue)
+        {
+            var decorator = new ReadOnlyDictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);
+            return new DisposableReadOnlyDictionaryAdapter<TKey, TValue>(decorator, source);
+        }
+
+        public static IQueryableDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(
+            this IQueryableDictionary<TKey, TValue> source, AlwaysGetDefaultValue<TKey, TValue> getDefaultValue)
+        {
+            var decorator = new DictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);
+            return new QueryableDictionaryAdapter<TKey, TValue>(decorator, source.Values);
+        }
+
+        public static IQueryableReadOnlyDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(
+            this IQueryableReadOnlyDictionary<TKey, TValue> source, AlwaysGetDefaultValue<TKey, TValue> getDefaultValue)
+        {
+            var decorator = new ReadOnlyDictionaryGetOrDefaultDecorator<TKey, TValue>(source, getDefaultValue);
+            return new QueryableReadOnlyDictionaryAdapter<TKey, TValue>(decorator, source.Values);
+        }
+
+        #endregion
+
         #region WithDefaultValue
 
         public static ICachedDictionary<TKey, TValue> WithDefaultValue<TKey, TValue>(
@@ -282,6 +379,100 @@ namespace ComposableCollections
             var adapter = new ConcurrentCachedWriteDictionaryAdapter<TKey, TValue>(source);
             return new CachedQueryableDictionaryAdapter<TKey, TValue>(adapter, adapter.AsBypassCache,
                 adapter.AsNeverFlush, adapter.FlushCache, adapter.GetWrites, source.Values);
+        }
+
+        #endregion
+
+        #region WithRefreshing that always refreshes the value
+
+        public static ICachedDictionary<TKey, TValue> WithRefreshing<TKey, TValue>(
+            this ICachedDictionary<TKey, TValue> source, AlwaysRefreshValue<TKey, TValue> refreshValue)
+        {
+            var decorator = new DictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
+            return new CachedDictionaryAdapter<TKey, TValue>(decorator, source.AsBypassCache, source.AsNeverFlush,
+                source.FlushCache, source.GetWrites);
+        }
+
+        public static ICachedDisposableDictionary<TKey, TValue> WithRefreshing<TKey, TValue>(
+            this ICachedDisposableDictionary<TKey, TValue> source, AlwaysRefreshValue<TKey, TValue> refreshValue)
+        {
+            var decorator = new DictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
+            return new CachedDisposableDictionaryAdapter<TKey, TValue>(decorator, source.AsBypassCache,
+                source.AsNeverFlush, source.FlushCache, source.GetWrites, source);
+        }
+
+        public static ICachedDisposableQueryableDictionary<TKey, TValue> WithRefreshing<TKey, TValue>(
+            this ICachedDisposableQueryableDictionary<TKey, TValue> source,
+            AlwaysRefreshValue<TKey, TValue> refreshValue)
+        {
+            var decorator = new DictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
+            return new CachedDisposableQueryableDictionaryAdapter<TKey, TValue>(decorator, source.AsBypassCache,
+                source.AsNeverFlush, source.FlushCache, source.GetWrites, source, source.Values);
+        }
+
+        public static ICachedQueryableDictionary<TKey, TValue> WithRefreshing<TKey, TValue>(
+            this ICachedQueryableDictionary<TKey, TValue> source, AlwaysRefreshValue<TKey, TValue> refreshValue)
+        {
+            var decorator = new DictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
+            return new CachedQueryableDictionaryAdapter<TKey, TValue>(decorator, source.AsBypassCache,
+                source.AsNeverFlush, source.FlushCache, source.GetWrites, source.Values);
+        }
+
+        public static IComposableDictionary<TKey, TValue> WithRefreshing<TKey, TValue>(
+            this IComposableDictionary<TKey, TValue> source, AlwaysRefreshValue<TKey, TValue> refreshValue)
+        {
+            var decorator = new DictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
+            return decorator;
+        }
+
+        public static IComposableReadOnlyDictionary<TKey, TValue> WithRefreshing<TKey, TValue>(
+            this IComposableReadOnlyDictionary<TKey, TValue> source, AlwaysRefreshValue<TKey, TValue> refreshValue)
+        {
+            var decorator = new ReadOnlyDictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
+            return decorator;
+        }
+
+        public static IDisposableDictionary<TKey, TValue> WithRefreshing<TKey, TValue>(
+            this IDisposableDictionary<TKey, TValue> source, AlwaysRefreshValue<TKey, TValue> refreshValue)
+        {
+            var decorator = new DictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
+            return new DisposableDictionaryAdapter<TKey, TValue>(decorator, source);
+        }
+
+        public static IDisposableQueryableDictionary<TKey, TValue> WithRefreshing<TKey, TValue>(
+            this IDisposableQueryableDictionary<TKey, TValue> source, AlwaysRefreshValue<TKey, TValue> refreshValue)
+        {
+            var decorator = new DictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
+            return new DisposableQueryableDictionaryAdapter<TKey, TValue>(decorator, source, source.Values);
+        }
+
+        public static IDisposableQueryableReadOnlyDictionary<TKey, TValue> WithRefreshing<TKey, TValue>(
+            this IDisposableQueryableReadOnlyDictionary<TKey, TValue> source,
+            AlwaysRefreshValue<TKey, TValue> refreshValue)
+        {
+            var decorator = new ReadOnlyDictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
+            return new DisposableQueryableReadOnlyDictionaryAdapter<TKey, TValue>(decorator, source, source.Values);
+        }
+
+        public static IDisposableReadOnlyDictionary<TKey, TValue> WithRefreshing<TKey, TValue>(
+            this IDisposableReadOnlyDictionary<TKey, TValue> source, AlwaysRefreshValue<TKey, TValue> refreshValue)
+        {
+            var decorator = new ReadOnlyDictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
+            return new DisposableReadOnlyDictionaryAdapter<TKey, TValue>(decorator, source);
+        }
+
+        public static IQueryableDictionary<TKey, TValue> WithRefreshing<TKey, TValue>(
+            this IQueryableDictionary<TKey, TValue> source, AlwaysRefreshValue<TKey, TValue> refreshValue)
+        {
+            var decorator = new DictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
+            return new QueryableDictionaryAdapter<TKey, TValue>(decorator, source.Values);
+        }
+
+        public static IQueryableReadOnlyDictionary<TKey, TValue> WithRefreshing<TKey, TValue>(
+            this IQueryableReadOnlyDictionary<TKey, TValue> source, AlwaysRefreshValue<TKey, TValue> refreshValue)
+        {
+            var decorator = new ReadOnlyDictionaryGetOrRefreshDecorator<TKey, TValue>(source, refreshValue);
+            return new QueryableReadOnlyDictionaryAdapter<TKey, TValue>(decorator, source.Values);
         }
 
         #endregion
@@ -717,8 +908,8 @@ namespace ComposableCollections
         #region WithMapping - transactional different key types
 
         public static
-            IReadWriteFactory<IDisposableReadOnlyDictionary<TKey2, TValue2>,
-                ICachedDisposableDictionary<TKey2, TValue2>> WithMapping<TKey1, TValue1, TKey2, TValue2>(
+            IReadWriteFactory<IDisposableReadOnlyDictionary<TKey2, TValue2>, ICachedDisposableDictionary<TKey2, TValue2>
+            > WithMapping<TKey1, TValue1, TKey2, TValue2>(
                 this IReadWriteFactory<IDisposableReadOnlyDictionary<TKey1, TValue1>,
                     ICachedDisposableDictionary<TKey1, TValue1>> source,
                 Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertToValue2, Func<TKey1, TKey2> convertToKey2,
@@ -749,8 +940,8 @@ namespace ComposableCollections
         }
 
         public static
-            IReadWriteFactory<IDisposableReadOnlyDictionary<TKey2, TValue2>,
-                IDisposableDictionary<TKey2, TValue2>> WithMapping<TKey1, TValue1, TKey2, TValue2>(
+            IReadWriteFactory<IDisposableReadOnlyDictionary<TKey2, TValue2>, IDisposableDictionary<TKey2, TValue2>>
+            WithMapping<TKey1, TValue1, TKey2, TValue2>(
                 this IReadWriteFactory<IDisposableReadOnlyDictionary<TKey1, TValue1>,
                     IDisposableDictionary<TKey1, TValue1>> source,
                 Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertToValue2, Func<TKey1, TKey2> convertToKey2,
@@ -785,8 +976,8 @@ namespace ComposableCollections
         #region WithMapping - transactional same key type
 
         public static
-            IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue2>,
-                ICachedDisposableDictionary<TKey, TValue2>> WithMapping<TKey, TValue1, TValue2>(
+            IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue2>, ICachedDisposableDictionary<TKey, TValue2>>
+            WithMapping<TKey, TValue1, TValue2>(
                 this IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue1>,
                     ICachedDisposableDictionary<TKey, TValue1>> source, Func<TKey, TValue1, TValue2> convertToValue2,
                 Func<TKey, TValue2, TValue1> convertToValue1)

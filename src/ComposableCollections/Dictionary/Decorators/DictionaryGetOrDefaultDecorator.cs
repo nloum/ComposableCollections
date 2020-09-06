@@ -29,6 +29,17 @@ namespace ComposableCollections.Dictionary.Decorators
             };
         }
 
+        public DictionaryGetOrDefaultDecorator(IComposableDictionary<TKey, TValue> source, AlwaysGetDefaultValue<TKey, TValue> getDefaultValue)
+        {
+            _source = source;
+            _getDefaultValue = (TKey key, out TValue value, out bool persist) =>
+            {
+                persist = true;
+                value = getDefaultValue(key);
+                return true;
+            };
+        }
+
         protected DictionaryGetOrDefaultDecorator()
         {
         }

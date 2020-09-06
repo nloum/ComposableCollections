@@ -4,6 +4,7 @@ namespace ComposableCollections.Dictionary.Sources
 {
     public delegate bool GetDefaultValueWithOptionalPersistence<TKey, TValue>(TKey key, out TValue value, out bool persist);
     public delegate bool GetDefaultValue<TKey, TValue>(TKey key, out TValue value);
+    public delegate TValue AlwaysGetDefaultValue<TKey, TValue>(TKey key);
     
     public class DictionaryGetOrDefault<TKey, TValue> : ComposableDictionary<TKey, TValue>
     {

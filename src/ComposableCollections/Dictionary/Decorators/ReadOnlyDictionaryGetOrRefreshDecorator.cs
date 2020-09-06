@@ -17,6 +17,16 @@ namespace ComposableCollections.Dictionary.Decorators
             _refreshValue = refreshValue;
         }
 
+        public ReadOnlyDictionaryGetOrRefreshDecorator(IComposableReadOnlyDictionary<TKey, TValue> source, AlwaysRefreshValue<TKey, TValue> refreshValue)
+        {
+            _source = source;
+            _refreshValue = (TKey key, TValue value, out TValue refreshedValue) =>
+            {
+                refreshedValue = refreshValue(key, value);
+                return true;
+            };
+        }
+
         protected ReadOnlyDictionaryGetOrRefreshDecorator()
         {
         }

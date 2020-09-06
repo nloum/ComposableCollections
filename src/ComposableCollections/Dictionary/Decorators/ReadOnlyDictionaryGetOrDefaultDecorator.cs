@@ -16,6 +16,16 @@ namespace ComposableCollections.Dictionary.Decorators
             _source = source;
             _getDefaultValue = getDefaultValue;
         }
+        
+        public ReadOnlyDictionaryGetOrDefaultDecorator(IComposableReadOnlyDictionary<TKey, TValue> source, AlwaysGetDefaultValue<TKey, TValue> getDefaultValue)
+        {
+            _source = source;
+            _getDefaultValue = (TKey key, out TValue value) =>
+            {
+                value = getDefaultValue(key);
+                return true;
+            };
+        }
 
         protected ReadOnlyDictionaryGetOrDefaultDecorator()
         {

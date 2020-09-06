@@ -29,6 +29,17 @@ namespace ComposableCollections.Dictionary.Decorators
             };
         }
 
+        public DictionaryGetOrRefreshDecorator(IComposableDictionary<TKey, TValue> source, AlwaysRefreshValue<TKey, TValue> refreshValue)
+        {
+            _source = source;
+            _refreshValue = (TKey key, TValue value, out TValue refreshedValue, out bool persist) =>
+            {
+                persist = true;
+                refreshedValue = refreshValue(key, value);
+                return true;
+            };
+        }
+
         protected DictionaryGetOrRefreshDecorator()
         {
         }

@@ -4,6 +4,7 @@ namespace ComposableCollections.Dictionary.Sources
 {
     public delegate bool RefreshValueWithOptionalPersistence<TKey, TValue>(TKey key, TValue previousValue, out TValue refreshedValue, out bool persist);
     public delegate bool RefreshValue<TKey, TValue>(TKey key, TValue previousValue, out TValue refreshedValue);
+    public delegate TValue AlwaysRefreshValue<TKey, TValue>(TKey key, TValue previousValue);
     
     public class DictionaryGetOrRefresh<TKey, TValue> : ComposableDictionary<TKey, TValue>
     {

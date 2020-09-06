@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LiveLinq" Version="1.1.0-alpha0161" />
+    <PackageReference Include="LiveLinq" Version="1.1.0-alpha0163" />
     <PackageReference Include="MoreCollections" Version="1.1.0-alpha0091" />
     <PackageReference Include="ReactiveProcesses" Version="1.0.0-alpha0012" />
     <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0040" />

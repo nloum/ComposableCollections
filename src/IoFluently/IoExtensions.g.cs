@@ -332,12 +332,12 @@ namespace IoFluently
             return path.IoService.ReadAllText(path);
         }
 
-        public static IEnumerable<string> ReadLines(this AbsolutePath path)
+        public static IEnumerable<string> ObserveLines(this AbsolutePath path)
         {
             return path.IoService.ReadLines(path);
         }
 
-        public static IEnumerable<string> ReadLines(this AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
+        public static IEnumerable<string> ObserveLines(this AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read, Encoding encoding = null,
             Boolean detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, Boolean leaveOpen = false)
         {

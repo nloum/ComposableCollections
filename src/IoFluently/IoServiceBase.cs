@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 using LiveLinq;
 using LiveLinq.Set;
 using MoreCollections;
-using ReactiveProcesses;
 using SimpleMonads;
 using UnitsNet;
 using UtilityDisposables;
@@ -28,8 +27,6 @@ namespace IoFluently
         protected string DefaultDirectorySeparatorForThisEnvironment;
 
         public IOpenFilesTrackingService OpenFilesTrackingService { get; }
-
-        public virtual IReactiveProcessFactory ReactiveProcessFactory { get; }
 
         public virtual AbsolutePath CurrentDirectory => TryParseAbsolutePath(Environment.CurrentDirectory).Value;
 
@@ -52,10 +49,9 @@ namespace IoFluently
             return Ancestors(path, false);
         }
 
-        protected IoServiceBase(IOpenFilesTrackingService openFilesTrackingService, IReactiveProcessFactory reactiveProcessFactory, string newline)
+        protected IoServiceBase(IOpenFilesTrackingService openFilesTrackingService, string newline)
         {
             OpenFilesTrackingService = openFilesTrackingService;
-            ReactiveProcessFactory = reactiveProcessFactory;
             _newline = newline;
         }
 

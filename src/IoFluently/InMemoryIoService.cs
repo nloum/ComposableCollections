@@ -10,7 +10,6 @@ using GenericNumbers;
 using LiveLinq;
 using LiveLinq.Dictionary;
 using LiveLinq.Set;
-using ReactiveProcesses;
 using SimpleMonads;
 using UnitsNet;
 using static SimpleMonads.Utility;
@@ -45,7 +44,7 @@ namespace IoFluently
         private readonly bool _isCaseSensitiveByDefault;
         public ObservableDictionary<string, Folder> RootFolders { get; } = new ObservableDictionary<string, Folder>();
 
-        public InMemoryIoService(string newline, bool isCaseSensitiveByDefault, bool enableOpenFilesTracking = false, IReactiveProcessFactory reactiveProcessFactory = null) : base(new OpenFilesTrackingService(enableOpenFilesTracking), reactiveProcessFactory ?? new ReactiveProcessFactory(), newline)
+        public InMemoryIoService(string newline, bool isCaseSensitiveByDefault, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), newline)
         {
             _newline = newline;
             _isCaseSensitiveByDefault = isCaseSensitiveByDefault;

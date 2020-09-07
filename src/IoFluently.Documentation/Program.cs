@@ -4,9 +4,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Xml;
-using LiveLinq;
-using ReactiveProcesses;
-using SimpleMonads;
 
 namespace IoFluently.Documentation
 {

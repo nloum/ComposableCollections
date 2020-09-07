@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -12,7 +13,6 @@ using LiveLinq;
 using LiveLinq.Core;
 using LiveLinq.Dictionary;
 using LiveLinq.Set;
-using ReactiveProcesses;
 using SimpleMonads;
 using UnitsNet;
 using UtilityDisposables;
@@ -29,7 +29,7 @@ namespace IoFluently
             return new Queryable<AbsolutePath>(new QueryContext());
         }
 
-        public IoService(bool enableOpenFilesTracking = false, IReactiveProcessFactory reactiveProcessFactory = null) : base(new OpenFilesTrackingService(enableOpenFilesTracking), reactiveProcessFactory ?? new ReactiveProcessFactory(), Environment.NewLine)
+        public IoService(bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), Environment.NewLine)
         {
             PathObservationMethod = GetDefaultPathObservationMethod();
         }
@@ -58,50 +58,49 @@ namespace IoFluently
             // and the FileSystemWatcher class on Windows should be sufficient, it would be nice to have this support for
             // completeness' sake.
 
-            ReactiveProcess proc;
-
+            var args = "";
             var recursiveArg = includeSubFolders ? "--recursive" : string.Empty;
             
             if (PathObservationMethod == PathObservationMethod.FsWatchDefault)
             {
-                proc = ReactiveProcessFactory.Start("fswatch", $"-0 {recursiveArg} \"{root}\"");
+                args = $"-0 {recursiveArg} \"{root}\"";
             }
             else if (PathObservationMethod == PathObservationMethod.FsWatchPollMonitor)
             {
-                proc = ReactiveProcessFactory.Start("fswatch", $"--monitor=poll_monitor -0 {recursiveArg} \"{root}\"");
+                args = $"--monitor=poll_monitor -0 {recursiveArg} \"{root}\"";
             }
             else if (PathObservationMethod == PathObservationMethod.FsWatchFsEventsMonitor)
             {
-                proc = ReactiveProcessFactory.Start("fswatch", $"--monitor=fsevents_monitor -0 {recursiveArg} \"{root}\"");
+                args = $"--monitor=fsevents_monitor -0 {recursiveArg} \"{root}\"";
             }
             else if (PathObservationMethod == PathObservationMethod.FsWatchKQueueMonitor)
             {
-                proc = ReactiveProcessFactory.Start("fswatch", $"--monitor=kqueue_monitor -0 {recursiveArg} \"{root}\"");
+                args = $"--monitor=kqueue_monitor -0 {recursiveArg} \"{root}\"";
             }
             else
             {
                 throw new ArgumentException($"Unknown path observation method: {PathObservationMethod}");
             }
+            
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo("fswatch", args)
+                {
+                    UseShellExecute = false,
+                    RedirectStandardError = true,
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                },
+            };
+
+            process.Start();
 
             var initialState = includeSubFolders ? root.Descendants()
                 .ToImmutableDictionary(x => x, x => x.GetPathType())
                 : root.Children().ToImmutableDictionary(x => x, x => x.GetPathType());
 
-            var resultObservable = proc.StandardOutput
-                .Scan(new {StringBuilder = new StringBuilder(), BuiltString = (string) null},
-                    (state, ch) =>
-                    {
-                        if (ch == 0)
-                        {
-                            return new
-                            {
-                                StringBuilder = new StringBuilder(), BuiltString = state.StringBuilder.ToString()
-                            };
-                        }
-
-                        state.StringBuilder.Append(ch);
-                        return new {state.StringBuilder, BuiltString = (string) null};
-                    }).Where(state => state.BuiltString != null).Select(state => state.BuiltString)
+            var resultObservable = process.StandardOutput
+                .Observe(new []{ (char)0 })
                 .Scan(new {State = initialState, LastEvents = (IDictionaryChangeStrict<AbsolutePath, PathType>[]) null},
                     (state, itemString) =>
                     {

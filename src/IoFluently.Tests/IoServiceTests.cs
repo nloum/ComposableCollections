@@ -3,7 +3,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ReactiveProcesses;
 
 namespace IoFluently.Tests
 {

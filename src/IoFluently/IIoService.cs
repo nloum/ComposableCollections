@@ -7,7 +7,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using LiveLinq.Dictionary;
 using LiveLinq.Set;
-using ReactiveProcesses;
 using SimpleMonads;
 using TreeLinq;
 using UnitsNet;
@@ -57,7 +56,6 @@ namespace IoFluently
         #region Utilities
         
         void UpdateStorage();
-        IReactiveProcessFactory ReactiveProcessFactory { get; }
         bool HasExtension(AbsolutePath path, string extension);
         bool ContainsFiles(AbsolutePath path);
         bool FolderContainsFiles(AbsolutePath path);

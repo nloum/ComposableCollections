@@ -83,7 +83,7 @@ namespace IoFluently
                 (text) => path.WriteAllLines(text.Lines));
         }
 
-        public static IPathWithKnownFormatSync<string> AsSmallTextFile(this AbsolutePath path)
+        public static IPathWithKnownFormatSync<string, string> AsSmallTextFile(this AbsolutePath path)
         {
             return path.AsPathFormat(() => path.ReadAllText(), (text) => path.WriteAllText(text));
         }

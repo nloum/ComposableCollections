@@ -7,11 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "..\build\_build.c
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComposableCollections", "ComposableCollections\ComposableCollections.csproj", "{7A3EEC2A-B15D-4D92-A89E-1390FDFD0BF5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComposableCollections.Tests", "ComposableCollections.Tests\ComposableCollections.Tests.csproj", "{D61660E9-22E9-4A99-811F-4AE5D55F8AE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComposableCollections.Tests", "ComposableCollections.Tests\ComposableCollections.Tests.csproj", "{D61660E9-22E9-4A99-811F-4AE5D55F8AE0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComposableCollections.CodeGenerator", "ComposableCollections.CodeGenerator\ComposableCollections.CodeGenerator.csproj", "{F3F8B960-BDD6-4903-98DD-A1A2E49A16AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComposableCollections.CodeGenerator", "ComposableCollections.CodeGenerator\ComposableCollections.CodeGenerator.csproj", "{F3F8B960-BDD6-4903-98DD-A1A2E49A16AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComposableCollections.SourceGenerator", "ComposableCollections.SourceGenerator\ComposableCollections.SourceGenerator.csproj", "{4D0C7D2D-A666-4E98-B8A3-583CF00C7DF2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComposableCollections.SourceGenerator", "ComposableCollections.SourceGenerator\ComposableCollections.SourceGenerator.csproj", "{4D0C7D2D-A666-4E98-B8A3-583CF00C7DF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComposableCollections.SourceGenerator.Tests", "ComposableCollections.SourceGenerator.Tests\ComposableCollections.SourceGenerator.Tests.csproj", "{9335D19C-6292-4724-9C96-4D36D0A0C870}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,6 +39,10 @@ Global
 		{4D0C7D2D-A666-4E98-B8A3-583CF00C7DF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D0C7D2D-A666-4E98-B8A3-583CF00C7DF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D0C7D2D-A666-4E98-B8A3-583CF00C7DF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9335D19C-6292-4724-9C96-4D36D0A0C870}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9335D19C-6292-4724-9C96-4D36D0A0C870}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9335D19C-6292-4724-9C96-4D36D0A0C870}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9335D19C-6292-4724-9C96-4D36D0A0C870}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

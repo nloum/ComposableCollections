@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using ComposableCollections.Dictionary.Base;
 using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Write;
 
 namespace ComposableCollections.Dictionary.Adapters
 {
-    public class CachedDisposableDictionaryAdapter<TKey, TValue> : DelegateDictionaryBase<TKey, TValue>, ICachedDisposableDictionary<TKey, TValue>
+    public class CachedWriteDisposableQueryableDictionaryAdapter<TKey, TValue> : DelegateDictionaryBase<TKey, TValue>, ICachedWriteDisposableQueryableDictionary<TKey, TValue>
     {
         private Func<IComposableReadOnlyDictionary<TKey, TValue>> _asBypassCache;
         private Func<IComposableDictionary<TKey, TValue>> _asNeverFlush;
@@ -14,35 +15,35 @@ namespace ComposableCollections.Dictionary.Adapters
         private Func<bool, IEnumerable<DictionaryWrite<TKey, TValue>>> _getWrites;
         private IDisposable _disposable;
 
-        public CachedDisposableDictionaryAdapter(ICachedDictionary<TKey, TValue> source, IDisposable disposable) : base(source)
+        public CachedWriteDisposableQueryableDictionaryAdapter(ICachedWriteQueryableDictionary<TKey, TValue> source, IDisposable disposable) : base(source)
         {
-            _asBypassCache = source.AsBypassCache;
-            _asNeverFlush = source.AsNeverFlush;
             _flushCache = source.FlushCache;
-            _getWrites = source.GetWrites;
             _disposable = disposable;
+            Values = source.Values;
         }
 
-        public CachedDisposableDictionaryAdapter(IComposableDictionary<TKey, TValue> source, Func<IComposableReadOnlyDictionary<TKey, TValue>> asBypassCache, Func<IComposableDictionary<TKey, TValue>> asNeverFlush, Action flushCache, Func<bool, IEnumerable<DictionaryWrite<TKey, TValue>>> getWrites, IDisposable disposable) : base(source)
+        public CachedWriteDisposableQueryableDictionaryAdapter(IComposableDictionary<TKey, TValue> source, Func<IComposableReadOnlyDictionary<TKey, TValue>> asBypassCache, Func<IComposableDictionary<TKey, TValue>> asNeverFlush, Action flushCache, Func<bool, IEnumerable<DictionaryWrite<TKey, TValue>>> getWrites, IDisposable disposable, IQueryable<TValue> values) : base(source)
         {
             _asBypassCache = asBypassCache;
             _asNeverFlush = asNeverFlush;
             _flushCache = flushCache;
             _getWrites = getWrites;
             _disposable = disposable;
+            Values = values;
         }
 
-        protected CachedDisposableDictionaryAdapter()
+        protected CachedWriteDisposableQueryableDictionaryAdapter()
         {
         }
 
-        protected void Initialize(IComposableDictionary<TKey, TValue> source, Func<IComposableReadOnlyDictionary<TKey, TValue>> asBypassCache, Func<IComposableDictionary<TKey, TValue>> asNeverFlush, Action flushCache, Func<bool, IEnumerable<DictionaryWrite<TKey, TValue>>> getWrites, IDisposable disposable)
+        protected void Initialize(IComposableDictionary<TKey, TValue> source, Func<IComposableReadOnlyDictionary<TKey, TValue>> asBypassCache, Func<IComposableDictionary<TKey, TValue>> asNeverFlush, Action flushCache, Func<bool, IEnumerable<DictionaryWrite<TKey, TValue>>> getWrites, IDisposable disposable, IQueryable<TValue> values)
         {
             _asBypassCache = asBypassCache;
             _asNeverFlush = asNeverFlush;
             _flushCache = flushCache;
             _getWrites = getWrites;
             _disposable = disposable;
+            Values = values;
             base.Initialize(source);
         }
         
@@ -70,5 +71,7 @@ namespace ComposableCollections.Dictionary.Adapters
         {
             _disposable.Dispose();
         }
+
+        public new IQueryable<TValue> Values { get; private set; }
     }
 }

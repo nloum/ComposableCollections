@@ -739,7 +739,7 @@ namespace ComposableCollections.CodeGenerator
 			    readOnlyArguments.Add("convertToKey1");
 			    readWriteArguments.Add("convertToKey1");
 
-			    var readOnlyInterface = iface.Replace("Dictionary", "ReadOnlyDictionary").Replace("Cached", "");
+			    var readOnlyInterface = iface.Replace("Dictionary", "ReadOnlyDictionary").Replace("CachedWrite", "");
 			    
 			    textWriter.WriteLine(
 				    $"public static IReadOnlyFactory<{readOnlyInterface}<TKey2, TValue2>> WithMapping<TKey1, TValue1, TKey2, TValue2>(this IReadOnlyFactory<{readOnlyInterface}<TKey1, TValue1>> source, {string.Join(", ", parameters)}) {{");
@@ -801,6 +801,13 @@ namespace ComposableCollections.CodeGenerator
 	        var ioService = new IoService(new ReactiveProcessFactory());
 	        var repoRoot = ioService.CurrentDirectory.Ancestors().First(ancestor => (ancestor / ".git").IsFolder());
 
+	        var withBuiltInKeyAdapterClasses = repoRoot / "src" / "ComposableCollections" / "Dictionary" /
+	                                           "WithBuiltInKey" / "Adapters.g.cs";
+	        using (var streamWriter = withBuiltInKeyAdapterClasses.OpenWriter())
+	        {
+		        GenerateWithBuiltInKeyAdapterClasses(streamWriter);
+	        }
+ 	        
 	        var dictionaryExtensionsFilePath = repoRoot / "src" / "ComposableCollections" / "DictionaryExtensions.g.cs";
 	        using (var streamWriter = dictionaryExtensionsFilePath.OpenWriter())
 	        {
@@ -830,6 +837,16 @@ namespace ComposableCollections.CodeGenerator
 		        GenerateWithMappingExtensionMethods(streamWriter);
 		        streamWriter.WriteLine("}\n}");
 	        }
+        }
+
+        private static void GenerateWithBuiltInKeyAdapterClasses(StreamWriter streamWriter)
+        {
+	        streamWriter.WriteLine("namespace ComposableCollections.Dictionary.WithBuiltInKey {");
+
+	        var withBuiltInKeyInterfaces = new Dictionary<string, string>();
+	        withBuiltInKeyInterfaces.Add("ICachedReadDictionary", "ICachedReadDictionary");
+	        
+	        streamWriter.WriteLine("}");
         }
     }
 }

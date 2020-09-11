@@ -132,69 +132,6 @@ namespace ComposableCollections
 
         #endregion
         
-        #region WithBuiltInKey
-        
-        public static ICachedDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this ICachedDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
-            return new CachedDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
-        }
-        public static IDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IComposableDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
-            return new DictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
-        }
-        public static IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IDisposableQueryableReadOnlyDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
-            return new DisposableQueryableReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
-        }
-        public static IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IQueryableReadOnlyDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
-            return new QueryableReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
-        }
-        public static ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this ICachedDisposableQueryableDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
-            return new CachedDisposableQueryableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
-        }
-        public static IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IDisposableQueryableDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
-            return new DisposableQueryableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
-        }
-        public static IQueryableDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IQueryableDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
-            return new QueryableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
-        }
-        public static ICachedQueryableDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this ICachedQueryableDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
-            return new CachedQueryableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
-        }
-        public static ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this ICachedDisposableDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
-            return new CachedDisposableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
-        }
-        public static IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IDisposableReadOnlyDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
-            return new DisposableReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
-        }
-        public static IDisposableDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IDisposableDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
-            return new DisposableDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
-        }
-        public static IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> WithBuiltInKey<TKey, TValue>(this IComposableReadOnlyDictionary<TKey, TValue> source, Func<TValue, TKey> getKey) {
-            return new ReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue>(source, getKey);
-        }
-
-        public static IReadWriteFactory<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, ICachedDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>> WithBuiltInKey<TKey, TValue>(
-            this IReadWriteFactory<IDisposableQueryableReadOnlyDictionary<TKey, TValue>, ICachedDisposableQueryableDictionary<TKey, TValue>> source, Func<TValue, TKey> getKey)
-        {
-            return source.Select(readOnly => readOnly.WithBuiltInKey(getKey),
-                readWrite => readWrite.WithBuiltInKey(getKey));
-        }
-        public static IReadWriteFactory<IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>> WithBuiltInKey<TKey, TValue>(
-            this IReadWriteFactory<IDisposableQueryableReadOnlyDictionary<TKey, TValue>, IDisposableQueryableDictionary<TKey, TValue>> source, Func<TValue, TKey> getKey) {
-            return source.Select(readOnly => readOnly.WithBuiltInKey(getKey),
-                readWrite => readWrite.WithBuiltInKey(getKey));
-        }
-        public static IReadWriteFactory<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, ICachedDisposableDictionaryWithBuiltInKey<TKey, TValue>> WithBuiltInKey<TKey, TValue>(
-            this IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, ICachedDisposableDictionary<TKey, TValue>> source, Func<TValue, TKey> getKey) {
-            return source.Select(readOnly => readOnly.WithBuiltInKey(getKey),
-                readWrite => readWrite.WithBuiltInKey(getKey));
-        }
-        public static IReadWriteFactory<IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>, IDisposableDictionaryWithBuiltInKey<TKey, TValue>> WithBuiltInKey<TKey, TValue>(
-            this IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source, Func<TValue, TKey> getKey) {
-            return source.Select(readOnly => readOnly.WithBuiltInKey(getKey),
-                readWrite => readWrite.WithBuiltInKey(getKey));
-        }
-        
-        #endregion
-        
         #region WithEachMethodAsSeparateTransaction
         
         /// <summary>
@@ -315,37 +252,37 @@ namespace ComposableCollections
         
         #region WithWritesCombinedAtEndOfTransaction
         
-        /// <summary>
-        /// Converts the source to a transactional dictionary that keeps all writes pending until the transaction is completed.
-        /// </summary>
-        public static IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithWritesCombinedAtEndOfTransaction<TKey, TValue>(this IComposableDictionary<TKey, TValue> source)
-        {
-            return new AnonymousReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>(() =>
-            {
-                return new DisposableReadOnlyDictionaryAdapter<TKey, TValue>(source, EmptyDisposable.Default);
-            }, () =>
-            {
-                var cache = source.WithWriteCaching();
-                return new DisposableDictionaryAdapter<TKey, TValue>(cache, new AnonymousDisposable(() => cache.FlushCache()));
-            });
-        }
-
-        /// <summary>
-        /// Converts the source to a transactional dictionary that keeps all writes pending until the transaction is completed.
-        /// </summary>
-        public static IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithWritesCombinedAtEndOfTransaction<TKey, TValue>(this IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source)
-        {
-            return new AnonymousReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>(source.CreateReader, () =>
-            {
-                var disposableDictionary = source.CreateWriter();
-                var cache = disposableDictionary.WithWriteCaching();
-                return new DisposableDictionaryAdapter<TKey, TValue>(cache, new AnonymousDisposable(() =>
-                {
-                    cache.FlushCache();
-                    disposableDictionary.Dispose();
-                }));
-            });
-        }
+        // /// <summary>
+        // /// Converts the source to a transactional dictionary that keeps all writes pending until the transaction is completed.
+        // /// </summary>
+        // public static IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithWritesCombinedAtEndOfTransaction<TKey, TValue>(this IComposableDictionary<TKey, TValue> source)
+        // {
+        //     return new AnonymousReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>(() =>
+        //     {
+        //         return new DisposableReadOnlyDictionaryAdapter<TKey, TValue>(source, EmptyDisposable.Default);
+        //     }, () =>
+        //     {
+        //         var cache = source.WithWriteCaching();
+        //         return new DisposableDictionaryAdapter<TKey, TValue>(cache, new AnonymousDisposable(() => cache.FlushCache()));
+        //     });
+        // }
+        //
+        // /// <summary>
+        // /// Converts the source to a transactional dictionary that keeps all writes pending until the transaction is completed.
+        // /// </summary>
+        // public static IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithWritesCombinedAtEndOfTransaction<TKey, TValue>(this IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source)
+        // {
+        //     return new AnonymousReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>(source.CreateReader, () =>
+        //     {
+        //         var disposableDictionary = source.CreateWriter();
+        //         var cache = disposableDictionary.WithWriteCaching();
+        //         return new DisposableDictionaryAdapter<TKey, TValue>(cache, new AnonymousDisposable(() =>
+        //         {
+        //             cache.FlushCache();
+        //             disposableDictionary.Dispose();
+        //         }));
+        //     });
+        // }
 
         #endregion
     }

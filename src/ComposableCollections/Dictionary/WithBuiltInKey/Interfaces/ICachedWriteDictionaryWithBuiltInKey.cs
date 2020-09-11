@@ -8,12 +8,9 @@ namespace ComposableCollections.Dictionary.WithBuiltInKey.Interfaces
     /// A dictionary with a built-in key that will keep track of the changes you make to it, and then allows you to flush
     /// those changes to another dictionary.
     /// </summary>
-    public interface ICachedDictionaryWithBuiltInKey<TKey, TValue> : IDictionaryWithBuiltInKey<TKey, TValue>
+    public interface ICachedWriteDictionaryWithBuiltInKey<TKey, TValue> : IDictionaryWithBuiltInKey<TKey, TValue>
     {
-        ICachedDictionary<TKey, TValue> AsCachedDictionary();
-        IReadOnlyDictionaryWithBuiltInKey<TKey, TValue> AsBypassCache();
-        IDictionaryWithBuiltInKey<TKey, TValue> AsNeverFlush();
+        ICachedWriteDictionary<TKey, TValue> AsCachedDictionary();
         void FlushCache();
-        IEnumerable<DictionaryWrite<TKey, TValue>> GetWrites(bool clear);
     }
 }

@@ -12,7 +12,7 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary.Adapters
 {
-    public class ConcurrentCachedWriteDictionaryAdapter<TKey, TValue> : DictionaryBase<TKey, TValue>, ICachedDictionary<TKey, TValue>
+    public class ConcurrentCachedWriteWriteDictionaryAdapter<TKey, TValue> : DictionaryBase<TKey, TValue>, ICachedWriteDictionary<TKey, TValue>
     {
         private readonly IComposableDictionary<TKey, TValue> _addedOrUpdated;
         private readonly IComposableDictionary<TKey, TValue> _removed;
@@ -20,7 +20,7 @@ namespace ComposableCollections.Dictionary.Adapters
         protected readonly object _lock = new object();
         private ImmutableList<DictionaryWrite<TKey, TValue>> _writes = ImmutableList<DictionaryWrite<TKey, TValue>>.Empty;
 
-        public ConcurrentCachedWriteDictionaryAdapter(IComposableDictionary<TKey, TValue> flushCacheTo, IComposableDictionary<TKey, TValue> addedOrUpdated = null, IComposableDictionary<TKey, TValue> removed = null)
+        public ConcurrentCachedWriteWriteDictionaryAdapter(IComposableDictionary<TKey, TValue> flushCacheTo, IComposableDictionary<TKey, TValue> addedOrUpdated = null, IComposableDictionary<TKey, TValue> removed = null)
         {
             _addedOrUpdated = addedOrUpdated ?? new ComposableDictionary<TKey, TValue>();
             _removed = removed ?? new ComposableDictionary<TKey, TValue>();

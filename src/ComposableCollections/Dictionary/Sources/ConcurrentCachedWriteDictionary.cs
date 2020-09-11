@@ -6,14 +6,14 @@ using ComposableCollections.Dictionary.Write;
 
 namespace ComposableCollections.Dictionary.Sources
 {
-    public class ConcurrentCachedDictionary<TKey, TValue> : DictionaryBase<TKey, TValue>, ICachedDictionary<TKey, TValue>
+    public class ConcurrentCachedWriteDictionary<TKey, TValue> : DictionaryBase<TKey, TValue>, ICachedWriteDictionary<TKey, TValue>
     {
         private readonly IComposableDictionary<TKey, TValue> _cache;
         private readonly IComposableDictionary<TKey, TValue> _flushCacheTo;
         protected readonly object _lock = new object();
         private ImmutableList<DictionaryWrite<TKey, TValue>> _writes = ImmutableList<DictionaryWrite<TKey, TValue>>.Empty;
 
-        public ConcurrentCachedDictionary(IComposableDictionary<TKey, TValue> flushCacheTo, IComposableDictionary<TKey, TValue> cache)
+        public ConcurrentCachedWriteDictionary(IComposableDictionary<TKey, TValue> flushCacheTo, IComposableDictionary<TKey, TValue> cache)
         {
             _cache = cache;
             _flushCacheTo = flushCacheTo;

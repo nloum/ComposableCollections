@@ -17,13 +17,13 @@ namespace ComposableCollections.Tests.Decorators
             Console.WriteLine(readWriteLockDictionaryDecorator[3]);
         }
         
-        [TestMethod]
-        public void ReadWriteOperationsShouldWorkWithFluentSyntax()
-        {
-            var readWriteLockDictionaryDecorator = new ComposableDictionary<int, string>()
-                .WithReadWriteLock();
-            readWriteLockDictionaryDecorator.Add(3, "Hey");
-            Console.WriteLine(readWriteLockDictionaryDecorator[3]);
-        }
+        // [TestMethod]
+        // public void ReadWriteOperationsShouldWorkWithFluentSyntax()
+        // {
+        //     var readWriteLockDictionaryDecorator = new ComposableDictionary<int, string>()
+        //         .WithReadWriteLock();
+        //     readWriteLockDictionaryDecorator.Add(3, "Hey");
+        //     Console.WriteLine(readWriteLockDictionaryDecorator[3]);
+        // }
     }
 }

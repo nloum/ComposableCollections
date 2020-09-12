@@ -1,0 +1,2 @@
+namespace ComposableCollections.Dictionary.WithBuiltInKey {
+}

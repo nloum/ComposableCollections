@@ -10,7 +10,7 @@ namespace ComposableCollections.Dictionary.WithBuiltInKey.Interfaces
     /// </summary>
     public interface ICachedWriteDictionaryWithBuiltInKey<TKey, TValue> : IDictionaryWithBuiltInKey<TKey, TValue>
     {
-        ICachedWriteDictionary<TKey, TValue> AsCachedDictionary();
+        IWriteCachedDictionary<TKey, TValue> AsCachedDictionary();
         void FlushCache();
     }
 }

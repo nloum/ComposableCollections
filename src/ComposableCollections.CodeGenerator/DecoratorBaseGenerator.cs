@@ -46,6 +46,17 @@ namespace ComposableCollections.CodeGenerator
                 
                 var semanticModel = getSemanticModel(syntaxTreeForEachInterface[interfaceDeclaration]);
 
+                var usings = new List<string>();
+
+                var interfaceSymbol = semanticModel.GetDeclaredSymbol(interfaceDeclaration);
+                var baseInterfaces = Utilities.GetBaseInterfaces(interfaceSymbol);
+                foreach (var item in baseInterfaces.SelectMany(baseInterface => baseInterface.DeclaringSyntaxReferences))
+                {
+                    var moreUsings = Utilities.GetDescendantsOfType<UsingDirectiveSyntax>(item.SyntaxTree.GetRoot())
+                        .Select(us => $"using {us.Name};");
+                    usings.AddRange(moreUsings);
+                }
+
                 var duplicateMembers = new DuplicateMembersService(interfaceDeclaration, semanticModel);
                 var delegateMember = new DelegateMemberService();
                 
@@ -58,8 +69,6 @@ namespace ComposableCollections.CodeGenerator
                 {
                     genericParams = $"<{string.Join(", ", typeParameters)}>";
                 }
-
-                var usings = new List<string>();
 
                 sourceCodeBuilder.AppendLine(
                     $"namespace {_settings.Namespace} {{\npublic class {className}{genericParams} : {iface}{genericParams} {{");

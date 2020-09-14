@@ -7,6 +7,7 @@ using Humanizer;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using MoreCollections;
 
 namespace ComposableCollections.CodeGenerator
 {
@@ -73,6 +74,13 @@ namespace ComposableCollections.CodeGenerator
 
                 foreach (var interfaceToImplement in interfacesToImplement)
                 {
+                    var baseInterfaces = Utilities.GetBaseInterfaces(interfaceToImplement);
+                    foreach (var item in baseInterfaces.SelectMany(baseInterface => baseInterface.DeclaringSyntaxReferences))
+                    {
+                        var moreUsings = Utilities.GetDescendantsOfType<UsingDirectiveSyntax>(item.SyntaxTree.GetRoot())
+                            .Select(us => $"using {us.Name};");
+                        usings.AddRange(moreUsings);
+                    }
                     usings.Add($"using {string.Join(".", interfaceToImplement.ContainingNamespace.ConstituentNamespaces)};");
                 }
 
@@ -106,6 +114,8 @@ namespace ComposableCollections.CodeGenerator
                 sourceCodeBuilder.AppendLine("}");
                 
                 var delegateMemberService = new DelegateMemberService();
+
+                var membersDelegated = new HashSet<ISymbol>();
                 
                 foreach (var interfaceToImplement in interfacesToImplement)
                 {
@@ -116,7 +126,11 @@ namespace ComposableCollections.CodeGenerator
                     {
                         foreach (var member in groupOfMembers.Value)
                         {
-                            delegateMemberService.DelegateMember(member, fieldName, groupOfMembers.Key, true, sourceCodeBuilder, usings);
+                            if (!membersDelegated.Contains(member))
+                            {
+                                membersDelegated.Add(member);
+                                delegateMemberService.DelegateMember(member, fieldName, groupOfMembers.Key, true, sourceCodeBuilder, usings);
+                            }
                         }
                     }
                 }

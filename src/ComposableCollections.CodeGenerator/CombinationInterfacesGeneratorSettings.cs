@@ -16,5 +16,8 @@ namespace ComposableCollections.CodeGenerator
         [XmlArray("InterfaceNameBlacklist")]
         [XmlArrayItem("Regex", typeof(string))]
         public List<string> InterfaceNameBlacklistRegexes { get; set; }
+        [XmlArray("PreExistingInterfaces")]
+        [XmlArrayItem("PreExistingInterface", typeof(string))]
+        public List<string> PreExistingInterfaces { get; set; }
     }
 }

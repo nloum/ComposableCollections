@@ -60,7 +60,7 @@ namespace ComposableCollections.CodeGenerator
             {
                 if (!GetName(combination, out var name)) continue;
 
-                if (interfaceDeclarations.TryGetValue(name, out var value))
+                if (_settings.PreExistingInterfaces.Any(preExistingInterface => preExistingInterface == name) && interfaceDeclarations.TryGetValue(name, out var value))
                 {
                     var genericParams = new Dictionary<string, TypeParameter>();
 
@@ -231,7 +231,6 @@ namespace ComposableCollections.CodeGenerator
             {
                 throw new InvalidOperationException("None of the name creation regexes matched");
             }
-            
 
             if (string.IsNullOrWhiteSpace(name))
             {

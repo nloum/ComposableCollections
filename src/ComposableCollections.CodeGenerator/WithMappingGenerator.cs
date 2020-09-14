@@ -19,7 +19,8 @@ namespace ComposableCollections.CodeGenerator
 	    {
 		    var textWriter = new StringWriter();
 		    
-		    textWriter.WriteLine(@"using System;
+		    var partial = _settings.Partial ? "partial " : "";
+		    textWriter.WriteLine($@"using System;
  		        using System.Collections.Generic;
  		        using System.Linq;
  		        using System.Linq.Expressions;
@@ -34,10 +35,10 @@ namespace ComposableCollections.CodeGenerator
  		        using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
  		        using UtilityDisposables;
 
- 			        namespace ComposableCollections
- 		        {
-         public static partial class DictionaryExtensions
-         {");
+ 			        namespace {_settings.Namespace}
+ 		        {{
+         public static {partial}class {_settings.Class}
+         {{");
 		    textWriter.WriteLine("#region WithMapping - different key types");
 		    
 		    foreach (var iface in _settings.Interfaces)

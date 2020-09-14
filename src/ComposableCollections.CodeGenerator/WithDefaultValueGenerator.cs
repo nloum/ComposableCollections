@@ -18,8 +18,9 @@ namespace ComposableCollections.CodeGenerator
 	    public ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
 	    {
 		    var textWriter = new StringWriter();
-		    
-		    textWriter.WriteLine(@"using System;
+
+		    var partial = _settings.Partial ? "partial " : "";
+		    textWriter.WriteLine($@"using System;
  		        using System.Collections.Generic;
  		        using System.Linq;
  		        using System.Linq.Expressions;
@@ -34,10 +35,10 @@ namespace ComposableCollections.CodeGenerator
  		        using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
  		        using UtilityDisposables;
 
- 			        namespace ComposableCollections
- 		        {
-         public static partial class DictionaryExtensions
-         {");
+ 			        namespace {_settings.Namespace}
+ 		        {{
+         public static {partial}class {_settings.Class}
+         {{");
 		    textWriter.WriteLine("#region WithDefaultValue that always returns a value");
 		    
 		    foreach (var iface in _settings.Interfaces)
@@ -181,7 +182,7 @@ namespace ComposableCollections.CodeGenerator
 		    textWriter.WriteLine("#endregion");
 		    textWriter.WriteLine("}\n}");
 
-		    var results = ImmutableDictionary<string, string>.Empty.Add("WithMappingExtensions.g.cs", textWriter.ToString());
+		    var results = ImmutableDictionary<string, string>.Empty.Add("WithDefaultValueExtensions.g.cs", textWriter.ToString());
 		    return results;
 	    }
     }

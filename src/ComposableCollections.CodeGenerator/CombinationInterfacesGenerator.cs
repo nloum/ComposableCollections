@@ -1,80 +1,24 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml.Serialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ComposableCollections.CodeGenerator
 {
-    public class InterfaceCombinerSettings
+    public class CombinationInterfacesGenerator : IGenerator<CombinationInterfacesGeneratorSettings>
     {
-        [XmlAttribute("Namespace")]
-        public string Namespace { get; set; }
-        [XmlArray("InterfaceNameModifiers")]
-        [XmlArrayItem("InterfaceNameModifier", typeof(InterfaceNameModifier))]
-        public List<InterfaceNameModifier> InterfaceNameModifiers { get; set; }
-        [XmlArray("InterfaceNameBuilders")]
-        [XmlArrayItem("InterfaceNameBuilder", typeof(InterfaceNameBuilder))]
-        public List<InterfaceNameBuilder> InterfaceNameBuilders { get; set; }
-        [XmlArray("InterfaceNameBlacklist")]
-        [XmlArrayItem("Regex", typeof(string))]
-        public List<string> InterfaceNameBlacklistRegexes { get; set; }
-    }
-
-    public class InterfaceNameBuilder
-    {
-        [XmlAttribute("SearchRegex")]
-        public string Search { get; set; }
-        [XmlAttribute("ReplaceRegex")]
-        public string Replacement { get; set; }
-    }
-
-    public class InterfaceNameModifier : IEnumerable<string>
-    {
-        [XmlArray]
-        [XmlArrayItem("Value")]
-        public List<string> Values { get; set; } = new List<string>();
-
-        public void Add(string value)
-        {
-            Values.Add(value);
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public IEnumerator<string> GetEnumerator()
-        {
-            return Values.GetEnumerator();
-        }
-    }
-
-    public class InterfaceCombiner
-    {
-        private readonly InterfaceCombinerSettings _settings;
+        private CombinationInterfacesGeneratorSettings _settings;
         
-        public InterfaceCombiner(InterfaceCombinerSettings settings)
+        public void Initialize(CombinationInterfacesGeneratorSettings settings)
         {
             _settings = settings;
         }
 
-        private void TraverseTree(SyntaxNode syntaxNode, Action<SyntaxNode> visit)
-        {
-            visit(syntaxNode);
-            foreach (var child in syntaxNode.ChildNodes())
-            {
-                TraverseTree(child, visit);
-            }
-        }
-        
         private enum TypeParameterVariance
         {
             Out, In, None
@@ -92,13 +36,13 @@ namespace ComposableCollections.CodeGenerator
             public int Index { get; }
         }
         
-        public ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees)
+        public ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
         {
             var interfaceDeclarations = new Dictionary<string, InterfaceDeclarationSyntax>();
             
             foreach (var syntaxTree in syntaxTrees)
             {
-                TraverseTree(syntaxTree.GetRoot(), node =>
+                Utilities.TraverseTree(syntaxTree.GetRoot(), node =>
                 {
                     if (node is InterfaceDeclarationSyntax interfaceDeclarationSyntax)
                     {

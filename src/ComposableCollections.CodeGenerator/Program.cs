@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Text.RegularExpressions;
-using ComposableCollections.Dictionary;
-using Humanizer;
 using IoFluently;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using ReactiveProcesses;
@@ -812,10 +808,23 @@ namespace ComposableCollections.CodeGenerator
 	        // {
 		       //  GenerateWithBuiltInKeyAdapterClasses(streamWriter);
 	        // }
- 	        
-	        var settings = new InterfaceCombinerSettings()
+
+	        var csFiles = (repoRoot / "src" / "ComposableCollections").Descendants()
+		        .Where(child => child.HasExtension(".cs"));
+
+	        var syntaxTrees = csFiles.Select(csFile =>
+		        CSharpSyntaxTree.ParseText(SourceText.From(csFile.ReadText(), Encoding.UTF8))).ToImmutableList();
+	        
+	        var compilation = CSharpCompilation.Create("HelloWorld")
+		        .AddReferences(MetadataReference.CreateFromFile(
+			        typeof(string).Assembly.Location),
+			        MetadataReference.CreateFromFile((repoRoot / "src" / "ComposableCollections" / "bin" / "Debug" / "netstandard2.0" / "ComposableCollections.dll").ToString()))
+		        .AddSyntaxTrees(syntaxTrees);
+	        
+	        var combinationInterfacesGenerator = new CombinationInterfacesGenerator();
+	        var combinationInterfacesGeneratorSettings = new CombinationInterfacesGeneratorSettings()
 	        {
- 		        Namespace = "ComposableCollections.Dictionary.Interfaces",
+		        Namespace = "ComposableCollections.Dictionary.Interfaces",
 		        InterfaceNameBlacklistRegexes = new List<string>()
 		        {
 			        "ReadOnly.*Write",
@@ -849,23 +858,64 @@ namespace ComposableCollections.CodeGenerator
 			        new InterfaceNameModifier() { "", "Queryable" },
 			        new InterfaceNameModifier() { "ReadOnly", "" },
 		        }
-			        
 	        };
-	        var interfaceCombiner = new InterfaceCombiner(settings);
+	        combinationInterfacesGenerator.Initialize(combinationInterfacesGeneratorSettings);
+	        var combinedInterfaces = combinationInterfacesGenerator.Generate(syntaxTrees, syntaxTree => compilation.GetSemanticModel(syntaxTree));
 
-	        var csFiles = (repoRoot / "src" / "ComposableCollections" / "Dictionary" / "Interfaces").Children()
-		        .Where(child => child.HasExtension(".cs"));
-
-	        var syntaxTrees = csFiles.Select(csFile =>
+	        var anonymousImplementationGenerator = new AnonymousImplementationGenerator();
+	        var anonymousImplementationGeneratorSettings = new AnonymousImplementationGeneratorSettings()
 	        {
-			    return CSharpSyntaxTree.ParseText(SourceText.From(csFile.ReadText(), Encoding.UTF8));
-	        });
-	        
-	        var results = interfaceCombiner.Generate(syntaxTrees);
+		        Namespace = "ComposableCollections.Dictionary.Interfaces",
+		        InterfacesToImplement = new List<string>()
+		        {
+			        "IDisposableQueryableDictionary",
+			        "IDisposableQueryableReadOnlyDictionary",
+			        "IReadCachedDisposableDictionary",
+			        "IReadCachedDisposableQueryableDictionary",
+			        "IReadCachedDisposableQueryableReadOnlyDictionary",
+			        "IReadCachedDisposableReadOnlyDictionary",
+			        "IReadCachedQueryableDictionary",
+			        "IReadCachedQueryableReadOnlyDictionary",
+			        "IReadWriteCachedDisposableDictionary",
+			        "IReadWriteCachedDisposableQueryableDictionary",
+			        "IReadWriteCachedQueryableDictionary",
+			        "IWriteCachedDisposableDictionary",
+			        "IWriteCachedDisposableQueryableDictionary",
+			        "IWriteCachedQueryableDictionary",
+		        }
+	        };
+	        anonymousImplementationGenerator.Initialize(anonymousImplementationGeneratorSettings);
+	        var anonymousImplementations = anonymousImplementationGenerator.Generate(syntaxTrees, syntaxTree => compilation.GetSemanticModel(syntaxTree));
 
+	        
+	        var decoratorBaseGenerator = new DecoratorBaseGenerator();
+	        var decoratorBaseSettings = new DecoratorBaseGeneratorSettings()
+	        {
+		        Namespace = "ComposableCollections.Dictionary.Interfaces",
+		        InterfacesToImplement = new List<string>()
+		        {
+			        "IDisposableQueryableDictionary",
+			        "IDisposableQueryableReadOnlyDictionary",
+			        "IReadCachedDisposableDictionary",
+			        "IReadCachedDisposableQueryableDictionary",
+			        "IReadCachedDisposableQueryableReadOnlyDictionary",
+			        "IReadCachedDisposableReadOnlyDictionary",
+			        "IReadCachedQueryableDictionary",
+			        "IReadCachedQueryableReadOnlyDictionary",
+			        "IReadWriteCachedDisposableDictionary",
+			        "IReadWriteCachedDisposableQueryableDictionary",
+			        "IReadWriteCachedQueryableDictionary",
+			        "IWriteCachedDisposableDictionary",
+			        "IWriteCachedDisposableQueryableDictionary",
+			        "IWriteCachedQueryableDictionary",
+		        }
+	        };
+	        decoratorBaseGenerator.Initialize(decoratorBaseSettings);
+	        var decoratorBases = decoratorBaseGenerator.Generate(syntaxTrees, syntaxTree => compilation.GetSemanticModel(syntaxTree));
+	        
 	        var autoGeneratedInterfacesFolder =
 		        (repoRoot / "src" / "ComposableCollections" / "Dictionary" / "AutoGeneratedInterfaces");
-	        foreach (var result in results)
+	        foreach (var result in combinedInterfaces.Concat(anonymousImplementations).Concat(decoratorBases))
 	        {
 		        (autoGeneratedInterfacesFolder / result.Key).WriteText(result.Value);
 	        }

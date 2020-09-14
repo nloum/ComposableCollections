@@ -16,7 +16,7 @@ namespace ComposableCollections.CodeGenerator
         
         public DuplicateMembersService(InterfaceDeclarationSyntax interfaceDeclaration, SemanticModel semanticModel)
         {
-            var membersPerInterfaceToImplement = Utilities.GetMembers(interfaceDeclaration, semanticModel);
+            var membersPerInterfaceToImplement = Utilities.GetMembersGroupedByDeclaringType(interfaceDeclaration, semanticModel);
 
             _duplicateIndexers = membersPerInterfaceToImplement.SelectMany(memberToImplement =>
             {
@@ -37,21 +37,25 @@ namespace ComposableCollections.CodeGenerator
                 .ToImmutableDictionary(x => x.Key, x => x.ToImmutableHashSet());
         }
 
-        public bool IsDuplicate(IPropertySymbol propertySymbol)
+        public bool IsDuplicate(ISymbol symbol)
         {
-            if (propertySymbol.IsIndexer)
+            if (symbol is IPropertySymbol propertySymbol)
             {
-                return _duplicateIndexers.ContainsKey(GetIndexerKey(propertySymbol));
+                if (propertySymbol.IsIndexer)
+                {
+                    return _duplicateIndexers.ContainsKey(GetIndexerKey(propertySymbol));
+                }
+
+                return _duplicateProperties.ContainsKey(GetPropertyKey(propertySymbol));
+            }
+            else if (symbol is IMethodSymbol methodSymbol)
+            {
+                return _duplicateMethods.ContainsKey(GetMethodKey(methodSymbol));
             }
 
-            return _duplicateProperties.ContainsKey(GetPropertyKey(propertySymbol));
+            return false;
         }
         
-        public bool IsDuplicate(IMethodSymbol methodSymbol)
-        {
-            return _duplicateMethods.ContainsKey(GetMethodKey(methodSymbol));
-        }
-
         private string GetIndexerKey(IPropertySymbol propertySymbol)
         {
             return string.Join(", ", propertySymbol.Parameters);

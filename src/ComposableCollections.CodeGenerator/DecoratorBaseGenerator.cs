@@ -80,13 +80,13 @@ namespace ComposableCollections.CodeGenerator
                 sourceCodeBuilder.AppendLine($"{fieldName} = {parameterName};");
                 sourceCodeBuilder.AppendLine("}");
                 
-                var members = Utilities.GetMembers(interfaceDeclaration, semanticModel);
+                var members = Utilities.GetMembersGroupedByDeclaringType(interfaceDeclaration, semanticModel);
                 
                 foreach (var member in members)
                 {
                     foreach (var memberItem in member.Value)
                     {
-                        delegateMember.DelegateMember(memberItem, fieldName, member.Key, duplicateMembers, sourceCodeBuilder, usings);
+                        delegateMember.DelegateMember(memberItem, fieldName, member.Key, duplicateMembers.IsDuplicate(memberItem), sourceCodeBuilder, usings);
                     }
                 }
 

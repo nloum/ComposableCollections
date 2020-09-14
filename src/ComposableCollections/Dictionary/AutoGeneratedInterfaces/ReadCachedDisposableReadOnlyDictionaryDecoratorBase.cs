@@ -3,12 +3,20 @@ using ComposableCollections.Dictionary.Interfaces;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using SimpleMonads;
 namespace ComposableCollections.Dictionary.Interfaces {
 public class ReadCachedDisposableReadOnlyDictionaryDecoratorBase<TKey, TValue> : IReadCachedDisposableReadOnlyDictionary<TKey, TValue> {
 private readonly IReadCachedDisposableReadOnlyDictionary<TKey, TValue> _decoratedObject;
 public ReadCachedDisposableReadOnlyDictionaryDecoratorBase(IReadCachedDisposableReadOnlyDictionary<TKey, TValue> decoratedObject) {
 _decoratedObject = decoratedObject;
+}
+void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache() {
+_decoratedObject.ReloadCache();
+}
+void IDisposable.Dispose() {
+_decoratedObject.Dispose();
+}
+System.Collections.IEnumerator IEnumerable.GetEnumerator() {
+return _decoratedObject.GetEnumerator();
 }
 System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
@@ -26,16 +34,7 @@ return _decoratedObject.ContainsKey( key);
 IMaybe<TValue> IComposableReadOnlyDictionary<TKey, TValue>.TryGetValue( TKey key) {
 return _decoratedObject.TryGetValue( key);
 }
-void IDisposable.Dispose() {
-_decoratedObject.Dispose();
-}
-System.Collections.IEnumerator IEnumerable.GetEnumerator() {
-return _decoratedObject.GetEnumerator();
-}
 int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _decoratedObject.Count;
-void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache() {
-_decoratedObject.ReloadCache();
-}
 }
 }
 

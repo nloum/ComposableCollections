@@ -6,8 +6,6 @@ using Humanizer;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using MoreCollections;
-using SimpleMonads;
 
 namespace ComposableCollections.CodeGenerator
 {
@@ -111,20 +109,20 @@ namespace ComposableCollections.CodeGenerator
             }
         }
         
-        public static ImmutableDictionary<string, ImmutableList<ISymbol>> GetMembers(InterfaceDeclarationSyntax syntax, SemanticModel semanticModel)
+        public static ImmutableDictionary<string, ImmutableList<ISymbol>> GetMembersGroupedByDeclaringType(InterfaceDeclarationSyntax syntax, SemanticModel semanticModel)
         {
             var symbol = semanticModel.GetDeclaredSymbol(syntax);
-            return GetMembers(symbol);
+            return GetMembersGroupedByDeclaringType(symbol);
         }
 
-        public static ImmutableDictionary<string, ImmutableList<ISymbol>> GetMembers(INamedTypeSymbol symbol)
+        public static ImmutableDictionary<string, ImmutableList<ISymbol>> GetMembersGroupedByDeclaringType(INamedTypeSymbol symbol)
         {
             var results = new Dictionary<string, ImmutableList<ISymbol>>();
-            GetMembers(symbol, results);
+            GetMembersGroupedByDeclaringType(symbol, results);
             return results.ToImmutableDictionary();
         }
         
-        private static void GetMembers(INamedTypeSymbol symbol, Dictionary<string, ImmutableList<ISymbol>> results)
+        private static void GetMembersGroupedByDeclaringType(INamedTypeSymbol symbol, Dictionary<string, ImmutableList<ISymbol>> results)
         {
             var typeArguments = symbol.TypeArguments.Length == 0 ? "" : $"<{string.Join(", ", symbol.TypeArguments)}>";
             var key = $"{symbol.Name}{typeArguments}";
@@ -137,7 +135,7 @@ namespace ComposableCollections.CodeGenerator
             
             foreach (var baseInterface in symbol.Interfaces)
             {
-                GetMembers(baseInterface, results);
+                GetMembersGroupedByDeclaringType(baseInterface, results);
             }
         }
         

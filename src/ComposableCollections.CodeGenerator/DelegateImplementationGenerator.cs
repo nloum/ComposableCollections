@@ -10,11 +10,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ComposableCollections.CodeGenerator
 {
-    public class AnonymousImplementationGenerator : IGenerator<AnonymousImplementationGeneratorSettings>
+    public class DelegateImplementationGenerator : IGenerator<DelegateImplementationGeneratorSettings>
     {
-        private AnonymousImplementationGeneratorSettings _settings;
+        private DelegateImplementationGeneratorSettings _settings;
 
-        public void Initialize(AnonymousImplementationGeneratorSettings settings)
+        public void Initialize(DelegateImplementationGeneratorSettings settings)
         {
             _settings = settings;
         }
@@ -104,6 +104,22 @@ namespace ComposableCollections.CodeGenerator
                     .Select(name => $"_{name} = {name};");
                 sourceCodeBuilder.AppendLine(string.Join("\n", fieldAssignments));
                 sourceCodeBuilder.AppendLine("}");
+                
+                var delegateMemberService = new DelegateMemberService();
+                
+                foreach (var interfaceToImplement in interfacesToImplement)
+                {
+                    var fieldName = "_" + Utilities.GenerateVariableName(interfaceToImplement.Name, true);
+                    
+                    var membersGroupedByDeclaringType = Utilities.GetMembersGroupedByDeclaringType(interfaceToImplement);
+                    foreach (var groupOfMembers in membersGroupedByDeclaringType)
+                    {
+                        foreach (var member in groupOfMembers.Value)
+                        {
+                            delegateMemberService.DelegateMember(member, fieldName, groupOfMembers.Key, true, sourceCodeBuilder, usings);
+                        }
+                    }
+                }
                 
                 sourceCodeBuilder.AppendLine("}\n}\n");
 

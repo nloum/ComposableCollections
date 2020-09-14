@@ -7,7 +7,7 @@ namespace ComposableCollections.CodeGenerator
 {
     public class DelegateMemberService
     {
-        public void DelegateMember(ISymbol member, string delegateToField, string explicitInterfaceImplementation, DuplicateMembersService duplicateMembers, StringBuilder sourceCodeBuilder, List<string> usings)
+        public void DelegateMember(ISymbol member, string delegateToField, string explicitInterfaceImplementation, bool explicitImplementation, StringBuilder sourceCodeBuilder, List<string> usings)
         {
             if (member.Kind == SymbolKind.Method)
             {
@@ -44,7 +44,7 @@ namespace ComposableCollections.CodeGenerator
                     usings.AddRange(Utilities.GetUsings(typeArg));
                 }
 
-                if (duplicateMembers.IsDuplicate(methodDeclaration))
+                if (explicitImplementation)
                 {
                     // Explicit interface implementation
                     
@@ -78,7 +78,7 @@ namespace ComposableCollections.CodeGenerator
 
                     usings.AddRange(Utilities.GetUsings(propertyDeclaration.Type));
 
-                    if (duplicateMembers.IsDuplicate(propertyDeclaration))
+                    if (explicitImplementation)
                     {
                         sourceCodeBuilder.Append(
                             $"{propertyDeclaration.Type} {explicitInterfaceImplementation}.this[{propertyParams}]");
@@ -112,7 +112,7 @@ namespace ComposableCollections.CodeGenerator
                 else
                 {
                     usings.AddRange(Utilities.GetUsings(propertyDeclaration.Type));
-                    if (duplicateMembers.IsDuplicate(propertyDeclaration))
+                    if (explicitImplementation)
                     {
                         sourceCodeBuilder.Append(
                             $"{propertyDeclaration.Type} {explicitInterfaceImplementation}.{propertyDeclaration.Name}");

@@ -256,6 +256,17 @@ namespace ComposableCollections.CodeGenerator
 	        withWriteCachingGenerator.Initialize(withWriteCachingSettings);
 	        var withWriteCachingFiles = withWriteCachingGenerator.Generate(syntaxTrees, syntaxTree => compilation.GetSemanticModel(syntaxTree));
 
+	        var withReadCachingGenerator = new ExtensionMethodVariationGenerator();
+	        withReadCachingGenerator.Initialize(new ExtensionMethodVariationGeneratorSettings()
+	        {
+		        ExtensionMethodName = "WithReadCaching"
+	        });
+	        var withReadCachingFiles = withReadCachingGenerator.Generate(syntaxTrees, syntaxTree => compilation.GetSemanticModel(syntaxTree));
+	        foreach (var result in withReadCachingFiles)
+	        {
+		        (repoRoot / "src" / "ComposableCollections" / result.Key).WriteText(result.Value);
+	        }
+	        
 	        foreach (var result in combinedInterfaces)
 	        {
 		        (repoRoot / "src" / "ComposableCollections" / "Dictionary" / "Interfaces" / result.Key).WriteText(result.Value);

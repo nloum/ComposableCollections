@@ -12,10 +12,12 @@ private readonly IReadWriteCachedDisposableQueryableDictionary<TKey, TValue> _de
 public ReadWriteCachedDisposableQueryableDictionaryDecoratorBase(IReadWriteCachedDisposableQueryableDictionary<TKey, TValue> decoratedObject) {
 _decoratedObject = decoratedObject;
 }
+System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
+return _decoratedObject.GetEnumerator();
+}
 void IWriteCachedDictionary<TKey, TValue>.FlushCache() {
 _decoratedObject.FlushCache();
 }
-IQueryable<TValue> IQueryableReadOnlyDictionary<TKey, TValue>.Values => _decoratedObject.Values;
 void IDisposable.Dispose() {
 _decoratedObject.Dispose();
 }
@@ -221,9 +223,7 @@ return _decoratedObject.TryRemove( key,  out removedItem);
 void IComposableDictionary<TKey, TValue>.Remove( TKey key,  out TValue removedItem) {
 _decoratedObject.Remove( key,  out removedItem);
 }
-void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache() {
-_decoratedObject.ReloadCache();
-}
+int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _decoratedObject.Count;
 System.Collections.Generic.IEqualityComparer<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Comparer => _decoratedObject.Comparer;
 TValue IComposableReadOnlyDictionary<TKey, TValue>.GetValue( TKey key) {
 return _decoratedObject.GetValue( key);
@@ -237,13 +237,13 @@ return _decoratedObject.ContainsKey( key);
 IMaybe<TValue> IComposableReadOnlyDictionary<TKey, TValue>.TryGetValue( TKey key) {
 return _decoratedObject.TryGetValue( key);
 }
-System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
-return _decoratedObject.GetEnumerator();
+void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache() {
+_decoratedObject.ReloadCache();
 }
 System.Collections.IEnumerator IEnumerable.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
 }
-int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _decoratedObject.Count;
+IQueryable<TValue> IQueryableReadOnlyDictionary<TKey, TValue>.Values => _decoratedObject.Values;
 }
 }
 

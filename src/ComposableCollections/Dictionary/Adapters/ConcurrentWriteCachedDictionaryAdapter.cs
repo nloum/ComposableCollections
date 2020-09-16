@@ -49,16 +49,6 @@ namespace ComposableCollections.Dictionary.Adapters
             return writesToFlush;
         }
 
-        public IComposableReadOnlyDictionary<TKey, TValue> AsBypassCache()
-        {
-            return _flushCacheTo;
-        }
-
-        public IComposableDictionary<TKey, TValue> AsNeverFlush()
-        {
-            throw new NotImplementedException();
-        }
-
         public virtual void FlushCache()
         {
             _flushCacheTo.Write(GetWrites(true), out var _);

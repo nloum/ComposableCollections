@@ -19,7 +19,11 @@ namespace ComposableCollections
 {
     public static partial class DictionaryExtensions
     {
-        
+        public static IComposableReadOnlyDictionary<TKey, TValue> WithReadCaching<TKey, TValue>(
+            this IComposableReadOnlyDictionary<TKey, TValue> source)
+        {
+            
+        }
         
         public static IQueryableReadOnlyDictionary<TKey, TValue> AsQueryableReadOnlyDictionary<TKey, TValue>(
             this IQueryable<TValue> queryable, Expression<Func<TValue, TKey>> getKey)

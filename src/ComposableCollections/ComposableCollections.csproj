@@ -18,8 +18,4 @@
   <ItemGroup>
     <ProjectReference Include="ComposableCollections.SourceGenerator\ComposableCollections.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="Dictionary\Base" />
-  </ItemGroup>
 </Project>

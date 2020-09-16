@@ -84,14 +84,14 @@ namespace ComposableCollections.CodeGenerator
                     usings.Add($"using {string.Join(".", interfaceToImplement.ContainingNamespace.ConstituentNamespaces)};");
                 }
 
-                var parameterTypesInOrder = interfacesToImplement.Select(baseType =>
+                var parameterTypesInOrder = interfacesToImplement.Select(interfaceToImplement =>
                 {
-                    if (baseType.TypeParameters.Length == 0)
+                    if (interfaceToImplement.TypeParameters.Length == 0)
                     {
-                        return baseType.Name;
+                        return interfaceToImplement.Name;
                     }
                     
-                    return $"{baseType.Name}<{string.Join(", ", baseType.TypeParameters)}>";
+                    return $"{interfaceToImplement.Name}<{string.Join(", ", interfaceToImplement.TypeParameters)}>";
                 }).ToImmutableList();
 
                 var parameterNamesInOrder = interfacesToImplement.Select(baseType => baseType.Name)

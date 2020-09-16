@@ -8,7 +8,7 @@ using SimpleMonads;
 
 namespace ComposableCollections.Dictionary.Adapters
 {
-    public class QueryableToQueryableReadOnlyDictionaryAdapter<TKey, TValue> : IQueryableReadOnlyDictionary<TKey, TValue>
+    public class  QueryableToQueryableReadOnlyDictionaryAdapter<TKey, TValue> : IQueryableReadOnlyDictionary<TKey, TValue>
     {
         private readonly IQueryable<TValue> _queryable;
         private readonly Expression<Func<TValue, TKey>> _getKey;

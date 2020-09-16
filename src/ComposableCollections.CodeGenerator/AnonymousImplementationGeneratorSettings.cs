@@ -10,5 +10,8 @@ namespace ComposableCollections.CodeGenerator
         public List<string> InterfacesToImplement { get; set; }
         [XmlAttribute("Namespace")]
         public string Namespace { get; set; }
+
+        [XmlAttribute("MaxMemberCountPassedIndividually")]
+        public int MaxMemberCountPassedIndividually { get; set; } = 1;
     }
 }

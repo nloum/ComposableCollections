@@ -16,6 +16,9 @@ _writeCachedDictionary = writeCachedDictionary;
 void IDisposable.Dispose() {
 _disposable.Dispose();
 }
+System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
+return _writeCachedDictionary.GetEnumerator();
+}
 void IWriteCachedDictionary<TKey, TValue>.FlushCache() {
 _writeCachedDictionary.FlushCache();
 }
@@ -221,6 +224,7 @@ return _writeCachedDictionary.TryRemove( key,  out removedItem);
 void IComposableDictionary<TKey, TValue>.Remove( TKey key,  out TValue removedItem) {
 _writeCachedDictionary.Remove( key,  out removedItem);
 }
+int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _writeCachedDictionary.Count;
 System.Collections.Generic.IEqualityComparer<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Comparer => _writeCachedDictionary.Comparer;
 TValue IComposableReadOnlyDictionary<TKey, TValue>.GetValue( TKey key) {
 return _writeCachedDictionary.GetValue( key);
@@ -234,13 +238,9 @@ return _writeCachedDictionary.ContainsKey( key);
 IMaybe<TValue> IComposableReadOnlyDictionary<TKey, TValue>.TryGetValue( TKey key) {
 return _writeCachedDictionary.TryGetValue( key);
 }
-System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
-return _writeCachedDictionary.GetEnumerator();
-}
 System.Collections.IEnumerator IEnumerable.GetEnumerator() {
 return _writeCachedDictionary.GetEnumerator();
 }
-int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _writeCachedDictionary.Count;
 }
 }
 

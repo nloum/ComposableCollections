@@ -7,8 +7,19 @@ namespace ComposableCollections.CodeGenerator
 {
     public class DelegateMemberService
     {
-        public void DelegateMember(ISymbol member, string delegateToField, string explicitInterfaceImplementation, bool explicitImplementation, StringBuilder sourceCodeBuilder, List<string> usings)
+        public void DelegateMember(ISymbol member, string delegateToField, bool explicitImplementation, StringBuilder sourceCodeBuilder, List<string> usings, bool? shouldOverride = null)
         {
+            var containingType = member.ContainingType;
+            if (shouldOverride == null)
+            {
+                shouldOverride = containingType.TypeKind == TypeKind.Class;
+            }
+            var explicitInterfaceImplementation = containingType.Name;
+            if (containingType.Arity > 0)
+            {
+                explicitInterfaceImplementation += $"<{string.Join(", ", containingType.TypeArguments)}>";
+            }
+            
             if (member.Kind == SymbolKind.Method)
             {
                 var methodDeclaration = member as IMethodSymbol;
@@ -52,7 +63,14 @@ namespace ComposableCollections.CodeGenerator
                 }
                 else
                 {
-                    sourceCodeBuilder.AppendLine($"public virtual {returnType} {member.Name}{methodTypeParameters}({methodParams}) {{");
+                    if (shouldOverride == true)
+                    {
+                        sourceCodeBuilder.AppendLine($"public override {returnType} {member.Name}{methodTypeParameters}({methodParams}) {{");
+                    }
+                    else
+                    {
+                        sourceCodeBuilder.AppendLine($"public virtual {returnType} {member.Name}{methodTypeParameters}({methodParams}) {{");
+                    }
                 }
                 
                 if (!methodDeclaration.ReturnsVoid)
@@ -85,8 +103,16 @@ namespace ComposableCollections.CodeGenerator
                     }
                     else
                     {
-                        sourceCodeBuilder.Append(
-                            $"public virtual {propertyDeclaration.Type} this[{propertyParams}]");
+                        if (shouldOverride == true)
+                        {
+                            sourceCodeBuilder.Append(
+                                $"public override {propertyDeclaration.Type} this[{propertyParams}]");
+                        }
+                        else
+                        {
+                            sourceCodeBuilder.Append(
+                                $"public virtual {propertyDeclaration.Type} this[{propertyParams}]");
+                        }
                     }
                     
                     if (propertyDeclaration.GetMethod != null && propertyDeclaration.SetMethod == null)
@@ -119,8 +145,16 @@ namespace ComposableCollections.CodeGenerator
                     }
                     else
                     {
-                        sourceCodeBuilder.Append(
-                            $"public virtual {propertyDeclaration.Type} {propertyDeclaration.Name}");
+                        if (shouldOverride == true)
+                        {
+                            sourceCodeBuilder.Append(
+                                $"public override {propertyDeclaration.Type} {propertyDeclaration.Name}");
+                        }
+                        else
+                        {
+                            sourceCodeBuilder.Append(
+                                $"public virtual {propertyDeclaration.Type} {propertyDeclaration.Name}");
+                        }
                     }
                     if (propertyDeclaration.GetMethod != null && propertyDeclaration.SetMethod == null)
                     {
@@ -128,8 +162,16 @@ namespace ComposableCollections.CodeGenerator
                     }
                     else
                     {
-                        sourceCodeBuilder.AppendLine(
-                            $"public virtual {propertyDeclaration.Type} {propertyDeclaration.Name} {{");
+                        if (shouldOverride == true)
+                        {
+                            sourceCodeBuilder.AppendLine(
+                                $"public override {propertyDeclaration.Type} {propertyDeclaration.Name} {{");
+                        }
+                        else
+                        {
+                            sourceCodeBuilder.AppendLine(
+                                $"public virtual {propertyDeclaration.Type} {propertyDeclaration.Name} {{");
+                        }
 
                         if (propertyDeclaration.GetMethod != null)
                         {

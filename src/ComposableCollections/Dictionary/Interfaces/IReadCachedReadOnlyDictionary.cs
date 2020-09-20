@@ -9,5 +9,8 @@ namespace ComposableCollections.Dictionary.Interfaces
     public interface IReadCachedReadOnlyDictionary<TKey, out TValue> : IComposableReadOnlyDictionary<TKey, TValue>
     {
         void ReloadCache();
+        void ReloadCache(TKey key);
+        void InvalidCache();
+        void InvalidCache(TKey key);
     }
 }

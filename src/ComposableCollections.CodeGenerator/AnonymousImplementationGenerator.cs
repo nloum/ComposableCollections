@@ -20,15 +20,6 @@ namespace ComposableCollections.CodeGenerator
             _settings = settings;
         }
 
-        private void TraverseTree(SyntaxNode syntaxNode, Action<SyntaxNode> visit)
-        {
-            visit(syntaxNode);
-            foreach (var child in syntaxNode.ChildNodes())
-            {
-                TraverseTree(child, visit);
-            }
-        }
-
         public ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
         {
             var interfaceDeclarations = new Dictionary<string, InterfaceDeclarationSyntax>();
@@ -38,7 +29,7 @@ namespace ComposableCollections.CodeGenerator
             
             foreach (var syntaxTree in syntaxTreesList)
             {
-                TraverseTree(syntaxTree.GetRoot(), node =>
+                Utilities.TraverseTree(syntaxTree.GetRoot(), node =>
                 {
                     if (node is InterfaceDeclarationSyntax interfaceDeclarationSyntax)
                     {
@@ -129,7 +120,7 @@ namespace ComposableCollections.CodeGenerator
                             if (!membersDelegated.Contains(member))
                             {
                                 membersDelegated.Add(member);
-                                delegateMemberService.DelegateMember(member, fieldName, groupOfMembers.Key, true, sourceCodeBuilder, usings);
+                                delegateMemberService.DelegateMember(member, fieldName, true, sourceCodeBuilder, usings);
                             }
                         }
                     }

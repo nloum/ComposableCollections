@@ -95,7 +95,7 @@ namespace ComposableCollections.CodeGenerator
                 {
                     foreach (var memberItem in member.Value)
                     {
-                        delegateMember.DelegateMember(memberItem, fieldName, member.Key, duplicateMembers.IsDuplicate(memberItem), sourceCodeBuilder, usings);
+                        delegateMember.DelegateMember(memberItem, fieldName,duplicateMembers.IsDuplicate(memberItem), sourceCodeBuilder, usings);
                     }
                 }
 

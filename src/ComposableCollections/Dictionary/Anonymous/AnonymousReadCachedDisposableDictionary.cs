@@ -15,6 +15,20 @@ _composableDictionary = composableDictionary;
 _disposable = disposable;
 _readCachedReadOnlyDictionary = readCachedReadOnlyDictionary;
 }
+System.Collections.Generic.IEqualityComparer<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Comparer => _composableDictionary.Comparer;
+TValue IComposableReadOnlyDictionary<TKey, TValue>.GetValue( TKey key) {
+return _composableDictionary.GetValue( key);
+}
+TValue IComposableReadOnlyDictionary<TKey, TValue>.this[ TKey key] => _composableDictionary[ key];
+System.Collections.Generic.IEnumerable<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Keys => _composableDictionary.Keys;
+System.Collections.Generic.IEnumerable<TValue> IComposableReadOnlyDictionary<TKey, TValue>.Values => _composableDictionary.Values;
+bool IComposableReadOnlyDictionary<TKey, TValue>.ContainsKey( TKey key) {
+return _composableDictionary.ContainsKey( key);
+}
+IMaybe<TValue> IComposableReadOnlyDictionary<TKey, TValue>.TryGetValue( TKey key) {
+return _composableDictionary.TryGetValue( key);
+}
+int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _composableDictionary.Count;
 System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
 return _composableDictionary.GetEnumerator();
 }
@@ -220,20 +234,6 @@ return _composableDictionary.TryRemove( key,  out removedItem);
 void IComposableDictionary<TKey, TValue>.Remove( TKey key,  out TValue removedItem) {
 _composableDictionary.Remove( key,  out removedItem);
 }
-int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _composableDictionary.Count;
-System.Collections.Generic.IEqualityComparer<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Comparer => _composableDictionary.Comparer;
-TValue IComposableReadOnlyDictionary<TKey, TValue>.GetValue( TKey key) {
-return _composableDictionary.GetValue( key);
-}
-TValue IComposableReadOnlyDictionary<TKey, TValue>.this[ TKey key] => _composableDictionary[ key];
-System.Collections.Generic.IEnumerable<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Keys => _composableDictionary.Keys;
-System.Collections.Generic.IEnumerable<TValue> IComposableReadOnlyDictionary<TKey, TValue>.Values => _composableDictionary.Values;
-bool IComposableReadOnlyDictionary<TKey, TValue>.ContainsKey( TKey key) {
-return _composableDictionary.ContainsKey( key);
-}
-IMaybe<TValue> IComposableReadOnlyDictionary<TKey, TValue>.TryGetValue( TKey key) {
-return _composableDictionary.TryGetValue( key);
-}
 System.Collections.IEnumerator IEnumerable.GetEnumerator() {
 return _composableDictionary.GetEnumerator();
 }
@@ -242,6 +242,15 @@ _disposable.Dispose();
 }
 void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache() {
 _readCachedReadOnlyDictionary.ReloadCache();
+}
+void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache( TKey key) {
+_readCachedReadOnlyDictionary.ReloadCache( key);
+}
+void IReadCachedReadOnlyDictionary<TKey, TValue>.InvalidCache() {
+_readCachedReadOnlyDictionary.InvalidCache();
+}
+void IReadCachedReadOnlyDictionary<TKey, TValue>.InvalidCache( TKey key) {
+_readCachedReadOnlyDictionary.InvalidCache( key);
 }
 }
 }

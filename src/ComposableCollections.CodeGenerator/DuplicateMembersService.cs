@@ -52,7 +52,7 @@ namespace ComposableCollections.CodeGenerator
             {
                 return _duplicateMethods.ContainsKey(GetMethodKey(methodSymbol));
             }
-
+ 
             return false;
         }
         

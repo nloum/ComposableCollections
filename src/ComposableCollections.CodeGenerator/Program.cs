@@ -287,6 +287,26 @@ namespace ComposableCollections.CodeGenerator
 	        {
 		        (repoRoot / "src" / "ComposableCollections" / result.Key).WriteText(result.Value);
 	        }
+	        
+	        var concurrentWriteCachedDictionaryAdapterSubClassesGeneratorSettings = new SubclassCombinationImplementationGeneratorSettings()
+	        {
+		        Namespace = "ComposableCollections.Dictionary.Adapters",
+		        BaseClass = "ConcurrentWriteCachedDictionaryAdapter",
+		        ClassNameModifiers = new List<ClassNameBuilder>
+		        {
+			        new ClassNameBuilder() { Search = "WriteCached", Replacement = "ConcurrentWriteCached" },
+			        new ClassNameBuilder() { Search = "Dictionary", Replacement = "DictionaryAdapter" },
+		        }
+	        };
+	        var concurrentWriteCachedDictionaryAdapterSubClassesGenerator = new SubclassCombinationImplementationGenerator();
+	        concurrentWriteCachedDictionaryAdapterSubClassesGenerator.Initialize(concurrentWriteCachedDictionaryAdapterSubClassesGeneratorSettings);
+	        var concurrentWriteCachedDictionarySubclasses =
+		        concurrentWriteCachedDictionaryAdapterSubClassesGenerator.Generate(syntaxTrees,
+			        syntaxTree => compilation.GetSemanticModel(syntaxTree));
+	        foreach (var result in concurrentWriteCachedDictionarySubclasses)
+	        {
+		        (repoRoot / "src" / "ComposableCollections" / "Dictionary" / "Adapters" / result.Key).WriteText(result.Value);
+	        }
         }
     }
 }

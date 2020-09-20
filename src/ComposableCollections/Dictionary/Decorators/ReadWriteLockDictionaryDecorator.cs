@@ -8,7 +8,7 @@ using UtilityDisposables;
 
 namespace ComposableCollections.Dictionary.Decorators
 {
-    public class ReadWriteLockDictionaryDecorator<TKey, TValue> : LockedDictionaryBase<TKey, TValue>
+    public class ReadWriteLockDictionaryDecorator<TKey, TValue> : LockedDictionaryBase<TKey, TValue>, IComposableDictionary<TKey, TValue>
     {
         private readonly IComposableDictionary<TKey, TValue> _source;
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();

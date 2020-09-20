@@ -12,5 +12,11 @@ namespace ComposableCollections.CodeGenerator
         [XmlArray("ClassNameModifiers")]
         [XmlArrayItem("ClassNameModifier", typeof(ClassNameBuilder))]
         public List<ClassNameBuilder> ClassNameModifiers { get; set; }
+        [XmlArray("ClassNameBlacklist")]
+        [XmlArrayItem("ClassNameBlacklist", typeof(string))]
+        public List<string> ClassNameBlacklist { get; set; } = new List<string>();
+        [XmlArray("ClassNameWhitelist")]
+        [XmlArrayItem("ClassNameWhitelist", typeof(string))]
+        public List<string> ClassNameWhitelist { get; set; } = new List<string>();
     }
 }

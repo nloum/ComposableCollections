@@ -131,7 +131,7 @@ namespace ComposableCollections.CodeGenerator
                         genericParams = $"<{genericParams}>";
                     }
                     
-                    results.Add($"{name}.cs", $"namespace {_settings.Namespace} {{\npublic interface {name}{genericParams}{baseList} {{\n}}\n}}");
+                    results.Add($"{name}.g.cs", $"namespace {_settings.Namespace} {{\npublic interface {name}{genericParams}{baseList} {{\n}}\n}}");
                 }
             }
 

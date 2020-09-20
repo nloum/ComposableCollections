@@ -130,7 +130,7 @@ namespace ComposableCollections.CodeGenerator
 
                 usings = usings.Distinct().OrderBy(x => x).ToList();
                 
-                results.Add($"{className}.cs", $"{string.Join("\n",usings)}\n{sourceCodeBuilder}");
+                results.Add($"{className}.g.cs", $"{string.Join("\n",usings)}\n{sourceCodeBuilder}");
             }
 
             return results.ToImmutableDictionary();

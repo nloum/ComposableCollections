@@ -118,6 +118,18 @@ namespace ComposableCollections.CodeGenerator
                 {
                     subClassName = Regex.Replace(subClassName, modifier.Search, modifier.Replacement);
                 }
+
+                if (_settings.ClassNameBlacklist.Any(classNameBlacklistItem =>
+                    Regex.IsMatch(subClassName, classNameBlacklistItem)))
+                {
+                    continue;
+                }
+                
+                if (!_settings.ClassNameWhitelist.All(classNameWhitelistItem =>
+                    Regex.IsMatch(subClassName, classNameWhitelistItem)))
+                {
+                    continue;
+                }
                 
                 usings.AddRange(Utilities.GetDescendantsOfType<UsingDirectiveSyntax>(subInterface.SyntaxTree.GetRoot())
                     .Select(us => $"using {us.Name};\n"));

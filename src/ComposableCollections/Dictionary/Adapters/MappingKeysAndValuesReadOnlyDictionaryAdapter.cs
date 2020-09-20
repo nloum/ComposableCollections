@@ -6,19 +6,19 @@ using ComposableCollections.Dictionary.Interfaces;
 
 namespace ComposableCollections.Dictionary.Adapters
 {
-    public class MappingKeysAndValuesReadOnlyDictionaryAdapter<TKey1, TValue1, TKey2, TValue2> : ReadOnlyDictionaryBase<TKey2, TValue2>, IComposableReadOnlyDictionary<TKey2, TValue2>
+    public class MappingKeysAndValuesReadOnlyDictionaryAdapter<TSourceKey, TSourceValue, TKey, TValue> : ReadOnlyDictionaryBase<TKey, TValue>, IComposableReadOnlyDictionary<TKey, TValue>
     {
-        private readonly IComposableReadOnlyDictionary<TKey1, TValue1> _innerValues;
-        private Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> _convertTo2;
-        private Func<TKey2, TKey1> _convertToKey1;
-        private Func<TKey1, TKey2> _convertToKey2;
+        private readonly IComposableReadOnlyDictionary<TSourceKey, TSourceValue> _innerValues;
+        private Func<TSourceKey, TSourceValue, IKeyValue<TKey, TValue>> _convertTo2;
+        private Func<TKey, TSourceKey> _convertToKey1;
+        private Func<TSourceKey, TKey> _convertToKey2;
         
-        protected MappingKeysAndValuesReadOnlyDictionaryAdapter(IComposableReadOnlyDictionary<TKey1, TValue1> innerValues)
+        protected MappingKeysAndValuesReadOnlyDictionaryAdapter(IComposableReadOnlyDictionary<TSourceKey, TSourceValue> innerValues)
         {
             _innerValues = innerValues;
         }
 
-        public MappingKeysAndValuesReadOnlyDictionaryAdapter(IComposableReadOnlyDictionary<TKey1, TValue1> innerValues, Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertTo2, Func<TKey1, TKey2> convertToKey2, Func<TKey2, TKey1> convertToKey1)
+        public MappingKeysAndValuesReadOnlyDictionaryAdapter(IComposableReadOnlyDictionary<TSourceKey, TSourceValue> innerValues, Func<TSourceKey, TSourceValue, IKeyValue<TKey, TValue>> convertTo2, Func<TSourceKey, TKey> convertToKey2, Func<TKey, TSourceKey> convertToKey1)
         {
             _innerValues = innerValues;
             _convertTo2 = convertTo2;
@@ -26,27 +26,27 @@ namespace ComposableCollections.Dictionary.Adapters
             _convertToKey2 = convertToKey2;
         }
 
-        protected virtual IKeyValue<TKey2, TValue2> Convert(TKey1 key, TValue1 value)
+        protected virtual IKeyValue<TKey, TValue> Convert(TSourceKey key, TSourceValue value)
         {
             return _convertTo2(key, value);
         }
 
-        protected virtual TKey1 ConvertToKey1(TKey2 key)
+        protected virtual TSourceKey ConvertToKey1(TKey key)
         {
             return _convertToKey1(key);
         }
 
-        protected virtual TKey2 ConvertToKey2(TKey1 key)
+        protected virtual TKey ConvertToKey2(TSourceKey key)
         {
             return _convertToKey2(key);
         }
 
-        public override bool ContainsKey(TKey2 key)
+        public override bool ContainsKey(TKey key)
         {
             return _innerValues.ContainsKey(ConvertToKey1(key));
         }
 
-        public override bool TryGetValue(TKey2 key, out TValue2 value)
+        public override bool TryGetValue(TKey key, out TValue value)
         {
             var convertedKey = ConvertToKey1(key);
             var innerValue = _innerValues.TryGetValue(convertedKey);
@@ -61,14 +61,14 @@ namespace ComposableCollections.Dictionary.Adapters
             return true;
         }
 
-        public override IEnumerator<IKeyValue<TKey2, TValue2>> GetEnumerator()
+        public override IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
             return _innerValues.Select(kvp => Convert(kvp.Key, kvp.Value)).GetEnumerator();
         }
 
         public override int Count => _innerValues.Count;
-        public override IEqualityComparer<TKey2> Comparer => EqualityComparer<TKey2>.Default;
-        public override IEnumerable<TKey2> Keys => _innerValues.Keys.Select(ConvertToKey2);
-        public override IEnumerable<TValue2> Values => _innerValues.Select(kvp => Convert(kvp.Key, kvp.Value).Value);
+        public override IEqualityComparer<TKey> Comparer => EqualityComparer<TKey>.Default;
+        public override IEnumerable<TKey> Keys => _innerValues.Keys.Select(ConvertToKey2);
+        public override IEnumerable<TValue> Values => _innerValues.Select(kvp => Convert(kvp.Key, kvp.Value).Value);
     }
 }

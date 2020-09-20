@@ -13,20 +13,20 @@ namespace ComposableCollections.Dictionary.Adapters
     /// IDictionaryEx{TKey, TValue} instance. This will lazily convert objects in the underlying innerValues.
     /// This class works whether innerValues changes underneath it or not.
     /// </summary>
-    public class MappingKeysAndValuesDictionaryAdapter<TKey1, TValue1, TKey2, TValue2> : DictionaryBase<TKey2, TValue2>, IComposableDictionary<TKey2, TValue2>
+    public class MappingKeysAndValuesDictionaryAdapter<TSourceKey, TSourceValue, TKey, TValue> : DictionaryBase<TKey, TValue>, IComposableDictionary<TKey, TValue>
     {
-        private readonly IComposableDictionary<TKey1, TValue1> _innerValues;
-        private Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> _convertTo2;
-        private Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> _convertTo1;
-        private Func<TKey2, TKey1> _convertToKey1;
-        private Func<TKey1, TKey2> _convertToKey2;
+        private readonly IComposableDictionary<TSourceKey, TSourceValue> _innerValues;
+        private Func<TSourceKey, TSourceValue, IKeyValue<TKey, TValue>> _convertTo2;
+        private Func<TKey, TValue, IKeyValue<TSourceKey, TSourceValue>> _convertTo1;
+        private Func<TKey, TSourceKey> _convertToKey1;
+        private Func<TSourceKey, TKey> _convertToKey2;
         
-        protected MappingKeysAndValuesDictionaryAdapter(IComposableDictionary<TKey1, TValue1> innerValues)
+        protected MappingKeysAndValuesDictionaryAdapter(IComposableDictionary<TSourceKey, TSourceValue> innerValues)
         {
             _innerValues = innerValues;
         }
 
-        public MappingKeysAndValuesDictionaryAdapter(IComposableDictionary<TKey1, TValue1> innerValues, Func<TKey1, TValue1, IKeyValue<TKey2, TValue2>> convertTo2, Func<TKey2, TValue2, IKeyValue<TKey1, TValue1>> convertTo1, Func<TKey1, TKey2> convertToKey2, Func<TKey2, TKey1> convertToKey1)
+        public MappingKeysAndValuesDictionaryAdapter(IComposableDictionary<TSourceKey, TSourceValue> innerValues, Func<TSourceKey, TSourceValue, IKeyValue<TKey, TValue>> convertTo2, Func<TKey, TValue, IKeyValue<TSourceKey, TSourceValue>> convertTo1, Func<TSourceKey, TKey> convertToKey2, Func<TKey, TSourceKey> convertToKey1)
         {
             _innerValues = innerValues;
             _convertTo2 = convertTo2;
@@ -35,32 +35,32 @@ namespace ComposableCollections.Dictionary.Adapters
             _convertToKey2 = convertToKey2;
         }
 
-        protected virtual IKeyValue<TKey2, TValue2> Convert(TKey1 key, TValue1 value)
+        protected virtual IKeyValue<TKey, TValue> Convert(TSourceKey key, TSourceValue value)
         {
             return _convertTo2(key, value);
         }
 
-        protected virtual IKeyValue<TKey1, TValue1> Convert(TKey2 key, TValue2 value)
+        protected virtual IKeyValue<TSourceKey, TSourceValue> Convert(TKey key, TValue value)
         {
             return _convertTo1(key, value);
         }
 
-        protected virtual TKey1 ConvertToKey1(TKey2 key)
+        protected virtual TSourceKey ConvertToKey1(TKey key)
         {
             return _convertToKey1(key);
         }
 
-        protected virtual TKey2 ConvertToKey2(TKey1 key)
+        protected virtual TKey ConvertToKey2(TSourceKey key)
         {
             return _convertToKey2(key);
         }
 
-        public override bool ContainsKey(TKey2 key)
+        public override bool ContainsKey(TKey key)
         {
             return _innerValues.ContainsKey(ConvertToKey1(key));
         }
 
-        public override bool TryGetValue(TKey2 key, out TValue2 value)
+        public override bool TryGetValue(TKey key, out TValue value)
         {
             var convertedKey = ConvertToKey1(key);
             var innerValue = _innerValues.TryGetValue(convertedKey);
@@ -75,32 +75,32 @@ namespace ComposableCollections.Dictionary.Adapters
             return true;
         }
 
-        public override IEnumerator<IKeyValue<TKey2, TValue2>> GetEnumerator()
+        public override IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
         {
-            return _innerValues.Select(kvp => Convert((TKey1) kvp.Key, kvp.Value)).GetEnumerator();
+            return _innerValues.Select(kvp => Convert((TSourceKey) kvp.Key, kvp.Value)).GetEnumerator();
         }
 
         public override int Count => _innerValues.Count;
-        public override IEqualityComparer<TKey2> Comparer => EqualityComparer<TKey2>.Default;
-        public override IEnumerable<TKey2> Keys => _innerValues.Keys.Select(ConvertToKey2);
-        public override IEnumerable<TValue2> Values => _innerValues.Select(kvp => Convert(kvp.Key, kvp.Value).Value);
+        public override IEqualityComparer<TKey> Comparer => EqualityComparer<TKey>.Default;
+        public override IEnumerable<TKey> Keys => _innerValues.Keys.Select(ConvertToKey2);
+        public override IEnumerable<TValue> Values => _innerValues.Select(kvp => Convert(kvp.Key, kvp.Value).Value);
 
-        public override void Write(IEnumerable<DictionaryWrite<TKey2, TValue2>> writes,
-            out IReadOnlyList<DictionaryWriteResult<TKey2, TValue2>> results)
+        public override void Write(IEnumerable<DictionaryWrite<TKey, TValue>> writes,
+            out IReadOnlyList<DictionaryWriteResult<TKey, TValue>> results)
         {
             _innerValues.Write(writes.Select(write =>
             {
-                Func<TValue1> valueIfAdding = () =>
+                Func<TSourceValue> valueIfAdding = () =>
                 {
                     var result = write.ValueIfAdding.Value();
                     return Convert(write.Key, result).Value;
                 };
-                Func<TValue1, TValue1> valueIfUpdating = previousValue =>
+                Func<TSourceValue, TSourceValue> valueIfUpdating = previousValue =>
                 {
                     var result = write.ValueIfAdding.Value();
                     return Convert(write.Key, result).Value;
                 };
-                return new DictionaryWrite<TKey1, TValue1>(write.Type, ConvertToKey1(write.Key),
+                return new DictionaryWrite<TSourceKey, TSourceValue>(write.Type, ConvertToKey1(write.Key),
                     valueIfAdding.ToMaybe(),
                     valueIfUpdating.ToMaybe());
             }), out var innerResults);
@@ -109,7 +109,7 @@ namespace ComposableCollections.Dictionary.Adapters
             {
                 if (innerResult.Type == DictionaryWriteType.Add || innerResult.Type == DictionaryWriteType.TryAdd)
                 {
-                    return DictionaryWriteResult<TKey2, TValue2>.CreateAdd(ConvertToKey2(innerResult.Key),
+                    return DictionaryWriteResult<TKey, TValue>.CreateAdd(ConvertToKey2(innerResult.Key),
                         innerResult.Add.Value.Added,
                         innerResult.Add.Value.ExistingValue.Select(value => Convert(innerResult.Key, value).Value),
                         innerResult.Add.Value.NewValue.Select(value => Convert(innerResult.Key, value).Value));
@@ -117,20 +117,20 @@ namespace ComposableCollections.Dictionary.Adapters
                 else if (innerResult.Type == DictionaryWriteType.Remove ||
                          innerResult.Type == DictionaryWriteType.TryRemove)
                 {
-                    return DictionaryWriteResult<TKey2, TValue2>.CreateRemove(ConvertToKey2(innerResult.Key),
+                    return DictionaryWriteResult<TKey, TValue>.CreateRemove(ConvertToKey2(innerResult.Key),
                         innerResult.Remove.Value.Select(value => Convert(innerResult.Key, value).Value));
                 }
                 else if (innerResult.Type == DictionaryWriteType.Update ||
                          innerResult.Type == DictionaryWriteType.TryUpdate)
                 {
-                    return DictionaryWriteResult<TKey2, TValue2>.CreateUpdate(ConvertToKey2(innerResult.Key),
+                    return DictionaryWriteResult<TKey, TValue>.CreateUpdate(ConvertToKey2(innerResult.Key),
                         innerResult.Update.Value.Updated,
                         innerResult.Update.Value.ExistingValue.Select(value => Convert(innerResult.Key, value).Value),
                         innerResult.Update.Value.NewValue.Select(value => Convert(innerResult.Key, value).Value));
                 }
                 else if (innerResult.Type == DictionaryWriteType.AddOrUpdate)
                 {
-                    return DictionaryWriteResult<TKey2, TValue2>.CreateAddOrUpdate(ConvertToKey2(innerResult.Key),
+                    return DictionaryWriteResult<TKey, TValue>.CreateAddOrUpdate(ConvertToKey2(innerResult.Key),
                         innerResult.AddOrUpdate.Value.Result,
                         innerResult.AddOrUpdate.Value.ExistingValue.Select(value =>
                             Convert(innerResult.Key, value).Value),

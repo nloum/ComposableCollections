@@ -137,7 +137,7 @@ namespace ComposableCollections.CodeGenerator
                     .Select(us => $"using {us.Name};\n"));
 
                 classDefinition.Add($"namespace {_settings.Namespace} {{\n");
-                classDefinition.Add($"public class {subClassName}{subInterface.TypeParameterList} : {theClass.Identifier}{theClass.TypeParameterList}, {subInterface.Identifier}{subInterface.TypeParameterList} {{\n");
+                classDefinition.Add($"public class {subClassName}{theClass.TypeParameterList} : {theClass.Identifier}{theClass.TypeParameterList}, {subInterface.Identifier}{subInterface.TypeParameterList} {{\n");
 
                 var stuffAddedForSubInterface =
                     Utilities.GetBaseInterfaces(getSemanticModel(syntaxTreeForEachInterface[subInterface]).GetDeclaredSymbol(subInterface))
@@ -149,19 +149,41 @@ namespace ComposableCollections.CodeGenerator
                         theClassSemanticModel.GetSymbolInfo(adaptedParameter.Type).Symbol as INamedTypeSymbol)
                     .Concat(stuffAddedForSubInterface).Select(x => x.ToString()).ToImmutableHashSet();
 
+                if (_settings.AllowDifferentTypeParameters)
+                {
+                    desiredAdaptedBaseInterfaces = desiredAdaptedBaseInterfaces.Select(Utilities.GetWithoutTypeArguments).ToImmutableHashSet();
+                }
+
                 InterfaceDeclarationSyntax bestAdaptedInterface = null;
 
                 foreach (var iface in interfaceDeclarations.Values)
                 {
                     var ifaceBaseInterfaces = Utilities
                         .GetBaseInterfaces(getSemanticModel(syntaxTreeForEachInterface[iface])
-                            .GetDeclaredSymbol(iface)).ToImmutableHashSet();
-                    if (desiredAdaptedBaseInterfaces.Count == ifaceBaseInterfaces.Count
-                        && ifaceBaseInterfaces.All(ifaceBaseInterface =>
-                            desiredAdaptedBaseInterfaces.Contains(ifaceBaseInterface.ToString())))
+                            .GetDeclaredSymbol(iface))
+                        .Select(x => x.ToString()).ToImmutableHashSet();
+                    
+                    if (_settings.AllowDifferentTypeParameters)
                     {
-                        bestAdaptedInterface = iface;
-                        break;
+                         ifaceBaseInterfaces = ifaceBaseInterfaces.Select(Utilities.GetWithoutTypeArguments).ToImmutableHashSet();
+                    }
+                    
+                    if (iface.Identifier == subInterface.Identifier)
+                    {
+                        int a = 3;
+                        var union = ifaceBaseInterfaces.Union(desiredAdaptedBaseInterfaces);
+                        var except1 = ifaceBaseInterfaces.Except(desiredAdaptedBaseInterfaces);
+                        var except2 = desiredAdaptedBaseInterfaces.Except(ifaceBaseInterfaces);
+                    }
+
+                    if (desiredAdaptedBaseInterfaces.Count == ifaceBaseInterfaces.Count)
+                    {
+                        if (ifaceBaseInterfaces.All(ifaceBaseInterface =>
+                            desiredAdaptedBaseInterfaces.Contains(ifaceBaseInterface)))
+                        {
+                            bestAdaptedInterface = iface;
+                            break;
+                        }
                     }
                 }
                 classDefinition.Add(

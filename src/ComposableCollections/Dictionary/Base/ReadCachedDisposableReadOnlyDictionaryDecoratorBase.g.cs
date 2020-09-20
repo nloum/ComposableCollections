@@ -10,18 +10,6 @@ private readonly IReadCachedDisposableReadOnlyDictionary<TKey, TValue> _decorate
 public ReadCachedDisposableReadOnlyDictionaryDecoratorBase(IReadCachedDisposableReadOnlyDictionary<TKey, TValue> decoratedObject) {
 _decoratedObject = decoratedObject;
 }
-void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache() {
-_decoratedObject.ReloadCache();
-}
-void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache( TKey key) {
-_decoratedObject.ReloadCache( key);
-}
-void IReadCachedReadOnlyDictionary<TKey, TValue>.InvalidCache() {
-_decoratedObject.InvalidCache();
-}
-void IReadCachedReadOnlyDictionary<TKey, TValue>.InvalidCache( TKey key) {
-_decoratedObject.InvalidCache( key);
-}
 System.Collections.Generic.IEqualityComparer<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Comparer => _decoratedObject.Comparer;
 TValue IComposableReadOnlyDictionary<TKey, TValue>.GetValue( TKey key) {
 return _decoratedObject.GetValue( key);
@@ -38,12 +26,24 @@ return _decoratedObject.TryGetValue( key);
 System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
 }
-int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _decoratedObject.Count;
-System.Collections.IEnumerator IEnumerable.GetEnumerator() {
-return _decoratedObject.GetEnumerator();
+void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache() {
+_decoratedObject.ReloadCache();
 }
+void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache( TKey key) {
+_decoratedObject.ReloadCache( key);
+}
+void IReadCachedReadOnlyDictionary<TKey, TValue>.InvalidCache() {
+_decoratedObject.InvalidCache();
+}
+void IReadCachedReadOnlyDictionary<TKey, TValue>.InvalidCache( TKey key) {
+_decoratedObject.InvalidCache( key);
+}
+int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _decoratedObject.Count;
 void IDisposable.Dispose() {
 _decoratedObject.Dispose();
+}
+System.Collections.IEnumerator IEnumerable.GetEnumerator() {
+return _decoratedObject.GetEnumerator();
 }
 }
 }

@@ -146,6 +146,17 @@ namespace ComposableCollections.CodeGenerator
             return baseClasses.Any(x => x.ToString() == baseClass.ToString());
         }
 
+        public static string GetWithoutTypeArguments(string type)
+        {
+            var idx = type.IndexOf('<');
+            if (idx >= 0)
+            {
+                return type.Substring(0, idx);
+            }
+
+            return type;
+        }
+        
         public static IReadOnlyList<INamedTypeSymbol> GetBaseClasses(INamedTypeSymbol superClass)
         {
             var baseClasses = new List<INamedTypeSymbol>();

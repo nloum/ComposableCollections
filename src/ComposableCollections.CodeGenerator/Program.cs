@@ -301,29 +301,94 @@ namespace ComposableCollections.CodeGenerator
 	        
 	        
 	        
-	        var withMappingAdapterSubClassesGeneratorSettings = new SubclassCombinationImplementationGeneratorSettings()
+	        var withMappingKeysAndValuesAdapterSubClassesGeneratorSettings = new SubclassCombinationImplementationGeneratorSettings()
 	        {
 		        Namespace = "ComposableCollections.Dictionary.Adapters",
 		        BaseClass = "MappingKeysAndValuesDictionaryAdapter",
+		        AllowDifferentTypeParameters = true,
+		        ClassNameBlacklist = new List<string>()
+		        {
+			        "WithBuiltInKey"
+		        },
 		        ClassNameModifiers = new List<ClassNameBuilder>
 		        {
 			        new ClassNameBuilder() { Search = "Dictionary", Replacement = "MappingKeysAndValuesDictionaryAdapter" },
 		        }
 	        };
-	        var withMappingAdapterAdapterSubClassesGenerator = new SubclassCombinationImplementationGenerator();
-	        withMappingAdapterAdapterSubClassesGenerator.Initialize(withMappingAdapterSubClassesGeneratorSettings);
-	        var withMappingAdapterSubclasses =
-		        withMappingAdapterAdapterSubClassesGenerator.Generate(syntaxTrees,
+	        var withMappingKeysAndValuesAdapterAdapterSubClassesGenerator = new SubclassCombinationImplementationGenerator();
+	        withMappingKeysAndValuesAdapterAdapterSubClassesGenerator.Initialize(withMappingKeysAndValuesAdapterSubClassesGeneratorSettings);
+	        var withMappingKeysAndValuesAdapterSubclasses =
+		        withMappingKeysAndValuesAdapterAdapterSubClassesGenerator.Generate(syntaxTrees,
 			        syntaxTree => compilation.GetSemanticModel(syntaxTree));
-	        foreach (var result in withMappingAdapterSubclasses)
+	        foreach (var result in withMappingKeysAndValuesAdapterSubclasses)
 	        {
 		        (repoRoot / "src" / "ComposableCollections" / "Dictionary" / "Adapters" / result.Key).WriteText(result.Value);
 	        }
 
-	        var withMappingReadOnlyAdapterSubClassesGeneratorSettings = new SubclassCombinationImplementationGeneratorSettings()
+	        var withMappingKeysAndValuesReadOnlyAdapterSubClassesGeneratorSettings = new SubclassCombinationImplementationGeneratorSettings()
+	        {
+		        Namespace = "ComposableCollections.Dictionary.Adapters",
+		        BaseClass = "MappingKeysAndValuesReadOnlyDictionaryAdapter",
+		        AllowDifferentTypeParameters = true,
+		        ClassNameBlacklist = new List<string>()
+		        {
+			        "WithBuiltInKey"
+		        },
+		        ClassNameWhitelist = new List<string>()
+		        {
+				    "ReadOnly"
+		        },
+		        ClassNameModifiers = new List<ClassNameBuilder>
+		        {
+			        new ClassNameBuilder() { Search = "Dictionary", Replacement = "MappingKeysAndValuesDictionaryAdapter" },
+		        }
+	        };
+	        var withMappingKeysAndValuesReadOnlyAdapterAdapterSubClassesGenerator = new SubclassCombinationImplementationGenerator();
+	        withMappingKeysAndValuesReadOnlyAdapterAdapterSubClassesGenerator.Initialize(withMappingKeysAndValuesReadOnlyAdapterSubClassesGeneratorSettings);
+	        var withMappingKeysAndValuesReadOnlyAdapterSubclasses =
+		        withMappingKeysAndValuesReadOnlyAdapterAdapterSubClassesGenerator.Generate(syntaxTrees,
+			        syntaxTree => compilation.GetSemanticModel(syntaxTree));
+	        foreach (var result in withMappingKeysAndValuesReadOnlyAdapterSubclasses)
+	        {
+		        (repoRoot / "src" / "ComposableCollections" / "Dictionary" / "Adapters" / result.Key).WriteText(result.Value);
+	        }
+	        
+	        
+	        
+	        
+	        var withMappingValuesAdapterSubClassesGeneratorSettings = new SubclassCombinationImplementationGeneratorSettings()
+	        {
+		        Namespace = "ComposableCollections.Dictionary.Adapters",
+		        BaseClass = "MappingValuesDictionaryAdapter",
+		        AllowDifferentTypeParameters = true,
+		        ClassNameBlacklist = new List<string>()
+		        {
+			        "WithBuiltInKey"
+		        },
+		        ClassNameModifiers = new List<ClassNameBuilder>
+		        {
+			        new ClassNameBuilder() { Search = "Dictionary", Replacement = "MappingValuesDictionaryAdapter" },
+		        }
+	        };
+	        var withMappingValuesAdapterAdapterSubClassesGenerator = new SubclassCombinationImplementationGenerator();
+	        withMappingValuesAdapterAdapterSubClassesGenerator.Initialize(withMappingValuesAdapterSubClassesGeneratorSettings);
+	        var withMappingValuesAdapterSubclasses =
+		        withMappingValuesAdapterAdapterSubClassesGenerator.Generate(syntaxTrees,
+			        syntaxTree => compilation.GetSemanticModel(syntaxTree));
+	        foreach (var result in withMappingValuesAdapterSubclasses)
+	        {
+		        (repoRoot / "src" / "ComposableCollections" / "Dictionary" / "Adapters" / result.Key).WriteText(result.Value);
+	        }
+
+	        var withMappingValuesReadOnlyAdapterSubClassesGeneratorSettings = new SubclassCombinationImplementationGeneratorSettings()
 	        {
 		        Namespace = "ComposableCollections.Dictionary.Adapters",
 		        BaseClass = "MappingValuesReadOnlyDictionaryAdapter",
+		        AllowDifferentTypeParameters = true,
+		        ClassNameBlacklist = new List<string>()
+		        {
+			        "WithBuiltInKey"
+		        },
 		        ClassNameWhitelist = new List<string>()
 		        {
 				    "ReadOnly"
@@ -333,30 +398,14 @@ namespace ComposableCollections.CodeGenerator
 			        new ClassNameBuilder() { Search = "Dictionary", Replacement = "MappingValuesDictionaryAdapter" },
 		        }
 	        };
-	        var withMappingReadOnlyAdapterAdapterSubClassesGenerator = new SubclassCombinationImplementationGenerator();
-	        withMappingReadOnlyAdapterAdapterSubClassesGenerator.Initialize(withMappingReadOnlyAdapterSubClassesGeneratorSettings);
-	        var withMappingReadOnlyAdapterSubclasses =
-		        withMappingReadOnlyAdapterAdapterSubClassesGenerator.Generate(syntaxTrees,
+	        var withMappingValuesReadOnlyAdapterAdapterSubClassesGenerator = new SubclassCombinationImplementationGenerator();
+	        withMappingValuesReadOnlyAdapterAdapterSubClassesGenerator.Initialize(withMappingValuesReadOnlyAdapterSubClassesGeneratorSettings);
+	        var withMappingValuesReadOnlyAdapterSubclasses =
+		        withMappingValuesReadOnlyAdapterAdapterSubClassesGenerator.Generate(syntaxTrees,
 			        syntaxTree => compilation.GetSemanticModel(syntaxTree));
-	        foreach (var result in withMappingReadOnlyAdapterSubclasses)
+	        foreach (var result in withMappingValuesReadOnlyAdapterSubclasses)
 	        {
 		        (repoRoot / "src" / "ComposableCollections" / "Dictionary" / "Adapters" / result.Key).WriteText(result.Value);
-	        }
-
-	        var withMappingExtensionMethodsGeneratorSettings = new ConstructorToExtensionMethodGeneratorSettings()
-	        {
-		        Namespace = "ComposableCollections",
-		        BaseClass = "ReadWriteLockDictionaryAdapter",
-		        ExtensionMethodName = "WithMapping"
-	        };
-	        var withMappingExtensionMethodsGenerator = new ConstructorToExtensionMethodGenerator();
-	        withMappingExtensionMethodsGenerator.Initialize(withMappingExtensionMethodsGeneratorSettings);
-	        var withMappingExtensionMethods =
-		        withMappingExtensionMethodsGenerator.Generate(syntaxTrees,
-			        syntaxTree => compilation.GetSemanticModel(syntaxTree));
-	        foreach (var result in withMappingExtensionMethods)
-	        {
-		        (repoRoot / "src" / "ComposableCollections" / result.Key).WriteText(result.Value);
 	        }
         }
     }

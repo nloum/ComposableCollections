@@ -18,5 +18,6 @@ namespace ComposableCollections.CodeGenerator
         [XmlArray("ClassNameWhitelist")]
         [XmlArrayItem("ClassNameWhitelist", typeof(string))]
         public List<string> ClassNameWhitelist { get; set; } = new List<string>();
+        public bool AllowDifferentTypeParameters { get; set; }
     }
 }

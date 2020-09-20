@@ -9,17 +9,17 @@ namespace ComposableCollections.Dictionary.Adapters
     /// IDictionaryEx{TKey, TValue} instance. This will lazily convert objects in the underlying innerValues.
     /// This class works whether innerValues changes underneath it or not.
     /// </summary>
-    public class MappingValuesDictionaryAdapter<TKey, TValue1, TValue2> : MappingKeysAndValuesDictionaryAdapter<TKey, TValue1, TKey, TValue2>, IComposableDictionary<TKey, TValue2>
+    public class MappingValuesDictionaryAdapter<TKey, TSourceValue, TValue> : MappingKeysAndValuesDictionaryAdapter<TKey, TSourceValue, TKey, TValue>, IComposableDictionary<TKey, TValue>
     {
-        public MappingValuesDictionaryAdapter(IComposableDictionary<TKey, TValue1> innerValues) : base(innerValues)
+        public MappingValuesDictionaryAdapter(IComposableDictionary<TKey, TSourceValue> innerValues) : base(innerValues)
         {
         }
 
-        public MappingValuesDictionaryAdapter(IComposableDictionary<TKey, TValue1> innerValues, Func<TKey, TValue1, TValue2> convertTo2, Func<TKey, TValue2, TValue1> convertTo1) : base(innerValues, (key, value) => new KeyValue<TKey, TValue2>(key, convertTo2(key, value)), (key, value) => new KeyValue<TKey, TValue1>(key, convertTo1(key, value)), null, null)
+        public MappingValuesDictionaryAdapter(IComposableDictionary<TKey, TSourceValue> innerValues, Func<TKey, TSourceValue, TValue> convertTo2, Func<TKey, TValue, TSourceValue> convertTo1) : base(innerValues, (key, value) => new KeyValue<TKey, TValue>(key, convertTo2(key, value)), (key, value) => new KeyValue<TKey, TSourceValue>(key, convertTo1(key, value)), null, null)
         {
         }
 
-        public MappingValuesDictionaryAdapter(IComposableDictionary<TKey, TValue1> innerValues, Func<TKey, TValue1, IKeyValue<TKey, TValue2>> convertTo2, Func<TKey, TValue2, IKeyValue<TKey, TValue1>> convertTo1) : base(innerValues, convertTo2, convertTo1, null, null)
+        public MappingValuesDictionaryAdapter(IComposableDictionary<TKey, TSourceValue> innerValues, Func<TKey, TSourceValue, IKeyValue<TKey, TValue>> convertTo2, Func<TKey, TValue, IKeyValue<TKey, TSourceValue>> convertTo1) : base(innerValues, convertTo2, convertTo1, null, null)
         {
         }
 

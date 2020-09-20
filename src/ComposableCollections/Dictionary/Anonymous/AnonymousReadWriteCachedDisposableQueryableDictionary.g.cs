@@ -35,10 +35,10 @@ System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValu
 return _queryableReadOnlyDictionary.GetEnumerator();
 }
 int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _queryableReadOnlyDictionary.Count;
+IQueryable<TValue> IQueryableReadOnlyDictionary<TKey, TValue>.Values => _queryableReadOnlyDictionary.Values;
 System.Collections.IEnumerator IEnumerable.GetEnumerator() {
 return _queryableReadOnlyDictionary.GetEnumerator();
 }
-IQueryable<TValue> IQueryableReadOnlyDictionary<TKey, TValue>.Values => _queryableReadOnlyDictionary.Values;
 void IDisposable.Dispose() {
 _disposable.Dispose();
 }

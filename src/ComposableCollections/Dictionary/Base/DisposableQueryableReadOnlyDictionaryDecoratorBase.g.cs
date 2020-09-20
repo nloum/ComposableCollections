@@ -28,12 +28,12 @@ System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValu
 return _decoratedObject.GetEnumerator();
 }
 int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _decoratedObject.Count;
-System.Collections.IEnumerator IEnumerable.GetEnumerator() {
-return _decoratedObject.GetEnumerator();
-}
-IQueryable<TValue> IQueryableReadOnlyDictionary<TKey, TValue>.Values => _decoratedObject.Values;
 void IDisposable.Dispose() {
 _decoratedObject.Dispose();
+}
+IQueryable<TValue> IQueryableReadOnlyDictionary<TKey, TValue>.Values => _decoratedObject.Values;
+System.Collections.IEnumerator IEnumerable.GetEnumerator() {
+return _decoratedObject.GetEnumerator();
 }
 }
 }

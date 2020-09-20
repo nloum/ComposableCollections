@@ -308,7 +308,10 @@ namespace ComposableCollections.CodeGenerator
 		        AllowDifferentTypeParameters = true,
 		        ClassNameBlacklist = new List<string>()
 		        {
-			        "WithBuiltInKey"
+			        "WithBuiltInKey",
+			        "Queryable",
+			        "ReadCached",
+			        "ReadWriteCached",
 		        },
 		        ClassNameModifiers = new List<ClassNameBuilder>
 		        {
@@ -332,7 +335,10 @@ namespace ComposableCollections.CodeGenerator
 		        AllowDifferentTypeParameters = true,
 		        ClassNameBlacklist = new List<string>()
 		        {
-			        "WithBuiltInKey"
+			        "WithBuiltInKey",
+			        "Queryable",
+			        "ReadCached",
+			        "ReadWriteCached",
 		        },
 		        ClassNameWhitelist = new List<string>()
 		        {
@@ -363,7 +369,10 @@ namespace ComposableCollections.CodeGenerator
 		        AllowDifferentTypeParameters = true,
 		        ClassNameBlacklist = new List<string>()
 		        {
-			        "WithBuiltInKey"
+			        "WithBuiltInKey",
+			        "Queryable",
+			        "ReadCached",
+			        "ReadWriteCached",
 		        },
 		        ClassNameModifiers = new List<ClassNameBuilder>
 		        {
@@ -387,7 +396,10 @@ namespace ComposableCollections.CodeGenerator
 		        AllowDifferentTypeParameters = true,
 		        ClassNameBlacklist = new List<string>()
 		        {
-			        "WithBuiltInKey"
+			        "WithBuiltInKey",
+			        "Queryable",
+			        "ReadCached",
+			        "ReadWriteCached",
 		        },
 		        ClassNameWhitelist = new List<string>()
 		        {

@@ -124,7 +124,7 @@ namespace ComposableCollections.CodeGenerator
                 {
                     continue;
                 }
-                
+                 
                 if (!_settings.ClassNameWhitelist.All(classNameWhitelistItem =>
                     Regex.IsMatch(subClassName, classNameWhitelistItem)))
                 {
@@ -137,7 +137,13 @@ namespace ComposableCollections.CodeGenerator
                     .Select(us => $"using {us.Name};\n"));
 
                 classDefinition.Add($"namespace {_settings.Namespace} {{\n");
-                classDefinition.Add($"public class {subClassName}{theClass.TypeParameterList} : {theClass.Identifier}{theClass.TypeParameterList}, {subInterface.Identifier}{subInterface.TypeParameterList} {{\n");
+                var subInterfaceTypeArgs =
+                    string.Join(", ", subInterface.TypeParameterList.Parameters.Select(p => p.Identifier));
+                if (!string.IsNullOrWhiteSpace(subInterfaceTypeArgs))
+                {
+                    subInterfaceTypeArgs = $"<{subInterfaceTypeArgs}>";
+                }
+                classDefinition.Add($"public class {subClassName}{theClass.TypeParameterList} : {theClass.Identifier}{theClass.TypeParameterList}, {subInterface.Identifier}{subInterfaceTypeArgs} {{\n");
 
                 var stuffAddedForSubInterface =
                     Utilities.GetBaseInterfaces(getSemanticModel(syntaxTreeForEachInterface[subInterface]).GetDeclaredSymbol(subInterface))
@@ -148,6 +154,12 @@ namespace ComposableCollections.CodeGenerator
                     .GetBaseInterfaces(
                         theClassSemanticModel.GetSymbolInfo(adaptedParameter.Type).Symbol as INamedTypeSymbol)
                     .Concat(stuffAddedForSubInterface).Select(x => x.ToString()).ToImmutableHashSet();
+                var adaptedParameterTypeArgs = "";
+                var tmp = adaptedParameter.Type.ToString();
+                if (tmp.Contains("<"))
+                {
+                    adaptedParameterTypeArgs = tmp.Substring(tmp.IndexOf('<'));
+                }
 
                 if (_settings.AllowDifferentTypeParameters)
                 {
@@ -187,7 +199,7 @@ namespace ComposableCollections.CodeGenerator
                     }
                 }
                 classDefinition.Add(
-                    $"private readonly {bestAdaptedInterface.Identifier}{subInterface.TypeParameterList} _adapted;\n");
+                    $"private readonly {bestAdaptedInterface.Identifier}{adaptedParameterTypeArgs} _adapted;\n");
 
                 foreach (var constructor in constructors)
                 {
@@ -195,7 +207,7 @@ namespace ComposableCollections.CodeGenerator
                     var baseConstructorArguments = new List<string>();
 
                     constructorParameters.Add(
-                        $"{bestAdaptedInterface.Identifier}{subInterface.TypeParameterList} adapted");
+                        $"{bestAdaptedInterface.Identifier}{adaptedParameterTypeArgs} adapted");
                     baseConstructorArguments.Add("adapted");
 
                     for (var i = 1; i < constructor.ParameterList.Parameters.Count; i++)

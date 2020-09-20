@@ -16,6 +16,13 @@ _queryableReadOnlyDictionary = queryableReadOnlyDictionary;
 _disposable = disposable;
 _writeCachedDictionary = writeCachedDictionary;
 }
+System.Collections.IEnumerator IEnumerable.GetEnumerator() {
+return _queryableReadOnlyDictionary.GetEnumerator();
+}
+int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _queryableReadOnlyDictionary.Count;
+System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
+return _queryableReadOnlyDictionary.GetEnumerator();
+}
 System.Collections.Generic.IEqualityComparer<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Comparer => _queryableReadOnlyDictionary.Comparer;
 TValue IComposableReadOnlyDictionary<TKey, TValue>.GetValue( TKey key) {
 return _queryableReadOnlyDictionary.GetValue( key);
@@ -29,19 +36,9 @@ return _queryableReadOnlyDictionary.ContainsKey( key);
 IMaybe<TValue> IComposableReadOnlyDictionary<TKey, TValue>.TryGetValue( TKey key) {
 return _queryableReadOnlyDictionary.TryGetValue( key);
 }
-System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
-return _queryableReadOnlyDictionary.GetEnumerator();
-}
-int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _queryableReadOnlyDictionary.Count;
 IQueryable<TValue> IQueryableReadOnlyDictionary<TKey, TValue>.Values => _queryableReadOnlyDictionary.Values;
-System.Collections.IEnumerator IEnumerable.GetEnumerator() {
-return _queryableReadOnlyDictionary.GetEnumerator();
-}
 void IDisposable.Dispose() {
 _disposable.Dispose();
-}
-void IWriteCachedDictionary<TKey, TValue>.FlushCache() {
-_writeCachedDictionary.FlushCache();
 }
 void IComposableDictionary<TKey, TValue>.SetValue( TKey key,  TValue value) {
 _writeCachedDictionary.SetValue( key,  value);
@@ -244,6 +241,9 @@ return _writeCachedDictionary.TryRemove( key,  out removedItem);
 }
 void IComposableDictionary<TKey, TValue>.Remove( TKey key,  out TValue removedItem) {
 _writeCachedDictionary.Remove( key,  out removedItem);
+}
+void IWriteCachedDictionary<TKey, TValue>.FlushCache() {
+_writeCachedDictionary.FlushCache();
 }
 }
 }

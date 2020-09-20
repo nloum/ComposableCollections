@@ -156,116 +156,116 @@ namespace ComposableCollections.CodeGenerator
 	        withDefaultValueGenerator.Initialize(withDefaultValueSettings);
 	        var withDefaultValueFiles = withDefaultValueGenerator.Generate(syntaxTrees, syntaxTree => compilation.GetSemanticModel(syntaxTree));
 
-	        var withMappingSettings = new WithMappingGeneratorSettings()
-	        {
-		        Namespace = "ComposableCollections",
-		        Class = "WithMappingExtensions",
-		        Partial = false,
-		        Interfaces = new List<string>
-		        {
-			        "ICachedDictionary",
-			        "ICachedDisposableDictionary",
-			        "ICachedDisposableQueryableDictionary",
-			        "ICachedQueryableDictionary",
-			        "IComposableDictionary",
-			        "IComposableReadOnlyDictionary",
-			        "IDisposableDictionary",
-			        "IDisposableQueryableDictionary",
-			        "IDisposableQueryableReadOnlyDictionary",
-			        "IDisposableReadOnlyDictionary",
-			        "IQueryableDictionary",
-			        "IQueryableReadOnlyDictionary"
-		        }
-	        };
-	        var withMappingGenerator = new WithMappingGenerator();
-	        withMappingGenerator.Initialize(withMappingSettings);
-	        var withMappingFiles = withMappingGenerator.Generate(syntaxTrees, syntaxTree => compilation.GetSemanticModel(syntaxTree));
-	        
-	        var withReadWriteLockSettings = new WithReadWriteLockGeneratorSettings()
-	        {
-		        Namespace = "ComposableCollections",
-		        Class = "WithReadWriteLockExtensions",
-		        Partial = false,
-		        Interfaces = new List<string>
-		        {
-			        "ICachedDictionary",
-			        "ICachedDisposableDictionary",
-			        "ICachedDisposableQueryableDictionary",
-			        "ICachedQueryableDictionary",
-			        "IComposableDictionary",
-			        "IComposableReadOnlyDictionary",
-			        "IDisposableDictionary",
-			        "IDisposableQueryableDictionary",
-			        "IDisposableQueryableReadOnlyDictionary",
-			        "IDisposableReadOnlyDictionary",
-			        "IQueryableDictionary",
-			        "IQueryableReadOnlyDictionary"
-		        }
-	        };
-	        var withReadWriteLockGenerator = new WithReadWriteLockGenerator();
-	        withReadWriteLockGenerator.Initialize(withReadWriteLockSettings);
-	        var withReadWriteLockFiles = withReadWriteLockGenerator.Generate(syntaxTrees, syntaxTree => compilation.GetSemanticModel(syntaxTree));
-
-	        var withRefreshingSettings = new WithRefreshingGeneratorSettings()
-	        {
-		        Namespace = "ComposableCollections",
-		        Class = "WithRefreshingExtensions",
-		        Partial = false,
-		        Interfaces = new List<string>
-		        {
-			        "ICachedDictionary",
-			        "ICachedDisposableDictionary",
-			        "ICachedDisposableQueryableDictionary",
-			        "ICachedQueryableDictionary",
-			        "IComposableDictionary",
-			        "IComposableReadOnlyDictionary",
-			        "IDisposableDictionary",
-			        "IDisposableQueryableDictionary",
-			        "IDisposableQueryableReadOnlyDictionary",
-			        "IDisposableReadOnlyDictionary",
-			        "IQueryableDictionary",
-			        "IQueryableReadOnlyDictionary"
-		        }
-	        };
-	        var withRefreshingGenerator = new WithRefreshingGenerator();
-	        withRefreshingGenerator.Initialize(withRefreshingSettings);
-	        var withRefreshingFiles = withRefreshingGenerator.Generate(syntaxTrees, syntaxTree => compilation.GetSemanticModel(syntaxTree));
-
-	        var withWriteCachingSettings = new WithWriteCachingGeneratorSettings()
-	        {
-		        Namespace = "ComposableCollections",
-		        Class = "WithWriteCachingExtensions",
-		        Partial = false,
-		        Interfaces = new List<string>
-		        {
-			        "ICachedDictionary",
-			        "ICachedDisposableDictionary",
-			        "ICachedDisposableQueryableDictionary",
-			        "ICachedQueryableDictionary",
-			        "IComposableDictionary",
-			        "IComposableReadOnlyDictionary",
-			        "IDisposableDictionary",
-			        "IDisposableQueryableDictionary",
-			        "IDisposableQueryableReadOnlyDictionary",
-			        "IDisposableReadOnlyDictionary",
-			        "IQueryableDictionary",
-			        "IQueryableReadOnlyDictionary"
-		        }
-	        };
-	        var withWriteCachingGenerator = new WithWriteCachingGenerator();
-	        withWriteCachingGenerator.Initialize(withWriteCachingSettings);
-	        var withWriteCachingFiles = withWriteCachingGenerator.Generate(syntaxTrees, syntaxTree => compilation.GetSemanticModel(syntaxTree));
-
-	        var withReadCachingGenerator = new ExtensionMethodVariationGenerator();
-	        withReadCachingGenerator.Initialize(new ExtensionMethodVariationGeneratorSettings()
-	        {
-		        ExtensionMethodName = "WithReadCaching"
-	        });
-	        var withReadCachingFiles = withReadCachingGenerator.Generate(syntaxTrees, syntaxTree => compilation.GetSemanticModel(syntaxTree));
-	        foreach (var result in withReadCachingFiles)
-	        {
-		        (repoRoot / "src" / "ComposableCollections" / result.Key).WriteText(result.Value);
-	        }
+	        // var withMappingSettings = new WithMappingGeneratorSettings()
+	        // {
+		       //  Namespace = "ComposableCollections",
+		       //  Class = "WithMappingExtensions",
+		       //  Partial = false,
+		       //  Interfaces = new List<string>
+		       //  {
+			      //   "ICachedDictionary",
+			      //   "ICachedDisposableDictionary",
+			      //   "ICachedDisposableQueryableDictionary",
+			      //   "ICachedQueryableDictionary",
+			      //   "IComposableDictionary",
+			      //   "IComposableReadOnlyDictionary",
+			      //   "IDisposableDictionary",
+			      //   "IDisposableQueryableDictionary",
+			      //   "IDisposableQueryableReadOnlyDictionary",
+			      //   "IDisposableReadOnlyDictionary",
+			      //   "IQueryableDictionary",
+			      //   "IQueryableReadOnlyDictionary"
+		       //  }
+	        // };
+	        // var withMappingGenerator = new WithMappingGenerator();
+	        // withMappingGenerator.Initialize(withMappingSettings);
+	        // var withMappingFiles = withMappingGenerator.Generate(syntaxTrees, syntaxTree => compilation.GetSemanticModel(syntaxTree));
+	        //
+	        // var withReadWriteLockSettings = new WithReadWriteLockGeneratorSettings()
+	        // {
+		       //  Namespace = "ComposableCollections",
+		       //  Class = "WithReadWriteLockExtensions",
+		       //  Partial = false,
+		       //  Interfaces = new List<string>
+		       //  {
+			      //   "ICachedDictionary",
+			      //   "ICachedDisposableDictionary",
+			      //   "ICachedDisposableQueryableDictionary",
+			      //   "ICachedQueryableDictionary",
+			      //   "IComposableDictionary",
+			      //   "IComposableReadOnlyDictionary",
+			      //   "IDisposableDictionary",
+			      //   "IDisposableQueryableDictionary",
+			      //   "IDisposableQueryableReadOnlyDictionary",
+			      //   "IDisposableReadOnlyDictionary",
+			      //   "IQueryableDictionary",
+			      //   "IQueryableReadOnlyDictionary"
+		       //  }
+	        // };
+	        // var withReadWriteLockGenerator = new WithReadWriteLockGenerator();
+	        // withReadWriteLockGenerator.Initialize(withReadWriteLockSettings);
+	        // var withReadWriteLockFiles = withReadWriteLockGenerator.Generate(syntaxTrees, syntaxTree => compilation.GetSemanticModel(syntaxTree));
+	        //
+	        // var withRefreshingSettings = new WithRefreshingGeneratorSettings()
+	        // {
+		       //  Namespace = "ComposableCollections",
+		       //  Class = "WithRefreshingExtensions",
+		       //  Partial = false,
+		       //  Interfaces = new List<string>
+		       //  {
+			      //   "ICachedDictionary",
+			      //   "ICachedDisposableDictionary",
+			      //   "ICachedDisposableQueryableDictionary",
+			      //   "ICachedQueryableDictionary",
+			      //   "IComposableDictionary",
+			      //   "IComposableReadOnlyDictionary",
+			      //   "IDisposableDictionary",
+			      //   "IDisposableQueryableDictionary",
+			      //   "IDisposableQueryableReadOnlyDictionary",
+			      //   "IDisposableReadOnlyDictionary",
+			      //   "IQueryableDictionary",
+			      //   "IQueryableReadOnlyDictionary"
+		       //  }
+	        // };
+	        // var withRefreshingGenerator = new WithRefreshingGenerator();
+	        // withRefreshingGenerator.Initialize(withRefreshingSettings);
+	        // var withRefreshingFiles = withRefreshingGenerator.Generate(syntaxTrees, syntaxTree => compilation.GetSemanticModel(syntaxTree));
+	        //
+	        // var withWriteCachingSettings = new WithWriteCachingGeneratorSettings()
+	        // {
+		       //  Namespace = "ComposableCollections",
+		       //  Class = "WithWriteCachingExtensions",
+		       //  Partial = false,
+		       //  Interfaces = new List<string>
+		       //  {
+			      //   "ICachedDictionary",
+			      //   "ICachedDisposableDictionary",
+			      //   "ICachedDisposableQueryableDictionary",
+			      //   "ICachedQueryableDictionary",
+			      //   "IComposableDictionary",
+			      //   "IComposableReadOnlyDictionary",
+			      //   "IDisposableDictionary",
+			      //   "IDisposableQueryableDictionary",
+			      //   "IDisposableQueryableReadOnlyDictionary",
+			      //   "IDisposableReadOnlyDictionary",
+			      //   "IQueryableDictionary",
+			      //   "IQueryableReadOnlyDictionary"
+		       //  }
+	        // };
+	        // var withWriteCachingGenerator = new WithWriteCachingGenerator();
+	        // withWriteCachingGenerator.Initialize(withWriteCachingSettings);
+	        // var withWriteCachingFiles = withWriteCachingGenerator.Generate(syntaxTrees, syntaxTree => compilation.GetSemanticModel(syntaxTree));
+	        //
+	        // var withReadCachingGenerator = new ExtensionMethodVariationGenerator();
+	        // withReadCachingGenerator.Initialize(new ExtensionMethodVariationGeneratorSettings()
+	        // {
+		       //  ExtensionMethodName = "WithReadCaching"
+	        // });
+	        // var withReadCachingFiles = withReadCachingGenerator.Generate(syntaxTrees, syntaxTree => compilation.GetSemanticModel(syntaxTree));
+	        // foreach (var result in withReadCachingFiles)
+	        // {
+		       //  (repoRoot / "src" / "ComposableCollections" / result.Key).WriteText(result.Value);
+	        // }
 	        
 	        foreach (var result in combinedInterfaces)
 	        {
@@ -282,11 +282,11 @@ namespace ComposableCollections.CodeGenerator
 		        (repoRoot / "src" / "ComposableCollections" / "Dictionary" / "Base" / result.Key).WriteText(result.Value);
 	        }
 
-	        foreach (var result in withDefaultValueFiles.Concat(withMappingFiles)
-		        .Concat(withReadWriteLockFiles).Concat(withRefreshingFiles).Concat(withWriteCachingFiles))
-	        {
-		        (repoRoot / "src" / "ComposableCollections" / result.Key).WriteText(result.Value);
-	        }
+	        // foreach (var result in withDefaultValueFiles.Concat(withMappingFiles)
+		       //  .Concat(withReadWriteLockFiles).Concat(withRefreshingFiles).Concat(withWriteCachingFiles))
+	        // {
+		       //  (repoRoot / "src" / "ComposableCollections" / result.Key).WriteText(result.Value);
+	        // }
 	        
 	        var concurrentWriteCachedDictionaryAdapterSubClassesGeneratorSettings = new SubclassCombinationImplementationGeneratorSettings()
 	        {
@@ -306,6 +306,76 @@ namespace ComposableCollections.CodeGenerator
 	        foreach (var result in concurrentWriteCachedDictionarySubclasses)
 	        {
 		        (repoRoot / "src" / "ComposableCollections" / "Dictionary" / "Adapters" / result.Key).WriteText(result.Value);
+	        }
+	        
+	        var getOrDefaultDecoratorSubClassesGeneratorSettings = new SubclassCombinationImplementationGeneratorSettings()
+	        {
+		        Namespace = "ComposableCollections.Dictionary.Decorators",
+		        BaseClass = "DictionaryGetOrDefaultDecorator",
+		        ClassNameModifiers = new List<ClassNameBuilder>
+		        {
+			        new ClassNameBuilder() { Search = "Dictionary", Replacement = "GetOrDefaultDictionaryDecorator" },
+		        }
+	        };
+	        var getOrDefaultDecoratorAdapterSubClassesGenerator = new SubclassCombinationImplementationGenerator();
+	        getOrDefaultDecoratorAdapterSubClassesGenerator.Initialize(getOrDefaultDecoratorSubClassesGeneratorSettings);
+	        var getOrDefaultDecoratorSubclasses =
+		        getOrDefaultDecoratorAdapterSubClassesGenerator.Generate(syntaxTrees,
+			        syntaxTree => compilation.GetSemanticModel(syntaxTree));
+	        foreach (var result in getOrDefaultDecoratorSubclasses)
+	        {
+		        (repoRoot / "src" / "ComposableCollections" / "Dictionary" / "Decorators" / result.Key).WriteText(result.Value);
+	        }
+	        
+	        var getOrDefaultExtensionMethodsGeneratorSettings = new ConstructorToExtensionMethodGeneratorSettings()
+	        {
+		        Namespace = "ComposableCollections",
+		        BaseClass = "DictionaryGetOrDefaultDecorator",
+		        ExtensionMethodName = "WithDefaultValue"
+	        };
+	        var getOrDefaultExtensionMethodsGenerator = new ConstructorToExtensionMethodGenerator();
+	        getOrDefaultExtensionMethodsGenerator.Initialize(getOrDefaultExtensionMethodsGeneratorSettings);
+	        var getOrDefaultExtensionMethods =
+		        getOrDefaultExtensionMethodsGenerator.Generate(syntaxTrees,
+			        syntaxTree => compilation.GetSemanticModel(syntaxTree));
+	        foreach (var result in getOrDefaultExtensionMethods)
+	        {
+		        (repoRoot / "src" / "ComposableCollections" / result.Key).WriteText(result.Value);
+	        }
+	        
+	        var getOrRefreshDecoratorSubClassesGeneratorSettings = new SubclassCombinationImplementationGeneratorSettings()
+	        {
+		        Namespace = "ComposableCollections.Dictionary.Decorators",
+		        BaseClass = "DictionaryGetOrRefreshDecorator",
+		        ClassNameModifiers = new List<ClassNameBuilder>
+		        {
+			        new ClassNameBuilder() { Search = "Dictionary", Replacement = "GetOrRefreshDictionaryDecorator" },
+		        }
+	        };
+	        var getOrRefreshDecoratorAdapterSubClassesGenerator = new SubclassCombinationImplementationGenerator();
+	        getOrRefreshDecoratorAdapterSubClassesGenerator.Initialize(getOrRefreshDecoratorSubClassesGeneratorSettings);
+	        var getOrRefreshDecoratorSubclasses =
+		        getOrRefreshDecoratorAdapterSubClassesGenerator.Generate(syntaxTrees,
+			        syntaxTree => compilation.GetSemanticModel(syntaxTree));
+	        foreach (var result in getOrRefreshDecoratorSubclasses)
+	        {
+		        (repoRoot / "src" / "ComposableCollections" / "Dictionary" / "Decorators" / result.Key).WriteText(result.Value);
+	        }
+
+	        var getOrRefreshExtensionMethodsGeneratorSettings = new ConstructorToExtensionMethodGeneratorSettings()
+	        {
+		        Namespace = "ComposableCollections",
+		        BaseClass = "DictionaryGetOrRefreshDecorator",
+		        ExtensionMethodName = "WithRefreshing"
+	        };
+	        var getOrRefreshExtensionMethodsGenerator = new ConstructorToExtensionMethodGenerator();
+	        getOrRefreshExtensionMethodsGenerator.Initialize(getOrRefreshExtensionMethodsGeneratorSettings);
+	        var getOrRefreshExtensionMethods =
+		        getOrRefreshExtensionMethodsGenerator.Generate(syntaxTrees,
+			        syntaxTree => compilation.GetSemanticModel(syntaxTree));
+	        foreach (var result in getOrRefreshExtensionMethods)
+	        {
+		        (repoRoot / "src" / "ComposableCollections" / result.Key).WriteText(result.Value);
 	        }
         }
     }

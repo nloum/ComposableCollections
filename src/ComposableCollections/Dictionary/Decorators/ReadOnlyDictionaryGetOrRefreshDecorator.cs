@@ -8,8 +8,8 @@ namespace ComposableCollections.Dictionary.Decorators
 {
     public class ReadOnlyDictionaryGetOrRefreshDecorator<TKey, TValue> : IComposableReadOnlyDictionary<TKey, TValue>
     {
-        private IComposableReadOnlyDictionary<TKey, TValue> _source;
-        private RefreshValue<TKey, TValue> _refreshValue;
+        private readonly IComposableReadOnlyDictionary<TKey, TValue> _source;
+        private readonly RefreshValue<TKey, TValue> _refreshValue;
 
         public ReadOnlyDictionaryGetOrRefreshDecorator(IComposableReadOnlyDictionary<TKey, TValue> source, RefreshValue<TKey, TValue> refreshValue)
         {
@@ -25,16 +25,6 @@ namespace ComposableCollections.Dictionary.Decorators
                 refreshedValue = refreshValue(key, value);
                 return true;
             };
-        }
-
-        protected ReadOnlyDictionaryGetOrRefreshDecorator()
-        {
-        }
-
-        protected void Initialize(IComposableReadOnlyDictionary<TKey, TValue> source, RefreshValue<TKey, TValue> getDefaultValue)
-        {
-            _source = source;
-            _refreshValue = getDefaultValue;
         }
 
         IEnumerator IEnumerable.GetEnumerator()

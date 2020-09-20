@@ -131,13 +131,7 @@ namespace ComposableCollections.CodeGenerator
                     Utilities.GetBaseInterfaces(getSemanticModel(syntaxTreeForEachInterface[subInterface]).GetDeclaredSymbol(subInterface))
                         .Except(Utilities.GetBaseInterfaces(theClassSemanticModel.GetDeclaredSymbol(theClass)));
 
-                var constructor = constructors.Single();
-                
-                var adaptedParameter = constructor.ParameterList.Parameters.First();
-
-                var constructorParameters = new List<string>();
-                var baseConstructorArguments = new List<string>();
-                 
+                var adaptedParameter = constructors.First().ParameterList.Parameters.First();
                 var desiredAdaptedBaseInterfaces = Utilities
                     .GetBaseInterfaces(
                         theClassSemanticModel.GetSymbolInfo(adaptedParameter.Type).Symbol as INamedTypeSymbol)
@@ -147,7 +141,9 @@ namespace ComposableCollections.CodeGenerator
 
                 foreach (var iface in interfaceDeclarations.Values)
                 {
-                    var ifaceBaseInterfaces = Utilities.GetBaseInterfaces(getSemanticModel(syntaxTreeForEachInterface[iface]).GetDeclaredSymbol(iface)).ToImmutableHashSet();
+                    var ifaceBaseInterfaces = Utilities
+                        .GetBaseInterfaces(getSemanticModel(syntaxTreeForEachInterface[iface])
+                            .GetDeclaredSymbol(iface)).ToImmutableHashSet();
                     if (desiredAdaptedBaseInterfaces.Count == ifaceBaseInterfaces.Count
                         && ifaceBaseInterfaces.All(ifaceBaseInterface =>
                             desiredAdaptedBaseInterfaces.Contains(ifaceBaseInterface.ToString())))
@@ -156,24 +152,32 @@ namespace ComposableCollections.CodeGenerator
                         break;
                     }
                 }
-                
-                classDefinition.Add($"private readonly {bestAdaptedInterface.Identifier}{subInterface.TypeParameterList} _adapted;\n");
-                constructorParameters.Add($"{bestAdaptedInterface.Identifier}{subInterface.TypeParameterList} adapted");
-                baseConstructorArguments.Add("adapted");
+                classDefinition.Add(
+                    $"private readonly {bestAdaptedInterface.Identifier}{subInterface.TypeParameterList} _adapted;\n");
 
-                for (var i = 1; i < constructor.ParameterList.Parameters.Count; i++)
+                foreach (var constructor in constructors)
                 {
-                    var parameter = constructor.ParameterList.Parameters[i];
-                    constructorParameters.Add($"{parameter.Type} {parameter.Identifier}");
-                    baseConstructorArguments.Add(parameter.Identifier.ToString());
+                    var constructorParameters = new List<string>();
+                    var baseConstructorArguments = new List<string>();
+
+                    constructorParameters.Add(
+                        $"{bestAdaptedInterface.Identifier}{subInterface.TypeParameterList} adapted");
+                    baseConstructorArguments.Add("adapted");
+
+                    for (var i = 1; i < constructor.ParameterList.Parameters.Count; i++)
+                    {
+                        var parameter = constructor.ParameterList.Parameters[i];
+                        constructorParameters.Add($"{parameter.Type} {parameter.Identifier}");
+                        baseConstructorArguments.Add(parameter.Identifier.ToString());
+                    }
+
+                    classDefinition.Add($"public {subClassName}(");
+                    classDefinition.Add(string.Join(", ", constructorParameters));
+                    classDefinition.Add(") : base(" + string.Join(", ", baseConstructorArguments) + ") {\n");
+                    classDefinition.Add("_adapted = adapted;");
+                    classDefinition.Add("}\n");
                 }
-                
-                classDefinition.Add($"public {subClassName}(");
-                classDefinition.Add(string.Join(", ", constructorParameters));
-                classDefinition.Add(") : base(" + string.Join(", ", baseConstructorArguments) + ") {\n");
-                classDefinition.Add("_adapted = adapted;");
-                classDefinition.Add("}\n");
-                
+
                 foreach (var member in memberDeduplicationService.GetDeduplicatedMembers(getSemanticModel(syntaxTreeForEachInterface[bestAdaptedInterface]).GetDeclaredSymbol(bestAdaptedInterface)))
                 {
                     if (member.Duplicates.All(duplicate => baseMemberImplementationProfiles.Contains(memberDeduplicationService.GetImplementationProfile(duplicate))))
@@ -181,9 +185,12 @@ namespace ComposableCollections.CodeGenerator
                         continue;
                     }
 
-                    // var implementExplicitly = member.Duplicates.Any(duplicate =>
-                    //     baseMemberExplicitImplementationProfiles.Contains(
-                    //         memberDeduplicationService.GetExplicitImplementationProfile(duplicate)));
+                    usings.AddRange(member.Duplicates.SelectMany(duplicate => duplicate.DeclaringSyntaxReferences).SelectMany(syntaxRef =>
+                    {
+                        var root = syntaxRef.SyntaxTree.GetRoot();
+                        var usingDirectives = Utilities.GetDescendantsOfType<UsingDirectiveSyntax>(root);
+                        return usingDirectives.Select(usingDirective => $"{usingDirective}\n");
+                    }));
                     
                     var sourceCodeBuilder = new StringBuilder();
                     var shouldOverride = member.Duplicates.Any(duplicate => duplicate.ContainingType.TypeKind == TypeKind.Class);
@@ -192,7 +199,7 @@ namespace ComposableCollections.CodeGenerator
                 }
 
                 classDefinition.Add("}\n}\n");
-                result[subClassName + ".g.cs"] = string.Join("", usings.Concat(classDefinition));
+                result[subClassName + ".g.cs"] = string.Join("", usings.Distinct().Concat(classDefinition));
             }
 
             return result.ToImmutableDictionary();

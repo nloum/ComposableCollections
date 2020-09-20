@@ -139,6 +139,29 @@ namespace ComposableCollections.CodeGenerator
             }
         }
         
+        public static bool IsBaseClass(INamedTypeSymbol superClass, INamedTypeSymbol baseClass)
+        {
+            var baseClasses = new List<INamedTypeSymbol>();
+            GetBaseClasses(superClass, baseClasses);
+            return baseClasses.Any(x => x.ToString() == baseClass.ToString());
+        }
+
+        public static IReadOnlyList<INamedTypeSymbol> GetBaseClasses(INamedTypeSymbol superClass)
+        {
+            var baseClasses = new List<INamedTypeSymbol>();
+            GetBaseClasses(superClass, baseClasses);
+            return baseClasses;
+        }
+        
+        private static void GetBaseClasses(INamedTypeSymbol superClass, List<INamedTypeSymbol> result)
+        {
+            result.Add(superClass);
+            if (superClass?.BaseType?.TypeKind == TypeKind.Class)
+            {
+                GetBaseClasses(superClass.BaseType, result);
+            }
+        }
+        
         public static bool IsBaseInterface(INamedTypeSymbol superInterface, INamedTypeSymbol baseInterface)
         {
             var baseInterfaces = new List<INamedTypeSymbol>();

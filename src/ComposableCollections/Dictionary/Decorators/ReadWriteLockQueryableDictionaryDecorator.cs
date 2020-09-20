@@ -12,7 +12,6 @@ namespace ComposableCollections.Dictionary.Decorators
     {
         private readonly IQueryableDictionary<TKey, TValue> _source;
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
-        private IQueryable<TValue> _values;
 
         public ReadWriteLockQueryableDictionaryDecorator(IQueryableDictionary<TKey, TValue> source) : base(source)
         {

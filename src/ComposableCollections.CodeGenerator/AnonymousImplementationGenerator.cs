@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Humanizer;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.VisualBasic.FileIO;
 using MoreCollections;
 
 namespace ComposableCollections.CodeGenerator
@@ -61,69 +63,58 @@ namespace ComposableCollections.CodeGenerator
                     $"namespace {_settings.Namespace} {{\npublic class {className}{genericParams} : {iface}{genericParams} {{");
 
                 var semanticModel = getSemanticModel(syntaxTreeForEachInterface[interfaceDeclaration]);
-                var interfacesToImplement = GetInterfacesToImplementWith(interfaceDeclaration, semanticModel);
+                var delegateMemberCandidates = new List<MemberToBeDelegated>();
+                var candidateParameters = new List<Parameter>();
+                GetInterfacesToImplementWith(semanticModel.GetDeclaredSymbol(interfaceDeclaration), candidateParameters, delegateMemberCandidates);
+                
+                var delegateMemberService = new DelegateMemberService();
+                var memberDeduplicationService = new MemberDeduplicationService();
+                var deduplicatedDelegatedMembers = memberDeduplicationService
+                    .DeduplicateMembers(delegateMemberCandidates, delegated => delegated.Member).ToImmutableList();
+                var parameters = candidateParameters.Where(candidateParameter =>
+                        deduplicatedDelegatedMembers.Any(deduplicatedDelegatedMember =>
+                            deduplicatedDelegatedMember.Value.MemberName == candidateParameter.MemberName))
+                    .ToImmutableList();
+                var getEnumerator = deduplicatedDelegatedMembers.FirstOrDefault(delegateMemberCandidate =>
+                    delegateMemberCandidate.Value.Member.Name == "GetEnumerator");
 
-                foreach (var interfaceToImplement in interfacesToImplement)
+                foreach (var baseInterface in Utilities.GetBaseInterfaces(semanticModel.GetDeclaredSymbol(interfaceDeclaration)))
                 {
-                    var baseInterfaces = Utilities.GetBaseInterfaces(interfaceToImplement);
-                    foreach (var item in baseInterfaces.SelectMany(baseInterface => baseInterface.DeclaringSyntaxReferences))
-                    {
-                        var moreUsings = Utilities.GetDescendantsOfType<UsingDirectiveSyntax>(item.SyntaxTree.GetRoot())
-                            .Select(us => $"using {us.Name};");
-                        usings.AddRange(moreUsings);
-                    }
-                    usings.Add($"using {string.Join(".", interfaceToImplement.ContainingNamespace.ConstituentNamespaces)};");
+                    usings.Add($"using {string.Join(".", baseInterface.ContainingNamespace.ConstituentNamespaces)};");
+                }
+                
+                foreach (var usingDirective in Utilities.GetBaseInterfaces(semanticModel.GetDeclaredSymbol(interfaceDeclaration))
+                    .SelectMany(symbol => symbol.DeclaringSyntaxReferences).Select(syntaxRef => syntaxRef.SyntaxTree)
+                    .SelectMany(syntaxTree => Utilities.GetDescendantsOfType<UsingDirectiveSyntax>(syntaxTree.GetRoot())))
+                {
+                    usings.Add(usingDirective.ToString());
                 }
 
-                var parameterTypesInOrder = interfacesToImplement.Select(interfaceToImplement =>
-                {
-                    if (interfaceToImplement.TypeParameters.Length == 0)
-                    {
-                        return interfaceToImplement.Name;
-                    }
-                    
-                    return $"{interfaceToImplement.Name}<{string.Join(", ", interfaceToImplement.TypeParameters)}>";
-                }).ToImmutableList();
+                var parameterString = string.Join(", ", parameters
+                    .OrderBy(parameter => parameter.DelegateType).ThenBy(parameter => parameter.ParameterName)
+                    .Select(parameter => $"{parameter.Type} {parameter.ParameterName}"));
 
-                var parameterNamesInOrder = interfacesToImplement.Select(baseType => baseType.Name)
-                    .Select(baseType => Utilities.GenerateVariableName(baseType, true)).ToImmutableList();
-                
-                var parameters = parameterTypesInOrder.Zip(parameterNamesInOrder).Select((x) =>
-                    $"{x.First} {x.Second}");
-
-                var parameterString = string.Join(", ", parameters);
-
-                var fieldDefinitions =
-                    parameterTypesInOrder.Zip(parameterNamesInOrder).Select((type) => $"private {type.First} _{type.Second};");
-                sourceCodeBuilder.AppendLine(string.Join("\n", fieldDefinitions));
+                sourceCodeBuilder.AppendLine(string.Join("\n", parameters
+                    .OrderBy(parameter => parameter.DelegateType).ThenBy(parameter => parameter.ParameterName)
+                    .Select(parameter => parameter.ToMemberDeclaration())));
                 
                 sourceCodeBuilder.AppendLine($"public {className}({parameterString}) {{");
                 
-                var fieldAssignments = parameterNamesInOrder
-                    .Select(name => $"_{name} = {name};");
-                sourceCodeBuilder.AppendLine(string.Join("\n", fieldAssignments));
+                var memberAssignments = parameters
+                    .Select(parameter => $"{parameter.MemberName} = {parameter.ParameterName};");
+                sourceCodeBuilder.AppendLine(string.Join("\n", memberAssignments));
                 sourceCodeBuilder.AppendLine("}");
-                
-                var delegateMemberService = new DelegateMemberService();
 
-                var membersDelegated = new HashSet<ISymbol>();
-                
-                foreach (var interfaceToImplement in interfacesToImplement)
+                foreach (var deduplicatedMember in deduplicatedDelegatedMembers)
                 {
-                    var fieldName = "_" + Utilities.GenerateVariableName(interfaceToImplement.Name, true);
-                    
-                    var membersGroupedByDeclaringType = Utilities.GetMembersGroupedByDeclaringType(interfaceToImplement);
-                    foreach (var groupOfMembers in membersGroupedByDeclaringType)
-                    {
-                        foreach (var member in groupOfMembers.Value)
-                        {
-                            if (!membersDelegated.Contains(member))
-                            {
-                                membersDelegated.Add(member);
-                                delegateMemberService.DelegateMember(member, fieldName, true, sourceCodeBuilder, usings);
-                            }
-                        }
-                    }
+                    delegateMemberService.DelegateMember(deduplicatedMember.Value.Member, deduplicatedMember.Value.MemberName, deduplicatedMember.Value.SetMemberName, deduplicatedMember.ImplementExplicitly, sourceCodeBuilder, usings, deduplicatedMember.Value.Type, null);
+                }
+
+                if (getEnumerator != null)
+                {
+                    sourceCodeBuilder.AppendLine("IEnumerator IEnumerable.GetEnumerator() {");
+                    sourceCodeBuilder.Append($"return {getEnumerator.Value.MemberName}.GetEnumerator();");
+                    sourceCodeBuilder.AppendLine("}");
                 }
                 
                 sourceCodeBuilder.AppendLine("}\n}\n");
@@ -136,56 +127,209 @@ namespace ComposableCollections.CodeGenerator
             return results.ToImmutableDictionary();
         }
 
-        private ImmutableList<INamedTypeSymbol> GetInterfacesToImplementWith(InterfaceDeclarationSyntax interfaceDeclaration,
-            SemanticModel semanticModel)
+        private void GetInterfacesToImplementWith(INamedTypeSymbol superInterface,
+            List<Parameter> parameters,
+            List<MemberToBeDelegated> membersToBeDelegated)
         {
-            var interfacesToImplement = interfaceDeclaration.BaseList.Types.SelectMany(baseType =>
+            if (_settings.AllowedArguments?.Any(allowedArgument => Regex.IsMatch(superInterface.Name, allowedArgument)) == true)
             {
-                var symbolInfo = semanticModel.GetSymbolInfo(baseType.Type);
-                if (symbolInfo.Symbol is INamedTypeSymbol namedTypeSymbol)
+                var type = superInterface.Name;
+                if (superInterface.TypeArguments.Length > 0)
                 {
-                    var result = new List<INamedTypeSymbol>();
-                    GetInterfacesToImplementWith(namedTypeSymbol, result);
-                    return result;
+                    type += $"<{string.Join(", ", superInterface.TypeArguments.Select(typeArgument => typeArgument.Name))}>";
+                }
+                var matchingParameter = parameters.FirstOrDefault(parameter => parameter.Type == type);
+                if (matchingParameter == null)
+                {
+                    var parameterName = Utilities.GenerateVariableName(superInterface.Name, true);
+                    matchingParameter = new Parameter(parameterName, "_" + parameterName, type, DelegateType.DelegateObject);
+                    parameters.Add(matchingParameter);
                 }
 
-                return Enumerable.Empty<INamedTypeSymbol>();
-            }).Distinct().ToImmutableList();
-
-            var interfacesToNotImplement = new List<INamedTypeSymbol>();
-
-            for (var i = 0; i < interfacesToImplement.Count; i++)
-            {
-                for (var j = 0; j < interfacesToImplement.Count; j++)
+                foreach (var member in Utilities.GetBaseInterfaces(superInterface).SelectMany(iface => iface.GetMembers()))
                 {
-                    if (i == j)
-                    {
-                        continue;
-                    }
-
-                    if (Utilities.IsBaseInterface(interfacesToImplement[i], interfacesToImplement[j]))
-                    {
-                        interfacesToNotImplement.Add(interfacesToImplement[j]);
-                    }
+                    membersToBeDelegated.Add(new MemberToBeDelegated(matchingParameter.MemberName, type, member, DelegateType.DelegateObject, ImmutableList<INamedTypeSymbol>.Empty.Add(member.ContainingType)));
                 }
-            }
-
-            interfacesToImplement = interfacesToImplement.Except(interfacesToNotImplement).ToImmutableList();
-            return interfacesToImplement;
-        }
-
-        private void GetInterfacesToImplementWith(INamedTypeSymbol superInterface, List<INamedTypeSymbol> result)
-        {
-            if (superInterface.MemberNames.Any())
-            {
-                result.Add(superInterface);
             }
             else
             {
+                foreach (var member in superInterface.GetMembers())
+                {
+                    if (member is IMethodSymbol methodSymbol)
+                    {
+                        if (member.Name.StartsWith("get_") || member.Name.StartsWith("set_"))
+                        {
+                            continue;
+                        }
+
+                        CalculateMethodDelegationDetails(parameters, membersToBeDelegated, methodSymbol);
+                    }
+                    else if (member is IPropertySymbol propertySymbol)
+                    {
+                        if (propertySymbol.IsReadOnly && _settings.CachePropertyValues)
+                        {
+                                var parameterName = propertySymbol.Name.Camelize();
+                                parameters.Add(new Parameter(parameterName, propertySymbol.Name, propertySymbol.Type.ToString(), DelegateType.AutoProperty));
+                                membersToBeDelegated.Add(new MemberToBeDelegated(null, null, propertySymbol, DelegateType.AutoProperty, ImmutableList<INamedTypeSymbol>.Empty.Add(superInterface)));
+                        }
+                        else
+                        {
+                            CalculatePropertyDelegationDetails(parameters, membersToBeDelegated, propertySymbol);
+                        }
+                    }
+                }
+
                 foreach (var baseType in superInterface.Interfaces)
                 {
-                    GetInterfacesToImplementWith(baseType, result);
+                    GetInterfacesToImplementWith(baseType, parameters, membersToBeDelegated);
                 }
+            }
+        }
+        
+        private static void CalculatePropertyDelegationDetails(List<Parameter> parameters, List<MemberToBeDelegated> membersToBeDelegated, IPropertySymbol propertySymbol)
+        {
+            if (propertySymbol.IsIndexer)
+            {
+                throw new InvalidOperationException();
+            }
+
+            Parameter getter = null, setter = null;
+            
+            if (!propertySymbol.IsWriteOnly)
+            {
+                var parameterType = $"Func<{propertySymbol.Type}>";
+                var parameterName = "get" + propertySymbol.Name;
+                getter = GetParameter(parameters, parameterType, parameterName, p => $"_{p}", DelegateType.ActionOrFunc);
+            }
+            if (!propertySymbol.IsReadOnly)
+            {
+                var parameterType = $"Action<{propertySymbol.Type}>";
+                var parameterName = "set" + propertySymbol.Name;
+                setter = GetParameter(parameters, parameterType, parameterName, p => $"_{p}", DelegateType.ActionOrFunc);
+            }
+
+            if (propertySymbol.IsReadOnly)
+            {
+                membersToBeDelegated.Add(new MemberToBeDelegated(getter.MemberName, getter.Type, propertySymbol, DelegateType.ActionOrFunc, ImmutableList<INamedTypeSymbol>.Empty.Add(propertySymbol.ContainingType)));
+            }
+            else if (propertySymbol.IsWriteOnly)
+            {
+                membersToBeDelegated.Add(new MemberToBeDelegated(null, null, setter.MemberName, setter.Type, propertySymbol, DelegateType.ActionOrFunc, ImmutableList<INamedTypeSymbol>.Empty.Add(propertySymbol.ContainingType)));
+            }
+            else
+            {
+                membersToBeDelegated.Add(new MemberToBeDelegated(getter.MemberName, getter.Type, setter.MemberName, setter.Type, propertySymbol, DelegateType.ActionOrFunc, ImmutableList<INamedTypeSymbol>.Empty.Add(propertySymbol.ContainingType)));
+            }
+        }
+
+        private static Parameter GetParameter(List<Parameter> parameters, string parameterType, string parameterName, Func<string, string> calculateMemberNameFromParameterName,
+            DelegateType delegateType)
+        {
+            var parameterIndex = -1;
+            Parameter parameter = null;
+            while (true)
+            {
+                parameterIndex++;
+                var tmpParameterName = parameterName + (parameterIndex > 0 ? parameterIndex.ToString() : "");
+
+                parameter = parameters.FirstOrDefault(parameter => parameter.ParameterName == tmpParameterName);
+                if (parameter == null || parameter.Type == parameterType)
+                {
+                    parameterName = tmpParameterName;
+                    break;
+                }
+            }
+
+            if (parameter == null)
+            {
+                parameter = new Parameter(parameterName, calculateMemberNameFromParameterName(parameterName),
+                    parameterType, DelegateType.ActionOrFunc);
+                parameters.Add(parameter);
+            }
+            
+            return parameter;
+        }
+
+        private static void CalculateMethodDelegationDetails(List<Parameter> parameters, List<MemberToBeDelegated> membersToBeDelegated, IMethodSymbol methodSymbol)
+        {
+            if (methodSymbol.ReturnsVoid)
+            {
+                var parameterTypes = string.Join(", ", methodSymbol.Parameters.Select(parameter => parameter.Type.ToString()));
+                var parameterType = methodSymbol.Parameters.Length == 0
+                    ? "Action"
+                    : $"Action<{parameterTypes}>";
+                var parameterName = methodSymbol.Name.Camelize();
+                var preExistingParameter = GetParameter(parameters, parameterType, parameterName, p => $"_{p}", DelegateType.ActionOrFunc);
+                membersToBeDelegated.Add(new MemberToBeDelegated(preExistingParameter.MemberName, parameterType, methodSymbol, DelegateType.ActionOrFunc, ImmutableList<INamedTypeSymbol>.Empty.Add(methodSymbol.ContainingType)));
+            }
+            else
+            {
+                var parameterTypes = string.Join(", ",
+                    methodSymbol.Parameters.Select(parameter => parameter.Type.ToString())
+                        .Concat(new[] {methodSymbol.ReturnType.ToString()}));
+                var parameterType = $"Func<{parameterTypes}>";
+                var parameterName = methodSymbol.Name.Camelize();
+                var preExistingParameter = GetParameter(parameters, parameterType, parameterName, p => $"_{p}", DelegateType.ActionOrFunc);
+                membersToBeDelegated.Add(new MemberToBeDelegated(preExistingParameter.MemberName, parameterType, methodSymbol, DelegateType.ActionOrFunc, ImmutableList<INamedTypeSymbol>.Empty.Add(methodSymbol.ContainingType)));
+            }
+        }
+
+        private class Parameter
+        {
+            public Parameter(string parameterName, string memberName, string type, DelegateType delegateType)
+            {
+                ParameterName = parameterName;
+                MemberName = memberName;
+                Type = type;
+                DelegateType = delegateType;
+            }
+
+            public string ParameterName { get; }
+            public string MemberName { get; }
+            public string Type { get; }
+            public DelegateType DelegateType { get; }
+
+            public string ToMemberDeclaration()
+            {
+                return $"private readonly {Type} {MemberName};";
+            }
+        }
+        
+        private class MemberToBeDelegated
+        {
+            public MemberToBeDelegated(string memberName, string fieldType, ISymbol member, DelegateType type, ImmutableList<INamedTypeSymbol> containingTypes)
+            {
+                MemberName = memberName;
+                FieldType = fieldType;
+                SetMemberName = null;
+                SetFieldType = null;
+                Member = member;
+                Type = type;
+                ContainingTypes = containingTypes;
+            }
+
+            public MemberToBeDelegated(string memberName, string fieldType, string setMemberName, string setFieldType, ISymbol member, DelegateType type, ImmutableList<INamedTypeSymbol> containingTypes)
+            {
+                MemberName = memberName;
+                FieldType = fieldType;
+                SetMemberName = setMemberName;
+                SetFieldType = setFieldType;
+                Member = member;
+                Type = type;
+                ContainingTypes = containingTypes;
+            }
+
+            public string MemberName { get; }
+            public string FieldType { get; }
+            public string SetMemberName { get; }
+            public string SetFieldType { get; }
+            public ISymbol Member { get; }
+            public DelegateType Type { get; }
+            public ImmutableList<INamedTypeSymbol> ContainingTypes { get; }
+
+            public override string ToString()
+            {
+                return $"{FieldType}.{Member.Name}";
             }
         }
     }

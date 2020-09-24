@@ -7,36 +7,37 @@ using System.Collections.Generic;
 using System.Linq;
 namespace ComposableCollections.Dictionary.Interfaces {
 public class AnonymousDisposableQueryableReadOnlyDictionary<TKey, TValue> : IDisposableQueryableReadOnlyDictionary<TKey, TValue> {
-private IQueryableReadOnlyDictionary<TKey, TValue> _queryableReadOnlyDictionary;
-private IDisposable _disposable;
-public AnonymousDisposableQueryableReadOnlyDictionary(IQueryableReadOnlyDictionary<TKey, TValue> queryableReadOnlyDictionary, IDisposable disposable) {
-_queryableReadOnlyDictionary = queryableReadOnlyDictionary;
-_disposable = disposable;
+private readonly IComposableReadOnlyDictionary<TKey, TValue> _composableReadOnlyDictionary;
+private readonly Action _dispose;
+private readonly Func<IQueryable<TValue>> _getValues;
+public AnonymousDisposableQueryableReadOnlyDictionary(IComposableReadOnlyDictionary<TKey, TValue> composableReadOnlyDictionary, Action dispose, Func<IQueryable<TValue>> getValues) {
+_getValues = getValues;
+_composableReadOnlyDictionary = composableReadOnlyDictionary;
+_dispose = dispose;
 }
-System.Collections.IEnumerator IEnumerable.GetEnumerator() {
-return _queryableReadOnlyDictionary.GetEnumerator();
+public virtual TValue this[ TKey key] => _composableReadOnlyDictionary[ key];
+IQueryable<TValue> IQueryableReadOnlyDictionary<TKey, TValue>.Values => _getValues();
+System.Collections.Generic.IEnumerable<TValue> IComposableReadOnlyDictionary<TKey, TValue>.Values => _composableReadOnlyDictionary.Values;
+public virtual System.Collections.Generic.IEqualityComparer<TKey> Comparer => _composableReadOnlyDictionary.Comparer;
+public virtual System.Collections.Generic.IEnumerable<TKey> Keys => _composableReadOnlyDictionary.Keys;
+public virtual int Count => _composableReadOnlyDictionary.Count;
+public virtual TValue GetValue( TKey key) {
+return _composableReadOnlyDictionary.GetValue( key);
 }
-int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _queryableReadOnlyDictionary.Count;
+public virtual bool ContainsKey( TKey key) {
+return _composableReadOnlyDictionary.ContainsKey( key);
+}
+public virtual IMaybe<TValue> TryGetValue( TKey key) {
+return _composableReadOnlyDictionary.TryGetValue( key);
+}
 System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
-return _queryableReadOnlyDictionary.GetEnumerator();
+return _composableReadOnlyDictionary.GetEnumerator();
 }
-System.Collections.Generic.IEqualityComparer<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Comparer => _queryableReadOnlyDictionary.Comparer;
-TValue IComposableReadOnlyDictionary<TKey, TValue>.GetValue( TKey key) {
-return _queryableReadOnlyDictionary.GetValue( key);
+public virtual void Dispose() {
+_dispose();
 }
-TValue IComposableReadOnlyDictionary<TKey, TValue>.this[ TKey key] => _queryableReadOnlyDictionary[ key];
-System.Collections.Generic.IEnumerable<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Keys => _queryableReadOnlyDictionary.Keys;
-System.Collections.Generic.IEnumerable<TValue> IComposableReadOnlyDictionary<TKey, TValue>.Values => _queryableReadOnlyDictionary.Values;
-bool IComposableReadOnlyDictionary<TKey, TValue>.ContainsKey( TKey key) {
-return _queryableReadOnlyDictionary.ContainsKey( key);
-}
-IMaybe<TValue> IComposableReadOnlyDictionary<TKey, TValue>.TryGetValue( TKey key) {
-return _queryableReadOnlyDictionary.TryGetValue( key);
-}
-IQueryable<TValue> IQueryableReadOnlyDictionary<TKey, TValue>.Values => _queryableReadOnlyDictionary.Values;
-void IDisposable.Dispose() {
-_disposable.Dispose();
-}
+IEnumerator IEnumerable.GetEnumerator() {
+return _composableReadOnlyDictionary.GetEnumerator();}
 }
 }
 

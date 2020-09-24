@@ -13,6 +13,10 @@ _decoratedObject = decoratedObject;
 void IDisposable.Dispose() {
 _decoratedObject.Dispose();
 }
+int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _decoratedObject.Count;
+System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
+return _decoratedObject.GetEnumerator();
+}
 void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache() {
 _decoratedObject.ReloadCache();
 }
@@ -26,10 +30,6 @@ void IReadCachedReadOnlyDictionary<TKey, TValue>.InvalidCache( TKey key) {
 _decoratedObject.InvalidCache( key);
 }
 System.Collections.IEnumerator IEnumerable.GetEnumerator() {
-return _decoratedObject.GetEnumerator();
-}
-int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _decoratedObject.Count;
-System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
 }
 System.Collections.Generic.IEqualityComparer<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Comparer => _decoratedObject.Comparer;

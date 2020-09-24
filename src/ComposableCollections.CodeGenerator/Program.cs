@@ -85,10 +85,19 @@ namespace ComposableCollections.CodeGenerator
 	        var anonymousImplementationGeneratorSettings = new AnonymousImplementationGeneratorSettings()
 	        {
 		        Namespace = "ComposableCollections.Dictionary.Interfaces",
+		        AllowedArguments = new List<string>()
+		        {
+			        "IComposableReadOnlyDictionary",
+			        "IComposableDictionary"
+		        },
 		        InterfacesToImplement = new List<string>()
 		        {
+			        "IDisposableDictionary",
 			        "IDisposableQueryableDictionary",
 			        "IDisposableQueryableReadOnlyDictionary",
+			        "IDisposableReadOnlyDictionary",
+			        "IQueryableDictionary",
+			        "IQueryableReadOnlyDictionary",
 			        "IReadCachedDisposableDictionary",
 			        "IReadCachedDisposableQueryableDictionary",
 			        "IReadCachedDisposableQueryableReadOnlyDictionary",
@@ -188,7 +197,7 @@ namespace ComposableCollections.CodeGenerator
 	        var getOrDefaultExtensionMethodsGeneratorSettings = new ConstructorToExtensionMethodGeneratorSettings()
 	        {
 		        Namespace = "ComposableCollections",
-		        BaseClass = "DictionaryGetOrDefaultDecorator",
+		        BaseClasses = new List<string>() { "DictionaryGetOrDefaultDecorator" },
 		        ExtensionMethodName = "WithDefaultValue"
 	        };
 	        var getOrDefaultExtensionMethodsGenerator = new ConstructorToExtensionMethodGenerator();
@@ -223,7 +232,7 @@ namespace ComposableCollections.CodeGenerator
 	        var getOrRefreshExtensionMethodsGeneratorSettings = new ConstructorToExtensionMethodGeneratorSettings()
 	        {
 		        Namespace = "ComposableCollections",
-		        BaseClass = "DictionaryGetOrRefreshDecorator",
+		        BaseClasses = new List<string>() { "DictionaryGetOrRefreshDecorator" },
 		        ExtensionMethodName = "WithRefreshing"
 	        };
 	        var getOrRefreshExtensionMethodsGenerator = new ConstructorToExtensionMethodGenerator();
@@ -284,7 +293,7 @@ namespace ComposableCollections.CodeGenerator
 	        var withReadWriteLockExtensionMethodsGeneratorSettings = new ConstructorToExtensionMethodGeneratorSettings()
 	        {
 		        Namespace = "ComposableCollections",
-		        BaseClass = "ReadWriteLockDictionaryDecorator",
+		        BaseClasses = new List<string>() { "ReadWriteLockDictionaryDecorator" },
 		        ExtensionMethodName = "WithReadWriteLock"
 	        };
 	        var withReadWriteLockExtensionMethodsGenerator = new ConstructorToExtensionMethodGenerator();
@@ -419,6 +428,29 @@ namespace ComposableCollections.CodeGenerator
 	        {
 		        (repoRoot / "src" / "ComposableCollections" / "Dictionary" / "Adapters" / result.Key).WriteText(result.Value);
 	        }
+	        
+	        var withMappingKeysAndValuesExtensionMethodsGeneratorSettings = new ConstructorToExtensionMethodGeneratorSettings()
+	        {
+		        Namespace = "ComposableCollections",
+		        BaseClasses = new List<string>()
+		        {
+			        "MappingKeysAndValuesDictionaryAdapter",
+			        "MappingKeysAndValuesReadOnlyDictionaryAdapter",
+			        "MappingValuesDictionaryAdapter",
+			        "MappingValuesReadOnlyDictionaryAdapter",
+		        },
+		        ExtensionMethodName = "WithMapping"
+	        };
+	        var withMappingKeysAndValuesExtensionMethodsGenerator = new ConstructorToExtensionMethodGenerator();
+	        withMappingKeysAndValuesExtensionMethodsGenerator.Initialize(withMappingKeysAndValuesExtensionMethodsGeneratorSettings);
+	        var withMappingKeysAndValuesExtensionMethods =
+		        withMappingKeysAndValuesExtensionMethodsGenerator.Generate(syntaxTrees,
+			        syntaxTree => compilation.GetSemanticModel(syntaxTree));
+	        foreach (var result in withMappingKeysAndValuesExtensionMethods)
+	        {
+		        (repoRoot / "src" / "ComposableCollections" / result.Key).WriteText(result.Value);
+	        }
+
         }
     }
 }

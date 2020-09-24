@@ -5,24 +5,13 @@ using SimpleMonads;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 namespace ComposableCollections.Dictionary.Interfaces {
-public class AnonymousReadWriteCachedQueryableDictionary<TKey, TValue> : IReadWriteCachedQueryableDictionary<TKey, TValue> {
+public class AnonymousDisposableDictionary<TKey, TValue> : IDisposableDictionary<TKey, TValue> {
 private readonly IComposableDictionary<TKey, TValue> _composableDictionary;
-private readonly Action _flushCache;
-private readonly Func<IQueryable<TValue>> _getValues;
-private readonly Action _invalidCache;
-private readonly Action<TKey> _invalidCache1;
-private readonly Action _reloadCache;
-private readonly Action<TKey> _reloadCache1;
-public AnonymousReadWriteCachedQueryableDictionary(IComposableDictionary<TKey, TValue> composableDictionary, Action flushCache, Func<IQueryable<TValue>> getValues, Action invalidCache, Action<TKey> invalidCache1, Action reloadCache, Action<TKey> reloadCache1) {
+private readonly Action _dispose;
+public AnonymousDisposableDictionary(IComposableDictionary<TKey, TValue> composableDictionary, Action dispose) {
 _composableDictionary = composableDictionary;
-_getValues = getValues;
-_flushCache = flushCache;
-_reloadCache = reloadCache;
-_reloadCache1 = reloadCache1;
-_invalidCache = invalidCache;
-_invalidCache1 = invalidCache1;
+_dispose = dispose;
 }
 public virtual TValue this[ TKey key] {
 get => _composableDictionary[ key];
@@ -30,8 +19,7 @@ set => _composableDictionary[ key] = value;
 }
 public virtual System.Collections.Generic.IEqualityComparer<TKey> Comparer => _composableDictionary.Comparer;
 public virtual System.Collections.Generic.IEnumerable<TKey> Keys => _composableDictionary.Keys;
-System.Collections.Generic.IEnumerable<TValue> IComposableReadOnlyDictionary<TKey, TValue>.Values => _composableDictionary.Values;
-IQueryable<TValue> IQueryableReadOnlyDictionary<TKey, TValue>.Values => _getValues();
+public virtual System.Collections.Generic.IEnumerable<TValue> Values => _composableDictionary.Values;
 public virtual int Count => _composableDictionary.Count;
 public virtual void SetValue( TKey key,  TValue value) {
 _composableDictionary.SetValue( key,  value);
@@ -243,20 +231,8 @@ return _composableDictionary.TryGetValue( key);
 System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
 return _composableDictionary.GetEnumerator();
 }
-public virtual void FlushCache() {
-_flushCache();
-}
-public virtual void ReloadCache() {
-_reloadCache();
-}
-public virtual void ReloadCache( TKey key) {
-_reloadCache1( key);
-}
-public virtual void InvalidCache() {
-_invalidCache();
-}
-public virtual void InvalidCache( TKey key) {
-_invalidCache1( key);
+public virtual void Dispose() {
+_dispose();
 }
 IEnumerator IEnumerable.GetEnumerator() {
 return _composableDictionary.GetEnumerator();}

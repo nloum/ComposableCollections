@@ -19,12 +19,6 @@ namespace ComposableCollections
 {
     public static partial class DictionaryExtensions
     {
-        public static IComposableReadOnlyDictionary<TKey, TValue> WithReadCaching<TKey, TValue>(
-            this IComposableReadOnlyDictionary<TKey, TValue> source)
-        {
-            
-        }
-        
         public static IQueryableReadOnlyDictionary<TKey, TValue> AsQueryableReadOnlyDictionary<TKey, TValue>(
             this IQueryable<TValue> queryable, Expression<Func<TValue, TKey>> getKey)
         {
@@ -34,19 +28,19 @@ namespace ComposableCollections
         #region Set to dictionary
         
         public static IDisposableQueryableDictionary<TKey, TKey> ToDictionary<TKey>(this IDisposableQueryableSet<TKey> source) {
-            return new DisposableQueryableDictionaryAdapter<TKey, TKey>(new SetToDictionaryAdapter<TKey>(source), source, source);
+            return new AnonymousDisposableQueryableDictionary<TKey, TKey>(new SetToDictionaryAdapter<TKey>(source), source.Dispose, () => source);
         }
         
         public static IDisposableQueryableReadOnlyDictionary<TKey, TKey> ToDictionary<TKey>(this IDisposableQueryableReadOnlySet<TKey> source) {
-            return new DisposableQueryableReadOnlyDictionaryAdapter<TKey, TKey>(new ReadOnlySetToReadOnlyDictionaryAdapter<TKey>(source), source, source);
+            return new AnonymousDisposableQueryableReadOnlyDictionary<TKey, TKey>(new ReadOnlySetToReadOnlyDictionaryAdapter<TKey>(source), source.Dispose, () => source);
         }
 
         public static IQueryableDictionary<TKey, TKey> ToDictionary<TKey>(this IQueryableSet<TKey> source) {
-            return new QueryableDictionaryAdapter<TKey, TKey>(new SetToDictionaryAdapter<TKey>(source), source);
+            return new AnonymousQueryableDictionary<TKey, TKey>(new SetToDictionaryAdapter<TKey>(source), () => source);
         }
         
         public static IQueryableReadOnlyDictionary<TKey, TKey> ToDictionary<TKey>(this IQueryableReadOnlySet<TKey> source) {
-            return new QueryableReadOnlyDictionaryAdapter<TKey, TKey>(new ReadOnlySetToReadOnlyDictionaryAdapter<TKey>(source), source);
+            return new AnonymousQueryableReadOnlyDictionary<TKey, TKey>(new ReadOnlySetToReadOnlyDictionaryAdapter<TKey>(source), () => source);
         }
 
         public static IComposableDictionary<TKey, TKey> ToDictionary<TKey>(this Set.IComposableSet<TKey> source) {

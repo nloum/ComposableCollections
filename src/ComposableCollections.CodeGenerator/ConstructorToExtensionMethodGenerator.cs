@@ -55,17 +55,25 @@ namespace ComposableCollections.CodeGenerator
                 });
             }
 
-            var theClass = classDeclarations[_settings.BaseClass];
-            var theClassSemanticModel = getSemanticModel(syntaxTreeForEachClass[theClass]);
-            var theClassSymbol = theClassSemanticModel.GetDeclaredSymbol(theClass);
-
-            var theClasses = classDeclarations.Where(kvp =>
+            var usings = new List<string>();
+            
+            var theClasses = _settings.BaseClasses.SelectMany(theClassName =>
             {
-                var aClassSymbol = getSemanticModel(syntaxTreeForEachClass[kvp.Value]).GetDeclaredSymbol(kvp.Value);
-                return Utilities.IsBaseClass(aClassSymbol, theClassSymbol);
+                var theClass = classDeclarations[theClassName];
+                var theClassSemanticModel = getSemanticModel(syntaxTreeForEachClass[theClass]);
+                var theClassSymbol = theClassSemanticModel.GetDeclaredSymbol(theClass);
+                
+                return classDeclarations.Where(kvp =>
+                {
+                    var syntaxTree = syntaxTreeForEachClass[kvp.Value];
+                    var usingStatementSyntaxes = Utilities.GetDescendantsOfType<UsingDirectiveSyntax>(syntaxTree.GetRoot());
+                    usings.AddRange(usingStatementSyntaxes
+                        .Select(us => us.ToString() + "\n"));
+                    var aClassSymbol = getSemanticModel(syntaxTree).GetDeclaredSymbol(kvp.Value);
+                    return Utilities.IsBaseClass(aClassSymbol, theClassSymbol);
+                });
             }).ToImmutableDictionary();
 
-            var usings = new List<string>();
             var extensionMethods = new List<string>();
             
             extensionMethods.Add($"namespace {_settings.Namespace} {{\n");
@@ -83,7 +91,7 @@ namespace ComposableCollections.CodeGenerator
                 var aClassSemanticModel = getSemanticModel(syntaxTreeForEachClass[aClass]);
                 usings.Add($"using {aClassSemanticModel.GetDeclaredSymbol(aClass).ContainingNamespace};\n");
 
-                foreach (var constructor in aClass.Members.OfType<ConstructorDeclarationSyntax>())
+                foreach (var constructor in aClass.Members.OfType<ConstructorDeclarationSyntax>().Where(constructor => constructor.Modifiers.Any(SyntaxKind.PublicKeyword)))
                 {
                     var constructorArguments = string.Join(", ",
                         constructor.ParameterList.Parameters.Select(parameter => parameter.Identifier.Text));
@@ -110,7 +118,7 @@ namespace ComposableCollections.CodeGenerator
 
             return ImmutableDictionary<string, string>.Empty
                 .Add($"{_settings.ExtensionMethodName}Extensions.g.cs",
-                    string.Join("", usings.Concat(extensionMethods)));
+                    string.Join("", usings.Distinct().OrderBy(x => x).Concat(extensionMethods)));
         }
     }
 }

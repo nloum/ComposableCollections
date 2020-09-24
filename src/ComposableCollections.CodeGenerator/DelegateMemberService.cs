@@ -7,7 +7,7 @@ namespace ComposableCollections.CodeGenerator
 {
     public class DelegateMemberService
     {
-        public void DelegateMember(ISymbol member, string delegateToField, bool explicitImplementation, StringBuilder sourceCodeBuilder, List<string> usings, bool? shouldOverride = null)
+        public void DelegateMember(ISymbol member, string delegateToField, string delegateSetterToField, bool explicitImplementation, StringBuilder sourceCodeBuilder, List<string> usings, DelegateType delegateType = DelegateType.DelegateObject, bool? shouldOverride = null)
         {
             var containingType = member.ContainingType;
             if (shouldOverride == null)
@@ -78,7 +78,14 @@ namespace ComposableCollections.CodeGenerator
                     sourceCodeBuilder.Append("return ");
                 }
 
-                sourceCodeBuilder.AppendLine($"{delegateToField}.{methodDeclaration.Name}({methodParamNames});");
+                if (delegateType == DelegateType.ActionOrFunc)
+                {
+                    sourceCodeBuilder.AppendLine($"{delegateToField}({methodParamNames});");
+                }
+                else if (delegateType == DelegateType.DelegateObject)
+                {
+                    sourceCodeBuilder.AppendLine($"{delegateToField}.{methodDeclaration.Name}({methodParamNames});");
+                }
                 sourceCodeBuilder.AppendLine("}");
             }
             else if (member.Kind == SymbolKind.Property)
@@ -156,33 +163,52 @@ namespace ComposableCollections.CodeGenerator
                                 $"public virtual {propertyDeclaration.Type} {propertyDeclaration.Name}");
                         }
                     }
-                    if (propertyDeclaration.GetMethod != null && propertyDeclaration.SetMethod == null)
+
+                    if (delegateType == DelegateType.DelegateObject)
                     {
-                        sourceCodeBuilder.AppendLine($" => {delegateToField}.{propertyDeclaration.Name};");
-                    }
-                    else
-                    {
-                        if (shouldOverride == true)
+                        if (propertyDeclaration.GetMethod != null && propertyDeclaration.SetMethod == null)
                         {
-                            sourceCodeBuilder.AppendLine(
-                                $"public override {propertyDeclaration.Type} {propertyDeclaration.Name} {{");
+                            sourceCodeBuilder.AppendLine($" => {delegateToField}.{propertyDeclaration.Name};");
                         }
                         else
                         {
-                            sourceCodeBuilder.AppendLine(
-                                $"public virtual {propertyDeclaration.Type} {propertyDeclaration.Name} {{");
-                        }
+                            sourceCodeBuilder.AppendLine("{");
 
-                        if (propertyDeclaration.GetMethod != null)
-                        {
-                            sourceCodeBuilder.AppendLine($"get => {delegateToField}.{propertyDeclaration.Name};");
-                        }
+                            if (propertyDeclaration.GetMethod != null)
+                            {
+                                sourceCodeBuilder.AppendLine($"get => {delegateToField}.{propertyDeclaration.Name};");
+                            }
 
-                        if (propertyDeclaration.SetMethod != null)
-                        {
-                            sourceCodeBuilder.AppendLine($"get => {delegateToField}.{propertyDeclaration.Name} = value;");
+                            if (propertyDeclaration.SetMethod != null)
+                            {
+                                sourceCodeBuilder.AppendLine($"get => {delegateToField}.{propertyDeclaration.Name} = value;");
+                            }
+                            
+                            sourceCodeBuilder.AppendLine("}");
                         }
-                        sourceCodeBuilder.AppendLine("}");
+                    }
+                    else if (delegateType == DelegateType.ActionOrFunc)
+                    {
+                        if (propertyDeclaration.GetMethod != null && propertyDeclaration.SetMethod == null)
+                        {
+                            sourceCodeBuilder.AppendLine($" => {delegateToField}();");
+                        }
+                        else
+                        {
+                            sourceCodeBuilder.AppendLine("{");
+
+                            if (propertyDeclaration.GetMethod != null)
+                            {
+                                sourceCodeBuilder.AppendLine($"get => {delegateToField}();");
+                            }
+
+                            if (propertyDeclaration.SetMethod != null)
+                            {
+                                sourceCodeBuilder.AppendLine($"get => {delegateSetterToField}(value);");
+                            }
+                            
+                            sourceCodeBuilder.AppendLine("}");
+                        }
                     }
                 }
             }

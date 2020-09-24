@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -8,7 +9,7 @@ namespace ComposableCollections.CodeGenerator
 {
     public class MemberDeduplicationService
     {
-        public IEnumerable<DeduplicatedMember> GetDeduplicatedMembers(params INamedTypeSymbol[] interfaces)
+        public IEnumerable<DeduplicatedMember<ISymbol>> GetDeduplicatedMembers(params INamedTypeSymbol[] interfaces)
         {
             return GetDeduplicatedMembers(interfaces.AsEnumerable());
         }
@@ -57,56 +58,66 @@ namespace ComposableCollections.CodeGenerator
             return symbol.Name;
         }
 
-        public IEnumerable<DeduplicatedMember> GetDeduplicatedMembers(IEnumerable<INamedTypeSymbol> interfaces)
+        public IEnumerable<DeduplicatedMember<ISymbol>> GetDeduplicatedMembers(IEnumerable<INamedTypeSymbol> interfaces)
         {
-            var indexers = new Dictionary<string, List<IPropertySymbol>>();
-            var properties = new Dictionary<string, List<IPropertySymbol>>();
-            var methods = new Dictionary<string, List<IMethodSymbol>>();
+            var members = interfaces
+                .SelectMany(iface => Utilities.GetBaseInterfaces(iface))
+                .SelectMany(iface => iface.GetMembers());
 
-            foreach (var iface in interfaces.SelectMany(iface => Utilities.GetBaseInterfaces(iface)))
+            return DeduplicateMembers(members, x => x);
+        }
+
+        public IEnumerable<DeduplicatedMember<T>> DeduplicateMembers<T>(IEnumerable<T> members, Func<T, ISymbol> symbol)
+        {
+            var indexers = new Dictionary<string, List<Tuple<T, IPropertySymbol>>>();
+            var properties = new Dictionary<string, List<Tuple<T, IPropertySymbol>>>();
+            var methods = new Dictionary<string, List<Tuple<T, IMethodSymbol>>>();
+
+            foreach (var member in members)
             {
-                foreach (var member in iface.GetMembers())
+                var memberSymbol = symbol(member);
+                var key = GetExplicitImplementationProfile(memberSymbol);
+                if (memberSymbol is IPropertySymbol propertySymbol)
                 {
-                    var key = GetExplicitImplementationProfile(member);
-                    if (member is IPropertySymbol propertySymbol)
+                    if (propertySymbol.IsIndexer)
                     {
-                        if (propertySymbol.IsIndexer)
+                        if (!indexers.ContainsKey(key))
                         {
-                            if (!indexers.ContainsKey(key))
-                            {
-                                indexers[key] = new List<IPropertySymbol>();
-                            }
-                            indexers[key].Add(propertySymbol);
+                            indexers[key] = new List<Tuple<T, IPropertySymbol>>();
                         }
-                        else
-                        {
-                            if (!properties.ContainsKey(key))
-                            {
-                                properties[key] = new List<IPropertySymbol>();
-                            }
-                            properties[key].Add(propertySymbol);
-                        }
+
+                        indexers[key].Add(Tuple.Create(member, propertySymbol));
                     }
-                    else if (member is IMethodSymbol methodSymbol)
+                    else
                     {
-                        if (!methods.ContainsKey(key))
+                        if (!properties.ContainsKey(key))
                         {
-                            methods[key] = new List<IMethodSymbol>();
+                            properties[key] = new List<Tuple<T, IPropertySymbol>>();
                         }
-                        methods[key].Add(methodSymbol);
+
+                        properties[key].Add(Tuple.Create(member, propertySymbol));
                     }
+                }
+                else if (memberSymbol is IMethodSymbol methodSymbol)
+                {
+                    if (!methods.ContainsKey(key))
+                    {
+                        methods[key] = new List<Tuple<T, IMethodSymbol>>();
+                    }
+
+                    methods[key].Add(Tuple.Create(member, methodSymbol));
                 }
             }
 
-            var results = new List<DeduplicatedMember>();
-            
+            var results = new List<DeduplicatedMember<T>>();
+
             foreach (var kvp in indexers)
             {
                 var indexerGroup = kvp.Value;
-                IPropertySymbol readWriteSymbol = null;
+                Tuple<T, IPropertySymbol> readWriteSymbol = null;
                 foreach (var indexer in indexerGroup)
                 {
-                    if (!indexer.IsReadOnly)
+                    if (!indexer.Item2.IsReadOnly)
                     {
                         readWriteSymbol = indexer;
                     }
@@ -114,11 +125,11 @@ namespace ComposableCollections.CodeGenerator
 
                 if (readWriteSymbol != null)
                 {
-                    results.Add(new DeduplicatedMember(kvp.Key, readWriteSymbol, false, indexerGroup));
+                    results.Add(new DeduplicatedMember<T>(kvp.Key, readWriteSymbol.Item1, false, indexerGroup.Select(kvp => kvp.Item1)));
                 }
                 else
                 {
-                    results.Add(new DeduplicatedMember(kvp.Key, kvp.Value.First(), false, indexerGroup));
+                    results.Add(new DeduplicatedMember<T>(kvp.Key, kvp.Value.First().Item1, false, indexerGroup.Select(kvp => kvp.Item1)));
                 }
             }
 
@@ -127,18 +138,21 @@ namespace ComposableCollections.CodeGenerator
                 var propertyGroup = kvp.Value;
                 if (propertyGroup.Count == 1)
                 {
-                    results.Add(new DeduplicatedMember(kvp.Key, propertyGroup.First(), false, propertyGroup));
+                    results.Add(new DeduplicatedMember<T>(kvp.Key, propertyGroup.First().Item1, false, propertyGroup.Select(tuple => tuple.Item1)));
                 }
                 else
                 {
-                    var propertiesGroupedByType = propertyGroup.GroupBy(property => property.Type).Select(group => new { group.Key, Values = group.ToImmutableList() }).ToImmutableList();
+                    var propertiesGroupedByType = propertyGroup.GroupBy(property => property.Item2.Type)
+                        .Select(group => new {@group.Key, Values = @group.ToImmutableList()}).ToImmutableList();
                     if (propertiesGroupedByType.Count == 1)
                     {
-                        results.Add(new DeduplicatedMember(kvp.Key, propertiesGroupedByType[0].Values[0], false, propertyGroup));
+                        results.Add(new DeduplicatedMember<T>(kvp.Key, propertiesGroupedByType[0].Values[0].Item1, false,
+                            propertyGroup.Select(tuple => tuple.Item1)));
                     }
                     else
                     {
-                        results.AddRange(propertiesGroupedByType.Select(property => new DeduplicatedMember(kvp.Key, property.Values.First(), true, propertyGroup)));
+                        results.AddRange(propertiesGroupedByType.Select(property =>
+                            new DeduplicatedMember<T>(kvp.Key, property.Values.First().Item1, true, propertyGroup.Select(tuple => tuple.Item1))));
                     }
                 }
             }
@@ -148,18 +162,21 @@ namespace ComposableCollections.CodeGenerator
                 var methodGroup = kvp.Value;
                 if (methodGroup.Count == 1)
                 {
-                    results.Add(new DeduplicatedMember(kvp.Key, methodGroup.First(), false, methodGroup));
+                    results.Add(new DeduplicatedMember<T>(kvp.Key, methodGroup.First().Item1, false, methodGroup.Select(tuple => tuple.Item1)));
                 }
                 else
                 {
-                    var propertiesGroupedByType = methodGroup.GroupBy(property => property.ReturnType).Select(group => new { group.Key, Values = group.ToImmutableList() }).ToImmutableList();
+                    var propertiesGroupedByType = methodGroup.GroupBy(property => property.Item2.ReturnType)
+                        .Select(group => new {@group.Key, Values = @group.ToImmutableList()}).ToImmutableList();
                     if (propertiesGroupedByType.Count == 1)
                     {
-                        results.Add(new DeduplicatedMember(kvp.Key, propertiesGroupedByType[0].Values[0], false, methodGroup));
+                        results.Add(new DeduplicatedMember<T>(kvp.Key, propertiesGroupedByType[0].Values[0].Item1, false, methodGroup.Select(tuple => tuple.Item1)));
                     }
                     else
                     {
-                        results.AddRange(methodGroup.Select(method => new DeduplicatedMember(kvp.Key, method, true, methodGroup)));
+                        results.AddRange(methodGroup
+                            .GroupBy(methodSymbol => this.GetExplicitImplementationProfile(methodSymbol.Item2))
+                            .Select(method => new DeduplicatedMember<T>(kvp.Key, method.First().Item1, true, methodGroup.Select(tuple => tuple.Item1))));
                     }
                 }
             }

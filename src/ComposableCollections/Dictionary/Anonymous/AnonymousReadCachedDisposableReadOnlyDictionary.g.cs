@@ -6,47 +6,54 @@ using System.Collections;
 using System.Collections.Generic;
 namespace ComposableCollections.Dictionary.Interfaces {
 public class AnonymousReadCachedDisposableReadOnlyDictionary<TKey, TValue> : IReadCachedDisposableReadOnlyDictionary<TKey, TValue> {
-private IDisposable _disposable;
-private IReadCachedReadOnlyDictionary<TKey, TValue> _readCachedReadOnlyDictionary;
-public AnonymousReadCachedDisposableReadOnlyDictionary(IDisposable disposable, IReadCachedReadOnlyDictionary<TKey, TValue> readCachedReadOnlyDictionary) {
-_disposable = disposable;
-_readCachedReadOnlyDictionary = readCachedReadOnlyDictionary;
+private readonly IComposableReadOnlyDictionary<TKey, TValue> _composableReadOnlyDictionary;
+private readonly Action _dispose;
+private readonly Action _invalidCache;
+private readonly Action<TKey> _invalidCache1;
+private readonly Action _reloadCache;
+private readonly Action<TKey> _reloadCache1;
+public AnonymousReadCachedDisposableReadOnlyDictionary(IComposableReadOnlyDictionary<TKey, TValue> composableReadOnlyDictionary, Action dispose, Action invalidCache, Action<TKey> invalidCache1, Action reloadCache, Action<TKey> reloadCache1) {
+_composableReadOnlyDictionary = composableReadOnlyDictionary;
+_dispose = dispose;
+_reloadCache = reloadCache;
+_reloadCache1 = reloadCache1;
+_invalidCache = invalidCache;
+_invalidCache1 = invalidCache1;
 }
-void IDisposable.Dispose() {
-_disposable.Dispose();
+public virtual TValue this[ TKey key] => _composableReadOnlyDictionary[ key];
+public virtual System.Collections.Generic.IEqualityComparer<TKey> Comparer => _composableReadOnlyDictionary.Comparer;
+public virtual System.Collections.Generic.IEnumerable<TKey> Keys => _composableReadOnlyDictionary.Keys;
+public virtual System.Collections.Generic.IEnumerable<TValue> Values => _composableReadOnlyDictionary.Values;
+public virtual int Count => _composableReadOnlyDictionary.Count;
+public virtual TValue GetValue( TKey key) {
+return _composableReadOnlyDictionary.GetValue( key);
 }
-void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache() {
-_readCachedReadOnlyDictionary.ReloadCache();
+public virtual bool ContainsKey( TKey key) {
+return _composableReadOnlyDictionary.ContainsKey( key);
 }
-void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache( TKey key) {
-_readCachedReadOnlyDictionary.ReloadCache( key);
+public virtual IMaybe<TValue> TryGetValue( TKey key) {
+return _composableReadOnlyDictionary.TryGetValue( key);
 }
-void IReadCachedReadOnlyDictionary<TKey, TValue>.InvalidCache() {
-_readCachedReadOnlyDictionary.InvalidCache();
-}
-void IReadCachedReadOnlyDictionary<TKey, TValue>.InvalidCache( TKey key) {
-_readCachedReadOnlyDictionary.InvalidCache( key);
-}
-System.Collections.IEnumerator IEnumerable.GetEnumerator() {
-return _readCachedReadOnlyDictionary.GetEnumerator();
-}
-int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _readCachedReadOnlyDictionary.Count;
 System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
-return _readCachedReadOnlyDictionary.GetEnumerator();
+return _composableReadOnlyDictionary.GetEnumerator();
 }
-System.Collections.Generic.IEqualityComparer<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Comparer => _readCachedReadOnlyDictionary.Comparer;
-TValue IComposableReadOnlyDictionary<TKey, TValue>.GetValue( TKey key) {
-return _readCachedReadOnlyDictionary.GetValue( key);
+public virtual void Dispose() {
+_dispose();
 }
-TValue IComposableReadOnlyDictionary<TKey, TValue>.this[ TKey key] => _readCachedReadOnlyDictionary[ key];
-System.Collections.Generic.IEnumerable<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Keys => _readCachedReadOnlyDictionary.Keys;
-System.Collections.Generic.IEnumerable<TValue> IComposableReadOnlyDictionary<TKey, TValue>.Values => _readCachedReadOnlyDictionary.Values;
-bool IComposableReadOnlyDictionary<TKey, TValue>.ContainsKey( TKey key) {
-return _readCachedReadOnlyDictionary.ContainsKey( key);
+public virtual void ReloadCache() {
+_reloadCache();
 }
-IMaybe<TValue> IComposableReadOnlyDictionary<TKey, TValue>.TryGetValue( TKey key) {
-return _readCachedReadOnlyDictionary.TryGetValue( key);
+public virtual void ReloadCache( TKey key) {
+_reloadCache1( key);
 }
+public virtual void InvalidCache() {
+_invalidCache();
+}
+public virtual void InvalidCache( TKey key) {
+_invalidCache1( key);
+}
+IEnumerator IEnumerable.GetEnumerator() {
+return _composableReadOnlyDictionary.GetEnumerator();}
 }
 }
 

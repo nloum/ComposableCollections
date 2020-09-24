@@ -240,7 +240,7 @@ namespace ComposableCollections.CodeGenerator
                     
                     var sourceCodeBuilder = new StringBuilder();
                     var shouldOverride = member.Duplicates.Any(duplicate => duplicate.ContainingType.TypeKind == TypeKind.Class);
-                    delegateMemberService.DelegateMember(member.Symbol, "_adapted", member.ImplementExplicitly, sourceCodeBuilder, usings, shouldOverride);
+                    delegateMemberService.DelegateMember(member.Value, "_adapted", null, member.ImplementExplicitly, sourceCodeBuilder, usings, DelegateType.DelegateObject, shouldOverride);
                     classDefinition.Add(sourceCodeBuilder + "\n");
                 }
 

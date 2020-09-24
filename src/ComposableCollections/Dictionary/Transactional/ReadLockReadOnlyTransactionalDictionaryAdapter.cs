@@ -1,6 +1,5 @@
 using System.Threading;
 using ComposableCollections.Common;
-using ComposableCollections.Dictionary.Adapters;
 using ComposableCollections.Dictionary.Interfaces;
 using UtilityDisposables;
 
@@ -19,7 +18,7 @@ namespace ComposableCollections.Dictionary.Transactional
         public IDisposableReadOnlyDictionary<TKey, TValue> CreateReader()
         {
             _lock.EnterReadLock();
-            return new DisposableReadOnlyDictionaryAdapter<TKey, TValue>(_source, new AnonymousDisposable(() => _lock.ExitReadLock()));
+            return new AnonymousDisposableReadOnlyDictionary<TKey, TValue>(_source, () => _lock.ExitReadLock());
         }
     }
 }

@@ -7,254 +7,260 @@ using System.Collections;
 using System.Collections.Generic;
 namespace ComposableCollections.Dictionary.Interfaces {
 public class AnonymousReadWriteCachedDisposableDictionary<TKey, TValue> : IReadWriteCachedDisposableDictionary<TKey, TValue> {
-private IDisposable _disposable;
-private IWriteCachedDictionary<TKey, TValue> _writeCachedDictionary;
-private IReadCachedReadOnlyDictionary<TKey, TValue> _readCachedReadOnlyDictionary;
-public AnonymousReadWriteCachedDisposableDictionary(IDisposable disposable, IWriteCachedDictionary<TKey, TValue> writeCachedDictionary, IReadCachedReadOnlyDictionary<TKey, TValue> readCachedReadOnlyDictionary) {
-_disposable = disposable;
-_writeCachedDictionary = writeCachedDictionary;
-_readCachedReadOnlyDictionary = readCachedReadOnlyDictionary;
+private readonly IComposableDictionary<TKey, TValue> _composableDictionary;
+private readonly Action _dispose;
+private readonly Action _flushCache;
+private readonly Action _invalidCache;
+private readonly Action<TKey> _invalidCache1;
+private readonly Action _reloadCache;
+private readonly Action<TKey> _reloadCache1;
+public AnonymousReadWriteCachedDisposableDictionary(IComposableDictionary<TKey, TValue> composableDictionary, Action dispose, Action flushCache, Action invalidCache, Action<TKey> invalidCache1, Action reloadCache, Action<TKey> reloadCache1) {
+_composableDictionary = composableDictionary;
+_dispose = dispose;
+_flushCache = flushCache;
+_reloadCache = reloadCache;
+_reloadCache1 = reloadCache1;
+_invalidCache = invalidCache;
+_invalidCache1 = invalidCache1;
 }
-void IDisposable.Dispose() {
-_disposable.Dispose();
+public virtual TValue this[ TKey key] {
+get => _composableDictionary[ key];
+set => _composableDictionary[ key] = value;
 }
-void IComposableDictionary<TKey, TValue>.SetValue( TKey key,  TValue value) {
-_writeCachedDictionary.SetValue( key,  value);
+public virtual System.Collections.Generic.IEqualityComparer<TKey> Comparer => _composableDictionary.Comparer;
+public virtual System.Collections.Generic.IEnumerable<TKey> Keys => _composableDictionary.Keys;
+public virtual System.Collections.Generic.IEnumerable<TValue> Values => _composableDictionary.Values;
+public virtual int Count => _composableDictionary.Count;
+public virtual void SetValue( TKey key,  TValue value) {
+_composableDictionary.SetValue( key,  value);
 }
-bool IComposableDictionary<TKey, TValue>.TryGetValue( TKey key,  out TValue value) {
-return _writeCachedDictionary.TryGetValue( key,  out value);
+public virtual bool TryGetValue( TKey key,  out TValue value) {
+return _composableDictionary.TryGetValue( key,  out value);
 }
-TValue IComposableDictionary<TKey, TValue>.this[ TKey key] {
-get => _writeCachedDictionary[ key];
-set => _writeCachedDictionary[ key] = value;
+public virtual void Write( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.Write.DictionaryWrite<TKey, TValue>> writes,  out System.Collections.Generic.IReadOnlyList<ComposableCollections.Dictionary.Write.DictionaryWriteResult<TKey, TValue>> results) {
+_composableDictionary.Write( writes,  out results);
 }
-void IComposableDictionary<TKey, TValue>.Write( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.Write.DictionaryWrite<TKey, TValue>> writes,  out System.Collections.Generic.IReadOnlyList<ComposableCollections.Dictionary.Write.DictionaryWriteResult<TKey, TValue>> results) {
-_writeCachedDictionary.Write( writes,  out results);
+public virtual bool TryAdd( TKey key,  TValue value) {
+return _composableDictionary.TryAdd( key,  value);
 }
-bool IComposableDictionary<TKey, TValue>.TryAdd( TKey key,  TValue value) {
-return _writeCachedDictionary.TryAdd( key,  value);
+public virtual bool TryAdd( TKey key,  System.Func<TValue> value) {
+return _composableDictionary.TryAdd( key,  value);
 }
-bool IComposableDictionary<TKey, TValue>.TryAdd( TKey key,  System.Func<TValue> value) {
-return _writeCachedDictionary.TryAdd( key,  value);
+public virtual bool TryAdd( TKey key,  System.Func<TValue> value,  out TValue existingValue,  out TValue newValue) {
+return _composableDictionary.TryAdd( key,  value,  out existingValue,  out newValue);
 }
-bool IComposableDictionary<TKey, TValue>.TryAdd( TKey key,  System.Func<TValue> value,  out TValue existingValue,  out TValue newValue) {
-return _writeCachedDictionary.TryAdd( key,  value,  out existingValue,  out newValue);
+public virtual void TryAddRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemAddAttempt<TValue>> results) {
+_composableDictionary.TryAddRange( newItems,  out results);
 }
-void IComposableDictionary<TKey, TValue>.TryAddRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemAddAttempt<TValue>> results) {
-_writeCachedDictionary.TryAddRange( newItems,  out results);
+public virtual void TryAddRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemAddAttempt<TValue>> results) {
+_composableDictionary.TryAddRange( newItems,  out results);
 }
-void IComposableDictionary<TKey, TValue>.TryAddRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemAddAttempt<TValue>> results) {
-_writeCachedDictionary.TryAddRange( newItems,  out results);
+public virtual void TryAddRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemAddAttempt<TValue>> results) {
+_composableDictionary.TryAddRange( newItems,  key,  value,  out results);
 }
-void IComposableDictionary<TKey, TValue>.TryAddRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemAddAttempt<TValue>> results) {
-_writeCachedDictionary.TryAddRange( newItems,  key,  value,  out results);
+public virtual void TryAddRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems) {
+_composableDictionary.TryAddRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.TryAddRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems) {
-_writeCachedDictionary.TryAddRange( newItems);
+public virtual void TryAddRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems) {
+_composableDictionary.TryAddRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.TryAddRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems) {
-_writeCachedDictionary.TryAddRange( newItems);
+public virtual void TryAddRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value) {
+_composableDictionary.TryAddRange( newItems,  key,  value);
 }
-void IComposableDictionary<TKey, TValue>.TryAddRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value) {
-_writeCachedDictionary.TryAddRange( newItems,  key,  value);
+public virtual void TryAddRange( ComposableCollections.Dictionary.IKeyValue<TKey, TValue>[] newItems) {
+_composableDictionary.TryAddRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.TryAddRange( ComposableCollections.Dictionary.IKeyValue<TKey, TValue>[] newItems) {
-_writeCachedDictionary.TryAddRange( newItems);
+public virtual void TryAddRange( System.Collections.Generic.KeyValuePair<TKey, TValue>[] newItems) {
+_composableDictionary.TryAddRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.TryAddRange( System.Collections.Generic.KeyValuePair<TKey, TValue>[] newItems) {
-_writeCachedDictionary.TryAddRange( newItems);
+public virtual void Add( TKey key,  TValue value) {
+_composableDictionary.Add( key,  value);
 }
-void IComposableDictionary<TKey, TValue>.Add( TKey key,  TValue value) {
-_writeCachedDictionary.Add( key,  value);
+public virtual void AddRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems) {
+_composableDictionary.AddRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.AddRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems) {
-_writeCachedDictionary.AddRange( newItems);
+public virtual void AddRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems) {
+_composableDictionary.AddRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.AddRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems) {
-_writeCachedDictionary.AddRange( newItems);
+public virtual void AddRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value) {
+_composableDictionary.AddRange( newItems,  key,  value);
 }
-void IComposableDictionary<TKey, TValue>.AddRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value) {
-_writeCachedDictionary.AddRange( newItems,  key,  value);
+public virtual void AddRange( ComposableCollections.Dictionary.IKeyValue<TKey, TValue>[] newItems) {
+_composableDictionary.AddRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.AddRange( ComposableCollections.Dictionary.IKeyValue<TKey, TValue>[] newItems) {
-_writeCachedDictionary.AddRange( newItems);
+public virtual void AddRange( System.Collections.Generic.KeyValuePair<TKey, TValue>[] newItems) {
+_composableDictionary.AddRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.AddRange( System.Collections.Generic.KeyValuePair<TKey, TValue>[] newItems) {
-_writeCachedDictionary.AddRange( newItems);
+public virtual bool TryUpdate( TKey key,  TValue value) {
+return _composableDictionary.TryUpdate( key,  value);
 }
-bool IComposableDictionary<TKey, TValue>.TryUpdate( TKey key,  TValue value) {
-return _writeCachedDictionary.TryUpdate( key,  value);
+public virtual bool TryUpdate( TKey key,  TValue value,  out TValue previousValue) {
+return _composableDictionary.TryUpdate( key,  value,  out previousValue);
 }
-bool IComposableDictionary<TKey, TValue>.TryUpdate( TKey key,  TValue value,  out TValue previousValue) {
-return _writeCachedDictionary.TryUpdate( key,  value,  out previousValue);
+public virtual bool TryUpdate( TKey key,  System.Func<TValue, TValue> value,  out TValue previousValue,  out TValue newValue) {
+return _composableDictionary.TryUpdate( key,  value,  out previousValue,  out newValue);
 }
-bool IComposableDictionary<TKey, TValue>.TryUpdate( TKey key,  System.Func<TValue, TValue> value,  out TValue previousValue,  out TValue newValue) {
-return _writeCachedDictionary.TryUpdate( key,  value,  out previousValue,  out newValue);
+public virtual void TryUpdateRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems) {
+_composableDictionary.TryUpdateRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.TryUpdateRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems) {
-_writeCachedDictionary.TryUpdateRange( newItems);
+public virtual void TryUpdateRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems) {
+_composableDictionary.TryUpdateRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.TryUpdateRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems) {
-_writeCachedDictionary.TryUpdateRange( newItems);
+public virtual void TryUpdateRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value) {
+_composableDictionary.TryUpdateRange( newItems,  key,  value);
 }
-void IComposableDictionary<TKey, TValue>.TryUpdateRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value) {
-_writeCachedDictionary.TryUpdateRange( newItems,  key,  value);
+public virtual void TryUpdateRange( ComposableCollections.Dictionary.IKeyValue<TKey, TValue>[] newItems) {
+_composableDictionary.TryUpdateRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.TryUpdateRange( ComposableCollections.Dictionary.IKeyValue<TKey, TValue>[] newItems) {
-_writeCachedDictionary.TryUpdateRange( newItems);
+public virtual void TryUpdateRange( System.Collections.Generic.KeyValuePair<TKey, TValue>[] newItems) {
+_composableDictionary.TryUpdateRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.TryUpdateRange( System.Collections.Generic.KeyValuePair<TKey, TValue>[] newItems) {
-_writeCachedDictionary.TryUpdateRange( newItems);
+public virtual void TryUpdateRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemUpdateAttempt<TValue>> results) {
+_composableDictionary.TryUpdateRange( newItems,  out results);
 }
-void IComposableDictionary<TKey, TValue>.TryUpdateRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemUpdateAttempt<TValue>> results) {
-_writeCachedDictionary.TryUpdateRange( newItems,  out results);
+public virtual void TryUpdateRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemUpdateAttempt<TValue>> results) {
+_composableDictionary.TryUpdateRange( newItems,  out results);
 }
-void IComposableDictionary<TKey, TValue>.TryUpdateRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemUpdateAttempt<TValue>> results) {
-_writeCachedDictionary.TryUpdateRange( newItems,  out results);
+public virtual void TryUpdateRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemUpdateAttempt<TValue>> results) {
+_composableDictionary.TryUpdateRange( newItems,  key,  value,  out results);
 }
-void IComposableDictionary<TKey, TValue>.TryUpdateRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemUpdateAttempt<TValue>> results) {
-_writeCachedDictionary.TryUpdateRange( newItems,  key,  value,  out results);
+public virtual void Update( TKey key,  TValue value) {
+_composableDictionary.Update( key,  value);
 }
-void IComposableDictionary<TKey, TValue>.Update( TKey key,  TValue value) {
-_writeCachedDictionary.Update( key,  value);
+public virtual void UpdateRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems) {
+_composableDictionary.UpdateRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.UpdateRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems) {
-_writeCachedDictionary.UpdateRange( newItems);
+public virtual void UpdateRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems) {
+_composableDictionary.UpdateRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.UpdateRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems) {
-_writeCachedDictionary.UpdateRange( newItems);
+public virtual void UpdateRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value) {
+_composableDictionary.UpdateRange( newItems,  key,  value);
 }
-void IComposableDictionary<TKey, TValue>.UpdateRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value) {
-_writeCachedDictionary.UpdateRange( newItems,  key,  value);
+public virtual void Update( TKey key,  TValue value,  out TValue previousValue) {
+_composableDictionary.Update( key,  value,  out previousValue);
 }
-void IComposableDictionary<TKey, TValue>.Update( TKey key,  TValue value,  out TValue previousValue) {
-_writeCachedDictionary.Update( key,  value,  out previousValue);
+public virtual void UpdateRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemUpdateAttempt<TValue>> results) {
+_composableDictionary.UpdateRange( newItems,  out results);
 }
-void IComposableDictionary<TKey, TValue>.UpdateRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemUpdateAttempt<TValue>> results) {
-_writeCachedDictionary.UpdateRange( newItems,  out results);
+public virtual void UpdateRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemUpdateAttempt<TValue>> results) {
+_composableDictionary.UpdateRange( newItems,  out results);
 }
-void IComposableDictionary<TKey, TValue>.UpdateRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemUpdateAttempt<TValue>> results) {
-_writeCachedDictionary.UpdateRange( newItems,  out results);
+public virtual void UpdateRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemUpdateAttempt<TValue>> results) {
+_composableDictionary.UpdateRange( newItems,  key,  value,  out results);
 }
-void IComposableDictionary<TKey, TValue>.UpdateRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemUpdateAttempt<TValue>> results) {
-_writeCachedDictionary.UpdateRange( newItems,  key,  value,  out results);
+public virtual void UpdateRange( ComposableCollections.Dictionary.IKeyValue<TKey, TValue>[] newItems) {
+_composableDictionary.UpdateRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.UpdateRange( ComposableCollections.Dictionary.IKeyValue<TKey, TValue>[] newItems) {
-_writeCachedDictionary.UpdateRange( newItems);
+public virtual void UpdateRange( System.Collections.Generic.KeyValuePair<TKey, TValue>[] newItems) {
+_composableDictionary.UpdateRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.UpdateRange( System.Collections.Generic.KeyValuePair<TKey, TValue>[] newItems) {
-_writeCachedDictionary.UpdateRange( newItems);
+public virtual ComposableCollections.Dictionary.Write.DictionaryItemAddOrUpdateResult AddOrUpdate( TKey key,  TValue value) {
+return _composableDictionary.AddOrUpdate( key,  value);
 }
-ComposableCollections.Dictionary.Write.DictionaryItemAddOrUpdateResult IComposableDictionary<TKey, TValue>.AddOrUpdate( TKey key,  TValue value) {
-return _writeCachedDictionary.AddOrUpdate( key,  value);
+public virtual ComposableCollections.Dictionary.Write.DictionaryItemAddOrUpdateResult AddOrUpdate( TKey key,  System.Func<TValue> valueIfAdding,  System.Func<TValue, TValue> valueIfUpdating) {
+return _composableDictionary.AddOrUpdate( key,  valueIfAdding,  valueIfUpdating);
 }
-ComposableCollections.Dictionary.Write.DictionaryItemAddOrUpdateResult IComposableDictionary<TKey, TValue>.AddOrUpdate( TKey key,  System.Func<TValue> valueIfAdding,  System.Func<TValue, TValue> valueIfUpdating) {
-return _writeCachedDictionary.AddOrUpdate( key,  valueIfAdding,  valueIfUpdating);
+public virtual ComposableCollections.Dictionary.Write.DictionaryItemAddOrUpdateResult AddOrUpdate( TKey key,  System.Func<TValue> valueIfAdding,  System.Func<TValue, TValue> valueIfUpdating,  out TValue previousValue,  out TValue newValue) {
+return _composableDictionary.AddOrUpdate( key,  valueIfAdding,  valueIfUpdating,  out previousValue,  out newValue);
 }
-ComposableCollections.Dictionary.Write.DictionaryItemAddOrUpdateResult IComposableDictionary<TKey, TValue>.AddOrUpdate( TKey key,  System.Func<TValue> valueIfAdding,  System.Func<TValue, TValue> valueIfUpdating,  out TValue previousValue,  out TValue newValue) {
-return _writeCachedDictionary.AddOrUpdate( key,  valueIfAdding,  valueIfUpdating,  out previousValue,  out newValue);
+public virtual void AddOrUpdateRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemAddOrUpdate<TValue>> results) {
+_composableDictionary.AddOrUpdateRange( newItems,  out results);
 }
-void IComposableDictionary<TKey, TValue>.AddOrUpdateRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemAddOrUpdate<TValue>> results) {
-_writeCachedDictionary.AddOrUpdateRange( newItems,  out results);
+public virtual void AddOrUpdateRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemAddOrUpdate<TValue>> results) {
+_composableDictionary.AddOrUpdateRange( newItems,  out results);
 }
-void IComposableDictionary<TKey, TValue>.AddOrUpdateRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemAddOrUpdate<TValue>> results) {
-_writeCachedDictionary.AddOrUpdateRange( newItems,  out results);
+public virtual void AddOrUpdateRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemAddOrUpdate<TValue>> results) {
+_composableDictionary.AddOrUpdateRange( newItems,  key,  value,  out results);
 }
-void IComposableDictionary<TKey, TValue>.AddOrUpdateRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, ComposableCollections.Dictionary.Write.IDictionaryItemAddOrUpdate<TValue>> results) {
-_writeCachedDictionary.AddOrUpdateRange( newItems,  key,  value,  out results);
+public virtual void AddOrUpdateRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems) {
+_composableDictionary.AddOrUpdateRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.AddOrUpdateRange( System.Collections.Generic.IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> newItems) {
-_writeCachedDictionary.AddOrUpdateRange( newItems);
+public virtual void AddOrUpdateRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems) {
+_composableDictionary.AddOrUpdateRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.AddOrUpdateRange( System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>> newItems) {
-_writeCachedDictionary.AddOrUpdateRange( newItems);
+public virtual void AddOrUpdateRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value) {
+_composableDictionary.AddOrUpdateRange( newItems,  key,  value);
 }
-void IComposableDictionary<TKey, TValue>.AddOrUpdateRange<TKeyValuePair>( System.Collections.Generic.IEnumerable<TKeyValuePair> newItems,  System.Func<TKeyValuePair, TKey> key,  System.Func<TKeyValuePair, TValue> value) {
-_writeCachedDictionary.AddOrUpdateRange( newItems,  key,  value);
+public virtual void AddOrUpdateRange( ComposableCollections.Dictionary.IKeyValue<TKey, TValue>[] newItems) {
+_composableDictionary.AddOrUpdateRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.AddOrUpdateRange( ComposableCollections.Dictionary.IKeyValue<TKey, TValue>[] newItems) {
-_writeCachedDictionary.AddOrUpdateRange( newItems);
+public virtual void AddOrUpdateRange( System.Collections.Generic.KeyValuePair<TKey, TValue>[] newItems) {
+_composableDictionary.AddOrUpdateRange( newItems);
 }
-void IComposableDictionary<TKey, TValue>.AddOrUpdateRange( System.Collections.Generic.KeyValuePair<TKey, TValue>[] newItems) {
-_writeCachedDictionary.AddOrUpdateRange( newItems);
+public virtual void TryRemoveRange( System.Collections.Generic.IEnumerable<TKey> keysToRemove) {
+_composableDictionary.TryRemoveRange( keysToRemove);
 }
-void IComposableDictionary<TKey, TValue>.TryRemoveRange( System.Collections.Generic.IEnumerable<TKey> keysToRemove) {
-_writeCachedDictionary.TryRemoveRange( keysToRemove);
+public virtual void RemoveRange( System.Collections.Generic.IEnumerable<TKey> keysToRemove) {
+_composableDictionary.RemoveRange( keysToRemove);
 }
-void IComposableDictionary<TKey, TValue>.RemoveRange( System.Collections.Generic.IEnumerable<TKey> keysToRemove) {
-_writeCachedDictionary.RemoveRange( keysToRemove);
+public virtual void RemoveWhere( System.Func<TKey, TValue, bool> predicate) {
+_composableDictionary.RemoveWhere( predicate);
 }
-void IComposableDictionary<TKey, TValue>.RemoveWhere( System.Func<TKey, TValue, bool> predicate) {
-_writeCachedDictionary.RemoveWhere( predicate);
+public virtual void RemoveWhere( System.Func<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>, bool> predicate) {
+_composableDictionary.RemoveWhere( predicate);
 }
-void IComposableDictionary<TKey, TValue>.RemoveWhere( System.Func<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>, bool> predicate) {
-_writeCachedDictionary.RemoveWhere( predicate);
+public virtual void Clear() {
+_composableDictionary.Clear();
 }
-void IComposableDictionary<TKey, TValue>.Clear() {
-_writeCachedDictionary.Clear();
+public virtual bool TryRemove( TKey key) {
+return _composableDictionary.TryRemove( key);
 }
-bool IComposableDictionary<TKey, TValue>.TryRemove( TKey key) {
-return _writeCachedDictionary.TryRemove( key);
+public virtual void Remove( TKey key) {
+_composableDictionary.Remove( key);
 }
-void IComposableDictionary<TKey, TValue>.Remove( TKey key) {
-_writeCachedDictionary.Remove( key);
+public virtual void TryRemoveRange( System.Collections.Generic.IEnumerable<TKey> keysToRemove,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, TValue> removedItems) {
+_composableDictionary.TryRemoveRange( keysToRemove,  out removedItems);
 }
-void IComposableDictionary<TKey, TValue>.TryRemoveRange( System.Collections.Generic.IEnumerable<TKey> keysToRemove,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, TValue> removedItems) {
-_writeCachedDictionary.TryRemoveRange( keysToRemove,  out removedItems);
+public virtual void RemoveRange( System.Collections.Generic.IEnumerable<TKey> keysToRemove,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, TValue> removedItems) {
+_composableDictionary.RemoveRange( keysToRemove,  out removedItems);
 }
-void IComposableDictionary<TKey, TValue>.RemoveRange( System.Collections.Generic.IEnumerable<TKey> keysToRemove,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, TValue> removedItems) {
-_writeCachedDictionary.RemoveRange( keysToRemove,  out removedItems);
+public virtual void RemoveWhere( System.Func<TKey, TValue, bool> predicate,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, TValue> removedItems) {
+_composableDictionary.RemoveWhere( predicate,  out removedItems);
 }
-void IComposableDictionary<TKey, TValue>.RemoveWhere( System.Func<TKey, TValue, bool> predicate,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, TValue> removedItems) {
-_writeCachedDictionary.RemoveWhere( predicate,  out removedItems);
+public virtual void RemoveWhere( System.Func<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>, bool> predicate,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, TValue> removedItems) {
+_composableDictionary.RemoveWhere( predicate,  out removedItems);
 }
-void IComposableDictionary<TKey, TValue>.RemoveWhere( System.Func<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>, bool> predicate,  out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, TValue> removedItems) {
-_writeCachedDictionary.RemoveWhere( predicate,  out removedItems);
+public virtual void Clear( out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, TValue> removedItems) {
+_composableDictionary.Clear( out removedItems);
 }
-void IComposableDictionary<TKey, TValue>.Clear( out ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, TValue> removedItems) {
-_writeCachedDictionary.Clear( out removedItems);
+public virtual bool TryRemove( TKey key,  out TValue removedItem) {
+return _composableDictionary.TryRemove( key,  out removedItem);
 }
-bool IComposableDictionary<TKey, TValue>.TryRemove( TKey key,  out TValue removedItem) {
-return _writeCachedDictionary.TryRemove( key,  out removedItem);
+public virtual void Remove( TKey key,  out TValue removedItem) {
+_composableDictionary.Remove( key,  out removedItem);
 }
-void IComposableDictionary<TKey, TValue>.Remove( TKey key,  out TValue removedItem) {
-_writeCachedDictionary.Remove( key,  out removedItem);
+public virtual TValue GetValue( TKey key) {
+return _composableDictionary.GetValue( key);
 }
-System.Collections.IEnumerator IEnumerable.GetEnumerator() {
-return _writeCachedDictionary.GetEnumerator();
+public virtual bool ContainsKey( TKey key) {
+return _composableDictionary.ContainsKey( key);
 }
-int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _writeCachedDictionary.Count;
+public virtual IMaybe<TValue> TryGetValue( TKey key) {
+return _composableDictionary.TryGetValue( key);
+}
 System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
-return _writeCachedDictionary.GetEnumerator();
+return _composableDictionary.GetEnumerator();
 }
-System.Collections.Generic.IEqualityComparer<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Comparer => _writeCachedDictionary.Comparer;
-TValue IComposableReadOnlyDictionary<TKey, TValue>.GetValue( TKey key) {
-return _writeCachedDictionary.GetValue( key);
+public virtual void Dispose() {
+_dispose();
 }
-TValue IComposableReadOnlyDictionary<TKey, TValue>.this[ TKey key] => _writeCachedDictionary[ key];
-System.Collections.Generic.IEnumerable<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Keys => _writeCachedDictionary.Keys;
-System.Collections.Generic.IEnumerable<TValue> IComposableReadOnlyDictionary<TKey, TValue>.Values => _writeCachedDictionary.Values;
-bool IComposableReadOnlyDictionary<TKey, TValue>.ContainsKey( TKey key) {
-return _writeCachedDictionary.ContainsKey( key);
+public virtual void FlushCache() {
+_flushCache();
 }
-IMaybe<TValue> IComposableReadOnlyDictionary<TKey, TValue>.TryGetValue( TKey key) {
-return _writeCachedDictionary.TryGetValue( key);
+public virtual void ReloadCache() {
+_reloadCache();
 }
-void IWriteCachedDictionary<TKey, TValue>.FlushCache() {
-_writeCachedDictionary.FlushCache();
+public virtual void ReloadCache( TKey key) {
+_reloadCache1( key);
 }
-void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache() {
-_readCachedReadOnlyDictionary.ReloadCache();
+public virtual void InvalidCache() {
+_invalidCache();
 }
-void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache( TKey key) {
-_readCachedReadOnlyDictionary.ReloadCache( key);
+public virtual void InvalidCache( TKey key) {
+_invalidCache1( key);
 }
-void IReadCachedReadOnlyDictionary<TKey, TValue>.InvalidCache() {
-_readCachedReadOnlyDictionary.InvalidCache();
-}
-void IReadCachedReadOnlyDictionary<TKey, TValue>.InvalidCache( TKey key) {
-_readCachedReadOnlyDictionary.InvalidCache( key);
-}
+IEnumerator IEnumerable.GetEnumerator() {
+return _composableDictionary.GetEnumerator();}
 }
 }
 

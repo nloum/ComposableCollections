@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<FluentApiSourceGeneratorConfig>
-  <SourceGenerators>
-    <CompositeInterfaceImplementation InterfaceRegex="IReadOnlyDictionaryWithBuiltInKey" IncludeSubInterfaces="True" />
-  </SourceGenerators>
-</FluentApiSourceGeneratorConfig>
+<FluentApiSourceGenerator>
+  <CodeGenerators>
+    <CombinationInterfaces InterfaceRegex="IReadOnlyDictionaryWithBuiltInKey" IncludeSubInterfaces="True" />
+  </CodeGenerators>
+</FluentApiSourceGenerator>

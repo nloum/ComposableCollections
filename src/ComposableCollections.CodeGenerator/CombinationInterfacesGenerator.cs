@@ -10,11 +10,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ComposableCollections.CodeGenerator
 {
-    public class CombinationInterfacesGenerator : IGenerator<CombinationInterfacesGeneratorSettings>
+    public class CombinationInterfacesGenerator : GeneratorBase<CombinationInterfacesGeneratorSettings>
     {
         private CombinationInterfacesGeneratorSettings _settings;
         
-        public void Initialize(CombinationInterfacesGeneratorSettings settings)
+        public override void Initialize(CombinationInterfacesGeneratorSettings settings)
         {
             _settings = settings;
         }
@@ -36,7 +36,7 @@ namespace ComposableCollections.CodeGenerator
             public int Index { get; }
         }
         
-        public ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
+        public override ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
         {
             var interfaceDeclarations = new Dictionary<string, InterfaceDeclarationSyntax>();
             

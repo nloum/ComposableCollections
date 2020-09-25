@@ -10,16 +10,16 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ComposableCollections.CodeGenerator
 {
-    public class DecoratorBaseGenerator : IGenerator<DecoratorBaseGeneratorSettings>
+    public class DecoratorBaseGenerator : GeneratorBase<DecoratorBaseGeneratorSettings>
     {
         private DecoratorBaseGeneratorSettings _settings;
 
-        public void Initialize(DecoratorBaseGeneratorSettings settings)
+        public override void Initialize(DecoratorBaseGeneratorSettings settings)
         {
             _settings = settings;
         }
 
-        public ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
+        public override ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
         {
             var interfaceDeclarations = new Dictionary<string, InterfaceDeclarationSyntax>();
             var syntaxTreeForEachInterface = new Dictionary<InterfaceDeclarationSyntax, SyntaxTree>();

@@ -8,16 +8,16 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ComposableCollections.CodeGenerator
 {
-    public class ConstructorToExtensionMethodGenerator : IGenerator<ConstructorToExtensionMethodGeneratorSettings>
+    public class ConstructorToExtensionMethodGenerator : GeneratorBase<ConstructorToExtensionMethodGeneratorSettings>
     {
         private ConstructorToExtensionMethodGeneratorSettings _settings;
 
-        public void Initialize(ConstructorToExtensionMethodGeneratorSettings settings)
+        public override void Initialize(ConstructorToExtensionMethodGeneratorSettings settings)
         {
             _settings = settings;
         }
 
-        public ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
+        public override ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
         {
             var interfaceDeclarations = new Dictionary<string, InterfaceDeclarationSyntax>();
             var interfaceSymbols = new Dictionary<InterfaceDeclarationSyntax, INamedTypeSymbol>();

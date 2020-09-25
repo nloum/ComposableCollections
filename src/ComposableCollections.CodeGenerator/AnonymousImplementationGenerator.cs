@@ -13,16 +13,16 @@ using MoreCollections;
 
 namespace ComposableCollections.CodeGenerator
 {
-    public class AnonymousImplementationGenerator : IGenerator<AnonymousImplementationGeneratorSettings>
+    public class AnonymousImplementationGenerator : GeneratorBase<AnonymousImplementationGeneratorSettings>
     {
         private AnonymousImplementationGeneratorSettings _settings;
 
-        public void Initialize(AnonymousImplementationGeneratorSettings settings)
+        public override void Initialize(AnonymousImplementationGeneratorSettings settings)
         {
             _settings = settings;
         }
 
-        public ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
+        public override ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
         {
             var interfaceDeclarations = new Dictionary<string, InterfaceDeclarationSyntax>();
             var syntaxTreeForEachInterface = new Dictionary<InterfaceDeclarationSyntax, SyntaxTree>();

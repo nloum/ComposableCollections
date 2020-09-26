@@ -6,8 +6,8 @@ namespace ComposableCollections.CodeGenerator
 {
     public class InterfaceNameModifier : IEnumerable<string>
     {
-        [XmlArray]
-        [XmlArrayItem("Value")]
+        [XmlArray("Values")]
+        [XmlArrayItem("Value", typeof(string))]
         public List<string> Values { get; set; } = new List<string>();
 
         public void Add(string value)

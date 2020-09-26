@@ -7,11 +7,11 @@ namespace ComposableCollections.CodeGenerator
     public class Configuration
     {
         [XmlArray("CodeGenerators")]
-        [XmlArrayItem("AnonymousImplementation", typeof(AnonymousImplementationGeneratorSettings))]
+        [XmlArrayItem("AnonymousImplementations", typeof(AnonymousImplementationsGeneratorSettings))]
         [XmlArrayItem("CombinationInterfaces", typeof(CombinationInterfacesGeneratorSettings))]
-        [XmlArrayItem("ConstructorToExtensionMethod", typeof(ConstructorToExtensionMethodGeneratorSettings))]
-        [XmlArrayItem("DecoratorBase", typeof(DecoratorBaseGeneratorSettings))]
-        [XmlArrayItem("SubclassCombinationImplementation", typeof(SubclassCombinationImplementationGeneratorSettings))]
+        [XmlArrayItem("ConstructorExtensionMethods", typeof(ConstructorExtensionMethodsGeneratorSettings))]
+        [XmlArrayItem("DecoratorBaseClasses", typeof(DecoratorBaseClassesGeneratorSettings))]
+        [XmlArrayItem("SubclassCombinationImplementations", typeof(SubclassCombinationImplementationsGeneratorSettings))]
         public List<object> CodeGenerators { get; set; } = new List<object>();
     }
 }

@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace ComposableCollections.CodeGenerator
 {
-    public class DecoratorBaseGeneratorSettings
+    public class DecoratorBaseClassesGeneratorSettings
     {
         [XmlArray("InterfacesToImplement")]
         [XmlArrayItem("Interface", typeof(string))]

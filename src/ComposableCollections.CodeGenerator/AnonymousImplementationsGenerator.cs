@@ -13,11 +13,11 @@ using MoreCollections;
 
 namespace ComposableCollections.CodeGenerator
 {
-    public class AnonymousImplementationGenerator : GeneratorBase<AnonymousImplementationGeneratorSettings>
+    public class AnonymousImplementationsGenerator : GeneratorBase<AnonymousImplementationsGeneratorSettings>
     {
-        private AnonymousImplementationGeneratorSettings _settings;
+        private AnonymousImplementationsGeneratorSettings _settings;
 
-        public override void Initialize(AnonymousImplementationGeneratorSettings settings)
+        public override void Initialize(AnonymousImplementationsGeneratorSettings settings)
         {
             _settings = settings;
         }

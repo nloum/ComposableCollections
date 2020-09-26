@@ -8,11 +8,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ComposableCollections.CodeGenerator
 {
-    public class ConstructorToExtensionMethodGenerator : GeneratorBase<ConstructorToExtensionMethodGeneratorSettings>
+    public class ConstructorExtensionMethodsGenerator : GeneratorBase<ConstructorExtensionMethodsGeneratorSettings>
     {
-        private ConstructorToExtensionMethodGeneratorSettings _settings;
+        private ConstructorExtensionMethodsGeneratorSettings _settings;
 
-        public override void Initialize(ConstructorToExtensionMethodGeneratorSettings settings)
+        public override void Initialize(ConstructorExtensionMethodsGeneratorSettings settings)
         {
             _settings = settings;
         }

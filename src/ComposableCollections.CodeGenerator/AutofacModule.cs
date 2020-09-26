@@ -7,16 +7,16 @@ namespace ComposableCollections.CodeGenerator
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<AnonymousImplementationGenerator>()
-                .Keyed<GeneratorBase>(typeof(AnonymousImplementationGeneratorSettings));
+            builder.RegisterType<AnonymousImplementationsGenerator>()
+                .Keyed<GeneratorBase>(typeof(AnonymousImplementationsGeneratorSettings));
             builder.RegisterType<CombinationInterfacesGenerator>()
                 .Keyed<GeneratorBase>(typeof(CombinationInterfacesGeneratorSettings));
-            builder.RegisterType<ConstructorToExtensionMethodGenerator>()
-                .Keyed<GeneratorBase>(typeof(ConstructorToExtensionMethodGeneratorSettings));
-            builder.RegisterType<DecoratorBaseGenerator>()
-                .Keyed<GeneratorBase>(typeof(DecoratorBaseGeneratorSettings));
-            builder.RegisterType<SubclassCombinationImplementationGenerator>()
-                .Keyed<GeneratorBase>(typeof(SubclassCombinationImplementationGeneratorSettings));
+            builder.RegisterType<ConstructorExtensionMethodsGenerator>()
+                .Keyed<GeneratorBase>(typeof(ConstructorExtensionMethodsGeneratorSettings));
+            builder.RegisterType<DecoratorBaseClassesGenerator>()
+                .Keyed<GeneratorBase>(typeof(DecoratorBaseClassesGeneratorSettings));
+            builder.RegisterType<SubclassCombinationImplementationsGenerator>()
+                .Keyed<GeneratorBase>(typeof(SubclassCombinationImplementationsGeneratorSettings));
             builder.Register<IIoService>(_ => new IoService(false)).SingleInstance();
             builder.RegisterType<CommandLineService>().AsImplementedInterfaces().SingleInstance();
         }

@@ -11,11 +11,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ComposableCollections.CodeGenerator
 {
-    public class SubclassCombinationImplementationGenerator : GeneratorBase<SubclassCombinationImplementationGeneratorSettings>
+    public class SubclassCombinationImplementationsGenerator : GeneratorBase<SubclassCombinationImplementationsGeneratorSettings>
     {
-        private SubclassCombinationImplementationGeneratorSettings _settings;
+        private SubclassCombinationImplementationsGeneratorSettings _settings;
 
-        public override void Initialize(SubclassCombinationImplementationGeneratorSettings settings)
+        public override void Initialize(SubclassCombinationImplementationsGeneratorSettings settings)
         {
             _settings = settings;
         }

@@ -10,11 +10,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ComposableCollections.CodeGenerator
 {
-    public class DecoratorBaseGenerator : GeneratorBase<DecoratorBaseGeneratorSettings>
+    public class DecoratorBaseClassesGenerator : GeneratorBase<DecoratorBaseClassesGeneratorSettings>
     {
-        private DecoratorBaseGeneratorSettings _settings;
+        private DecoratorBaseClassesGeneratorSettings _settings;
 
-        public override void Initialize(DecoratorBaseGeneratorSettings settings)
+        public override void Initialize(DecoratorBaseClassesGeneratorSettings settings)
         {
             _settings = settings;
         }

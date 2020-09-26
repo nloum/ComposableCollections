@@ -1,3 +1,4 @@
+using System.Drawing;
 using CommandLine;
 
 namespace ComposableCollections.CodeGenerator
@@ -10,9 +11,9 @@ namespace ComposableCollections.CodeGenerator
             SourceCodePath = sourceCodePath;
         }
 
-        [Option('c', "configuration")]
+        [Value(0, Required = true)]
         public string ConfigurationFilePath { get; }
-        [Option('s', "source")]
+        [Option('s', "source", Required = false)]
         public string SourceCodePath { get; }
     }
 }

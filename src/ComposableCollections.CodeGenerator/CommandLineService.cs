@@ -22,7 +22,9 @@ namespace ComposableCollections.CodeGenerator
         public void Run(CommandLineOptions options)
         {
             var configurationFilePath = _ioService.ParseAbsolutePath(options.ConfigurationFilePath, _ioService.CurrentDirectory);
-            var sourceCodePath = _ioService.ParseAbsolutePath(options.SourceCodePath, _ioService.CurrentDirectory);
+            var sourceCodePath = string.IsNullOrWhiteSpace(options.SourceCodePath)
+                ? configurationFilePath.Parent()
+                : _ioService.ParseAbsolutePath(options.SourceCodePath, _ioService.CurrentDirectory);
 
             var configurationFile = configurationFilePath.AsSerializedXmlFile<Configuration>();
             var configuration = configurationFile.Read();

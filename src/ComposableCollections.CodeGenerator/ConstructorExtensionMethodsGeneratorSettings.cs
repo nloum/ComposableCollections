@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace ComposableCollections.CodeGenerator
 {
-    public class ConstructorToExtensionMethodGeneratorSettings
+    public class ConstructorExtensionMethodsGeneratorSettings
     {
         [XmlAttribute("Namespace")]
         public string Namespace { get; set; }

@@ -1,7 +1,7 @@
 using System.Threading;
 using ComposableCollections.Common;
+using ComposableCollections.Dictionary.Anonymous;
 using ComposableCollections.Dictionary.Interfaces;
-using UtilityDisposables;
 
 namespace ComposableCollections.Dictionary.Transactional
 {

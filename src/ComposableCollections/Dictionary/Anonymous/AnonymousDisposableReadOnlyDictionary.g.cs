@@ -4,7 +4,7 @@ using SimpleMonads;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-namespace ComposableCollections.Dictionary.Interfaces {
+namespace ComposableCollections.Dictionary.Anonymous {
 public class AnonymousDisposableReadOnlyDictionary<TKey, TValue> : IDisposableReadOnlyDictionary<TKey, TValue> {
 private readonly IComposableReadOnlyDictionary<TKey, TValue> _composableReadOnlyDictionary;
 private readonly Action _dispose;

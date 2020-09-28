@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Humanizer;
+using IoFluently;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,13 +14,19 @@ namespace ComposableCollections.CodeGenerator
     public class DecoratorBaseClassesGenerator : GeneratorBase<DecoratorBaseClassesGeneratorSettings>
     {
         private DecoratorBaseClassesGeneratorSettings _settings;
+        private readonly IPathService _pathService;
+
+        public DecoratorBaseClassesGenerator(IPathService pathService)
+        {
+            _pathService = pathService;
+        }
 
         public override void Initialize(DecoratorBaseClassesGeneratorSettings settings)
         {
             _settings = settings;
         }
 
-        public override ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
+        public override ImmutableDictionary<AbsolutePath, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
         {
             var interfaceDeclarations = new Dictionary<string, InterfaceDeclarationSyntax>();
             var syntaxTreeForEachInterface = new Dictionary<InterfaceDeclarationSyntax, SyntaxTree>();
@@ -38,7 +45,7 @@ namespace ComposableCollections.CodeGenerator
                 });
             }
 
-            var results = new Dictionary<string, string>();
+            var results = new Dictionary<AbsolutePath, string>();
 
             foreach (var iface in _settings.InterfacesToImplement)
             {
@@ -103,7 +110,7 @@ namespace ComposableCollections.CodeGenerator
 
                 usings = usings.Distinct().OrderBy(x => x).ToList();
                 
-                results.Add($"{className}.g.cs", $"{string.Join("\n",usings)}\n{sourceCodeBuilder}");
+                results.Add(_pathService.SourceCodeRootFolder / (_settings.Folder ?? ".") / $"{className}.g.cs", $"{string.Join("\n",usings)}\n{sourceCodeBuilder}");
             }
 
             return results.ToImmutableDictionary();

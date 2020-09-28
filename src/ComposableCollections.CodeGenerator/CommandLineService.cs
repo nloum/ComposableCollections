@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using Autofac;
 using IoFluently;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 
@@ -12,11 +13,13 @@ namespace ComposableCollections.CodeGenerator
     {
         private readonly IIoService _ioService;
         private readonly ILifetimeScope _lifetimeScope;
+        private readonly IPathService _pathService;
 
-        public CommandLineService(IIoService ioService, ILifetimeScope lifetimeScope)
+        public CommandLineService(IIoService ioService, ILifetimeScope lifetimeScope, IPathService pathService)
         {
             _ioService = ioService;
             _lifetimeScope = lifetimeScope;
+            _pathService = pathService;
         }
 
         public void Run(CommandLineOptions options)
@@ -25,21 +28,34 @@ namespace ComposableCollections.CodeGenerator
             var sourceCodePath = string.IsNullOrWhiteSpace(options.SourceCodePath)
                 ? configurationFilePath.Parent()
                 : _ioService.ParseAbsolutePath(options.SourceCodePath, _ioService.CurrentDirectory);
+            _pathService.Initialize(sourceCodePath);
 
             var configurationFile = configurationFilePath.AsSerializedXmlFile<Configuration>();
             var configuration = configurationFile.Read();
 
             var csFiles = sourceCodePath.Descendants()
-                .Where(child => IoExtensions.HasExtension(child, ".cs"));
+                .Where(child => child.HasExtension(".cs"));
 			
             var syntaxTrees = csFiles.Select(csFile =>
                 CSharpSyntaxTree.ParseText(SourceText.From(csFile.ReadText(), Encoding.UTF8))).ToImmutableList();
-			
-            var compilation = CSharpCompilation.Create("HelloWorld")
-                // .AddReferences(MetadataReference.CreateFromFile(
-                //  typeof(string).Assembly.Location),
-                //  MetadataReference.CreateFromFile((repoRoot / "src" / "ComposableCollections" / "bin" / "Debug" / "netstandard2.0" / "ComposableCollections.dll").ToString()))
-                .AddSyntaxTrees(syntaxTrees);
+
+            var dllFiles = sourceCodePath.Descendants()
+                .Where(child => child.HasExtension(".dll"))
+                .OrderBy(file => file)
+                .GroupBy(file => file.Name)
+                .Select(group => group.First())
+                .ToImmutableList();
+
+            var compilation = CSharpCompilation.Create("HelloWorld");
+
+            foreach (var dllFile in dllFiles)
+            {
+                compilation = compilation
+                    .AddReferences(MetadataReference.CreateFromFile(typeof(string).Assembly.Location),
+                        MetadataReference.CreateFromFile(dllFile.ToString()));
+            }
+            
+            compilation = compilation.AddSyntaxTrees(syntaxTrees);
             
             foreach (var codeGeneratorSettings in configuration.CodeGenerators)
             {
@@ -48,7 +64,7 @@ namespace ComposableCollections.CodeGenerator
                 var outputFiles = generator.Generate(syntaxTrees, tree => compilation.GetSemanticModel(tree));
                 foreach (var outputFile in outputFiles)
                 {
-                    _ioService.WriteText(sourceCodePath / outputFile.Key, outputFile.Value);
+                    _ioService.WriteText(outputFile.Key, outputFile.Value);
                 }
             }
         }

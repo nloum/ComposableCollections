@@ -5,7 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-namespace ComposableCollections.Dictionary.Interfaces {
+namespace ComposableCollections.Dictionary.Anonymous {
 public class AnonymousQueryableReadOnlyDictionary<TKey, TValue> : IQueryableReadOnlyDictionary<TKey, TValue> {
 private readonly IComposableReadOnlyDictionary<TKey, TValue> _composableReadOnlyDictionary;
 private readonly Func<IQueryable<TValue>> _getValues;

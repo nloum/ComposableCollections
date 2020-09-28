@@ -5,24 +5,29 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Humanizer;
+using IoFluently;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.VisualBasic.FileIO;
-using MoreCollections;
 
 namespace ComposableCollections.CodeGenerator
 {
     public class AnonymousImplementationsGenerator : GeneratorBase<AnonymousImplementationsGeneratorSettings>
     {
         private AnonymousImplementationsGeneratorSettings _settings;
+        private readonly IPathService _pathService;
+
+        public AnonymousImplementationsGenerator(IPathService pathService)
+        {
+            _pathService = pathService;
+        }
 
         public override void Initialize(AnonymousImplementationsGeneratorSettings settings)
         {
             _settings = settings;
         }
 
-        public override ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
+        public override ImmutableDictionary<AbsolutePath, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
         {
             var interfaceDeclarations = new Dictionary<string, InterfaceDeclarationSyntax>();
             var syntaxTreeForEachInterface = new Dictionary<InterfaceDeclarationSyntax, SyntaxTree>();
@@ -41,7 +46,7 @@ namespace ComposableCollections.CodeGenerator
                 });
             }
 
-            var results = new Dictionary<string, string>();
+            var results = new Dictionary<AbsolutePath, string>();
 
             foreach (var iface in _settings.InterfacesToImplement)
             {
@@ -80,14 +85,23 @@ namespace ComposableCollections.CodeGenerator
 
                 foreach (var baseInterface in Utilities.GetBaseInterfaces(semanticModel.GetDeclaredSymbol(interfaceDeclaration)))
                 {
-                    usings.Add($"using {string.Join(".", baseInterface.ContainingNamespace.ConstituentNamespaces)};");
+                    var newUsing =
+                        $"using {string.Join(".", baseInterface.ContainingNamespace.ConstituentNamespaces)};";
+                    if (!newUsing.Contains("global namespace"))
+                    {
+                        usings.Add(newUsing);
+                    }
                 }
                 
                 foreach (var usingDirective in Utilities.GetBaseInterfaces(semanticModel.GetDeclaredSymbol(interfaceDeclaration))
                     .SelectMany(symbol => symbol.DeclaringSyntaxReferences).Select(syntaxRef => syntaxRef.SyntaxTree)
                     .SelectMany(syntaxTree => Utilities.GetDescendantsOfType<UsingDirectiveSyntax>(syntaxTree.GetRoot())))
                 {
-                    usings.Add(usingDirective.ToString());
+                    var newUsing = usingDirective.ToString();
+                    if (!newUsing.Contains("global namespace"))
+                    {
+                        usings.Add(newUsing);
+                    }
                 }
 
                 var parameterString = string.Join(", ", parameters
@@ -120,8 +134,9 @@ namespace ComposableCollections.CodeGenerator
                 sourceCodeBuilder.AppendLine("}\n}\n");
 
                 usings = usings.Distinct().OrderBy(x => x).ToList();
-                
-                results.Add($"{className}.g.cs", $"{string.Join("\n",usings)}\n{sourceCodeBuilder}");
+
+                var filePath = _pathService.SourceCodeRootFolder / (_settings.Folder ?? ".") / $"{className}.g.cs"; 
+                results.Add(filePath, $"{string.Join("\n",usings)}\n{sourceCodeBuilder}");
             }
 
             return results.ToImmutableDictionary();
@@ -146,7 +161,8 @@ namespace ComposableCollections.CodeGenerator
                     parameters.Add(matchingParameter);
                 }
 
-                foreach (var member in Utilities.GetBaseInterfaces(superInterface).SelectMany(iface => iface.GetMembers()))
+                var interfaces = Utilities.GetBaseInterfaces(superInterface).ToImmutableList();
+                foreach (var member in interfaces.SelectMany(iface => iface.GetMembers()))
                 {
                     membersToBeDelegated.Add(new MemberToBeDelegated(matchingParameter.MemberName, type, member, DelegateType.DelegateObject, ImmutableList<INamedTypeSymbol>.Empty.Add(member.ContainingType)));
                 }

@@ -218,8 +218,7 @@ namespace ComposableCollections.CodeGenerator
             var enumerators = enumerables.Select( enumerable => Tuple.Create( enumerable, enumerable.GetEnumerator() ) ).ToList();
 
             foreach ( var enumerator in enumerators ) {
-                if ( !enumerator.Item2.MoveNext() ) {
-                    throw new ArgumentException( "An empty enumerable was specified" );
+                if ( !enumerator.Item2.MoveNext() ) { throw new ArgumentException( "An empty enumerable was specified" );
                 }
             }
 

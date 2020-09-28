@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using IoFluently;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,13 +12,19 @@ namespace ComposableCollections.CodeGenerator
     public class ConstructorExtensionMethodsGenerator : GeneratorBase<ConstructorExtensionMethodsGeneratorSettings>
     {
         private ConstructorExtensionMethodsGeneratorSettings _settings;
+        private IPathService _pathService;
+
+        public ConstructorExtensionMethodsGenerator(IPathService pathService)
+        {
+            _pathService = pathService;
+        }
 
         public override void Initialize(ConstructorExtensionMethodsGeneratorSettings settings)
         {
             _settings = settings;
         }
 
-        public override ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
+        public override ImmutableDictionary<AbsolutePath, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
         {
             var interfaceDeclarations = new Dictionary<string, InterfaceDeclarationSyntax>();
             var interfaceSymbols = new Dictionary<InterfaceDeclarationSyntax, INamedTypeSymbol>();
@@ -116,8 +123,8 @@ namespace ComposableCollections.CodeGenerator
             
             extensionMethods.Add("}\n}\n");
 
-            return ImmutableDictionary<string, string>.Empty
-                .Add($"{_settings.ExtensionMethodName}Extensions.g.cs",
+            return ImmutableDictionary<AbsolutePath, string>.Empty
+                .Add(_pathService.SourceCodeRootFolder / (_settings.Folder ?? ".") / $"{_settings.ExtensionMethodName}Extensions.g.cs",
                     string.Join("", usings.Distinct().OrderBy(x => x).Concat(extensionMethods)));
         }
     }

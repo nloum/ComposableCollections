@@ -5,7 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-namespace ComposableCollections.Dictionary.Interfaces {
+namespace ComposableCollections.Dictionary.Anonymous {
 public class AnonymousDisposableQueryableReadOnlyDictionary<TKey, TValue> : IDisposableQueryableReadOnlyDictionary<TKey, TValue> {
 private readonly IComposableReadOnlyDictionary<TKey, TValue> _composableReadOnlyDictionary;
 private readonly Action _dispose;

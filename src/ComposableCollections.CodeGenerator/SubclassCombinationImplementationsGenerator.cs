@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using IoFluently;
 using LiveLinq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,13 +15,19 @@ namespace ComposableCollections.CodeGenerator
     public class SubclassCombinationImplementationsGenerator : GeneratorBase<SubclassCombinationImplementationsGeneratorSettings>
     {
         private SubclassCombinationImplementationsGeneratorSettings _settings;
+        private readonly IPathService _pathService;
+
+        public SubclassCombinationImplementationsGenerator(IPathService pathService)
+        {
+            _pathService = pathService;
+        }
 
         public override void Initialize(SubclassCombinationImplementationsGeneratorSettings settings)
         {
             _settings = settings;
         }
 
-        public override ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
+        public override ImmutableDictionary<AbsolutePath, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
         {
             var interfaceDeclarations = new Dictionary<string, InterfaceDeclarationSyntax>();
             var interfaceSymbols = new Dictionary<InterfaceDeclarationSyntax, INamedTypeSymbol>();
@@ -58,7 +65,7 @@ namespace ComposableCollections.CodeGenerator
                 });
             }
             
-            var result = new Dictionary<string, string>();
+            var result = new Dictionary<AbsolutePath, string>();
 
             var theClass = classDeclarations[_settings.BaseClass];
             var theClassSemanticModel = getSemanticModel(syntaxTreeForEachClass[theClass]);
@@ -116,7 +123,7 @@ namespace ComposableCollections.CodeGenerator
                 var subClassName = subInterface.Identifier.Text.Substring(1);
                 foreach (var modifier in _settings.ClassNameModifiers)
                 {
-                    subClassName = Regex.Replace(subClassName, modifier.Search, modifier.Replacement);
+                    subClassName = Regex.Replace(subClassName, modifier.Search ?? "", modifier.Replacement ?? "");
                 }
 
                 if (_settings.ClassNameBlacklist.Any(classNameBlacklistItem =>
@@ -245,7 +252,7 @@ namespace ComposableCollections.CodeGenerator
                 }
 
                 classDefinition.Add("}\n}\n");
-                result[subClassName + ".g.cs"] = string.Join("", usings.Distinct().Concat(classDefinition));
+                result[_pathService.SourceCodeRootFolder / (_settings.Folder ?? ".") / (subClassName + ".g.cs")] = string.Join("", usings.Distinct().Concat(classDefinition));
             }
 
             return result.ToImmutableDictionary();

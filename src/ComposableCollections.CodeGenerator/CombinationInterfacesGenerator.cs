@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using IoFluently;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,7 +14,13 @@ namespace ComposableCollections.CodeGenerator
     public class CombinationInterfacesGenerator : GeneratorBase<CombinationInterfacesGeneratorSettings>
     {
         private CombinationInterfacesGeneratorSettings _settings;
-        
+        private readonly IPathService _pathService;
+
+        public CombinationInterfacesGenerator(IPathService pathService)
+        {
+            _pathService = pathService;
+        }
+
         public override void Initialize(CombinationInterfacesGeneratorSettings settings)
         {
             _settings = settings;
@@ -36,7 +43,7 @@ namespace ComposableCollections.CodeGenerator
             public int Index { get; }
         }
         
-        public override ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
+        public override ImmutableDictionary<AbsolutePath, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
         {
             var interfaceDeclarations = new Dictionary<string, InterfaceDeclarationSyntax>();
             
@@ -51,10 +58,10 @@ namespace ComposableCollections.CodeGenerator
                 });
             }
             
-            var combinations = Utilities.CalcCombinationsOfOneFromEach(_settings.InterfaceNameModifiers);
+            var combinations = Utilities.CalcCombinationsOfOneFromEach(_settings.InterfaceNameModifiers.Select(x => x.Values));
             var interfaces = new Dictionary<string, ImmutableDictionary<string, TypeParameter>>();
 
-            var results = new Dictionary<string, string>();
+            var results = new Dictionary<AbsolutePath, string>();
             
             foreach (var combination in combinations)
             {
@@ -131,7 +138,7 @@ namespace ComposableCollections.CodeGenerator
                         genericParams = $"<{genericParams}>";
                     }
                     
-                    results.Add($"{name}.g.cs", $"namespace {_settings.Namespace} {{\npublic interface {name}{genericParams}{baseList} {{\n}}\n}}");
+                    results.Add(_pathService.SourceCodeRootFolder / (_settings.Folder ?? ".") / $"{name}.g.cs", $"namespace {_settings.Namespace} {{\npublic interface {name}{genericParams}{baseList} {{\n}}\n}}");
                 }
             }
 

@@ -4,25 +4,10 @@ using System.Xml.Serialization;
 
 namespace ComposableCollections.CodeGenerator
 {
-    public class InterfaceNameModifier : IEnumerable<string>
+    public class InterfaceNameModifier
     {
-        [XmlArray("Values")]
-        [XmlArrayItem("Value", typeof(string))]
-        public List<string> Values { get; set; } = new List<string>();
-
-        public void Add(string value)
-        {
-            Values.Add(value);
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public IEnumerator<string> GetEnumerator()
-        {
-            return Values.GetEnumerator();
-        }
+        [XmlArray("OneOf")]
+        [XmlArrayItem("Part", typeof(string))]
+        public List<string> Values { get; set; }
     }
 }

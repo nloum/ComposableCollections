@@ -5,7 +5,7 @@ using SimpleMonads;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-namespace ComposableCollections.Dictionary.Interfaces {
+namespace ComposableCollections.Dictionary.Anonymous {
 public class AnonymousReadWriteCachedDisposableDictionary<TKey, TValue> : IReadWriteCachedDisposableDictionary<TKey, TValue> {
 private readonly IComposableDictionary<TKey, TValue> _composableDictionary;
 private readonly Action _dispose;

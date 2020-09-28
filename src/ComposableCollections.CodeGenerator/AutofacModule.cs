@@ -17,8 +17,10 @@ namespace ComposableCollections.CodeGenerator
                 .Keyed<GeneratorBase>(typeof(DecoratorBaseClassesGeneratorSettings));
             builder.RegisterType<SubclassCombinationImplementationsGenerator>()
                 .Keyed<GeneratorBase>(typeof(SubclassCombinationImplementationsGeneratorSettings));
+            
             builder.Register<IIoService>(_ => new IoService(false)).SingleInstance();
             builder.RegisterType<CommandLineService>().AsImplementedInterfaces().SingleInstance();
+            builder.RegisterType<PathService>().AsImplementedInterfaces().SingleInstance();
         }
     }
 }

@@ -4,9 +4,9 @@ namespace ComposableCollections.CodeGenerator
 {
     public class ClassNameBuilder
     {
-        [XmlAttribute("SearchRegex")]
+        [XmlAttribute("Search")]
         public string Search { get; set; }
-        [XmlAttribute("ReplaceRegex")]
+        [XmlAttribute("Replace")]
         public string Replacement { get; set; }
     }
 }

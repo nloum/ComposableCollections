@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using IoFluently;
 using Microsoft.CodeAnalysis;
 
 namespace ComposableCollections.CodeGenerator
@@ -9,7 +10,7 @@ namespace ComposableCollections.CodeGenerator
     {
         public abstract void NonGenericInitialize(object settings);
 
-        public abstract ImmutableDictionary<string, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel);
+        public abstract ImmutableDictionary<AbsolutePath, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel);
     }
     
     public abstract class GeneratorBase<TSettings> : GeneratorBase

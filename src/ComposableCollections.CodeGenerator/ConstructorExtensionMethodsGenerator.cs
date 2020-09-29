@@ -85,9 +85,42 @@ namespace ComposableCollections.CodeGenerator
             
             extensionMethods.Add($"namespace {_settings.Namespace} {{\n");
             extensionMethods.Add($"public static class {_settings.ExtensionMethodName}Extensions {{\n");
+
+            var constructors = new List<Tuple<ClassDeclarationSyntax, ConstructorDeclarationSyntax, SemanticModel>>();
             
             foreach (var aClass in theClasses.Values)
             {
+                var aClassSemanticModel = getSemanticModel(syntaxTreeForEachClass[aClass]);
+                usings.Add($"using {aClassSemanticModel.GetDeclaredSymbol(aClass).ContainingNamespace};\n");
+
+                foreach (var constructor in aClass.Members.OfType<ConstructorDeclarationSyntax>().Where(constructor => constructor.Modifiers.Any(SyntaxKind.PublicKeyword)))
+                {
+                    constructors.Add( Tuple.Create(aClass, constructor, aClassSemanticModel) );
+                }
+            }
+            
+            var memberDeduplicationService = new MemberDeduplicationService();
+            var deduplicatedConstructors = memberDeduplicationService.DeduplicateMembers(constructors, x => x.Item3.GetDeclaredSymbol(x.Item2));
+
+            foreach (var deduplicatedMember in deduplicatedConstructors)
+            {
+                var (aClass, constructor, aClassSemanticModel) = deduplicatedMember.Value;
+                
+                var constructorArguments = string.Join(", ",
+                    constructor.ParameterList.Parameters.Select(parameter => parameter.Identifier.Text));
+
+                var parameters = string.Join(", ",
+                    constructor.ParameterList.Parameters.Select(parameter =>
+                        $"{parameter.Type} {parameter.Identifier.Text}"));
+                    
+                usings.AddRange(constructor.ParameterList.Parameters.Select(parameter => $"using {aClassSemanticModel.GetSymbolInfo(parameter.Type).Symbol.ContainingNamespace};\n"));
+
+                var theInterface = aClass.BaseList.Types.First(type =>
+                {
+                    var symbol = aClassSemanticModel.GetSymbolInfo(type.Type).Symbol as INamedTypeSymbol;
+                    return symbol.TypeKind == TypeKind.Interface;
+                });
+                    
                 var typeArgs = string.Join(", ",
                     aClass.TypeParameterList.Parameters.Select(parameter => parameter.Identifier.Text));
                 if (!string.IsNullOrWhiteSpace(typeArgs))
@@ -95,30 +128,9 @@ namespace ComposableCollections.CodeGenerator
                     typeArgs = $"<{typeArgs}>";
                 }
 
-                var aClassSemanticModel = getSemanticModel(syntaxTreeForEachClass[aClass]);
-                usings.Add($"using {aClassSemanticModel.GetDeclaredSymbol(aClass).ContainingNamespace};\n");
-
-                foreach (var constructor in aClass.Members.OfType<ConstructorDeclarationSyntax>().Where(constructor => constructor.Modifiers.Any(SyntaxKind.PublicKeyword)))
-                {
-                    var constructorArguments = string.Join(", ",
-                        constructor.ParameterList.Parameters.Select(parameter => parameter.Identifier.Text));
-
-                    var parameters = string.Join(", ",
-                        constructor.ParameterList.Parameters.Select(parameter =>
-                            $"{parameter.Type} {parameter.Identifier.Text}"));
-                    
-                    usings.AddRange(constructor.ParameterList.Parameters.Select(parameter => $"using {aClassSemanticModel.GetSymbolInfo(parameter.Type).Symbol.ContainingNamespace};\n"));
-
-                    var theInterface = aClass.BaseList.Types.First(type =>
-                    {
-                        var symbol = aClassSemanticModel.GetSymbolInfo(type.Type).Symbol as INamedTypeSymbol;
-                        return symbol.TypeKind == TypeKind.Interface;
-                    });
-                    
-                    extensionMethods.Add($"public static {theInterface.Type} {_settings.ExtensionMethodName}{typeArgs}(this {parameters}) {{\n");
-                    extensionMethods.Add($"return new {aClass.Identifier}{typeArgs}({constructorArguments});");
-                    extensionMethods.Add("}\n");
-                }
+                extensionMethods.Add($"public static {theInterface.Type} {_settings.ExtensionMethodName}{typeArgs}(this {parameters}) {{\n");
+                extensionMethods.Add($"return new {aClass.Identifier}{typeArgs}({constructorArguments});");
+                extensionMethods.Add("}\n");
             }
             
             extensionMethods.Add("}\n}\n");

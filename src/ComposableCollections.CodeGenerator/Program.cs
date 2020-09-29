@@ -11,7 +11,6 @@ namespace ComposableCollections.CodeGenerator
         {
 	        var parser = new Parser(with => with.EnableDashDash = true);
 	        var parserResult = parser.ParseArguments<CommandLineOptions>(args);
-	        Console.WriteLine(parserResult);
 	        parserResult
 		        .WithNotParsed(errors =>
 		        {

@@ -115,7 +115,5 @@ namespace ComposableCollections.CodeGenerator
 
             return results.ToImmutableDictionary();
         }
-
-        
     }
 }

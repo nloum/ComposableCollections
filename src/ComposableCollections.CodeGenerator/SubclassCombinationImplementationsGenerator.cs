@@ -187,7 +187,8 @@ namespace ComposableCollections.CodeGenerator
                          ifaceBaseInterfaces = ifaceBaseInterfaces.Select(Utilities.GetWithoutTypeArguments).ToImmutableHashSet();
                     }
                     
-                    if (iface.Identifier == subInterface.Identifier)
+                    //if (iface.Identifier == subInterface.Identifier)
+                    if (subInterface.Identifier.Text == "IDisposableDictionary")
                     {
                         int a = 3;
                         var union = ifaceBaseInterfaces.Union(desiredAdaptedBaseInterfaces);
@@ -205,9 +206,48 @@ namespace ComposableCollections.CodeGenerator
                         }
                     }
                 }
+
+                if (bestAdaptedInterface == null)
+                {
+                    int b = 3;
+                    
+                    foreach (var iface in interfaceDeclarations.Values)
+                    {
+                        var ifaceBaseInterfaces = Utilities
+                            .GetBaseInterfaces(getSemanticModel(syntaxTreeForEachInterface[iface])
+                                .GetDeclaredSymbol(iface))
+                            .Select(x => x.ToString()).ToImmutableHashSet();
+                    
+                        if (_settings.AllowDifferentTypeParameters)
+                        {
+                            ifaceBaseInterfaces = ifaceBaseInterfaces.Select(Utilities.GetWithoutTypeArguments).ToImmutableHashSet();
+                        }
+                    
+                        if (iface.Identifier == subInterface.Identifier)
+                        {
+                            int a = 3;
+                            var union = ifaceBaseInterfaces.Union(desiredAdaptedBaseInterfaces);
+                            var except1 = ifaceBaseInterfaces.Except(desiredAdaptedBaseInterfaces);
+                            var except2 = desiredAdaptedBaseInterfaces.Except(ifaceBaseInterfaces);
+                        }
+
+                        if (desiredAdaptedBaseInterfaces.Count == ifaceBaseInterfaces.Count)
+                        {
+                            if (ifaceBaseInterfaces.All(ifaceBaseInterface =>
+                                desiredAdaptedBaseInterfaces.Contains(ifaceBaseInterface)))
+                            {
+                                bestAdaptedInterface = iface;
+                                break;
+                            }
+                        }
+                    }
+                }
+
                 classDefinition.Add(
                     $"private readonly {bestAdaptedInterface.Identifier}{adaptedParameterTypeArgs} _adapted;\n");
 
+                
+                
                 foreach (var constructor in constructors)
                 {
                     var constructorParameters = new List<string>();

@@ -41,7 +41,7 @@ namespace ComposableCollections.Dictionary.WithBuiltInKey
             return GetEnumerator();
         }
 
-        public IEnumerator<IKeyValue<TKey, TValue>> GetEnumerator()
+        public IEnumerator<TValue> GetEnumerator()
         {
             return _source.GetEnumerator();
         }

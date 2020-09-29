@@ -6,7 +6,8 @@ using ComposableCollections.Dictionary.Sources;
 using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
 using System.Linq;
-using System.Collections.Generic;using ComposableCollections.Dictionary.Interfaces;namespace ComposableCollections.Dictionary.Decorators {
+using System.Collections.Generic;using ComposableCollections.Dictionary.Interfaces;
+namespace ComposableCollections.Dictionary.Decorators {
 public class ReadWriteCachedQueryableGetOrDefaultDictionaryDecorator<TKey, TValue> : DictionaryGetOrDefaultDecorator<TKey, TValue>, IReadWriteCachedQueryableDictionary<TKey, TValue> {
 private readonly IReadWriteCachedQueryableDictionary<TKey, TValue> _adapted;
 public ReadWriteCachedQueryableGetOrDefaultDictionaryDecorator(IReadWriteCachedQueryableDictionary<TKey, TValue> adapted, GetDefaultValueWithOptionalPersistence<TKey, TValue> getDefaultValue) : base(adapted, getDefaultValue) {

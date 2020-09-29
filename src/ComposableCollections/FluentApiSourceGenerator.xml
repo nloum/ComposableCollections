@@ -111,12 +111,9 @@
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="ConcurrentWriteCachedDictionaryAdapter"
                                         Folder="Dictionary/Adapters">
       <ClassNameModifiers>
-        <ClassNameModifier Search="WriteCached" Replacement="ConcurrentWriteCached" />
-        <ClassNameModifier Search="Dictionary" Replacement="DictionaryAdapter" />
+        <ClassNameModifier Search="WriteCached" Replace="ConcurrentWriteCached" />
+        <ClassNameModifier Search="Dictionary" Replace="DictionaryAdapter" />
       </ClassNameModifiers>
-      <ClassNameBlacklist>
-        <ClassName>WithBuiltInKey</ClassName>
-      </ClassNameBlacklist>
     </SubclassCombinationImplementations>
     <ConstructorExtensionMethods Namespace="ComposableCollections" ExtensionMethodName="WithWriteCaching">
       <BaseClasses>
@@ -127,7 +124,7 @@
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Decorators" BaseClass="DictionaryGetOrDefaultDecorator"
                                         Folder="Dictionary/Decorators">
       <ClassNameModifiers>
-        <ClassNameModifier Search="Dictionary" Replacement="GetOrDefaultDictionaryDecorator" />
+        <ClassNameModifier Search="Dictionary" Replace="GetOrDefaultDictionaryDecorator" />
       </ClassNameModifiers>
     </SubclassCombinationImplementations>
     <ConstructorExtensionMethods Namespace="ComposableCollections" ExtensionMethodName="WithDefaultValue">
@@ -139,7 +136,7 @@
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Decorators" BaseClass="DictionaryGetOrRefreshDecorator"
                                         Folder="Dictionary/Decorators">
       <ClassNameModifiers>
-        <ClassNameModifier Search="Dictionary" Replacement="GetOrRefreshDictionaryDecorator" />
+        <ClassNameModifier Search="Dictionary" Replace="GetOrRefreshDictionaryDecorator" />
       </ClassNameModifiers>
     </SubclassCombinationImplementations>
     <ConstructorExtensionMethods Namespace="ComposableCollections" ExtensionMethodName="WithRefreshing">
@@ -154,13 +151,13 @@
         <Regex>Queryable</Regex>
       </ClassNameBlacklist>
       <ClassNameModifiers>
-        <ClassNameModifier Search="Dictionary" Replacement="ReadWriteLockDictionaryDecorator" />
+        <ClassNameModifier Search="Dictionary" Replace="ReadWriteLockDictionaryDecorator" />
       </ClassNameModifiers>
     </SubclassCombinationImplementations>
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Decorators" BaseClass="ReadWriteLockQueryableDictionaryDecorator"
                                         Folder="Dictionary/Decorators">
       <ClassNameModifiers>
-        <ClassNameModifier Search="Dictionary" Replacement="ReadWriteLockDictionaryDecorator" />
+        <ClassNameModifier Search="Dictionary" Replace="ReadWriteLockDictionaryDecorator" />
       </ClassNameModifiers>
     </SubclassCombinationImplementations>
     <ConstructorExtensionMethods Namespace="ComposableCollections" ExtensionMethodName="WithReadWriteLock">
@@ -172,19 +169,17 @@
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="MappingKeysAndValuesDictionaryAdapter"
                                         AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
       <ClassNameBlacklist>
-        <ClassName>WithBuiltInKey</ClassName>
         <ClassName>Queryable</ClassName>
         <ClassName>ReadCached</ClassName>
         <ClassName>ReadWriteCached</ClassName>
       </ClassNameBlacklist>
       <ClassNameModifiers>
-        <ClassNameModifier Search="Dictionary" Replacement="MappingKeysAndValuesDictionaryAdapter" />
+        <ClassNameModifier Search="Dictionary" Replace="MappingKeysAndValuesDictionaryAdapter" />
       </ClassNameModifiers>
     </SubclassCombinationImplementations>
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="MappingKeysAndValuesReadOnlyDictionaryAdapter"
                                         AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
       <ClassNameBlacklist>
-        <ClassName>WithBuiltInKey</ClassName>
         <ClassName>Queryable</ClassName>
         <ClassName>ReadCached</ClassName>
         <ClassName>ReadWriteCached</ClassName>
@@ -193,25 +188,23 @@
         <ClassName>ReadOnly</ClassName>
       </ClassNameWhitelist>
       <ClassNameModifiers>
-        <ClassNameModifier Search="Dictionary" Replacement="MappingKeysAndValuesDictionaryAdapter" />
+        <ClassNameModifier Search="Dictionary" Replace="MappingKeysAndValuesDictionaryAdapter" />
       </ClassNameModifiers>
     </SubclassCombinationImplementations>
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="MappingValuesDictionaryAdapter"
                                         AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
       <ClassNameBlacklist>
-        <ClassName>WithBuiltInKey</ClassName>
         <ClassName>Queryable</ClassName>
         <ClassName>ReadCached</ClassName>
         <ClassName>ReadWriteCached</ClassName>
       </ClassNameBlacklist>
       <ClassNameModifiers>
-        <ClassNameModifier Search="Dictionary" Replacement="MappingValuesDictionaryAdapter" />
+        <ClassNameModifier Search="Dictionary" Replace="MappingValuesDictionaryAdapter" />
       </ClassNameModifiers>
     </SubclassCombinationImplementations>
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="MappingValuesReadOnlyDictionaryAdapter"
                                         AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
       <ClassNameBlacklist>
-        <ClassName>WithBuiltInKey</ClassName>
         <ClassName>Queryable</ClassName>
         <ClassName>ReadCached</ClassName>
         <ClassName>ReadWriteCached</ClassName>
@@ -220,7 +213,7 @@
         <ClassName>ReadOnly</ClassName>
       </ClassNameWhitelist>
       <ClassNameModifiers>
-        <ClassNameModifier Search="Dictionary" Replacement="MappingValuesDictionaryAdapter" />
+        <ClassNameModifier Search="Dictionary" Replace="MappingValuesDictionaryAdapter" />
       </ClassNameModifiers>
     </SubclassCombinationImplementations>
     <ConstructorExtensionMethods Namespace="ComposableCollections" ExtensionMethodName="WithMapping">

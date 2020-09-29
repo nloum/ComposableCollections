@@ -64,6 +64,10 @@ namespace ComposableCollections.CodeGenerator
                 var outputFiles = generator.Generate(syntaxTrees, tree => compilation.GetSemanticModel(tree));
                 foreach (var outputFile in outputFiles)
                 {
+                    if (!outputFile.Key.Exists())
+                    {
+                        int a = 3;
+                    }
                     _ioService.WriteText(outputFile.Key, outputFile.Value);
                 }
             }

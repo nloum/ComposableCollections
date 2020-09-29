@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ComposableCollections.Dictionary.Base;
 using ComposableCollections.Dictionary.Interfaces;
+
 namespace ComposableCollections.Dictionary.Adapters {
 public class DisposableReadOnlyMappingKeysAndValuesDictionaryAdapter<TSourceKey, TSourceValue, TKey, TValue> : MappingKeysAndValuesReadOnlyDictionaryAdapter<TSourceKey, TSourceValue, TKey, TValue>, IDisposableReadOnlyDictionary<TKey, TValue> {
 private readonly IDisposableReadOnlyDictionary<TSourceKey, TSourceValue> _adapted;

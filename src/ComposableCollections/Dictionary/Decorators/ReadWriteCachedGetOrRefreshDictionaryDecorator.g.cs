@@ -5,7 +5,8 @@ using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Sources;
 using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
-using ComposableCollections.Dictionary.Interfaces;namespace ComposableCollections.Dictionary.Decorators {
+using ComposableCollections.Dictionary.Interfaces;
+namespace ComposableCollections.Dictionary.Decorators {
 public class ReadWriteCachedGetOrRefreshDictionaryDecorator<TKey, TValue> : DictionaryGetOrRefreshDecorator<TKey, TValue>, IReadWriteCachedDictionary<TKey, TValue> {
 private readonly IReadWriteCachedDictionary<TKey, TValue> _adapted;
 public ReadWriteCachedGetOrRefreshDictionaryDecorator(IReadWriteCachedDictionary<TKey, TValue> adapted, RefreshValueWithOptionalPersistence<TKey, TValue> refreshValue) : base(adapted, refreshValue) {

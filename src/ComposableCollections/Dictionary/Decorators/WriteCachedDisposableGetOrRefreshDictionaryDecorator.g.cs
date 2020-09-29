@@ -5,6 +5,7 @@ using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Sources;
 using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
+
 namespace ComposableCollections.Dictionary.Decorators {
 public class WriteCachedDisposableGetOrRefreshDictionaryDecorator<TKey, TValue> : DictionaryGetOrRefreshDecorator<TKey, TValue>, IWriteCachedDisposableDictionary<TKey, TValue> {
 private readonly IWriteCachedDisposableDictionary<TKey, TValue> _adapted;

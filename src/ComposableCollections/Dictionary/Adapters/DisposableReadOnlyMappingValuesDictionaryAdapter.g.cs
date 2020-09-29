@@ -1,5 +1,6 @@
 ﻿using System;
 using ComposableCollections.Dictionary.Interfaces;
+
 namespace ComposableCollections.Dictionary.Adapters {
 public class DisposableReadOnlyMappingValuesDictionaryAdapter<TKey, TSourceValue, TValue> : MappingValuesReadOnlyDictionaryAdapter<TKey, TSourceValue, TValue>, IDisposableReadOnlyDictionary<TKey, TValue> {
 private readonly IDisposableReadOnlyDictionary<TKey, TSourceValue> _adapted;

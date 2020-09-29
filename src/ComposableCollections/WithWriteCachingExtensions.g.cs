@@ -34,21 +34,21 @@ using System.Xml;
 using UtilityDisposables;
 namespace ComposableCollections {
 public static class WithWriteCachingExtensions {
-public static IWriteCachedQueryableDictionary<TKey, TValue> WithWriteCaching<TKey, TValue>(this IWriteCachedQueryableDictionary<TKey, TValue> adapted, IComposableDictionary<TKey, TValue> addedOrUpdated, IComposableDictionary<TKey, TValue> removed) {
-return new ConcurrentWriteCachedQueryableDictionaryAdapter<TKey, TValue>(adapted, addedOrUpdated, removed);}
 public static IReadWriteCachedDictionary<TKey, TValue> WithWriteCaching<TKey, TValue>(this IReadWriteCachedDictionary<TKey, TValue> adapted, IComposableDictionary<TKey, TValue> addedOrUpdated, IComposableDictionary<TKey, TValue> removed) {
 return new ReadConcurrentWriteCachedDictionaryAdapter<TKey, TValue>(adapted, addedOrUpdated, removed);}
-public static IReadWriteCachedDisposableDictionary<TKey, TValue> WithWriteCaching<TKey, TValue>(this IReadWriteCachedDisposableDictionary<TKey, TValue> adapted, IComposableDictionary<TKey, TValue> addedOrUpdated, IComposableDictionary<TKey, TValue> removed) {
-return new ReadConcurrentWriteCachedDisposableDictionaryAdapter<TKey, TValue>(adapted, addedOrUpdated, removed);}
-public static IReadWriteCachedDisposableQueryableDictionary<TKey, TValue> WithWriteCaching<TKey, TValue>(this IReadWriteCachedDisposableQueryableDictionary<TKey, TValue> adapted, IComposableDictionary<TKey, TValue> addedOrUpdated, IComposableDictionary<TKey, TValue> removed) {
-return new ReadConcurrentWriteCachedDisposableQueryableDictionaryAdapter<TKey, TValue>(adapted, addedOrUpdated, removed);}
 public static IWriteCachedDictionary<TKey, TValue> WithWriteCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> flushCacheTo, IComposableDictionary<TKey, TValue> addedOrUpdated, IComposableDictionary<TKey, TValue> removed) {
 return new ConcurrentWriteCachedDictionaryAdapter<TKey, TValue>(flushCacheTo, addedOrUpdated, removed);}
 public static IWriteCachedDisposableDictionary<TKey, TValue> WithWriteCaching<TKey, TValue>(this IWriteCachedDisposableDictionary<TKey, TValue> adapted, IComposableDictionary<TKey, TValue> addedOrUpdated, IComposableDictionary<TKey, TValue> removed) {
 return new ConcurrentWriteCachedDisposableDictionaryAdapter<TKey, TValue>(adapted, addedOrUpdated, removed);}
-public static IReadWriteCachedQueryableDictionary<TKey, TValue> WithWriteCaching<TKey, TValue>(this IReadWriteCachedQueryableDictionary<TKey, TValue> adapted, IComposableDictionary<TKey, TValue> addedOrUpdated, IComposableDictionary<TKey, TValue> removed) {
-return new ReadConcurrentWriteCachedQueryableDictionaryAdapter<TKey, TValue>(adapted, addedOrUpdated, removed);}
 public static IWriteCachedDisposableQueryableDictionary<TKey, TValue> WithWriteCaching<TKey, TValue>(this IWriteCachedDisposableQueryableDictionary<TKey, TValue> adapted, IComposableDictionary<TKey, TValue> addedOrUpdated, IComposableDictionary<TKey, TValue> removed) {
 return new ConcurrentWriteCachedDisposableQueryableDictionaryAdapter<TKey, TValue>(adapted, addedOrUpdated, removed);}
+public static IReadWriteCachedDisposableDictionary<TKey, TValue> WithWriteCaching<TKey, TValue>(this IReadWriteCachedDisposableDictionary<TKey, TValue> adapted, IComposableDictionary<TKey, TValue> addedOrUpdated, IComposableDictionary<TKey, TValue> removed) {
+return new ReadConcurrentWriteCachedDisposableDictionaryAdapter<TKey, TValue>(adapted, addedOrUpdated, removed);}
+public static IReadWriteCachedQueryableDictionary<TKey, TValue> WithWriteCaching<TKey, TValue>(this IReadWriteCachedQueryableDictionary<TKey, TValue> adapted, IComposableDictionary<TKey, TValue> addedOrUpdated, IComposableDictionary<TKey, TValue> removed) {
+return new ReadConcurrentWriteCachedQueryableDictionaryAdapter<TKey, TValue>(adapted, addedOrUpdated, removed);}
+public static IReadWriteCachedDisposableQueryableDictionary<TKey, TValue> WithWriteCaching<TKey, TValue>(this IReadWriteCachedDisposableQueryableDictionary<TKey, TValue> adapted, IComposableDictionary<TKey, TValue> addedOrUpdated, IComposableDictionary<TKey, TValue> removed) {
+return new ReadConcurrentWriteCachedDisposableQueryableDictionaryAdapter<TKey, TValue>(adapted, addedOrUpdated, removed);}
+public static IWriteCachedQueryableDictionary<TKey, TValue> WithWriteCaching<TKey, TValue>(this IWriteCachedQueryableDictionary<TKey, TValue> adapted, IComposableDictionary<TKey, TValue> addedOrUpdated, IComposableDictionary<TKey, TValue> removed) {
+return new ConcurrentWriteCachedQueryableDictionaryAdapter<TKey, TValue>(adapted, addedOrUpdated, removed);}
 }
 }

@@ -9,7 +9,8 @@ using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Sources;
 using ComposableCollections.Dictionary.Write;
 using SimpleMonads;
-using ComposableCollections.Dictionary.Interfaces;namespace ComposableCollections.Dictionary.Adapters {
+using ComposableCollections.Dictionary.Interfaces;
+namespace ComposableCollections.Dictionary.Adapters {
 public class ReadConcurrentWriteCachedDisposableDictionaryAdapter<TKey, TValue> : ConcurrentWriteCachedDictionaryAdapter<TKey, TValue>, IReadWriteCachedDisposableDictionary<TKey, TValue> {
 private readonly IReadWriteCachedDisposableDictionary<TKey, TValue> _adapted;
 public ReadConcurrentWriteCachedDisposableDictionaryAdapter(IReadWriteCachedDisposableDictionary<TKey, TValue> adapted, IComposableDictionary<TKey, TValue> addedOrUpdated, IComposableDictionary<TKey, TValue> removed) : base(adapted, addedOrUpdated, removed) {

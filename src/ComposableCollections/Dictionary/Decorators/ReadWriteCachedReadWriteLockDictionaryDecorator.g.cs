@@ -6,7 +6,8 @@ using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Utilities;
 using UtilityDisposables;
 using ComposableCollections.Dictionary.Write;
-using ComposableCollections.Dictionary.Interfaces;namespace ComposableCollections.Dictionary.Decorators {
+using ComposableCollections.Dictionary.Interfaces;
+namespace ComposableCollections.Dictionary.Decorators {
 public class ReadWriteCachedReadWriteLockDictionaryDecorator<TKey, TValue> : ReadWriteLockDictionaryDecorator<TKey, TValue>, IReadWriteCachedDictionary<TKey, TValue> {
 private readonly IReadWriteCachedDictionary<TKey, TValue> _adapted;
 public ReadWriteCachedReadWriteLockDictionaryDecorator(IReadWriteCachedDictionary<TKey, TValue> adapted) : base(adapted) {

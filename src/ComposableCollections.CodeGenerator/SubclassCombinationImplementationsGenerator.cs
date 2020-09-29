@@ -137,13 +137,16 @@ namespace ComposableCollections.CodeGenerator
                 {
                     continue;
                 }
-                
+
+                var classPath = _pathService.SourceCodeRootFolder / (_settings.Folder ?? ".") /
+                                (subClassName + ".g.cs");
+
                 usings.AddRange(Utilities.GetDescendantsOfType<UsingDirectiveSyntax>(subInterface.SyntaxTree.GetRoot())
                     .Select(us => $"using {us.Name};\n"));
                 usings.AddRange(Utilities.GetDescendantsOfType<UsingDirectiveSyntax>(theClass.SyntaxTree.GetRoot())
                     .Select(us => $"using {us.Name};\n"));
 
-                classDefinition.Add($"namespace {_settings.Namespace} {{\n");
+                classDefinition.Add($"\nnamespace {_settings.Namespace} {{\n");
                 var subInterfaceTypeArgs =
                     string.Join(", ", subInterface.TypeParameterList.Parameters.Select(p => p.Identifier));
                 if (!string.IsNullOrWhiteSpace(subInterfaceTypeArgs))
@@ -207,47 +210,9 @@ namespace ComposableCollections.CodeGenerator
                     }
                 }
 
-                if (bestAdaptedInterface == null)
-                {
-                    int b = 3;
-                    
-                    foreach (var iface in interfaceDeclarations.Values)
-                    {
-                        var ifaceBaseInterfaces = Utilities
-                            .GetBaseInterfaces(getSemanticModel(syntaxTreeForEachInterface[iface])
-                                .GetDeclaredSymbol(iface))
-                            .Select(x => x.ToString()).ToImmutableHashSet();
-                    
-                        if (_settings.AllowDifferentTypeParameters)
-                        {
-                            ifaceBaseInterfaces = ifaceBaseInterfaces.Select(Utilities.GetWithoutTypeArguments).ToImmutableHashSet();
-                        }
-                    
-                        if (iface.Identifier == subInterface.Identifier)
-                        {
-                            int a = 3;
-                            var union = ifaceBaseInterfaces.Union(desiredAdaptedBaseInterfaces);
-                            var except1 = ifaceBaseInterfaces.Except(desiredAdaptedBaseInterfaces);
-                            var except2 = desiredAdaptedBaseInterfaces.Except(ifaceBaseInterfaces);
-                        }
-
-                        if (desiredAdaptedBaseInterfaces.Count == ifaceBaseInterfaces.Count)
-                        {
-                            if (ifaceBaseInterfaces.All(ifaceBaseInterface =>
-                                desiredAdaptedBaseInterfaces.Contains(ifaceBaseInterface)))
-                            {
-                                bestAdaptedInterface = iface;
-                                break;
-                            }
-                        }
-                    }
-                }
-
                 classDefinition.Add(
                     $"private readonly {bestAdaptedInterface.Identifier}{adaptedParameterTypeArgs} _adapted;\n");
 
-                
-                
                 foreach (var constructor in constructors)
                 {
                     var constructorParameters = new List<string>();
@@ -292,7 +257,7 @@ namespace ComposableCollections.CodeGenerator
                 }
 
                 classDefinition.Add("}\n}\n");
-                result[_pathService.SourceCodeRootFolder / (_settings.Folder ?? ".") / (subClassName + ".g.cs")] = string.Join("", usings.Distinct().Concat(classDefinition));
+                result[classPath] = string.Join("", usings.Distinct().Concat(classDefinition));
             }
 
             return result.ToImmutableDictionary();

@@ -1,7 +1,8 @@
 ﻿using System;
 using ComposableCollections.Dictionary.Interfaces;
 using System.Collections.Generic;
-using ComposableCollections.Dictionary.Interfaces;namespace ComposableCollections.Dictionary.Adapters {
+using ComposableCollections.Dictionary.Interfaces;
+namespace ComposableCollections.Dictionary.Adapters {
 public class ReadCachedDisposableReadOnlyMappingValuesDictionaryAdapter<TKey, TSourceValue, TValue> : MappingValuesReadOnlyDictionaryAdapter<TKey, TSourceValue, TValue>, IReadCachedDisposableReadOnlyDictionary<TKey, TValue> {
 private readonly IReadCachedDisposableReadOnlyDictionary<TKey, TSourceValue> _adapted;
 public ReadCachedDisposableReadOnlyMappingValuesDictionaryAdapter(IReadCachedDisposableReadOnlyDictionary<TKey, TSourceValue> adapted) : base(adapted) {

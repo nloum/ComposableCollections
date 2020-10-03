@@ -10,18 +10,11 @@ private readonly IReadCachedDisposableReadOnlyDictionary<TKey, TValue> _decorate
 public ReadCachedDisposableReadOnlyDictionaryDecoratorBase(IReadCachedDisposableReadOnlyDictionary<TKey, TValue> decoratedObject) {
 _decoratedObject = decoratedObject;
 }
-int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _decoratedObject.Count;
-void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache() {
-_decoratedObject.ReloadCache();
+void IDisposable.Dispose() {
+_decoratedObject.Dispose();
 }
-void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache( TKey key) {
-_decoratedObject.ReloadCache( key);
-}
-void IReadCachedReadOnlyDictionary<TKey, TValue>.InvalidCache() {
-_decoratedObject.InvalidCache();
-}
-void IReadCachedReadOnlyDictionary<TKey, TValue>.InvalidCache( TKey key) {
-_decoratedObject.InvalidCache( key);
+System.Collections.IEnumerator IEnumerable.GetEnumerator() {
+return _decoratedObject.GetEnumerator();
 }
 System.Collections.Generic.IEqualityComparer<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Comparer => _decoratedObject.Comparer;
 TValue IComposableReadOnlyDictionary<TKey, TValue>.GetValue( TKey key) {
@@ -36,14 +29,21 @@ return _decoratedObject.ContainsKey( key);
 IMaybe<TValue> IComposableReadOnlyDictionary<TKey, TValue>.TryGetValue( TKey key) {
 return _decoratedObject.TryGetValue( key);
 }
-System.Collections.IEnumerator IEnumerable.GetEnumerator() {
-return _decoratedObject.GetEnumerator();
-}
+int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _decoratedObject.Count;
 System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
 }
-void IDisposable.Dispose() {
-_decoratedObject.Dispose();
+void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache() {
+_decoratedObject.ReloadCache();
+}
+void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache( TKey key) {
+_decoratedObject.ReloadCache( key);
+}
+void IReadCachedReadOnlyDictionary<TKey, TValue>.InvalidCache() {
+_decoratedObject.InvalidCache();
+}
+void IReadCachedReadOnlyDictionary<TKey, TValue>.InvalidCache( TKey key) {
+_decoratedObject.InvalidCache( key);
 }
 }
 }

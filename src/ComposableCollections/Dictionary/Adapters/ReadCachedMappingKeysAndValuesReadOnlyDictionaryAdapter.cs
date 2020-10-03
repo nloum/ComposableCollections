@@ -5,7 +5,8 @@ namespace ComposableCollections.Dictionary.Adapters
 {
     public class
         ReadCachedMappingKeysAndValuesReadOnlyDictionaryAdapter<TSourceKey, TSourceValue, TKey, TValue> :
-            MappingKeysAndValuesReadOnlyDictionaryAdapter<TSourceKey, TSourceValue, TKey, TValue>
+            MappingKeysAndValuesReadOnlyDictionaryAdapter<TSourceKey, TSourceValue, TKey, TValue>,
+            IReadCachedReadOnlyDictionary<TKey, TValue>
     {
         private readonly IReadCachedReadOnlyDictionary<TSourceKey, TSourceValue> _innerValues;
         private readonly Func<TKey, TSourceKey> _convertToKey1;

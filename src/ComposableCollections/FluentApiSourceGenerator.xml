@@ -264,6 +264,49 @@
 
 
 
+    <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="ReadCachedQueryableMappingKeysAndValuesDictionaryAdapter"
+                                        AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
+      <ClassNameWhitelist>
+        <ClassName>Queryable</ClassName>
+      </ClassNameWhitelist>
+      <ClassNameModifiers>
+        <ClassNameModifier Search="Dictionary" Replace="MappingKeysAndValuesDictionaryAdapter" />
+      </ClassNameModifiers>
+    </SubclassCombinationImplementations>
+    <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="ReadCachedQueryableMappingKeysAndValuesReadOnlyDictionaryAdapter"
+                                        AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
+      <ClassNameWhitelist>
+        <ClassName>ReadOnly</ClassName>
+        <ClassName>Queryable</ClassName>
+      </ClassNameWhitelist>
+      <ClassNameModifiers>
+        <ClassNameModifier Search="Dictionary" Replace="MappingKeysAndValuesDictionaryAdapter" />
+      </ClassNameModifiers>
+    </SubclassCombinationImplementations>
+    <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="ReadCachedMappingKeysAndValuesDictionaryAdapter"
+                                        AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
+      <ClassNameBlacklist>
+        <ClassName>Queryable</ClassName>
+      </ClassNameBlacklist>
+      <ClassNameModifiers>
+        <ClassNameModifier Search="Dictionary" Replace="MappingKeysAndValuesDictionaryAdapter" />
+      </ClassNameModifiers>
+    </SubclassCombinationImplementations>
+    <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="ReadCachedMappingKeysAndValuesReadOnlyDictionaryAdapter"
+                                        AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
+      <ClassNameBlacklist>
+        <ClassName>Queryable</ClassName>
+      </ClassNameBlacklist>
+      <ClassNameWhitelist>
+        <ClassName>ReadOnly</ClassName>
+      </ClassNameWhitelist>
+      <ClassNameModifiers>
+        <ClassNameModifier Search="Dictionary" Replace="MappingKeysAndValuesDictionaryAdapter" />
+      </ClassNameModifiers>
+    </SubclassCombinationImplementations>
+
+
+
 
     <ConstructorExtensionMethods Namespace="ComposableCollections" ExtensionMethodName="WithMapping">
       <BaseClasses>

@@ -195,8 +195,6 @@
                                         AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
       <ClassNameBlacklist>
         <ClassName>Queryable</ClassName>
-        <ClassName>ReadCached</ClassName>
-        <ClassName>ReadWriteCached</ClassName>
       </ClassNameBlacklist>
       <ClassNameModifiers>
         <ClassNameModifier Search="Dictionary" Replace="MappingValuesDictionaryAdapter" />
@@ -206,8 +204,6 @@
                                         AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
       <ClassNameBlacklist>
         <ClassName>Queryable</ClassName>
-        <ClassName>ReadCached</ClassName>
-        <ClassName>ReadWriteCached</ClassName>
       </ClassNameBlacklist>
       <ClassNameWhitelist>
         <ClassName>ReadOnly</ClassName>
@@ -216,6 +212,59 @@
         <ClassNameModifier Search="Dictionary" Replace="MappingValuesDictionaryAdapter" />
       </ClassNameModifiers>
     </SubclassCombinationImplementations>
+
+
+
+    <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="QueryableMappingKeysAndValuesDictionaryAdapter"
+                                        AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
+      <ClassNameBlacklist>
+        <ClassName>ReadCached</ClassName>
+        <ClassName>ReadWriteCached</ClassName>
+      </ClassNameBlacklist>
+      <ClassNameWhitelist>
+        <ClassName>Queryable</ClassName>
+      </ClassNameWhitelist>
+      <ClassNameModifiers>
+        <ClassNameModifier Search="Dictionary" Replace="MappingKeysAndValuesDictionaryAdapter" />
+      </ClassNameModifiers>
+    </SubclassCombinationImplementations>
+    <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="QueryableMappingKeysAndValuesReadOnlyDictionaryAdapter"
+                                        AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
+      <ClassNameBlacklist>
+        <ClassName>ReadCached</ClassName>
+        <ClassName>ReadWriteCached</ClassName>
+      </ClassNameBlacklist>
+      <ClassNameWhitelist>
+        <ClassName>ReadOnly</ClassName>
+        <ClassName>Queryable</ClassName>
+      </ClassNameWhitelist>
+      <ClassNameModifiers>
+        <ClassNameModifier Search="Dictionary" Replace="MappingKeysAndValuesDictionaryAdapter" />
+      </ClassNameModifiers>
+    </SubclassCombinationImplementations>
+    <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="QueryableMappingValuesDictionaryAdapter"
+                                        AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
+      <ClassNameWhitelist>
+        <ClassName>Queryable</ClassName>
+      </ClassNameWhitelist>
+      <ClassNameModifiers>
+        <ClassNameModifier Search="Dictionary" Replace="MappingValuesDictionaryAdapter" />
+      </ClassNameModifiers>
+    </SubclassCombinationImplementations>
+    <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="QueryableMappingValuesReadOnlyDictionaryAdapter"
+                                        AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
+      <ClassNameWhitelist>
+        <ClassName>ReadOnly</ClassName>
+        <ClassName>Queryable</ClassName>
+      </ClassNameWhitelist>
+      <ClassNameModifiers>
+        <ClassNameModifier Search="Dictionary" Replace="MappingValuesDictionaryAdapter" />
+      </ClassNameModifiers>
+    </SubclassCombinationImplementations>
+
+
+
+
     <ConstructorExtensionMethods Namespace="ComposableCollections" ExtensionMethodName="WithMapping">
       <BaseClasses>
         <BaseClass>MappingKeysAndValuesDictionaryAdapter</BaseClass>

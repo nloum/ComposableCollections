@@ -113,7 +113,10 @@ namespace ComposableCollections.CodeGenerator
                     constructor.ParameterList.Parameters.Select(parameter =>
                         $"{parameter.Type} {parameter.Identifier.Text}"));
                     
-                usings.AddRange(constructor.ParameterList.Parameters.Select(parameter => $"using {aClassSemanticModel.GetSymbolInfo(parameter.Type).Symbol.ContainingNamespace};\n"));
+                usings.AddRange(constructor.ParameterList.Parameters
+                    .Select(parameter => aClassSemanticModel.GetSymbolInfo(parameter.Type).Symbol)
+                    .Where(symbol => symbol != null)
+                    .Select(symbol => $"using {symbol.ContainingNamespace};\n"));
 
                 var theInterface = aClass.BaseList.Types.First(type =>
                 {

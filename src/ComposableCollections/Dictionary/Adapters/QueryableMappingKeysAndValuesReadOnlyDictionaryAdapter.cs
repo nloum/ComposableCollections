@@ -16,7 +16,7 @@ namespace ComposableCollections.Dictionary.Adapters
         {
         }
 
-        private static Func<TSourceKey,TSourceValue,IKeyValue<TKey,TValue>> Convert(Func<TSourceKey,TKey> convertToKey2, Expression<Func<TSourceValue,TValue>> convertTo2)
+        private static Func<TSourceKey, TSourceValue, IKeyValue<TKey, TValue>> Convert(Func<TSourceKey, TKey> convertToKey2, Expression<Func<TSourceValue, TValue>> convertTo2)
         {
             var compiled = convertTo2.Compile();
             return (key, value) => new KeyValue<TKey, TValue>(convertToKey2(key), compiled(value));

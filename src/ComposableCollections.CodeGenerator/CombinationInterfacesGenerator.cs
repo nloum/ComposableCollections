@@ -229,7 +229,7 @@ namespace ComposableCollections.CodeGenerator
                 var str = generatedInterfaceName.ToString();
                 if (Regex.IsMatch(str, item.Search))
                 {
-                    name = Regex.Replace(str, item.Search, item.Replacement);
+                    name = Regex.Replace(str, item.Search, item.Replace);
                     break;
                 }
             }

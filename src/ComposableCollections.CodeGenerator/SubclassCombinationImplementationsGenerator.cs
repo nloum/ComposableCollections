@@ -123,7 +123,7 @@ namespace ComposableCollections.CodeGenerator
                 var subClassName = subInterface.Identifier.Text.Substring(1);
                 foreach (var modifier in _settings.ClassNameModifiers)
                 {
-                    subClassName = Regex.Replace(subClassName, modifier.Search ?? "", modifier.Replacement ?? "");
+                    subClassName = Regex.Replace(subClassName, modifier.Search ?? "", modifier.Replace ?? "");
                 }
 
                 if (_settings.ClassNameBlacklist.Any(classNameBlacklistItem =>
@@ -131,7 +131,7 @@ namespace ComposableCollections.CodeGenerator
                 {
                     continue;
                 }
-                 
+                
                 if (!_settings.ClassNameWhitelist.All(classNameWhitelistItem =>
                     Regex.IsMatch(subClassName, classNameWhitelistItem)))
                 {
@@ -140,6 +140,11 @@ namespace ComposableCollections.CodeGenerator
 
                 var classPath = _pathService.SourceCodeRootFolder / (_settings.Folder ?? ".") /
                                 (subClassName + ".g.cs");
+
+                if (!classPath.Exists())
+                {
+                    int a = 3;
+                }
 
                 usings.AddRange(Utilities.GetDescendantsOfType<UsingDirectiveSyntax>(subInterface.SyntaxTree.GetRoot())
                     .Select(us => $"using {us.Name};\n"));

@@ -20,9 +20,9 @@
         <Regex>Cached.*Cached</Regex>
       </InterfaceNameBlacklist>
       <InterfaceNameBuilders>
-        <InterfaceNameBuilder SearchRegex="^ReadOnly$" ReplaceRegex="IComposableReadOnlyDictionary" />
-        <InterfaceNameBuilder SearchRegex="^$" ReplaceRegex="IComposableDictionary" />
-        <InterfaceNameBuilder SearchRegex="(.+)" ReplaceRegex="I$1Dictionary" />
+        <InterfaceNameBuilder Search="^ReadOnly$" Replace="IComposableReadOnlyDictionary" />
+        <InterfaceNameBuilder Search="^$" Replace="IComposableDictionary" />
+        <InterfaceNameBuilder Search="(.+)" Replace="I$1Dictionary" />
       </InterfaceNameBuilders>
       <InterfaceNameModifiers>
         <InterfaceNameModifier>
@@ -148,7 +148,7 @@
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Decorators" BaseClass="ReadWriteLockDictionaryDecorator"
                                         Folder="Dictionary/Decorators">
       <ClassNameBlacklist>
-        <Regex>Queryable</Regex>
+        <ClassName>Queryable</ClassName>
       </ClassNameBlacklist>
       <ClassNameModifiers>
         <ClassNameModifier Search="Dictionary" Replace="ReadWriteLockDictionaryDecorator" />

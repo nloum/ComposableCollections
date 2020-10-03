@@ -7,6 +7,6 @@ namespace ComposableCollections.CodeGenerator
         [XmlAttribute("Search")]
         public string Search { get; set; }
         [XmlAttribute("Replace")]
-        public string Replacement { get; set; }
+        public string Replace { get; set; }
     }
 }

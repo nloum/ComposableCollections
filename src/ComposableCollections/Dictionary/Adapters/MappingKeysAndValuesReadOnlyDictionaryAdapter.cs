@@ -12,10 +12,13 @@ namespace ComposableCollections.Dictionary.Adapters
         private Func<TSourceKey, TSourceValue, IKeyValue<TKey, TValue>> _convertTo2;
         private Func<TKey, TSourceKey> _convertToKey1;
         private Func<TSourceKey, TKey> _convertToKey2;
-        
-        protected MappingKeysAndValuesReadOnlyDictionaryAdapter(IComposableReadOnlyDictionary<TSourceKey, TSourceValue> innerValues)
+
+        public MappingKeysAndValuesReadOnlyDictionaryAdapter(IComposableReadOnlyDictionary<TSourceKey, TSourceValue> innerValues, Func<TSourceValue, TValue> convertTo2, Func<TSourceKey, TKey> convertToKey2, Func<TKey, TSourceKey> convertToKey1)
         {
             _innerValues = innerValues;
+            _convertTo2 = (key, value) => new KeyValue<TKey, TValue>(convertToKey2(key), convertTo2(value));
+            _convertToKey1 = convertToKey1;
+            _convertToKey2 = convertToKey2;
         }
 
         public MappingKeysAndValuesReadOnlyDictionaryAdapter(IComposableReadOnlyDictionary<TSourceKey, TSourceValue> innerValues, Func<TSourceKey, TSourceValue, IKeyValue<TKey, TValue>> convertTo2, Func<TSourceKey, TKey> convertToKey2, Func<TKey, TSourceKey> convertToKey1)

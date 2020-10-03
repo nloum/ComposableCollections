@@ -33,6 +33,14 @@ namespace ComposableCollections.CodeGenerator
             var configurationFile = configurationFilePath.AsSerializedXmlFile<Configuration>();
             var configuration = configurationFile.Read();
 
+            var csGeneratedFiles = sourceCodePath.Descendants()
+                .Where(child => child.Name.EndsWith(".g.cs"));
+
+            // foreach (var csGeneratedFile in csGeneratedFiles)
+            // {
+            //     csGeneratedFile.DeleteFile();
+            // }
+
             var csFiles = sourceCodePath.Descendants()
                 .Where(child => child.HasExtension(".cs"));
 			

@@ -16,21 +16,25 @@ namespace ComposableCollections.Dictionary.Adapters
     public class MappingKeysAndValuesDictionaryAdapter<TSourceKey, TSourceValue, TKey, TValue> : DictionaryBase<TKey, TValue>, IComposableDictionary<TKey, TValue>
     {
         private readonly IComposableDictionary<TSourceKey, TSourceValue> _innerValues;
-        private Func<TSourceKey, TSourceValue, IKeyValue<TKey, TValue>> _convertTo2;
-        private Func<TKey, TValue, IKeyValue<TSourceKey, TSourceValue>> _convertTo1;
-        private Func<TKey, TSourceKey> _convertToKey1;
-        private Func<TSourceKey, TKey> _convertToKey2;
+        private readonly Func<TSourceKey, TSourceValue, IKeyValue<TKey, TValue>> _convertTo2;
+        private readonly Func<TKey, TValue, IKeyValue<TSourceKey, TSourceValue>> _convertTo1;
+        private readonly Func<TKey, TSourceKey> _convertToKey1;
+        private readonly Func<TSourceKey, TKey> _convertToKey2;
         
-        protected MappingKeysAndValuesDictionaryAdapter(IComposableDictionary<TSourceKey, TSourceValue> innerValues)
-        {
-            _innerValues = innerValues;
-        }
-
         public MappingKeysAndValuesDictionaryAdapter(IComposableDictionary<TSourceKey, TSourceValue> innerValues, Func<TSourceKey, TSourceValue, IKeyValue<TKey, TValue>> convertTo2, Func<TKey, TValue, IKeyValue<TSourceKey, TSourceValue>> convertTo1, Func<TSourceKey, TKey> convertToKey2, Func<TKey, TSourceKey> convertToKey1)
         {
             _innerValues = innerValues;
             _convertTo2 = convertTo2;
             _convertTo1 = convertTo1;
+            _convertToKey1 = convertToKey1;
+            _convertToKey2 = convertToKey2;
+        }
+
+        public MappingKeysAndValuesDictionaryAdapter(IComposableDictionary<TSourceKey, TSourceValue> innerValues, Func<TSourceValue, TValue> convertTo2, Func<TValue, TSourceValue> convertTo1, Func<TSourceKey, TKey> convertToKey2, Func<TKey, TSourceKey> convertToKey1)
+        {
+            _innerValues = innerValues;
+            _convertTo2 = (key, value) => new KeyValue<TKey, TValue>(convertToKey2(key), convertTo2(value));
+            _convertTo1 = (key, value) => new KeyValue<TSourceKey, TSourceValue>(convertToKey1(key), convertTo1(value));
             _convertToKey1 = convertToKey1;
             _convertToKey2 = convertToKey2;
         }

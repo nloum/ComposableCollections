@@ -4,9 +4,9 @@ namespace ComposableCollections.CodeGenerator
 {
     public class InterfaceNameBuilder
     {
-        [XmlAttribute("SearchRegex")]
+        [XmlAttribute("Search")]
         public string Search { get; set; }
-        [XmlAttribute("ReplaceRegex")]
-        public string Replacement { get; set; }
+        [XmlAttribute("Replace")]
+        public string Replace { get; set; }
     }
 }

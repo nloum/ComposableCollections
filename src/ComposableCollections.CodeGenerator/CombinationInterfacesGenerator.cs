@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using IoFluently;
@@ -67,26 +68,65 @@ namespace ComposableCollections.CodeGenerator
             {
                 if (!GetName(combination, out var name)) continue;
 
-                if (_settings.PreExistingInterfaces.Any(preExistingInterface => preExistingInterface == name) && interfaceDeclarations.TryGetValue(name, out var value))
+                var withSimpleTypeNames = PreExistingInterfacesWithSimpleTypeNames();
+                var matchingPreExisting = withSimpleTypeNames.FirstOrDefault(preExistingInterface => preExistingInterface.simpleTypeName == name);
+                if (matchingPreExisting.simpleTypeName != null)
                 {
                     var genericParams = new Dictionary<string, TypeParameter>();
-
-                    var index = 0;
-                    foreach (var param in value.TypeParameterList.Parameters)
+                    
+                    if (interfaceDeclarations.TryGetValue(name, out var value))
                     {
-                        var variance = TypeParameterVariance.None;
-                        if (param.AttributeLists.Any(SyntaxKind.OutKeyword))
+                        var index = 0;
+                        foreach (var param in value.TypeParameterList.Parameters)
                         {
-                            variance = TypeParameterVariance.Out;
-                        }
+                            var variance = TypeParameterVariance.None;
+                            if (param.AttributeLists.Any(SyntaxKind.OutKeyword))
+                            {
+                                variance = TypeParameterVariance.Out;
+                            }
 
-                        if (param.AttributeLists.Any(SyntaxKind.InKeyword))
+                            if (param.AttributeLists.Any(SyntaxKind.InKeyword))
+                            {
+                                variance = TypeParameterVariance.In;
+                            }
+
+                            genericParams.Add(param.Identifier.Text, new TypeParameter(variance, index));
+                            index++;
+                        }
+                    }
+                    else if (matchingPreExisting.withTypeParameters.Contains("<"))
+                    {
+                        var matchingPreExistingTypeParameters = matchingPreExisting
+                            .withTypeParameters
+                            .Substring(matchingPreExisting.withTypeParameters.IndexOf('<')).Trim('<', '>').Split(",")
+                            .Select(typeParameter => typeParameter.Trim());
+
+                        var index = 0;
+                        foreach (var typeParameter in matchingPreExistingTypeParameters)
                         {
-                            variance = TypeParameterVariance.In;
-                        }
+                            if (typeParameter.Contains(" "))
+                            {
+                                var words = typeParameter.Split(' ');
+                                if (words[0] == "in")
+                                {
+                                    genericParams.Add(words[1], new TypeParameter(TypeParameterVariance.In, index));
+                                }
+                                else if (words[0] == "out")
+                                {
+                                    genericParams.Add(words[1], new TypeParameter(TypeParameterVariance.Out, index));
+                                }
+                                else
+                                {
+                                    throw new ArgumentException($"Unknown type parameter variance {words[0]}");
+                                }
+                            }
+                            else
+                            {
+                                genericParams.Add(typeParameter, new TypeParameter(TypeParameterVariance.None, index));
+                            }
 
-                        genericParams.Add(param.Identifier.Text, new TypeParameter(variance, index));
-                        index++;
+                            index++;
+                        }
                     }
 
                     interfaces.Add(name, genericParams.ToImmutableDictionary());
@@ -109,9 +149,28 @@ namespace ComposableCollections.CodeGenerator
                         baseInterfaces.Add(baseName);
                     }
 
+                    var usings = new StringBuilder();
+                    
                     var baseList = "";
                     if (baseInterfaces.Count > 0)
                     {
+                        var preExistingInterfacesWithSimpleTypeNames = PreExistingInterfacesWithSimpleTypeNames();
+
+                        foreach (var baseInterface in baseInterfaces)
+                        {
+                            var matchingBaseInterface = preExistingInterfacesWithSimpleTypeNames.FirstOrDefault(pre =>
+                                pre.simpleTypeName == baseInterface);
+                            if (matchingBaseInterface.simpleTypeName == null)
+                            {
+                                continue;
+                            }
+                            if (matchingBaseInterface.withTypeParameters.Contains("."))
+                            {
+                                var theNamespace = matchingBaseInterface.withTypeParameters.Substring(0, matchingBaseInterface.withTypeParameters.LastIndexOf('.'));
+                                usings.AppendLine($"using {theNamespace};");
+                            }
+                        }
+                        
                         var joinedBaseInterfaces = string.Join(", ",
                             baseInterfaces.Select(baseInterface =>
                             {
@@ -138,11 +197,34 @@ namespace ComposableCollections.CodeGenerator
                         genericParams = $"<{genericParams}>";
                     }
                     
-                    results.Add(_pathService.SourceCodeRootFolder / (_settings.Folder ?? ".") / $"{name}.g.cs", $"namespace {_settings.Namespace} {{\npublic interface {name}{genericParams}{baseList} {{\n}}\n}}");
+                    results.Add(_pathService.SourceCodeRootFolder / (_settings.Folder ?? ".") / $"{name}.g.cs", $"{usings}\nnamespace {_settings.Namespace} {{\npublic interface {name}{genericParams}{baseList} {{\n}}\n}}");
                 }
             }
 
             return results.ToImmutableDictionary();
+        }
+
+        private ImmutableList<(string simpleTypeName, string withTypeParameters)> PreExistingInterfacesWithSimpleTypeNames()
+        {
+            return _settings.PreExistingInterfaces.Select(withTypeParameters =>
+            {
+                var simpleTypeName = withTypeParameters;
+
+                var typeParameterIndex = withTypeParameters.IndexOf("[");
+                if (typeParameterIndex >= 0)
+                {
+                    simpleTypeName = withTypeParameters.Substring(0, typeParameterIndex);
+                }
+
+                if (simpleTypeName.Contains("."))
+                {
+                    simpleTypeName = simpleTypeName.Substring(simpleTypeName.LastIndexOf('.')+1);
+                }
+
+                withTypeParameters = withTypeParameters.Replace('[', '<').Replace(']', '>');
+
+                return (simpleTypeName, withTypeParameters);
+            }).ToImmutableList();
         }
 
         private string ConvertToString(KeyValuePair<string, TypeParameter> kvp)

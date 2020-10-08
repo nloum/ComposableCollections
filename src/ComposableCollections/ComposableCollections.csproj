@@ -14,4 +14,9 @@
     <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0040" />
     <PackageReference Include="UtilityDisposables" Version="1.1.0-alpha0006" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DictionaryWithBuiltInKey\Anonymous" />
+    <Folder Include="DictionaryWithBuiltInKey\Decorators" />
+  </ItemGroup>
 </Project>

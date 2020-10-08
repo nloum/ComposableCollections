@@ -169,6 +169,10 @@ namespace ComposableCollections.CodeGenerator
             }
             else
             {
+                if (superInterface is IErrorTypeSymbol errorTypeSymbol)
+                {
+                    int a = 3;
+                }
                 foreach (var member in superInterface.GetMembers())
                 {
                     if (member is IMethodSymbol methodSymbol)

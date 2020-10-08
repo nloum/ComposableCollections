@@ -17,9 +17,9 @@
       <InterfaceNameBlacklist>
         <Regex>ReadOnly.*Write</Regex>
         <Regex>Write.*ReadOnly</Regex>
-        <Regex>Cached.*Cached</Regex>
       </InterfaceNameBlacklist>
       <InterfaceNameBuilders>
+        <InterfaceNameBuilder Search="ReadCachedWriteCached" Replace="ReadWriteCached" />
         <InterfaceNameBuilder Search="^ReadOnly$" Replace="IComposableReadOnlyDictionary" />
         <InterfaceNameBuilder Search="^$" Replace="IComposableDictionary" />
         <InterfaceNameBuilder Search="(.+)" Replace="I$1Dictionary" />
@@ -35,12 +35,6 @@
           <OneOf>
             <Part></Part>
             <Part>WriteCached</Part>
-          </OneOf>
-        </InterfaceNameModifier>
-        <InterfaceNameModifier>
-          <OneOf>
-            <Part></Part>
-            <Part>ReadWriteCached</Part>
           </OneOf>
         </InterfaceNameModifier>
         <InterfaceNameModifier>
@@ -316,5 +310,73 @@
         <BaseClass>MappingValuesReadOnlyDictionaryAdapter</BaseClass>
       </BaseClasses>
     </ConstructorExtensionMethods>
+
+
+
+
+
+
+
+
+    <AnonymousImplementations Namespace="ComposableCollections.DictionaryWithBuiltInKey.Anonymous" Folder="DictionaryWithBuiltInKey/Anonymous">
+      <AllowedArguments>
+        <AllowedArgument>IReadOnlyDictionaryWithBuiltInKey</AllowedArgument>
+        <AllowedArgument>IDictionaryWithBuiltInKey</AllowedArgument>
+      </AllowedArguments>
+      <InterfacesToImplement>
+        <Interface>IWriteCachedQueryableDictionaryWithBuiltInKey</Interface>
+        <Interface>IDictionaryWithBuiltInKey</Interface>
+        <Interface>IDisposableDictionaryWithBuiltInKey</Interface>
+        <Interface>IDisposableQueryableDictionaryWithBuiltInKey</Interface>
+        <Interface>IDisposableQueryableReadOnlyDictionaryWithBuiltInKey</Interface>
+        <Interface>IDisposableReadOnlyDictionaryWithBuiltInKey</Interface>
+        <Interface>IQueryableDictionaryWithBuiltInKey</Interface>
+        <Interface>IQueryableReadOnlyDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadCachedDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadCachedDisposableDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadCachedDisposableQueryableDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadCachedDisposableQueryableReadOnlyDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadCachedDisposableReadOnlyDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadCachedQueryableDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadCachedQueryableReadOnlyDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadCachedReadOnlyDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadOnlyDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadWriteCachedDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadWriteCachedDisposableDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadWriteCachedDisposableQueryableDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadWriteCachedQueryableDictionaryWithBuiltInKey</Interface>
+        <Interface>IWriteCachedDictionaryWithBuiltInKey</Interface>
+        <Interface>IWriteCachedDisposableDictionaryWithBuiltInKey</Interface>
+        <Interface>IWriteCachedDisposableQueryableDictionaryWithBuiltInKey</Interface>
+      </InterfacesToImplement>
+    </AnonymousImplementations>
+    <DecoratorBaseClasses Namespace="ComposableCollections.DictionaryWithBuiltInKey.Decorators" Folder="DictionaryWithBuiltInKey/Decorators">
+      <InterfacesToImplement>
+        <Interface>IWriteCachedQueryableDictionaryWithBuiltInKey</Interface>
+        <Interface>IDictionaryWithBuiltInKey</Interface>
+        <Interface>IDisposableDictionaryWithBuiltInKey</Interface>
+        <Interface>IDisposableQueryableDictionaryWithBuiltInKey</Interface>
+        <Interface>IDisposableQueryableReadOnlyDictionaryWithBuiltInKey</Interface>
+        <Interface>IDisposableReadOnlyDictionaryWithBuiltInKey</Interface>
+        <Interface>IQueryableDictionaryWithBuiltInKey</Interface>
+        <Interface>IQueryableReadOnlyDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadCachedDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadCachedDisposableDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadCachedDisposableQueryableDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadCachedDisposableQueryableReadOnlyDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadCachedDisposableReadOnlyDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadCachedQueryableDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadCachedQueryableReadOnlyDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadCachedReadOnlyDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadOnlyDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadWriteCachedDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadWriteCachedDisposableDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadWriteCachedDisposableQueryableDictionaryWithBuiltInKey</Interface>
+        <Interface>IReadWriteCachedQueryableDictionaryWithBuiltInKey</Interface>
+        <Interface>IWriteCachedDictionaryWithBuiltInKey</Interface>
+        <Interface>IWriteCachedDisposableDictionaryWithBuiltInKey</Interface>
+        <Interface>IWriteCachedDisposableQueryableDictionaryWithBuiltInKey</Interface>
+      </InterfacesToImplement>
+    </DecoratorBaseClasses>
   </CodeGenerators>
 </FluentApiSourceGenerator>

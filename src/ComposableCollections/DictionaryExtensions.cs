@@ -10,8 +10,6 @@ using ComposableCollections.Dictionary.Anonymous;
 using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Sources;
 using ComposableCollections.Dictionary.Transactional;
-using ComposableCollections.Dictionary.WithBuiltInKey;
-using ComposableCollections.Dictionary.WithBuiltInKey.Interfaces;
 using ComposableCollections.Set;
 using ComposableCollections.Utilities;
 using UtilityDisposables;

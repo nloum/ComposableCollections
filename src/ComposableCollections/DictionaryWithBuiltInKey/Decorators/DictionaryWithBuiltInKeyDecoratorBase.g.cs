@@ -12,7 +12,9 @@ private readonly IDictionaryWithBuiltInKey<TKey, TValue> _decoratedObject;
 public DictionaryWithBuiltInKeyDecoratorBase(IDictionaryWithBuiltInKey<TKey, TValue> decoratedObject) {
 _decoratedObject = decoratedObject;
 }
-int IReadOnlyCollection<TValue>.Count => _decoratedObject.Count;
+System.Collections.Generic.IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() {
+return _decoratedObject.GetEnumerator();
+}
 System.Collections.IEnumerator IEnumerable.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
 }
@@ -34,9 +36,6 @@ return _decoratedObject.ContainsKey( key);
 }
 IMaybe<TValue> IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.TryGetValue( TKey key) {
 return _decoratedObject.TryGetValue( key);
-}
-System.Collections.Generic.IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() {
-return _decoratedObject.GetEnumerator();
 }
 ComposableCollections.Dictionary.Interfaces.IComposableDictionary<TKey, TValue> IDictionaryWithBuiltInKey<TKey, TValue>.AsComposableDictionary() {
 return _decoratedObject.AsComposableDictionary();
@@ -165,6 +164,7 @@ return _decoratedObject.TryRemove( key,  out removedItem);
 void IDictionaryWithBuiltInKey<TKey, TValue>.Remove( TKey key,  out TValue removedItem) {
 _decoratedObject.Remove( key,  out removedItem);
 }
+int IReadOnlyCollection<TValue>.Count => _decoratedObject.Count;
 }
 }
 

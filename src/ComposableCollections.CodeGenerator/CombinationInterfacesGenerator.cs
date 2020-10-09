@@ -305,14 +305,12 @@ namespace ComposableCollections.CodeGenerator
                 generatedInterfaceName.Append(ifaceName);
             }
 
-            name = null;
+            name = generatedInterfaceName.ToString();
             foreach (var item in _settings.InterfaceNameBuilders)
             {
-                var str = generatedInterfaceName.ToString();
-                if (Regex.IsMatch(str, item.Search))
+                if (Regex.IsMatch(name, item.Search))
                 {
-                    name = Regex.Replace(str, item.Search, item.Replace);
-                    break;
+                    name = Regex.Replace(name, item.Search, item.Replace);
                 }
             }
 

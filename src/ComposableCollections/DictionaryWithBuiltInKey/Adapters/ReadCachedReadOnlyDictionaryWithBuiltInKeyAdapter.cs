@@ -5,7 +5,7 @@ using ComposableCollections.DictionaryWithBuiltInKey.Adapters;
 namespace ComposableCollections.DictionaryWithBuiltInKey.Interfaces
 {
     public class ReadCachedReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue> :
-        DictionaryWithBuiltInKeyAdapter<TKey, TValue>,
+        ReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, TValue>,
         IReadCachedReadOnlyDictionaryWithBuiltInKey<TKey, TValue>
     {
         private readonly IReadCachedReadOnlyDictionary<TKey, TValue> _source;

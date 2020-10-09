@@ -1,5 +1,5 @@
 ﻿
 namespace ComposableCollections.Dictionary.Interfaces {
-public interface IReadWriteCachedQueryableDictionary<TKey, TValue> : IQueryableDictionary<TKey, TValue>, IReadWriteCachedDictionary<TKey, TValue> {
+public interface IReadWriteCachedQueryableDictionary<TKey, TValue> : IWriteCachedQueryableDictionary<TKey, TValue>, IReadCachedQueryableDictionary<TKey, TValue>, IReadWriteCachedDictionary<TKey, TValue> {
 }
 }

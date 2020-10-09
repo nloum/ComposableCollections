@@ -11,11 +11,9 @@ private readonly IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue> _decor
 public QueryableReadOnlyDictionaryWithBuiltInKeyDecoratorBase(IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue> decoratedObject) {
 _decoratedObject = decoratedObject;
 }
-IQueryable<TValue> IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.Values => _decoratedObject.Values;
-ComposableCollections.Dictionary.Interfaces.IQueryableReadOnlyDictionary<TKey, TValue> IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsQueryableReadOnlyDictionary() {
-return _decoratedObject.AsQueryableReadOnlyDictionary();
+System.Collections.Generic.IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() {
+return _decoratedObject.GetEnumerator();
 }
-int IReadOnlyCollection<TValue>.Count => _decoratedObject.Count;
 System.Collections.IEnumerator IEnumerable.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
 }
@@ -38,8 +36,10 @@ return _decoratedObject.ContainsKey( key);
 IMaybe<TValue> IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.TryGetValue( TKey key) {
 return _decoratedObject.TryGetValue( key);
 }
-System.Collections.Generic.IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() {
-return _decoratedObject.GetEnumerator();
+int IReadOnlyCollection<TValue>.Count => _decoratedObject.Count;
+IQueryable<TValue> IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.Values => _decoratedObject.Values;
+ComposableCollections.Dictionary.Interfaces.IQueryableReadOnlyDictionary<TKey, TValue> IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsQueryableReadOnlyDictionary() {
+return _decoratedObject.AsQueryableReadOnlyDictionary();
 }
 }
 }

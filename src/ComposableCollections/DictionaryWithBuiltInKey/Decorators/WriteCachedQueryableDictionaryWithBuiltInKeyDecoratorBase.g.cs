@@ -13,23 +13,9 @@ private readonly IWriteCachedQueryableDictionaryWithBuiltInKey<TKey, TValue> _de
 public WriteCachedQueryableDictionaryWithBuiltInKeyDecoratorBase(IWriteCachedQueryableDictionaryWithBuiltInKey<TKey, TValue> decoratedObject) {
 _decoratedObject = decoratedObject;
 }
-ComposableCollections.Dictionary.Interfaces.IWriteCachedDictionary<TKey, TValue> IWriteCachedDictionaryWithBuiltInKey<TKey, TValue>.AsWriteCachedDictionary() {
-return _decoratedObject.AsWriteCachedDictionary();
+System.Collections.Generic.IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() {
+return _decoratedObject.GetEnumerator();
 }
-void IWriteCachedDictionaryWithBuiltInKey<TKey, TValue>.FlushCache() {
-_decoratedObject.FlushCache();
-}
-ComposableCollections.Dictionary.Interfaces.IQueryableDictionary<TKey, TValue> IQueryableDictionaryWithBuiltInKey<TKey, TValue>.AsQueryableDictionary() {
-return _decoratedObject.AsQueryableDictionary();
-}
-ComposableCollections.Dictionary.Interfaces.IWriteCachedQueryableDictionary<TKey, TValue> IWriteCachedQueryableDictionaryWithBuiltInKey<TKey, TValue>.AsWriteCachedQueryableDictionary() {
-return _decoratedObject.AsWriteCachedQueryableDictionary();
-}
-IQueryable<TValue> IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.Values => _decoratedObject.Values;
-ComposableCollections.Dictionary.Interfaces.IQueryableReadOnlyDictionary<TKey, TValue> IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsQueryableReadOnlyDictionary() {
-return _decoratedObject.AsQueryableReadOnlyDictionary();
-}
-int IReadOnlyCollection<TValue>.Count => _decoratedObject.Count;
 System.Collections.IEnumerator IEnumerable.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
 }
@@ -52,8 +38,8 @@ return _decoratedObject.ContainsKey( key);
 IMaybe<TValue> IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.TryGetValue( TKey key) {
 return _decoratedObject.TryGetValue( key);
 }
-System.Collections.Generic.IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() {
-return _decoratedObject.GetEnumerator();
+ComposableCollections.Dictionary.Interfaces.IQueryableDictionary<TKey, TValue> IQueryableDictionaryWithBuiltInKey<TKey, TValue>.AsQueryableDictionary() {
+return _decoratedObject.AsQueryableDictionary();
 }
 ComposableCollections.Dictionary.Interfaces.IComposableDictionary<TKey, TValue> IDictionaryWithBuiltInKey<TKey, TValue>.AsComposableDictionary() {
 return _decoratedObject.AsComposableDictionary();
@@ -181,6 +167,20 @@ return _decoratedObject.TryRemove( key,  out removedItem);
 }
 void IDictionaryWithBuiltInKey<TKey, TValue>.Remove( TKey key,  out TValue removedItem) {
 _decoratedObject.Remove( key,  out removedItem);
+}
+ComposableCollections.Dictionary.Interfaces.IWriteCachedDictionary<TKey, TValue> IWriteCachedDictionaryWithBuiltInKey<TKey, TValue>.AsWriteCachedDictionary() {
+return _decoratedObject.AsWriteCachedDictionary();
+}
+void IWriteCachedDictionaryWithBuiltInKey<TKey, TValue>.FlushCache() {
+_decoratedObject.FlushCache();
+}
+ComposableCollections.Dictionary.Interfaces.IWriteCachedQueryableDictionary<TKey, TValue> IWriteCachedQueryableDictionaryWithBuiltInKey<TKey, TValue>.AsWriteCachedQueryableDictionary() {
+return _decoratedObject.AsWriteCachedQueryableDictionary();
+}
+int IReadOnlyCollection<TValue>.Count => _decoratedObject.Count;
+IQueryable<TValue> IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.Values => _decoratedObject.Values;
+ComposableCollections.Dictionary.Interfaces.IQueryableReadOnlyDictionary<TKey, TValue> IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsQueryableReadOnlyDictionary() {
+return _decoratedObject.AsQueryableReadOnlyDictionary();
 }
 }
 }

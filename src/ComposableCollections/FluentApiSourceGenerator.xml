@@ -101,13 +101,6 @@
       </InterfacesToImplement>
     </DecoratorBaseClasses>
 
-    <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="ConcurrentWriteCachedDictionaryAdapter"
-                                        Folder="Dictionary/Adapters">
-      <ClassNameModifiers>
-        <ClassNameModifier Search="WriteCached" Replace="ConcurrentWriteCached" />
-        <ClassNameModifier Search="Dictionary" Replace="DictionaryAdapter" />
-      </ClassNameModifiers>
-    </SubclassCombinationImplementations>
     <ConstructorExtensionMethods Namespace="ComposableCollections" ExtensionMethodName="WithWriteCaching">
       <BaseClasses>
         <BaseClass>ConcurrentWriteCachedDictionaryAdapter</BaseClass>
@@ -313,10 +306,16 @@
 
 
 
+    <!-- ReadCached -->
+    <ConstructorExtensionMethods Namespace="ComposableCollections" ExtensionMethodName="WithReadCaching">
+      <BaseClasses>
+        <BaseClass>ReadCachedDictionaryAdapter</BaseClass>
+        <BaseClass>ReadCachedReadOnlyDictionaryAdapter</BaseClass>
+      </BaseClasses>
+    </ConstructorExtensionMethods>
 
 
-
-
+    <!-- Dictionary with built in keys -->
     <AnonymousImplementations Namespace="ComposableCollections.DictionaryWithBuiltInKey.Anonymous" Folder="DictionaryWithBuiltInKey/Anonymous">
       <AllowedArguments>
         <AllowedArgument>IReadOnlyDictionaryWithBuiltInKey</AllowedArgument>

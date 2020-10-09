@@ -12,13 +12,7 @@ private readonly IReadWriteCachedQueryableDictionary<TKey, TValue> _decoratedObj
 public ReadWriteCachedQueryableDictionaryDecoratorBase(IReadWriteCachedQueryableDictionary<TKey, TValue> decoratedObject) {
 _decoratedObject = decoratedObject;
 }
-System.Collections.IEnumerator IEnumerable.GetEnumerator() {
-return _decoratedObject.GetEnumerator();
-}
-IQueryable<TValue> IQueryableReadOnlyDictionary<TKey, TValue>.Values => _decoratedObject.Values;
-void IWriteCachedDictionary<TKey, TValue>.FlushCache() {
-_decoratedObject.FlushCache();
-}
+int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _decoratedObject.Count;
 System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
 }
@@ -224,6 +218,9 @@ return _decoratedObject.TryRemove( key,  out removedItem);
 void IComposableDictionary<TKey, TValue>.Remove( TKey key,  out TValue removedItem) {
 _decoratedObject.Remove( key,  out removedItem);
 }
+System.Collections.IEnumerator IEnumerable.GetEnumerator() {
+return _decoratedObject.GetEnumerator();
+}
 void IReadCachedReadOnlyDictionary<TKey, TValue>.ReloadCache() {
 _decoratedObject.ReloadCache();
 }
@@ -236,7 +233,6 @@ _decoratedObject.InvalidCache();
 void IReadCachedReadOnlyDictionary<TKey, TValue>.InvalidCache( TKey key) {
 _decoratedObject.InvalidCache( key);
 }
-int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _decoratedObject.Count;
 System.Collections.Generic.IEqualityComparer<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Comparer => _decoratedObject.Comparer;
 TValue IComposableReadOnlyDictionary<TKey, TValue>.GetValue( TKey key) {
 return _decoratedObject.GetValue( key);
@@ -249,6 +245,10 @@ return _decoratedObject.ContainsKey( key);
 }
 IMaybe<TValue> IComposableReadOnlyDictionary<TKey, TValue>.TryGetValue( TKey key) {
 return _decoratedObject.TryGetValue( key);
+}
+IQueryable<TValue> IQueryableReadOnlyDictionary<TKey, TValue>.Values => _decoratedObject.Values;
+void IWriteCachedDictionary<TKey, TValue>.FlushCache() {
+_decoratedObject.FlushCache();
 }
 }
 }

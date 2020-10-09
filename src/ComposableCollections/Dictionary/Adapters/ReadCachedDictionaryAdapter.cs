@@ -1,21 +1,31 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using ComposableCollections.Dictionary.Base;
 using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Sources;
+using ComposableCollections.Dictionary.Write;
 
 namespace ComposableCollections.Dictionary.Adapters
 {
-    public class ReadCachedReadOnlyDictionaryAdapter<TKey, TValue> : ReadOnlyDictionaryBase<TKey, TValue>, IReadCachedReadOnlyDictionary<TKey, TValue>
+    public class ReadCachedDictionaryAdapter<TKey, TValue> : DictionaryBase<TKey, TValue>,
+        IReadCachedDictionary<TKey, TValue>
     {
-        private readonly IComposableReadOnlyDictionary<TKey, TValue> _innerValues;
+        private readonly IComposableDictionary<TKey, TValue> _innerValues;
         private readonly IComposableDictionary<TKey, TValue> _cache = new ComposableDictionary<TKey, TValue>();
         private bool _isEntireCacheInvalidated = true;
         private readonly ISet<TKey> _invalidatedKeys = new HashSet<TKey>();
         private readonly object _lock = new object();
 
-        public ReadCachedReadOnlyDictionaryAdapter(IComposableReadOnlyDictionary<TKey, TValue> innerValues)
+        public ReadCachedDictionaryAdapter(IComposableDictionary<TKey, TValue> innerValues)
         {
             _innerValues = innerValues;
+        }
+
+        public override void Write(IEnumerable<DictionaryWrite<TKey, TValue>> writes, out IReadOnlyList<DictionaryWriteResult<TKey, TValue>> results)
+        {
+            var writesList = writes.ToImmutableList();
+            _innerValues.Write(writesList, out results);
+            _cache.Write(writesList, out var _);
         }
 
         public override bool TryGetValue(TKey key, out TValue value)

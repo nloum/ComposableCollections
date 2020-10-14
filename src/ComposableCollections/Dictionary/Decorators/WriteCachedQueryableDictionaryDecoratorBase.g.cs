@@ -12,9 +12,8 @@ private readonly IWriteCachedQueryableDictionary<TKey, TValue> _decoratedObject;
 public WriteCachedQueryableDictionaryDecoratorBase(IWriteCachedQueryableDictionary<TKey, TValue> decoratedObject) {
 _decoratedObject = decoratedObject;
 }
-int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _decoratedObject.Count;
-System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
-return _decoratedObject.GetEnumerator();
+void IWriteCachedDictionary<TKey, TValue>.FlushCache() {
+_decoratedObject.FlushCache();
 }
 void IComposableDictionary<TKey, TValue>.SetValue( TKey key,  TValue value) {
 _decoratedObject.SetValue( key,  value);
@@ -218,9 +217,7 @@ return _decoratedObject.TryRemove( key,  out removedItem);
 void IComposableDictionary<TKey, TValue>.Remove( TKey key,  out TValue removedItem) {
 _decoratedObject.Remove( key,  out removedItem);
 }
-System.Collections.IEnumerator IEnumerable.GetEnumerator() {
-return _decoratedObject.GetEnumerator();
-}
+IQueryable<TValue> IQueryableReadOnlyDictionary<TKey, TValue>.Values => _decoratedObject.Values;
 System.Collections.Generic.IEqualityComparer<TKey> IComposableReadOnlyDictionary<TKey, TValue>.Comparer => _decoratedObject.Comparer;
 TValue IComposableReadOnlyDictionary<TKey, TValue>.GetValue( TKey key) {
 return _decoratedObject.GetValue( key);
@@ -234,9 +231,12 @@ return _decoratedObject.ContainsKey( key);
 IMaybe<TValue> IComposableReadOnlyDictionary<TKey, TValue>.TryGetValue( TKey key) {
 return _decoratedObject.TryGetValue( key);
 }
-IQueryable<TValue> IQueryableReadOnlyDictionary<TKey, TValue>.Values => _decoratedObject.Values;
-void IWriteCachedDictionary<TKey, TValue>.FlushCache() {
-_decoratedObject.FlushCache();
+int IReadOnlyCollection<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.Count => _decoratedObject.Count;
+System.Collections.IEnumerator IEnumerable.GetEnumerator() {
+return _decoratedObject.GetEnumerator();
+}
+System.Collections.Generic.IEnumerator<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>> IEnumerable<ComposableCollections.Dictionary.IKeyValue<TKey, TValue>>.GetEnumerator() {
+return _decoratedObject.GetEnumerator();
 }
 }
 }

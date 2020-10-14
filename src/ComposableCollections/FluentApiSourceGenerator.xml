@@ -247,7 +247,8 @@
         <ClassNameModifier Search="Dictionary" Replace="MappingValuesDictionaryAdapter" />
       </ClassNameModifiers>
     </SubclassCombinationImplementations>
-
+    
+    
 
 
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="ReadCachedQueryableMappingKeysAndValuesDictionaryAdapter"
@@ -302,9 +303,7 @@
         <BaseClass>MappingValuesReadOnlyDictionaryAdapter</BaseClass>
       </BaseClasses>
     </ConstructorExtensionMethods>
-
-
-
+    
 
     <!-- ReadCached -->
     <ConstructorExtensionMethods Namespace="ComposableCollections" ExtensionMethodName="WithReadCaching">

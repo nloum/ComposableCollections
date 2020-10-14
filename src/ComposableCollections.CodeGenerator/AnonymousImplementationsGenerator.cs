@@ -27,30 +27,13 @@ namespace ComposableCollections.CodeGenerator
             _settings = settings;
         }
 
-        public override ImmutableDictionary<AbsolutePath, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
+        public override ImmutableDictionary<AbsolutePath, string> Generate(CodeIndexerService codeIndexerService)
         {
-            var interfaceDeclarations = new Dictionary<string, InterfaceDeclarationSyntax>();
-            var syntaxTreeForEachInterface = new Dictionary<InterfaceDeclarationSyntax, SyntaxTree>();
-
-            var syntaxTreesList = syntaxTrees.ToImmutableList();
-            
-            foreach (var syntaxTree in syntaxTreesList)
-            {
-                Utilities.TraverseTree(syntaxTree.GetRoot(), node =>
-                {
-                    if (node is InterfaceDeclarationSyntax interfaceDeclarationSyntax)
-                    {
-                        interfaceDeclarations.Add(interfaceDeclarationSyntax.Identifier.Text, interfaceDeclarationSyntax);
-                        syntaxTreeForEachInterface[interfaceDeclarationSyntax] = syntaxTree;
-                    }
-                });
-            }
-
             var results = new Dictionary<AbsolutePath, string>();
 
             foreach (var iface in _settings.InterfacesToImplement)
             {
-                var interfaceDeclaration = interfaceDeclarations[iface];
+                var interfaceDeclaration = codeIndexerService.GetInterfaceDeclaration(iface);
                 
                 var className = $"Anonymous{iface.Substring(1)}";
                 var sourceCodeBuilder = new StringBuilder();
@@ -67,7 +50,7 @@ namespace ComposableCollections.CodeGenerator
                 sourceCodeBuilder.AppendLine(
                     $"namespace {_settings.Namespace} {{\npublic class {className}{genericParams} : {iface}{genericParams} {{");
 
-                var semanticModel = getSemanticModel(syntaxTreeForEachInterface[interfaceDeclaration]);
+                var semanticModel = codeIndexerService.GetSemanticModel(interfaceDeclaration.SyntaxTree);
                 var delegateMemberCandidates = new List<MemberToBeDelegated>();
                 var candidateParameters = new List<Parameter>();
                 GetInterfacesToImplementWith(semanticModel.GetDeclaredSymbol(interfaceDeclaration), candidateParameters, delegateMemberCandidates);

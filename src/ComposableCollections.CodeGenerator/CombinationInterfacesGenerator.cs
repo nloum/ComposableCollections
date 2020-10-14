@@ -44,21 +44,8 @@ namespace ComposableCollections.CodeGenerator
             public int Index { get; }
         }
         
-        public override ImmutableDictionary<AbsolutePath, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
+        public override ImmutableDictionary<AbsolutePath, string> Generate(CodeIndexerService codeIndexerService)
         {
-            var interfaceDeclarations = new Dictionary<string, InterfaceDeclarationSyntax>();
-            
-            foreach (var syntaxTree in syntaxTrees)
-            {
-                Utilities.TraverseTree(syntaxTree.GetRoot(), node =>
-                {
-                    if (node is InterfaceDeclarationSyntax interfaceDeclarationSyntax)
-                    {
-                        interfaceDeclarations.Add(interfaceDeclarationSyntax.Identifier.Text, interfaceDeclarationSyntax);
-                    }
-                });
-            }
-            
             var combinations = Utilities.CalcCombinationsOfOneFromEach(_settings.InterfaceNameModifiers.Select(x => x.Values));
             var interfaces = new Dictionary<string, ImmutableDictionary<string, TypeParameter>>();
 
@@ -74,7 +61,7 @@ namespace ComposableCollections.CodeGenerator
                 {
                     var genericParams = new Dictionary<string, TypeParameter>();
                     
-                    if (interfaceDeclarations.TryGetValue(name, out var value))
+                    if (codeIndexerService.TryGetInterfaceDeclaration(name, out var value))
                     {
                         var index = 0;
                         foreach (var param in value.TypeParameterList.Parameters)

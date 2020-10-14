@@ -10,7 +10,7 @@ namespace ComposableCollections.CodeGenerator
     {
         public abstract void NonGenericInitialize(object settings);
 
-        public abstract ImmutableDictionary<AbsolutePath, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel);
+        public abstract ImmutableDictionary<AbsolutePath, string> Generate(CodeIndexerService codeIndexerService);
     }
     
     public abstract class GeneratorBase<TSettings> : GeneratorBase

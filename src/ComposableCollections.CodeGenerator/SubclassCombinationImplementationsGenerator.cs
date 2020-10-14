@@ -27,48 +27,12 @@ namespace ComposableCollections.CodeGenerator
             _settings = settings;
         }
 
-        public override ImmutableDictionary<AbsolutePath, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
+        public override ImmutableDictionary<AbsolutePath, string> Generate(CodeIndexerService codeIndexerService)
         {
-            var interfaceDeclarations = new Dictionary<string, InterfaceDeclarationSyntax>();
-            var interfaceSymbols = new Dictionary<InterfaceDeclarationSyntax, INamedTypeSymbol>();
-            var syntaxTreeForEachInterface = new Dictionary<InterfaceDeclarationSyntax, SyntaxTree>();
-            var classDeclarations = new Dictionary<string, ClassDeclarationSyntax>();
-            var syntaxTreeForEachClass = new Dictionary<ClassDeclarationSyntax, SyntaxTree>();
-            var classSymbols = new Dictionary<ClassDeclarationSyntax, INamedTypeSymbol>();
-
-            var syntaxTreesList = syntaxTrees.ToImmutableList();
-            
-            foreach (var syntaxTree in syntaxTreesList)
-            {
-                var semanticModel = getSemanticModel(syntaxTree);
-                Utilities.TraverseTree(syntaxTree.GetRoot(), node =>
-                {
-                    if (node is InterfaceDeclarationSyntax interfaceDeclarationSyntax)
-                    {
-                        interfaceDeclarations.Add(interfaceDeclarationSyntax.Identifier.Text, interfaceDeclarationSyntax);
-                        syntaxTreeForEachInterface[interfaceDeclarationSyntax] = syntaxTree;
-                        var interfaceSymbolInfo = semanticModel.GetDeclaredSymbol(interfaceDeclarationSyntax);
-                        interfaceSymbols[interfaceDeclarationSyntax] = interfaceSymbolInfo;
-                    }
-
-                    if (node is ClassDeclarationSyntax classDeclarationSyntax)
-                    {
-                        if (!classDeclarationSyntax.Modifiers.Any(SyntaxKind.PublicKeyword))
-                        {
-                            return;
-                        }
-                        classDeclarations[classDeclarationSyntax.Identifier.Text] = classDeclarationSyntax;
-                        syntaxTreeForEachClass[classDeclarationSyntax] = syntaxTree;
-                        var classSymbolInfo = semanticModel.GetDeclaredSymbol(classDeclarationSyntax);
-                        classSymbols[classDeclarationSyntax] = classSymbolInfo;
-                    }
-                });
-            }
-            
             var result = new Dictionary<AbsolutePath, string>();
 
-            var theClass = classDeclarations[_settings.BaseClass];
-            var theClassSemanticModel = getSemanticModel(syntaxTreeForEachClass[theClass]);
+            var theClass = codeIndexerService.GetClassDeclaration(_settings.BaseClass);
+            var theClassSemanticModel = codeIndexerService.GetSemanticModel(theClass.SyntaxTree);
 
             var baseInterfaceName = theClass.BaseList.Types.Select(baseType =>
             {
@@ -78,23 +42,23 @@ namespace ComposableCollections.CodeGenerator
                     key = key.Substring(0, key.IndexOf('<'));
                 }
 
-                if (interfaceDeclarations.ContainsKey(key))
+                if (codeIndexerService.TryGetInterfaceDeclaration(key, out var _))
                 {
                     return key;
                 }
 
                 return "";
             }).First(str => !string.IsNullOrWhiteSpace(str));
-            var baseInterface = interfaceDeclarations[baseInterfaceName];
-            var baseInterfaceSymbol = interfaceSymbols[baseInterface];
+            var baseInterface = codeIndexerService.GetInterfaceDeclaration(baseInterfaceName);
+            var baseInterfaceSymbol = codeIndexerService.GetSymbol(baseInterface);
 
             var subInterfaces = new List<InterfaceDeclarationSyntax>();
 
-            foreach(var interfaceDeclaration in interfaceDeclarations)
+            foreach(var interfaceDeclaration in codeIndexerService.GetAllInterfaceDeclarations())
             {
-                if (Utilities.IsBaseInterface(interfaceSymbols[interfaceDeclaration.Value], baseInterfaceSymbol))
+                if (Utilities.IsBaseInterface(codeIndexerService.GetSymbol(interfaceDeclaration), baseInterfaceSymbol))
                 {
-                    subInterfaces.Add(interfaceDeclaration.Value);
+                    subInterfaces.Add(interfaceDeclaration);
                 }
             }
 
@@ -161,7 +125,7 @@ namespace ComposableCollections.CodeGenerator
                 classDefinition.Add($"public class {subClassName}{theClass.TypeParameterList} : {theClass.Identifier}{theClass.TypeParameterList}, {subInterface.Identifier}{subInterfaceTypeArgs} {{\n");
 
                 var stuffAddedForSubInterface =
-                    Utilities.GetBaseInterfaces(getSemanticModel(syntaxTreeForEachInterface[subInterface]).GetDeclaredSymbol(subInterface))
+                    Utilities.GetBaseInterfaces(codeIndexerService.GetSemanticModel(subInterface.SyntaxTree).GetDeclaredSymbol(subInterface))
                         .Except(Utilities.GetBaseInterfaces(theClassSemanticModel.GetDeclaredSymbol(theClass)));
 
                 var adaptedParameter = constructors.First().ParameterList.Parameters.First();
@@ -183,10 +147,10 @@ namespace ComposableCollections.CodeGenerator
 
                 InterfaceDeclarationSyntax bestAdaptedInterface = null;
 
-                foreach (var iface in interfaceDeclarations.Values)
+                foreach (var iface in codeIndexerService.GetAllInterfaceDeclarations())
                 {
                     var ifaceBaseInterfaces = Utilities
-                        .GetBaseInterfaces(getSemanticModel(syntaxTreeForEachInterface[iface])
+                        .GetBaseInterfaces(codeIndexerService.GetSemanticModel(iface.SyntaxTree)
                             .GetDeclaredSymbol(iface))
                         .Select(x => x.ToString()).ToImmutableHashSet();
                     
@@ -241,7 +205,7 @@ namespace ComposableCollections.CodeGenerator
                     classDefinition.Add("}\n");
                 }
 
-                foreach (var member in memberDeduplicationService.GetDeduplicatedMembers(getSemanticModel(syntaxTreeForEachInterface[bestAdaptedInterface]).GetDeclaredSymbol(bestAdaptedInterface)))
+                foreach (var member in memberDeduplicationService.GetDeduplicatedMembers(codeIndexerService.GetSemanticModel(bestAdaptedInterface.SyntaxTree).GetDeclaredSymbol(bestAdaptedInterface)))
                 {
                     if (member.Duplicates.All(duplicate => baseMemberImplementationProfiles.Contains(memberDeduplicationService.GetImplementationProfile(duplicate))))
                     {

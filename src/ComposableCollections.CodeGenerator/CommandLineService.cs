@@ -64,12 +64,13 @@ namespace ComposableCollections.CodeGenerator
             }
             
             compilation = compilation.AddSyntaxTrees(syntaxTrees);
+            var codeIndexerService = new CodeIndexerService(syntaxTrees, tree => compilation.GetSemanticModel(tree));
             
             foreach (var codeGeneratorSettings in configuration.CodeGenerators)
             {
                 var generator = _lifetimeScope.ResolveKeyed<GeneratorBase>(codeGeneratorSettings.GetType());
                 generator.NonGenericInitialize(codeGeneratorSettings);
-                var outputFiles = generator.Generate(syntaxTrees, tree => compilation.GetSemanticModel(tree));
+                var outputFiles = generator.Generate(codeIndexerService);
                 foreach (var outputFile in outputFiles)
                 {
                     if (!outputFile.Key.Exists())

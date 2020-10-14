@@ -12,6 +12,9 @@ private readonly IReadCachedDictionaryWithBuiltInKey<TKey, TValue> _decoratedObj
 public ReadCachedDictionaryWithBuiltInKeyDecoratorBase(IReadCachedDictionaryWithBuiltInKey<TKey, TValue> decoratedObject) {
 _decoratedObject = decoratedObject;
 }
+System.Collections.Generic.IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() {
+return _decoratedObject.GetEnumerator();
+}
 ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, TValue> IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsComposableReadOnlyDictionary() {
 return _decoratedObject.AsComposableReadOnlyDictionary();
 }
@@ -31,19 +34,10 @@ return _decoratedObject.ContainsKey( key);
 IMaybe<TValue> IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.TryGetValue( TKey key) {
 return _decoratedObject.TryGetValue( key);
 }
-void IReadCachedReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.ReloadCache() {
-_decoratedObject.ReloadCache();
-}
-ComposableCollections.Dictionary.Interfaces.IReadCachedReadOnlyDictionary<TKey, TValue> IReadCachedReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsReadCachedReadOnlyDictionary() {
-return _decoratedObject.AsReadCachedReadOnlyDictionary();
-}
-System.Collections.Generic.IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() {
-return _decoratedObject.GetEnumerator();
-}
+int IReadOnlyCollection<TValue>.Count => _decoratedObject.Count;
 System.Collections.IEnumerator IEnumerable.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
 }
-int IReadOnlyCollection<TValue>.Count => _decoratedObject.Count;
 ComposableCollections.Dictionary.Interfaces.IComposableDictionary<TKey, TValue> IDictionaryWithBuiltInKey<TKey, TValue>.AsComposableDictionary() {
 return _decoratedObject.AsComposableDictionary();
 }
@@ -170,6 +164,12 @@ return _decoratedObject.TryRemove( key,  out removedItem);
 }
 void IDictionaryWithBuiltInKey<TKey, TValue>.Remove( TKey key,  out TValue removedItem) {
 _decoratedObject.Remove( key,  out removedItem);
+}
+void IReadCachedReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.ReloadCache() {
+_decoratedObject.ReloadCache();
+}
+ComposableCollections.Dictionary.Interfaces.IReadCachedReadOnlyDictionary<TKey, TValue> IReadCachedReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsReadCachedReadOnlyDictionary() {
+return _decoratedObject.AsReadCachedReadOnlyDictionary();
 }
 }
 }

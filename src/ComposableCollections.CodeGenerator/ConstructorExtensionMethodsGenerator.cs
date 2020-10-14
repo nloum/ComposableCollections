@@ -24,62 +24,25 @@ namespace ComposableCollections.CodeGenerator
             _settings = settings;
         }
 
-        public override ImmutableDictionary<AbsolutePath, string> Generate(IEnumerable<SyntaxTree> syntaxTrees, Func<SyntaxTree, SemanticModel> getSemanticModel)
+        public override ImmutableDictionary<AbsolutePath, string> Generate(CodeIndexerService codeIndexerService)
         {
-            var interfaceDeclarations = new Dictionary<string, InterfaceDeclarationSyntax>();
-            var interfaceSymbols = new Dictionary<InterfaceDeclarationSyntax, INamedTypeSymbol>();
-            var syntaxTreeForEachInterface = new Dictionary<InterfaceDeclarationSyntax, SyntaxTree>();
-            var classDeclarations = new Dictionary<string, ClassDeclarationSyntax>();
-            var syntaxTreeForEachClass = new Dictionary<ClassDeclarationSyntax, SyntaxTree>();
-            var classSymbols = new Dictionary<ClassDeclarationSyntax, INamedTypeSymbol>();
-
-            var syntaxTreesList = syntaxTrees.ToImmutableList();
-            
-            foreach (var syntaxTree in syntaxTreesList)
-            {
-                var semanticModel = getSemanticModel(syntaxTree);
-                Utilities.TraverseTree(syntaxTree.GetRoot(), node =>
-                {
-                    if (node is InterfaceDeclarationSyntax interfaceDeclarationSyntax)
-                    {
-                        interfaceDeclarations.Add(interfaceDeclarationSyntax.Identifier.Text, interfaceDeclarationSyntax);
-                        syntaxTreeForEachInterface[interfaceDeclarationSyntax] = syntaxTree;
-                        var interfaceSymbolInfo = semanticModel.GetDeclaredSymbol(interfaceDeclarationSyntax);
-                        interfaceSymbols[interfaceDeclarationSyntax] = interfaceSymbolInfo;
-                    }
-
-                    if (node is ClassDeclarationSyntax classDeclarationSyntax)
-                    {
-                        if (!classDeclarationSyntax.Modifiers.Any(SyntaxKind.PublicKeyword))
-                        {
-                            return;
-                        }
-                        classDeclarations[classDeclarationSyntax.Identifier.Text] = classDeclarationSyntax;
-                        syntaxTreeForEachClass[classDeclarationSyntax] = syntaxTree;
-                        var classSymbolInfo = semanticModel.GetDeclaredSymbol(classDeclarationSyntax);
-                        classSymbols[classDeclarationSyntax] = classSymbolInfo;
-                    }
-                });
-            }
-
             var usings = new List<string>();
             
             var theClasses = _settings.BaseClasses.SelectMany(theClassName =>
             {
-                var theClass = classDeclarations[theClassName];
-                var theClassSemanticModel = getSemanticModel(syntaxTreeForEachClass[theClass]);
+                var theClass = codeIndexerService.GetClassDeclaration(theClassName);
+                var theClassSemanticModel = codeIndexerService.GetSemanticModel(theClass.SyntaxTree);
                 var theClassSymbol = theClassSemanticModel.GetDeclaredSymbol(theClass);
                 
-                return classDeclarations.Where(kvp =>
+                return codeIndexerService.GetAllClassDeclarations().Where(classDecl =>
                 {
-                    var syntaxTree = syntaxTreeForEachClass[kvp.Value];
-                    var usingStatementSyntaxes = Utilities.GetDescendantsOfType<UsingDirectiveSyntax>(syntaxTree.GetRoot());
+                    var usingStatementSyntaxes = Utilities.GetDescendantsOfType<UsingDirectiveSyntax>(classDecl.SyntaxTree.GetRoot());
                     usings.AddRange(usingStatementSyntaxes
                         .Select(us => us.ToString() + "\n"));
-                    var aClassSymbol = getSemanticModel(syntaxTree).GetDeclaredSymbol(kvp.Value);
+                    var aClassSymbol = codeIndexerService.GetSemanticModel(classDecl.SyntaxTree).GetDeclaredSymbol(classDecl);
                     return Utilities.IsBaseClass(aClassSymbol, theClassSymbol);
                 });
-            }).ToImmutableDictionary();
+            }).ToImmutableDictionary(x => x.Identifier.Text);
 
             var extensionMethods = new List<string>();
             
@@ -90,7 +53,7 @@ namespace ComposableCollections.CodeGenerator
             
             foreach (var aClass in theClasses.Values)
             {
-                var aClassSemanticModel = getSemanticModel(syntaxTreeForEachClass[aClass]);
+                var aClassSemanticModel = codeIndexerService.GetSemanticModel(aClass.SyntaxTree);
                 usings.Add($"using {aClassSemanticModel.GetDeclaredSymbol(aClass).ContainingNamespace};\n");
 
                 foreach (var constructor in aClass.Members.OfType<ConstructorDeclarationSyntax>().Where(constructor => constructor.Modifiers.Any(SyntaxKind.PublicKeyword)))

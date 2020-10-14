@@ -11,11 +11,21 @@ private readonly IReadCachedQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TVal
 public ReadCachedQueryableReadOnlyDictionaryWithBuiltInKeyDecoratorBase(IReadCachedQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue> decoratedObject) {
 _decoratedObject = decoratedObject;
 }
+void IReadCachedReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.ReloadCache() {
+_decoratedObject.ReloadCache();
+}
+ComposableCollections.Dictionary.Interfaces.IReadCachedReadOnlyDictionary<TKey, TValue> IReadCachedReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsReadCachedReadOnlyDictionary() {
+return _decoratedObject.AsReadCachedReadOnlyDictionary();
+}
 IQueryable<TValue> IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.Values => _decoratedObject.Values;
 ComposableCollections.Dictionary.Interfaces.IQueryableReadOnlyDictionary<TKey, TValue> IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsQueryableReadOnlyDictionary() {
 return _decoratedObject.AsQueryableReadOnlyDictionary();
 }
-System.Collections.Generic.IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() {
+int IReadOnlyCollection<TValue>.Count => _decoratedObject.Count;
+ComposableCollections.Dictionary.Interfaces.IReadCachedQueryableReadOnlyDictionary<TKey, TValue> IReadCachedQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsReadCachedQueryableReadOnlyDictionary() {
+return _decoratedObject.AsReadCachedQueryableReadOnlyDictionary();
+}
+System.Collections.IEnumerator IEnumerable.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
 }
 ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, TValue> IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsComposableReadOnlyDictionary() {
@@ -37,18 +47,8 @@ return _decoratedObject.ContainsKey( key);
 IMaybe<TValue> IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.TryGetValue( TKey key) {
 return _decoratedObject.TryGetValue( key);
 }
-ComposableCollections.Dictionary.Interfaces.IReadCachedQueryableReadOnlyDictionary<TKey, TValue> IReadCachedQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsReadCachedQueryableReadOnlyDictionary() {
-return _decoratedObject.AsReadCachedQueryableReadOnlyDictionary();
-}
-int IReadOnlyCollection<TValue>.Count => _decoratedObject.Count;
-System.Collections.IEnumerator IEnumerable.GetEnumerator() {
+System.Collections.Generic.IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
-}
-void IReadCachedReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.ReloadCache() {
-_decoratedObject.ReloadCache();
-}
-ComposableCollections.Dictionary.Interfaces.IReadCachedReadOnlyDictionary<TKey, TValue> IReadCachedReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsReadCachedReadOnlyDictionary() {
-return _decoratedObject.AsReadCachedReadOnlyDictionary();
 }
 }
 }

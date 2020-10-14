@@ -20,10 +20,10 @@ namespace ComposableCollections.Dictionary.Adapters
         protected readonly object _lock = new object();
         private ImmutableList<DictionaryWrite<TKey, TValue>> _writes = ImmutableList<DictionaryWrite<TKey, TValue>>.Empty;
 
-        public ConcurrentWriteCachedDictionaryAdapter(IComposableDictionary<TKey, TValue> flushCacheTo, IComposableDictionary<TKey, TValue> addedOrUpdated = null, IComposableDictionary<TKey, TValue> removed = null)
+        public ConcurrentWriteCachedDictionaryAdapter(IComposableDictionary<TKey, TValue> flushCacheTo)
         {
-            _addedOrUpdated = addedOrUpdated ?? new ComposableDictionary<TKey, TValue>();
-            _removed = removed ?? new ComposableDictionary<TKey, TValue>();
+            _addedOrUpdated = new ComposableDictionary<TKey, TValue>();
+            _removed = new ComposableDictionary<TKey, TValue>();
             _flushCacheTo = flushCacheTo;
         }
 

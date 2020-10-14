@@ -251,37 +251,37 @@ namespace ComposableCollections
         
         #region WithWritesCombinedAtEndOfTransaction
         
-        // /// <summary>
-        // /// Converts the source to a transactional dictionary that keeps all writes pending until the transaction is completed.
-        // /// </summary>
-        // public static IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithWritesCombinedAtEndOfTransaction<TKey, TValue>(this IComposableDictionary<TKey, TValue> source)
-        // {
-        //     return new AnonymousReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>(() =>
-        //     {
-        //         return new DisposableReadOnlyDictionaryAdapter<TKey, TValue>(source, EmptyDisposable.Default);
-        //     }, () =>
-        //     {
-        //         var cache = source.WithWriteCaching();
-        //         return new DisposableDictionaryAdapter<TKey, TValue>(cache, new AnonymousDisposable(() => cache.FlushCache()));
-        //     });
-        // }
-        //
-        // /// <summary>
-        // /// Converts the source to a transactional dictionary that keeps all writes pending until the transaction is completed.
-        // /// </summary>
-        // public static IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithWritesCombinedAtEndOfTransaction<TKey, TValue>(this IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source)
-        // {
-        //     return new AnonymousReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>(source.CreateReader, () =>
-        //     {
-        //         var disposableDictionary = source.CreateWriter();
-        //         var cache = disposableDictionary.WithWriteCaching();
-        //         return new DisposableDictionaryAdapter<TKey, TValue>(cache, new AnonymousDisposable(() =>
-        //         {
-        //             cache.FlushCache();
-        //             disposableDictionary.Dispose();
-        //         }));
-        //     });
-        // }
+        /// <summary>
+        /// Converts the source to a transactional dictionary that keeps all writes pending until the transaction is completed.
+        /// </summary>
+        public static IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithWritesCombinedAtEndOfTransaction<TKey, TValue>(this IComposableDictionary<TKey, TValue> source)
+        {
+            return new AnonymousReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>(() =>
+            {
+                return new AnonymousDisposableReadOnlyDictionary<TKey, TValue>(source, () => { });
+            }, () =>
+            {
+                var cache = source.WithWriteCaching();
+                return new AnonymousDisposableDictionary<TKey, TValue>(cache, () => cache.FlushCache());
+            });
+        }
+        
+        /// <summary>
+        /// Converts the source to a transactional dictionary that keeps all writes pending until the transaction is completed.
+        /// </summary>
+        public static IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> WithWritesCombinedAtEndOfTransaction<TKey, TValue>(this IReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>> source)
+        {
+            return new AnonymousReadWriteFactory<IDisposableReadOnlyDictionary<TKey, TValue>, IDisposableDictionary<TKey, TValue>>(source.CreateReader, () =>
+            {
+                var disposableDictionary = source.CreateWriter();
+                var cache = disposableDictionary.WithWriteCaching();
+                return new AnonymousDisposableDictionary<TKey, TValue>(cache, () =>
+                {
+                    cache.FlushCache();
+                    disposableDictionary.Dispose();
+                });
+            });
+        }
 
         #endregion
     }

@@ -47,12 +47,12 @@ using System.Xml;
 using UtilityDisposables;
 namespace ComposableCollections {
 public static class WithReadCachingExtensions {
-public static IReadCachedDisposableDictionary<TKey, TValue> WithReadCaching<TKey, TValue>(this IDisposableDictionary<TKey, TValue> innerValues) {
-return new ReadCachedDisposableDictionaryAdapter<TKey, TValue>(innerValues);}
 public static IReadCachedReadOnlyDictionary<TKey, TValue> WithReadCaching<TKey, TValue>(this IComposableReadOnlyDictionary<TKey, TValue> innerValues) {
 return new ReadCachedReadOnlyDictionaryAdapter<TKey, TValue>(innerValues);}
 public static IReadWriteCachedDisposableDictionary<TKey, TValue> WithReadCaching<TKey, TValue>(this IWriteCachedDisposableDictionary<TKey, TValue> innerValues) {
 return new ReadWriteCachedDisposableDictionaryAdapter<TKey, TValue>(innerValues);}
+public static IReadCachedDisposableDictionary<TKey, TValue> WithReadCaching<TKey, TValue>(this IDisposableDictionary<TKey, TValue> innerValues) {
+return new ReadCachedDisposableDictionaryAdapter<TKey, TValue>(innerValues);}
 public static IReadCachedDisposableReadOnlyDictionary<TKey, TValue> WithReadCaching<TKey, TValue>(this IDisposableReadOnlyDictionary<TKey, TValue> innerValues) {
 return new ReadCachedDisposableReadOnlyDictionaryAdapter<TKey, TValue>(innerValues);}
 public static IReadCachedDictionary<TKey, TValue> WithReadCaching<TKey, TValue>(this IComposableDictionary<TKey, TValue> innerValues) {

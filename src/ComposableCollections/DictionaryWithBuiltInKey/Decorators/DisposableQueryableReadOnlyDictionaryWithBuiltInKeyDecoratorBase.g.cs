@@ -11,15 +11,22 @@ private readonly IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TVal
 public DisposableQueryableReadOnlyDictionaryWithBuiltInKeyDecoratorBase(IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue> decoratedObject) {
 _decoratedObject = decoratedObject;
 }
+void IDisposable.Dispose() {
+_decoratedObject.Dispose();
+}
 IQueryable<TValue> IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.Values => _decoratedObject.Values;
 ComposableCollections.Dictionary.Interfaces.IQueryableReadOnlyDictionary<TKey, TValue> IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsQueryableReadOnlyDictionary() {
 return _decoratedObject.AsQueryableReadOnlyDictionary();
 }
-void IDisposable.Dispose() {
-_decoratedObject.Dispose();
+int IReadOnlyCollection<TValue>.Count => _decoratedObject.Count;
+ComposableCollections.Dictionary.Interfaces.IDisposableReadOnlyDictionary<TKey, TValue> IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsDisposableReadOnlyDictionary() {
+return _decoratedObject.AsDisposableReadOnlyDictionary();
 }
-System.Collections.Generic.IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() {
+System.Collections.IEnumerator IEnumerable.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
+}
+ComposableCollections.Dictionary.Interfaces.IDisposableQueryableReadOnlyDictionary<TKey, TValue> IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsDisposableQueryableReadOnlyDictionary() {
+return _decoratedObject.AsDisposableQueryableReadOnlyDictionary();
 }
 ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, TValue> IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsComposableReadOnlyDictionary() {
 return _decoratedObject.AsComposableReadOnlyDictionary();
@@ -40,14 +47,7 @@ return _decoratedObject.ContainsKey( key);
 IMaybe<TValue> IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.TryGetValue( TKey key) {
 return _decoratedObject.TryGetValue( key);
 }
-ComposableCollections.Dictionary.Interfaces.IDisposableReadOnlyDictionary<TKey, TValue> IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsDisposableReadOnlyDictionary() {
-return _decoratedObject.AsDisposableReadOnlyDictionary();
-}
-ComposableCollections.Dictionary.Interfaces.IDisposableQueryableReadOnlyDictionary<TKey, TValue> IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsDisposableQueryableReadOnlyDictionary() {
-return _decoratedObject.AsDisposableQueryableReadOnlyDictionary();
-}
-int IReadOnlyCollection<TValue>.Count => _decoratedObject.Count;
-System.Collections.IEnumerator IEnumerable.GetEnumerator() {
+System.Collections.Generic.IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
 }
 }

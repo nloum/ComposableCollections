@@ -12,10 +12,17 @@ private readonly IWriteCachedDisposableDictionaryWithBuiltInKey<TKey, TValue> _d
 public WriteCachedDisposableDictionaryWithBuiltInKeyDecoratorBase(IWriteCachedDisposableDictionaryWithBuiltInKey<TKey, TValue> decoratedObject) {
 _decoratedObject = decoratedObject;
 }
+ComposableCollections.Dictionary.Interfaces.IWriteCachedDisposableDictionary<TKey, TValue> IWriteCachedDisposableDictionaryWithBuiltInKey<TKey, TValue>.AsWriteCachedDisposableDictionary() {
+return _decoratedObject.AsWriteCachedDisposableDictionary();
+}
 void IDisposable.Dispose() {
 _decoratedObject.Dispose();
 }
-System.Collections.Generic.IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() {
+int IReadOnlyCollection<TValue>.Count => _decoratedObject.Count;
+ComposableCollections.Dictionary.Interfaces.IDisposableReadOnlyDictionary<TKey, TValue> IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsDisposableReadOnlyDictionary() {
+return _decoratedObject.AsDisposableReadOnlyDictionary();
+}
+System.Collections.IEnumerator IEnumerable.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
 }
 ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, TValue> IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsComposableReadOnlyDictionary() {
@@ -37,11 +44,7 @@ return _decoratedObject.ContainsKey( key);
 IMaybe<TValue> IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.TryGetValue( TKey key) {
 return _decoratedObject.TryGetValue( key);
 }
-ComposableCollections.Dictionary.Interfaces.IDisposableReadOnlyDictionary<TKey, TValue> IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsDisposableReadOnlyDictionary() {
-return _decoratedObject.AsDisposableReadOnlyDictionary();
-}
-int IReadOnlyCollection<TValue>.Count => _decoratedObject.Count;
-System.Collections.IEnumerator IEnumerable.GetEnumerator() {
+System.Collections.Generic.IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
 }
 ComposableCollections.Dictionary.Interfaces.IComposableDictionary<TKey, TValue> IDictionaryWithBuiltInKey<TKey, TValue>.AsComposableDictionary() {
@@ -176,9 +179,6 @@ return _decoratedObject.AsWriteCachedDictionary();
 }
 void IWriteCachedDictionaryWithBuiltInKey<TKey, TValue>.FlushCache() {
 _decoratedObject.FlushCache();
-}
-ComposableCollections.Dictionary.Interfaces.IWriteCachedDisposableDictionary<TKey, TValue> IWriteCachedDisposableDictionaryWithBuiltInKey<TKey, TValue>.AsWriteCachedDisposableDictionary() {
-return _decoratedObject.AsWriteCachedDisposableDictionary();
 }
 ComposableCollections.Dictionary.Interfaces.IDisposableDictionary<TKey, TValue> IDisposableDictionaryWithBuiltInKey<TKey, TValue>.AsDisposableDictionary() {
 return _decoratedObject.AsDisposableDictionary();

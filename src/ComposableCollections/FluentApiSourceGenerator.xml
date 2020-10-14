@@ -304,6 +304,12 @@
       </BaseClasses>
     </ConstructorExtensionMethods>
     
+    <!-- WithBuiltInKey -->
+    <ConstructorExtensionMethods Namespace="ComposableCollections" ExtensionMethodName="WithBuiltInKey">
+      <BaseClasses>
+        <BaseClass>ReadOnlyDictionaryWithBuiltInKeyAdapter</BaseClass>
+      </BaseClasses>
+    </ConstructorExtensionMethods>
 
     <!-- ReadCached -->
     <ConstructorExtensionMethods Namespace="ComposableCollections" ExtensionMethodName="WithReadCaching">

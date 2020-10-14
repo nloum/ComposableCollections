@@ -13,15 +13,25 @@ private readonly IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> _dec
 public DisposableQueryableDictionaryWithBuiltInKeyDecoratorBase(IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue> decoratedObject) {
 _decoratedObject = decoratedObject;
 }
+void IDisposable.Dispose() {
+_decoratedObject.Dispose();
+}
 IQueryable<TValue> IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.Values => _decoratedObject.Values;
 ComposableCollections.Dictionary.Interfaces.IQueryableReadOnlyDictionary<TKey, TValue> IQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsQueryableReadOnlyDictionary() {
 return _decoratedObject.AsQueryableReadOnlyDictionary();
 }
-void IDisposable.Dispose() {
-_decoratedObject.Dispose();
+int IReadOnlyCollection<TValue>.Count => _decoratedObject.Count;
+ComposableCollections.Dictionary.Interfaces.IDisposableReadOnlyDictionary<TKey, TValue> IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsDisposableReadOnlyDictionary() {
+return _decoratedObject.AsDisposableReadOnlyDictionary();
 }
-System.Collections.Generic.IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() {
+System.Collections.IEnumerator IEnumerable.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
+}
+ComposableCollections.Dictionary.Interfaces.IDisposableQueryableDictionary<TKey, TValue> IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>.AsDisposableQueryableDictionary() {
+return _decoratedObject.AsDisposableQueryableDictionary();
+}
+ComposableCollections.Dictionary.Interfaces.IDisposableQueryableReadOnlyDictionary<TKey, TValue> IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsDisposableQueryableReadOnlyDictionary() {
+return _decoratedObject.AsDisposableQueryableReadOnlyDictionary();
 }
 ComposableCollections.Dictionary.Interfaces.IComposableReadOnlyDictionary<TKey, TValue> IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsComposableReadOnlyDictionary() {
 return _decoratedObject.AsComposableReadOnlyDictionary();
@@ -42,17 +52,7 @@ return _decoratedObject.ContainsKey( key);
 IMaybe<TValue> IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.TryGetValue( TKey key) {
 return _decoratedObject.TryGetValue( key);
 }
-ComposableCollections.Dictionary.Interfaces.IDisposableReadOnlyDictionary<TKey, TValue> IDisposableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsDisposableReadOnlyDictionary() {
-return _decoratedObject.AsDisposableReadOnlyDictionary();
-}
-ComposableCollections.Dictionary.Interfaces.IQueryableDictionary<TKey, TValue> IQueryableDictionaryWithBuiltInKey<TKey, TValue>.AsQueryableDictionary() {
-return _decoratedObject.AsQueryableDictionary();
-}
-ComposableCollections.Dictionary.Interfaces.IDisposableQueryableReadOnlyDictionary<TKey, TValue> IDisposableQueryableReadOnlyDictionaryWithBuiltInKey<TKey, TValue>.AsDisposableQueryableReadOnlyDictionary() {
-return _decoratedObject.AsDisposableQueryableReadOnlyDictionary();
-}
-int IReadOnlyCollection<TValue>.Count => _decoratedObject.Count;
-System.Collections.IEnumerator IEnumerable.GetEnumerator() {
+System.Collections.Generic.IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() {
 return _decoratedObject.GetEnumerator();
 }
 ComposableCollections.Dictionary.Interfaces.IComposableDictionary<TKey, TValue> IDictionaryWithBuiltInKey<TKey, TValue>.AsComposableDictionary() {
@@ -182,8 +182,8 @@ return _decoratedObject.TryRemove( key,  out removedItem);
 void IDictionaryWithBuiltInKey<TKey, TValue>.Remove( TKey key,  out TValue removedItem) {
 _decoratedObject.Remove( key,  out removedItem);
 }
-ComposableCollections.Dictionary.Interfaces.IDisposableQueryableDictionary<TKey, TValue> IDisposableQueryableDictionaryWithBuiltInKey<TKey, TValue>.AsDisposableQueryableDictionary() {
-return _decoratedObject.AsDisposableQueryableDictionary();
+ComposableCollections.Dictionary.Interfaces.IQueryableDictionary<TKey, TValue> IQueryableDictionaryWithBuiltInKey<TKey, TValue>.AsQueryableDictionary() {
+return _decoratedObject.AsQueryableDictionary();
 }
 ComposableCollections.Dictionary.Interfaces.IDisposableDictionary<TKey, TValue> IDisposableDictionaryWithBuiltInKey<TKey, TValue>.AsDisposableDictionary() {
 return _decoratedObject.AsDisposableDictionary();

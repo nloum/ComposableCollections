@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace ComposableCollections.Utilities
 {
-    internal class Enumerable<T> : IEnumerable<T>
+    public class Enumerable<T> : IEnumerable<T>
     {
         private readonly Func<IEnumerator<T>> _getEnumerator;
 

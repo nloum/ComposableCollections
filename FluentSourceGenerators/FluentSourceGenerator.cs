@@ -1,11 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
+using System.Xml.Serialization;
+using ComposableCollections.CodeGenerator;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 
 namespace FluentSourceGenerators
 {
@@ -24,112 +30,65 @@ namespace FluentSourceGenerators
 
         public void Execute(GeneratorExecutionContext context)
         {
-            var syntaxRoots = context.Compilation.SyntaxTrees.SelectMany(syntaxTree =>
-                    Utilities.GetDescendantsOfType<InterfaceDeclarationSyntax>(syntaxTree.GetRoot()));
-            var ifacesToGenerateImplementationsFor = syntaxRoots
-                .Where(iface =>
-                {
-                    foreach (var attr in iface.AttributeLists.SelectMany(list => list.Attributes))
-                    {
-                        if (attr.Name.ToString() == "AnonymousImplementation")
-                        {
-                            return true;
-                        }
-                    }
+            var configurationFile = context.AdditionalFiles.First(
+                additionalFile => additionalFile.Path.Contains("FluentApiSourceGenerator.xml"));
 
-                    return false;
-                })
-                .ToImmutableList();
-            
-            foreach (var iface in _settings.InterfacesToImplement)
-            { 
-                var interfaceDeclaration = codeIndexerService.GetInterfaceDeclaration(iface);
-                
-                var className = $"Anonymous{iface.Substring(1)}";
-                var sourceCodeBuilder = new StringBuilder();
+            var lastSeparatorIndex = configurationFile.Path.IndexOf('@');
+            var projectFolder = configurationFile.Path.Substring(0, lastSeparatorIndex);
+            var fileName = configurationFile.Path.Substring(configurationFile.Path.IndexOf('(')).Trim(')', '(');
+            var configurationFilePath = Path.Combine(projectFolder, fileName);
 
-                var typeParameters = interfaceDeclaration.TypeParameterList.Parameters.Select(tps => tps.Identifier.Text).ToImmutableList();
-                var genericParams = "";
-                if (typeParameters.Count > 0)
+            Configuration configuration = null;
+            using (var streamReader = new StreamReader(configurationFilePath))
+            {
+                configuration = (Configuration) new XmlSerializer(typeof (Configuration)).Deserialize(streamReader);
+            }
+
+            var compilation = context.Compilation;
+
+            foreach (var codeGeneratorSettings in configuration.CodeGenerators)
+            {
+                var codeIndexerService = new CodeIndexerService(compilation.SyntaxTrees, tree => compilation.GetSemanticModel(tree));
+
+                GeneratorBase generator;
+                if (codeGeneratorSettings is AnonymousImplementationsGeneratorSettings anonymousImplementationsGeneratorSettings)
                 {
-                    genericParams = $"<{string.Join(", ", typeParameters)}>";
+                    generator = new AnonymousImplementationsGenerator();
+                    generator.NonGenericInitialize(anonymousImplementationsGeneratorSettings);
                 }
-
-                var usings = new List<string>();
-                
-                sourceCodeBuilder.AppendLine(
-                    $"namespace {_settings.Namespace} {{\npublic class {className}{genericParams} : {iface}{genericParams} {{");
-
-                var semanticModel = codeIndexerService.GetSemanticModel(interfaceDeclaration.SyntaxTree);
-                var delegateMemberCandidates = new List<MemberToBeDelegated>();
-                var candidateParameters = new List<Parameter>();
-                GetInterfacesToImplementWith(semanticModel.GetDeclaredSymbol(interfaceDeclaration), candidateParameters, delegateMemberCandidates);
-                
-                var delegateMemberService = new DelegateMemberService();
-                var memberDeduplicationService = new MemberDeduplicationService();
-                var deduplicatedDelegatedMembers = memberDeduplicationService
-                    .DeduplicateMembers(delegateMemberCandidates, delegated => delegated.Member).ToImmutableList();
-                var parameters = candidateParameters.Where(candidateParameter =>
-                        deduplicatedDelegatedMembers.Any(deduplicatedDelegatedMember =>
-                            deduplicatedDelegatedMember.Value.MemberName == candidateParameter.MemberName))
-                    .ToImmutableList();
-                var getEnumerator = deduplicatedDelegatedMembers.FirstOrDefault(delegateMemberCandidate =>
-                    delegateMemberCandidate.Value.Member.Name == "GetEnumerator");
-
-                foreach (var baseInterface in Utilities.GetBaseInterfaces(semanticModel.GetDeclaredSymbol(interfaceDeclaration)))
+                else if (codeGeneratorSettings is CombinationInterfacesGeneratorSettings combinationInterfacesGeneratorSettings)
                 {
-                    var newUsing =
-                        $"using {string.Join(".", baseInterface.ContainingNamespace.ConstituentNamespaces)};";
-                    if (!newUsing.Contains("global namespace"))
-                    {
-                        usings.Add(newUsing);
-                    }
+                    generator = new CombinationInterfacesGenerator();
+                    generator.NonGenericInitialize(combinationInterfacesGeneratorSettings);
+                }
+                else if (codeGeneratorSettings is ConstructorExtensionMethodsGeneratorSettings constructorExtensionMethodsGeneratorSettings)
+                {
+                    generator = new ConstructorExtensionMethodsGenerator();
+                    generator.NonGenericInitialize(constructorExtensionMethodsGeneratorSettings);
+                }
+                else if (codeGeneratorSettings is DecoratorBaseClassesGeneratorSettings decoratorBaseClassesGeneratorSettings)
+                {
+                    generator = new DecoratorBaseClassesGenerator();
+                    generator.NonGenericInitialize(decoratorBaseClassesGeneratorSettings);
+                }
+                else if (codeGeneratorSettings is SubclassCombinationImplementationsGeneratorSettings subclassCombinationImplementationsGeneratorSettings)
+                {
+                    generator = new SubclassCombinationImplementationsGenerator();
+                    generator.NonGenericInitialize(subclassCombinationImplementationsGeneratorSettings);
+                }
+                else
+                {
+                    throw new ArgumentException($"Unknown settings type: {codeGeneratorSettings?.GetType()?.Name}");
                 }
                 
-                foreach (var usingDirective in Utilities.GetBaseInterfaces(semanticModel.GetDeclaredSymbol(interfaceDeclaration))
-                    .SelectMany(symbol => symbol.DeclaringSyntaxReferences).Select(syntaxRef => syntaxRef.SyntaxTree)
-                    .SelectMany(syntaxTree => Utilities.GetDescendantsOfType<UsingDirectiveSyntax>(syntaxTree.GetRoot())))
+                generator.NonGenericInitialize(codeGeneratorSettings);
+                var outputFiles = generator.Generate(codeIndexerService);
+                foreach (var outputFile in outputFiles)
                 {
-                    var newUsing = usingDirective.ToString();
-                    if (!newUsing.Contains("global namespace"))
-                    {
-                        usings.Add(newUsing);
-                    }
+                    context.AddSource(outputFile.Key, outputFile.Value);
+                    var options = (CSharpParseOptions)context.Compilation.SyntaxTrees.First().Options;
+                    compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(SourceText.From(outputFile.Value, Encoding.UTF8), options));
                 }
-
-                var parameterString = string.Join(", ", parameters
-                    .OrderBy(parameter => parameter.DelegateType).ThenBy(parameter => parameter.ParameterName)
-                    .Select(parameter => $"{parameter.Type} {parameter.ParameterName}"));
-
-                sourceCodeBuilder.AppendLine(string.Join("\n", parameters
-                    .OrderBy(parameter => parameter.DelegateType).ThenBy(parameter => parameter.ParameterName)
-                    .Select(parameter => parameter.ToMemberDeclaration())));
-                
-                sourceCodeBuilder.AppendLine($"public {className}({parameterString}) {{");
-                
-                var memberAssignments = parameters
-                    .Select(parameter => $"{parameter.MemberName} = {parameter.ParameterName};");
-                sourceCodeBuilder.AppendLine(string.Join("\n", memberAssignments));
-                sourceCodeBuilder.AppendLine("}");
-
-                foreach (var deduplicatedMember in deduplicatedDelegatedMembers)
-                {
-                    delegateMemberService.DelegateMember(deduplicatedMember.Value.Member, deduplicatedMember.Value.MemberName, deduplicatedMember.Value.SetMemberName, deduplicatedMember.ImplementExplicitly, sourceCodeBuilder, usings, deduplicatedMember.Value.Type, null);
-                }
-
-                if (getEnumerator != null)
-                {
-                    sourceCodeBuilder.AppendLine("IEnumerator IEnumerable.GetEnumerator() {");
-                    sourceCodeBuilder.Append($"return {getEnumerator.Value.MemberName}.GetEnumerator();");
-                    sourceCodeBuilder.AppendLine("}");
-                }
-                
-                sourceCodeBuilder.AppendLine("}\n}\n");
-
-                usings = usings.Distinct().OrderBy(x => x).ToList();
-
-                var filePath = _pathService.SourceCodeRootFolder / (_settings.Folder ?? ".") / $"{className}.g.cs"; 
-                results.Add(filePath, $"{string.Join("\n",usings)}\n{sourceCodeBuilder}");
             }
         }
     }

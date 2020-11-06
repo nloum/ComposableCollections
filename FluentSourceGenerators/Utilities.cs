@@ -1,16 +1,37 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Humanizer;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace FluentSourceGenerators
+namespace ComposableCollections.CodeGenerator
 {
-    public class Utilities
+    public static class Utilities
     {
+        /// <summary>
+        /// By default, pascalize converts strings to UpperCamelCase also removing underscores
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static string Pascalize(this string input)
+        {   
+            return Regex.Replace(input, "(?:^|_| +)(.)", match => match.Groups[1].Value.ToUpper());
+        }
+
+        /// <summary>
+        /// Same as Pascalize except that the first character is lower case
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static string Camelize(this string input)
+        {
+            var word = input.Pascalize();
+            return word.Length > 0 ? word.Substring(0, 1).ToLower() + word.Substring(1) : word;
+        }
+        
         public static SyntaxNode FindParentOfKind(SyntaxNode child, SyntaxKind syntaxKind)
         {
             if (child.IsKind(syntaxKind))
@@ -111,8 +132,8 @@ namespace FluentSourceGenerators
         
         public static ImmutableDictionary<string, ImmutableList<ISymbol>> GetMembersGroupedByDeclaringType(InterfaceDeclarationSyntax syntax, SemanticModel semanticModel)
         {
-            var symbol = ModelExtensions.GetDeclaredSymbol(semanticModel, syntax);
-            return GetMembersGroupedByDeclaringType(symbol as INamedTypeSymbol);
+            var symbol = semanticModel.GetDeclaredSymbol(syntax);
+            return GetMembersGroupedByDeclaringType(symbol);
         }
 
         public static ImmutableDictionary<string, ImmutableList<ISymbol>> GetMembersGroupedByDeclaringType(INamedTypeSymbol symbol)

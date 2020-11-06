@@ -13,6 +13,10 @@
     <PackageReference Include="GenericNumbers" Version="1.1.0-alpha0031" />
     <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0040" />
     <PackageReference Include="UtilityDisposables" Version="1.1.0-alpha0006" />
+    <PackageReference Include="Autofac" Version="6.0.0" />
+    <PackageReference Include="CommandLineParser" Version="2.8.0" />
+    <PackageReference Include="Humanizer" Version="2.8.26" />
+    <ProjectReference Include="..\..\..\FluentSourceGenerators\FluentSourceGenerators\FluentSourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>

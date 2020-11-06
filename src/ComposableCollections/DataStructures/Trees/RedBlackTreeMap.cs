@@ -33,6 +33,44 @@ namespace DataStructures.Trees
         public RedBlackTreeMap(bool allowDuplicates) : base(allowDuplicates) { }
 
 
+        private Dictionary<RedBlackTreeMapNode<TKey, TValue>, ReindexState> _nodesToReindex =
+            new Dictionary<RedBlackTreeMapNode<TKey, TValue>, ReindexState>();
+
+        protected class ReindexState
+        {
+            public bool LeftChildChanged { get; set; }
+            public bool RightChildChanged { get; set; }
+        }
+
+        private void _setLeftChildChanged(RedBlackTreeMapNode<TKey, TValue> node)
+        {
+            node.LeftChild.Depth = node.Depth + 1;
+            
+            if (!_nodesToReindex.TryGetValue(node, out var reindexState))
+            {
+                reindexState = new ReindexState();
+                _nodesToReindex[node] = reindexState;
+            }
+
+            reindexState.LeftChildChanged = true;
+        }
+        
+        private void _setRightChildChanged(RedBlackTreeMapNode<TKey, TValue> node)
+        {
+            node.RightChild.Depth = node.Depth + 1;
+            
+            if (!_nodesToReindex.TryGetValue(node, out var reindexState))
+            {
+                reindexState = new ReindexState();
+                _nodesToReindex[node] = reindexState;
+            }
+
+            reindexState.RightChildChanged = true;
+        }
+
+        protected virtual void Reindex(IReadOnlyDictionary<RedBlackTreeMapNode<TKey, TValue>, ReindexState> reindexState)
+        {
+        }
 
         /*************************************************************************************************/
         /***
@@ -140,7 +178,9 @@ namespace DataStructures.Trees
 
             // Perform the rotation
             currentNode.RightChild = pivotNode.LeftChild;
+            _setRightChildChanged(currentNode);
             pivotNode.LeftChild = currentNode;
+            _setLeftChildChanged(pivotNode);
 
             // Update parents references
             currentNode.Parent = pivotNode;
@@ -155,9 +195,15 @@ namespace DataStructures.Trees
 
             // Update the original parent's child node
             if (isLeftChild)
+            {
                 parent.LeftChild = pivotNode;
+                _setLeftChildChanged(parent);
+            }
             else if (parent != null)
+            {
                 parent.RightChild = pivotNode;
+                _setRightChildChanged(parent);
+            }
         }
 
         /// <summary>
@@ -183,7 +229,9 @@ namespace DataStructures.Trees
 
             // Perform the rotation
             currentNode.LeftChild = pivotNode.RightChild;
+            _setLeftChildChanged(currentNode);
             pivotNode.RightChild = currentNode;
+            _setRightChildChanged(pivotNode);
 
             // Update parents references
             currentNode.Parent = pivotNode;
@@ -198,9 +246,15 @@ namespace DataStructures.Trees
 
             // Update the original parent's child node
             if (isLeftChild)
+            {
                 parent.LeftChild = pivotNode;
+                _setLeftChildChanged(parent);
+            }
             else if (parent != null)
+            {
                 parent.RightChild = pivotNode;
+                _setRightChildChanged(parent);
+            }
         }
 
         /// <summary>
@@ -449,7 +503,7 @@ namespace DataStructures.Trees
         /// Separated from the overriden version to avoid casting the objects from BSTMapNode to RedBlackTreeMapNode.
         /// This is called from the overriden _remove(BSTMapNode nodeToDelete) helper.
         /// </summary>
-        protected bool _remove(RedBlackTreeMapNode<TKey, TValue> nodeToDelete)
+        protected virtual bool _remove(RedBlackTreeMapNode<TKey, TValue> nodeToDelete)
         {
             if (nodeToDelete == null)
                 return false;
@@ -487,10 +541,12 @@ namespace DataStructures.Trees
                 if (node1.IsLeftChild)
                 {
                     node1.Parent.LeftChild = node2;
+                    _setLeftChildChanged(node1.Parent);
                 }
                 else
                 {
                     node1.Parent.RightChild = node2;
+                    _setRightChildChanged(node1.Parent);
                 }
             }
             else
@@ -522,13 +578,17 @@ namespace DataStructures.Trees
 
         /*************************************************************************************************/
 
+        protected virtual RedBlackTreeMapNode<TKey, TValue> Create(TKey key, TValue value)
+        {
+            return new RedBlackTreeMapNode<TKey, TValue>(key, value);
+        }
 
         /// <summary>
         /// Insert data item to tree
         /// </summary>
         public override void Insert(TKey key, TValue value)
         {
-            var newNode = new RedBlackTreeMapNode<TKey, TValue>(key, value);
+            var newNode = Create(key, value);
 
             // Invoke the super BST insert node method.
             // This insert node recursively starting from the root and checks for success status (related to allowDuplicates flag).
@@ -545,6 +605,12 @@ namespace DataStructures.Trees
 
             // Always color root as black
             Root.Color = RedBlackTreeColors.Black;
+            
+            if (_nodesToReindex.Count > 0)
+            {
+                Reindex(_nodesToReindex);
+                _nodesToReindex.Clear();
+            }
         }
 
         /// <summary>
@@ -615,6 +681,12 @@ namespace DataStructures.Trees
 
             if (status == false)
                 throw new Exception("Item was not found.");
+            
+            if (_nodesToReindex.Count > 0)
+            {
+                Reindex(_nodesToReindex);
+                _nodesToReindex.Clear();
+            }
         }
 
         /// <summary>
@@ -630,6 +702,12 @@ namespace DataStructures.Trees
 
             // Invoke the internal remove node method.
             this._remove(node);
+            
+            if (_nodesToReindex.Count > 0)
+            {
+                Reindex(_nodesToReindex);
+                _nodesToReindex.Clear();
+            }
         }
 
         /// <summary>
@@ -645,6 +723,12 @@ namespace DataStructures.Trees
 
             // Invoke the internal remove node method.
             this._remove(node);
+            
+            if (_nodesToReindex.Count > 0)
+            {
+                Reindex(_nodesToReindex);
+                _nodesToReindex.Clear();
+            }
         }
 
     }

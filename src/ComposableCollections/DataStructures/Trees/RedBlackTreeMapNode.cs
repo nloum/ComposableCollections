@@ -22,6 +22,8 @@
             RightChild = right;
         }
 
+        public int Depth { get; set; }
+
         public virtual RedBlackTreeColors Color
         {
             get { return this._color; }

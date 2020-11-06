@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>preview</LangVersion>
+    <AdditionalFileItemNames>FluentApiSourceGenerator.xml</AdditionalFileItemNames>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -10,15 +10,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentSourceGenerators" Version="1.0.0-alpha0003" />
     <PackageReference Include="GenericNumbers" Version="1.1.0-alpha0031" />
     <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0040" />
     <PackageReference Include="UtilityDisposables" Version="1.1.0-alpha0006" />
     <PackageReference Include="Autofac" Version="6.0.0" />
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
     <PackageReference Include="Humanizer" Version="2.8.26" />
-    <ProjectReference Include="..\..\..\FluentSourceGenerators\FluentSourceGenerators\FluentSourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
-
+ 
   <ItemGroup>
     <Folder Include="DictionaryWithBuiltInKey\Anonymous" />
     <Folder Include="DictionaryWithBuiltInKey\Decorators" />

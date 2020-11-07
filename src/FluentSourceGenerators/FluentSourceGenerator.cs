@@ -81,7 +81,6 @@ namespace FluentSourceGenerators
                     throw new ArgumentException($"Unknown settings type: {codeGeneratorSettings?.GetType()?.Name}");
                 }
                 
-                generator.NonGenericInitialize(codeGeneratorSettings);
                 var outputFiles = generator.Generate(codeIndexerService);
                 foreach (var outputFile in outputFiles)
                 {

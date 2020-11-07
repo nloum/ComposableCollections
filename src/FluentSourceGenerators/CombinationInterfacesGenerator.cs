@@ -48,6 +48,11 @@ namespace ComposableCollections.CodeGenerator
             {
                 if (!GetName(combination, out var name)) continue;
 
+                if (interfaces.ContainsKey(name))
+                {
+                    continue;
+                }
+
                 var withSimpleTypeNames = PreExistingInterfacesWithSimpleTypeNames();
                 var matchingPreExisting = withSimpleTypeNames.FirstOrDefault(preExistingInterface => preExistingInterface.simpleTypeName == name);
                 if (matchingPreExisting.simpleTypeName != null)

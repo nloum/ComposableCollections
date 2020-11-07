@@ -7,8 +7,6 @@ namespace ComposableCollections.CodeGenerator
     {
         [XmlAttribute("Namespace")]
         public string Namespace { get; set; }
-        [XmlAttribute("Folder")]
-        public string Folder { get; set; }
         [XmlArray("InterfaceNameModifiers")]
         [XmlArrayItem("InterfaceNameModifier", typeof(InterfaceNameModifier))]
         public List<InterfaceNameModifier> InterfaceNameModifiers { get; set; }

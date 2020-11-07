@@ -7,8 +7,6 @@ namespace ComposableCollections.CodeGenerator
     {
         [XmlAttribute("Namespace")]
         public string Namespace { get; set; }
-        [XmlAttribute("Folder")]
-        public string Folder { get; set; }
         [XmlAttribute("BaseClass")]
         public string BaseClass { get; set; }
         [XmlArray("ClassNameModifiers")]

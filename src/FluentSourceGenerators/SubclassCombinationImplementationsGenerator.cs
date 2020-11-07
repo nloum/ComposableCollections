@@ -144,7 +144,7 @@ namespace ComposableCollections.CodeGenerator
                     }
                     
                     //if (iface.Identifier == subInterface.Identifier)
-                    if (subInterface.Identifier.Text == "IDisposableDictionary")
+                    if (iface.Identifier.Text == "IObservableReadWriteCachedQueryableDictionary")
                     {
                         int a = 3;
                         var union = ifaceBaseInterfaces.Union(desiredAdaptedBaseInterfaces);

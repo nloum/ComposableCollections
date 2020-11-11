@@ -97,7 +97,7 @@ namespace ComposableCollections.List
         /// should be inserted at into the target list such that target remains sorted.
         /// Based on this: http://stackoverflow.com/a/23682008/4995014
         /// </summary>
-        public static int GetIndexOfSortedInsert<T>(this List<T> target, Func<T, int> comparer, int min = 0, int max = -1)
+        public static int GetIndexOfSortedInsert<T>(this IList<T> target, Func<T, int> comparer, int min = 0, int max = -1)
         {
             // Special case for when the target list is empty
             if (target.Count == 0)
@@ -153,7 +153,7 @@ namespace ComposableCollections.List
         /// should be inserted at into the target list such that target remains sorted.
         /// Based on this: http://stackoverflow.com/a/23682008/4995014
         /// </summary>
-        public static int GetIndexOfSortedInsert<T>(this List<T> target, T newElement, Func<T, T, int> compare, int min = 0, int max = -1)
+        public static int GetIndexOfSortedInsert<T>(this IList<T> target, T newElement, Func<T, T, int> compare, int min = 0, int max = -1)
         {
             return target.GetIndexOfSortedInsert(newElement, (t1) => compare(t1, newElement), min, max);
         }
@@ -163,7 +163,7 @@ namespace ComposableCollections.List
         /// should be inserted at into the target list such that target remains sorted.
         /// Based on this: http://stackoverflow.com/a/23682008/4995014
         /// </summary>
-        public static int GetIndexOfSortedInsert<T, TKey>(this List<T> target, T newElement, Func<T, TKey> keySelector, int min = 0, int max = -1)
+        public static int GetIndexOfSortedInsert<T, TKey>(this IList<T> target, T newElement, Func<T, TKey> keySelector, int min = 0, int max = -1)
         {
             return target.GetIndexOfSortedInsert((t1) => keySelector(t1).CompareTo(keySelector(newElement)), min, max);
         }
@@ -173,7 +173,7 @@ namespace ComposableCollections.List
         /// should be inserted at into the target list such that target remains sorted.
         /// Based on this: http://stackoverflow.com/a/23682008/4995014
         /// </summary>
-        public static int GetIndexOfSortedInsert<T>(this List<T> target, T newElement, int min = 0, int max = -1)
+        public static int GetIndexOfSortedInsert<T>(this IList<T> target, T newElement, int min = 0, int max = -1)
         {
             return target.GetIndexOfSortedInsert(newElement, t => t, min, max);
         }
@@ -182,7 +182,7 @@ namespace ComposableCollections.List
         /// Assumes that target is already sorted. This function inserts the specified newElement
         /// into the target list at a location that makes the target list remain sorted.
         /// </summary>
-        public static int SortedInsert<T>(this List<T> target, T newElement, int min = 0, int max = -1)
+        public static int SortedInsert<T>(this IList<T> target, T newElement, int min = 0, int max = -1)
         {
             var index = GetIndexOfSortedInsert(target, newElement, min, max);
 
@@ -195,7 +195,7 @@ namespace ComposableCollections.List
         /// Assumes that target is already sorted. This function inserts the specified newElement
         /// into the target list at a location that makes the target list remain sorted.
         /// </summary>
-        public static int SortedInsert<T, TKey>(this List<T> target, T newElement, Func<T, TKey> keySelector, int min = 0, int max = -1)
+        public static int SortedInsert<T, TKey>(this IList<T> target, T newElement, Func<T, TKey> keySelector, int min = 0, int max = -1)
         {
             var index = GetIndexOfSortedInsert(target, newElement, keySelector, min, max);
 
@@ -208,7 +208,7 @@ namespace ComposableCollections.List
         /// Assumes that target is already sorted. This function inserts the specified newElement
         /// into the target list at a location that makes the target list remain sorted.
         /// </summary>
-        public static int SortedInsert<T>(this List<T> target, T newElement, Func<T, int> comparer, int min = 0, int max = -1)
+        public static int SortedInsert<T>(this IList<T> target, T newElement, Func<T, int> comparer, int min = 0, int max = -1)
         {
             var index = GetIndexOfSortedInsert(target, newElement, comparer, min, max);
 
@@ -221,7 +221,7 @@ namespace ComposableCollections.List
         /// Assumes that target is already sorted. This function inserts the specified newElement
         /// into the target list at a location that makes the target list remain sorted.
         /// </summary>
-        public static int SortedInsert<T>(this List<T> target, T newElement, Func<T, T, int> comparer, int min = 0, int max = -1)
+        public static int SortedInsert<T>(this IList<T> target, T newElement, Func<T, T, int> comparer, int min = 0, int max = -1)
         {
             var index = GetIndexOfSortedInsert(target, t1 => comparer(t1, newElement), min, max);
 

@@ -7,13 +7,33 @@ using static GenericNumbers.NumbersUtility;
 
 namespace ComposableCollections.List
 {
-    public class OrderedList<T> : ICollection<T>
+    public class OrderedList<T> : ICollection<T>, IReadOnlyList<T>
     {
-        private readonly List<T> _wrapped;
+        private readonly IList<T> _wrapped;
+        private Func<T, T, int> _compare;
+
+        public OrderedList(List<T> wrapped, Func<T, T, int> compare)
+        {
+            _wrapped = wrapped;
+            _compare = compare;
+        }
 
         public OrderedList(List<T> wrapped)
         {
             _wrapped = wrapped;
+            _compare = (x, y) => x.CompareTo(y);
+        }
+
+        public OrderedList(Func<T, T, int> compare)
+        {
+            _wrapped = new List<T>();
+            _compare = compare;
+        }
+
+        public OrderedList()
+        {
+            _wrapped = new List<T>();
+            _compare = (x, y) => x.CompareTo(y);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -25,6 +45,8 @@ namespace ComposableCollections.List
         {
             return _wrapped.GetEnumerator();
         }
+
+        public T this[int index] => _wrapped[index];
 
         public void Add(T item)
         {
@@ -54,6 +76,11 @@ namespace ComposableCollections.List
 
         public int Count => _wrapped.Count;
         public bool IsReadOnly => false;
+
+        public int Compare(T item1, T item2)
+        {
+            return _compare(item1, item2);
+        }
         
         /// <summary>
         /// Uses a binary search to find the minimum and maximum indices at which the needle occurs.
@@ -102,48 +129,18 @@ namespace ComposableCollections.List
         /// <param name="min">Specifies the minimum index at which the element might be found. This can be used to ignore big portions of the list, reducing the number of iterations the search must perform. This can be a relative index.</param>
         /// <param name="max">Specifies the maximum index at which the element might be found. This can be used to ignore big portions of the list, reducing the number of iterations the search must perform. This can be a relative index.</param>
         /// <returns>The absolute index of the element if found; otherwise, returns -1</returns>
-        public INumberRange<int> RangeBinarySearch(T needle, Func<T, T, int> compare, int min = 0, int max = -1)
-        {
-            var rangeMin = _wrapped.GetIndexOfSortedInsert(t =>
-            {
-                var result = compare(t, needle);
-                if (result == 0)
-                    return 1;
-                return result;
-            }, min, max);
-            var rangeMax = _wrapped.GetIndexOfSortedInsert(t =>
-            {
-                var result = compare(t, needle);
-                if (result == 0)
-                    return -1;
-                return result;
-            }, min, max) - 1;
-            return Range(rangeMin, rangeMax, false, false);
-        }
-
-        /// <summary>
-        /// Uses a binary search to find the minimum and maximum indices at which the needle occurs.
-        /// For instance, in the list [0, 1, 1, 2, 3, 3, 3, 3, 4], when this function is called with
-        /// 3 as the needle, the return value will be 4 and 7, because that's the first and last indices
-        /// of the item 3 in the list.
-        /// </summary>
-        /// <param name="haystack">The list in which to search</param>
-        /// <param name="needle">The item you're searching for.</param>
-        /// <param name="min">Specifies the minimum index at which the element might be found. This can be used to ignore big portions of the list, reducing the number of iterations the search must perform. This can be a relative index.</param>
-        /// <param name="max">Specifies the maximum index at which the element might be found. This can be used to ignore big portions of the list, reducing the number of iterations the search must perform. This can be a relative index.</param>
-        /// <returns>The absolute index of the element if found; otherwise, returns -1</returns>
         public INumberRange<int> RangeBinarySearch(T needle, int min = 0, int max = -1)
         {
             var rangeMin = _wrapped.GetIndexOfSortedInsert(t =>
             {
-                var result = t.CompareTo(needle);
+                var result = Compare(t, needle);
                 if (result == 0)
                     return 1;
                 return result;
             }, min, max);
             var rangeMax = _wrapped.GetIndexOfSortedInsert(t =>
             {
-                var result = t.CompareTo(needle);
+                var result = Compare(t, needle);
                 if (result == 0)
                     return -1;
                 return result;
@@ -151,38 +148,6 @@ namespace ComposableCollections.List
             return Range(rangeMin, rangeMax, false, false);
         }
 
-        /// <summary>
-        /// Uses a binary search to find the minimum and maximum indices at which the needle occurs.
-        /// For instance, in the list [0, 1, 1, 2, 3, 3, 3, 3, 4], when this function is called with
-        /// 3 as the needle, the return value will be 4 and 7, because that's the first and last indices
-        /// of the item 3 in the list.
-        /// </summary>
-        /// <param name="haystack">The list in which to search</param>
-        /// <param name="needle">A function that compares the item you're searching for with the specified item.</param>
-        /// <param name="keySelector">The key that is comparable. The Compare function for this type defines the sort order of this list
-        /// and is used by the binary search algorithm.</param>
-        /// <param name="min">Specifies the minimum index at which the element might be found. This can be used to ignore big portions of the list, reducing the number of iterations the search must perform. This can be a relative index.</param>
-        /// <param name="max">Specifies the maximum index at which the element might be found. This can be used to ignore big portions of the list, reducing the number of iterations the search must perform. This can be a relative index.</param>
-        /// <returns>The absolute index of the element if found; otherwise, returns -1</returns>
-        public INumberRange<int> RangeBinarySearch<TKey>(T needle, Func<T, TKey> keySelector, int min = 0, int max = -1)
-        {
-            var rangeMin = _wrapped.GetIndexOfSortedInsert(t =>
-            {
-                var result = keySelector(t).CompareTo(keySelector(needle));
-                if (result == 0)
-                    return 1;
-                return result;
-            }, min, max);
-            var rangeMax = _wrapped.GetIndexOfSortedInsert(t =>
-            {
-                var result = keySelector(t).CompareTo(keySelector(needle));
-                if (result == 0)
-                    return -1;
-                return result;
-            }, min, max) - 1;
-            return Range(rangeMin, rangeMax, false, false);
-        }
-        
         /// <summary>
         /// Performs a binary search on the given data.
         /// </summary>
@@ -194,37 +159,7 @@ namespace ComposableCollections.List
         /// <returns>The absolute index of the element if found; otherwise, returns -1</returns>
         public int BinarySearch(T needle, int min = 0, int max = -1)
         {
-            return this.BinarySearch(t => t.CompareTo(needle), min, max);
-        }
-
-        /// <summary>
-        /// Performs a binary search on the given data.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="needle">The item for which to search</param>
-        /// <param name="keySelector">The function that, for a given item, returns the key by which the item is compared</param>
-        /// <param name="min">Specifies the minimum index at which the element might be found. This can be used to ignore big portions of the list, reducing the number of iterations the search must perform. This can be a relative index.</param>
-        /// <param name="max">Specifies the maximum index at which the element might be found. This can be used to ignore big portions of the list, reducing the number of iterations the search must perform. This can be a relative index.</param>
-        /// <returns>The absolute index of the element if found; otherwise, returns -1</returns>
-        public int BinarySearch<TKey>(T needle, Func<T, TKey> keySelector, int min = 0, int max = -1)
-        {
-            return BinarySearch(t => keySelector(t).CompareTo(keySelector(needle)), min, max);
-        }
-
-        /// <summary>
-        /// Performs a binary search on the given data.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="needle">The item for which to search</param>
-        /// <param name="keySelector">The function that, for a given item, returns the key by which the item is compared</param>
-        /// <param name="min">Specifies the minimum index at which the element might be found. This can be used to ignore big portions of the list, reducing the number of iterations the search must perform. This can be a relative index.</param>
-        /// <param name="max">Specifies the maximum index at which the element might be found. This can be used to ignore big portions of the list, reducing the number of iterations the search must perform. This can be a relative index.</param>
-        /// <returns>The absolute index of the element if found; otherwise, returns -1</returns>
-        public int BinarySearch(T needle, Func<T, T, int> comparer, int min = 0, int max = -1)
-        {
-            return BinarySearch(t => comparer(t, needle), min, max);
+            return this.BinarySearch(t => Compare(t, needle), min, max);
         }
 
         /// <summary>

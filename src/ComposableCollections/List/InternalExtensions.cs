@@ -63,7 +63,7 @@ namespace ComposableCollections.List
         /// <param name="source"></param>
         /// <param name="idx">The relative index</param>
         /// <returns>The absolute index</returns>
-        public static int GetAbsoluteIndex<T>(this List<T> source, int idx)
+        public static int GetAbsoluteIndex<T>(this IList<T> source, int idx)
         {
             if (idx < 0)
             {

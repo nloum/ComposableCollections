@@ -70,7 +70,7 @@ namespace IoFluently
                 }
             }
 
-            return EnumerableUtility.EmptyArray<string>();
+            return Enumerable.Empty<string>();
         }
 
         public virtual IMaybe<string> TryReadText(AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,

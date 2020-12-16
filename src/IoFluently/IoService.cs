@@ -29,7 +29,11 @@ namespace IoFluently
             return new Queryable<AbsolutePath>(new QueryContext());
         }
 
-        public IoService(bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), Environment.NewLine)
+        public IoService() : this(false)
+        {
+        }
+        
+        public IoService(bool enableOpenFilesTracking) : base(new OpenFilesTrackingService(enableOpenFilesTracking), Environment.NewLine)
         {
             PathObservationMethod = GetDefaultPathObservationMethod();
         }

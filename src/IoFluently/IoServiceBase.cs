@@ -185,7 +185,7 @@ namespace IoFluently
         public virtual AbsolutePath CreateTemporaryPath(PathType type)
         {
             var path = Path.GetRandomFileName();
-            var spec = TryParseAbsolutePath(path).Value;
+            var spec = ParseAbsolutePath(path, ParseAbsolutePath(Path.GetTempPath()));
             if (type == PathType.File)
                 spec.Create(PathType.File);
             if (type == PathType.Folder)

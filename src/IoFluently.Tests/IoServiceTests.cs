@@ -48,6 +48,38 @@ namespace IoFluently.Tests
                 throw new ArgumentException($"Unknown IoServiceType {type}");
             }
         }
+
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        public void CreateTemporaryFileShouldWork(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, true);
+            var temporaryPath = uut.CreateTemporaryPath(PathType.File);
+            temporaryPath.IsFile().Should().BeTrue();
+            temporaryPath.DeleteFile();
+            temporaryPath.IsFile().Should().BeFalse();
+        }
+        
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        public void CreateTemporaryFolderShouldWork(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, true);
+            var temporaryPath = uut.CreateTemporaryPath(PathType.Folder);
+            temporaryPath.IsFolder().Should().BeTrue();
+            temporaryPath.DeleteFolder();
+            temporaryPath.IsFolder().Should().BeFalse();
+        }
+        
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        public void CreateTemporaryNonExistentPathShouldWork(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, true);
+            var temporaryPath = uut.CreateTemporaryPath(PathType.None);
+            temporaryPath.IsFolder().Should().BeFalse();
+            temporaryPath.IsFile().Should().BeFalse();
+        }
         
         [TestMethod]
         [DataRow(IoServiceType.IoService)]

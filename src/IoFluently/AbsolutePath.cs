@@ -116,7 +116,12 @@ namespace IoFluently
 
             return sb.ToString();
         }
-
+        
+        public static implicit operator string(AbsolutePath path)  
+        {  
+            return path.ToString();
+        } 
+        
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
@@ -127,6 +132,11 @@ namespace IoFluently
 
         public static AbsolutePath operator / (AbsolutePath absPath, string whatToAdd)
         {
+            if (string.IsNullOrEmpty(whatToAdd))
+            {
+                return absPath;
+            }
+            
             return new AbsolutePath(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd);
         }
 
@@ -142,6 +152,11 @@ namespace IoFluently
 
         public static AbsolutePath operator / (AbsolutePath absPath, RelativePath whatToAdd)
         {
+            if (whatToAdd == null)
+            {
+                return absPath;
+            }
+
             return new AbsolutePath(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd.Path);
         }
 

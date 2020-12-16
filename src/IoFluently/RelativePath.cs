@@ -125,7 +125,12 @@ namespace IoFluently
 
             return sb.ToString();
         }
-
+        
+        public static implicit operator string(RelativePath path)  
+        {  
+            return path.ToString();
+        }
+        
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
@@ -149,6 +154,11 @@ namespace IoFluently
         
         public static RelativePath operator / (RelativePath relPath, string whatToAdd)
         {
+            if (string.IsNullOrEmpty(whatToAdd))
+            {
+                return relPath;
+            }
+            
             return new RelativePath(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, relPath.Path / whatToAdd);
         }
 
@@ -164,6 +174,11 @@ namespace IoFluently
 
         public static RelativePath operator / (RelativePath relPath, RelativePath whatToAdd)
         {
+            if (whatToAdd == null)
+            {
+                return relPath;
+            }
+            
             return new RelativePath(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, relPath.Path / whatToAdd.Path);
         }
 

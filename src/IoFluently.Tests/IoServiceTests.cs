@@ -279,6 +279,58 @@ namespace IoFluently.Tests
         }
 
         [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        public void RelativePathSlashNullShouldReturnOriginalPath(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, false);
+            var test1 = uut.ParseRelativePath("test1");
+            var path = test1 / (RelativePath)null;
+            path.Should().Be(test1);
+            
+            path = test1 / (string)null;
+            path.Should().Be(test1);
+            
+            path = test1 / "";
+            path.Should().Be(test1);
+        }
+
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        public void AbsolutePathSlashNullShouldReturnOriginalPath(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, false);
+            var test1 = uut.ParseAbsolutePath("/test1");
+            var path = test1 / (RelativePath)null;
+            path.Should().Be(test1);
+            
+            path = test1 / (string)null;
+            path.Should().Be(test1);
+            
+            path = test1 / "";
+            path.Should().Be(test1);
+        }
+
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        public void RelativePathWithTrailingSlashShouldBeEqualToWithoutTrailingSlash(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, false);
+            var withTrailingSlash = uut.ParseRelativePath("test1/");
+            var withoutTrailingSlash = uut.ParseRelativePath("test1");
+            withTrailingSlash.Should().Be(withoutTrailingSlash);
+        }
+
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        public void AbsolutePathWithTrailingSlashShouldBeEqualToWithoutTrailingSlash(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, false);
+            var withTrailingSlash = uut.ParseAbsolutePath("/test1/");
+            var withoutTrailingSlash = uut.ParseAbsolutePath("/test1");
+            withTrailingSlash.Should().Be(withoutTrailingSlash);
+        }
+
+        [TestMethod]
         [DataRow(false, IoServiceType.IoService, true, IoServiceType.IoService, true)]
         [DataRow(false, IoServiceType.InMemoryWindowsIoService, true, IoServiceType.InMemoryWindowsIoService, true)]
         [DataRow(false, IoServiceType.InMemoryUnixIoService, true, IoServiceType.InMemoryUnixIoService, true)]

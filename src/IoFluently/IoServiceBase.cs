@@ -306,16 +306,24 @@ namespace IoFluently
                 flags = IsCaseSensitiveByDefault() ? CaseSensitivityMode.CaseSensitive : CaseSensitivityMode.CaseInsensitive;
             error = string.Empty;
             relativePath = null;
-            if (path.Contains(":") && path.Contains("/"))
-            {
-                path = path.Replace("/", "\\");
-            }
-            var isWindowsStyle = path.Contains("\\") || path.Contains(":");
-            var isUnixStyle = path.Contains("/");
+            
+            var backslashIndex = path.IndexOf('\\');
+            var isWindowsStyle = backslashIndex != -1;
+            var slashIndex = path.IndexOf('/');
+            var isUnixStyle = slashIndex != -1;
+
             if (isWindowsStyle && isUnixStyle)
             {
-                error = "Cannot mix slashes and backslashes in the same path";
-                return false;
+                if (backslashIndex < slashIndex)
+                {
+                    isUnixStyle = false;
+                    path = path.Replace("/", "\\");
+                }
+                else
+                {
+                    isWindowsStyle = false;
+                    path = path.Replace("\\", "/");
+                }
             }
 
             if (isWindowsStyle)
@@ -587,14 +595,27 @@ namespace IoFluently
             {
                 path = path.Replace("/", "\\");
             }
-            var isWindowsStyle = path.Contains("\\") || path.Contains(":");
-            var isUnixStyle = path.Contains("/");
+
+            var backslashIndex = path.IndexOf('\\');
+            var containsColon = path.Contains(":");
+            var isWindowsStyle = backslashIndex != -1 || containsColon;
+            var slashIndex = path.IndexOf('/');
+            var isUnixStyle = slashIndex != -1;
+
             if (isWindowsStyle && isUnixStyle)
             {
-                error = "Cannot mix slashes and backslashes in the same path";
-                return false;
+                if (containsColon || backslashIndex < slashIndex)
+                {
+                    isUnixStyle = false;
+                    path = path.Replace("/", "\\");
+                }
+                else
+                {
+                    isWindowsStyle = false;
+                    path = path.Replace("\\", "/");
+                }
             }
-
+            
             if (isWindowsStyle)
             {
                 if (flags.HasFlag(CaseSensitivityMode.UseDefaultsForGivenPath))

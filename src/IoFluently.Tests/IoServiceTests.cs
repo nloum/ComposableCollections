@@ -234,6 +234,51 @@ namespace IoFluently.Tests
         }
 
         [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        public void ShouldParseMixedDirectorySeparatorsAsAbsoluteWindowsPath(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, false);
+            var path = uut.ParseAbsolutePath("C:\\test1/test2");
+            path.ToString().Should().Be("C:\\test1\\test2");
+        }
+
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        public void ShouldParseMixedDirectorySeparatorsAsAbsoluteWindowsUncPath(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, false);
+            var path = uut.ParseRelativePath(@"\\test1/test2");
+            path.ToString().Should().Be(@"\\test1\test2");
+        }
+        
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        public void ShouldParseMixedDirectorySeparatorsAsAbsoluteLinuxPath(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, false);
+            var path = uut.ParseAbsolutePath("/test1\\test2");
+            path.ToString().Should().Be("/test1/test2");
+        }
+        
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        public void ShouldParseMixedDirectorySeparatorsAsRelativeLinuxPath(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, false);
+            var path = uut.ParseRelativePath("test1/test2\\test3");
+            path.ToString().Should().Be("./test1/test2/test3");
+        }
+        
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        public void ShouldParseMixedDirectorySeparatorsAsRelativeWindowsPath(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, false);
+            var path = uut.ParseRelativePath("test1\\test2/test3");
+            path.ToString().Should().Be(".\\test1\\test2\\test3");
+        }
+
+        [TestMethod]
         [DataRow(false, IoServiceType.IoService, true, IoServiceType.IoService, true)]
         [DataRow(false, IoServiceType.InMemoryWindowsIoService, true, IoServiceType.InMemoryWindowsIoService, true)]
         [DataRow(false, IoServiceType.InMemoryUnixIoService, true, IoServiceType.InMemoryUnixIoService, true)]

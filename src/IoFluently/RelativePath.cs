@@ -108,12 +108,19 @@ namespace IoFluently
 
         public override string ToString()
         {
+            var isUnc = Path.Components.FirstOrDefault() == @"\\";
+
             var sb = new StringBuilder();
             for (var i = 0; i < Path.Count; i++)
             {
                 sb.Append(Path[i]);
                 if (Path[i] != DirectorySeparator && i + 1 != Path.Count)
-                    sb.Append(DirectorySeparator);
+                {
+                    if (!isUnc || i != 0)
+                    {
+                        sb.Append(DirectorySeparator);
+                    }
+                }
             }
 
             return sb.ToString();

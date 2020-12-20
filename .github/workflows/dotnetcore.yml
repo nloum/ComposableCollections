@@ -26,5 +26,6 @@ jobs:
       - uses: actions/checkout@v1
       - name: Run './build.sh Push'
         run: ./build.sh Push
+        container: mcr.microsoft.com/dotnet/aspnet:5.0
         env:
             NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}

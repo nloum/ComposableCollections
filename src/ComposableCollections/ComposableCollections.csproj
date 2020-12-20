@@ -7,6 +7,7 @@
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DocumentationFile>bin\Release\ComposableCollections.xml</DocumentationFile>
+    <NoWarn>1701;1702;1570</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

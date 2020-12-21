@@ -37,7 +37,7 @@ namespace FluentSourceGenerators
             var fileName = configurationFile.Path.Substring(configurationFile.Path.IndexOf('(')).Trim(')', '(');
             var configurationFilePath = Path.Combine(projectFolder, fileName);
 
-            Configuration configuration = null;
+            Configuration? configuration = null;
             using (var streamReader = new StreamReader(configurationFilePath))
             {
                 configuration = (Configuration) new XmlSerializer(typeof (Configuration)).Deserialize(streamReader);

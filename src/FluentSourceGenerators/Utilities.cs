@@ -32,7 +32,7 @@ namespace FluentSourceGenerators
             return word.Length > 0 ? word.Substring(0, 1).ToLower() + word.Substring(1) : word;
         }
         
-        public static SyntaxNode FindParentOfKind(SyntaxNode child, SyntaxKind syntaxKind)
+        public static SyntaxNode? FindParentOfKind(SyntaxNode child, SyntaxKind syntaxKind)
         {
             if (child.IsKind(syntaxKind))
             {

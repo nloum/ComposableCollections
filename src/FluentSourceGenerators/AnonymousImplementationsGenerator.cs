@@ -227,7 +227,7 @@ namespace ComposableCollections.CodeGenerator
                 parameterIndex++;
                 var tmpParameterName = parameterName + (parameterIndex > 0 ? parameterIndex.ToString() : "");
 
-                parameter = parameters.FirstOrDefault(parameter => parameter.ParameterName == tmpParameterName);
+                parameter = parameters.FirstOrDefault(p => p.ParameterName == tmpParameterName);
                 if (parameter == null || parameter.Type == parameterType)
                 {
                     parameterName = tmpParameterName;

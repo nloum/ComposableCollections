@@ -65,7 +65,7 @@ namespace ComposableCollections.CodeGenerator
             var constructors = theClass.Members.OfType<ConstructorDeclarationSyntax>()
                 .ToImmutableList();
             var baseInterfaces = Utilities.GetBaseInterfaces(theClassSemanticModel.GetDeclaredSymbol(theClass));
-            var baseMembers = baseInterfaces.SelectMany(baseInterface => baseInterface.GetMembers());
+            var baseMembers = baseInterfaces.SelectMany(aBaseInterface => aBaseInterface.GetMembers());
             var baseMemberExplicitImplementationProfiles =
                 baseMembers.Select(baseMember => memberDeduplicationService.GetExplicitImplementationProfile(baseMember)).Distinct().ToImmutableHashSet();
             var baseMemberImplementationProfiles =

@@ -125,11 +125,11 @@ namespace ComposableCollections.CodeGenerator
 
                 if (readWriteSymbol != null)
                 {
-                    results.Add(new DeduplicatedMember<T>(kvp.Key, readWriteSymbol.Item1, false, indexerGroup.Select(kvp => kvp.Item1)));
+                    results.Add(new DeduplicatedMember<T>(kvp.Key, readWriteSymbol.Item1, false, indexerGroup.Select(duplicate => duplicate.Item1)));
                 }
                 else
                 {
-                    results.Add(new DeduplicatedMember<T>(kvp.Key, kvp.Value.First().Item1, false, indexerGroup.Select(kvp => kvp.Item1)));
+                    results.Add(new DeduplicatedMember<T>(kvp.Key, kvp.Value.First().Item1, false, indexerGroup.Select(duplicate => duplicate.Item1)));
                 }
             }
 

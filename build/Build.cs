@@ -151,8 +151,8 @@ class Build : NukeBuild
     {
 	    get
 	    {
-		    var package = NuGetPackageResolver.GetGlobalInstalledPackage("GitVersion.Tool", "5.3.3", null);
-		    var settings = new GitVersionSettings().SetProcessToolPath(package.Directory / "tools/netcoreapp3.1/any/gitversion.dll");
+		    var package = NuGetPackageResolver.GetGlobalInstalledPackage("GitVersion.Tool", "5.6.0", null);
+		    var settings = new GitVersionSettings().SetProcessToolPath(package.Directory / "tools/net5.0/any/gitversion.dll");
 		    var gitVersion = GitVersionTasks.GitVersion(settings).Result;
 		    return gitVersion;
 	    }

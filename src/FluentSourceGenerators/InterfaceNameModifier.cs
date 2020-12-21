@@ -1,8 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace ComposableCollections.CodeGenerator
+namespace FluentSourceGenerators
 {
     public class InterfaceNameModifier
     {

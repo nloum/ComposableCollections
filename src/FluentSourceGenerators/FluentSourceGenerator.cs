@@ -7,7 +7,6 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Xml.Serialization;
-using ComposableCollections.CodeGenerator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;

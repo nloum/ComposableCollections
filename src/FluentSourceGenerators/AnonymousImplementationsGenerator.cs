@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace ComposableCollections.CodeGenerator
+namespace FluentSourceGenerators
 {
     public class AnonymousImplementationsGenerator : GeneratorBase<AnonymousImplementationsGeneratorSettings>
     {

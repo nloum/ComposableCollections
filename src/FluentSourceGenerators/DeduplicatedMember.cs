@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
 
-namespace ComposableCollections.CodeGenerator
+namespace FluentSourceGenerators
 {
     public class DeduplicatedMember<T>
     {

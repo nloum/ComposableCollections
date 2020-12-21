@@ -1,4 +1,4 @@
-namespace ComposableCollections.CodeGenerator
+namespace FluentSourceGenerators
 {
     public enum DelegateType
     {

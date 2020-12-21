@@ -1,9 +1,9 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 
-namespace ComposableCollections.CodeGenerator
+namespace FluentSourceGenerators
 {
     public class DelegateMemberService
     {

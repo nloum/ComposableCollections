@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
 
-namespace ComposableCollections.CodeGenerator
+namespace FluentSourceGenerators
 {
     public abstract class GeneratorBase
     {

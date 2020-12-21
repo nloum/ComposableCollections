@@ -1,6 +1,6 @@
 using System.Xml.Serialization;
 
-namespace ComposableCollections.CodeGenerator
+namespace FluentSourceGenerators
 {
     public class InterfaceNameBuilder
     {

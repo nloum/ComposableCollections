@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Xml;
+using LiveLinq;
 
 namespace IoFluently.Documentation
 {
@@ -14,6 +15,17 @@ namespace IoFluently.Documentation
             var ioService = new IoService();
 
             var repoRoot = ioService.CurrentDirectory.Ancestors().First(ancestor => ioService.IsFolder(ancestor / ".git"));
+            repoRoot.Descendants().ToLiveLinq()
+                .Subscribe(x =>
+                {
+                    Console.WriteLine(x);
+                }, (x, _) =>
+                {
+                    Console.WriteLine(x);
+                });
+
+            Console.ReadKey();
+            
             var xmlDoc = (repoRoot / "src/IoFluently/bin/Debug/IoFluently.xml").AsXmlFile();
             var csharpDocumentation = xmlDoc.Read();
 

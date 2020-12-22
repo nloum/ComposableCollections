@@ -27,15 +27,15 @@ namespace FluentSourceGenerators
             var theClass = codeIndexerService.GetClassDeclaration(_settings.BaseClass);
             if (theClass == null)
             {
-                Utilities.ThrowException(
+                throw Utilities.MakeException(
                     $"The class {_settings.BaseClass} could not be found in the syntax");
             }
-            var theClassSemanticModel = codeIndexerService.GetSemanticModel(theClass.SyntaxTree)
-                ?? Utilities.ThrowException($"The class {_settings.BaseClass} has no semantic model");
+            var theClassSemanticModel = codeIndexerService.GetSemanticModel(theClass!.SyntaxTree)
+                ?? throw Utilities.MakeException($"The class {_settings.BaseClass} has no semantic model");
 
             if (theClass.BaseList == null || theClass.BaseList.Types.Count == 0)
             {
-                Utilities.ThrowException($"The class {_settings.BaseClass} needs to implement an interface" +
+                throw Utilities.MakeException($"The class {_settings.BaseClass} needs to implement an interface" +
                                                     $" for the {nameof(SubclassCombinationImplementationsGenerator)} to work");
             }
             
@@ -50,14 +50,14 @@ namespace FluentSourceGenerators
                 var result = theClassSemanticModel!.GetDeclaredSymbol(baseType.Type) as INamedTypeSymbol;
                 if (result == null)
                 {
-                    Utilities.ThrowException($"The class {_settings.BaseClass} inherits from {key} but {key} is not defined in {_settings.BaseClass}'s semantic model.");
+                    throw Utilities.MakeException($"The class {_settings.BaseClass} inherits from {key} but {key} is not defined in {_settings.BaseClass}'s semantic model.");
                 }
                 return result;
-            }).FirstOrDefault(s => s.TypeKind == TypeKind.Interface);
+            }).FirstOrDefault(s => s!.TypeKind == TypeKind.Interface);
 
             if (baseInterfaceSymbol == null)
             {
-                Utilities.ThrowException($"The class {_settings.BaseClass} needs to implement an interface" +
+                throw Utilities.MakeException($"The class {_settings.BaseClass} needs to implement an interface" +
                                                     $" for the {nameof(SubclassCombinationImplementationsGenerator)} to work");
             }
 
@@ -68,7 +68,7 @@ namespace FluentSourceGenerators
                 var interfaceSymbol = codeIndexerService.GetSymbol(interfaceDeclaration);
                 if (interfaceSymbol == null)
                 {
-                    Utilities.ThrowException($"The interface {interfaceDeclaration.Identifier} has no symbol");
+                    throw Utilities.MakeException($"The interface {interfaceDeclaration.Identifier} has no symbol");
                 }
                 if (Utilities.IsBaseInterface(interfaceSymbol, baseInterfaceSymbol))
                 {
@@ -79,7 +79,7 @@ namespace FluentSourceGenerators
             for (var i = 0; i < subInterfaces.Count; i++)
             {
                 var subInterface = subInterfaces[i];
-                if (subInterface.Identifier.Text == baseInterfaceSymbol.Name)
+                if (subInterface.Identifier.Text == baseInterfaceSymbol!.Name)
                 {
                     subInterfaces.RemoveAt(i);
                     break;
@@ -167,13 +167,13 @@ namespace FluentSourceGenerators
                     var ifaceSemanticModel = codeIndexerService.GetSemanticModel(iface.SyntaxTree);
                     if (ifaceSemanticModel == null)
                     {
-                        Utilities.ThrowException(
+                        throw Utilities.MakeException(
                             $"The interface {iface.Identifier.Text} has no semantic model");
                     }
                     var ifaceSymbol = ifaceSemanticModel.GetDeclaredSymbol(iface);
                     if (ifaceSymbol == null)
                     {
-                        Utilities.ThrowException($"The interface {iface.Identifier.Text} has no symbol in the semantic model");
+                        throw Utilities.MakeException($"The interface {iface.Identifier.Text} has no symbol in the semantic model");
                     }
                     var ifaceBaseInterfaces = Utilities
                         .GetBaseInterfaces(ifaceSymbol)
@@ -197,11 +197,11 @@ namespace FluentSourceGenerators
 
                 if (bestAdaptedInterface == null)
                 {
-                    Utilities.ThrowException($"Cannot find the best interface to adapt for {adaptedParameter.Type}");
+                    throw Utilities.MakeException($"Cannot find the best interface to adapt for {adaptedParameter.Type}");
                 }
                 
                 classDefinition.Add(
-                    $"private readonly {bestAdaptedInterface.Identifier}{adaptedParameterTypeArgs} _adapted;\n");
+                    $"private readonly {bestAdaptedInterface!.Identifier}{adaptedParameterTypeArgs} _adapted;\n");
 
                 foreach (var constructor in constructors)
                 {

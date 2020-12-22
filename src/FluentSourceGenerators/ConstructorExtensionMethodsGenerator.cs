@@ -49,14 +49,14 @@ namespace FluentSourceGenerators
                 var aClassSemanticModel = codeIndexerService.GetSemanticModel(aClass.SyntaxTree);
                 if (aClassSemanticModel == null)
                 {
-                    Utilities.ThrowException($"There is no semantic model for the class {aClass.Identifier}, which is defined in the syntax. This implies a logic error in FluentSourceGenerators.");
+                    throw Utilities.MakeException($"There is no semantic model for the class {aClass.Identifier}, which is defined in the syntax. This implies a logic error in FluentSourceGenerators.");
                 }
                 var aClassSymbol = aClassSemanticModel?.GetDeclaredSymbol(aClass);
                 if (aClassSymbol == null)
                 {
-                    Utilities.ThrowException($"There is no symbol for the class {aClass.Identifier}, which is defined in the syntax. This implies a logic error in FluentSourceGenerators.");
+                    throw Utilities.MakeException($"There is no symbol for the class {aClass.Identifier}, which is defined in the syntax. This implies a logic error in FluentSourceGenerators.");
                 }
-                usings.Add($"using {aClassSymbol.ContainingNamespace};\n");
+                usings.Add($"using {aClassSymbol!.ContainingNamespace};\n");
 
                 foreach (var constructor in aClass.Members.OfType<ConstructorDeclarationSyntax>().Where(constructor => constructor.Modifiers.Any(SyntaxKind.PublicKeyword)))
                 {

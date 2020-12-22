@@ -12,10 +12,10 @@ namespace FluentSourceGenerators
 {
     public static class Utilities
     {
-        public static void ThrowException(string errorMessage, [CallerFilePath] string callerFilePath = null,
+        public static InvalidOperationException MakeException(string errorMessage, [CallerFilePath] string callerFilePath = null,
             [CallerLineNumber] int callerLineNumber = 0, [CallerMemberName] string callerMemberName = null)
         {
-            throw new InvalidOperationException(errorMessage +
+            return new InvalidOperationException(errorMessage +
                                                 $" ({callerFilePath}:{callerLineNumber} in {callerMemberName})");
         } 
     

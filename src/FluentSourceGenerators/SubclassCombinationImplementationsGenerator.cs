@@ -47,12 +47,20 @@ namespace FluentSourceGenerators
                     key = key.Substring(0, key.IndexOf('<'));
                 }
 
-                var result = theClassSemanticModel!.GetDeclaredSymbol(baseType.Type) as INamedTypeSymbol;
+                var result = theClassSemanticModel!.GetDeclaredSymbol(baseType.Type);
                 if (result == null)
                 {
                     throw Utilities.MakeException($"The class {_settings.BaseClass} inherits from {key} but {key} is not defined in {_settings.BaseClass}'s semantic model.");
                 }
-                return result;
+
+                var typedResult = result as INamedTypeSymbol;
+                if (typedResult == null)
+                {
+                    throw Utilities.MakeException(
+                        $"The declared symbol for {key} is a {result.GetType().Name} but it should be a {nameof(INamedTypeSymbol)}");
+                }
+                
+                return typedResult;
             }).FirstOrDefault(s => s!.TypeKind == TypeKind.Interface);
 
             if (baseInterfaceSymbol == null)

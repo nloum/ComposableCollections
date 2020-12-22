@@ -41,7 +41,7 @@ namespace FluentSourceGenerators
 
             if (typeToAddExtensionMethodsFor == null)
             {
-                throw new InvalidOperationException(
+                Utilities.ThrowException(
                     $"Could not find a class or interface named {_settings.TypeToAddExtensionMethodsFor}");
             } 
             

@@ -29,7 +29,7 @@ namespace FluentSourceGenerators
 
                 if (interfaceDeclaration == null)
                 {
-                    throw new InvalidOperationException($"Cannot find interface named {iface}");
+                    Utilities.ThrowException($"Cannot find interface named {iface}");
                 }
                 
                 var className = $"Anonymous{iface.Substring(1)}";
@@ -190,7 +190,7 @@ namespace FluentSourceGenerators
         {
             if (propertySymbol.IsIndexer)
             {
-                throw new InvalidOperationException();
+                Utilities.ThrowException();
             }
 
             Parameter? getter = null, setter = null;
@@ -223,7 +223,7 @@ namespace FluentSourceGenerators
             else
             {
                 var typeName = ((INamedTypeSymbol) propertySymbol.ContainingSymbol)?.Name ?? "unknown";
-                throw new InvalidOperationException(
+                Utilities.ThrowException(
                     $"The property {propertySymbol.Name} in type {typeName} has no accessible getter or setter");
             }
         }

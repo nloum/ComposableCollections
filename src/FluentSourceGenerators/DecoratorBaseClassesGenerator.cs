@@ -21,7 +21,7 @@ namespace FluentSourceGenerators
         {
             if (_settings == null)
             {
-                throw new InvalidOperationException(
+                Utilities.ThrowException(
                     $"Settings not initialized for {nameof(DecoratorBaseClassesGenerator)}");
             }
             
@@ -34,7 +34,7 @@ namespace FluentSourceGenerators
                 var semanticModel = codeIndexerService.GetSemanticModel(interfaceDeclaration.SyntaxTree);
                 if (semanticModel == null)
                 {
-                    throw new InvalidOperationException($"No semantic model for interface {interfaceDeclaration.Identifier}, which is in the syntax.");
+                    Utilities.ThrowException($"No semantic model for interface {interfaceDeclaration.Identifier}, which is in the syntax.");
                 }
 
                 var usings = new List<string>();
@@ -42,7 +42,7 @@ namespace FluentSourceGenerators
                 var interfaceSymbol = semanticModel.GetDeclaredSymbol(interfaceDeclaration);
                 if (interfaceSymbol == null)
                 {
-                    throw new InvalidOperationException(
+                    Utilities.ThrowException(
                         $"No symbol for interface {interfaceDeclaration.Identifier}, which is in the syntax.");
                 }
                 var baseInterfaces = Utilities.GetBaseInterfaces(interfaceSymbol);

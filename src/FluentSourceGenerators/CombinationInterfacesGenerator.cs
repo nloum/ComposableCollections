@@ -300,7 +300,7 @@ namespace FluentSourceGenerators
 
             if (name == null)
             {
-                throw new InvalidOperationException("None of the name creation regexes matched");
+                Utilities.ThrowException("None of the name creation regexes matched");
             }
 
             if (string.IsNullOrWhiteSpace(name))

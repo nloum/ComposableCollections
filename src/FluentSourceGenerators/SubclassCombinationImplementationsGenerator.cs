@@ -27,15 +27,15 @@ namespace FluentSourceGenerators
             var theClass = codeIndexerService.GetClassDeclaration(_settings.BaseClass);
             if (theClass == null)
             {
-                throw new InvalidOperationException(
+                Utilities.ThrowException(
                     $"The class {_settings.BaseClass} could not be found in the syntax");
             }
             var theClassSemanticModel = codeIndexerService.GetSemanticModel(theClass.SyntaxTree)
-                ?? throw new InvalidOperationException($"The class {_settings.BaseClass} has no semantic model");
+                ?? Utilities.ThrowException($"The class {_settings.BaseClass} has no semantic model");
 
             if (theClass.BaseList == null || theClass.BaseList.Types.Count == 0)
             {
-                throw new InvalidOperationException($"The class {_settings.BaseClass} needs to implement an interface" +
+                Utilities.ThrowException($"The class {_settings.BaseClass} needs to implement an interface" +
                                                     $" for the {nameof(SubclassCombinationImplementationsGenerator)} to work");
             }
             
@@ -50,14 +50,14 @@ namespace FluentSourceGenerators
                 var result = theClassSemanticModel!.GetDeclaredSymbol(baseType.Type) as INamedTypeSymbol;
                 if (result == null)
                 {
-                    throw new InvalidOperationException($"The class {_settings.BaseClass} inherits from {key} but {key} is not defined in {_settings.BaseClass}'s semantic model.");
+                    Utilities.ThrowException($"The class {_settings.BaseClass} inherits from {key} but {key} is not defined in {_settings.BaseClass}'s semantic model.");
                 }
                 return result;
             }).FirstOrDefault(s => s.TypeKind == TypeKind.Interface);
 
             if (baseInterfaceSymbol == null)
             {
-                throw new InvalidOperationException($"The class {_settings.BaseClass} needs to implement an interface" +
+                Utilities.ThrowException($"The class {_settings.BaseClass} needs to implement an interface" +
                                                     $" for the {nameof(SubclassCombinationImplementationsGenerator)} to work");
             }
 
@@ -68,7 +68,7 @@ namespace FluentSourceGenerators
                 var interfaceSymbol = codeIndexerService.GetSymbol(interfaceDeclaration);
                 if (interfaceSymbol == null)
                 {
-                    throw new InvalidOperationException($"The interface {interfaceDeclaration.Identifier} has no symbol");
+                    Utilities.ThrowException($"The interface {interfaceDeclaration.Identifier} has no symbol");
                 }
                 if (Utilities.IsBaseInterface(interfaceSymbol, baseInterfaceSymbol))
                 {
@@ -167,13 +167,13 @@ namespace FluentSourceGenerators
                     var ifaceSemanticModel = codeIndexerService.GetSemanticModel(iface.SyntaxTree);
                     if (ifaceSemanticModel == null)
                     {
-                        throw new InvalidOperationException(
+                        Utilities.ThrowException(
                             $"The interface {iface.Identifier.Text} has no semantic model");
                     }
                     var ifaceSymbol = ifaceSemanticModel.GetDeclaredSymbol(iface);
                     if (ifaceSymbol == null)
                     {
-                        throw new InvalidOperationException($"The interface {iface.Identifier.Text} has no symbol in the semantic model");
+                        Utilities.ThrowException($"The interface {iface.Identifier.Text} has no symbol in the semantic model");
                     }
                     var ifaceBaseInterfaces = Utilities
                         .GetBaseInterfaces(ifaceSymbol)
@@ -197,7 +197,7 @@ namespace FluentSourceGenerators
 
                 if (bestAdaptedInterface == null)
                 {
-                    throw new InvalidOperationException($"Cannot find the best interface to adapt for {adaptedParameter.Type}");
+                    Utilities.ThrowException($"Cannot find the best interface to adapt for {adaptedParameter.Type}");
                 }
                 
                 classDefinition.Add(

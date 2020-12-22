@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -11,6 +12,13 @@ namespace FluentSourceGenerators
 {
     public static class Utilities
     {
+        public static void ThrowException(string errorMessage, [CallerFilePath] string callerFilePath = null,
+            [CallerLineNumber] int callerLineNumber = 0, [CallerMemberName] string callerMemberName = null)
+        {
+            throw new InvalidOperationException(errorMessage +
+                                                $" ({callerFilePath}:{callerLineNumber} in {callerMemberName})");
+        } 
+    
         /// <summary>
         /// By default, pascalize converts strings to UpperCamelCase also removing underscores
         /// </summary>

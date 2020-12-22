@@ -97,7 +97,7 @@ namespace FluentSourceGenerators
                 }
 
                 var returnType = theInterface != null ? theInterface?.Type.ToString() : aClass!.Identifier + typeArgs;
-                extensionMethods.Add(aClassSemanticModel?.GetDeclaredSymbol(constructor)?.GetDocumentationCommentXml() ?? "");
+                extensionMethods.Add(aClassSemanticModel?.GetDeclaredSymbol(constructor)?.GetDocumentationCommentXml() + "\n" ?? "");
                 extensionMethods.Add($"public static {returnType} {_settings.ExtensionMethodName}{typeArgs}(this {parameters}) {{\n");
                 extensionMethods.Add($"return new {aClass.Identifier}{typeArgs}({constructorArguments});");
                 extensionMethods.Add("}\n");

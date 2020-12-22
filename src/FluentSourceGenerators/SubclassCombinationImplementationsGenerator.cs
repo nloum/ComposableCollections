@@ -134,6 +134,9 @@ namespace FluentSourceGenerators
                 {
                     subInterfaceTypeArgs = $"<{subInterfaceTypeArgs}>";
                 }
+                classDefinition.Add("/// <summary>\n");
+                classDefinition.Add($"/// Extends <cref see=\"{_settings.BaseClass}\" /> to implement <cref see=\"{subInterface.Identifier.Text}\" />.\n");
+                classDefinition.Add("/// </summary>\n");
                 classDefinition.Add($"public class {subClassName}{theClass.TypeParameterList} : {theClass.Identifier}{theClass.TypeParameterList}, {subInterface.Identifier}{subInterfaceTypeArgs} {{\n");
 
                 var stuffAddedForSubInterface =
@@ -215,7 +218,8 @@ namespace FluentSourceGenerators
                         constructorParameters.Add($"{parameter.Type} {parameter.Identifier}");
                         baseConstructorArguments.Add(parameter.Identifier.ToString());
                     }
-
+                    
+                    classDefinition.Add(theClassSemanticModel.GetDeclaredSymbol(constructor)?.GetDocumentationCommentXml() + "\n" ?? "");
                     classDefinition.Add($"public {subClassName}(");
                     classDefinition.Add(string.Join(", ", constructorParameters));
                     classDefinition.Add(") : base(" + string.Join(", ", baseConstructorArguments) + ") {\n");

@@ -9,7 +9,7 @@ namespace FluentSourceGenerators
 {
     public class CodeIndexerService
     {
-        private readonly Func<SyntaxTree, SemanticModel> _getSemanticModel;
+        private readonly Func<SyntaxTree, SemanticModel?> _getSemanticModel;
         private Dictionary<string, List<InterfaceDeclarationSyntax>> _interfaceDeclarations;
         private Dictionary<string, List<ClassDeclarationSyntax>> _classDeclarations;
 
@@ -93,14 +93,14 @@ namespace FluentSourceGenerators
             return false;
         }
 
-        public INamedTypeSymbol GetSymbol(InterfaceDeclarationSyntax interfaceDecl)
+        public INamedTypeSymbol? GetSymbol(InterfaceDeclarationSyntax interfaceDecl)
         {
-            return (INamedTypeSymbol) GetSemanticModel(interfaceDecl.SyntaxTree).GetDeclaredSymbol(interfaceDecl);
+            return GetSemanticModel(interfaceDecl.SyntaxTree).GetDeclaredSymbol(interfaceDecl) as INamedTypeSymbol;
         }
 
-        public INamedTypeSymbol GetSymbol(ClassDeclarationSyntax classDecl)
+        public INamedTypeSymbol? GetSymbol(ClassDeclarationSyntax classDecl)
         {
-            return (INamedTypeSymbol) GetSemanticModel(classDecl.SyntaxTree).GetDeclaredSymbol(classDecl);
+            return GetSemanticModel(classDecl.SyntaxTree).GetDeclaredSymbol(classDecl) as INamedTypeSymbol;
         }
         
         public IEnumerable<InterfaceDeclarationSyntax> GetAllInterfaceDeclarations()
@@ -113,7 +113,7 @@ namespace FluentSourceGenerators
             return _classDeclarations.SelectMany(kvp => kvp.Value);
         }
 
-        public SemanticModel GetSemanticModel(SyntaxTree syntaxTree)
+        public SemanticModel? GetSemanticModel(SyntaxTree syntaxTree)
         {
             return _getSemanticModel(syntaxTree);
         }

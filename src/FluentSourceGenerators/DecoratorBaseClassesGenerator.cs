@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace FluentSourceGenerators
 {
     public class DecoratorBaseClassesGenerator : GeneratorBase<DecoratorBaseClassesGeneratorSettings>
     {
-        private DecoratorBaseClassesGeneratorSettings _settings;
+        private DecoratorBaseClassesGeneratorSettings? _settings;
 
         public override void Initialize(DecoratorBaseClassesGeneratorSettings settings)
         {
@@ -18,17 +19,32 @@ namespace FluentSourceGenerators
 
         public override ImmutableDictionary<string, string> Generate(CodeIndexerService codeIndexerService)
         {
+            if (_settings == null)
+            {
+                throw new InvalidOperationException(
+                    $"Settings not initialized for {nameof(DecoratorBaseClassesGenerator)}");
+            }
+            
             var results = new Dictionary<string, string>();
 
-            foreach (var iface in _settings.InterfacesToImplement)
+            foreach (var iface in _settings?.InterfacesToImplement ?? Enumerable.Empty<string>())
             {
                 var interfaceDeclaration = codeIndexerService.GetInterfaceDeclaration(iface);
                 
                 var semanticModel = codeIndexerService.GetSemanticModel(interfaceDeclaration.SyntaxTree);
+                if (semanticModel == null)
+                {
+                    throw new InvalidOperationException($"No semantic model for interface {interfaceDeclaration.Identifier}, which is in the syntax.");
+                }
 
                 var usings = new List<string>();
 
                 var interfaceSymbol = semanticModel.GetDeclaredSymbol(interfaceDeclaration);
+                if (interfaceSymbol == null)
+                {
+                    throw new InvalidOperationException(
+                        $"No symbol for interface {interfaceDeclaration.Identifier}, which is in the syntax.");
+                }
                 var baseInterfaces = Utilities.GetBaseInterfaces(interfaceSymbol);
                 foreach (var item in baseInterfaces.SelectMany(baseInterface => baseInterface.DeclaringSyntaxReferences))
                 {
@@ -43,7 +59,7 @@ namespace FluentSourceGenerators
                 var className = $"{iface.Substring(1)}DecoratorBase";
                 var sourceCodeBuilder = new StringBuilder();
 
-                var typeParameters = interfaceDeclaration.TypeParameterList.Parameters.Select(tps => tps.Identifier.Text).ToImmutableList();
+                var typeParameters = interfaceDeclaration?.TypeParameterList?.Parameters.Select(tps => tps.Identifier.Text).ToImmutableList( ) ?? ImmutableList<string>.Empty;
                 var genericParams = "";
                 if (typeParameters.Count > 0)
                 {
@@ -51,12 +67,12 @@ namespace FluentSourceGenerators
                 }
 
                 sourceCodeBuilder.AppendLine(
-                    $"namespace {_settings.Namespace} {{\npublic class {className}{genericParams} : {iface}{genericParams} {{");
+                    $"namespace {_settings?.Namespace} {{\npublic class {className}{genericParams} : {iface}{genericParams} {{");
 
                 //var parameterName = Utilities.GenerateVariableName(interfaceDeclaration.Identifier.Text, true);
                 var parameterName = "decoratedObject";
                 
-                var parameters = $"{interfaceDeclaration.Identifier}{genericParams} {parameterName}";
+                var parameters = $"{interfaceDeclaration!.Identifier}{genericParams} {parameterName}";
 
                 var parameterString = string.Join(", ", parameters);
                 //var fieldName = "_" + parameterName;

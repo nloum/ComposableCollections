@@ -47,16 +47,25 @@ namespace FluentSourceGenerators
             foreach (var aClass in theClasses.Values)
             {
                 var aClassSemanticModel = codeIndexerService.GetSemanticModel(aClass.SyntaxTree);
-                usings.Add($"using {aClassSemanticModel.GetDeclaredSymbol(aClass).ContainingNamespace};\n");
+                if (aClassSemanticModel == null)
+                {
+                    throw new InvalidOperationException($"There is no semantic model for the class {aClass.Identifier}, which is defined in the syntax. This implies a logic error in FluentSourceGenerators.");
+                }
+                var aClassSymbol = aClassSemanticModel?.GetDeclaredSymbol(aClass);
+                if (aClassSymbol == null)
+                {
+                    throw new InvalidOperationException($"There is no symbol for the class {aClass.Identifier}, which is defined in the syntax. This implies a logic error in FluentSourceGenerators.");
+                }
+                usings.Add($"using {aClassSymbol.ContainingNamespace};\n");
 
                 foreach (var constructor in aClass.Members.OfType<ConstructorDeclarationSyntax>().Where(constructor => constructor.Modifiers.Any(SyntaxKind.PublicKeyword)))
                 {
-                    constructors.Add( Tuple.Create(aClass, constructor, aClassSemanticModel) );
+                    constructors.Add( Tuple.Create(aClass, constructor, aClassSemanticModel!) );
                 }
             }
             
             var memberDeduplicationService = new MemberDeduplicationService();
-            var deduplicatedConstructors = memberDeduplicationService.DeduplicateMembers(constructors, x => x.Item3.GetDeclaredSymbol(x.Item2));
+            var deduplicatedConstructors = memberDeduplicationService.DeduplicateMembers(constructors, x => x.Item3.GetDeclaredSymbol(x.Item2)!);
 
             foreach (var deduplicatedMember in deduplicatedConstructors)
             {
@@ -70,24 +79,25 @@ namespace FluentSourceGenerators
                         $"{parameter.Type} {parameter.Identifier.Text}"));
                     
                 usings.AddRange(constructor.ParameterList.Parameters
-                    .Select(parameter => aClassSemanticModel.GetSymbolInfo(parameter.Type).Symbol)
+                    .Select(parameter => aClassSemanticModel.GetSymbolInfo(parameter.Type!).Symbol!)
                     .Where(symbol => symbol != null)
                     .Select(symbol => $"using {symbol.ContainingNamespace};\n"));
 
-                var theInterface = aClass.BaseList.Types.First(type =>
+                var theInterface = aClass!.BaseList?.Types.FirstOrDefault(type =>
                 {
                     var symbol = aClassSemanticModel.GetSymbolInfo(type.Type).Symbol as INamedTypeSymbol;
-                    return symbol.TypeKind == TypeKind.Interface;
+                    return symbol != null && symbol.TypeKind == TypeKind.Interface;
                 });
                     
-                var typeArgs = string.Join(", ",
-                    aClass.TypeParameterList.Parameters.Select(parameter => parameter.Identifier.Text));
+                var typeArgs = aClass!.TypeParameterList != null ? string.Join(", ",
+                    aClass!.TypeParameterList!.Parameters.Select(parameter => parameter.Identifier.Text)) : String.Empty;
                 if (!string.IsNullOrWhiteSpace(typeArgs))
                 {
                     typeArgs = $"<{typeArgs}>";
                 }
 
-                extensionMethods.Add($"public static {theInterface.Type} {_settings.ExtensionMethodName}{typeArgs}(this {parameters}) {{\n");
+                var returnType = theInterface != null ? theInterface?.Type.ToString() : aClass!.Identifier + typeArgs;
+                extensionMethods.Add($"public static {returnType} {_settings.ExtensionMethodName}{typeArgs}(this {parameters}) {{\n");
                 extensionMethods.Add($"return new {aClass.Identifier}{typeArgs}({constructorArguments});");
                 extensionMethods.Add("}\n");
             }

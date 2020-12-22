@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace FluentSourceGenerators
 {
@@ -60,7 +61,7 @@ namespace FluentSourceGenerators
                     if (codeIndexerService.TryGetInterfaceDeclaration(name, out var value))
                     {
                         var index = 0;
-                        foreach (var param in value.TypeParameterList.Parameters)
+                        foreach (var param in value?.TypeParameterList?.Parameters ?? Enumerable.Empty<TypeParameterSyntax>())
                         {
                             var variance = TypeParameterVariance.None;
                             if (param.AttributeLists.Any(SyntaxKind.OutKeyword))

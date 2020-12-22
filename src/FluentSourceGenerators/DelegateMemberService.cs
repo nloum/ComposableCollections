@@ -22,7 +22,7 @@ namespace FluentSourceGenerators
             
             if (member.Kind == SymbolKind.Method)
             {
-                var methodDeclaration = member as IMethodSymbol;
+                var methodDeclaration = (IMethodSymbol)member;
 
                 // Skip properties because they're handling explicitly below
                 if (methodDeclaration.Name.StartsWith("get_") ||
@@ -90,7 +90,7 @@ namespace FluentSourceGenerators
             }
             else if (member.Kind == SymbolKind.Property)
             {
-                var propertyDeclaration = member as IPropertySymbol;
+                var propertyDeclaration = (IPropertySymbol)member;
 
                 foreach (var param in propertyDeclaration.Parameters)
                 {

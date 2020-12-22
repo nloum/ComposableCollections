@@ -113,7 +113,7 @@ namespace FluentSourceGenerators
             foreach (var kvp in indexers)
             {
                 var indexerGroup = kvp.Value;
-                Tuple<T, IPropertySymbol> readWriteSymbol = null;
+                Tuple<T, IPropertySymbol>? readWriteSymbol = null;
                 foreach (var indexer in indexerGroup)
                 {
                     if (!indexer.Item2.IsReadOnly)

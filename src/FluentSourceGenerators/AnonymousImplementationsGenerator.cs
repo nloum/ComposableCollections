@@ -26,11 +26,16 @@ namespace FluentSourceGenerators
             foreach (var iface in _settings.InterfacesToImplement)
             {
                 var interfaceDeclaration = codeIndexerService.GetInterfaceDeclaration(iface);
+
+                if (interfaceDeclaration == null)
+                {
+                    throw new InvalidOperationException($"Cannot find interface named {iface}");
+                }
                 
                 var className = $"Anonymous{iface.Substring(1)}";
                 var sourceCodeBuilder = new StringBuilder();
 
-                var typeParameters = interfaceDeclaration.TypeParameterList.Parameters.Select(tps => tps.Identifier.Text).ToImmutableList();
+                var typeParameters = interfaceDeclaration?.TypeParameterList?.Parameters.Select(tps => tps.Identifier.Text).ToImmutableList() ?? ImmutableList<string>.Empty;
                 var genericParams = "";
                 if (typeParameters.Count > 0)
                 {
@@ -42,7 +47,7 @@ namespace FluentSourceGenerators
                 sourceCodeBuilder.AppendLine(
                     $"namespace {_settings.Namespace} {{\npublic class {className}{genericParams} : {iface}{genericParams} {{");
 
-                var semanticModel = codeIndexerService.GetSemanticModel(interfaceDeclaration.SyntaxTree);
+                var semanticModel = codeIndexerService.GetSemanticModel(interfaceDeclaration!.SyntaxTree);
                 var delegateMemberCandidates = new List<MemberToBeDelegated>();
                 var candidateParameters = new List<Parameter>();
                 GetInterfacesToImplementWith(semanticModel.GetDeclaredSymbol(interfaceDeclaration), candidateParameters, delegateMemberCandidates);
@@ -188,7 +193,7 @@ namespace FluentSourceGenerators
                 throw new InvalidOperationException();
             }
 
-            Parameter getter = null, setter = null;
+            Parameter? getter = null, setter = null;
             
             if (!propertySymbol.IsWriteOnly)
             {
@@ -202,18 +207,24 @@ namespace FluentSourceGenerators
                 var parameterName = "set" + propertySymbol.Name;
                 setter = GetParameter(parameters, parameterType, parameterName, p => $"_{p}", DelegateType.ActionOrFunc);
             }
-
-            if (propertySymbol.IsReadOnly)
+            
+            if (getter != null && setter == null)
             {
                 membersToBeDelegated.Add(new MemberToBeDelegated(getter.MemberName, getter.Type, propertySymbol, DelegateType.ActionOrFunc, ImmutableList<INamedTypeSymbol>.Empty.Add(propertySymbol.ContainingType)));
             }
-            else if (propertySymbol.IsWriteOnly)
+            else if (setter != null && getter == null)
             {
                 membersToBeDelegated.Add(new MemberToBeDelegated(null, null, setter.MemberName, setter.Type, propertySymbol, DelegateType.ActionOrFunc, ImmutableList<INamedTypeSymbol>.Empty.Add(propertySymbol.ContainingType)));
             }
-            else
+            else if (setter != null && getter != null)
             {
                 membersToBeDelegated.Add(new MemberToBeDelegated(getter.MemberName, getter.Type, setter.MemberName, setter.Type, propertySymbol, DelegateType.ActionOrFunc, ImmutableList<INamedTypeSymbol>.Empty.Add(propertySymbol.ContainingType)));
+            }
+            else
+            {
+                var typeName = ((INamedTypeSymbol) propertySymbol.ContainingSymbol)?.Name ?? "unknown";
+                throw new InvalidOperationException(
+                    $"The property {propertySymbol.Name} in type {typeName} has no accessible getter or setter");
             }
         }
 
@@ -221,7 +232,7 @@ namespace FluentSourceGenerators
             DelegateType delegateType)
         {
             var parameterIndex = -1;
-            Parameter parameter = null;
+            Parameter? parameter = null;
             while (true)
             {
                 parameterIndex++;

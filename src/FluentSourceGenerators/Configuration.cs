@@ -12,6 +12,7 @@ namespace FluentSourceGenerators
         [XmlArrayItem("ConstructorExtensionMethods", typeof(ConstructorExtensionMethodsGeneratorSettings))]
         [XmlArrayItem("DecoratorBaseClasses", typeof(DecoratorBaseClassesGeneratorSettings))]
         [XmlArrayItem("SubclassCombinationImplementations", typeof(SubclassCombinationImplementationsGeneratorSettings))]
+        [XmlArrayItem("DependencyInjectableExtensionMethods", typeof(DependencyInjectableExtensionMethodsGeneratorSettings))]
         public List<object> CodeGenerators { get; set; } = new List<object>();
     }
 }

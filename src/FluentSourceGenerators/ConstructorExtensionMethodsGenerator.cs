@@ -88,7 +88,7 @@ namespace FluentSourceGenerators
                     var symbol = aClassSemanticModel.GetSymbolInfo(type.Type).Symbol as INamedTypeSymbol;
                     return symbol != null && symbol.TypeKind == TypeKind.Interface;
                 });
-                    
+                
                 var typeArgs = aClass!.TypeParameterList != null ? string.Join(", ",
                     aClass!.TypeParameterList!.Parameters.Select(parameter => parameter.Identifier.Text)) : String.Empty;
                 if (!string.IsNullOrWhiteSpace(typeArgs))

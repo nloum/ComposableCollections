@@ -75,6 +75,11 @@ namespace FluentSourceGenerators
                     generator = new SubclassCombinationImplementationsGenerator();
                     generator.NonGenericInitialize(subclassCombinationImplementationsGeneratorSettings);
                 }
+                else if (codeGeneratorSettings is DependencyInjectableExtensionMethodsGeneratorSettings dependencyInjectableExtensionMethodsGeneratorSettings)
+                {
+                    generator = new DependencyInjectableExtensionMethodsGenerator();
+                    generator.NonGenericInitialize(dependencyInjectableExtensionMethodsGeneratorSettings);
+                }
                 else
                 {
                     throw new ArgumentException($"Unknown settings type: {codeGeneratorSettings?.GetType()?.Name}");

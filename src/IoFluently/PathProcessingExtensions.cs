@@ -79,7 +79,7 @@ namespace IoFluently
 
         public static IPathWithKnownFormatSync<Text, Text> AsTextFile(this AbsolutePath path)
         {
-            return path.AsPathFormat(() => new Text(path.ObserveLines()),
+            return path.AsPathFormat(() => new Text(path.ReadLines()),
                 (text) => path.WriteAllLines(text.Lines));
         }
 

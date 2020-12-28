@@ -142,6 +142,11 @@ namespace IoFluently
         
         #region Translation stuff
         
+        IAbsolutePathTranslation Copy(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination);
+        IAbsolutePathTranslation Copy(AbsolutePath source, AbsolutePath destination);
+        IAbsolutePathTranslation Move(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination);
+        IAbsolutePathTranslation Move(AbsolutePath source, AbsolutePath destination);
+
         IAbsolutePathTranslation Translate(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination);
         IAbsolutePathTranslation Translate(AbsolutePath source, AbsolutePath destination);
         void RenameTo(AbsolutePath source, AbsolutePath target);

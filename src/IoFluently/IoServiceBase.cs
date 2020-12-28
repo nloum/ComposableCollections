@@ -1217,6 +1217,26 @@ namespace IoFluently
             });
         }
 
+        public IAbsolutePathTranslation Copy(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination)
+        {
+            return pathToBeCopied.Translate(source, destination).Copy();
+        }
+
+        public IAbsolutePathTranslation Copy(AbsolutePath source, AbsolutePath destination)
+        {
+            return source.Translate(destination).Copy();
+        }
+
+        public IAbsolutePathTranslation Move(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination)
+        {
+            return pathToBeCopied.Translate(source, destination).Move();
+        }
+
+        public IAbsolutePathTranslation Move(AbsolutePath source, AbsolutePath destination)
+        {
+            return source.Translate(destination).Move();
+        }
+
         public virtual IAbsolutePathTranslation Translate(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination)
         {
             return new CalculatedAbsolutePathTranslation(pathToBeCopied, source, destination, this);

@@ -66,7 +66,18 @@ namespace SimpleMonads
 
         protected bool Equals(IMaybe<T> other)
         {
-            return HasValue == other.HasValue && EqualityComparer<T>.Default.Equals(Value, other.Value);
+            if (!HasValue && !other.HasValue) {
+                return true;
+            }
+            
+            if (HasValue && other.HasValue) {
+                return EqualityComparer<T>.Default.Equals(Value, other.Value);
+            }
+            
+            // At this point one of the maybes has a value and the other doesn't,
+            // so return false without accessing the .Value of either (because accessing
+            // the .Value will throw an exception).
+            return false;
         }
 
         public override bool Equals(object obj)

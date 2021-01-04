@@ -36,15 +36,21 @@ namespace FluentSourceGenerators
             var fileName = configurationFile.Path.Substring(configurationFile.Path.IndexOf('(')).Trim(')', '(');
             var configurationFilePath = Path.Combine(projectFolder, fileName);
 
+            var compilation = context.Compilation;
+            Action<string, string> addSource = context.AddSource;
+            
+            Execute(configurationFilePath, compilation, addSource);
+        }
+
+        public static void Execute(string configurationFilePath, Compilation compilation,
+            Action<string, string> addSource)
+        {
             Configuration? configuration = null;
             using (var streamReader = new StreamReader(configurationFilePath))
             {
                 configuration = (Configuration) new XmlSerializer(typeof (Configuration)).Deserialize(streamReader);
             }
 
-            var compilation = context.Compilation;
-            Action<string, string> addSource = context.AddSource;
-            
             Execute(configuration, compilation, addSource);
         }
 

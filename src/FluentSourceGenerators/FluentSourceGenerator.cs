@@ -4,12 +4,11 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata;
 using System.Text;
 using System.Xml.Serialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Text;
 
 namespace FluentSourceGenerators
@@ -44,13 +43,23 @@ namespace FluentSourceGenerators
             }
 
             var compilation = context.Compilation;
+            Action<string, string> addSource = context.AddSource;
+            
+            Execute(configuration, compilation, addSource);
+        }
 
+        public static void Execute(Configuration configuration, Compilation compilation, Action<string, string> addSource)
+        {
+            var options = (CSharpParseOptions) compilation.SyntaxTrees.First().Options;
+            
             foreach (var codeGeneratorSettings in configuration.CodeGenerators)
             {
-                var codeIndexerService = new CodeIndexerService(compilation.SyntaxTrees, tree => compilation.GetSemanticModel(tree));
+                var codeIndexerService =
+                    new CodeIndexerService(compilation.SyntaxTrees, tree => compilation.GetSemanticModel(tree));
 
                 GeneratorBase generator;
-                if (codeGeneratorSettings is AnonymousImplementationsGeneratorSettings anonymousImplementationsGeneratorSettings)
+                if (codeGeneratorSettings is AnonymousImplementationsGeneratorSettings anonymousImplementationsGeneratorSettings
+                )
                 {
                     generator = new AnonymousImplementationsGenerator();
                     generator.NonGenericInitialize(anonymousImplementationsGeneratorSettings);
@@ -60,7 +69,8 @@ namespace FluentSourceGenerators
                     generator = new CombinationInterfacesGenerator();
                     generator.NonGenericInitialize(combinationInterfacesGeneratorSettings);
                 }
-                else if (codeGeneratorSettings is ConstructorExtensionMethodsGeneratorSettings constructorExtensionMethodsGeneratorSettings)
+                else if (codeGeneratorSettings is ConstructorExtensionMethodsGeneratorSettings
+                    constructorExtensionMethodsGeneratorSettings)
                 {
                     generator = new ConstructorExtensionMethodsGenerator();
                     generator.NonGenericInitialize(constructorExtensionMethodsGeneratorSettings);
@@ -70,12 +80,14 @@ namespace FluentSourceGenerators
                     generator = new DecoratorBaseClassesGenerator();
                     generator.NonGenericInitialize(decoratorBaseClassesGeneratorSettings);
                 }
-                else if (codeGeneratorSettings is SubclassCombinationImplementationsGeneratorSettings subclassCombinationImplementationsGeneratorSettings)
+                else if (codeGeneratorSettings is SubclassCombinationImplementationsGeneratorSettings
+                    subclassCombinationImplementationsGeneratorSettings)
                 {
                     generator = new SubclassCombinationImplementationsGenerator();
                     generator.NonGenericInitialize(subclassCombinationImplementationsGeneratorSettings);
                 }
-                else if (codeGeneratorSettings is DependencyInjectableExtensionMethodsGeneratorSettings dependencyInjectableExtensionMethodsGeneratorSettings)
+                else if (codeGeneratorSettings is DependencyInjectableExtensionMethodsGeneratorSettings
+                    dependencyInjectableExtensionMethodsGeneratorSettings)
                 {
                     generator = new DependencyInjectableExtensionMethodsGenerator();
                     generator.NonGenericInitialize(dependencyInjectableExtensionMethodsGeneratorSettings);
@@ -84,13 +96,14 @@ namespace FluentSourceGenerators
                 {
                     throw new ArgumentException($"Unknown settings type: {codeGeneratorSettings?.GetType()?.Name}");
                 }
-                
+
                 var outputFiles = generator.Generate(codeIndexerService);
                 foreach (var outputFile in outputFiles)
                 {
-                    context.AddSource(outputFile.Key, outputFile.Value);
-                    var options = (CSharpParseOptions)context.Compilation.SyntaxTrees.First().Options;
-                    compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(SourceText.From(outputFile.Value, Encoding.UTF8), options));
+                    addSource(outputFile.Key, outputFile.Value);
+                    compilation =
+                        compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(SourceText.From(outputFile.Value, Encoding.UTF8),
+                            options));
                 }
             }
         }

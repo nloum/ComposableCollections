@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace FluentSourceGenerators
 {
+    
     [Generator]
     public class FluentSourceGenerator : ISourceGenerator
     {

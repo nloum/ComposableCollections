@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Nuke.Common;
 using Nuke.Common.CI;
@@ -45,7 +46,8 @@ class Build : NukeBuild
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
     AbsolutePath TestResultDirectory => ArtifactsDirectory / "test-results";
-    Project PackageProject => Solution.GetProject("FluentSourceGenerators");
+    Project FluentSourceGenerators => Solution.GetProject("FluentSourceGenerators");
+    Project DebuggableSourceGeneratorsGenerators => Solution.GetProject("DebuggableSourceGenerators");
     IEnumerable<Project> TestProjects => Solution.GetProjects("*.Tests");
     
     Target Clean => _ => _
@@ -85,7 +87,7 @@ class Build : NukeBuild
 				.SetFileVersion(GitVersion.AssemblySemFileVer)
 				.SetInformationalVersion(GitVersion.InformationalVersion)
 				.CombineWith(
-					from project in new[] { PackageProject }
+					from project in new[] { FluentSourceGenerators, DebuggableSourceGeneratorsGenerators }
 					from framework in project.GetTargetFrameworks()
                     select new { project, framework }, (cs, v) => cs
 						.SetProject(v.project)
@@ -124,12 +126,15 @@ class Build : NukeBuild
             DotNetPack(s => s
                 .EnableNoRestore()
                 .EnableNoBuild()
-				.SetProject(PackageProject)
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
                 .SetVersion(GitVersion.NuGetVersionV2)
 				.SetIncludeSymbols(true)
 				.SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
+                .CombineWith(
+	                from project in new[] { FluentSourceGenerators, DebuggableSourceGeneratorsGenerators }
+	                select new { project }, (cs, v) => cs
+		                .SetProject(v.project))
             );
         });
 

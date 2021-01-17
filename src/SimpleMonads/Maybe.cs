@@ -15,7 +15,7 @@ namespace SimpleMonads
 
         private Maybe()
         {
-            _throwOnNothingAccessed = () => new MemberAccessException("Cannot access value of a Nothing");
+            _throwOnNothingAccessed = () => throw new MemberAccessException("Cannot access value of a Nothing");
             HasValue = false;
         }
 
@@ -23,6 +23,7 @@ namespace SimpleMonads
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
+            _throwOnNothingAccessed = () => throw new NotImplementedException("This line should never be reached because a value was specified");
             HasValue = true;
             Value = value;
         }
@@ -40,14 +41,26 @@ namespace SimpleMonads
             get
             {
                 if (!HasValue) _throwOnNothingAccessed();
-                return ValueOrDefault;
+                return ValueOrDefault!;
             }
             set => ValueOrDefault = value;
         }
 
-        [DataMember] public T ValueOrDefault { get; set; }
+        [DataMember] public T? ValueOrDefault { get; set; }
 
-        public object ObjectValue => Value;
+        public object ObjectValue
+        {
+            get
+            {
+                if (HasValue)
+                    return Value!;
+                else
+                {
+                    _throwOnNothingAccessed();
+                    throw new NotImplementedException();
+                }
+            }
+        }
 
         public TMonad2 Bind<TMonad2, TElement2>(Func<T, TMonad2> f) where TMonad2 : IMonad<TElement2>
         {

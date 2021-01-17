@@ -6,10 +6,6 @@ namespace SimpleMonads
     [DataContract]
     public class Identity<T> : IIdentity<T>
     {
-        public Identity()
-        {
-        }
-
         public Identity(T value)
         {
             Value = value;

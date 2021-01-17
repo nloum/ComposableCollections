@@ -9,20 +9,20 @@ namespace SimpleMonads
     {
         private readonly Func<T> _calculateValue;
         private readonly object _lock = new object();
-        private T _value;
+        private T? _value;
 
         public Lazy(Func<T> calculateValue)
         {
-            if (calculateValue == null)
-                throw new ArgumentNullException(nameof(calculateValue));
+            if (calculateValue == null) throw new ArgumentNullException(nameof(calculateValue));
             _calculateValue = calculateValue;
             LazyState = LazyState.Uncalculated;
         }
 
         public Lazy(T value)
         {
+            _calculateValue = () => throw new NotImplementedException();
+            _value = value ?? throw new ArgumentNullException(nameof(value));
             LazyState = LazyState.Calculated;
-            _value = value;
         }
 
         public LazyState LazyState { get; private set; }
@@ -42,19 +42,19 @@ namespace SimpleMonads
                         OnPropertyChanged(nameof(ObjectValue));
                     }
 
-                    return _value;
+                    return _value!;
                 }
             }
         }
 
-        public object ObjectValue => Value;
+        public object ObjectValue => Value!;
 
         public TMonad2 Bind<TMonad2, TElement2>(Func<T, TMonad2> f) where TMonad2 : IMonad<TElement2>
         {
-            return f(_value);
+            return f(Value);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public override string ToString()
         {
@@ -73,7 +73,7 @@ namespace SimpleMonads
 
         protected bool Equals(Lazy<T> other)
         {
-            return EqualityComparer<T>.Default.Equals(_value, other._value) && LazyState == other.LazyState;
+            return LazyState == other.LazyState && EqualityComparer<T>.Default.Equals(_value!, other._value!);
         }
 
         public override bool Equals(object obj)
@@ -88,12 +88,11 @@ namespace SimpleMonads
         {
             unchecked
             {
-                var _ = Value;
-                return (EqualityComparer<T>.Default.GetHashCode(_value) * 397) ^ (int) LazyState;
+                return EqualityComparer<T>.Default.GetHashCode(Value) * 397;
             }
         }
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

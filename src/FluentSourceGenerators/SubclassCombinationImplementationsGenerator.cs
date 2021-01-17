@@ -47,7 +47,7 @@ namespace FluentSourceGenerators
                     key = key.Substring(0, key.IndexOf('<'));
                 }
 
-                var result = theClassSemanticModel!.GetDeclaredSymbol(baseType.Type);
+                var result = theClassSemanticModel!.GetSymbolInfo(baseType.Type).Symbol;
                 if (result == null)
                 {
                     throw Utilities.MakeException($"The class {_settings.BaseClass} inherits from {key} but {key} is not defined in {_settings.BaseClass}'s semantic model.");
@@ -152,9 +152,11 @@ namespace FluentSourceGenerators
                         .Except(Utilities.GetBaseInterfaces(theClassSemanticModel.GetDeclaredSymbol(theClass)));
 
                 var adaptedParameter = constructors.First().ParameterList.Parameters.First();
+                var adaptedParameterSymbol =
+                    theClassSemanticModel.GetSymbolInfo(adaptedParameter.Type).Symbol as INamedTypeSymbol;
                 var desiredAdaptedBaseInterfaces = Utilities
                     .GetBaseInterfaces(
-                        theClassSemanticModel.GetSymbolInfo(adaptedParameter.Type).Symbol as INamedTypeSymbol)
+                        adaptedParameterSymbol)
                     .Concat(stuffAddedForSubInterface).Select(x => x.ToString()).ToImmutableHashSet();
                 var adaptedParameterTypeArgs = "";
                 var tmp = adaptedParameter.Type.ToString();
@@ -168,21 +170,18 @@ namespace FluentSourceGenerators
                     desiredAdaptedBaseInterfaces = desiredAdaptedBaseInterfaces.Select(Utilities.GetWithoutTypeArguments).ToImmutableHashSet();
                 }
 
-                InterfaceDeclarationSyntax? bestAdaptedInterface = null;
+                INamedTypeSymbol? bestAdaptedInterface = null;
 
-                foreach (var iface in codeIndexerService.GetAllInterfaceDeclarations())
+                var subInterfaceSemanticModel = codeIndexerService.GetSemanticModel(subInterface.SyntaxTree);
+
+                var subInterfaceBaseInterfaces = subInterface?.BaseList?.Types.Select(
+                    baseTypeSyntax =>
+                    {
+                        return subInterfaceSemanticModel.GetSymbolInfo(baseTypeSyntax.Type).Symbol as INamedTypeSymbol;
+                    }).ToImmutableList() ?? ImmutableList<INamedTypeSymbol>.Empty;
+                
+                foreach (var ifaceSymbol in subInterfaceBaseInterfaces.Concat(codeIndexerService.GetAllInterfaceSymbols()))
                 {
-                    var ifaceSemanticModel = codeIndexerService.GetSemanticModel(iface.SyntaxTree);
-                    if (ifaceSemanticModel == null)
-                    {
-                        throw Utilities.MakeException(
-                            $"The interface {iface.Identifier.Text} has no semantic model");
-                    }
-                    var ifaceSymbol = ifaceSemanticModel.GetDeclaredSymbol(iface);
-                    if (ifaceSymbol == null)
-                    {
-                        throw Utilities.MakeException($"The interface {iface.Identifier.Text} has no symbol in the semantic model");
-                    }
                     var ifaceBaseInterfaces = Utilities
                         .GetBaseInterfaces(ifaceSymbol)
                         .Select(x => x.ToString()).ToImmutableHashSet();
@@ -191,13 +190,16 @@ namespace FluentSourceGenerators
                     {
                          ifaceBaseInterfaces = ifaceBaseInterfaces.Select(Utilities.GetWithoutTypeArguments).ToImmutableHashSet();
                     }
+
+                    var oneWay = desiredAdaptedBaseInterfaces.Except(ifaceBaseInterfaces).ToImmutableList();
+                    var otherWay = ifaceBaseInterfaces.Except(desiredAdaptedBaseInterfaces).ToImmutableList();
                     
                     if (desiredAdaptedBaseInterfaces.Count == ifaceBaseInterfaces.Count)
                     {
                         if (ifaceBaseInterfaces.All(ifaceBaseInterface =>
                             desiredAdaptedBaseInterfaces.Contains(ifaceBaseInterface)))
                         {
-                            bestAdaptedInterface = iface;
+                            bestAdaptedInterface = ifaceSymbol;
                             break;
                         }
                     }
@@ -209,7 +211,7 @@ namespace FluentSourceGenerators
                 }
                 
                 classDefinition.Add(
-                    $"private readonly {bestAdaptedInterface!.Identifier}{adaptedParameterTypeArgs} _adapted;\n");
+                    $"private readonly {bestAdaptedInterface!.Name}{adaptedParameterTypeArgs} _adapted;\n");
 
                 foreach (var constructor in constructors)
                 {
@@ -217,7 +219,7 @@ namespace FluentSourceGenerators
                     var baseConstructorArguments = new List<string>();
 
                     constructorParameters.Add(
-                        $"{bestAdaptedInterface.Identifier}{adaptedParameterTypeArgs} adapted");
+                        $"{bestAdaptedInterface.Name}{adaptedParameterTypeArgs} adapted");
                     baseConstructorArguments.Add("adapted");
 
                     for (var i = 1; i < constructor.ParameterList.Parameters.Count; i++)
@@ -235,7 +237,7 @@ namespace FluentSourceGenerators
                     classDefinition.Add("}\n");
                 }
 
-                foreach (var member in memberDeduplicationService.GetDeduplicatedMembers(codeIndexerService.GetSemanticModel(bestAdaptedInterface.SyntaxTree).GetDeclaredSymbol(bestAdaptedInterface)))
+                foreach (var member in memberDeduplicationService.GetDeduplicatedMembers(bestAdaptedInterface))
                 {
                     if (member.Duplicates.All(duplicate => baseMemberImplementationProfiles.Contains(memberDeduplicationService.GetImplementationProfile(duplicate))))
                     {

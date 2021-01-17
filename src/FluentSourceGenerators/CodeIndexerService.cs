@@ -108,6 +108,27 @@ namespace FluentSourceGenerators
             return _interfaceDeclarations.SelectMany(kvp => kvp.Value);
         }
         
+        public IEnumerable<INamedTypeSymbol> GetAllInterfaceSymbols()
+        {
+            return _interfaceDeclarations.SelectMany(kvp => kvp.Value)
+                .Select(iface =>
+                {
+                    var ifaceSemanticModel = GetSemanticModel(iface.SyntaxTree);
+                    if (ifaceSemanticModel == null)
+                    {
+                        throw Utilities.MakeException(
+                            $"The interface {iface.Identifier.Text} has no semantic model");
+                    }
+                    var ifaceSymbol = ifaceSemanticModel.GetDeclaredSymbol(iface);
+                    if (ifaceSymbol == null)
+                    {
+                        throw Utilities.MakeException($"The interface {iface.Identifier.Text} has no symbol in the semantic model");
+                    }
+
+                    return (INamedTypeSymbol)ifaceSymbol;
+                });
+        }
+        
         public IEnumerable<ClassDeclarationSyntax> GetAllClassDeclarations()
         {
             return _classDeclarations.SelectMany(kvp => kvp.Value);

@@ -11,5 +11,7 @@ namespace DebuggableSourceGenerators
         Lazy<IType> GetType(INamedTypeSymbol symbol);
         void ConvertMembers(INamedTypeSymbol symbol, out IReadOnlyList<Property> properties, out IReadOnlyList<Indexer> indexers,
             out IReadOnlyList<Method> methods);
+
+        void LoadTypesFromAssemblies();
     }
 }

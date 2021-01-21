@@ -10,12 +10,24 @@ namespace DebuggableSourceGenerators
     public class SymbolService : ISymbolService
     {
         ITypeRegistryService TypeRegistryService;
+        private HashSet<IAssemblySymbol> _assemblies = new();
 
         public SymbolService(ITypeRegistryService typeRegistryService)
         {
             TypeRegistryService = typeRegistryService;
         }
 
+        public void LoadTypesFromAssemblies()
+        {
+            foreach (var assembly in _assemblies)
+            {
+                foreach (var type in assembly.GetForwardedTypes())
+                {
+                    GetType(type);
+                }
+            }
+        }
+        
         public string Convert(INamespaceSymbol namespaceSymbol)
         {
             var sb = new StringBuilder();
@@ -33,8 +45,18 @@ namespace DebuggableSourceGenerators
             return sb.ToString();
         }
 
+        private void TryAddAssembly(IAssemblySymbol assembly)
+        {
+            if (!_assemblies.Contains(assembly))
+            {
+                _assemblies.Add(assembly);
+            }
+        }
+
         public Lazy<IType> GetType(ITypeSymbol symbol)
         {
+            TryAddAssembly(symbol.ContainingAssembly);
+            
             if (symbol is INamedTypeSymbol namedTypeSymbol)
             {
                 return GetType(namedTypeSymbol);
@@ -66,7 +88,7 @@ namespace DebuggableSourceGenerators
 
         public Lazy<IType> GetType(INamedTypeSymbol namedTypeSymbol)
         {
-            Console.WriteLine(namedTypeSymbol.Name);
+            TryAddAssembly(namedTypeSymbol.ContainingAssembly);
             
             if (namedTypeSymbol.IsGenericType && !namedTypeSymbol.IsDefinition)
             {
@@ -123,7 +145,7 @@ namespace DebuggableSourceGenerators
             });
         }
 
-        public IEnumerable<Parameter> Convert(IEnumerable<IParameterSymbol> parameterSymbols)
+        private IEnumerable<Parameter> Convert(IEnumerable<IParameterSymbol> parameterSymbols)
         {
             foreach (var parameterSymbol in parameterSymbols)
             {

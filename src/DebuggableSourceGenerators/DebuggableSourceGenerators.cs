@@ -103,10 +103,10 @@ namespace DebuggableSourceGenerators
             }
         }
         
-        public static Compilation CompileProject(string solutionUrl, string project)
+        public static Compilation CompileProject(string solutionFilePath, string projectName)
         {
-            return CompileSolution(solutionUrl)
-                .First(compilation => compilation.AssemblyName == Path.GetFileNameWithoutExtension(project));
+            return CompileSolution(solutionFilePath)
+                .First(compilation => compilation.AssemblyName == Path.GetFileNameWithoutExtension(projectName));
         }
     }
 }

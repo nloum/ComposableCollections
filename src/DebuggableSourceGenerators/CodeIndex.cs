@@ -12,12 +12,13 @@ using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
+using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 
 namespace DebuggableSourceGenerators
 {
     public class CodeIndex
     {
-        Func<SyntaxTree, SemanticModel> GetSemanticModel;
+        List<Func<SyntaxTree, SemanticModel>> GetSemanticModel = new();
 
         Dictionary<TypeIdentifier, IType> _types = new();
 
@@ -31,7 +32,19 @@ namespace DebuggableSourceGenerators
         {
             TypeRegistryService = new TypeRegistryServiceImpl(this);
             SymbolService = new SymbolService(TypeRegistryService);
-            SyntaxService = new SyntaxService(TypeRegistryService, SymbolService, syntaxTree => GetSemanticModel(syntaxTree));
+            SyntaxService = new SyntaxService(TypeRegistryService, SymbolService, syntaxTree =>
+            {
+                foreach (var item in GetSemanticModel)
+                {
+                    var result = item(syntaxTree);
+                    if (result != null)
+                    {
+                        return result;
+                    }
+                }
+
+                return null;
+            });
             NonLoadedAssemblyService = new NonLoadedAssemblyService(TypeRegistryService);
         }
 
@@ -161,7 +174,7 @@ namespace DebuggableSourceGenerators
         public void AddCompilation(Compilation compilation)
         {
             _compilations.Add(compilation);
-             GetSemanticModel = syntaxTree => compilation.GetSemanticModel(syntaxTree);
+             GetSemanticModel.Add(syntaxTree => compilation.GetSemanticModel(syntaxTree));
             
              var interfaceDeclarationSyntaxes = new Dictionary<TypeIdentifier, List<InterfaceDeclarationSyntax>>();
              var classDeclarationSyntaxes = new Dictionary<TypeIdentifier, List<ClassDeclarationSyntax>>();

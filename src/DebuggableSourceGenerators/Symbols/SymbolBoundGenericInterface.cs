@@ -4,14 +4,14 @@ namespace DebuggableSourceGenerators
 {
     public class SymbolBoundGenericInterface : IBoundGenericStructuredType
     {
-        public SymbolBoundGenericInterface(string name, IStructuredType unboundForm, IReadOnlyList<IType> typeParameterValues)
+        public SymbolBoundGenericInterface(TypeIdentifier identifier, IStructuredType unboundForm, IReadOnlyList<IType> typeParameterValues)
         {
-            Name = name;
+            Identifier = identifier;
             UnboundForm = unboundForm;
             TypeParameterValues = typeParameterValues;
         }
 
-        public string Name { get; }
+        public TypeIdentifier Identifier { get; }
         public IStructuredType UnboundForm { get; }
         public IReadOnlyList<IType> TypeParameterValues { get; }
     }

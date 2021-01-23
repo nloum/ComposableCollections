@@ -5,12 +5,12 @@ namespace DebuggableSourceGenerators
 {
     public class SymbolEnum : IEnum
     {
-        public string Name { get; }
+        public TypeIdentifier Identifier { get; }
         public IReadOnlyList<string> Values { get; }
 
-        public SymbolEnum(string name, IEnumerable<string> values)
+        public SymbolEnum(TypeIdentifier identifier, IEnumerable<string> values)
         {
-            Name = name;
+            Identifier = identifier;
             Values = values.ToImmutableList();
         }
     }

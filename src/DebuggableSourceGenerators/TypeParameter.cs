@@ -2,13 +2,13 @@
 {
     public class TypeParameter : IType
     {
-        public TypeParameter(string name, VarianceMode varianceMode)
+        public TypeParameter(TypeIdentifier identifier, VarianceMode varianceMode)
         {
-            Name = name;
+            Identifier = identifier;
             VarianceMode = varianceMode;
         }
 
-        public string Name { get; }
+        public TypeIdentifier Identifier { get; }
 
         public VarianceMode VarianceMode { get; }
 
@@ -24,7 +24,7 @@
             //     varianceModeString = "out ";
             // }
 
-            return $"{Name}";
+            return $"{Identifier}";
         }
     }
 }

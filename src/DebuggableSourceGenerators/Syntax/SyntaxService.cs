@@ -51,7 +51,7 @@ namespace DebuggableSourceGenerators
                     varianceMode = VarianceMode.Out;
                 }
                 
-                yield return new TypeParameter(item.Identifier.Text, varianceMode);
+                yield return new TypeParameter(new TypeIdentifier(item.Identifier.Text, 0), varianceMode);
             }
         }
 
@@ -62,7 +62,7 @@ namespace DebuggableSourceGenerators
 
             if (namedTypeSymbol == null)
             {
-                return new Lazy<IType>(new TypeParameter(typeSyntax.ToString(), VarianceMode.None));
+                return new Lazy<IType>(new TypeParameter(new TypeIdentifier(typeSyntax.ToString(), 0), VarianceMode.None));
             }
 
             return SymbolService.GetType(namedTypeSymbol);
@@ -82,7 +82,9 @@ namespace DebuggableSourceGenerators
                 }
                 else if (member is IndexerDeclarationSyntax indexerDeclarationSyntax)
                 {
-                    tmpIndexers.Add(new Indexer(TypeRegistryService.GetType(indexerDeclarationSyntax.Type.ToString()), Convert(indexerDeclarationSyntax.ParameterList.Parameters).ToImmutableList()));
+                    // var identifier = new TypeIdentifier(indexerDeclarationSyntax.Type.ToString(), indexerDeclarationSyntax.Type.);
+                    //
+                    // tmpIndexers.Add(new Indexer(TypeRegistryService.GetType(), Convert(indexerDeclarationSyntax.ParameterList.Parameters).ToImmutableList()));
                 }
                 else if (member is MethodDeclarationSyntax methodDeclarationSyntax)
                 {

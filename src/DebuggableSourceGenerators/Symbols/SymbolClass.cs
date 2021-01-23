@@ -14,9 +14,9 @@ namespace DebuggableSourceGenerators
             SymbolService = symbolService;
         }
 
-        public void Initialize(INamedTypeSymbol namedTypeSymbol)
+        public void Initialize(TypeIdentifier identifier, INamedTypeSymbol namedTypeSymbol)
         {
-            Name = namedTypeSymbol.Name;
+            Identifier = identifier;
 
             var properties = new List<Property>();
             var indexers = new List<Indexer>();
@@ -32,7 +32,7 @@ namespace DebuggableSourceGenerators
             Methods = methods;
         }
         
-        public string Name { get; private set; }
+        public TypeIdentifier Identifier { get; private set; }
         public IReadOnlyList<TypeParameter> TypeParameters { get; private set; }
         public IReadOnlyList<Property> Properties { get; private set; }
         public IReadOnlyList<Method> Methods { get; private set; }

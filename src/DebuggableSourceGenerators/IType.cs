@@ -2,6 +2,6 @@
 {
     public interface IType
     {
-        string Name { get; }
+        TypeIdentifier Identifier { get; }
     }
 }

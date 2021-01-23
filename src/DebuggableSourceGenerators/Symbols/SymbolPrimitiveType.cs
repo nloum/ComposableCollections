@@ -2,11 +2,11 @@
 {
     public class SymbolPrimitiveType : IPrimitiveType
     {
-        public SymbolPrimitiveType(string name)
+        public SymbolPrimitiveType(TypeIdentifier identifier)
         {
-            Name = name;
+            Identifier = identifier;
         }
 
-        public string Name { get; }
+        public TypeIdentifier Identifier { get; }
     }
 }

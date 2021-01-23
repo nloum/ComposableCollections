@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.FindSymbols;
 
 namespace DebuggableSourceGenerators
 {
@@ -21,9 +22,9 @@ namespace DebuggableSourceGenerators
         {
             foreach (var assembly in _assemblies)
             {
-                foreach (var type in assembly.GetForwardedTypes())
+                foreach (var typeName in assembly.TypeNames)
                 {
-                    GetType(type);
+                    var symbol = assembly.GetTypeByMetadataName(typeName);
                 }
             }
         }
@@ -63,7 +64,7 @@ namespace DebuggableSourceGenerators
             }
             else if (symbol is ITypeParameterSymbol typeParameterSymbol)
             {
-                return new Lazy<IType>(new TypeParameter(typeParameterSymbol.Name, Convert(typeParameterSymbol.Variance)));
+                return new Lazy<IType>(new TypeParameter(GetTypeIdentifier(typeParameterSymbol), Convert(typeParameterSymbol.Variance)));
             }
 
             throw new NotImplementedException();
@@ -84,8 +85,18 @@ namespace DebuggableSourceGenerators
             return VarianceMode.None;
         }
 
-        private int i = 0;
+        public TypeIdentifier GetTypeIdentifier(ITypeSymbol namedTypeSymbol)
+        {
+            return new TypeIdentifier(Convert(namedTypeSymbol.ContainingNamespace), namedTypeSymbol.Name,
+                0);
+        }
 
+        public TypeIdentifier GetTypeIdentifier(INamedTypeSymbol namedTypeSymbol)
+        {
+            return new TypeIdentifier(Convert(namedTypeSymbol.ContainingNamespace), namedTypeSymbol.Name,
+                namedTypeSymbol.Arity);
+        }
+        
         public Lazy<IType> GetType(INamedTypeSymbol namedTypeSymbol)
         {
             TryAddAssembly(namedTypeSymbol.ContainingAssembly);
@@ -96,7 +107,7 @@ namespace DebuggableSourceGenerators
                 {
                     return new Lazy<IType>(() =>
                     {
-                        return new SymbolBoundGenericInterface(namedTypeSymbol.Name,
+                        return new SymbolBoundGenericInterface(GetTypeIdentifier(namedTypeSymbol),
                             (IStructuredType) GetType(namedTypeSymbol.OriginalDefinition),
                             namedTypeSymbol.TypeArguments.Select(typeArg =>
                                 GetType(typeArg)).Select(l => l.Value).ToList());
@@ -106,7 +117,7 @@ namespace DebuggableSourceGenerators
                 {
                     return new Lazy<IType>(() =>
                     {
-                        return new SymbolBoundGenericClass(namedTypeSymbol.Name,
+                        return new SymbolBoundGenericClass(GetTypeIdentifier(namedTypeSymbol),
                             (IStructuredType) GetType(namedTypeSymbol.OriginalDefinition),
                             namedTypeSymbol.TypeArguments.Select(typeArg =>
                                 GetType(typeArg)).Select(l => l.Value).ToList());
@@ -116,31 +127,30 @@ namespace DebuggableSourceGenerators
 
             return new Lazy<IType>(() =>
             {
-                return TypeRegistryService.TryAddType(Convert(namedTypeSymbol.ContainingNamespace),
-                    namedTypeSymbol.Name, namedTypeSymbol.Arity,
+                return TypeRegistryService.TryAddType(GetTypeIdentifier(namedTypeSymbol),
                     () =>
                     {
                         if (namedTypeSymbol.TypeKind == TypeKind.Interface)
                         {
                             var result = new SymbolInterface(TypeRegistryService, this);
-                            result.Initialize(namedTypeSymbol);
+                            result.Initialize(GetTypeIdentifier(namedTypeSymbol), namedTypeSymbol);
                             return result;
                         }
 
                         if (namedTypeSymbol.TypeKind == TypeKind.Class)
                         {
                             var result = new SymbolClass(TypeRegistryService, this);
-                            result.Initialize(namedTypeSymbol);
+                            result.Initialize(GetTypeIdentifier(namedTypeSymbol), namedTypeSymbol);
                             return result;
                         }
 
                         if (namedTypeSymbol.TypeKind == TypeKind.Enum)
                         {
-                            var result = new SymbolEnum(namedTypeSymbol.Name, namedTypeSymbol.MemberNames);
+                            var result = new SymbolEnum(GetTypeIdentifier(namedTypeSymbol), namedTypeSymbol.MemberNames);
                             return result;
                         }
 
-                        return new SymbolPrimitiveType(namedTypeSymbol.Name);
+                        return new SymbolPrimitiveType(GetTypeIdentifier(namedTypeSymbol));
                     });
             });
         }

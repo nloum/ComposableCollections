@@ -15,10 +15,10 @@ namespace DebuggableSourceGenerators
             SyntaxService = syntaxService;
         }
         
-        public void Initialize(InterfaceDeclarationSyntax[] interfaceDeclarationSyntaxes)
+        public void Initialize(TypeIdentifier identifier, InterfaceDeclarationSyntax[] interfaceDeclarationSyntaxes)
         {
             var firstInterfaceDeclarationSyntax = interfaceDeclarationSyntaxes[0];
-            Name = firstInterfaceDeclarationSyntax.Identifier.Text;
+            Identifier = identifier;
 
             TypeParameters = SyntaxService.Convert(firstInterfaceDeclarationSyntax.TypeParameterList).ToImmutableList();
 
@@ -39,7 +39,7 @@ namespace DebuggableSourceGenerators
             Methods = methods;
         }
 
-        public string Name { get; private set; }
+        public TypeIdentifier Identifier { get; private set; }
         public IReadOnlyList<TypeParameter> TypeParameters { get; private set; }
         public IReadOnlyList<Property> Properties { get; private set; }
         public IReadOnlyList<Method> Methods { get; private set; }

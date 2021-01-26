@@ -8,7 +8,7 @@ namespace DebuggableSourceGenerators.NonLoadedAssembly
     /// Test implementation of ISignatureTypeProvider<TType, TGenericContext> that uses strings in ilasm syntax as TType.
     /// A real provider in any sort of perf constraints would not want to allocate strings freely like this, but it keeps test code simple.
     /// </summary>
-    internal sealed class SignatureVisualizer : ISignatureTypeProvider<IType, object>
+    internal sealed class SignatureVisualizer : ISignatureTypeProvider<string, object>
     {
         private readonly MetadataVisualizer _visualizer;
 
@@ -17,7 +17,7 @@ namespace DebuggableSourceGenerators.NonLoadedAssembly
             _visualizer = visualizer;
         }
 
-        public IType GetPrimitiveType(PrimitiveTypeCode typeCode)
+        public string GetPrimitiveType(PrimitiveTypeCode typeCode)
         {
             switch (typeCode)
             {

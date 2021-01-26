@@ -46,7 +46,7 @@ namespace DebuggableSourceGenerators.NonLoadedAssembly
                 
                 TypeRegistryService.TryAddType(identifier, () =>
                 {
-                    var result = new NonLoadedAssemblyClass();
+                    var result = new NonLoadedAssemblyClass(this);
                     result.Initialize(identifier, mr, tdef);
                     return result;
                 });

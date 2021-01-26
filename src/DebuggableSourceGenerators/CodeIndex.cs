@@ -105,6 +105,11 @@ namespace DebuggableSourceGenerators
             return ResolveType(identifier);
         }
 
+        public IEnumerable<IType> ResolveTypes(Func<TypeIdentifier, bool> predicate)
+        {
+            return _types.Where(kvp => predicate(kvp.Key)).Select(kvp => kvp.Value);
+        }
+
         public bool TryResolveType(string namespaceName, string typeName, int arity, out IType type)
         {
             var identifier = new TypeIdentifier(namespaceName, typeName, arity);

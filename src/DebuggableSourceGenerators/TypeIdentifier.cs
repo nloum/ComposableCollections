@@ -6,7 +6,7 @@ namespace DebuggableSourceGenerators
     {
         public TypeIdentifier(string namespaceName, string name, int arity)
         {
-            if (namespaceName != null)
+            if (!string.IsNullOrWhiteSpace(namespaceName))
             {
                 FullName = $"{namespaceName}.{name}";
             }
@@ -47,6 +47,11 @@ namespace DebuggableSourceGenerators
 
         public override string ToString()
         {
+            if (Arity == 0)
+            {
+                return FullName;
+            }
+            
             return $"{FullName}`{Arity}";
         }
     }

@@ -1,16 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.IO;
+﻿using System.IO;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
+using System.Security.Principal;
+using DebuggableSourceGenerators;
+using DebuggableSourceGenerators.NonLoadedAssembly;
 
 namespace DebuggableSourceGenerators.NonLoadedAssembly
 {
-     public interface INonLoadedAssemblyService
-    {
-        void AddAllTypes(string assemblyFilePath);
-    }
-
     public class NonLoadedAssemblyService : INonLoadedAssemblyService
     {
         private ITypeRegistryService TypeRegistryService;
@@ -31,7 +27,22 @@ namespace DebuggableSourceGenerators.NonLoadedAssembly
             {
                 TypeDefinition tdef = mr.GetTypeDefinition(tdefh);
 
-                var identifier = new TypeIdentifier(mr.GetString(tdef.Namespace), mr.GetString(tdef.Name), 0);
+                var name = mr.GetString(tdef.Name);
+                var indexOfAritySeparator = name.LastIndexOf('`');
+                var arity = 0;
+                if (indexOfAritySeparator != -1)
+                {
+                    var split = name.Split('`');
+                    name = split[0];
+                    arity = int.Parse(split[1]);
+                }
+                
+                var identifier = new TypeIdentifier(mr.GetString(tdef.Namespace), name, arity);
+
+                if (identifier.FullName == "<Module>" || identifier.FullName.Contains("__AnonymousType"))
+                {
+                    continue;
+                }
                 
                 TypeRegistryService.TryAddType(identifier, () =>
                 {
@@ -41,27 +52,5 @@ namespace DebuggableSourceGenerators.NonLoadedAssembly
                 });
             }
         }
-    }
-
-    public class NonLoadedAssemblyClass : IClass
-    {
-        public void Initialize(TypeIdentifier identifier, MetadataReader metadataReader, TypeDefinition typeDefinition)
-        {
-            Identifier = identifier;
-
-            var properties = typeDefinition.GetProperties().ToImmutableList();
-            foreach (var property in properties)
-            {
-                var propertyDefinition = metadataReader.GetPropertyDefinition(property);
-                var propertyName = metadataReader.GetString(propertyDefinition.Name);
-                
-            }
-        }
-
-        public TypeIdentifier Identifier { get; private set; }
-        public IReadOnlyList<TypeParameter> TypeParameters { get; }
-        public IReadOnlyList<Property> Properties { get; }
-        public IReadOnlyList<Method> Methods { get; }
-        public IReadOnlyList<Indexer> Indexers { get; }
     }
 }

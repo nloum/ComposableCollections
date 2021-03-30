@@ -1,6 +1,12 @@
+using System;
 using System.Collections.Immutable;
 using System.Reflection.Metadata;
 using System.Text;
+using DebuggableSourceGenerators.PrimitiveTypes;
+using Microsoft.VisualBasic.CompilerServices;
+using ByteType = DebuggableSourceGenerators.PrimitiveTypes.ByteType;
+using CharType = DebuggableSourceGenerators.PrimitiveTypes.CharType;
+using DoubleType = DebuggableSourceGenerators.PrimitiveTypes.DoubleType;
 
 namespace DebuggableSourceGenerators.NonLoadedAssembly
 {
@@ -21,25 +27,25 @@ namespace DebuggableSourceGenerators.NonLoadedAssembly
         {
             switch (typeCode)
             {
-                case PrimitiveTypeCode.Boolean: return "bool";
-                case PrimitiveTypeCode.Byte: return "uint8";
-                case PrimitiveTypeCode.Char: return "char";
-                case PrimitiveTypeCode.Double: return "float64";
-                case PrimitiveTypeCode.Int16: return "int16";
-                case PrimitiveTypeCode.Int32: return "int32";
-                case PrimitiveTypeCode.Int64: return "int64";
-                case PrimitiveTypeCode.IntPtr: return "native int";
-                case PrimitiveTypeCode.Object: return "object";
-                case PrimitiveTypeCode.SByte: return "int8";
-                case PrimitiveTypeCode.Single: return "float32";
-                case PrimitiveTypeCode.String: return "string";
-                case PrimitiveTypeCode.TypedReference: return "typedref";
-                case PrimitiveTypeCode.UInt16: return "uint16";
-                case PrimitiveTypeCode.UInt32: return "uint32";
-                case PrimitiveTypeCode.UInt64: return "uint64";
-                case PrimitiveTypeCode.UIntPtr: return "native uint";
-                case PrimitiveTypeCode.Void: return "void";
-                default: return "<bad metadata>";
+                case PrimitiveTypeCode.Boolean: return new BoolType();
+                case PrimitiveTypeCode.Byte: return new ByteType();
+                case PrimitiveTypeCode.Char: return new CharType();
+                case PrimitiveTypeCode.Double: return new DoubleType();
+                case PrimitiveTypeCode.Int16: return new Integer16Type();
+                case PrimitiveTypeCode.Int32: return new Integer32Type();
+                case PrimitiveTypeCode.Int64: return new Integer64Type();
+                case PrimitiveTypeCode.IntPtr: return new NativeIntegerType();
+                case PrimitiveTypeCode.Object: return new ObjectType();
+                case PrimitiveTypeCode.SByte: return new SignedByteType();
+                case PrimitiveTypeCode.Single: return new FloatType();
+                case PrimitiveTypeCode.String: return new StringType();
+                case PrimitiveTypeCode.TypedReference: return new TypedReferenceType();
+                case PrimitiveTypeCode.UInt16: return new UnsignedInteger16Type();
+                case PrimitiveTypeCode.UInt32: return new UnsignedInteger32Type();
+                case PrimitiveTypeCode.UInt64: return new UnsignedInteger64Type();
+                case PrimitiveTypeCode.UIntPtr: return new NativeUnsignedIntegerType();
+                case PrimitiveTypeCode.Void: return new VoidType();
+                default: throw new ArgumentException(nameof(typeCode));
             }
         }
 

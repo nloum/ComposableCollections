@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using DebuggableSourceGenerators.PrimitiveTypes;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.FindSymbols;
 
@@ -150,7 +151,11 @@ namespace DebuggableSourceGenerators
                             return result;
                         }
 
-                        return new SymbolPrimitiveType(GetTypeIdentifier(namedTypeSymbol));
+                        if (namedTypeSymbol.Name == "bool")
+                        {
+                            return new BoolType();
+                        }
+                        else throw new InvalidOperationException();
                     });
             });
         }

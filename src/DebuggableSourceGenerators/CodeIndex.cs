@@ -8,6 +8,7 @@ using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Xml;
 using DebuggableSourceGenerators.NonLoadedAssembly;
+using DebuggableSourceGenerators.Reflection;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,8 +25,9 @@ namespace DebuggableSourceGenerators
 
         ISyntaxService SyntaxService;
         ISymbolService SymbolService;
-        private INonLoadedAssemblyService NonLoadedAssemblyService;
+        //private INonLoadedAssemblyService NonLoadedAssemblyService;
         private TypeRegistryServiceImpl TypeRegistryService;
+        private IReflectionService ReflectionService;
         private List<Compilation> _compilations = new();
 
         public CodeIndex()
@@ -45,7 +47,8 @@ namespace DebuggableSourceGenerators
 
                 return null;
             });
-            NonLoadedAssemblyService = new NonLoadedAssemblyService(TypeRegistryService);
+            ReflectionService = new ReflectionService();
+            //NonLoadedAssemblyService = new NonLoadedAssemblyService(TypeRegistryService);
         }
 
         private class TypeRegistryServiceImpl : ITypeRegistryService
@@ -168,7 +171,9 @@ namespace DebuggableSourceGenerators
 
         public void AddAssemblyFile(string assemblyFilePath)
         {
-            NonLoadedAssemblyService.AddAllTypes(assemblyFilePath);
+            var assembly = Assembly.LoadFile(assemblyFilePath);
+            assembly.DefinedTypes
+            //NonLoadedAssemblyService.AddAllTypes(assemblyFilePath);
         }
 
         public void AddCompilation(Compilation compilation)

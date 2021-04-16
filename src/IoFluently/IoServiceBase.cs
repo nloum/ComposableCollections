@@ -61,7 +61,11 @@ namespace IoFluently
 
         public IDirectoryContents GetDirectoryContents( string subpath ) => new AbsolutePathDirectoryContents( ParseAbsolutePath( subpath ) );
 
-        public IChangeToken Watch( string filter ) => new EmptyChangeToken();
+        public IChangeToken Watch( string filter )
+        {
+            // TODO - implement this properly
+            return new EmptyChangeToken();
+        }
 
         public virtual IEnumerable<string> ReadLines(AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,

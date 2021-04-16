@@ -13,11 +13,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LiveLinq" Version="1.1.0-alpha0175" />
+    <PackageReference Include="LiveLinq" Version="1.1.0-alpha0184" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="5.0.0" />
-    <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0040" />
+    <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0043" />
     <PackageReference Include="TreeLinq" Version="1.0.0-alpha0019" />
-    <PackageReference Include="UnitsNet" Version="4.79.0" />
+    <PackageReference Include="UnitsNet" Version="4.89.0" />
     <PackageReference Include="UtilityDisposables" Version="1.1.0-alpha0006" />
   </ItemGroup>
 

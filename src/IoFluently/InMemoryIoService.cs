@@ -236,55 +236,73 @@ namespace IoFluently
         {
             File file = null;
             var maybeFile = GetFile(path);
-            if (!maybeFile.HasValue && fileMode.HasFlag(FileMode.Create) || fileMode.HasFlag(FileMode.CreateNew) ||
-                fileMode.HasFlag(FileMode.OpenOrCreate))
+            if (!maybeFile.HasValue)
             {
-                var pathParent = path.Parent();
-                Folder parentFolder = null;
-                var maybeParentFolder = GetFolder(pathParent);
-                if (!maybeParentFolder.HasValue)
+                if (fileMode == FileMode.Create || fileMode == FileMode.CreateNew ||
+                    fileMode == FileMode.OpenOrCreate)
                 {
-                    CreateFolder(pathParent);
-                    parentFolder = GetFolder(pathParent).Value;
+                    var pathParent = path.Parent();
+                    Folder parentFolder = null;
+                    var maybeParentFolder = GetFolder(pathParent);
+                    if (!maybeParentFolder.HasValue)
+                    {
+                        CreateFolder(pathParent);
+                        parentFolder = GetFolder(pathParent).Value;
+                    }
+                    else
+                    {
+                        parentFolder = maybeParentFolder.Value;
+                    }
+                
+                    var now = DateTimeOffset.UtcNow;
+                    file = new File()
+                    {
+                        Attributes = FileAttributes.Normal,
+                        Contents = new byte[0],
+                        CreationTime = now,
+                        IsEncrypted = false,
+                        LastAccessTime = now,
+                        LastWriteTime = now,
+                    };
+                
+                    parentFolder.Files.Add(path.Name, file);
+                    
+                    file.Lock.AcquireReaderLock(0);
+                    var memoryStream = new MemoryStream();
+                    
+                    return ((Stream)new StreamCloseDecorator(memoryStream, () =>
+                    {
+                        memoryStream.Seek(0, SeekOrigin.Begin);
+                        file.Contents = memoryStream.ToArray();
+                        file.Lock.ReleaseReaderLock();
+                    })).ToMaybe();
                 }
                 else
                 {
-                    parentFolder = maybeParentFolder.Value;
+                    throw new InvalidOperationException(
+                        $"None of the necessary flags for creating a file (FileMode.Create, FileMode.CreateNew, FileMode.OpenOrCreate) were specified but {path} does not exist");
                 }
-                
-                var now = DateTimeOffset.UtcNow;
-                file = new File()
-                {
-                    Attributes = FileAttributes.Normal,
-                    Contents = new byte[0],
-                    CreationTime = now,
-                    IsEncrypted = false,
-                    LastAccessTime = now,
-                    LastWriteTime = now,
-                };
-                
-                parentFolder.Files.Add(path.Name, file);
             }
             else
             {
-                if (fileMode.HasFlag(FileMode.CreateNew))
+                if (fileMode == FileMode.CreateNew)
                 {
                     return Nothing<FileStream>(() => throw new InvalidOperationException($"The FileMode.CreateNew flag was specified, but the file {path} did indeed exist"));
                 }
                 
                 file = GetFile(path).Value;
-            }
-            
-            file.Lock.AcquireReaderLock(0);
-            var memoryStream = new MemoryStream(file.Contents);
+                
+                file.Lock.AcquireReaderLock(0);
+                var memoryStream = new MemoryStream();
+                memoryStream.Write(file.Contents, 0, file.Contents.Length);
+                memoryStream.Seek(0, SeekOrigin.Begin);
 
-            return ((Stream)new StreamCloseDisposeDecorator(memoryStream, () =>
-            {
-                //file.Lock.ReleaseReaderLock();
-            }, () =>
-            {
-                file.Lock.ReleaseReaderLock();
-            })).ToMaybe();
+                return ((Stream)new StreamCloseDecorator(memoryStream, () =>
+                {
+                    file.Contents = memoryStream.GetBuffer();
+                    file.Lock.ReleaseReaderLock();
+                })).ToMaybe();
+            }
         }
 
         public override AbsolutePath CreateFolder(AbsolutePath path)

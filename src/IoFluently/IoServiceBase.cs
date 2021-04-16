@@ -778,7 +778,11 @@ namespace IoFluently
                 {
                     var components = "/".ItemConcat(path.Substring(1).Split('/')).ToList();
                     components.RemoveWhere((i, str) => i != 0 && str == ".");
-                    if (components.Any(string.IsNullOrEmpty))
+                    if (components.Count == 2 && components[0] == "/" && components[1].Length == 0)
+                    {
+                        components.RemoveAt(1);
+                    }
+                    else if (components.Any(string.IsNullOrEmpty))
                     {
                         error = "Must not contain any directories that have empty names";
                         return false;

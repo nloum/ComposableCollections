@@ -18,7 +18,7 @@ namespace IoFluently.Tests
         
         private void CreateUnitsUnderTest(bool sameInstance, IoServiceType type1, bool enableOpenFilesTracking1, out IIoService unitUnderTest1, IoServiceType type2, bool enableOpenFilesTracking2, out IIoService unitUnderTest2)
         {
-            unitUnderTest1 = CreateUnitUnderTest(type1, enableOpenFilesTracking1);
+            unitUnderTest1 = CreateUnitUnderTest(type1, "/", enableOpenFilesTracking1);
             
             if (type2 == type1 && sameInstance)
             {
@@ -26,10 +26,10 @@ namespace IoFluently.Tests
                 return;
             }
 
-            unitUnderTest2 = CreateUnitUnderTest(type2, enableOpenFilesTracking2);
+            unitUnderTest2 = CreateUnitUnderTest(type2, "/", enableOpenFilesTracking2);
         }
 
-        private IIoService CreateUnitUnderTest(IoServiceType type, bool enableOpenFilesTracking)
+        private IIoService CreateUnitUnderTest(IoServiceType type, string directorySeparator, bool enableOpenFilesTracking)
         {
             if (type == IoServiceType.IoService)
             {
@@ -37,11 +37,11 @@ namespace IoFluently.Tests
             }
             else if (type == IoServiceType.InMemoryWindowsIoService)
             {
-                return new InMemoryIoService("\r\n", false, enableOpenFilesTracking);
+                return new InMemoryIoService("\r\n", false, directorySeparator, enableOpenFilesTracking);
             }
             else if (type == IoServiceType.InMemoryUnixIoService)
             {
-                return new InMemoryIoService("\n", true, enableOpenFilesTracking);
+                return new InMemoryIoService("\n", true, directorySeparator, enableOpenFilesTracking);
             }
             else
             {
@@ -53,7 +53,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         public void CreateTemporaryFileShouldWork(IoServiceType type)
         {
-            var uut = CreateUnitUnderTest(type, true);
+            var uut = CreateUnitUnderTest(type, "/", true);
             var temporaryPath = uut.CreateTemporaryPath(PathType.File);
             temporaryPath.IsFile().Should().BeTrue();
             temporaryPath.DeleteFile();
@@ -64,7 +64,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         public void CreateTemporaryFolderShouldWork(IoServiceType type)
         {
-            var uut = CreateUnitUnderTest(type, true);
+            var uut = CreateUnitUnderTest(type, "/", true);
             var temporaryPath = uut.CreateTemporaryPath(PathType.Folder);
             temporaryPath.IsFolder().Should().BeTrue();
             temporaryPath.DeleteFolder();
@@ -75,7 +75,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         public void CreateTemporaryNonExistentPathShouldWork(IoServiceType type)
         {
-            var uut = CreateUnitUnderTest(type, true);
+            var uut = CreateUnitUnderTest(type, "/", true);
             var temporaryPath = uut.CreateTemporaryPath(PathType.None);
             temporaryPath.IsFolder().Should().BeFalse();
             temporaryPath.IsFile().Should().BeFalse();
@@ -87,7 +87,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.InMemoryUnixIoService)]
         public void SimplifyShouldNotChangeSimplePath(IoServiceType type)
         {
-            var uut = CreateUnitUnderTest(type, true);
+            var uut = CreateUnitUnderTest(type, "/", true);
             var simplified = uut.CurrentDirectory.Simplify();
             uut.CurrentDirectory.ToString().Should().Be(simplified.ToString());
         }
@@ -97,7 +97,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.InMemoryWindowsIoService)]
         [DataRow(IoServiceType.InMemoryUnixIoService)]
         public void HasExtensionShouldWorkWithAndWithoutTheDot(IoServiceType type) {
-            var uut = CreateUnitUnderTest(type, false);
+            var uut = CreateUnitUnderTest(type, "/", false);
             var testTxt = uut.ParseAbsolutePath("/test.txt");
             testTxt.HasExtension(".txt").Should().BeTrue();
             testTxt.HasExtension("txt").Should().BeTrue();
@@ -109,7 +109,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.InMemoryUnixIoService)]
         public void WithoutExtensionsShouldWork(IoServiceType type)
         {
-            var uut = CreateUnitUnderTest(type, false);
+            var uut = CreateUnitUnderTest(type, "/", false);
             var testTxt = uut.ParseAbsolutePath("/test.test.txt");
             var test = testTxt.WithoutExtension();
             test.ToString().Should().Be("/test.test");
@@ -121,7 +121,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.InMemoryUnixIoService)]
         public void CommonShouldOnlyReturnFullFolderNames(IoServiceType type)
         {
-            var ioService = CreateUnitUnderTest(type, false);
+            var ioService = CreateUnitUnderTest(type, "/", false);
 
             var parent = ioService.ParseAbsolutePath("C:\\test1\\test2");
             var item1 = parent / "test3" / "test.csproj";
@@ -138,7 +138,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.InMemoryUnixIoService)]
         public void ShouldNotParseWindowsAbsolutePathAsRelativePath(IoServiceType type)
         {
-            var ioService = CreateUnitUnderTest(type, false);
+            var ioService = CreateUnitUnderTest(type, "/", false);
             ioService.TryParseRelativePath("C:\\test1").HasValue.Should().BeFalse();
         }
 
@@ -148,7 +148,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.InMemoryUnixIoService)]
         public void ShouldNotParseUnixAbsolutePathAsRelativePath(IoServiceType type)
         {
-            var ioService = CreateUnitUnderTest(type, false);
+            var ioService = CreateUnitUnderTest(type, "/", false);
             ioService.TryParseRelativePath("/test1").HasValue.Should().BeFalse();
         }
 
@@ -158,7 +158,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.InMemoryUnixIoService)]
         public void ShouldNotParseRelativePathAsAbsolutePath(IoServiceType type)
         {
-            var ioService = CreateUnitUnderTest(type, false);
+            var ioService = CreateUnitUnderTest(type, "/", false);
             ioService.TryParseAbsolutePath("test1").HasValue.Should().BeFalse();
         }
 
@@ -168,7 +168,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.InMemoryUnixIoService)]
         public void RelativePathShouldWork(IoServiceType type)
         {
-            var ioService = CreateUnitUnderTest(type, false);
+            var ioService = CreateUnitUnderTest(type, "/", false);
 
             var parent = ioService.ParseAbsolutePath("C:\\test1\\test2");
             var item1 = parent / "test3" / "test.csproj";
@@ -185,7 +185,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.InMemoryUnixIoService)]
         public void ShouldParseWithComplexMixedDirectorySeparators(IoServiceType type)
         {
-            var ioService = CreateUnitUnderTest(type, false);
+            var ioService = CreateUnitUnderTest(type, "/", false);
             var result = ioService.ParseAbsolutePath("C:\\test1\\./test2\\");
             result.ToString().Should().Be("C:\\test1\\test2");
         }
@@ -196,7 +196,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.InMemoryUnixIoService)]
         public void ShouldParseWithMixedDirectorySeparators(IoServiceType type)
         {
-            var ioService = CreateUnitUnderTest(type, false);
+            var ioService = CreateUnitUnderTest(type, "/", false);
             var result = ioService.ParseAbsolutePath("C:\\test1/test2\\");
             result.ToString().Should().Be("C:\\test1\\test2");
         }
@@ -205,7 +205,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         public void ShouldBeAbleToExecuteParentQuery(IoServiceType type)
         {
-            var ioService = CreateUnitUnderTest(type, false);
+            var ioService = CreateUnitUnderTest(type, "/", false);
 
             var repoRoot = ioService.CurrentDirectory.Ancestors().First(ancestor => (ancestor / ".git").IsFolder());
             var testFolder = repoRoot / "test_folder";
@@ -221,7 +221,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         public void ShouldBeAbleToExecuteAncestorQuery(IoServiceType type)
         {
-            var ioService = CreateUnitUnderTest(type, false);
+            var ioService = CreateUnitUnderTest(type, "/", false);
 
             var repoRoot = ioService.CurrentDirectory.Ancestors().First(ancestor => (ancestor / ".git").IsFolder());
             var testFolder = repoRoot / "test_folder";
@@ -234,10 +234,18 @@ namespace IoFluently.Tests
         }
 
         [TestMethod]
+        public void ShouldParseLinuxRoot()
+        {
+            var uut = CreateUnitUnderTest(IoServiceType.InMemoryUnixIoService, "/", false);
+            var root = uut.ParseAbsolutePath("/");
+            root.Should().Be(root.Root());
+        }
+        
+        [TestMethod]
         [DataRow(IoServiceType.IoService)]
         public void ShouldParseMixedDirectorySeparatorsAsAbsoluteWindowsPath(IoServiceType type)
         {
-            var uut = CreateUnitUnderTest(type, false);
+            var uut = CreateUnitUnderTest(type, "/", false);
             var path = uut.ParseAbsolutePath("C:\\test1/test2");
             path.ToString().Should().Be("C:\\test1\\test2");
         }
@@ -246,7 +254,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         public void ShouldParseMixedDirectorySeparatorsAsAbsoluteWindowsUncPath(IoServiceType type)
         {
-            var uut = CreateUnitUnderTest(type, false);
+            var uut = CreateUnitUnderTest(type, "/", false);
             var path = uut.ParseRelativePath(@"\\test1/test2");
             path.ToString().Should().Be(@"\\test1\test2");
         }
@@ -255,7 +263,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         public void ShouldParseMixedDirectorySeparatorsAsAbsoluteLinuxPath(IoServiceType type)
         {
-            var uut = CreateUnitUnderTest(type, false);
+            var uut = CreateUnitUnderTest(type, "/", false);
             var path = uut.ParseAbsolutePath("/test1\\test2");
             path.ToString().Should().Be("/test1/test2");
         }
@@ -264,7 +272,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         public void ShouldParseMixedDirectorySeparatorsAsRelativeLinuxPath(IoServiceType type)
         {
-            var uut = CreateUnitUnderTest(type, false);
+            var uut = CreateUnitUnderTest(type, "/", false);
             var path = uut.ParseRelativePath("test1/test2\\test3");
             path.ToString().Should().Be("./test1/test2/test3");
         }
@@ -273,7 +281,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         public void ShouldParseMixedDirectorySeparatorsAsRelativeWindowsPath(IoServiceType type)
         {
-            var uut = CreateUnitUnderTest(type, false);
+            var uut = CreateUnitUnderTest(type, "/", false);
             var path = uut.ParseRelativePath("test1\\test2/test3");
             path.ToString().Should().Be(".\\test1\\test2\\test3");
         }
@@ -282,7 +290,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         public void RelativePathSlashNullShouldReturnOriginalPath(IoServiceType type)
         {
-            var uut = CreateUnitUnderTest(type, false);
+            var uut = CreateUnitUnderTest(type, "/", false);
             var test1 = uut.ParseRelativePath("test1");
             var path = test1 / (RelativePath)null;
             path.Should().Be(test1);
@@ -298,7 +306,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         public void AbsolutePathSlashNullShouldReturnOriginalPath(IoServiceType type)
         {
-            var uut = CreateUnitUnderTest(type, false);
+            var uut = CreateUnitUnderTest(type, "/", false);
             var test1 = uut.ParseAbsolutePath("/test1");
             var path = test1 / (RelativePath)null;
             path.Should().Be(test1);
@@ -314,7 +322,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         public void RelativePathWithTrailingSlashShouldBeEqualToWithoutTrailingSlash(IoServiceType type)
         {
-            var uut = CreateUnitUnderTest(type, false);
+            var uut = CreateUnitUnderTest(type, "/", false);
             var withTrailingSlash = uut.ParseRelativePath("test1/");
             var withoutTrailingSlash = uut.ParseRelativePath("test1");
             withTrailingSlash.Should().Be(withoutTrailingSlash);
@@ -324,7 +332,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         public void AbsolutePathWithTrailingSlashShouldBeEqualToWithoutTrailingSlash(IoServiceType type)
         {
-            var uut = CreateUnitUnderTest(type, false);
+            var uut = CreateUnitUnderTest(type, "/", false);
             var withTrailingSlash = uut.ParseAbsolutePath("/test1/");
             var withoutTrailingSlash = uut.ParseAbsolutePath("/test1");
             withTrailingSlash.Should().Be(withoutTrailingSlash);
@@ -360,7 +368,7 @@ namespace IoFluently.Tests
         [DataRow(true, IoServiceType.InMemoryUnixIoService, false, IoServiceType.InMemoryUnixIoService, false)]
         public void MovingShouldWork(bool sameInstance, IoServiceType type1, bool enableOpenFileTracking1, IoServiceType type2, bool enableOpenFileTracking2)
         {
-            var ioService = CreateUnitUnderTest(type1, false);
+            var ioService = CreateUnitUnderTest(type1, "/", false);
 
             var sourceFolder = ioService.CurrentDirectory / "test1";
 

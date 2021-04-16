@@ -12,6 +12,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using LiveLinq;
 using LiveLinq.Set;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Primitives;
 using MoreCollections;
 using SimpleMonads;
 using UnitsNet;
@@ -54,6 +56,12 @@ namespace IoFluently
             OpenFilesTrackingService = openFilesTrackingService;
             _newline = newline;
         }
+        
+        public IFileInfo GetFileInfo( string subpath ) => new AbsolutePathFileInfoAdapter(ParseAbsolutePath( subpath ));
+
+        public IDirectoryContents GetDirectoryContents( string subpath ) => new AbsolutePathDirectoryContents( ParseAbsolutePath( subpath ) );
+
+        public IChangeToken Watch( string filter ) => new EmptyChangeToken();
 
         public virtual IEnumerable<string> ReadLines(AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,

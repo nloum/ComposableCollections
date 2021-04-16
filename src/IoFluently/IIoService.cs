@@ -7,13 +7,14 @@ using System.Text;
 using System.Text.RegularExpressions;
 using LiveLinq.Dictionary;
 using LiveLinq.Set;
+using Microsoft.Extensions.FileProviders;
 using SimpleMonads;
 using TreeLinq;
 using UnitsNet;
 
 namespace IoFluently
 {
-    public interface IIoService
+    public interface IIoService : IFileProvider
     {
         IQueryable<AbsolutePath> Query();
         

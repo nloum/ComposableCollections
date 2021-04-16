@@ -36,18 +36,25 @@ namespace IoFluently
             public Dictionary<string, Folder> Folders { get; } = new Dictionary<string, Folder>();
         }
 
+        public override string GetDefaultDirectorySeparatorForThisEnvironment()
+        {
+            return _defaultDirectorySeparatorForThisEnvironment;
+        }
+
         public override IQueryable<AbsolutePath> Query()
         {
             throw new NotImplementedException();
         }
 
         private readonly bool _isCaseSensitiveByDefault;
+        private string _defaultDirectorySeparatorForThisEnvironment;
         public ObservableDictionary<string, Folder> RootFolders { get; } = new ObservableDictionary<string, Folder>();
 
-        public InMemoryIoService(string newline, bool isCaseSensitiveByDefault, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), newline)
+        public InMemoryIoService(string newline, bool isCaseSensitiveByDefault, string defaultDirectorySeparatorForThisEnvironment = null, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), newline)
         {
             _newline = newline;
             _isCaseSensitiveByDefault = isCaseSensitiveByDefault;
+            _defaultDirectorySeparatorForThisEnvironment = defaultDirectorySeparatorForThisEnvironment ?? base.GetDefaultDirectorySeparatorForThisEnvironment();
         }
 
         public override ISetChanges<AbsolutePath> ToLiveLinq(AbsolutePath path, bool includeFileContentChanges, bool includeSubFolders, string pattern)

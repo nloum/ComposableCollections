@@ -209,16 +209,21 @@ namespace IoFluently
 
         public virtual string GetDefaultDirectorySeparatorForThisEnvironment()
         {
-            lock (Lock)
+            if (DefaultDirectorySeparatorForThisEnvironment == null)
             {
-                if (DefaultDirectorySeparatorForThisEnvironment == null)
+                lock (Lock)
                 {
-                    var path = Path.Combine("a", "b");
-                    DefaultDirectorySeparatorForThisEnvironment = path.Substring(1, path.Length - 2);
-                }
+                    if (DefaultDirectorySeparatorForThisEnvironment == null)
+                    {
+                        var path = Path.Combine("a", "b");
+                        DefaultDirectorySeparatorForThisEnvironment = path.Substring(1, path.Length - 2);
+                    }
 
-                return DefaultDirectorySeparatorForThisEnvironment;
+                    return DefaultDirectorySeparatorForThisEnvironment;
+                }
             }
+
+            return DefaultDirectorySeparatorForThisEnvironment;
         }
 
         /// <summary>

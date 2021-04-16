@@ -25,13 +25,28 @@ namespace IoFluently
         /// </summary>
         bool IsCaseSensitiveByDefault();
         
+        /// <summary>
+        /// Linux uses / as a directory separator, Windows uses \ as a directory separator. This method returns the directory
+        /// separator for the current environment. Note that this isn't necessarily always \ on Windows; for example, if
+        /// there's an IIoService that uses SSH to connect to a Linux machine, then this method would return / for that
+        /// IoService implementation.
+        /// </summary>
         string GetDefaultDirectorySeparatorForThisEnvironment();
 
         #endregion
         
         #region Creating and deleting
         
+        /// <summary>
+        /// Delete the specified folder. This throws an exception if the path is a file, doesn't exist, or the current
+        /// process doesn't have permission to delete the folder. Also, if the directory still contains files or folders
+        /// and recursive is false, then this will throw an exception as well.
+        /// </summary>
+        /// <param name="path">The folder to delete</param>
+        /// <param name="recursive">Whether to delete the folder recursively.</param>
+        /// <returns>The path that was deleted</returns>
         AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false);
+        
         AbsolutePath Create(AbsolutePath path, PathType pathType);
         AbsolutePath CreateFolder(AbsolutePath path);
         AbsolutePath CreateTemporaryPath(PathType type);

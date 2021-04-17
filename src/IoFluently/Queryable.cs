@@ -8,8 +8,12 @@ using System.Reflection;
 using Castle.DynamicProxy.Contributors;
 using TreeLinq;
 
-namespace IoFluently
-{
+namespace IoFluently {
+    /// <summary>
+    /// IQueryable implementation that converts expressions like AbsolutePaths.Where(path => path.Contains("test")) into
+    /// efficient calls to the .NET file system APIs.
+    /// </summary>
+    /// <typeparam name="T">The element type</typeparam>
     public class Queryable<T> : IOrderedQueryable<T>
     {
         public Queryable(IQueryContext queryContext)

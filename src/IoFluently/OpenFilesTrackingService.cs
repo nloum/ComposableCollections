@@ -6,18 +6,28 @@ using UtilityDisposables;
 
 namespace IoFluently
 {
+    /// <summary>
+    /// Standard implementation of <see cref="IOpenFilesTrackingService"/>
+    /// </summary>
     public class OpenFilesTrackingService : IOpenFilesTrackingService
     {
         private object _lock = new object();
         private readonly Dictionary<AbsolutePath, Dictionary<Guid, object>> _openFiles = new Dictionary<AbsolutePath, Dictionary<Guid, object>>();
-        
+
+        /// <inheritdoc />
         public bool IsEnabled { get; }
 
+        /// <summary>
+        /// Creates a service for tracking open files.
+        /// </summary>
+        /// <param name="isEnabled">When this service is created is the only time you can enable or disable open-files tracking,
+        /// for performance reasons. Use this parameter to enable or disable open-files tracking.</param>
         public OpenFilesTrackingService(bool isEnabled)
         {
             IsEnabled = isEnabled;
         }
 
+        /// <inheritdoc />
         public IDisposable TrackOpenFile(AbsolutePath absolutePath, Func<object> tag)
         {
             if (IsEnabled)
@@ -47,6 +57,7 @@ namespace IoFluently
             return Disposable.Empty;
         }
 
+        /// <inheritdoc />
         public IEnumerable<object> GetTagsForOpenFile(AbsolutePath absolutePath)
         {
             if (IsEnabled)

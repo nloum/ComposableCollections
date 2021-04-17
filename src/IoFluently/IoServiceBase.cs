@@ -1,15 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Security;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using LiveLinq;
 using LiveLinq.Set;
 using Microsoft.Extensions.FileProviders;
@@ -17,8 +13,6 @@ using Microsoft.Extensions.Primitives;
 using MoreCollections;
 using SimpleMonads;
 using UnitsNet;
-using UtilityDisposables;
-using EnumerableUtility = MoreCollections.EnumerableUtility;
 using static SimpleMonads.Utility;
 
 namespace IoFluently

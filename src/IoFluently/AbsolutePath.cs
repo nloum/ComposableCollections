@@ -10,11 +10,29 @@ using static SimpleMonads.Utility;
 
 namespace IoFluently
 {
-    public class AbsolutePath : IComparable
+    /// <summary>
+    /// Represents an absolute path to a file or folder (the file or folder doesn't have to exist)
+    /// </summary>
+    public class AbsolutePath : IComparable, IComparable<AbsolutePath>, IEquatable<AbsolutePath>
     {
+        /// <summary>
+        /// Indicates whether or not the absolute path is case sensitive
+        /// </summary>
         public bool IsCaseSensitive { get; }
+        
+        /// <summary>
+        /// Indicates what the directory separator is for this absolute path (e.g., '/' or '\') 
+        /// </summary>
         public string DirectorySeparator { get; }
+        
+        /// <summary>
+        /// The IIoService that is used for this absolute path
+        /// </summary>
         public IIoService IoService { get; }
+        
+        /// <summary>
+        /// The TreeLinq absolute path that this object represents
+        /// </summary>
         public AbsolutePath<string> Path { get; }
 
         internal AbsolutePath(bool isCaseSensitive, string directorySeparator, IIoService ioService, IEnumerable<string> path)
@@ -29,12 +47,33 @@ namespace IoFluently
             }
         }
 
+        /// <summary>
+        /// Returns the files and folders that this folder contains, but not anything else. This will not return files or folders
+        /// that are nested deeper. For example, if this folder contains a folder called Level1, and Level1 contains another
+        /// folder called Level2, then this method will return only Level1, not Level2 or anything else in Level1.
+        /// </summary>
+        /// <param name="pattern">The string pattern that files or folders must match to be included in the return value.
+        /// If this is null, then all files and folders in this folder are returned.</param>
+        /// <returns>An object representing the children files and folders of this folder.</returns>
         public AbsolutePathChildren Children(string pattern = null) => new AbsolutePathChildren(this, pattern, IoService);
         
+        /// <summary>
+        /// Returns the files and folders that this folder contains, and the files and folders that they contain, etc.
+        /// This will return ALL files and folders that are nested deeper as well. For example, if this folder contains
+        /// a folder called Level1, and Level1 contains another folder called Level2, then this method will return both
+        /// Level1, Level2, and anything else in Level1.
+        /// </summary>
+        /// <param name="pattern">The string pattern that files or folders must match to be included in the return value.
+        /// If this is null, then all files and folders in this folder are returned.</param>
+        /// <returns>An object representing the descendant files and folders of this folder.</returns>
         public AbsolutePathDescendants Descendants(string pattern = null) => new AbsolutePathDescendants(this, pattern, IoService);
         
+        /// <summary>
+        /// The file or directory name, a.k.a the last component in the path
+        /// </summary>
         public string Name => Path[Path.Count - 1];
 
+        /// <inheritdoc />
         public int CompareTo(object obj)
         {
             var tp = obj as AbsolutePath;
@@ -79,11 +118,13 @@ namespace IoFluently
             }
         }
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             return (Path != null ? Path.GetHashCode() : 0);
         }
 
+        /// <inheritdoc />
         public int CompareTo(AbsolutePath other)
         {
             var compareCounts = Path.Count - other.Path.Count;
@@ -99,11 +140,13 @@ namespace IoFluently
             return 0;
         }
 
-        protected bool Equals(AbsolutePath other)
+        /// <inheritdoc />
+        public bool Equals(AbsolutePath other)
         {
             return Equals(Path, other.Path);
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             var sb = new StringBuilder();
@@ -117,11 +160,17 @@ namespace IoFluently
             return sb.ToString();
         }
         
+        /// <summary>
+        /// Converts this AbsolutePath to a string form of the path
+        /// </summary>
+        /// <param name="path">The path to be converted to a string</param>
+        /// <returns>The string form of this path</returns>
         public static implicit operator string(AbsolutePath path)  
         {  
             return path.ToString();
-        } 
-        
+        }
+
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
@@ -130,6 +179,12 @@ namespace IoFluently
             return Equals((AbsolutePath) obj);
         }
 
+        /// <summary>
+        /// Adds a subpath to all this relative path
+        /// </summary>
+        /// <param name="relPath">The relative path that will have a subpath added to it</param>
+        /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
+        /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
         public static AbsolutePath operator / (AbsolutePath absPath, string whatToAdd)
         {
             if (string.IsNullOrEmpty(whatToAdd))
@@ -140,16 +195,34 @@ namespace IoFluently
             return new AbsolutePath(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd);
         }
 
+        /// <summary>
+        /// Adds a subpath to all this relative path
+        /// </summary>
+        /// <param name="relPath">The relative path that will have a subpath added to it</param>
+        /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
+        /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
         public static AbsolutePaths operator / (AbsolutePath absPath, IEnumerable<RelativePath> whatToAdd)
         {
             return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd.Select(x => x.Path));
         }
 
+        /// <summary>
+        /// Adds a subpath to all this relative path
+        /// </summary>
+        /// <param name="relPath">The relative path that will have a subpath added to it</param>
+        /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
+        /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
         public static AbsolutePaths operator / (AbsolutePath absPath, Func<AbsolutePath, IEnumerable<RelativePath>> whatToAdd)
         {
             return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Path / (x => whatToAdd(new AbsolutePath(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, x)).Select(y => y.Path)));
         }
 
+        /// <summary>
+        /// Adds a subpath to all this relative path
+        /// </summary>
+        /// <param name="relPath">The relative path that will have a subpath added to it</param>
+        /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
+        /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
         public static AbsolutePath operator / (AbsolutePath absPath, RelativePath whatToAdd)
         {
             if (whatToAdd == null)
@@ -160,16 +233,34 @@ namespace IoFluently
             return new AbsolutePath(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd.Path);
         }
 
+        /// <summary>
+        /// Adds a subpath to all this relative path
+        /// </summary>
+        /// <param name="relPath">The relative path that will have a subpath added to it</param>
+        /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
+        /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
         public static AbsolutePaths operator / (AbsolutePath absPath, IEnumerable<string> whatToAdd)
         {
             return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd);
         }
 
+        /// <summary>
+        /// Uses the AbsolutePath.Equals method to compare equality between the two AbsolutePaths
+        /// </summary>
+        /// <param name="left">The first object to check for equality</param>
+        /// <param name="right">The second object to check for equality</param>
+        /// <returns>True if the two objects are equal; false otherwise</returns>
         public static bool operator ==(AbsolutePath left, AbsolutePath right)
         {
             return Equals(left, right);
         }
 
+        /// <summary>
+        /// Uses the AbsolutePath.Equals method to compare equality between the two AbsolutePaths
+        /// </summary>
+        /// <param name="left">The first object to check for inequality</param>
+        /// <param name="right">The second object to check for inequality</param>
+        /// <returns>False if the two objects are equal; true otherwise</returns>
         public static bool operator !=(AbsolutePath left, AbsolutePath right)
         {
             return !Equals(left, right);

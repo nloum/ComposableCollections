@@ -4,7 +4,10 @@ using System.Text;
 
 namespace IoFluently
 {
-    internal class Utility
+    /// <summary>
+    /// Static class containing internal utilities used by IoFluently.
+    /// </summary>
+    internal static class Utility
     {
         /// <summary>
         /// Converts a <see cref="Type"/> to its C# name. E.g., if you pass in typeof(<see cref="IEnumerable{int}"/>) this

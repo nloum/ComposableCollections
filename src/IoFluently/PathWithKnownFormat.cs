@@ -242,35 +242,145 @@ namespace IoFluently
         }
     }
     
+    /// <summary>
+    /// Represents a path (typically a file, but it could be a folder too) that has a known format that can be deserialized
+    /// to a .NET object.
+    /// This specific interface reads asynchronously.
+    /// There are variants of this interface that read and write synchronously and asynchronously.
+    /// </summary>
+    /// <typeparam name="TReader">A type that represents the deserialized file format. This could be the actual contents of
+    /// the file, such as a Text object or even a string if this is a text file. Or this could be a more complex object whose
+    /// purpose is to allow the developer to read the file more selectively, such as an Image object, where the image data
+    /// is lazily loaded.</typeparam>
     public interface IPathWithKnownFormatAsync<TReader>
     {
+        /// <summary>
+        /// The path of the file.
+        /// </summary>
         AbsolutePath Path { get; }
+        
+        /// <summary>
+        /// Reads from the file.
+        /// </summary>
+        /// <returns>The object that has been read</returns>
         Task<TReader> Read();
     }
     
+    /// <summary>
+    /// Represents a path (typically a file, but it could be a folder too) that has a known format that can be deserialized
+    /// to a .NET object.
+    /// This specific interface reads synchronously.
+    /// There are variants of this interface that read and write synchronously and asynchronously.
+    /// </summary>
+    /// <typeparam name="TReader">A type that represents the deserialized file format. This could be the actual contents of
+    /// the file, such as a Text object or even a string if this is a text file. Or this could be a more complex object whose
+    /// purpose is to allow the developer to read the file more selectively, such as an Image object, where the image data
+    /// is lazily loaded.</typeparam>
     public interface IPathWithKnownFormatSync<out TReader>
     {
+        /// <summary>
+        /// The path of the file.
+        /// </summary>
         AbsolutePath Path { get; }
+        
+        /// <summary>
+        /// Reads from the file.
+        /// </summary>
+        /// <returns>The object that has been read</returns>
         TReader Read();
     }
 
+    /// <summary>
+    /// Represents a path (typically a file, but it could be a folder too) that has a known format that can be serialized
+    /// from a .NET object.
+    /// This specific interface reads asynchronously and writes asynchronously.
+    /// There are variants of this interface that read and write synchronously and asynchronously.
+    /// </summary>
+    /// <typeparam name="TReader">A type that represents the deserialized file format. This could be the actual contents of
+    /// the file, such as a Text object or even a string if this is a text file. Or this could be a more complex object whose
+    /// purpose is to allow the developer to read the file more selectively, such as an Image object, where the image data
+    /// is lazily loaded.</typeparam>
+    /// <typeparam name="TWriter">A type that represents the serialized file format. This could be the actual contents of
+    /// the file, such as a Text object or even a string if this is a text file. Or this could be a more complex object whose
+    /// purpose is to allow the developer to write the file more selectively, such as an Image object, where the image data
+    /// is lazily written.</typeparam>
     public interface IPathWithKnownFormatAsync<TReader, in TWriter> : IPathWithKnownFormatAsync<TReader>
     {
+        /// <summary>
+        /// Writes to the file.
+        /// </summary>
+        /// <param name="writer">The object to be written</param>
+        /// <returns>A task that completes when the writing of the object is finished</returns>
         Task Write(TWriter writer);
     }
     
+    /// <summary>
+    /// Represents a path (typically a file, but it could be a folder too) that has a known format that can be serialized
+    /// from a .NET object.
+    /// This specific interface reads asynchronously and writes synchronously.
+    /// There are variants of this interface that read and write synchronously and asynchronously.
+    /// </summary>
+    /// <typeparam name="TReader">A type that represents the deserialized file format. This could be the actual contents of
+    /// the file, such as a Text object or even a string if this is a text file. Or this could be a more complex object whose
+    /// purpose is to allow the developer to read the file more selectively, such as an Image object, where the image data
+    /// is lazily loaded.</typeparam>
+    /// <typeparam name="TWriter">A type that represents the serialized file format. This could be the actual contents of
+    /// the file, such as a Text object or even a string if this is a text file. Or this could be a more complex object whose
+    /// purpose is to allow the developer to write the file more selectively, such as an Image object, where the image data
+    /// is lazily written.</typeparam>
     public interface IPathWithKnownFormatAsyncSync<TReader, in TWriter> : IPathWithKnownFormatAsync<TReader>
     {
+        /// <summary>
+        /// Writes to the file.
+        /// </summary>
+        /// <param name="writer">The object to be written</param>
         void Write(TWriter writer);
     }
     
+    /// <summary>
+    /// Represents a path (typically a file, but it could be a folder too) that has a known format that can be serialized
+    /// from a .NET object.
+    /// This specific interface reads synchronously and writes synchronously.
+    /// There are variants of this interface that read and write synchronously and asynchronously.
+    /// </summary>
+    /// <typeparam name="TReader">A type that represents the deserialized file format. This could be the actual contents of
+    /// the file, such as a Text object or even a string if this is a text file. Or this could be a more complex object whose
+    /// purpose is to allow the developer to read the file more selectively, such as an Image object, where the image data
+    /// is lazily loaded.</typeparam>
+    /// <typeparam name="TWriter">A type that represents the serialized file format. This could be the actual contents of
+    /// the file, such as a Text object or even a string if this is a text file. Or this could be a more complex object whose
+    /// purpose is to allow the developer to write the file more selectively, such as an Image object, where the image data
+    /// is lazily written.</typeparam>
     public interface IPathWithKnownFormatSync<out TReader, in TWriter> : IPathWithKnownFormatSync<TReader>
     {
+        /// <summary>
+        /// Writes to the file.
+        /// </summary>
+        /// <param name="writer">The object to be written</param>
         void Write(TWriter writer);
     }
     
+    /// <summary>
+    /// Represents a path (typically a file, but it could be a folder too) that has a known format that can be serialized
+    /// from a .NET object.
+    /// This specific interface reads synchronously and writes asynchronously.
+    /// There are variants of this interface that read and write synchronously and asynchronously.
+    /// </summary>
+    /// <typeparam name="TReader">A type that represents the deserialized file format. This could be the actual contents of
+    /// the file, such as a Text object or even a string if this is a text file. Or this could be a more complex object whose
+    /// purpose is to allow the developer to read the file more selectively, such as an Image object, where the image data
+    /// is lazily loaded.</typeparam>
+    /// <typeparam name="TWriter">A type that represents the serialized file format. This could be the actual contents of
+    /// the file, such as a Text object or even a string if this is a text file. Or this could be a more complex object whose
+    /// purpose is to allow the developer to write the file more selectively, such as an Image object, where the image data
+    /// is lazily written.</typeparam>
     public interface IPathWithKnownFormatSyncAsync<out TReader, in TWriter> : IPathWithKnownFormatSync<TReader>
     {
+        /// <summary>
+        /// Writes to the file.
+        /// </summary>
+        /// <param name="writer">The object to be written</param>
+        /// <returns>A task that completes when the writing of the object is finished</returns>
         Task Write(TWriter writer);
     }
 }

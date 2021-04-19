@@ -28,6 +28,8 @@ namespace IoFluently
         {
             return new Queryable<AbsolutePath>(new QueryContext());
         }
+        
+        public override AbsolutePath CurrentDirectory => TryParseAbsolutePath(Environment.CurrentDirectory).Value;
 
         public IoService() : this(false)
         {

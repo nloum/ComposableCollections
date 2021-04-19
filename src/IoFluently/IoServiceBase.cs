@@ -24,7 +24,7 @@ namespace IoFluently
 
         public IOpenFilesTrackingService OpenFilesTrackingService { get; }
 
-        public virtual AbsolutePath CurrentDirectory => TryParseAbsolutePath(Environment.CurrentDirectory).Value;
+        public abstract AbsolutePath CurrentDirectory { get; }
 
         public abstract IObservableReadOnlySet<AbsolutePath> Storage { get; }
 

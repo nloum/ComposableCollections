@@ -48,8 +48,16 @@ namespace IoFluently
 
         private readonly bool _isCaseSensitiveByDefault;
         private string _defaultDirectorySeparatorForThisEnvironment;
+        private AbsolutePath _currentDirectory = null;
         public ObservableDictionary<string, Folder> RootFolders { get; } = new ObservableDictionary<string, Folder>();
 
+        public override AbsolutePath CurrentDirectory => _currentDirectory;
+
+        public void SetCurrentDirectory(AbsolutePath newCurrentDirectory)
+        {
+            _currentDirectory = newCurrentDirectory;
+        }
+        
         public InMemoryIoService(string newline, bool isCaseSensitiveByDefault, string defaultDirectorySeparatorForThisEnvironment = null, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), newline)
         {
             _newline = newline;

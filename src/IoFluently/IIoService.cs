@@ -49,7 +49,20 @@ namespace IoFluently
         
         AbsolutePath Create(AbsolutePath path, PathType pathType);
         AbsolutePath CreateFolder(AbsolutePath path);
+        
+        /// <summary>
+        /// Creates a file or folder in the temporary folder
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         AbsolutePath CreateTemporaryPath(PathType type);
+
+        /// <summary>
+        /// Returns the path to the user's temporary folder
+        /// </summary>
+        /// <returns>The path to the user's temporary folder</returns>
+        AbsolutePath GetTemporaryFolder();
+        
         AbsolutePath CreateEmptyFile(AbsolutePath path);
         Stream CreateFile(AbsolutePath path);
         AbsolutePath DeleteFile(AbsolutePath path);

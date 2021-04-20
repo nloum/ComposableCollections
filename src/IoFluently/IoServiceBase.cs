@@ -188,16 +188,19 @@ namespace IoFluently
             }
         }
 
+        /// <inheritdoc />
         public virtual AbsolutePath CreateTemporaryPath(PathType type)
         {
-            var path = Path.GetRandomFileName();
-            var spec = ParseAbsolutePath(path, ParseAbsolutePath(Path.GetTempPath()));
+            var spec = GetTemporaryFolder() / Guid.NewGuid().ToString();
             if (type == PathType.File)
                 spec.Create(PathType.File);
             if (type == PathType.Folder)
                 spec.Create(PathType.Folder);
             return spec;
         }
+
+        /// <inheritdoc />
+        public abstract AbsolutePath GetTemporaryFolder();
 
         public abstract bool IsCaseSensitiveByDefault();
 

@@ -496,6 +496,12 @@ namespace IoFluently
                 return _isCaseSensitiveByDefault.Value;
             }
         }
+
+        /// <inheritdoc />
+        public override AbsolutePath GetTemporaryFolder()
+        {
+            return ParseAbsolutePath(Path.GetTempPath());
+        }
         
         public override AbsolutePath CreateFolder(AbsolutePath path)
         {

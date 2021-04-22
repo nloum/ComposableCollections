@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading;
 using LiveLinq.Set;
 using SimpleMonads;
 using UnitsNet;
@@ -132,7 +133,7 @@ namespace IoFluently
                 }
                 zipEntry.Delete();
             }
-
+            
             return path;
         }
 

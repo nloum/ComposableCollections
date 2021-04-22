@@ -13,7 +13,8 @@ namespace IoFluently.Tests
         {
             IoService,
             InMemoryWindowsIoService,
-            InMemoryUnixIoService
+            InMemoryUnixIoService,
+            InMemoryZipIoService,
         }
         
         private void CreateUnitsUnderTest(bool sameInstance, IoServiceType type1, bool enableOpenFilesTracking1, out IIoService unitUnderTest1, IoServiceType type2, bool enableOpenFilesTracking2, out IIoService unitUnderTest2)
@@ -37,11 +38,28 @@ namespace IoFluently.Tests
             }
             else if (type == IoServiceType.InMemoryWindowsIoService)
             {
-                return new InMemoryIoService("\r\n", false, "/", enableOpenFilesTracking);
+                var result = new InMemoryIoService("\r\n", false, "/", enableOpenFilesTracking);
+                result.RootFolders.Add("/", new InMemoryIoService.Folder());
+                result.SetCurrentDirectory(result.ParseAbsolutePath("/"));
+                result.SetTemporaryFolder(result.ParseAbsolutePath("/"));
+                return result;
             }
             else if (type == IoServiceType.InMemoryUnixIoService)
             {
-                return new InMemoryIoService("\n", true, "/", enableOpenFilesTracking);
+                var result = new InMemoryIoService("\n", true, "/", enableOpenFilesTracking);
+                result.RootFolders.Add("/", new InMemoryIoService.Folder());
+                result.SetCurrentDirectory(result.ParseAbsolutePath("/"));
+                result.SetTemporaryFolder(result.ParseAbsolutePath("/"));
+                return result;
+            }
+            else if (type == IoServiceType.InMemoryZipIoService)
+            {
+                var inMemoryIoService = new InMemoryIoService("\n", true, "/", enableOpenFilesTracking);
+                inMemoryIoService.RootFolders.Add("/", new InMemoryIoService.Folder());
+                var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip");
+                var result = testZipFilePath.AsZipFile(true);
+                result.SetTemporaryFolder(result.ParseAbsolutePath("/tmp"));
+                return result;
             }
             else
             {
@@ -50,7 +68,8 @@ namespace IoFluently.Tests
         }
 
         [TestMethod]
-        [DataRow(IoServiceType.IoService)]
+        //[DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void CreateTemporaryFileShouldWork(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, true);
@@ -85,6 +104,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         [DataRow(IoServiceType.InMemoryWindowsIoService)]
         [DataRow(IoServiceType.InMemoryUnixIoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void SimplifyShouldNotChangeSimplePath(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, true);
@@ -96,6 +116,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         [DataRow(IoServiceType.InMemoryWindowsIoService)]
         [DataRow(IoServiceType.InMemoryUnixIoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void HasExtensionShouldWorkWithAndWithoutTheDot(IoServiceType type) {
             var uut = CreateUnitUnderTest(type, false);
             var testTxt = uut.ParseAbsolutePath("/test.txt");
@@ -107,6 +128,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         [DataRow(IoServiceType.InMemoryWindowsIoService)]
         [DataRow(IoServiceType.InMemoryUnixIoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void WithoutExtensionsShouldWork(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, false);
@@ -119,6 +141,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         [DataRow(IoServiceType.InMemoryWindowsIoService)]
         [DataRow(IoServiceType.InMemoryUnixIoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void CommonShouldOnlyReturnFullFolderNames(IoServiceType type)
         {
             var ioService = CreateUnitUnderTest(type, false);
@@ -136,6 +159,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         [DataRow(IoServiceType.InMemoryWindowsIoService)]
         [DataRow(IoServiceType.InMemoryUnixIoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void ShouldNotParseWindowsAbsolutePathAsRelativePath(IoServiceType type)
         {
             var ioService = CreateUnitUnderTest(type, false);
@@ -146,6 +170,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         [DataRow(IoServiceType.InMemoryWindowsIoService)]
         [DataRow(IoServiceType.InMemoryUnixIoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void ShouldNotParseUnixAbsolutePathAsRelativePath(IoServiceType type)
         {
             var ioService = CreateUnitUnderTest(type, false);
@@ -156,6 +181,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         [DataRow(IoServiceType.InMemoryWindowsIoService)]
         [DataRow(IoServiceType.InMemoryUnixIoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void ShouldNotParseRelativePathAsAbsolutePath(IoServiceType type)
         {
             var ioService = CreateUnitUnderTest(type, false);
@@ -166,6 +192,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         [DataRow(IoServiceType.InMemoryWindowsIoService)]
         [DataRow(IoServiceType.InMemoryUnixIoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void RelativePathShouldWork(IoServiceType type)
         {
             var ioService = CreateUnitUnderTest(type, false);
@@ -183,6 +210,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         [DataRow(IoServiceType.InMemoryWindowsIoService)]
         [DataRow(IoServiceType.InMemoryUnixIoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void ShouldParseWithComplexMixedDirectorySeparators(IoServiceType type)
         {
             var ioService = CreateUnitUnderTest(type, false);
@@ -194,6 +222,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.IoService)]
         [DataRow(IoServiceType.InMemoryWindowsIoService)]
         [DataRow(IoServiceType.InMemoryUnixIoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void ShouldParseWithMixedDirectorySeparators(IoServiceType type)
         {
             var ioService = CreateUnitUnderTest(type, false);
@@ -280,6 +309,7 @@ namespace IoFluently.Tests
 
         [TestMethod]
         [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void RelativePathSlashNullShouldReturnOriginalPath(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, false);
@@ -296,6 +326,7 @@ namespace IoFluently.Tests
 
         [TestMethod]
         [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void AbsolutePathSlashNullShouldReturnOriginalPath(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, false);
@@ -312,6 +343,7 @@ namespace IoFluently.Tests
 
         [TestMethod]
         [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void RelativePathWithTrailingSlashShouldBeEqualToWithoutTrailingSlash(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, false);
@@ -322,6 +354,7 @@ namespace IoFluently.Tests
 
         [TestMethod]
         [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void AbsolutePathWithTrailingSlashShouldBeEqualToWithoutTrailingSlash(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, false);
@@ -358,6 +391,17 @@ namespace IoFluently.Tests
         [DataRow(true, IoServiceType.IoService, false, IoServiceType.IoService, false)]
         [DataRow(true, IoServiceType.InMemoryWindowsIoService, false, IoServiceType.InMemoryWindowsIoService, false)]
         [DataRow(true, IoServiceType.InMemoryUnixIoService, false, IoServiceType.InMemoryUnixIoService, false)]
+
+        [DataRow(true, IoServiceType.InMemoryZipIoService, false, IoServiceType.InMemoryZipIoService, false)]
+        [DataRow(false, IoServiceType.InMemoryZipIoService, false, IoServiceType.InMemoryZipIoService, false)]
+        [DataRow(true, IoServiceType.InMemoryZipIoService, false, IoServiceType.InMemoryUnixIoService, false)]
+        [DataRow(false, IoServiceType.InMemoryZipIoService, false, IoServiceType.InMemoryUnixIoService, false)]
+        [DataRow(true, IoServiceType.InMemoryUnixIoService, false, IoServiceType.InMemoryZipIoService, false)]
+        [DataRow(false, IoServiceType.InMemoryUnixIoService, false, IoServiceType.InMemoryZipIoService, false)]
+        [DataRow(true, IoServiceType.InMemoryZipIoService, false, IoServiceType.InMemoryWindowsIoService, false)]
+        [DataRow(false, IoServiceType.InMemoryZipIoService, false, IoServiceType.InMemoryWindowsIoService, false)]
+        [DataRow(true, IoServiceType.InMemoryWindowsIoService, false, IoServiceType.InMemoryZipIoService, false)]
+        [DataRow(false, IoServiceType.InMemoryWindowsIoService, false, IoServiceType.InMemoryZipIoService, false)]
         public void MovingShouldWork(bool sameInstance, IoServiceType type1, bool enableOpenFileTracking1, IoServiceType type2, bool enableOpenFileTracking2)
         {
             var ioService = CreateUnitUnderTest(type1, false);

@@ -238,6 +238,29 @@ namespace IoFluently
         }
 
         /// <summary>
+        /// Creates an IIoService object for reading from and writing to the specified zip file
+        /// </summary>
+        /// <param name="absolutePath">The zip file path</param>
+        /// <param name="enableOpenFilesTracking">Whether to enable open-files tracking in the zip file</param>
+        /// <returns>An object that can be used for reading from and writing to the zip file</returns>
+        public static ZipIoService AsZipFile(this AbsolutePath absolutePath, bool enableOpenFilesTracking = false)
+        {
+            return new ZipIoService(absolutePath, absolutePath.IoService.GetNewlineCharacter(), enableOpenFilesTracking);
+        }
+
+        /// <summary>
+        /// Creates an IIoService object for reading from and writing to the specified zip file
+        /// </summary>
+        /// <param name="absolutePath">The zip file path</param>
+        /// <param name="newline">The newline character to be used when writing text to a file inside the zip file</param>
+        /// <param name="enableOpenFilesTracking">Whether to enable open-files tracking in the zip file</param>
+        /// <returns>An object that can be used for reading from and writing to the zip file</returns>
+        public static ZipIoService AsZipFile(this AbsolutePath absolutePath, string newline, bool enableOpenFilesTracking = false)
+        {
+            return new ZipIoService(absolutePath, newline, enableOpenFilesTracking);
+        }
+
+        /// <summary>
         /// Converts a lazy IEnumerable of lines of text into a Text object, just like the Text object returned by AsTextFile().Read().
         /// </summary>
         /// <param name="lines">The lines of text</param>

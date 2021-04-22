@@ -299,6 +299,12 @@ namespace IoFluently
         AbsolutePath Parent(AbsolutePath path);
 
         /// <summary>
+        /// Returns the newline character used by this IIoService when writing text to a file (e.g., '\n' or '\r\n')
+        /// </summary>
+        /// <returns>The newline character used by this IIoService when writing text to a file</returns>
+        string GetNewlineCharacter();
+        
+        /// <summary>
         /// </summary>
         /// <param name="path"></param>
         /// <param name="differentExtension">Must include the "." part of the extension (e.g., ".avi" not "avi")</param>
@@ -314,12 +320,12 @@ namespace IoFluently
         bool HasExtension(AbsolutePath path);
         bool IsReadOnly(AbsolutePath path);
         Information FileSize(AbsolutePath path);
-        FileAttributes Attributes(AbsolutePath attributes);
-        DateTimeOffset CreationTime(AbsolutePath attributes);
-        DateTimeOffset LastAccessTime(AbsolutePath attributes);
-        DateTimeOffset LastWriteTime(AbsolutePath attributes);
-        bool IsFile(AbsolutePath absolutePath);
-        bool IsFolder(AbsolutePath absolutePath);
+        FileAttributes Attributes(AbsolutePath path);
+        DateTimeOffset CreationTime(AbsolutePath path);
+        DateTimeOffset LastAccessTime(AbsolutePath path);
+        DateTimeOffset LastWriteTime(AbsolutePath path);
+        bool IsFile(AbsolutePath path);
+        bool IsFolder(AbsolutePath path);
         IMaybe<bool> TryIsReadOnly(AbsolutePath path);
         IMaybe<Information> TryFileSize(AbsolutePath path);
         IMaybe<FileAttributes> TryAttributes(AbsolutePath attributes);

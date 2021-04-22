@@ -8,7 +8,7 @@ using System.Reflection;
 using Castle.DynamicProxy.Contributors;
 using TreeLinq;
 
-namespace IoFluently {
+namespace IoFluently { 
     /// <summary>
     /// IQueryable implementation that converts expressions like AbsolutePaths.Where(path => path.Contains("test")) into
     /// efficient calls to the .NET file system APIs.

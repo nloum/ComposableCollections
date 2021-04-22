@@ -442,6 +442,11 @@ namespace IoFluently
                 childFolder = new Folder();
                 folder.Folders[components[0]] = childFolder;
             }
+
+            if (components.Count == 1)
+            {
+                return;
+            }
             
             EnsureFolderExists(childFolder, components.Skip(1).ToList());
         }

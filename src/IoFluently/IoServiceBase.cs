@@ -1519,8 +1519,16 @@ namespace IoFluently
         /// </summary>
         protected string _newline;
 
+        public virtual string GetNewlineCharacter()
+        {
+            return _newline;
+        }
+        
         /// <inheritdoc />
-        public abstract IMaybe<bool> TryIsReadOnly(AbsolutePath path);
+        public virtual IMaybe<bool> TryIsReadOnly(AbsolutePath path)
+        {
+            return TryAttributes(path).Select(attr => attr.HasFlag(FileAttributes.ReadOnly));
+        }
 
         /// <inheritdoc />
         public abstract IMaybe<Information> TryFileSize(AbsolutePath path);

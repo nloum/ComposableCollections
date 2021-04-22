@@ -7,6 +7,36 @@ namespace IoFluently
 {
     public static partial class IoExtensions
     {
+        /// <summary>
+        /// Don't use this method, instead use the / operator on AbsolutePath objects (and related objects) to write
+        /// idiomatic code with IoFluently.
+        /// </summary>
+        [Obsolete("Use the / operator on AbsolutePath objects (and related objects) to write idiomatic code with IoFluently", true)]
+        public static AbsolutePath Combine(this AbsolutePath path, string subpath)
+        {
+            throw new NotImplementedException();
+        }
+        
+        /// <summary>
+        /// Don't use this method, instead use the / operator on AbsolutePath objects (and related objects) to write
+        /// idiomatic code with IoFluently.
+        /// </summary>
+        [Obsolete("Use the / operator on RelativePath objects (and related objects) to write idiomatic code with IoFluently", true)]
+        public static AbsolutePath Combine(this RelativePath path, string subpath)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Don't use this method, instead use the / operator on AbsolutePath objects (and related objects) to write
+        /// idiomatic code with IoFluently.
+        /// </summary>
+        [Obsolete("Use the / operator on AbsolutePath objects (and related objects) to write idiomatic code with IoFluently", true)]
+        public static AbsolutePath Combine(this IIoService path, string subpath)
+        {
+            throw new NotImplementedException();
+        }
+
         public static IObservable<string> ObserveLines(this StreamReader reader)
         {
             return new StreamReaderObservableAdapter(reader, new[]{'\n'});

@@ -2,18 +2,23 @@
 
 ![dotnetcore](https://img.shields.io/github/workflow/status/nloum/IoFluently/dotnetcore) ![nuget](https://img.shields.io/nuget/v/IoFluently) ![license](https://img.shields.io/github/license/nloum/IoFluently) [![Join the chat at https://gitter.im/IoFluently/community](https://badges.gitter.im/IoFluently/community.svg)](https://gitter.im/IoFluently/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-IoFluently is a .NET Standard class library for dealing with files and folders. The API is straightforward and dependency injectable.
+IoFluently is a .NET Standard 2.0 class library for dealing with files and folders. The API is straightforward and dependency injectable.
 
 Here's what it looks like:
 
 ```
-var ioService = new IoService(new ReactiveProcessFactory());
+var ioService = new IoService();
 var readme = (ioService.CurrentDirectory / "docs" / "readme.md").AsSmallTextFile();
 var text = readme.Read();
 Console.WriteLine(text);
 ```
 
-I/O-heavy code is much more straightforward when it's written with IoFluently.
+Main advantages:
+
+- I/O-heavy code is much more straightforward when it's written with IoFluently.
+- I/O code is unit testable because the `IIoService` can be mocked or can use the `InMemoryIoService` implementation
+- I/O code can watch file system changes across platforms by polyfilling missing .NET features on non-Windows platforms
+- Includes optional tracking of which files are open, for debugging purposes
 
 ## Major features
 

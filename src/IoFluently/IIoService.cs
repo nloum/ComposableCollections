@@ -63,13 +63,59 @@ namespace IoFluently
         /// <returns>The path to the user's temporary folder</returns>
         AbsolutePath GetTemporaryFolder();
         
+        /// <summary>
+        /// Creates an empty file at the specified path
+        /// </summary>
+        /// <param name="path">The path that should become an empty file</param>
+        /// <returns>The same path that was specified</returns>
         AbsolutePath CreateEmptyFile(AbsolutePath path);
+        
+        /// <summary>
+        /// Creates an empty file at the specified path, and opens it for writing
+        /// </summary>
+        /// <param name="path">The path that should become a file</param>
+        /// <returns>The stream to be used to write to the specified file</returns>
         Stream CreateFile(AbsolutePath path);
+        
+        /// <summary>
+        /// Deletes the specified file
+        /// </summary>
+        /// <param name="path">The file that should be deleted</param>
+        /// <returns>The same path that was specified</returns>
         AbsolutePath DeleteFile(AbsolutePath path);
+        
+        /// <summary>
+        /// Empties the specified folder
+        /// </summary>
+        /// <param name="path">The path that should become an empty folder</param>
+        /// <returns>The same path that was specified</returns>
         AbsolutePath ClearFolder(AbsolutePath path);
+        
+        /// <summary>
+        /// Deletes the specified file or folder
+        /// </summary>
+        /// <param name="path">The path to the file or folder that should be deleted</param>
+        /// <param name="recursiveDeleteIfFolder">If true and the specified path is a folder, then the folder contents are
+        /// recursively deleted before the folder itself is deleted. If false and the specified path is a folder, and that
+        /// folder contains other files or folders, then an IOException is thrown. If the path is a file, this parameter
+        /// is ignored.</param>
+        /// <returns>The path that was just deleted</returns>
         AbsolutePath Delete(AbsolutePath path, bool recursiveDeleteIfFolder = false);
+        
+        /// <summary>
+        /// Creates the path as a folder if it isn't already. If the path is a file, throws an IOException.
+        /// </summary>
+        /// <param name="path">The path that should be a folder</param>
+        /// <returns>The same path that was specified</returns>
         AbsolutePath EnsureIsFolder(AbsolutePath path);
 
+        /// <summary>
+        /// Deletes the specified path if it is a folder. If the path is a file or doesn't exist, this returns without
+        /// throwing an exception. If recursive is false and the path is a non-empty folder, throws an IOException.
+        /// </summary>
+        /// <param name="path">The path that may be a folder</param>
+        /// <param name="recursive">Whether to recursively delete the contents of the path if the path is a non-empty folder</param>
+        /// <returns>The same path that was specified</returns>
         AbsolutePath EnsureIsNotFolder(AbsolutePath path, bool recursive = false);
 
         AbsolutePath EnsureIsFile(AbsolutePath path);

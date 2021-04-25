@@ -2,19 +2,11 @@
 
 namespace DebuggableSourceGenerators
 {
-    public class Parameter
+    public record Parameter
     {
-        public Lazy<IType> Type { get; }
-
-        public Parameter(string name, Lazy<IType> type, ParameterMode mode)
-        {
-            Name = name;
-            Type = type;
-            Mode = mode;
-        }
-
-        public string Name { get; }
-        public ParameterMode Mode { get; }
+        public Lazy<Type> Type { get; init; }
+        public string Name { get; init; }
+        public ParameterMode Mode { get; init; }
 
         public override string ToString()
         {

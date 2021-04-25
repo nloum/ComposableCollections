@@ -1,16 +1,10 @@
 ﻿namespace DebuggableSourceGenerators
 {
-    public class TypeParameter : IType
+    public record TypeParameter : Type
     {
-        public TypeParameter(TypeIdentifier identifier, VarianceMode varianceMode)
-        {
-            Identifier = identifier;
-            VarianceMode = varianceMode;
-        }
+        public TypeIdentifier Identifier { get; init; }
 
-        public TypeIdentifier Identifier { get; }
-
-        public VarianceMode VarianceMode { get; }
+        public VarianceMode VarianceMode { get; init; }
 
         public override string ToString()
         {

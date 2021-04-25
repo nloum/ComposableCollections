@@ -14,13 +14,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="ComposableCollections" Version="1.0.0-alpha0150" />
         <PackageReference Include="Microsoft.Build.Locator" Version="1.3.2" />
         <PackageReference Include="Microsoft.Build" ExcludeAssets="runtime" Version="16.8.0" />
         <PackageReference Include="Microsoft.Build.Tasks.Core" ExcludeAssets="runtime" Version="16.8.0" />
-        <PackageReference Include="Microsoft.CodeAnalysis" Version="3.9.0-2.final" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.9.0-2.final" PrivateAssets="all" />
-        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.2" PrivateAssets="all" />
-        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="3.9.0-2.final" />
+        <PackageReference Include="Microsoft.CodeAnalysis" Version="3.9.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.9.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.2" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="3.9.0" />
+        <PackageReference Include="Mono.Cecil" Version="0.11.3" />
         <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
     </ItemGroup>
 </Project>

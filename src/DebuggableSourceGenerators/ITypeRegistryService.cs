@@ -4,7 +4,7 @@ namespace DebuggableSourceGenerators
 {
     public interface ITypeRegistryService
     {
-        Lazy<IType> GetType(TypeIdentifier identifier);
-        IType TryAddType(TypeIdentifier identifier, Func<IType> type);
+        Lazy<Type> GetType(TypeIdentifier identifier);
+        Type TryAddType(TypeIdentifier identifier, Func<Type> type);
     }
 }

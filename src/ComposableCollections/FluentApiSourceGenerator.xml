@@ -119,6 +119,18 @@
       </BaseClasses>
     </ConstructorExtensionMethods>
 
+    <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Decorators" BaseClass="WhereDictionaryDecorator"
+                                        Folder="Dictionary/Decorators">
+      <ClassNameModifiers>
+        <ClassNameModifier Search="Dictionary" Replace="WhereDictionaryDecorator" />
+      </ClassNameModifiers>
+    </SubclassCombinationImplementations>
+    <ConstructorExtensionMethods Namespace="ComposableCollections" ExtensionMethodName="Where">
+      <BaseClasses>
+        <BaseClass>WhereDictionaryDecorator</BaseClass>
+      </BaseClasses>
+    </ConstructorExtensionMethods>
+
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Decorators" BaseClass="DictionaryGetOrRefreshDecorator"
                                         Folder="Dictionary/Decorators">
       <ClassNameModifiers>

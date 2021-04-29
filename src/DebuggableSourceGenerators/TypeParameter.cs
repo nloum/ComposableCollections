@@ -1,10 +1,14 @@
-﻿namespace DebuggableSourceGenerators
+﻿using System;
+using System.Collections.Immutable;
+
+namespace DebuggableSourceGenerators
 {
     public record TypeParameter : Type
     {
-        public TypeIdentifier Identifier { get; init; }
-
+        public override bool IsGenericParameter => true;
         public VarianceMode VarianceMode { get; init; }
+        public bool MustHaveEmptyConstructor { get; init; }
+        public ImmutableList<Lazy<Type>> MustBeAssignedTo { get; init; }
 
         public override string ToString()
         {

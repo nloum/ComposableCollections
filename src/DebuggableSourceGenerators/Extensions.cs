@@ -4,18 +4,26 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using ComposableCollections.Utilities;
+using Humanizer;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Mono.Cecil;
+using Mono.Cecil.Rocks;
 
 namespace DebuggableSourceGenerators
 {
     public static class Extensions
     {
+        static Extensions()
+        {
+            MSBuildLocator.RegisterDefaults();
+        }
+        
         public static void AddNugetPackage(this CodeIndexBuilder codeIndexBuilder, string packageName, string packageVersion, string targetFramework)
         {
-            foreach (var assemblyFile in GetPathToNugetPacketDlls(packageName, packageVersion, targetFramework))
+            foreach (var assemblyFile in GetPathToNugetPackageDlls(packageName, packageVersion, targetFramework))
             {
                 if (File.Exists(assemblyFile))
                 {
@@ -56,54 +64,128 @@ namespace DebuggableSourceGenerators
             }
         }
         
-        public static void AddProject(this CodeIndexBuilder codeIndexBuilder, string solutionFilePath, string projectName)
+        public static void AddProject(this CodeIndexBuilder codeIndexBuilder, string solutionFilePath, string projectFilePath, string projectAssemblyName = null)
         {
-            var compilation = CompileProject(solutionFilePath, projectName);
+            projectAssemblyName ??= Path.GetFileNameWithoutExtension(projectFilePath);
+            
+            var compilation = CompileProject(solutionFilePath, projectAssemblyName);
             codeIndexBuilder.AddCompilation(compilation);
+            codeIndexBuilder.AddProjectNugetDependencies(projectFilePath);
         }
 
         public static void AddAssemblyFile(this CodeIndexBuilder codeIndexBuilder, string assemblyFilePath)
         {
-            var types = AssemblyDefinition
+            var typeDefinitions = AssemblyDefinition
                 .ReadAssembly(assemblyFilePath)
                 .MainModule
                 .Types;
 
-            foreach (var type in types)
+            foreach (var typeDefinition in typeDefinitions)
             {
-                codeIndexBuilder.AddType(type);
+                // we don't want to index anonymous types
+                if (typeDefinition.Name.Contains("AnonymousType"))
+                {
+                    continue;
+                }
+                
+                codeIndexBuilder.AddType(typeDefinition);
             }
+        }
+
+        public static TypeIdentifier GetTypeIdentifier(TypeDefinition typeDefinition)
+        {
+            return TypeIdentifier.Parse(typeDefinition.Namespace, typeDefinition.Name);
         }
 
         public static Lazy<Type> GetOrAdd(this CodeIndexBuilder codeIndexBuilder, TypeDefinition typeDefinition)
         {
-            var identifier = new TypeIdentifier
+            var identifier = GetTypeIdentifier(typeDefinition);
+            
+            var typeParameters = new Dictionary<string, Lazy<TypeParameter>>();
+            
+            // TODO - sometimes generic classes have a nested generic type that has type parameters with the same name.
+            // e.g., class MyClass<T> { class MySubClass<T> { } }
+            // In this case, the GenericParameters property has two values, both named T. So we just take the last one,
+            // assuming that that's the inner T. This behavior could probably be improved.
+
+            foreach (var genericParameter in typeDefinition.GenericParameters)
             {
-                Namespace = typeDefinition.Namespace,
-                Name = typeDefinition.Name,
-                Arity = typeDefinition.GenericParameters.Count
-            };
+                typeParameters[genericParameter.Name] = new Lazy<TypeParameter>(() => new TypeParameter()
+                {
+                    Identifier = new TypeIdentifier() {Name = genericParameter.Name},
+                    VarianceMode = genericParameter.IsContravariant
+                        ? VarianceMode.In
+                        : (genericParameter.IsCovariant ? VarianceMode.Out : VarianceMode.None),
+                    MustBeAssignedTo = genericParameter.Constraints
+                        .Select(constraint => GetType(constraint.ConstraintType))
+                        .ToImmutableList()
+                });
+            }
+            
+            Lazy<Type> GetType(TypeReference typeRef)
+            {
+                var typeDef = typeRef.Resolve();
+
+                if (typeDef == null)
+                {
+                    return new Lazy<Type>(() => typeParameters[typeRef.Name].Value);
+                }
+
+                return codeIndexBuilder.GetOrAdd(typeDef);
+            }
             
             if (typeDefinition.IsClass)
             {
                 return codeIndexBuilder.GetOrAdd(identifier, () => new Class()
                 {
                     Identifier = identifier,
-                    Properties = typeDefinition.Properties.Select(prop => new Property
+                    Constructors = typeDefinition.GetConstructors().Select(constructor => new Constructor()
                     {
-                        Name = prop.Name,
-                        Type = codeIndexBuilder.GetOrAdd(prop.PropertyType.Resolve())
-                    }).ToImmutableList(),
-                    Methods = typeDefinition.Methods.Select(meth => new Method()
-                    {
-                        Name = meth.Name,
-                        ReturnType = codeIndexBuilder.GetOrAdd(meth.ReturnType.Resolve()),
-                        Parameters = meth.Parameters.Select(param => new Parameter()
+                        Parameters = constructor.Parameters.Select(parameter => new Parameter
                         {
-                            Name = param.Name,
-                            Type = codeIndexBuilder.GetOrAdd(param.ParameterType.Resolve())
+                            Name = parameter.Name,
+                            Mode = ParameterMode.In,
+                            Type = GetType(parameter.ParameterType)
                         }).ToImmutableList(),
-                    }).ToImmutableList()
+                    }).ToImmutableList(),
+                    Fields = typeDefinition.Fields.Select(field => new Field()
+                    {
+                        Name = field.Name,
+                        Type = GetType(field.FieldType)
+                    }).ToImmutableList(),
+                    Indexers = typeDefinition.Properties.Where(prop => prop.HasParameters).Select(prop =>
+                    {
+                        return new Indexer
+                        {
+                            Parameters = prop.Parameters.Select(parameter => new Parameter()
+                            {
+                                Name = parameter.Name,
+                                Mode = parameter.IsIn ? ParameterMode.In : ParameterMode.Out,
+                                Type = GetType(parameter.ParameterType)
+                            }).ToImmutableList(),
+                            ReturnType = GetType(prop.PropertyType)
+                        };
+                    }).ToImmutableList(),
+                    Properties = typeDefinition.Properties.Where(prop => !prop.HasParameters).Select(prop =>
+                    {
+                        return new Property
+                        {
+                            Name = prop.Name,
+                            Type = GetType(prop.PropertyType)
+                        };
+                    }).ToImmutableList(),
+                    TypeParameters = typeParameters.Values.ToImmutableList(),
+                    Methods = typeDefinition.Methods.Where(meth => !meth.IsConstructor && !meth.IsGetter && !meth.IsSetter)
+                        .Select(meth => new Method()
+                        {
+                            Name = meth.Name,
+                            ReturnType = GetType(meth.ReturnType),
+                            Parameters = meth.Parameters.Select(param => new Parameter()
+                            {
+                                Name = param.Name,
+                                Type = GetType(param.ParameterType)
+                            }).ToImmutableList(),
+                        }).ToImmutableList()
                 });
             }
             else if (typeDefinition.IsInterface)
@@ -111,21 +193,45 @@ namespace DebuggableSourceGenerators
                 return codeIndexBuilder.GetOrAdd(identifier, () => new Interface()
                 {
                     Identifier = identifier,
-                    Properties = typeDefinition.Properties.Select(prop => new Property
+                    Indexers = typeDefinition.Properties.Where(prop => prop.HasParameters).Select(prop =>
                     {
-                        Name = prop.Name,
-                        Type = codeIndexBuilder.GetOrAdd(prop.PropertyType.Resolve())
+                        return new Indexer
+                        {
+                            Parameters = prop.Parameters.Select(parameter => new Parameter()
+                            {
+                                Name = parameter.Name,
+                                Mode = parameter.IsIn ? ParameterMode.In : ParameterMode.Out,
+                                Type = GetType(parameter.ParameterType)
+                            }).ToImmutableList(),
+                            ReturnType = GetType(prop.PropertyType)
+                        };
                     }).ToImmutableList(),
+                    Properties = typeDefinition.Properties.Where(prop => !prop.HasParameters).Select(prop =>
+                    {
+                        return new Property
+                        {
+                            Name = prop.Name,
+                            Type = GetType(prop.PropertyType)
+                        };
+                    }).ToImmutableList(),
+                    TypeParameters = typeParameters.Values.ToImmutableList(),
                     Methods = typeDefinition.Methods.Select(meth => new Method()
                     {
                         Name = meth.Name,
-                        ReturnType = codeIndexBuilder.GetOrAdd(meth.ReturnType.Resolve()),
+                        ReturnType = GetType(meth.ReturnType),
                         Parameters = meth.Parameters.Select(param => new Parameter()
                         {
                             Name = param.Name,
-                            Type = codeIndexBuilder.GetOrAdd(param.ParameterType.Resolve())
+                            Type = GetType(param.ParameterType)
                         }).ToImmutableList(),
                     }).ToImmutableList()
+                });
+            }
+            else if (typeDefinition.IsEnum)
+            {
+                return codeIndexBuilder.GetOrAdd(identifier, () =>
+                {
+                    throw new NotImplementedException();
                 });
             }
             else
@@ -322,8 +428,79 @@ namespace DebuggableSourceGenerators
                 };
             });
         }
+
+        private static IEnumerable<string> GetTargetFrameworksForNugetPackage(string packageName, string packageVersion)
+        {
+            string homePath = (Environment.OSVersion.Platform == PlatformID.Unix || 
+                               Environment.OSVersion.Platform == PlatformID.MacOSX)
+                ? Environment.GetEnvironmentVariable("HOME")
+                : Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
+
+            var packageFolder = Path.Combine(homePath, ".nuget", "packages", packageName, packageVersion, "lib");
+
+            if (!Directory.Exists(packageFolder))
+            {
+                return Enumerable.Empty<string>();
+            }
+            
+            return Directory.GetDirectories(packageFolder).Select(dir => Path.GetFileName(dir));
+        }
+
+        private static int? HowCompatibleAreTargetFrameworks(string olderTargetFramework,
+            string newerTargetFramework)
+        {
+            if (olderTargetFramework == newerTargetFramework)
+            {
+                return 0;
+            }
+            
+            if (newerTargetFramework == "net5.0")
+            {
+                if (olderTargetFramework == "net472")
+                {
+                    return null;
+                }
+
+                if (olderTargetFramework == "net46")
+                {
+                    return null;
+                }
+
+                if (olderTargetFramework == "net40")
+                {
+                    return null;
+                }
+                
+                if (olderTargetFramework.StartsWith("netstandard"))
+                {
+                    return 1;
+                }
+                
+                if (olderTargetFramework == "netcoreapp3.1")
+                {
+                    return 2;
+                }
+                
+                if (olderTargetFramework == "netcoreapp3.0")
+                {
+                    return 3;
+                }
+                
+                if (olderTargetFramework == "netcoreapp2.1")
+                {
+                    return 4;
+                }
+                
+                if (olderTargetFramework == "netcoreapp2.0")
+                {
+                    return 5;
+                }
+            }
+
+            return null;
+        }
         
-        private static IEnumerable<string> GetPathToNugetPacketDlls(string packageName, string packageVersion,
+        private static IEnumerable<string> GetPathToNugetPackageDlls(string packageName, string packageVersion,
             string targetFramework)
         {
             string homePath = (Environment.OSVersion.Platform == PlatformID.Unix || 
@@ -331,12 +508,26 @@ namespace DebuggableSourceGenerators
                 ? Environment.GetEnvironmentVariable("HOME")
                 : Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
 
-            var packageFolder = Path.Combine(homePath, ".nuget", "packages", packageName, packageVersion, "lib", targetFramework);
+            var availableTargetFrameworks = GetTargetFrameworksForNugetPackage(packageName, packageVersion).ToImmutableList();
+            
+            var packageTargetFramework = availableTargetFrameworks
+                .Select(availableFramework => new { compatibility = HowCompatibleAreTargetFrameworks(availableFramework, targetFramework), availableFramework })
+                .Where(x => x.compatibility != null)
+                .OrderBy(x => x.compatibility)
+                .Select(x => x.availableFramework)
+                .FirstOrDefault();
+
+            if (packageTargetFramework == null)
+            {
+                Console.WriteLine($"None of the available target frameworks for {packageName} {packageVersion} ({availableTargetFrameworks.Humanize()}) are compatible with {targetFramework})");
+                return Enumerable.Empty<string>();
+            }
+            
+            var packageFolder = Path.Combine(homePath, ".nuget", "packages", packageName, packageVersion, "lib", packageTargetFramework);
 
             if (Directory.Exists(packageFolder))
             {
-                return Directory.GetFiles(packageFolder, "*.dll")
-                    .Select(dllFileName => Path.Combine(packageFolder, dllFileName));
+                return Directory.GetFiles(packageFolder, "*.dll");
             }
             
             // TODO - error out and fix the times this breaks
@@ -383,7 +574,6 @@ namespace DebuggableSourceGenerators
         
         private static IEnumerable<Compilation> CompileSolution(string solutionUrl)
         {
-            MSBuildLocator.RegisterDefaults();
             using MSBuildWorkspace workspace = MSBuildWorkspace.Create();
 
             Solution solution = workspace.OpenSolutionAsync(solutionUrl).Result;
@@ -393,13 +583,15 @@ namespace DebuggableSourceGenerators
             {
                 var project = solution.GetProject(projectId);
 
-                var additionalMetadataReferences = GetNugetDependencies(project.FilePath)
+                var dllDependencies = GetNugetDependencies(project.FilePath)
                     .SelectMany(nugetDependency =>
                     {
                         return GetProjectTargetFrameworks(project.FilePath)
-                            .SelectMany(targetFramework => GetPathToNugetPacketDlls(nugetDependency.packageName,
+                            .SelectMany(targetFramework => GetPathToNugetPackageDlls(nugetDependency.packageName,
                                 nugetDependency.packageVersion, targetFramework));
-                    })
+                    }).ToImmutableList();
+
+                var additionalMetadataReferences = dllDependencies
                     .Select(dllFilePath => MetadataReference.CreateFromFile(dllFilePath));
 
                 project = project.AddMetadataReferences(additionalMetadataReferences);
@@ -415,10 +607,10 @@ namespace DebuggableSourceGenerators
             }
         }
         
-        private static Compilation CompileProject(string solutionFilePath, string projectName)
+        private static Compilation CompileProject(string solutionFilePath, string projectAssemblyName)
         {
             return CompileSolution(solutionFilePath)
-                .First(compilation => compilation.AssemblyName == Path.GetFileNameWithoutExtension(projectName));
+                .First(compilation => compilation.AssemblyName == Path.GetFileNameWithoutExtension(projectAssemblyName));
         }
     }
 }

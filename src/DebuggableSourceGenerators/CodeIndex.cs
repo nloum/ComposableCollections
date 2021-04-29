@@ -10,13 +10,24 @@ namespace DebuggableSourceGenerators
 {
     public class CodeIndex : IEnumerable<IKeyValue<TypeIdentifier, Type>>
     {
-        private readonly IComposableDictionary<TypeIdentifier, Lazy<Type>> _lazyTypes;
-        private readonly IComposableDictionary<TypeIdentifier, Type> _types;
+        private readonly IComposableReadOnlyDictionary<TypeIdentifier, Lazy<Type>> _lazyTypes;
+        private readonly IComposableReadOnlyDictionary<TypeIdentifier, Type> _types;
 
         public CodeIndex(IComposableDictionary<TypeIdentifier, Lazy<Type>> lazyTypes)
         {
-            _lazyTypes = lazyTypes;
-            _types = _lazyTypes.WithMapping(x => x.Value, x => new Lazy<Type>(x));
+            _lazyTypes = lazyTypes.ToComposableDictionary();
+            _types = _lazyTypes.WithMapping(x =>
+            {
+                try
+                {
+                    return x.Value;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    return null;
+                }
+            });
         }
 
         public IEnumerator<IKeyValue<TypeIdentifier, Type>> GetEnumerator()
@@ -47,7 +58,15 @@ namespace DebuggableSourceGenerators
 
         public bool TryGetValue(TypeIdentifier key, out Type value)
         {
-            return _types.TryGetValue(key, out value);
+            var maybe = _types.TryGetValue(key);
+            if (maybe.HasValue)
+            {
+                value = maybe.Value;
+                return true;
+            }
+
+            value = default;
+            return false;
         }
 
         public Type this[TypeIdentifier key]

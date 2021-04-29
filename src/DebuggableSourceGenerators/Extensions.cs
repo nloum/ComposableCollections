@@ -21,7 +21,7 @@ namespace DebuggableSourceGenerators
             MSBuildLocator.RegisterDefaults();
         }
         
-        public static void AddNugetPackage(this CodeIndexBuilder codeIndexBuilder, string packageName, string packageVersion, string targetFramework)
+        public static CodeIndexBuilder AddNugetPackage(this CodeIndexBuilder codeIndexBuilder, string packageName, string packageVersion, string targetFramework)
         {
             foreach (var assemblyFile in GetPathToNugetPackageDlls(packageName, packageVersion, targetFramework))
             {
@@ -30,9 +30,11 @@ namespace DebuggableSourceGenerators
                     codeIndexBuilder.AddAssemblyFile(assemblyFile);
                 }
             }
+
+            return codeIndexBuilder;
         }
 
-        public static void AddProjectNugetDependencies(this CodeIndexBuilder codeIndexBuilder, string projectFile)
+        public static CodeIndexBuilder AddProjectNugetDependencies(this CodeIndexBuilder codeIndexBuilder, string projectFile)
         {
             var projectTargetFrameworks = GetProjectTargetFrameworks(projectFile).ToImmutableList();
             
@@ -43,9 +45,11 @@ namespace DebuggableSourceGenerators
                     codeIndexBuilder.AddNugetPackage(nugetDependency.packageName, nugetDependency.packageVersion, targetFramework);
                 }
             }
+
+            return codeIndexBuilder;
         }
 
-        public static void AddProjectNugetDependencies(this CodeIndexBuilder codeIndexBuilder, string projectFile, string targetFramework)
+        public static CodeIndexBuilder AddProjectNugetDependencies(this CodeIndexBuilder codeIndexBuilder, string projectFile, string targetFramework)
         {
             var projectTargetFrameworks = GetProjectTargetFrameworks(projectFile).ToImmutableList();
             
@@ -53,27 +57,33 @@ namespace DebuggableSourceGenerators
             {
                 codeIndexBuilder.AddNugetPackage(nugetDependency.packageName, nugetDependency.packageVersion, targetFramework);
             }
+
+            return codeIndexBuilder;
         }
 
-        public static void AddSolution(this CodeIndexBuilder codeIndexBuilder, string solutionFilePath)
+        public static CodeIndexBuilder AddSolution(this CodeIndexBuilder codeIndexBuilder, string solutionFilePath)
         {
             var compilations = CompileSolution(solutionFilePath);
             foreach (var compilation in compilations)
             {
                 codeIndexBuilder.AddCompilation(compilation);
             }
+
+            return codeIndexBuilder;
         }
         
-        public static void AddProject(this CodeIndexBuilder codeIndexBuilder, string solutionFilePath, string projectFilePath, string projectAssemblyName = null)
+        public static CodeIndexBuilder AddProject(this CodeIndexBuilder codeIndexBuilder, string solutionFilePath, string projectFilePath, string projectAssemblyName = null)
         {
             projectAssemblyName ??= Path.GetFileNameWithoutExtension(projectFilePath);
             
             var compilation = CompileProject(solutionFilePath, projectAssemblyName);
             codeIndexBuilder.AddCompilation(compilation);
             codeIndexBuilder.AddProjectNugetDependencies(projectFilePath);
+
+            return codeIndexBuilder;
         }
 
-        public static void AddAssemblyFile(this CodeIndexBuilder codeIndexBuilder, string assemblyFilePath)
+        public static CodeIndexBuilder AddAssemblyFile(this CodeIndexBuilder codeIndexBuilder, string assemblyFilePath)
         {
             var typeDefinitions = AssemblyDefinition
                 .ReadAssembly(assemblyFilePath)
@@ -90,6 +100,8 @@ namespace DebuggableSourceGenerators
                 
                 codeIndexBuilder.AddType(typeDefinition);
             }
+
+            return codeIndexBuilder;
         }
 
         public static TypeIdentifier GetTypeIdentifier(TypeDefinition typeDefinition)
@@ -240,7 +252,7 @@ namespace DebuggableSourceGenerators
             }
         }
         
-        public static void AddType(this CodeIndexBuilder codeIndexBuilder, TypeDefinition typeDefinition)
+        public static CodeIndexBuilder AddType(this CodeIndexBuilder codeIndexBuilder, TypeDefinition typeDefinition)
         {
             codeIndexBuilder.GetOrAdd(typeDefinition);
             
@@ -248,9 +260,11 @@ namespace DebuggableSourceGenerators
             {
                 codeIndexBuilder.AddType(nestedType);
             }
+
+            return codeIndexBuilder;
         }
 
-        public static void AddCompilation(this CodeIndexBuilder codeIndexBuilder, Compilation compilation)
+        public static CodeIndexBuilder AddCompilation(this CodeIndexBuilder codeIndexBuilder, Compilation compilation)
         {
             foreach (var syntaxTree in compilation.SyntaxTrees)
             {
@@ -258,9 +272,11 @@ namespace DebuggableSourceGenerators
                 var root = syntaxTree.GetRoot();
                 codeIndexBuilder.AddSyntaxNode(root, semanticModel);
             }
+
+            return codeIndexBuilder;
         }
 
-        public static void AddSyntaxNode(this CodeIndexBuilder codeIndexBuilder, SyntaxNode syntaxNode, SemanticModel semanticModel)
+        public static CodeIndexBuilder AddSyntaxNode(this CodeIndexBuilder codeIndexBuilder, SyntaxNode syntaxNode, SemanticModel semanticModel)
         {
             var symbol = semanticModel.GetDeclaredSymbol(syntaxNode) as INamedTypeSymbol;
             if (symbol != null)
@@ -272,13 +288,15 @@ namespace DebuggableSourceGenerators
             {
                 codeIndexBuilder.AddSyntaxNode(child, semanticModel);
             }
+
+            return codeIndexBuilder;
         }
 
-        public static void AddSymbol(this CodeIndexBuilder codeIndexBuilder, INamedTypeSymbol symbol)
+        public static CodeIndexBuilder AddSymbol(this CodeIndexBuilder codeIndexBuilder, INamedTypeSymbol symbol)
         {
             if (!symbol.IsType)
             {
-                return;
+                return codeIndexBuilder;
             }
 
             var typeIdentifier = new TypeIdentifier()
@@ -427,6 +445,8 @@ namespace DebuggableSourceGenerators
                     Fields = fields.ToImmutableList(),
                 };
             });
+
+            return codeIndexBuilder;
         }
 
         private static IEnumerable<string> GetTargetFrameworksForNugetPackage(string packageName, string packageVersion)

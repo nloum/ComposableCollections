@@ -111,6 +111,17 @@ namespace ComposableCollections
         /// Copies all the items into a new composable read-only dictionary.
         /// </summary>
         public static IComposableReadOnlyDictionary<TKey, TValue> ToComposableReadOnlyDictionary<TKey, TValue>(
+            this IEnumerable<IKeyValue<TKey, TValue>> source)
+        {
+            var results = new ComposableDictionary<TKey, TValue>();
+            results.AddRange(source);
+            return results;
+        }
+
+        /// <summary>
+        /// Copies all the items into a new composable read-only dictionary.
+        /// </summary>
+        public static IComposableReadOnlyDictionary<TKey, TValue> ToComposableReadOnlyDictionary<TKey, TValue>(
             this IEnumerable<KeyValuePair<TKey, TValue>> source)
         {
             var results = new ComposableDictionary<TKey, TValue>();

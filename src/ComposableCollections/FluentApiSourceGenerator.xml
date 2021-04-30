@@ -131,6 +131,18 @@
       </BaseClasses>
     </ConstructorExtensionMethods>
 
+    <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Decorators" BaseClass="AvoidCollectionModifiedExceptionsDecorator"
+                                        Folder="Dictionary/Decorators">
+      <ClassNameModifiers>
+        <ClassNameModifier Search="Dictionary" Replace="AvoidCollectionModifiedExceptionsDecorator" />
+      </ClassNameModifiers>
+    </SubclassCombinationImplementations>
+    <ConstructorExtensionMethods Namespace="ComposableCollections" ExtensionMethodName="AvoidCollectionModifiedExceptions">
+      <BaseClasses>
+        <BaseClass>AvoidCollectionModifiedExceptionsDecorator</BaseClass>
+      </BaseClasses>
+    </ConstructorExtensionMethods>
+
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Decorators" BaseClass="DictionaryGetOrRefreshDecorator"
                                         Folder="Dictionary/Decorators">
       <ClassNameModifiers>

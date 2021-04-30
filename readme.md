@@ -7,7 +7,7 @@ IoFluently is a .NET Standard class library for dealing with files and folders. 
 Here's what it looks like:
 
 ```
-var ioService = new IoService(new ReactiveProcessFactory());
+var ioService = new IoService();
 var readme = (ioService.CurrentDirectory / "docs" / "readme.md").AsSmallTextFile();
 var text = readme.Read();
 Console.WriteLine(text);

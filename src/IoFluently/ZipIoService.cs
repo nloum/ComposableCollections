@@ -50,7 +50,7 @@ namespace IoFluently
         public override AbsolutePath CurrentDirectory { get; }
 
         /// <inheritdoc />
-        public override IObservableReadOnlySet<AbsolutePath> Storage { get; } = new ObservableSet<AbsolutePath>();
+        public override IObservableReadOnlySet<AbsolutePath> Roots { get; } = new ObservableSet<AbsolutePath>();
 
         /// <inheritdoc />
         public override IQueryable<AbsolutePath> Query()
@@ -105,7 +105,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override void UpdateStorage()
+        public override void UpdateRoots()
         {
             // There is never any storage, so simply ignore this call
         }

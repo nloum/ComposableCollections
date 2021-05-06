@@ -400,7 +400,7 @@ namespace IoFluently
             return path;
         }
 
-        public override IObservableReadOnlySet<AbsolutePath> Storage => _storage;
+        public override IObservableReadOnlySet<AbsolutePath> Roots => _storage;
 
         private readonly ObservableSet<AbsolutePath> _storage = new ObservableSet<AbsolutePath>();
 
@@ -421,7 +421,7 @@ namespace IoFluently
             return ImmutableArray<AbsolutePath>.Empty;
         }
 
-        public override void UpdateStorage()
+        public override void UpdateRoots()
         {
             var currentStorage = Directory.GetLogicalDrives();
             foreach (var drive in currentStorage)

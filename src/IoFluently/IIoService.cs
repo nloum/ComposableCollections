@@ -17,6 +17,7 @@ namespace IoFluently
     public interface IIoService : IFileProvider
     {
         IQueryable<AbsolutePath> Query();
+        IObservableReadOnlySet<AbsolutePath> Roots { get; }
         
         #region Environmental stuff
         
@@ -130,7 +131,7 @@ namespace IoFluently
         
         #region Utilities
         
-        void UpdateStorage();
+        void UpdateRoots();
         bool HasExtension(AbsolutePath path, string extension);
         bool ContainsFiles(AbsolutePath path);
         bool FolderContainsFiles(AbsolutePath path);

@@ -158,7 +158,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IObservableReadOnlySet<AbsolutePath> Storage => RootFolders.ToLiveLinq().KeysAsSet().Select(x => ParseAbsolutePath(x)).ToReadOnlyObservableSet();
+        public override IObservableReadOnlySet<AbsolutePath> Roots => RootFolders.ToLiveLinq().KeysAsSet().Select(x => ParseAbsolutePath(x)).ToReadOnlyObservableSet();
 
         private IMaybe<File> GetFile(AbsolutePath path)
         {
@@ -240,7 +240,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override void UpdateStorage()
+        public override void UpdateRoots()
         {
             throw new NotImplementedException();
         }

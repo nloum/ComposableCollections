@@ -26,7 +26,7 @@ namespace IoFluently
 
         public abstract AbsolutePath CurrentDirectory { get; }
 
-        public abstract IObservableReadOnlySet<AbsolutePath> Storage { get; }
+        public abstract IObservableReadOnlySet<AbsolutePath> Roots { get; }
 
         public abstract IQueryable<AbsolutePath> Query();
 
@@ -865,7 +865,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public abstract void UpdateStorage();
+        public abstract void UpdateRoots();
 
         private string ReadText(StreamReader streamReader)
         {

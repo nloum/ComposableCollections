@@ -27,20 +27,9 @@ namespace IoFluently
         /// Creates a zip file IIoService
         /// </summary>
         /// <param name="zipFilePath">The path to the zip file</param>
-        /// <param name="enableOpenFilesTracking">Whether to enable the tracking of open files</param>
-        public ZipIoService(AbsolutePath zipFilePath, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), "\n")
-        {
-            ZipFilePath = zipFilePath;
-            CurrentDirectory = ParseAbsolutePath("/");
-        }
-
-        /// <summary>
-        /// Creates a zip file IIoService
-        /// </summary>
-        /// <param name="zipFilePath">The path to the zip file</param>
         /// <param name="newline">The newline character(s) (e.g. '\n' or '\r\n')</param>
         /// <param name="enableOpenFilesTracking">Whether to enable the tracking of open files</param>
-        public ZipIoService(AbsolutePath zipFilePath, string newline, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), newline)
+        public ZipIoService(AbsolutePath zipFilePath, string newline = null, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), true, "/", newline ?? Environment.NewLine)
         {
             ZipFilePath = zipFilePath;
             CurrentDirectory = ParseAbsolutePath("/");
@@ -60,13 +49,6 @@ namespace IoFluently
                 .Select(zipEntry => ParseAbsolutePath(zipEntry.FullName, CurrentDirectory))
                 .AsQueryable();
             return new QueryableWithDisposable<AbsolutePath>(queryable, archive);
-        }
-
-        /// <inheritdoc />
-        public override string GetDefaultDirectorySeparatorForThisEnvironment()
-        {
-            // This is part of the ZIP spec
-            return "/";
         }
 
         /// <inheritdoc />
@@ -94,14 +76,6 @@ namespace IoFluently
         public override AbsolutePath GetTemporaryFolder()
         {
             return _temporaryFolder;
-        }
-
-        /// <inheritdoc />
-        public override bool IsCaseSensitiveByDefault()
-        {
-            // Technically zip files can contain multiple files with the same name, so to be closer to this reality we just
-            // act like case sensitivity is always on for zip files.
-            return true;
         }
 
         /// <inheritdoc />

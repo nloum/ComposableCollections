@@ -19,8 +19,8 @@ namespace IoFluently
 {
     public abstract class IoServiceBase : IIoService
     {
-        protected readonly object Lock = new object();
-        protected string DefaultDirectorySeparatorForThisEnvironment;
+        public string DefaultDirectorySeparator { get; }
+        public bool IsCaseSensitiveByDefault { get; }
 
         public IOpenFilesTrackingService OpenFilesTrackingService { get; }
 
@@ -35,20 +35,32 @@ namespace IoFluently
 
         public abstract IMaybe<StreamWriter> TryOpenWriter(AbsolutePath pathSpec);
 
-        protected IoServiceBase(IOpenFilesTrackingService openFilesTrackingService)
+        protected IoServiceBase(IOpenFilesTrackingService openFilesTrackingService, bool isCaseSensitiveByDefault, string defaultDirectorySeparator, string newline)
         {
-            OpenFilesTrackingService = openFilesTrackingService;
+            IsCaseSensitiveByDefault = isCaseSensitiveByDefault;
+            OpenFilesTrackingService = openFilesTrackingService ?? throw new ArgumentNullException(nameof(openFilesTrackingService));
+            DefaultDirectorySeparator = defaultDirectorySeparator ?? throw new ArgumentNullException(nameof(defaultDirectorySeparator));
+            _newline = newline ?? throw new ArgumentNullException(nameof(newline));
+        }
+
+        protected static string GetDefaultDirectorySeparatorForThisEnvironment()
+        {
+            var path = Path.Combine("a", "b");
+            var result = path.Substring(1, path.Length - 2);
+            return result;
+        }
+
+        protected static bool ShouldBeCaseSensitiveByDefault()
+        {
+            var file = Path.GetTempFileName();
+            var caseSensitive = File.Exists(file.ToLower()) && File.Exists(file.ToUpper());
+            File.Delete(file);
+            return caseSensitive;
         }
 
         public IEnumerable<AbsolutePath> Ancestors(AbsolutePath path)
         {
             return Ancestors(path, false);
-        }
-
-        protected IoServiceBase(IOpenFilesTrackingService openFilesTrackingService, string newline)
-        {
-            OpenFilesTrackingService = openFilesTrackingService;
-            _newline = newline;
         }
         
         public IFileInfo GetFileInfo( string subpath ) => new AbsolutePathFileInfoAdapter(ParseAbsolutePath( subpath ));
@@ -202,29 +214,6 @@ namespace IoFluently
         /// <inheritdoc />
         public abstract AbsolutePath GetTemporaryFolder();
 
-        /// <inheritdoc />
-        public abstract bool IsCaseSensitiveByDefault();
-
-        /// <inheritdoc />
-        public virtual string GetDefaultDirectorySeparatorForThisEnvironment()
-        {
-            if (DefaultDirectorySeparatorForThisEnvironment == null)
-            {
-                lock (Lock)
-                {
-                    if (DefaultDirectorySeparatorForThisEnvironment == null)
-                    {
-                        var path = Path.Combine("a", "b");
-                        DefaultDirectorySeparatorForThisEnvironment = path.Substring(1, path.Length - 2);
-                    }
-
-                    return DefaultDirectorySeparatorForThisEnvironment;
-                }
-            }
-
-            return DefaultDirectorySeparatorForThisEnvironment;
-        }
-
         /// <summary>
         ///     Returns a regex that filters files the same as the specified pattern.
         ///     From here: http://www.java2s.com/Code/CSharp/Regular-Expressions/Checksifnamematchespatternwithandwildcards.htm
@@ -323,7 +312,7 @@ namespace IoFluently
                 throw new ArgumentException(
                     "Cannot specify both PathFlags.UseDefaultsFromUtility and PathFlags.UseDefaultsForGivenPath");
             if (flags == CaseSensitivityMode.UseDefaultsFromEnvironment)
-                flags = IsCaseSensitiveByDefault() ? CaseSensitivityMode.CaseSensitive : CaseSensitivityMode.CaseInsensitive;
+                flags = IsCaseSensitiveByDefault ? CaseSensitivityMode.CaseSensitive : CaseSensitivityMode.CaseInsensitive;
             error = string.Empty;
             relativePath = null;
             
@@ -568,7 +557,7 @@ namespace IoFluently
             // If we reach this point, there are no backslashes or slashes in the path, meaning that it's a
             // path with one element.
             if (flags.HasFlag(CaseSensitivityMode.UseDefaultsFromEnvironment))
-                flags = IsCaseSensitiveByDefault() ? CaseSensitivityMode.CaseSensitive : CaseSensitivityMode.CaseInsensitive;
+                flags = IsCaseSensitiveByDefault ? CaseSensitivityMode.CaseSensitive : CaseSensitivityMode.CaseInsensitive;
             if (path == ".." || path == ".")
                 relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, GetDefaultDirectorySeparatorForThisEnvironment(), this, new[]{path});
             else
@@ -612,7 +601,7 @@ namespace IoFluently
                 throw new ArgumentException(
                     "Cannot specify both PathFlags.UseDefaultsFromUtility and PathFlags.UseDefaultsForGivenPath");
             if (flags.HasFlag(CaseSensitivityMode.UseDefaultsFromEnvironment))
-                flags = IsCaseSensitiveByDefault() ? CaseSensitivityMode.CaseSensitive : CaseSensitivityMode.CaseInsensitive;
+                flags = IsCaseSensitiveByDefault ? CaseSensitivityMode.CaseSensitive : CaseSensitivityMode.CaseInsensitive;
             error = string.Empty;
             pathSpec = null;
             if (path.Contains(":") && path.Contains("/"))

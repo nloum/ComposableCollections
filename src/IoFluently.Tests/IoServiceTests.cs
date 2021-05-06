@@ -68,6 +68,14 @@ namespace IoFluently.Tests
         }
 
         [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        public void RootsShouldNotBeEmptyByDefault(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, true);
+            uut.Roots.Count.Should().NotBe(0);
+        }
+        
+        [TestMethod]
         //[DataRow(IoServiceType.IoService)]
         [DataRow(IoServiceType.InMemoryZipIoService)]
         public void CreateTemporaryFileShouldWork(IoServiceType type)

@@ -29,19 +29,9 @@ namespace IoFluently
         
         #region Environmental stuff
         
-        /// <summary>
-        /// Determines whether the environment that this IIoService is for is case sensitive by default. 
-        /// </summary>
-        bool IsCaseSensitiveByDefault();
+        string DefaultDirectorySeparator { get; }
+        bool IsCaseSensitiveByDefault { get; }
         
-        /// <summary>
-        /// Linux uses / as a directory separator, Windows uses \ as a directory separator. This method returns the directory
-        /// separator for the current environment. Note that this isn't necessarily always \ on Windows; for example, if
-        /// there's an IIoService that uses SSH to connect to a Linux machine, then this method would return / for that
-        /// IoService implementation.
-        /// </summary>
-        string GetDefaultDirectorySeparatorForThisEnvironment();
-
         #endregion
         
         #region Creating and deleting

@@ -33,11 +33,15 @@ namespace IoFluently
 
         public IoService() : this(false)
         {
+            UpdateRoots();
         }
         
-        public IoService(bool enableOpenFilesTracking) : base(new OpenFilesTrackingService(enableOpenFilesTracking), Environment.NewLine)
+        
+        
+        public IoService(bool enableOpenFilesTracking) : base(new OpenFilesTrackingService(enableOpenFilesTracking), ShouldBeCaseSensitiveByDefault(), GetDefaultDirectorySeparatorForThisEnvironment(), Environment.NewLine)
         {
             PathObservationMethod = GetDefaultPathObservationMethod();
+            UpdateRoots();
         }
 
         public PathObservationMethod GetDefaultPathObservationMethod()
@@ -423,6 +427,15 @@ namespace IoFluently
 
         public override void UpdateRoots()
         {
+            if (DefaultDirectorySeparator == "/")
+            {
+                if (_storage.Count == 0)
+                {
+                    _storage.Add(ParseAbsolutePath("/"));
+                }
+                return;
+            }
+            
             var currentStorage = Directory.GetLogicalDrives();
             foreach (var drive in currentStorage)
             {
@@ -476,25 +489,6 @@ namespace IoFluently
                         watcher.Dispose();
                     }
                 });
-        }
-
-        public override bool IsCaseSensitiveByDefault()
-        {
-            lock (Lock)
-            {
-                if (_isCaseSensitiveByDefault == null)
-                {
-                    var file = Path.GetTempFileName();
-                    var caseSensitive = File.Exists(file.ToLower()) && File.Exists(file.ToUpper());
-                    File.Delete(file);
-                    if (caseSensitive)
-                        _isCaseSensitiveByDefault = true;
-                    else
-                        _isCaseSensitiveByDefault = false;
-                }
-
-                return _isCaseSensitiveByDefault.Value;
-            }
         }
 
         /// <inheritdoc />

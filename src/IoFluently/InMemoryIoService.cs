@@ -85,19 +85,11 @@ namespace IoFluently
         }
         
         /// <inheritdoc />
-        public override string GetDefaultDirectorySeparatorForThisEnvironment()
-        {
-            return _defaultDirectorySeparatorForThisEnvironment;
-        }
-
-        /// <inheritdoc />
         public override IQueryable<AbsolutePath> Query()
         {
             throw new NotImplementedException();
         }
 
-        private readonly bool _isCaseSensitiveByDefault;
-        private string _defaultDirectorySeparatorForThisEnvironment;
         private AbsolutePath _currentDirectory = null;
         private AbsolutePath _temporaryFolder = null;
         
@@ -129,11 +121,9 @@ namespace IoFluently
         /// E.g., '/' for Unix-like environments, '\\' for Windows-like environments.</param>
         /// <param name="enableOpenFilesTracking">Whether to track which files are open (useful for debugging, but comes
         /// with a performance hit)</param>
-        public InMemoryIoService(string newline, bool isCaseSensitiveByDefault, string defaultDirectorySeparatorForThisEnvironment = null, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), newline)
+        public InMemoryIoService(string newline = null, bool? isCaseSensitiveByDefault = null, string defaultDirectorySeparatorForThisEnvironment = null, bool enableOpenFilesTracking = false)
+            : base(new OpenFilesTrackingService(enableOpenFilesTracking), isCaseSensitiveByDefault ?? ShouldBeCaseSensitiveByDefault(), defaultDirectorySeparatorForThisEnvironment ?? GetDefaultDirectorySeparatorForThisEnvironment(), newline ?? Environment.NewLine)
         {
-            _newline = newline;
-            _isCaseSensitiveByDefault = isCaseSensitiveByDefault;
-            _defaultDirectorySeparatorForThisEnvironment = defaultDirectorySeparatorForThisEnvironment ?? base.GetDefaultDirectorySeparatorForThisEnvironment();
         }
 
         /// <inheritdoc />
@@ -231,12 +221,6 @@ namespace IoFluently
         public override IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath)
         {
             throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public override bool IsCaseSensitiveByDefault()
-        {
-            return _isCaseSensitiveByDefault;
         }
 
         /// <inheritdoc />

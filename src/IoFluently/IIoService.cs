@@ -16,7 +16,15 @@ namespace IoFluently
 {
     public interface IIoService : IFileProvider
     {
+        /// <summary>
+        /// Returns an IQueryable that converts expressions like AbsolutePaths.Where(path => path.Contains("test")) into
+        /// efficient calls to the .NET file system APIs.
+        /// </summary>
         IQueryable<AbsolutePath> Query();
+        
+        /// <summary>
+        /// Lists the file system roots. On Unix-like operating systems, there's only one file system root, and it is '/'.
+        /// </summary>
         IObservableReadOnlySet<AbsolutePath> Roots { get; }
         
         #region Environmental stuff
@@ -131,6 +139,10 @@ namespace IoFluently
         
         #region Utilities
         
+        /// <summary>
+        /// Updates the file system roots. On Unix-like operating systems, there's only one file system root, and it is '/'.
+        /// On Windows, there can be multiple, e.g. 'C:', 'D:', 'E:'. This method is only useful on Windows.
+        /// </summary>
         void UpdateRoots();
         bool HasExtension(AbsolutePath path, string extension);
         bool ContainsFiles(AbsolutePath path);

@@ -6,6 +6,7 @@ IMaybe<T2> Item2 { get; }
 IMaybe<T3> Item3 { get; }
 IMaybe<T4> Item4 { get; }
 IMaybe<T5> Item5 { get; }
+object Value { get; }
 IEither<T1, T2, T3, T4, T5, T6> Or<T6>();
 IEither<T1, T2, T3, T4, T5, T6, T7> Or<T6, T7>();
 IEither<T1, T2, T3, T4, T5, T6, T7, T8> Or<T6, T7, T8>();

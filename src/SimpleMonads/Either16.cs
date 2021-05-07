@@ -67,6 +67,7 @@ public IMaybe<T13> Item13 { get; } = Utility.Nothing<T13>();
 public IMaybe<T14> Item14 { get; } = Utility.Nothing<T14>();
 public IMaybe<T15> Item15 { get; } = Utility.Nothing<T15>();
 public IMaybe<T16> Item16 { get; } = Utility.Nothing<T16>();
+public object Value => this.Select(x => (object)x, x => (object)x, x => (object)x, x => (object)x, x => (object)x, x => (object)x, x => (object)x, x => (object)x, x => (object)x, x => (object)x, x => (object)x, x => (object)x, x => (object)x, x => (object)x, x => (object)x, x => (object)x);
 public bool Equals(IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> other) {
 if (ReferenceEquals(null, other)) return false;
 if (ReferenceEquals(this, other)) return true;

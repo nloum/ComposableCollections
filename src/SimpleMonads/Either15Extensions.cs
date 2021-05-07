@@ -834,5 +834,57 @@ throw new InvalidOperationException();
 }
 }
 
+public static IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> ForEach<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> input, Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6, Action<T7> action7, Action<T8> action8, Action<T9> action9, Action<T10> action10, Action<T11> action11, Action<T12> action12, Action<T13> action13, Action<T14> action14, Action<T15> action15) {
+if (input.Item1.HasValue) {
+action1(input.Item1.Value);
+}
+else if (input.Item2.HasValue) {
+action2(input.Item2.Value);
+}
+else if (input.Item3.HasValue) {
+action3(input.Item3.Value);
+}
+else if (input.Item4.HasValue) {
+action4(input.Item4.Value);
+}
+else if (input.Item5.HasValue) {
+action5(input.Item5.Value);
+}
+else if (input.Item6.HasValue) {
+action6(input.Item6.Value);
+}
+else if (input.Item7.HasValue) {
+action7(input.Item7.Value);
+}
+else if (input.Item8.HasValue) {
+action8(input.Item8.Value);
+}
+else if (input.Item9.HasValue) {
+action9(input.Item9.Value);
+}
+else if (input.Item10.HasValue) {
+action10(input.Item10.Value);
+}
+else if (input.Item11.HasValue) {
+action11(input.Item11.Value);
+}
+else if (input.Item12.HasValue) {
+action12(input.Item12.Value);
+}
+else if (input.Item13.HasValue) {
+action13(input.Item13.Value);
+}
+else if (input.Item14.HasValue) {
+action14(input.Item14.Value);
+}
+else if (input.Item15.HasValue) {
+action15(input.Item15.Value);
+}
+else {
+throw new InvalidOperationException();
+}
+return input;
+}
+
 }
 }

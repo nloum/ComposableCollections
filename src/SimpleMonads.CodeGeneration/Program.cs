@@ -78,6 +78,7 @@ namespace SimpleMonads.CodeGeneration
             {
                 writer.WriteLine($"public interface IEither<{string.Join(", ", genericArgDefinitions)}> \n{{");
                 writer.WriteLine(string.Join("\n", interfaceProperties));
+                writer.WriteLine("object Value { get; }");
                 for (var i = arity + 1; i <= maxArity; i++) GenerateOrDeclaration(writer, arity, i);
                 writer.WriteLine("}");
             }
@@ -88,6 +89,7 @@ namespace SimpleMonads.CodeGeneration
                     $"public class Either<{string.Join(", ", genericArgNames)}> : IEither<{string.Join(", ", genericArgNames)}>, IEquatable<IEither<{string.Join(", ", genericArgNames)}>>\n{{");
                 writer.WriteLine(string.Join("\n", constructors));
                 writer.WriteLine(string.Join("\n", classProperties));
+                GenerateValue(writer, arity);
                 for (var i = arity + 1; i <= maxArity; i++) GenerateOrImplementation(writer, arity, i);
                 GenerateEqualityMembers(writer, arity);
                 GenerateToString(writer, arity);
@@ -98,11 +100,21 @@ namespace SimpleMonads.CodeGeneration
             {
                 writer.WriteLine($"public static class Either{arity}Extensions\n{{");
 
-                for (var i = 1; i <= arity; i++) GeneratePartialSelect(writer, arity, i);
+                for (var i = 1; i <= arity; i++)
+                {
+                    GeneratePartialSelect(writer, arity, i);
+                }
                 GenerateFullSelect(writer, arity, genericArgNamesA, genericArgNamesB);
+                GenerateFullForEach(writer, arity, genericArgNames);
 
                 writer.WriteLine("}");
             }
+        }
+
+        private static void GenerateValue(TextWriter writer, int arity)
+        {
+            var selectArguments = string.Join(", ", Enumerable.Repeat(0, arity).Select(_ => "x => (object)x"));
+            writer.WriteLine($"public object Value => this.Select({selectArguments});");
         }
 
         private static void GenerateEqualityMembers(TextWriter writer, int arity)
@@ -272,6 +284,32 @@ namespace SimpleMonads.CodeGeneration
             writer.WriteLine($"public static IEither<{string.Join(", ", genericArgNamesB)}> " +
                              $"Select<{string.Join(", ", genericArgNamesA)}, {string.Join(", ", genericArgNamesB)}>(" +
                              $"this IEither<{string.Join(", ", genericArgNamesA)}> input, {string.Join(", ", selectors)}) {{\n" +
+                             body +
+                             "}\n");
+        }
+
+        private static void GenerateFullForEach(TextWriter writer, int arity, List<string> genericArgNames)
+        {
+            var body = new StringBuilder();
+            var actions = new List<string>();
+            for (var i = 1; i <= arity; i++)
+            {
+                if (i > 1) body.Append("else ");
+
+                body.Append(
+                    $"if (input.Item{i}.HasValue) {{\n");
+
+                body.Append($"action{i}(input.Item{i}.Value);\n}}\n");
+
+                actions.Add($"Action<T{i}> action{i}");
+            }
+
+            body.Append("else {\nthrow new InvalidOperationException();\n}\n");
+            body.Append("return input;\n");
+
+            writer.WriteLine($"public static IEither<{string.Join(", ", genericArgNames)}> " +
+                             $"ForEach<{string.Join(", ", genericArgNames)}>(" +
+                             $"this IEither<{string.Join(", ", genericArgNames)}> input, {string.Join(", ", actions)}) {{\n" +
                              body +
                              "}\n");
         }

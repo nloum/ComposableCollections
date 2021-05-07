@@ -41,5 +41,18 @@ throw new InvalidOperationException();
 }
 }
 
+public static IEither<T1, T2> ForEach<T1, T2>(this IEither<T1, T2> input, Action<T1> action1, Action<T2> action2) {
+if (input.Item1.HasValue) {
+action1(input.Item1.Value);
+}
+else if (input.Item2.HasValue) {
+action2(input.Item2.Value);
+}
+else {
+throw new InvalidOperationException();
+}
+return input;
+}
+
 }
 }

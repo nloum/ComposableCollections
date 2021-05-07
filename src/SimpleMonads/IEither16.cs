@@ -17,5 +17,6 @@ IMaybe<T13> Item13 { get; }
 IMaybe<T14> Item14 { get; }
 IMaybe<T15> Item15 { get; }
 IMaybe<T16> Item16 { get; }
+object Value { get; }
 }
 }

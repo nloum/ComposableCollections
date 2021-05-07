@@ -134,5 +134,27 @@ throw new InvalidOperationException();
 }
 }
 
+public static IEither<T1, T2, T3, T4, T5> ForEach<T1, T2, T3, T4, T5>(this IEither<T1, T2, T3, T4, T5> input, Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5) {
+if (input.Item1.HasValue) {
+action1(input.Item1.Value);
+}
+else if (input.Item2.HasValue) {
+action2(input.Item2.Value);
+}
+else if (input.Item3.HasValue) {
+action3(input.Item3.Value);
+}
+else if (input.Item4.HasValue) {
+action4(input.Item4.Value);
+}
+else if (input.Item5.HasValue) {
+action5(input.Item5.Value);
+}
+else {
+throw new InvalidOperationException();
+}
+return input;
+}
+
 }
 }

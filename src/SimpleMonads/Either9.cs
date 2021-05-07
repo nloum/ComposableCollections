@@ -39,6 +39,7 @@ public IMaybe<T6> Item6 { get; } = Utility.Nothing<T6>();
 public IMaybe<T7> Item7 { get; } = Utility.Nothing<T7>();
 public IMaybe<T8> Item8 { get; } = Utility.Nothing<T8>();
 public IMaybe<T9> Item9 { get; } = Utility.Nothing<T9>();
+public object Value => this.Select(x => (object)x, x => (object)x, x => (object)x, x => (object)x, x => (object)x, x => (object)x, x => (object)x, x => (object)x, x => (object)x);
 public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Or<T10>()
 {
 if (Item1.HasValue) {

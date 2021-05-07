@@ -12,6 +12,7 @@ IMaybe<T8> Item8 { get; }
 IMaybe<T9> Item9 { get; }
 IMaybe<T10> Item10 { get; }
 IMaybe<T11> Item11 { get; }
+object Value { get; }
 IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Or<T12>();
 IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Or<T12, T13>();
 IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Or<T12, T13, T14>();

@@ -4,6 +4,7 @@ public interface IEither<out T1, out T2, out T3>
 IMaybe<T1> Item1 { get; }
 IMaybe<T2> Item2 { get; }
 IMaybe<T3> Item3 { get; }
+object Value { get; }
 IEither<T1, T2, T3, T4> Or<T4>();
 IEither<T1, T2, T3, T4, T5> Or<T4, T5>();
 IEither<T1, T2, T3, T4, T5, T6> Or<T4, T5, T6>();

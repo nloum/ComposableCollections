@@ -216,5 +216,32 @@ return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3>))}({Utility.
 }
 throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class?");
 }
+public static implicit operator Either<T1, T2, T3>(T1 t1) {
+return new Either<T1, T2, T3>(t1);
+}
+public static implicit operator T1(Either<T1, T2, T3> either) {
+return either.Item1.Value;
+}
+public static implicit operator Maybe<T1>(Either<T1, T2, T3> either) {
+return (Maybe<T1>)either.Item1;
+}
+public static implicit operator Either<T1, T2, T3>(T2 t2) {
+return new Either<T1, T2, T3>(t2);
+}
+public static implicit operator T2(Either<T1, T2, T3> either) {
+return either.Item2.Value;
+}
+public static implicit operator Maybe<T2>(Either<T1, T2, T3> either) {
+return (Maybe<T2>)either.Item2;
+}
+public static implicit operator Either<T1, T2, T3>(T3 t3) {
+return new Either<T1, T2, T3>(t3);
+}
+public static implicit operator T3(Either<T1, T2, T3> either) {
+return either.Item3.Value;
+}
+public static implicit operator Maybe<T3>(Either<T1, T2, T3> either) {
+return (Maybe<T3>)either.Item3;
+}
 }
 }

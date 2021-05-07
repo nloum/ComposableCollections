@@ -93,6 +93,7 @@ namespace SimpleMonads.CodeGeneration
                 for (var i = arity + 1; i <= maxArity; i++) GenerateOrImplementation(writer, arity, i);
                 GenerateEqualityMembers(writer, arity);
                 GenerateToString(writer, arity);
+                GenerateImplicitOperators(writer, arity, genericArgNames);
                 writer.WriteLine("}");
             }
 
@@ -109,6 +110,25 @@ namespace SimpleMonads.CodeGeneration
 
                 writer.WriteLine("}");
             }
+        }
+
+        private static void GenerateImplicitOperators(TextWriter writer, int arity, List<string> genericArgNames)
+        {
+            for (var i = 1; i <= arity; i++)
+            {
+                writer.WriteLine($"public static implicit operator Either<{string.Join(", ", genericArgNames)}>(T{i} t{i}) {{");
+                writer.WriteLine($"return new Either<{string.Join(", ", genericArgNames)}>(t{i});");
+                writer.WriteLine("}");
+                
+                writer.WriteLine($"public static implicit operator T{i}(Either<{string.Join(", ", genericArgNames)}> either) {{");
+                writer.WriteLine($"return either.Item{i}.Value;");
+                writer.WriteLine("}");
+                
+                writer.WriteLine($"public static implicit operator Maybe<T{i}>(Either<{string.Join(", ", genericArgNames)}> either) {{");
+                writer.WriteLine($"return (Maybe<T{i}>)either.Item{i};");
+                writer.WriteLine("}");
+            }
+            
         }
 
         private static void GenerateValue(TextWriter writer, int arity)

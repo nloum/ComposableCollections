@@ -1,6 +1,7 @@
 ﻿namespace DebuggableSourceGenerators
 {
-    public interface IClass : IStructuredType
+    public record PrimitiveType : Type
     {
+        
     }
 }

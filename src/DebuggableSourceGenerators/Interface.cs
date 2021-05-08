@@ -1,6 +1,6 @@
 ﻿namespace DebuggableSourceGenerators
 {
-    public interface IInterface : IStructuredType
+    public record Interface : StructuredType
     {
         
     }

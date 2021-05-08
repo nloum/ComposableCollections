@@ -2,57 +2,68 @@
 
 namespace DebuggableSourceGenerators
 {
-    public class TypeIdentifier
+    public record TypeIdentifier
     {
-        public TypeIdentifier(string namespaceName, string name, int arity)
+        public static TypeIdentifier Parse(string fullName)
         {
-            if (!string.IsNullOrWhiteSpace(namespaceName))
-            {
-                FullName = $"{namespaceName}.{name}";
-            }
-            else
-            {
-                FullName = name;
-            }
+            string @namespace;
+            string name;
+            int arity = 0;
             
-            Arity = arity;
-        }
-
-        public TypeIdentifier(string fullName, int arity)
-        {
-            FullName = fullName;
-            Arity = arity;
-        }
-
-        public string FullName { get; }
-        public int Arity { get; }
-
-        protected bool Equals(TypeIdentifier other)
-        {
-            return FullName == other.FullName && Arity == other.Arity;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((TypeIdentifier) obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(FullName, Arity);
-        }
-
-        public override string ToString()
-        {
-            if (Arity == 0)
+            var split = fullName.Split('`');
+            if (split.Length == 2)
             {
-                return FullName;
+                arity = int.Parse(split[1]);
+                fullName = split[0];
             }
-            
-            return $"{FullName}`{Arity}";
+
+            var lastIndex = fullName.LastIndexOf('.');
+            @name = fullName.Substring(lastIndex + 1);
+            @namespace = fullName.Substring(0, lastIndex);
+
+            return new TypeIdentifier()
+            {
+                Name = name,
+                Namespace = @namespace,
+                Arity = arity
+            };
         }
+        
+        public static TypeIdentifier Parse(string @namespace, string name)
+        {
+            int arity = 0;
+            
+            var split = name.Split('`');
+            if (split.Length == 2)
+            {
+                arity = int.Parse(split[1]);
+                name = split[0];
+            }
+
+            return new TypeIdentifier()
+            {
+                Name = name,
+                Namespace = @namespace,
+                Arity = arity
+            };
+        }
+
+        private readonly string _name;
+        public string Namespace { get; init; }
+
+        public string Name
+        {
+            get => _name;
+            init
+            {
+                if (value.Contains('`'))
+                {
+                    throw new InvalidOperationException("Names cannot have ` in them");
+                }
+                _name = value;
+            }
+        }
+
+        public int Arity { get; init; }
     }
 }

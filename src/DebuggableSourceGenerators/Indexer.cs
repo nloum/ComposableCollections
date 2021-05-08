@@ -6,15 +6,13 @@ namespace DebuggableSourceGenerators
 {
     public class Indexer
     {
-        public Indexer(Lazy<IType> returnType, IReadOnlyList<Parameter> parameters)
-        {
-            ReturnType = returnType;
-            Parameters = parameters;
-        }
+        public bool IsStatic { get; init; }
+        public Lazy<Type> ReturnType { get; init; }
 
-        public Lazy<IType> ReturnType { get; }
-
-        public IReadOnlyList<Parameter> Parameters { get; }
+        public IReadOnlyList<Parameter> Parameters { get; init; }
+        public Visibility GetterVisibility { get; init; }
+        public Visibility SetterVisibility { get; init; }
+        public bool IsVirtual { get; init; }
 
         public override string ToString()
         {

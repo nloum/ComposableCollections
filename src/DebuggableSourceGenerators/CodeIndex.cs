@@ -1,414 +1,82 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Metadata;
-using System.Reflection.PortableExecutable;
-using System.Runtime.Versioning;
-using System.Text.RegularExpressions;
-using System.Xml;
-using DebuggableSourceGenerators.NonLoadedAssembly;
-using DebuggableSourceGenerators.Reflection;
-using Microsoft.Build.Locator;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.MSBuild;
-using Microsoft.CodeAnalysis.VisualBasic.Syntax;
+using ComposableCollections;
+using ComposableCollections.Dictionary;
+using ComposableCollections.Dictionary.Interfaces;
+using SimpleMonads;
 
 namespace DebuggableSourceGenerators
 {
-    public class CodeIndex
+    public class CodeIndex : IEnumerable<IKeyValue<TypeIdentifier, Type>>
     {
-        List<Func<SyntaxTree, SemanticModel>> GetSemanticModel = new();
+        private readonly IComposableReadOnlyDictionary<TypeIdentifier, Lazy<Type>> _lazyTypes;
+        private readonly IComposableReadOnlyDictionary<TypeIdentifier, Type> _types;
 
-        Dictionary<TypeIdentifier, IType> _types = new();
-
-        ISyntaxService SyntaxService;
-        ISymbolService SymbolService;
-        private INonLoadedAssemblyService NonLoadedAssemblyService;
-        private TypeRegistryServiceImpl TypeRegistryService;
-        private IReflectionService ReflectionService;
-        private List<Compilation> _compilations = new();
-        private HashSet<string> _assemblyFiles = new();
-
-        public CodeIndex()
+        public CodeIndex(IComposableDictionary<TypeIdentifier, Lazy<Type>> lazyTypes)
         {
-            TypeRegistryService = new TypeRegistryServiceImpl(this);
-            SymbolService = new SymbolService(TypeRegistryService);
-            SyntaxService = new SyntaxService(TypeRegistryService, SymbolService, syntaxTree =>
+            _lazyTypes = lazyTypes.ToComposableDictionary();
+            _types = _lazyTypes.WithMapping(x =>
             {
-                foreach (var item in GetSemanticModel)
+                try
                 {
-                    var result = item(syntaxTree);
-                    if (result != null)
-                    {
-                        return result;
-                    }
+                    return x.Value;
                 }
-
-                return null;
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    return null;
+                }
             });
-            ReflectionService = new ReflectionService(TypeRegistryService);
-            NonLoadedAssemblyService = new NonLoadedAssemblyService(TypeRegistryService);
         }
 
-        private class TypeRegistryServiceImpl : ITypeRegistryService
+        public IEnumerator<IKeyValue<TypeIdentifier, Type>> GetEnumerator()
         {
-            private CodeIndex _codeIndex;
+            return _types.GetEnumerator();
+        }
 
-            public TypeRegistryServiceImpl(CodeIndex codeIndex)
+        public int Count => _types.Count;
+
+        public Type GetValue(TypeIdentifier key)
+        {
+            return _types.GetValue(key);
+        }
+
+        public bool ContainsKey(TypeIdentifier key)
+        {
+            return _types.ContainsKey(key);
+        }
+
+        public IMaybe<Type> TryGetValue(TypeIdentifier key)
+        {
+            return _types.TryGetValue(key);
+        }
+
+        public IEnumerable<TypeIdentifier> Keys => _types.Keys;
+
+        public IEnumerable<Type> Values => _types.Values;
+
+        public bool TryGetValue(TypeIdentifier key, out Type value)
+        {
+            var maybe = _types.TryGetValue(key);
+            if (maybe.HasValue)
             {
-                _codeIndex = codeIndex;
+                value = maybe.Value;
+                return true;
             }
 
-            public Lazy<IType> GetType(TypeIdentifier identifier)
-            {
-                return new Lazy<IType>(_codeIndex.ResolveType(identifier));
-            }
-
-            public IType TryAddType(TypeIdentifier identifier, Func<IType> type)
-            {
-                return _codeIndex.TryAddType(identifier, type);
-            }
+            value = default;
+            return false;
         }
 
-        public IType TryAddType(TypeIdentifier identifier, Func<IType> type)
+        public Type this[TypeIdentifier key]
         {
-            if (!_types.ContainsKey(identifier))
-            {
-                _types.Add(identifier, type());
-            }
-
-            return _types[identifier];
+            get => _types[key];
         }
 
-        public bool TryResolveType(TypeIdentifier identifier, out IType type)
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            return _types.TryGetValue(identifier, out type);
-        }
-
-        public IType ResolveType(TypeIdentifier identifier)
-        {
-            if (!TryResolveType(identifier, out var result))
-            {
-                throw new KeyNotFoundException($"Could not find type {identifier}");
-            }
-
-            return result;
-        }
-
-        public bool TryResolveType(string typeName, int arity, out IType type)
-        {
-            var identifier = new TypeIdentifier(typeName, arity);
-            return _types.TryGetValue(identifier, out type);
-        }
-
-        public IType ResolveType(string typeName, int arity)
-        {
-            var identifier = new TypeIdentifier(typeName, arity);
-            return ResolveType(identifier);
-        }
-
-        public IEnumerable<IType> ResolveTypes(Func<TypeIdentifier, bool> predicate)
-        {
-            return _types.Where(kvp => predicate(kvp.Key)).Select(kvp => kvp.Value);
-        }
-
-        public bool TryResolveType(string namespaceName, string typeName, int arity, out IType type)
-        {
-            var identifier = new TypeIdentifier(namespaceName, typeName, arity);
-            return _types.TryGetValue(identifier, out type);
-        }
-
-        public IType ResolveType(string namespaceName, string typeName, int arity)
-        {
-            var identifier = new TypeIdentifier(namespaceName, typeName, arity);
-            return ResolveType(identifier);
-        }
-
-        public void AddNugetPackage(NugetPackageSpecifier packageSpecifier, bool includePackageDependencies = true)
-        {
-            foreach (var assemblyFile in GetPathToNugetPacketDlls(packageSpecifier))
-            {
-                if (File.Exists(assemblyFile))
-                {
-                    AddAssemblyFile(assemblyFile);
-                }
-            }
-
-            foreach (var item in GetNugetPackageDependencies(packageSpecifier))
-            {
-                AddNugetPackage(item);
-            }
-        }
-
-        public IEnumerable<NugetPackageSpecifier> GetNugetPackageDependencies(NugetPackageSpecifier nugetPackageSpecifier)
-        {
-            string homePath = (Environment.OSVersion.Platform == PlatformID.Unix || 
-                               Environment.OSVersion.Platform == PlatformID.MacOSX)
-                ? Environment.GetEnvironmentVariable("HOME")
-                : Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
-
-            var packageFolder = Path.Combine(homePath, ".nuget", "packages", nugetPackageSpecifier.PackageName, nugetPackageSpecifier.PackageVersion);
-
-            var nuspecFile = Directory.GetFiles(packageFolder, "*.nuspec").First();
-            
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(nuspecFile);
-            var targetFrameworks = xmlDoc.SelectNodes("//package/metadata/dependencies/group").Cast<XmlElement>()
-                .ToImmutableDictionary(x => x.Attributes["targetFramework"].Value.ToLower().TrimStart('.'), x =>
-                {
-                    var targetFramework = x.Attributes["targetFramework"].Value.ToLower().TrimStart('.');
-                    return x.SelectNodes("/dependency")
-                        .Cast<XmlElement>()
-                        .Select(xmlElement => new NugetPackageSpecifier(xmlElement.Attributes["id"].Value,
-                            xmlElement.Attributes["version"].Value, targetFramework))
-                        .ToImmutableList();
-                });
-
-            return targetFrameworks[nugetPackageSpecifier.TargetFramework];
-        }
-        
-        public void AddProjectNugetDependencies(string projectFile, string targetFramework = null)
-        {
-            foreach (var nugetDependency in GetNugetDependencies(projectFile, targetFramework))
-            {
-                AddNugetPackage(nugetDependency);
-            }
-        }
-
-        public void AddSolution(string solutionFilePath)
-        {
-            var compilations = CompileSolution(solutionFilePath);
-            foreach (var compilation in compilations)
-            {
-                AddCompilation(compilation);
-            }
-        }
-        
-        public void AddProject(string solutionFilePath, string projectName)
-        {
-            var compilation = CompileProject(solutionFilePath, projectName);
-            AddCompilation(compilation);
-        }
-
-        public void AddAssembly(Assembly assembly)
-        {
-            ReflectionService.AddAllTypes(assembly);
-        }
-
-        public void AddAssemblyFile(string assemblyFilePath)
-        {
-            if (_assemblyFiles.Contains(assemblyFilePath))
-            {
-                return;
-            }
-            
-            try
-            {
-                var assembly = Assembly.LoadFile(assemblyFilePath);
-                AddAssembly(assembly);
-            }
-            catch (Exception e)
-            {
-                // TODO - do something here
-            }
-            
-            //NonLoadedAssemblyService.AddAllTypes(assemblyFilePath);
-        }
-
-        public void AddCompilation(Compilation compilation)
-        {
-            _compilations.Add(compilation);
-             GetSemanticModel.Add(syntaxTree => compilation.GetSemanticModel(syntaxTree));
-            
-             var interfaceDeclarationSyntaxes = new Dictionary<TypeIdentifier, List<InterfaceDeclarationSyntax>>();
-             var classDeclarationSyntaxes = new Dictionary<TypeIdentifier, List<ClassDeclarationSyntax>>();
-            
-             foreach (var syntaxTree in compilation.SyntaxTrees)
-             {
-                 Utilities.TraverseTree(syntaxTree.GetRoot(), node =>
-                 {
-                     if (node is InterfaceDeclarationSyntax interfaceDeclarationSyntax)
-                     {
-                         var typeIdentifier = new TypeIdentifier(Utilities.GetNamespace(interfaceDeclarationSyntax),
-                             interfaceDeclarationSyntax.Identifier.Text,
-                             interfaceDeclarationSyntax.TypeParameterList == null
-                                 ? 0
-                                 : interfaceDeclarationSyntax.TypeParameterList.Parameters.Count);
-            
-                         if (!interfaceDeclarationSyntaxes.TryGetValue(typeIdentifier, out var items))
-                         {
-                             items = new List<InterfaceDeclarationSyntax>();
-                             interfaceDeclarationSyntaxes[typeIdentifier] = items;
-                         }
-            
-                         items.Add(interfaceDeclarationSyntax);
-                     }
-                     else if (node is ClassDeclarationSyntax classDeclarationSyntax)
-                     {
-                         var typeIdentifier = new TypeIdentifier(
-                             Utilities.GetNamespace(classDeclarationSyntax),
-                             classDeclarationSyntax.Identifier.Text,
-                             classDeclarationSyntax.TypeParameterList == null
-                                 ? 0
-                                 : classDeclarationSyntax.TypeParameterList.Parameters.Count);
-                         if (!classDeclarationSyntaxes.TryGetValue(typeIdentifier, out var items))
-                         {
-                             items = new List<ClassDeclarationSyntax>();
-                             classDeclarationSyntaxes[typeIdentifier] = items;
-                         }
-            
-                         items.Add(classDeclarationSyntax);
-                     }
-                 });
-             }
-
-             foreach (var list in interfaceDeclarationSyntaxes)
-             {
-                 var iface = new SyntaxInterface(TypeRegistryService, SyntaxService);
-                 iface.Initialize(list.Key, list.Value.ToArray());
-                 _types[list.Key] = iface;
-             }
-            
-             foreach (var list in classDeclarationSyntaxes)
-             {
-                 var clazz = new SyntaxClass(TypeRegistryService, SyntaxService);
-                 clazz.Initialize(list.Key, list.Value.ToArray());
-                 _types[list.Key] = clazz;
-             }
-
-             var assemblies = new List<Assembly>();
-             
-            foreach (var reference in compilation.References)
-            {
-                if (File.Exists(reference.Display))
-                {
-                    try
-                    {
-                        assemblies.Add(Assembly.LoadFile(reference.Display));
-                    }
-                    catch (BadImageFormatException e)
-                    {
-                    }
-                }
-            }
-
-            foreach (var assembly in assemblies)
-            {
-                AddAssembly(assembly);
-            }
-                
-            foreach (var symbol in compilation.GetSymbolsWithName(_ => true, SymbolFilter.Type))
-            {
-                if (symbol is INamedTypeSymbol namedTypeSymbol)
-                {
-                    var key = SymbolService.GetTypeIdentifier(namedTypeSymbol);
-                    if (!_types.ContainsKey(key))
-                    {
-                        SymbolService.GetType(namedTypeSymbol);                    
-                    }
-                }
-            }
-        }
-        
-        private static IEnumerable<string> GetPathToNugetPacketDlls(NugetPackageSpecifier packageSpecifier)
-        {
-            string homePath = (Environment.OSVersion.Platform == PlatformID.Unix || 
-                               Environment.OSVersion.Platform == PlatformID.MacOSX)
-                ? Environment.GetEnvironmentVariable("HOME")
-                : Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
-
-            var packageFolder = Path.Combine(homePath, ".nuget", "packages", packageSpecifier.PackageName, packageSpecifier.PackageVersion, "lib", packageSpecifier.TargetFramework);
-
-            if (Directory.Exists(packageFolder))
-            {
-                return Directory.GetFiles(packageFolder, "*.dll")
-                    .Select(dllFileName => Path.Combine(packageFolder, dllFileName));
-            }
-            
-            // TODO - error out and fix the times this breaks
-            return Enumerable.Empty<string>();
-        }
-
-        private static IEnumerable<NugetPackageSpecifier> GetNugetDependencies(string projectFile, DotNetFramework targetFramework = null)
-        {
-            
-            
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(projectFile);
-            var result = new List<NugetPackageSpecifier>();
-            var packageReferences = xmlDoc.SelectNodes("//Project/ItemGroup/PackageReference");
-            if (packageReferences != null)
-            {
-                foreach (var item in packageReferences)
-                {
-                    var packageReference = item as XmlElement;
-                    var packageName = packageReference.Attributes["Include"].Value;
-                    var packageVersion = packageReference.Attributes["Version"].Value;
-                    result.Add(new NugetPackageSpecifier(packageName, packageVersion, bestTargetFramework));
-                }
-            }
-
-            return result;
-        }
-
-        private static IEnumerable<DotNetFramework> GetProjectTargetFrameworks(string projectFile)
-        {
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(projectFile);
-            var result = new List<DotNetFramework>();
-            var packageReferences = xmlDoc.SelectNodes("//Project/PropertyGroup/TargetFramework");
-            if (packageReferences != null)
-            {
-                foreach (var item in packageReferences)
-                {
-                    var targetFramework = item as XmlElement;
-                    result.Add(DotNetFramework.Parse(targetFramework.InnerText));
-                }
-            }
-
-            return result;
-        }
-        
-        private static IEnumerable<Compilation> CompileSolution(string solutionUrl)
-        {
-            MSBuildLocator.RegisterDefaults();
-            using MSBuildWorkspace workspace = MSBuildWorkspace.Create();
-
-            Solution solution = workspace.OpenSolutionAsync(solutionUrl).Result;
-            ProjectDependencyGraph projectGraph = solution.GetProjectDependencyGraph();
-
-            foreach (ProjectId projectId in projectGraph.GetTopologicallySortedProjects())
-            {
-                var project = solution.GetProject(projectId);
-
-                var additionalMetadataReferences = GetNugetDependencies(project.FilePath)
-                    .SelectMany(nugetDependency =>
-                    {
-                        return GetPathToNugetPacketDlls(nugetDependency);
-                    })
-                    .Select(dllFilePath => MetadataReference.CreateFromFile(dllFilePath));
-
-                project = project.AddMetadataReferences(additionalMetadataReferences);
-                
-                var compilationTask = project.GetCompilationAsync();
-                compilationTask.Wait();
-                Compilation projectCompilation = compilationTask.Result;
-                
-                if (null != projectCompilation && !string.IsNullOrEmpty(projectCompilation.AssemblyName))
-                {
-                    yield return projectCompilation;
-                }
-            }
-        }
-        
-        private static Compilation CompileProject(string solutionFilePath, string projectName)
-        {
-            return CompileSolution(solutionFilePath)
-                .First(compilation => compilation.AssemblyName == Path.GetFileNameWithoutExtension(projectName));
+            return GetEnumerator();
         }
     }
 }

@@ -4,20 +4,11 @@ namespace DebuggableSourceGenerators
 {
     public class Property
     {
-        public Property(string name, Lazy<IType> type)
-        {
-            Name = name;
-            Type = type;
-        }
-
-        public string Name { get; }
-        public Lazy<IType> Type { get; }
-
-        // TODO - are the getter / setter public, private, or protected?
-        
-        public override string ToString()
-        {
-            return $"{Type.Value} {Name} {{ get; }} {{ set; }}";
-        }
+        public bool IsStatic { get; init; }
+        public string Name { get; init; }
+        public Lazy<Type> Type { get; init; }
+        public Visibility GetterVisibility { get; init; }
+        public Visibility SetterVisibility { get; init; }
+        public bool IsVirtual { get; init; }
     }
 }

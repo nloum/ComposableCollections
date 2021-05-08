@@ -17,10 +17,8 @@ namespace DebuggableSourceGenerators.Tests
 
             var repoRoot = ioService.CurrentDirectory.Ancestors().First(x => (x / ".git").IsFolder());
             var solutionPath = repoRoot / "src" / "FluentSourceGenerators.sln";
-            var debuggableSourceGeneratorsProjectPath =
-                repoRoot / "src" / "DebuggableSourceGenerators" / "DebuggableSourceGenerators.csproj";
 
-            uut.AddProject(solutionPath, debuggableSourceGeneratorsProjectPath);
+            uut.AddSolution(solutionPath);
 
             var codeIndex = uut.Build();
 
@@ -42,10 +40,12 @@ namespace DebuggableSourceGenerators.Tests
             codeIndexClass.Should().NotBeNull();
 
             codeIndexClass.Constructors.Count.Should().Be(1);
-            codeIndexClass.Fields.Count.Should().Be(2);
+            codeIndexClass.Fields.Count.Should().Be(1);
             codeIndexClass.Indexers.Count.Should().Be(1);
             codeIndexClass.Properties.Count.Should().Be(3);
             codeIndexClass.Methods.Count.Should().Be(6);
+            codeIndexClass.Interfaces.Count.Should().Be(1);
+            codeIndexClass.Interfaces[0].Value.Identifier.Name.Should().Be("IEnumerable");
         }
         
         [TestMethod]
@@ -56,10 +56,8 @@ namespace DebuggableSourceGenerators.Tests
 
             var repoRoot = ioService.CurrentDirectory.Ancestors().First(x => (x / ".git").IsFolder());
             var solutionPath = repoRoot / "src" / "FluentSourceGenerators.sln";
-            var debuggableSourceGeneratorsProjectPath =
-                repoRoot / "src" / "DebuggableSourceGenerators" / "DebuggableSourceGenerators.csproj";
 
-            uut.AddProject(solutionPath, debuggableSourceGeneratorsProjectPath);
+            uut.AddSolution(solutionPath);
 
             var codeIndex = uut.Build();
 
@@ -76,15 +74,17 @@ namespace DebuggableSourceGenerators.Tests
 
             queryableType.Should().NotBeNull();
 
-            var codeIndexClass = queryableType as Class;
+            var queryable = queryableType as Class;
             
-            codeIndexClass.Should().NotBeNull();
+            queryable.Should().NotBeNull();
 
-            codeIndexClass.Constructors.Count.Should().Be(1);
-            codeIndexClass.Fields.Count.Should().Be(2);
-            codeIndexClass.Indexers.Count.Should().Be(0);
-            codeIndexClass.Properties.Count.Should().Be(3);
-            codeIndexClass.Methods.Count.Should().Be(2);
+            queryable.Constructors.Count.Should().Be(1);
+            queryable.Fields.Count.Should().Be(2);
+            queryable.Indexers.Count.Should().Be(0);
+            queryable.Properties.Count.Should().Be(3);
+            queryable.Methods.Count.Should().Be(2);
+            queryable.Interfaces.Count.Should().Be(4);
+            queryable.Interfaces[0].Value.Identifier.Name.Should().Be("IQueryable");
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 
 namespace DebuggableSourceGenerators
 {
@@ -6,5 +7,6 @@ namespace DebuggableSourceGenerators
     {
         public ImmutableList<Constructor> Constructors { get; init; }
         public ImmutableList<Field> Fields { get; init; }
+        public Lazy<Class> BaseClass { get; init; }
     }
 }

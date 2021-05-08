@@ -8,9 +8,11 @@ using ComposableCollections.Utilities;
 using Humanizer;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.MSBuild;
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
+using SimpleMonads;
 
 namespace DebuggableSourceGenerators
 {
@@ -61,25 +63,88 @@ namespace DebuggableSourceGenerators
             return codeIndexBuilder;
         }
 
-        public static CodeIndexBuilder AddSolution(this CodeIndexBuilder codeIndexBuilder, string solutionFilePath)
+        public static CodeIndexBuilder AddSolution(this CodeIndexBuilder codeIndexBuilder, string solutionFilePath, Func<string, bool> projectAssemblyNamePredicate = null)
         {
-            var compilations = CompileSolution(solutionFilePath);
-            foreach (var compilation in compilations)
+            if (projectAssemblyNamePredicate == null)
             {
-                codeIndexBuilder.AddCompilation(compilation);
+                projectAssemblyNamePredicate = _ => true;
             }
-
-            return codeIndexBuilder;
-        }
-        
-        public static CodeIndexBuilder AddProject(this CodeIndexBuilder codeIndexBuilder, string solutionFilePath, string projectFilePath, string projectAssemblyName = null)
-        {
-            projectAssemblyName ??= Path.GetFileNameWithoutExtension(projectFilePath);
             
-            var compilation = CompileProject(solutionFilePath, projectAssemblyName);
-            codeIndexBuilder.AddCompilation(compilation);
-            codeIndexBuilder.AddProjectNugetDependencies(projectFilePath);
+            using MSBuildWorkspace workspace = MSBuildWorkspace.Create();
 
+            var openSolutionTask = workspace.OpenSolutionAsync(solutionFilePath);
+            openSolutionTask.Wait();
+            Solution solution = openSolutionTask.Result;
+            ProjectDependencyGraph projectGraph = solution.GetProjectDependencyGraph();
+
+            foreach (ProjectId projectId in projectGraph.GetTopologicallySortedProjects())
+            {
+                var project = solution.GetProject(projectId);
+
+                var dllDependencies = GetNugetDependencies(project.FilePath)
+                    .SelectMany(nugetDependency =>
+                    {
+                        return GetProjectTargetFrameworks(project.FilePath)
+                            .SelectMany(targetFramework => GetPathToNugetPackageDlls(nugetDependency.packageName,
+                                nugetDependency.packageVersion, targetFramework));
+                    }).ToImmutableList();
+                
+                var additionalMetadataReferences = dllDependencies
+                    .Select(dllFilePath => MetadataReference.CreateFromFile(dllFilePath)).ToList();
+                
+                project = project.AddMetadataReferences(additionalMetadataReferences);
+                
+                var compilationTask = project.GetCompilationAsync();
+                compilationTask.Wait();
+                Compilation projectCompilation = compilationTask.Result;
+                
+                if (null != projectCompilation && !string.IsNullOrEmpty(projectCompilation.AssemblyName))
+                {
+                    if (projectAssemblyNamePredicate(projectCompilation.AssemblyName))
+                    {
+                         using (var pestream = new MemoryStream())
+                         using (var pdbstream = new MemoryStream())
+                         using (var xmldocstream = new MemoryStream())
+                         using (var win32resources = new MemoryStream())
+                         {
+                             var result = projectCompilation.Emit(pestream, pdbstream, xmldocstream, win32resources);
+                             
+                             if (!result.Success)
+                             {
+                                 var formatter = new DiagnosticFormatter();
+                                 var errors = result.Diagnostics.Where(diag => diag.Severity == DiagnosticSeverity.Error)
+                                     .ToImmutableList();
+                                 foreach (var diagnostic in errors)
+                                 {
+                                     var message = formatter.Format(diagnostic);
+                                     Console.WriteLine(message);
+                                 }
+                             }
+             
+                             pestream.Seek(0, SeekOrigin.Begin);
+                             pdbstream.Seek(0, SeekOrigin.Begin);
+                             xmldocstream.Seek(0, SeekOrigin.Begin);
+                             win32resources.Seek(0, SeekOrigin.Begin);
+                             var typeDefinitions = AssemblyDefinition
+                                 .ReadAssembly(pestream, new ReaderParameters()
+                                 {
+                                     InMemory = true,
+                                     ReadingMode = ReadingMode.Immediate,
+                                     SymbolStream = pdbstream,
+                                     ReadSymbols = true,
+                                 })
+                                 .MainModule
+                                 .Types;
+             
+                             foreach (var typeDefinition in typeDefinitions)
+                             {
+                                 codeIndexBuilder.AddType(typeDefinition);
+                             }
+                         }
+                    }
+                }
+            }
+            
             return codeIndexBuilder;
         }
 
@@ -136,14 +201,23 @@ namespace DebuggableSourceGenerators
             
             Lazy<Type> GetType(TypeReference typeRef)
             {
-                var typeDef = typeRef.Resolve();
-
-                if (typeDef == null)
+                TypeDefinition typeDef = null;
+                try
                 {
-                    return new Lazy<Type>(() => typeParameters[typeRef.Name].Value);
-                }
+                    typeDef = typeRef.Resolve();
+                    
+                    if (typeDef == null)
+                    {
+                        return new Lazy<Type>(() => typeParameters[typeRef.Name].Value);
+                    }
 
-                return codeIndexBuilder.GetOrAdd(typeDef);
+                    return codeIndexBuilder.GetOrAdd(typeDef);
+                }
+                catch (AssemblyResolutionException e)
+                {
+                    Console.WriteLine(e);
+                    return new Lazy<Type>(() => null);
+                }
             }
             
             if (typeDefinition.IsClass)
@@ -151,6 +225,8 @@ namespace DebuggableSourceGenerators
                 return codeIndexBuilder.GetOrAdd(identifier, () => new Class()
                 {
                     Identifier = identifier,
+                    BaseClass = new Lazy<Class>(() => (Class)codeIndexBuilder.GetOrAdd(typeDefinition.BaseType.Resolve()).Value),
+                    Interfaces = typeDefinition.Interfaces.Select(iface => new Lazy<Interface>(() => (Interface)codeIndexBuilder.GetOrAdd(iface.InterfaceType.Resolve()).Value)).ToImmutableList(),
                     Constructors = typeDefinition.GetConstructors().Select(constructor => new Constructor()
                     {
                         Parameters = constructor.Parameters.Select(parameter => new Parameter
@@ -205,6 +281,7 @@ namespace DebuggableSourceGenerators
                 return codeIndexBuilder.GetOrAdd(identifier, () => new Interface()
                 {
                     Identifier = identifier,
+                    Interfaces = typeDefinition.Interfaces.Select(iface => new Lazy<Interface>(() => (Interface)codeIndexBuilder.GetOrAdd(iface.InterfaceType.Resolve()).Value)).ToImmutableList(),
                     Indexers = typeDefinition.Properties.Where(prop => prop.HasParameters).Select(prop =>
                     {
                         return new Indexer
@@ -264,24 +341,15 @@ namespace DebuggableSourceGenerators
             return codeIndexBuilder;
         }
 
-        public static CodeIndexBuilder AddCompilation(this CodeIndexBuilder codeIndexBuilder, Compilation compilation)
-        {
-            foreach (var syntaxTree in compilation.SyntaxTrees)
-            {
-                var semanticModel = compilation.GetSemanticModel(syntaxTree);
-                var root = syntaxTree.GetRoot();
-                codeIndexBuilder.AddSyntaxNode(root, semanticModel);
-            }
-
-            return codeIndexBuilder;
-        }
-
         public static CodeIndexBuilder AddSyntaxNode(this CodeIndexBuilder codeIndexBuilder, SyntaxNode syntaxNode, SemanticModel semanticModel)
         {
             var symbol = semanticModel.GetDeclaredSymbol(syntaxNode) as INamedTypeSymbol;
             if (symbol != null)
             {
-                codeIndexBuilder.AddSymbol(symbol);
+                if (symbol is not IErrorTypeSymbol)
+                {
+                    codeIndexBuilder.AddSymbol(symbol);
+                }
             }
             
             foreach (var child in syntaxNode.ChildNodes())
@@ -292,13 +360,8 @@ namespace DebuggableSourceGenerators
             return codeIndexBuilder;
         }
 
-        public static CodeIndexBuilder AddSymbol(this CodeIndexBuilder codeIndexBuilder, INamedTypeSymbol symbol)
+        public static Lazy<Type> GetOrAdd(this CodeIndexBuilder codeIndexBuilder, INamedTypeSymbol symbol)
         {
-            if (!symbol.IsType)
-            {
-                return codeIndexBuilder;
-            }
-
             var typeIdentifier = new TypeIdentifier()
             {
                 Name = symbol.Name,
@@ -306,7 +369,17 @@ namespace DebuggableSourceGenerators
                 Arity = symbol.Arity,
             };
 
-            codeIndexBuilder.GetOrAdd(typeIdentifier, () =>
+            if (typeIdentifier.Name.Contains("<"))
+            {
+                int a = 3;
+            }
+
+            if (symbol is IErrorTypeSymbol)
+            {
+                int a = 3;
+            }
+
+            return codeIndexBuilder.GetOrAdd(typeIdentifier, () =>
             {
                 var fields = new List<Field>();
                 var methods = new List<Method>();
@@ -436,15 +509,69 @@ namespace DebuggableSourceGenerators
                     }
                 }
 
-                return new Class()
+                var baseTypes = symbol.Interfaces.ToList();
+                if (symbol.BaseType != null)
                 {
-                    Constructors = constructors.ToImmutableList(),
-                    Methods = methods.ToImmutableList(),
-                    Indexers = indexers.ToImmutableList(),
-                    Properties = properties.ToImmutableList(),
-                    Fields = fields.ToImmutableList(),
-                };
+                    baseTypes.Add(symbol.BaseType);
+                }
+
+                var interfaces = baseTypes.Where(x => x.TypeKind == TypeKind.Interface || (x.TypeKind == TypeKind.Error && x.Name.StartsWith("I")))
+                    .Select(type => new Lazy<Interface>(() =>
+                        (Interface)codeIndexBuilder.GetOrAdd(type).Value)).ToImmutableList();
+                var baseClass = baseTypes.Where(x => x.TypeKind == TypeKind.Class || (x.TypeKind == TypeKind.Error && !x.Name.StartsWith("I"))).Select(type => new Lazy<Class>(() => (Class)codeIndexBuilder.GetOrAdd(type).Value)).FirstOrDefault();
+
+                if (symbol.TypeKind == TypeKind.Class)
+                {
+                    return new Class()
+                    {
+                        Identifier = typeIdentifier,
+                        Interfaces = interfaces,
+                        BaseClass = baseClass,
+                        Constructors = constructors.ToImmutableList(),
+                        Methods = methods.ToImmutableList(),
+                        Indexers = indexers.ToImmutableList(),
+                        Properties = properties.ToImmutableList(),
+                        Fields = fields.ToImmutableList(),
+                    };
+                }
+                else if (symbol.TypeKind == TypeKind.Interface)
+                {
+                    return new Interface()
+                    {
+                        Identifier = typeIdentifier,
+                        Interfaces = interfaces,
+                        Methods = methods.ToImmutableList(),
+                        Indexers = indexers.ToImmutableList(),
+                        Properties = properties.ToImmutableList(),
+                    };
+                }
+                else if (symbol.TypeKind == TypeKind.Enum)
+                {
+                    return new Enum()
+                    {
+                        Identifier = typeIdentifier,
+                        Values = fields.Select(f => f.Name).ToImmutableList(),
+                    };
+                }
+                else if (symbol.TypeKind == TypeKind.Error)
+                {
+                    return null;
+                }
+                else
+                {
+                    throw new NotImplementedException($"No support for {symbol.TypeKind.ToString().Pluralize()} yet");
+                }
             });
+        }
+        
+        public static CodeIndexBuilder AddSymbol(this CodeIndexBuilder codeIndexBuilder, INamedTypeSymbol symbol)
+        {
+            if (!symbol.IsType)
+            {
+                return codeIndexBuilder;
+            }
+
+            codeIndexBuilder.GetOrAdd(symbol);
 
             return codeIndexBuilder;
         }
@@ -610,10 +737,10 @@ namespace DebuggableSourceGenerators
                             .SelectMany(targetFramework => GetPathToNugetPackageDlls(nugetDependency.packageName,
                                 nugetDependency.packageVersion, targetFramework));
                     }).ToImmutableList();
-
+                
                 var additionalMetadataReferences = dllDependencies
-                    .Select(dllFilePath => MetadataReference.CreateFromFile(dllFilePath));
-
+                    .Select(dllFilePath => MetadataReference.CreateFromFile(dllFilePath)).ToList();
+                
                 project = project.AddMetadataReferences(additionalMetadataReferences);
                 
                 var compilationTask = project.GetCompilationAsync();

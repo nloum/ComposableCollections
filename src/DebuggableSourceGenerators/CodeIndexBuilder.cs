@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.Linq;
 using ComposableCollections;
 using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Sources;
@@ -21,7 +22,40 @@ namespace DebuggableSourceGenerators
 
         public Lazy<Type> GetType(TypeIdentifier key)
         {
-            return new(() => _lazyTypes.GetValue(key).Value);
+            return new(() =>
+            {
+                if (_lazyTypes.TryGetValue(key, out var value))
+                {
+                    return value.Value;
+                }
+
+                if (string.IsNullOrWhiteSpace(key.Namespace))
+                {
+                    var matchingTypeIdentifiers = _lazyTypes.Keys.Where(x => x.Name == key.Name).ToImmutableList();
+                    if (matchingTypeIdentifiers.Count == 1)
+                    {
+                        return _lazyTypes[matchingTypeIdentifiers[0]].Value;
+                    }
+
+                    if (matchingTypeIdentifiers.Count > 1)
+                    {
+                        matchingTypeIdentifiers =
+                            matchingTypeIdentifiers.Where(x => x.Arity == key.Arity).ToImmutableList();
+                        
+                        if (matchingTypeIdentifiers.Count == 1)
+                        {
+                            return _lazyTypes[matchingTypeIdentifiers[0]].Value;
+                        }
+
+                        if (matchingTypeIdentifiers.Count > 1)
+                        {
+                            throw new InvalidOperationException($"Multiple types match {key}");
+                        }
+                    }
+                }
+                
+                throw new InvalidOperationException($"No types match {key}");
+            });
         }
 
         public Lazy<Type> GetOrAdd(TypeIdentifier key, Func<Type> value)

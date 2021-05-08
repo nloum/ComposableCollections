@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace DebuggableSourceGenerators
 {
@@ -62,6 +63,38 @@ namespace DebuggableSourceGenerators
                 }
                 _name = value;
             }
+        }
+
+        public override string ToString()
+        {
+            var result = new StringBuilder();
+            result.Append(Name);
+            if (Arity > 0)
+            {
+                result.Append('`');
+                result.Append(Arity.ToString());
+            }
+
+            if (Namespace != null)
+            {
+                result.Insert(0, '.');
+                result.Insert(0, Namespace);
+            }
+            
+            var resultString = result.ToString();
+            return resultString;
+        }
+
+        public virtual bool Equals(TypeIdentifier other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return _name == other._name && Namespace == other.Namespace && Arity == other.Arity;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(_name, Namespace, Arity);
         }
 
         public int Arity { get; init; }

@@ -6,8 +6,11 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
+using System.Runtime.Versioning;
+using System.Text.RegularExpressions;
 using System.Xml;
 using DebuggableSourceGenerators.NonLoadedAssembly;
+using DebuggableSourceGenerators.Reflection;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -26,7 +29,9 @@ namespace DebuggableSourceGenerators
         ISymbolService SymbolService;
         private INonLoadedAssemblyService NonLoadedAssemblyService;
         private TypeRegistryServiceImpl TypeRegistryService;
+        private IReflectionService ReflectionService;
         private List<Compilation> _compilations = new();
+        private HashSet<string> _assemblyFiles = new();
 
         public CodeIndex()
         {
@@ -45,6 +50,7 @@ namespace DebuggableSourceGenerators
 
                 return null;
             });
+            ReflectionService = new ReflectionService(TypeRegistryService);
             NonLoadedAssemblyService = new NonLoadedAssemblyService(TypeRegistryService);
         }
 
@@ -122,37 +128,54 @@ namespace DebuggableSourceGenerators
             return ResolveType(identifier);
         }
 
-        public void AddNugetPackage(string packageName, string packageVersion, string targetFramework)
+        public void AddNugetPackage(NugetPackageSpecifier packageSpecifier, bool includePackageDependencies = true)
         {
-            foreach (var assemblyFile in GetPathToNugetPacketDlls(packageName, packageVersion, targetFramework))
+            foreach (var assemblyFile in GetPathToNugetPacketDlls(packageSpecifier))
             {
                 if (File.Exists(assemblyFile))
                 {
                     AddAssemblyFile(assemblyFile);
                 }
             }
-        }
 
-        public void AddProjectNugetDependencies(string projectFile)
-        {
-            var projectTargetFrameworks = GetProjectTargetFrameworks(projectFile).ToImmutableList();
-            
-            foreach (var nugetDependency in GetNugetDependencies(projectFile))
+            foreach (var item in GetNugetPackageDependencies(packageSpecifier))
             {
-                foreach (var targetFramework in projectTargetFrameworks)
-                {
-                    AddNugetPackage(nugetDependency.packageName, nugetDependency.packageVersion, targetFramework);
-                }
+                AddNugetPackage(item);
             }
         }
 
-        public void AddProjectNugetDependencies(string projectFile, string targetFramework)
+        public IEnumerable<NugetPackageSpecifier> GetNugetPackageDependencies(NugetPackageSpecifier nugetPackageSpecifier)
         {
-            var projectTargetFrameworks = GetProjectTargetFrameworks(projectFile).ToImmutableList();
+            string homePath = (Environment.OSVersion.Platform == PlatformID.Unix || 
+                               Environment.OSVersion.Platform == PlatformID.MacOSX)
+                ? Environment.GetEnvironmentVariable("HOME")
+                : Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
+
+            var packageFolder = Path.Combine(homePath, ".nuget", "packages", nugetPackageSpecifier.PackageName, nugetPackageSpecifier.PackageVersion);
+
+            var nuspecFile = Directory.GetFiles(packageFolder, "*.nuspec").First();
             
-            foreach (var nugetDependency in GetNugetDependencies(projectFile))
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.Load(nuspecFile);
+            var targetFrameworks = xmlDoc.SelectNodes("//package/metadata/dependencies/group").Cast<XmlElement>()
+                .ToImmutableDictionary(x => x.Attributes["targetFramework"].Value.ToLower().TrimStart('.'), x =>
+                {
+                    var targetFramework = x.Attributes["targetFramework"].Value.ToLower().TrimStart('.');
+                    return x.SelectNodes("/dependency")
+                        .Cast<XmlElement>()
+                        .Select(xmlElement => new NugetPackageSpecifier(xmlElement.Attributes["id"].Value,
+                            xmlElement.Attributes["version"].Value, targetFramework))
+                        .ToImmutableList();
+                });
+
+            return targetFrameworks[nugetPackageSpecifier.TargetFramework];
+        }
+        
+        public void AddProjectNugetDependencies(string projectFile, string targetFramework = null)
+        {
+            foreach (var nugetDependency in GetNugetDependencies(projectFile, targetFramework))
             {
-                AddNugetPackage(nugetDependency.packageName, nugetDependency.packageVersion, targetFramework);
+                AddNugetPackage(nugetDependency);
             }
         }
 
@@ -171,9 +194,29 @@ namespace DebuggableSourceGenerators
             AddCompilation(compilation);
         }
 
+        public void AddAssembly(Assembly assembly)
+        {
+            ReflectionService.AddAllTypes(assembly);
+        }
+
         public void AddAssemblyFile(string assemblyFilePath)
         {
-            NonLoadedAssemblyService.AddAllTypes(assemblyFilePath);
+            if (_assemblyFiles.Contains(assemblyFilePath))
+            {
+                return;
+            }
+            
+            try
+            {
+                var assembly = Assembly.LoadFile(assemblyFilePath);
+                AddAssembly(assembly);
+            }
+            catch (Exception e)
+            {
+                // TODO - do something here
+            }
+            
+            //NonLoadedAssemblyService.AddAllTypes(assemblyFilePath);
         }
 
         public void AddCompilation(Compilation compilation)
@@ -237,24 +280,25 @@ namespace DebuggableSourceGenerators
                  _types[list.Key] = clazz;
              }
 
-            // foreach (var reference in compilation.References)
-            // {
-            //     if (reference.GetType().Name == "MetadataImageReference")
-            //     {
-            //         var filePathProperty = reference.GetType().GetProperty("FilePath");
-            //         var filePath = (string)filePathProperty.GetValue(reference);
-            //         var assembly = Assembly.LoadFile(filePath);
-            //         assembly.DefinedTypes
-            //         Console.WriteLine(filePath);
-            //     }
-            // }
-            
+             var assemblies = new List<Assembly>();
+             
             foreach (var reference in compilation.References)
             {
                 if (File.Exists(reference.Display))
                 {
-                    AddAssemblyFile(reference.Display);
+                    try
+                    {
+                        assemblies.Add(Assembly.LoadFile(reference.Display));
+                    }
+                    catch (BadImageFormatException e)
+                    {
+                    }
                 }
+            }
+
+            foreach (var assembly in assemblies)
+            {
+                AddAssembly(assembly);
             }
                 
             foreach (var symbol in compilation.GetSymbolsWithName(_ => true, SymbolFilter.Type))
@@ -270,15 +314,14 @@ namespace DebuggableSourceGenerators
             }
         }
         
-        private static IEnumerable<string> GetPathToNugetPacketDlls(string packageName, string packageVersion,
-            string targetFramework)
+        private static IEnumerable<string> GetPathToNugetPacketDlls(NugetPackageSpecifier packageSpecifier)
         {
             string homePath = (Environment.OSVersion.Platform == PlatformID.Unix || 
                                Environment.OSVersion.Platform == PlatformID.MacOSX)
                 ? Environment.GetEnvironmentVariable("HOME")
                 : Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
 
-            var packageFolder = Path.Combine(homePath, ".nuget", "packages", packageName, packageVersion, "lib", targetFramework);
+            var packageFolder = Path.Combine(homePath, ".nuget", "packages", packageSpecifier.PackageName, packageSpecifier.PackageVersion, "lib", packageSpecifier.TargetFramework);
 
             if (Directory.Exists(packageFolder))
             {
@@ -290,11 +333,13 @@ namespace DebuggableSourceGenerators
             return Enumerable.Empty<string>();
         }
 
-        private static IEnumerable<(string packageName, string packageVersion)> GetNugetDependencies(string projectFile)
+        private static IEnumerable<NugetPackageSpecifier> GetNugetDependencies(string projectFile, DotNetFramework targetFramework = null)
         {
+            
+            
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.Load(projectFile);
-            var result = new List<(string packageName, string packageVersion)>();
+            var result = new List<NugetPackageSpecifier>();
             var packageReferences = xmlDoc.SelectNodes("//Project/ItemGroup/PackageReference");
             if (packageReferences != null)
             {
@@ -303,25 +348,25 @@ namespace DebuggableSourceGenerators
                     var packageReference = item as XmlElement;
                     var packageName = packageReference.Attributes["Include"].Value;
                     var packageVersion = packageReference.Attributes["Version"].Value;
-                    result.Add((packageName, packageVersion));
+                    result.Add(new NugetPackageSpecifier(packageName, packageVersion, bestTargetFramework));
                 }
             }
 
             return result;
         }
 
-        private static IEnumerable<string> GetProjectTargetFrameworks(string projectFile)
+        private static IEnumerable<DotNetFramework> GetProjectTargetFrameworks(string projectFile)
         {
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.Load(projectFile);
-            var result = new List<string>();
+            var result = new List<DotNetFramework>();
             var packageReferences = xmlDoc.SelectNodes("//Project/PropertyGroup/TargetFramework");
             if (packageReferences != null)
             {
                 foreach (var item in packageReferences)
                 {
                     var targetFramework = item as XmlElement;
-                    result.Add(targetFramework.InnerText);
+                    result.Add(DotNetFramework.Parse(targetFramework.InnerText));
                 }
             }
 
@@ -343,9 +388,7 @@ namespace DebuggableSourceGenerators
                 var additionalMetadataReferences = GetNugetDependencies(project.FilePath)
                     .SelectMany(nugetDependency =>
                     {
-                        return GetProjectTargetFrameworks(project.FilePath)
-                            .SelectMany(targetFramework => GetPathToNugetPacketDlls(nugetDependency.packageName,
-                                nugetDependency.packageVersion, targetFramework));
+                        return GetPathToNugetPacketDlls(nugetDependency);
                     })
                     .Select(dllFilePath => MetadataReference.CreateFromFile(dllFilePath));
 

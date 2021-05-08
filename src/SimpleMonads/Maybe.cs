@@ -113,6 +113,16 @@ namespace SimpleMonads
         {
             return HasValue ? $"Some({Value})" : "None";
         }
+
+        public static implicit operator Maybe<T>(T value)
+        {
+            return new Maybe<T>(value);
+        }
+        
+        public static implicit operator T(Maybe<T> maybe)
+        {
+            return maybe.Value;
+        }
     }
 
     public static class Maybe

@@ -10,7 +10,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="LiveLinq" Version="1.1.0-alpha0186" />
+      <PackageReference Include="LiveLinq" Version="1.1.0-alpha0189" />
       <PackageReference Include="Markdig" Version="0.22.1" />
       <PackageReference Include="TreeLinq" Version="1.0.0-alpha0019" />
     </ItemGroup>

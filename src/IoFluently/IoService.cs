@@ -36,8 +36,6 @@ namespace IoFluently
             UpdateRoots();
         }
         
-        
-        
         public IoService(bool enableOpenFilesTracking) : base(new OpenFilesTrackingService(enableOpenFilesTracking), ShouldBeCaseSensitiveByDefault(), GetDefaultDirectorySeparatorForThisEnvironment(), Environment.NewLine)
         {
             PathObservationMethod = GetDefaultPathObservationMethod();

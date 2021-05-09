@@ -44,38 +44,34 @@ namespace DebuggableSourceGenerators.Tests.Write
         }
         
         [TestMethod]
-        public void ShouldSupportCreatingClassWithAStaticallyImplementedMethod()
+        public void ShouldSupportCreatingClassWithAStaticallyImplementedMethodFromInterface()
         {
             var classBuilder = new ClassBuilder()
             {
                 Name = "MyClass",
                 IncludeConstructorForAllProperties = true,
-                Properties =
-                {
-                    new Property()
-                    {
-                        Name = "Id",
-                        Type = typeof(Guid),
-                    },
-                    new Property()
-                    {
-                        Name = "Name",
-                        Type = typeof(string),
-                    },
-                },
-                // Add a default constructor for EntityFrameworkCore
+                Interfaces = { typeof(IHasMethod) },
+                StaticMethodImplementationSources = { typeof(HasMethodImpl) },
                 Constructors = { new Constructor() }
             };
-            
+
             var clazz = classBuilder.Build();
 
-            var expectedId = Guid.NewGuid();
-            var expectedName = "ARandomName";
-            var instance = Activator.CreateInstance(clazz, expectedId, expectedName);
-            var id = (Guid)clazz.GetProperty("Id").GetValue(instance);
-            id.Should().Be(expectedId);
-            var name = (string) clazz.GetProperty("Name").GetValue(instance);
-            name.Should().Be(expectedName);
+            var instance = (IHasMethod)Activator.CreateInstance(clazz);
+            instance.Hello().Should().Be("World!");
+        }
+
+        public interface IHasMethod
+        {
+            string Hello();
+        }
+
+        public static class HasMethodImpl
+        {
+            public static string Hello()
+            {
+                return "World!";
+            }
         }
 
         [TestMethod]

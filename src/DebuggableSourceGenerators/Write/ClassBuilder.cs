@@ -96,11 +96,11 @@ namespace DebuggableSourceGenerators.Write
 
             foreach (var method in Methods)
             {
-                var methodInfo = method.MethodToOverride ?? method.ImplementationMode.Item1.ValueOrDefault?.StaticMethod;
-                method.ImplementationMode.ForEach(_ =>
+                var methodInfo = method.MethodToOverride ?? method.Implementation.Item1.ValueOrDefault?.StaticMethod;
+                method.Implementation.ForEach(_ =>
                 {
                     throw new InvalidOperationException(
-                        $"There is supposed to be a constructor to setup the {method.Name} method but the implementation mode {method.ImplementationMode} is invalid for this");
+                        $"There is supposed to be a constructor to setup the {method.Name} method but the implementation mode {method.Implementation} is invalid for this");
                 }, delegateFromConstructorParameter =>
                 {
                     method.Field = typeBuilder.DefineField("_" + method.Name.Camelize(), GetDelegateType(methodInfo),
@@ -350,9 +350,9 @@ namespace DebuggableSourceGenerators.Write
 
             foreach (var method in Methods)
             {
-                method.Name ??= method.ImplementationMode.Item1.ValueOrDefault?.StaticMethod?.Name;
+                method.Name ??= method.Implementation.Item1.ValueOrDefault?.StaticMethod?.Name;
 
-                method.ImplementationMode.Item1.IfHasValue(value =>
+                method.Implementation.Item1.IfHasValue(value =>
                 {
                     foreach (var baseType in baseTypes)
                     {
@@ -414,7 +414,7 @@ namespace DebuggableSourceGenerators.Write
 
                         if (match)
                         {
-                            method.ImplementationMode = new MethodImplementationMode(new StaticMethodImplementation()
+                            method.Implementation = new Method.MethodImpl(new Method.MethodImpl.Static()
                             {
                                 StaticMethod = possibleImplementation
                             });
@@ -422,7 +422,7 @@ namespace DebuggableSourceGenerators.Write
                         }
                     }
 
-                    if (method.ImplementationMode.Item1.HasValue)
+                    if (method.Implementation?.Item1?.HasValue == true)
                     {
                         break;
                     }
@@ -433,7 +433,7 @@ namespace DebuggableSourceGenerators.Write
 
             foreach (var method in Methods)
             {
-                method.ImplementationMode.ForEach(staticMethodImplementation =>
+                method.Implementation.ForEach(staticMethodImplementation =>
                 {
                     method.Name ??= staticMethodImplementation.StaticMethod.Name;
 

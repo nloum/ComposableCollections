@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using System.Xml;
 using Humanizer;
 using Microsoft.Build.Locator;
@@ -10,6 +12,12 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
+using NuGet.Common;
+using NuGet.Packaging.Core;
+using NuGet.Protocol;
+using NuGet.Protocol.Core.Types;
+using NuGet.Versioning;
+using ILogger = Microsoft.Build.Framework.ILogger;
 
 namespace DebuggableSourceGenerators.Read
 {
@@ -99,49 +107,65 @@ namespace DebuggableSourceGenerators.Read
                 {
                     if (projectAssemblyNamePredicate(projectCompilation.AssemblyName))
                     {
-                         using (var pestream = new MemoryStream())
-                         using (var pdbstream = new MemoryStream())
-                         using (var xmldocstream = new MemoryStream())
-                         using (var win32resources = new MemoryStream())
-                         {
-                             var result = projectCompilation.Emit(pestream, pdbstream, xmldocstream, win32resources);
-                             
-                             if (!result.Success)
-                             {
-                                 var formatter = new DiagnosticFormatter();
-                                 var errors = result.Diagnostics.Where(diag => diag.Severity == DiagnosticSeverity.Error)
-                                     .ToImmutableList();
-                                 foreach (var diagnostic in errors)
-                                 {
-                                     var message = formatter.Format(diagnostic);
-                                     Console.WriteLine(message);
-                                 }
-                             }
-             
-                             pestream.Seek(0, SeekOrigin.Begin);
-                             pdbstream.Seek(0, SeekOrigin.Begin);
-                             xmldocstream.Seek(0, SeekOrigin.Begin);
-                             win32resources.Seek(0, SeekOrigin.Begin);
-                             var typeDefinitions = AssemblyDefinition
-                                 .ReadAssembly(pestream, new ReaderParameters()
-                                 {
-                                     InMemory = true,
-                                     ReadingMode = ReadingMode.Immediate,
-                                     SymbolStream = pdbstream,
-                                     ReadSymbols = true,
-                                 })
-                                 .MainModule
-                                 .Types;
-             
-                             foreach (var typeDefinition in typeDefinitions)
-                             {
-                                 codeIndexBuilder.AddType(typeDefinition);
-                             }
-                         }
+                        codeIndexBuilder.AddCompilation(projectCompilation);
+                        codeIndexBuilder.AddProjectNugetDependencies(project.FilePath);
+
+                        // using (var pestream = new MemoryStream())
+                        // using (var pdbstream = new MemoryStream())
+                        // using (var xmldocstream = new MemoryStream())
+                        // using (var win32resources = new MemoryStream())
+                        // {
+                        //     var result = projectCompilation.Emit(pestream, pdbstream, xmldocstream, win32resources);
+                        //     
+                        //     if (!result.Success)
+                        //     {
+                        //         var formatter = new DiagnosticFormatter();
+                        //         var errors = result.Diagnostics.Where(diag => diag.Severity == DiagnosticSeverity.Error)
+                        //             .ToImmutableList();
+                        //         foreach (var diagnostic in errors)
+                        //         {
+                        //             var message = formatter.Format(diagnostic);
+                        //             Console.WriteLine(message);
+                        //         }
+                        //     }
+                        //
+                        //     pestream.Seek(0, SeekOrigin.Begin);
+                        //     pdbstream.Seek(0, SeekOrigin.Begin);
+                        //     xmldocstream.Seek(0, SeekOrigin.Begin);
+                        //     win32resources.Seek(0, SeekOrigin.Begin);
+                        //     var typeDefinitions = AssemblyDefinition
+                        //         .ReadAssembly(pestream, new ReaderParameters()
+                        //         {
+                        //             InMemory = true,
+                        //             ReadingMode = ReadingMode.Immediate,
+                        //             SymbolStream = pdbstream,
+                        //             ReadSymbols = true,
+                        //         })
+                        //         .MainModule
+                        //         .Types;
+                        //
+                        //     foreach (var typeDefinition in typeDefinitions)
+                        //     {
+                        //         codeIndexBuilder.AddType(typeDefinition);
+                        //     }
+                        // }
                     }
                 }
             }
             
+            return codeIndexBuilder;
+        }
+        
+        
+        public static CodeIndexBuilder AddCompilation(this CodeIndexBuilder codeIndexBuilder, Compilation compilation)
+        {
+            foreach (var syntaxTree in compilation.SyntaxTrees)
+            {
+                var semanticModel = compilation.GetSemanticModel(syntaxTree);
+                var root = syntaxTree.GetRoot();
+                codeIndexBuilder.AddSyntaxNode(root, semanticModel);
+            }
+
             return codeIndexBuilder;
         }
 
@@ -357,24 +381,25 @@ namespace DebuggableSourceGenerators.Read
             return codeIndexBuilder;
         }
 
+        public static string GetFullNamespace(this INamespaceSymbol namespaceSymbol)
+        {
+            if (namespaceSymbol.IsGlobalNamespace)
+            {
+                return "";
+            }
+            
+            var result = namespaceSymbol.ToString();
+            return result;
+        }
+        
         public static Lazy<Type> GetOrAdd(this CodeIndexBuilder codeIndexBuilder, INamedTypeSymbol symbol)
         {
             var typeIdentifier = new TypeIdentifier()
             {
                 Name = symbol.Name,
-                Namespace = symbol.ContainingNamespace.Name,
+                Namespace = GetFullNamespace(symbol.ContainingNamespace),
                 Arity = symbol.Arity,
             };
-
-            if (typeIdentifier.Name.Contains("<"))
-            {
-                int a = 3;
-            }
-
-            if (symbol is IErrorTypeSymbol)
-            {
-                int a = 3;
-            }
 
             return codeIndexBuilder.GetOrAdd(typeIdentifier, () =>
             {
@@ -514,7 +539,10 @@ namespace DebuggableSourceGenerators.Read
 
                 var interfaces = baseTypes.Where(x => x.TypeKind == TypeKind.Interface || (x.TypeKind == TypeKind.Error && x.Name.StartsWith("I")))
                     .Select(type => new Lazy<Interface>(() =>
-                        (Interface)codeIndexBuilder.GetOrAdd(type).Value)).ToImmutableList();
+                    {
+                        var result = (Interface) codeIndexBuilder.GetOrAdd(type).Value;
+                        return result;
+                    })).ToImmutableList();
                 var baseClass = baseTypes.Where(x => x.TypeKind == TypeKind.Class || (x.TypeKind == TypeKind.Error && !x.Name.StartsWith("I"))).Select(type => new Lazy<Class>(() => (Class)codeIndexBuilder.GetOrAdd(type).Value)).FirstOrDefault();
 
                 if (symbol.TypeKind == TypeKind.Class)
@@ -584,6 +612,32 @@ namespace DebuggableSourceGenerators.Read
 
             if (!Directory.Exists(packageFolder))
             {
+                var logger = NullLogger.Instance;
+                CancellationToken cancellationToken = CancellationToken.None;
+                
+                var cache = new SourceCacheContext();
+                var repository = Repository.Factory.GetCoreV3("https://api.nuget.org/v3/index.json");
+                var resource = repository.GetResourceAsync<PackageMetadataResource>().WaitForResult();
+
+                var pkgId = new PackageIdentity(packageName, NuGetVersion.Parse(packageVersion));
+                
+                var package = resource.GetMetadataAsync(
+                    pkgId,
+                    cache,
+                    logger,
+                    cancellationToken).WaitForResult();
+
+                // foreach (IPackageSearchMetadata package in packages)
+                // {
+                    Console.WriteLine($"Version: {package.Identity.Version}");
+                    Console.WriteLine($"Listed: {package.IsListed}");
+                    Console.WriteLine($"Tags: {package.Tags}");
+                    Console.WriteLine($"Description: {package.Description}");
+                // }
+
+                // TODO - is this okay?
+                return new[] {"netstandard2.0"};
+                
                 return Enumerable.Empty<string>();
             }
             

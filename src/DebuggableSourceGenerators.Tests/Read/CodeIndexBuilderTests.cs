@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using DebuggableSourceGenerators.Read;
 using FluentAssertions;
@@ -25,11 +26,11 @@ namespace DebuggableSourceGenerators.Tests
 
             var codeIndexTypeId = new TypeIdentifier()
             {
-                Namespace = "DebuggableSourceGenerators",
+                Namespace = "DebuggableSourceGenerators.Read",
                 Name = "CodeIndex",
                 Arity = 0
             };
-            
+
             codeIndex.ContainsKey(codeIndexTypeId).Should().BeTrue();
 
             var codeIndexType = codeIndex[codeIndexTypeId];

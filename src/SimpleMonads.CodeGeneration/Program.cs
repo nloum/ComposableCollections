@@ -73,6 +73,8 @@ namespace SimpleMonads.CodeGeneration
 
             var genericArgNamesA = genericArgNames.Select(x => x + "A").ToList();
             var genericArgNamesB = genericArgNames.Select(x => x + "B").ToList();
+            var genericArgNamesString = string.Join(", ", genericArgNames);
+            var baseConstraints = string.Join(" ", genericArgNames.Select(arg => $"where {arg} : TBase"));
 
             if (part == CodePart.Interface)
             {
@@ -80,13 +82,17 @@ namespace SimpleMonads.CodeGeneration
                 writer.WriteLine(string.Join("\n", interfaceProperties));
                 writer.WriteLine("object Value { get; }");
                 for (var i = arity + 1; i <= maxArity; i++) GenerateOrDeclaration(writer, arity, i);
+                writer.WriteLine($"public interface ICast<out TBase> : IEither<{genericArgNamesString}> {{");
+                writer.WriteLine("new TBase Value { get; }");
+                writer.WriteLine("}");
                 writer.WriteLine("}");
             }
 
             if (part == CodePart.Class)
             {
+                GenerateCastClass(writer, arity, genericArgNames);
                 writer.WriteLine(
-                    $"public class Either<{string.Join(", ", genericArgNames)}> : IEither<{string.Join(", ", genericArgNames)}>, IEquatable<IEither<{string.Join(", ", genericArgNames)}>>\n{{");
+                    $"public class Either<{string.Join(", ", genericArgNames)}> : IEither<{genericArgNamesString}>, IEquatable<IEither<{genericArgNamesString}>>\n{{");
                 writer.WriteLine(string.Join("\n", constructors));
                 writer.WriteLine(string.Join("\n", classProperties));
                 GenerateValue(writer, arity);
@@ -94,6 +100,7 @@ namespace SimpleMonads.CodeGeneration
                 GenerateEqualityMembers(writer, arity);
                 GenerateToString(writer, arity);
                 GenerateImplicitOperators(writer, arity, genericArgNames);
+                GenerateCastMethod(writer, arity, genericArgNames);
                 writer.WriteLine("}");
             }
 
@@ -110,6 +117,33 @@ namespace SimpleMonads.CodeGeneration
 
                 writer.WriteLine("}");
             }
+        }
+
+        private static void GenerateCastClass(TextWriter writer, int arity, List<string> genericArgNames)
+        {
+            var baseConstraints = string.Join(" ", genericArgNames.Select(arg => $"where {arg} : TBase"));
+            var genericArgNamesString = string.Join(", ", genericArgNames);
+            writer.WriteLine($"internal class CastImpl<TBase, {genericArgNamesString}> : Either<{genericArgNamesString}>, IEither<{genericArgNamesString}>.ICast<TBase> {{");
+            foreach(var genericArgName in genericArgNames)
+            {
+                writer.WriteLine($"public CastImpl({genericArgName} item) : base(item) {{ }}");
+            }
+            writer.WriteLine("public new TBase Value => (TBase)base.Value;");
+            writer.WriteLine("}");
+        }
+        
+        private static void GenerateCastMethod(TextWriter writer, int arity, List<string> genericArgNames)
+        {
+            var genericArgNamesString = string.Join(", ", genericArgNames);
+            writer.WriteLine($"public IEither<{genericArgNamesString}>.ICast<TBase> Cast<TBase>() {{");
+            for (var i = 1; i <= arity; i++)
+            {
+                writer.WriteLine($"if (Item{i}.HasValue) {{");
+                writer.WriteLine($"return new CastImpl<TBase, {genericArgNamesString}>(Item{i}.Value);");
+                writer.WriteLine("}");
+            }
+            writer.WriteLine("throw new InvalidOperationException(\"None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?\");");
+            writer.WriteLine("}");
         }
 
         private static void GenerateImplicitOperators(TextWriter writer, int arity, List<string> genericArgNames)
@@ -180,7 +214,7 @@ namespace SimpleMonads.CodeGeneration
                 writer.WriteLine("return $\"{Utility.ConvertToCSharpTypeName(typeof(Either<" + genericParameters + ">))}({Utility.ConvertToCSharpTypeName(typeof(T" + (i + 1) + "))} Item" + (i+1) + ": {Item" + (i+1) + ".Value})\";");
                 writer.WriteLine("}");
             }
-            writer.WriteLine("throw new InvalidOperationException(\"None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class?\");");
+            writer.WriteLine("throw new InvalidOperationException(\"None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?\");");
             writer.WriteLine("}");
         }
 

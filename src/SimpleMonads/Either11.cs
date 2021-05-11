@@ -1,6 +1,20 @@
 using System;
 
 namespace SimpleMonads {
+internal class CastImpl<TBase, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> : Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>, IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>.ICast<TBase> {
+public CastImpl(T1 item) : base(item) { }
+public CastImpl(T2 item) : base(item) { }
+public CastImpl(T3 item) : base(item) { }
+public CastImpl(T4 item) : base(item) { }
+public CastImpl(T5 item) : base(item) { }
+public CastImpl(T6 item) : base(item) { }
+public CastImpl(T7 item) : base(item) { }
+public CastImpl(T8 item) : base(item) { }
+public CastImpl(T9 item) : base(item) { }
+public CastImpl(T10 item) : base(item) { }
+public CastImpl(T11 item) : base(item) { }
+public new TBase Value => (TBase)base.Value;
+}
 public class Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> : IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>, IEquatable<IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>>
 {
 public Either(T1 item1) {
@@ -294,7 +308,7 @@ return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, 
 if (Item11.HasValue) {
 return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>))}({Utility.ConvertToCSharpTypeName(typeof(T11))} Item11: {Item11.Value})";
 }
-throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class?");
+throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }
 public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(T1 t1) {
 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(t1);
@@ -394,6 +408,42 @@ return either.Item11.Value;
 }
 public static implicit operator Maybe<T11>(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> either) {
 return (Maybe<T11>)either.Item11;
+}
+public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>.ICast<TBase> Cast<TBase>() {
+if (Item1.HasValue) {
+return new CastImpl<TBase, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Item1.Value);
+}
+if (Item2.HasValue) {
+return new CastImpl<TBase, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Item2.Value);
+}
+if (Item3.HasValue) {
+return new CastImpl<TBase, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Item3.Value);
+}
+if (Item4.HasValue) {
+return new CastImpl<TBase, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Item4.Value);
+}
+if (Item5.HasValue) {
+return new CastImpl<TBase, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Item5.Value);
+}
+if (Item6.HasValue) {
+return new CastImpl<TBase, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Item6.Value);
+}
+if (Item7.HasValue) {
+return new CastImpl<TBase, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Item7.Value);
+}
+if (Item8.HasValue) {
+return new CastImpl<TBase, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Item8.Value);
+}
+if (Item9.HasValue) {
+return new CastImpl<TBase, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Item9.Value);
+}
+if (Item10.HasValue) {
+return new CastImpl<TBase, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Item10.Value);
+}
+if (Item11.HasValue) {
+return new CastImpl<TBase, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Item11.Value);
+}
+throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }
 }
 }

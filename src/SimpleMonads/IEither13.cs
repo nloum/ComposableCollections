@@ -18,5 +18,8 @@ object Value { get; }
 IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Or<T14>();
 IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Or<T14, T15>();
 IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Or<T14, T15, T16>();
+public interface ICast<out TBase> : IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> {
+new TBase Value { get; }
+}
 }
 }

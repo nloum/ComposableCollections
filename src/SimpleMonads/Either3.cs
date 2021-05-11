@@ -1,6 +1,12 @@
 using System;
 
 namespace SimpleMonads {
+internal class CastImpl<TBase, T1, T2, T3> : Either<T1, T2, T3>, IEither<T1, T2, T3>.ICast<TBase> {
+public CastImpl(T1 item) : base(item) { }
+public CastImpl(T2 item) : base(item) { }
+public CastImpl(T3 item) : base(item) { }
+public new TBase Value => (TBase)base.Value;
+}
 public class Either<T1, T2, T3> : IEither<T1, T2, T3>, IEquatable<IEither<T1, T2, T3>>
 {
 public Either(T1 item1) {
@@ -214,7 +220,7 @@ return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3>))}({Utility.
 if (Item3.HasValue) {
 return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3>))}({Utility.ConvertToCSharpTypeName(typeof(T3))} Item3: {Item3.Value})";
 }
-throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class?");
+throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }
 public static implicit operator Either<T1, T2, T3>(T1 t1) {
 return new Either<T1, T2, T3>(t1);
@@ -242,6 +248,18 @@ return either.Item3.Value;
 }
 public static implicit operator Maybe<T3>(Either<T1, T2, T3> either) {
 return (Maybe<T3>)either.Item3;
+}
+public IEither<T1, T2, T3>.ICast<TBase> Cast<TBase>() {
+if (Item1.HasValue) {
+return new CastImpl<TBase, T1, T2, T3>(Item1.Value);
+}
+if (Item2.HasValue) {
+return new CastImpl<TBase, T1, T2, T3>(Item2.Value);
+}
+if (Item3.HasValue) {
+return new CastImpl<TBase, T1, T2, T3>(Item3.Value);
+}
+throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }
 }
 }

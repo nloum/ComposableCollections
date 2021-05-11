@@ -3,7 +3,7 @@ using System;
 namespace SimpleMonads {
 public static class Either11Extensions
 {
-public static IEither<T1B, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Select1<T1A, T1B, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(IEither<T1A, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> either, Func<T1A, T1B> selector)
+public static SubTypesOf<object>.IEither<T1B, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Select1<TBase, T1A, T1B, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(SubTypesOf<TBase>.IEither<T1A, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> either, Func<T1A, T1B> selector) where T1A : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6 : TBase where T7 : TBase where T8 : TBase where T9 : TBase where T10 : TBase where T11 : TBase
 {
 if (either.Item1.HasValue) {
 return new Either<T1B, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(selector(either.Item1.Value));
@@ -42,7 +42,7 @@ else {
 throw new InvalidOperationException();
 }
 }
-public static IEither<T1, T2B, T3, T4, T5, T6, T7, T8, T9, T10, T11> Select2<T1, T2A, T2B, T3, T4, T5, T6, T7, T8, T9, T10, T11>(IEither<T1, T2A, T3, T4, T5, T6, T7, T8, T9, T10, T11> either, Func<T2A, T2B> selector)
+public static SubTypesOf<object>.IEither<T1, T2B, T3, T4, T5, T6, T7, T8, T9, T10, T11> Select2<TBase, T1, T2A, T2B, T3, T4, T5, T6, T7, T8, T9, T10, T11>(SubTypesOf<TBase>.IEither<T1, T2A, T3, T4, T5, T6, T7, T8, T9, T10, T11> either, Func<T2A, T2B> selector) where T1 : TBase where T2A : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6 : TBase where T7 : TBase where T8 : TBase where T9 : TBase where T10 : TBase where T11 : TBase
 {
 if (either.Item1.HasValue) {
 return new Either<T1, T2B, T3, T4, T5, T6, T7, T8, T9, T10, T11>(either.Item1.Value);
@@ -81,7 +81,7 @@ else {
 throw new InvalidOperationException();
 }
 }
-public static IEither<T1, T2, T3B, T4, T5, T6, T7, T8, T9, T10, T11> Select3<T1, T2, T3A, T3B, T4, T5, T6, T7, T8, T9, T10, T11>(IEither<T1, T2, T3A, T4, T5, T6, T7, T8, T9, T10, T11> either, Func<T3A, T3B> selector)
+public static SubTypesOf<object>.IEither<T1, T2, T3B, T4, T5, T6, T7, T8, T9, T10, T11> Select3<TBase, T1, T2, T3A, T3B, T4, T5, T6, T7, T8, T9, T10, T11>(SubTypesOf<TBase>.IEither<T1, T2, T3A, T4, T5, T6, T7, T8, T9, T10, T11> either, Func<T3A, T3B> selector) where T1 : TBase where T2 : TBase where T3A : TBase where T4 : TBase where T5 : TBase where T6 : TBase where T7 : TBase where T8 : TBase where T9 : TBase where T10 : TBase where T11 : TBase
 {
 if (either.Item1.HasValue) {
 return new Either<T1, T2, T3B, T4, T5, T6, T7, T8, T9, T10, T11>(either.Item1.Value);
@@ -120,7 +120,7 @@ else {
 throw new InvalidOperationException();
 }
 }
-public static IEither<T1, T2, T3, T4B, T5, T6, T7, T8, T9, T10, T11> Select4<T1, T2, T3, T4A, T4B, T5, T6, T7, T8, T9, T10, T11>(IEither<T1, T2, T3, T4A, T5, T6, T7, T8, T9, T10, T11> either, Func<T4A, T4B> selector)
+public static SubTypesOf<object>.IEither<T1, T2, T3, T4B, T5, T6, T7, T8, T9, T10, T11> Select4<TBase, T1, T2, T3, T4A, T4B, T5, T6, T7, T8, T9, T10, T11>(SubTypesOf<TBase>.IEither<T1, T2, T3, T4A, T5, T6, T7, T8, T9, T10, T11> either, Func<T4A, T4B> selector) where T1 : TBase where T2 : TBase where T3 : TBase where T4A : TBase where T5 : TBase where T6 : TBase where T7 : TBase where T8 : TBase where T9 : TBase where T10 : TBase where T11 : TBase
 {
 if (either.Item1.HasValue) {
 return new Either<T1, T2, T3, T4B, T5, T6, T7, T8, T9, T10, T11>(either.Item1.Value);
@@ -159,7 +159,7 @@ else {
 throw new InvalidOperationException();
 }
 }
-public static IEither<T1, T2, T3, T4, T5B, T6, T7, T8, T9, T10, T11> Select5<T1, T2, T3, T4, T5A, T5B, T6, T7, T8, T9, T10, T11>(IEither<T1, T2, T3, T4, T5A, T6, T7, T8, T9, T10, T11> either, Func<T5A, T5B> selector)
+public static SubTypesOf<object>.IEither<T1, T2, T3, T4, T5B, T6, T7, T8, T9, T10, T11> Select5<TBase, T1, T2, T3, T4, T5A, T5B, T6, T7, T8, T9, T10, T11>(SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5A, T6, T7, T8, T9, T10, T11> either, Func<T5A, T5B> selector) where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5A : TBase where T6 : TBase where T7 : TBase where T8 : TBase where T9 : TBase where T10 : TBase where T11 : TBase
 {
 if (either.Item1.HasValue) {
 return new Either<T1, T2, T3, T4, T5B, T6, T7, T8, T9, T10, T11>(either.Item1.Value);
@@ -198,7 +198,7 @@ else {
 throw new InvalidOperationException();
 }
 }
-public static IEither<T1, T2, T3, T4, T5, T6B, T7, T8, T9, T10, T11> Select6<T1, T2, T3, T4, T5, T6A, T6B, T7, T8, T9, T10, T11>(IEither<T1, T2, T3, T4, T5, T6A, T7, T8, T9, T10, T11> either, Func<T6A, T6B> selector)
+public static SubTypesOf<object>.IEither<T1, T2, T3, T4, T5, T6B, T7, T8, T9, T10, T11> Select6<TBase, T1, T2, T3, T4, T5, T6A, T6B, T7, T8, T9, T10, T11>(SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6A, T7, T8, T9, T10, T11> either, Func<T6A, T6B> selector) where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6A : TBase where T7 : TBase where T8 : TBase where T9 : TBase where T10 : TBase where T11 : TBase
 {
 if (either.Item1.HasValue) {
 return new Either<T1, T2, T3, T4, T5, T6B, T7, T8, T9, T10, T11>(either.Item1.Value);
@@ -237,7 +237,7 @@ else {
 throw new InvalidOperationException();
 }
 }
-public static IEither<T1, T2, T3, T4, T5, T6, T7B, T8, T9, T10, T11> Select7<T1, T2, T3, T4, T5, T6, T7A, T7B, T8, T9, T10, T11>(IEither<T1, T2, T3, T4, T5, T6, T7A, T8, T9, T10, T11> either, Func<T7A, T7B> selector)
+public static SubTypesOf<object>.IEither<T1, T2, T3, T4, T5, T6, T7B, T8, T9, T10, T11> Select7<TBase, T1, T2, T3, T4, T5, T6, T7A, T7B, T8, T9, T10, T11>(SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7A, T8, T9, T10, T11> either, Func<T7A, T7B> selector) where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6 : TBase where T7A : TBase where T8 : TBase where T9 : TBase where T10 : TBase where T11 : TBase
 {
 if (either.Item1.HasValue) {
 return new Either<T1, T2, T3, T4, T5, T6, T7B, T8, T9, T10, T11>(either.Item1.Value);
@@ -276,7 +276,7 @@ else {
 throw new InvalidOperationException();
 }
 }
-public static IEither<T1, T2, T3, T4, T5, T6, T7, T8B, T9, T10, T11> Select8<T1, T2, T3, T4, T5, T6, T7, T8A, T8B, T9, T10, T11>(IEither<T1, T2, T3, T4, T5, T6, T7, T8A, T9, T10, T11> either, Func<T8A, T8B> selector)
+public static SubTypesOf<object>.IEither<T1, T2, T3, T4, T5, T6, T7, T8B, T9, T10, T11> Select8<TBase, T1, T2, T3, T4, T5, T6, T7, T8A, T8B, T9, T10, T11>(SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8A, T9, T10, T11> either, Func<T8A, T8B> selector) where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6 : TBase where T7 : TBase where T8A : TBase where T9 : TBase where T10 : TBase where T11 : TBase
 {
 if (either.Item1.HasValue) {
 return new Either<T1, T2, T3, T4, T5, T6, T7, T8B, T9, T10, T11>(either.Item1.Value);
@@ -315,7 +315,7 @@ else {
 throw new InvalidOperationException();
 }
 }
-public static IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9B, T10, T11> Select9<T1, T2, T3, T4, T5, T6, T7, T8, T9A, T9B, T10, T11>(IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9A, T10, T11> either, Func<T9A, T9B> selector)
+public static SubTypesOf<object>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9B, T10, T11> Select9<TBase, T1, T2, T3, T4, T5, T6, T7, T8, T9A, T9B, T10, T11>(SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9A, T10, T11> either, Func<T9A, T9B> selector) where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6 : TBase where T7 : TBase where T8 : TBase where T9A : TBase where T10 : TBase where T11 : TBase
 {
 if (either.Item1.HasValue) {
 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9B, T10, T11>(either.Item1.Value);
@@ -354,7 +354,7 @@ else {
 throw new InvalidOperationException();
 }
 }
-public static IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10B, T11> Select10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10A, T10B, T11>(IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10A, T11> either, Func<T10A, T10B> selector)
+public static SubTypesOf<object>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10B, T11> Select10<TBase, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10A, T10B, T11>(SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10A, T11> either, Func<T10A, T10B> selector) where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6 : TBase where T7 : TBase where T8 : TBase where T9 : TBase where T10A : TBase where T11 : TBase
 {
 if (either.Item1.HasValue) {
 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10B, T11>(either.Item1.Value);
@@ -393,7 +393,7 @@ else {
 throw new InvalidOperationException();
 }
 }
-public static IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11B> Select11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11A, T11B>(IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11A> either, Func<T11A, T11B> selector)
+public static SubTypesOf<object>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11B> Select11<TBase, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11A, T11B>(SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11A> either, Func<T11A, T11B> selector) where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6 : TBase where T7 : TBase where T8 : TBase where T9 : TBase where T10 : TBase where T11A : TBase
 {
 if (either.Item1.HasValue) {
 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11B>(either.Item1.Value);
@@ -432,7 +432,7 @@ else {
 throw new InvalidOperationException();
 }
 }
-public static IEither<T1B, T2B, T3B, T4B, T5B, T6B, T7B, T8B, T9B, T10B, T11B> Select<T1A, T2A, T3A, T4A, T5A, T6A, T7A, T8A, T9A, T10A, T11A, T1B, T2B, T3B, T4B, T5B, T6B, T7B, T8B, T9B, T10B, T11B>(this IEither<T1A, T2A, T3A, T4A, T5A, T6A, T7A, T8A, T9A, T10A, T11A> input, Func<T1A, T1B> selector1, Func<T2A, T2B> selector2, Func<T3A, T3B> selector3, Func<T4A, T4B> selector4, Func<T5A, T5B> selector5, Func<T6A, T6B> selector6, Func<T7A, T7B> selector7, Func<T8A, T8B> selector8, Func<T9A, T9B> selector9, Func<T10A, T10B> selector10, Func<T11A, T11B> selector11) {
+public static SubTypesOf<object>.IEither<T1B, T2B, T3B, T4B, T5B, T6B, T7B, T8B, T9B, T10B, T11B> Select<TBase, T1A, T2A, T3A, T4A, T5A, T6A, T7A, T8A, T9A, T10A, T11A, T1B, T2B, T3B, T4B, T5B, T6B, T7B, T8B, T9B, T10B, T11B>(this SubTypesOf<TBase>.IEither<T1A, T2A, T3A, T4A, T5A, T6A, T7A, T8A, T9A, T10A, T11A> input, Func<T1A, T1B> selector1, Func<T2A, T2B> selector2, Func<T3A, T3B> selector3, Func<T4A, T4B> selector4, Func<T5A, T5B> selector5, Func<T6A, T6B> selector6, Func<T7A, T7B> selector7, Func<T8A, T8B> selector8, Func<T9A, T9B> selector9, Func<T10A, T10B> selector10, Func<T11A, T11B> selector11) where T1A : TBase where T2A : TBase where T3A : TBase where T4A : TBase where T5A : TBase where T6A : TBase where T7A : TBase where T8A : TBase where T9A : TBase where T10A : TBase where T11A : TBase {
 if (input.Item1.HasValue) {
 return new Either<T1B, T2B, T3B, T4B, T5B, T6B, T7B, T8B, T9B, T10B, T11B>(
 selector1(input.Item1.Value));
@@ -482,7 +482,7 @@ throw new InvalidOperationException();
 }
 }
 
-public static IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> ForEach<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> input, Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6, Action<T7> action7, Action<T8> action8, Action<T9> action9, Action<T10> action10, Action<T11> action11) {
+public static SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> ForEach<TBase, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> input, Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6, Action<T7> action7, Action<T8> action8, Action<T9> action9, Action<T10> action10, Action<T11> action11) where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6 : TBase where T7 : TBase where T8 : TBase where T9 : TBase where T10 : TBase where T11 : TBase {
 if (input.Item1.HasValue) {
 action1(input.Item1.Value);
 }

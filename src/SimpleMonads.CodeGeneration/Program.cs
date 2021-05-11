@@ -57,7 +57,8 @@ namespace SimpleMonads.CodeGeneration
             var genericArgNames = new List<string>();
             var interfaceProperties = new List<string>();
             var classProperties = new List<string>();
-            var constructors = new List<string>();
+            var subTypesOfConstructors = new List<string>();
+            var eitherConstructors = new List<string>();
 
             for (var i = 1; i <= arity; i++)
             {
@@ -66,9 +67,10 @@ namespace SimpleMonads.CodeGeneration
                 genericArgDefinitions.Add($"out {argName}");
                 interfaceProperties.Add($"IMaybe<{argName}> Item{i} {{ get; }}");
                 classProperties.Add($"public IMaybe<{argName}> Item{i} {{ get; }} = Utility.Nothing<{argName}>();");
-                constructors.Add($"public Either({argName} item{i}) {{\n" +
-                                 $"Item{i} = item{i}.ToMaybe();\n" +
-                                 "}");
+                subTypesOfConstructors.Add($"public Either({argName} item{i}) {{\n" +
+                                           $"Item{i} = item{i}.ToMaybe();\n" +
+                                           "}");
+                eitherConstructors.Add($"public Either({argName} item{i}) : base(item{i}) {{ }}\n");
             }
 
             var genericArgNamesA = genericArgNames.Select(x => x + "A").ToList();
@@ -78,29 +80,41 @@ namespace SimpleMonads.CodeGeneration
 
             if (part == CodePart.Interface)
             {
-                writer.WriteLine($"public interface IEither<{string.Join(", ", genericArgDefinitions)}> \n{{");
+                writer.WriteLine("public partial class SubTypesOf<TBase> {");
+                writer.WriteLine($"public interface IEither{arity} : IEither {{\n" +
+                                 "TBase Value { get; }" +
+                                 $"\n}}");
+                writer.WriteLine($"public interface IEither<{string.Join(", ", genericArgDefinitions)}> : IEither{arity} {baseConstraints} \n{{");
                 writer.WriteLine(string.Join("\n", interfaceProperties));
-                writer.WriteLine("object Value { get; }");
                 for (var i = arity + 1; i <= maxArity; i++) GenerateOrDeclaration(writer, arity, i);
                 writer.WriteLine($"public interface ICast<out TBase> : IEither<{genericArgNamesString}> {{");
-                writer.WriteLine("new TBase Value { get; }");
+                writer.WriteLine("TBase Value { get; }");
                 writer.WriteLine("}");
+                writer.WriteLine("}");
+                writer.WriteLine("}");
+                writer.WriteLine($"public interface IEither<{string.Join(", ", genericArgDefinitions)}> : SubTypesOf<object>.IEither<{genericArgNamesString}> \n{{");
                 writer.WriteLine("}");
             }
 
             if (part == CodePart.Class)
             {
-                GenerateCastClass(writer, arity, genericArgNames);
+                //GenerateCastClass(writer, arity, genericArgNames);
+                writer.WriteLine("public partial class SubTypesOf<TBase> {");
                 writer.WriteLine(
-                    $"public class Either<{string.Join(", ", genericArgNames)}> : IEither<{genericArgNamesString}>, IEquatable<IEither<{genericArgNamesString}>>\n{{");
-                writer.WriteLine(string.Join("\n", constructors));
+                    $"public class Either<{string.Join(", ", genericArgNames)}> : IEither<{genericArgNamesString}>, IEquatable<IEither<{genericArgNamesString}>> {baseConstraints}\n{{");
+                writer.WriteLine(string.Join("\n", subTypesOfConstructors));
                 writer.WriteLine(string.Join("\n", classProperties));
                 GenerateValue(writer, arity);
                 for (var i = arity + 1; i <= maxArity; i++) GenerateOrImplementation(writer, arity, i);
                 GenerateEqualityMembers(writer, arity);
                 GenerateToString(writer, arity);
                 GenerateImplicitOperators(writer, arity, genericArgNames);
-                GenerateCastMethod(writer, arity, genericArgNames);
+                //GenerateCastMethod(writer, arity, genericArgNames);
+                writer.WriteLine("}");
+                writer.WriteLine("}");
+                writer.WriteLine(
+                    $"public class Either<{genericArgNamesString}> : SubTypesOf<object>.Either<{genericArgNamesString}>, IEither<{genericArgNamesString}>\n{{");
+                writer.WriteLine(string.Join("\n", eitherConstructors));
                 writer.WriteLine("}");
             }
 
@@ -150,15 +164,15 @@ namespace SimpleMonads.CodeGeneration
         {
             for (var i = 1; i <= arity; i++)
             {
-                writer.WriteLine($"public static implicit operator Either<{string.Join(", ", genericArgNames)}>(T{i} t{i}) {{");
+                writer.WriteLine($"public static implicit operator SubTypesOf<TBase>.Either<{string.Join(", ", genericArgNames)}>(T{i} t{i}) {{");
                 writer.WriteLine($"return new Either<{string.Join(", ", genericArgNames)}>(t{i});");
                 writer.WriteLine("}");
                 
-                writer.WriteLine($"public static implicit operator T{i}(Either<{string.Join(", ", genericArgNames)}> either) {{");
+                writer.WriteLine($"public static implicit operator T{i}(SubTypesOf<TBase>.Either<{string.Join(", ", genericArgNames)}> either) {{");
                 writer.WriteLine($"return either.Item{i}.Value;");
                 writer.WriteLine("}");
                 
-                writer.WriteLine($"public static implicit operator Maybe<T{i}>(Either<{string.Join(", ", genericArgNames)}> either) {{");
+                writer.WriteLine($"public static implicit operator Maybe<T{i}>(SubTypesOf<TBase>.Either<{string.Join(", ", genericArgNames)}> either) {{");
                 writer.WriteLine($"return (Maybe<T{i}>)either.Item{i};");
                 writer.WriteLine("}");
             }
@@ -167,14 +181,24 @@ namespace SimpleMonads.CodeGeneration
 
         private static void GenerateValue(TextWriter writer, int arity)
         {
-            var selectArguments = string.Join(", ", Enumerable.Repeat(0, arity).Select(_ => "x => (object)x"));
-            writer.WriteLine($"public object Value => this.Select({selectArguments});");
+            var selectArguments = string.Join(", ", Enumerable.Repeat(0, arity).Select(_ => "x => (TBase)x"));
+            writer.Write("public TBase Value => Item1.Cast<TBase>()");
+            for (var i = 2; i <= arity - 1; i++)
+            {
+                writer.Write($".Otherwise(Item{i}.Cast<TBase>()");
+            }
+            writer.Write($".Otherwise(() => Item{arity}.Value");
+            for (var i = 2; i <= arity; i++)
+            {
+                writer.Write(")");
+            }
+            writer.WriteLine(";");
         }
 
         private static void GenerateEqualityMembers(TextWriter writer, int arity)
         {
             var genericParameters = string.Join(", ", Enumerable.Repeat(0, arity).Select((_, i) => $"T{i + 1}"));
-            writer.WriteLine($"public bool Equals(IEither<{genericParameters}> other) {{");
+            writer.WriteLine($"public bool Equals(SubTypesOf<TBase>.IEither<{genericParameters}> other) {{");
             writer.WriteLine("if (ReferenceEquals(null, other)) return false;");
             writer.WriteLine("if (ReferenceEquals(this, other)) return true;");
             writer.Write("return ");
@@ -222,23 +246,25 @@ namespace SimpleMonads.CodeGeneration
         {
             var arityArgs = Enumerable.Range(1, arity).Select(i => $"T{i}");
             var additionalArityArgs = Enumerable.Range(arity + 1, biggerArityArgs - arity).Select(i => $"T{i}");
+            var additionalArityArgsConstraints = string.Join(" ", Enumerable.Range(arity + 1, biggerArityArgs - arity).Select(i => $"where T{i} : TBase"));
             var maxArityArgs = Enumerable.Range(1, biggerArityArgs).Select(i => $"T{i}");
             writer.WriteLine(
-                $"IEither<{string.Join(", ", maxArityArgs)}> Or<{string.Join(", ", additionalArityArgs)}>();");
+                $"SubTypesOf<TBase>.IEither<{string.Join(", ", maxArityArgs)}> Or<{string.Join(", ", additionalArityArgs)}>() {additionalArityArgsConstraints};");
         }
 
         private static void GenerateOrImplementation(TextWriter writer, int arity, int biggerArityArgs)
         {
             var arityArgs = Enumerable.Range(1, arity).Select(i => $"T{i}");
             var additionalArityArgs = Enumerable.Range(arity + 1, biggerArityArgs - arity).Select(i => $"T{i}");
+            var additionalArityArgsConstraints = string.Join(" ", Enumerable.Range(arity + 1, biggerArityArgs - arity).Select(i => $"where T{i} : TBase"));
             var maxArityArgs = Enumerable.Range(1, biggerArityArgs).Select(i => $"T{i}");
             writer.WriteLine(
-                $"public IEither<{string.Join(", ", maxArityArgs)}> Or<{string.Join(", ", additionalArityArgs)}>()\n{{");
+                $"public SubTypesOf<TBase>.IEither<{string.Join(", ", maxArityArgs)}> Or<{string.Join(", ", additionalArityArgs)}>() {additionalArityArgsConstraints}\n{{");
 
             for (var i = 1; i <= arity; i++)
             {
                 writer.WriteLine($"if (Item{i}.HasValue) {{");
-                writer.WriteLine($"return new Either<{string.Join(", ", maxArityArgs)}>(Item{i}.Value);");
+                writer.WriteLine($"return new SubTypesOf<TBase>.Either<{string.Join(", ", maxArityArgs)}>(Item{i}.Value);");
                 writer.WriteLine("}");
             }
 
@@ -247,7 +273,7 @@ namespace SimpleMonads.CodeGeneration
 
         private static void GeneratePartialSelect(TextWriter writer, int arity, int i)
         {
-            writer.Write("public static IEither<");
+            writer.Write("public static SubTypesOf<object>.IEither<");
             for (var j = 1; j <= arity; j++)
             {
                 if (j == i)
@@ -258,7 +284,7 @@ namespace SimpleMonads.CodeGeneration
                 if (j < arity) writer.Write(", ");
             }
 
-            writer.Write($"> Select{i}<");
+            writer.Write($"> Select{i}<TBase, ");
 
             for (var j = 1; j <= arity; j++)
             {
@@ -270,7 +296,7 @@ namespace SimpleMonads.CodeGeneration
                 if (j < arity) writer.Write(", ");
             }
 
-            writer.Write(">(IEither<");
+            writer.Write(">(SubTypesOf<TBase>.IEither<");
 
             for (var j = 1; j <= arity; j++)
             {
@@ -282,7 +308,18 @@ namespace SimpleMonads.CodeGeneration
                 if (j < arity) writer.Write(", ");
             }
 
-            writer.Write($"> either, Func<T{i}A, T{i}B> selector)\n{{\n");
+            var constraintsList = new List<string>();
+            for (var j = 1; j <= arity; j++)
+            {
+                if (j == i)
+                     constraintsList.Add($"where T{j}A : TBase");
+                else
+                    constraintsList.Add($"where T{j} : TBase");
+            }
+
+            var constraints = string.Join(" ", constraintsList);
+
+            writer.Write($"> either, Func<T{i}A, T{i}B> selector) {constraints}\n{{\n");
 
             for (var j = 1; j <= arity; j++)
             {
@@ -335,9 +372,12 @@ namespace SimpleMonads.CodeGeneration
 
             body.Append("else {\nthrow new InvalidOperationException();\n}\n");
 
-            writer.WriteLine($"public static IEither<{string.Join(", ", genericArgNamesB)}> " +
-                             $"Select<{string.Join(", ", genericArgNamesA)}, {string.Join(", ", genericArgNamesB)}>(" +
-                             $"this IEither<{string.Join(", ", genericArgNamesA)}> input, {string.Join(", ", selectors)}) {{\n" +
+            var baseConstraints = string.Join(" ",
+                string.Join(" ", genericArgNamesA.Select(arg => $"where {arg} : TBase")));
+            
+            writer.WriteLine($"public static SubTypesOf<object>.IEither<{string.Join(", ", genericArgNamesB)}> " +
+                             $"Select<TBase, {string.Join(", ", genericArgNamesA)}, {string.Join(", ", genericArgNamesB)}>(" +
+                             $"this SubTypesOf<TBase>.IEither<{string.Join(", ", genericArgNamesA)}> input, {string.Join(", ", selectors)}) {baseConstraints} {{\n" +
                              body +
                              "}\n");
         }
@@ -361,9 +401,11 @@ namespace SimpleMonads.CodeGeneration
             body.Append("else {\nthrow new InvalidOperationException();\n}\n");
             body.Append("return input;\n");
 
-            writer.WriteLine($"public static IEither<{string.Join(", ", genericArgNames)}> " +
-                             $"ForEach<{string.Join(", ", genericArgNames)}>(" +
-                             $"this IEither<{string.Join(", ", genericArgNames)}> input, {string.Join(", ", actions)}) {{\n" +
+            var baseConstraints = string.Join(" ", genericArgNames.Select(arg => $"where {arg} : TBase"));
+
+            writer.WriteLine($"public static SubTypesOf<TBase>.IEither<{string.Join(", ", genericArgNames)}> " +
+                             $"ForEach<TBase, {string.Join(", ", genericArgNames)}>(" +
+                             $"this SubTypesOf<TBase>.IEither<{string.Join(", ", genericArgNames)}> input, {string.Join(", ", actions)}) {baseConstraints} {{\n" +
                              body +
                              "}\n");
         }

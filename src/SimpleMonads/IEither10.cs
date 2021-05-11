@@ -1,5 +1,9 @@
 namespace SimpleMonads {
-public interface IEither<out T1, out T2, out T3, out T4, out T5, out T6, out T7, out T8, out T9, out T10> 
+public partial class SubTypesOf<TBase> {
+public interface IEither10 : IEither {
+TBase Value { get; }
+}
+public interface IEither<out T1, out T2, out T3, out T4, out T5, out T6, out T7, out T8, out T9, out T10> : IEither10 where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6 : TBase where T7 : TBase where T8 : TBase where T9 : TBase where T10 : TBase 
 {
 IMaybe<T1> Item1 { get; }
 IMaybe<T2> Item2 { get; }
@@ -11,15 +15,18 @@ IMaybe<T7> Item7 { get; }
 IMaybe<T8> Item8 { get; }
 IMaybe<T9> Item9 { get; }
 IMaybe<T10> Item10 { get; }
-object Value { get; }
-IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Or<T11>();
-IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Or<T11, T12>();
-IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Or<T11, T12, T13>();
-IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Or<T11, T12, T13, T14>();
-IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Or<T11, T12, T13, T14, T15>();
-IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Or<T11, T12, T13, T14, T15, T16>();
+SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Or<T11>() where T11 : TBase;
+SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Or<T11, T12>() where T11 : TBase where T12 : TBase;
+SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Or<T11, T12, T13>() where T11 : TBase where T12 : TBase where T13 : TBase;
+SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Or<T11, T12, T13, T14>() where T11 : TBase where T12 : TBase where T13 : TBase where T14 : TBase;
+SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Or<T11, T12, T13, T14, T15>() where T11 : TBase where T12 : TBase where T13 : TBase where T14 : TBase where T15 : TBase;
+SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Or<T11, T12, T13, T14, T15, T16>() where T11 : TBase where T12 : TBase where T13 : TBase where T14 : TBase where T15 : TBase where T16 : TBase;
 public interface ICast<out TBase> : IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> {
-new TBase Value { get; }
+TBase Value { get; }
 }
+}
+}
+public interface IEither<out T1, out T2, out T3, out T4, out T5, out T6, out T7, out T8, out T9, out T10> : SubTypesOf<object>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> 
+{
 }
 }

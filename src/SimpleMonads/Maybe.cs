@@ -127,6 +127,25 @@ namespace SimpleMonads
 
     public static class Maybe
     {
+        public static IMaybe<T> Cast<T>(this IMaybe maybe)
+        {
+            if (maybe.HasValue)
+            {
+                return new Maybe<T>((T) maybe.ObjectValue);
+            }
+            return Maybe<T>.Nothing();
+        }
+        
+        public static IMaybe<T> OfType<T>(this IMaybe maybe)
+        {
+            if (maybe.HasValue && maybe.ObjectValue is T t)
+            {
+                return new Maybe<T>(t);
+            }
+            
+            return Maybe<T>.Nothing();
+        }
+    
         public static IMaybe<T> WithErrorMessage<T>(this IMaybe<T> maybe, Action errorMessage)
         {
             if (maybe.HasValue)

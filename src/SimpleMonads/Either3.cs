@@ -13,9 +13,9 @@ Item2 = item2.ToMaybe();
 public EitherBase(T3 item3) {
 Item3 = item3.ToMaybe();
 }
-public IMaybe<T1> Item1 { get; internal init; } = Utility.Nothing<T1>();
-public IMaybe<T2> Item2 { get; internal init; } = Utility.Nothing<T2>();
-public IMaybe<T3> Item3 { get; internal init; } = Utility.Nothing<T3>();
+public IMaybe<T1> Item1 { get; init; } = Utility.Nothing<T1>();
+public IMaybe<T2> Item2 { get; init; } = Utility.Nothing<T2>();
+public IMaybe<T3> Item3 { get; init; } = Utility.Nothing<T3>();
 public IEither<T1, T2, T3, T4> Or<T4>()
 {
 if (Item1.HasValue) {

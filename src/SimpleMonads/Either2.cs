@@ -10,8 +10,8 @@ Item1 = item1.ToMaybe();
 public EitherBase(T2 item2) {
 Item2 = item2.ToMaybe();
 }
-public IMaybe<T1> Item1 { get; internal init; } = Utility.Nothing<T1>();
-public IMaybe<T2> Item2 { get; internal init; } = Utility.Nothing<T2>();
+public IMaybe<T1> Item1 { get; init; } = Utility.Nothing<T1>();
+public IMaybe<T2> Item2 { get; init; } = Utility.Nothing<T2>();
 public IEither<T1, T2, T3> Or<T3>()
 {
 if (Item1.HasValue) {

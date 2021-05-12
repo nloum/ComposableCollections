@@ -70,7 +70,7 @@ namespace SimpleMonads.CodeGeneration
                 genericArgNames.Add(argName);
                 genericArgDefinitions.Add($"out {argName}");
                 interfaceProperties.Add($"IMaybe<{argName}> Item{i} {{ get; }}");
-                classProperties.Add($"public IMaybe<{argName}> Item{i} {{ get; internal init; }} = Utility.Nothing<{argName}>();");
+                classProperties.Add($"public IMaybe<{argName}> Item{i} {{ get; init; }} = Utility.Nothing<{argName}>();");
                 baseConstructors.Add($"public EitherBase({argName} item{i}) {{\n" +
                                            $"Item{i} = item{i}.ToMaybe();\n" +
                                            "}");

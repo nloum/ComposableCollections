@@ -16,10 +16,10 @@ Item3 = item3.ToMaybe();
 public EitherBase(T4 item4) {
 Item4 = item4.ToMaybe();
 }
-public IMaybe<T1> Item1 { get; internal init; } = Utility.Nothing<T1>();
-public IMaybe<T2> Item2 { get; internal init; } = Utility.Nothing<T2>();
-public IMaybe<T3> Item3 { get; internal init; } = Utility.Nothing<T3>();
-public IMaybe<T4> Item4 { get; internal init; } = Utility.Nothing<T4>();
+public IMaybe<T1> Item1 { get; init; } = Utility.Nothing<T1>();
+public IMaybe<T2> Item2 { get; init; } = Utility.Nothing<T2>();
+public IMaybe<T3> Item3 { get; init; } = Utility.Nothing<T3>();
+public IMaybe<T4> Item4 { get; init; } = Utility.Nothing<T4>();
 public IEither<T1, T2, T3, T4, T5> Or<T5>()
 {
 if (Item1.HasValue) {

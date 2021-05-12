@@ -28,14 +28,14 @@ Item7 = item7.ToMaybe();
 public EitherBase(T8 item8) {
 Item8 = item8.ToMaybe();
 }
-public IMaybe<T1> Item1 { get; internal init; } = Utility.Nothing<T1>();
-public IMaybe<T2> Item2 { get; internal init; } = Utility.Nothing<T2>();
-public IMaybe<T3> Item3 { get; internal init; } = Utility.Nothing<T3>();
-public IMaybe<T4> Item4 { get; internal init; } = Utility.Nothing<T4>();
-public IMaybe<T5> Item5 { get; internal init; } = Utility.Nothing<T5>();
-public IMaybe<T6> Item6 { get; internal init; } = Utility.Nothing<T6>();
-public IMaybe<T7> Item7 { get; internal init; } = Utility.Nothing<T7>();
-public IMaybe<T8> Item8 { get; internal init; } = Utility.Nothing<T8>();
+public IMaybe<T1> Item1 { get; init; } = Utility.Nothing<T1>();
+public IMaybe<T2> Item2 { get; init; } = Utility.Nothing<T2>();
+public IMaybe<T3> Item3 { get; init; } = Utility.Nothing<T3>();
+public IMaybe<T4> Item4 { get; init; } = Utility.Nothing<T4>();
+public IMaybe<T5> Item5 { get; init; } = Utility.Nothing<T5>();
+public IMaybe<T6> Item6 { get; init; } = Utility.Nothing<T6>();
+public IMaybe<T7> Item7 { get; init; } = Utility.Nothing<T7>();
+public IMaybe<T8> Item8 { get; init; } = Utility.Nothing<T8>();
 public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9> Or<T9>()
 {
 if (Item1.HasValue) {

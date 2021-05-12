@@ -19,7 +19,7 @@ namespace SimpleMonads.Tests
             SubTypesOf<Animal>.Either<Dog, Cat> subTypesOf = new Dog();
             var isDog = false;
             var isCat = false;
-            subTypesOf.ForEach(dog => isDog = true, cat => isCat = true);
+            subTypesOf.ForEach(dog => isDog = true, cat => isCat = true );
             isDog.Should().BeTrue();
             isCat.Should().BeFalse();
         }

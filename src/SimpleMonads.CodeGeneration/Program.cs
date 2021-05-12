@@ -108,13 +108,14 @@ namespace SimpleMonads.CodeGeneration
                 for (var i = arity + 1; i <= maxArity; i++) GenerateOrImplementation(writer, arity, i);
                 GenerateEqualityMembers(writer, arity);
                 GenerateToString(writer, arity);
-                GenerateImplicitOperators(writer, arity, genericArgNames);
+                GenerateSubTypesOfImplicitOperators(writer, arity, genericArgNames);
                 //GenerateCastMethod(writer, arity, genericArgNames);
                 writer.WriteLine("}");
                 writer.WriteLine("}");
                 writer.WriteLine(
                     $"public class Either<{genericArgNamesString}> : SubTypesOf<object>.Either<{genericArgNamesString}>, IEither<{genericArgNamesString}>\n{{");
                 writer.WriteLine(string.Join("\n", eitherConstructors));
+                GenerateEitherImplicitOperators(writer, arity, genericArgNames);
                 writer.WriteLine("}");
             }
 
@@ -160,23 +161,42 @@ namespace SimpleMonads.CodeGeneration
             writer.WriteLine("}");
         }
 
-        private static void GenerateImplicitOperators(TextWriter writer, int arity, List<string> genericArgNames)
+        private static void GenerateEitherImplicitOperators(TextWriter writer, int arity, List<string> genericArgNames)
         {
             for (var i = 1; i <= arity; i++)
             {
-                writer.WriteLine($"public static implicit operator SubTypesOf<TBase>.Either<{string.Join(", ", genericArgNames)}>(T{i} t{i}) {{");
-                writer.WriteLine($"return new Either<{string.Join(", ", genericArgNames)}>(t{i});");
+                writer.WriteLine($"public static implicit operator Either<{string.Join(", ", genericArgNames)}>(T{i} t{i}) {{");
+                writer.WriteLine($"return new(t{i});");
                 writer.WriteLine("}");
-                
-                writer.WriteLine($"public static implicit operator T{i}(SubTypesOf<TBase>.Either<{string.Join(", ", genericArgNames)}> either) {{");
-                writer.WriteLine($"return either.Item{i}.Value;");
-                writer.WriteLine("}");
-                
-                writer.WriteLine($"public static implicit operator Maybe<T{i}>(SubTypesOf<TBase>.Either<{string.Join(", ", genericArgNames)}> either) {{");
-                writer.WriteLine($"return (Maybe<T{i}>)either.Item{i};");
+            }
+        }
+
+        private static void GenerateSubTypesOfImplicitOperators(TextWriter writer, int arity, List<string> genericArgNames)
+        {
+            for (var i = 1; i <= arity; i++)
+            {
+                writer.WriteLine($"public static implicit operator Either<{string.Join(", ", genericArgNames)}>(T{i} t{i}) {{");
+                writer.WriteLine($"return new(t{i});");
                 writer.WriteLine("}");
             }
             
+            writer.WriteLine($"public static implicit operator TBase(Either<{string.Join(", ", genericArgNames)}> either) {{");
+            writer.WriteLine($"return either.Value;");
+            writer.WriteLine("}");
+
+            for (var i = 1; i <= arity; i++)
+            {
+                writer.WriteLine($"public static implicit operator T{i}(Either<{string.Join(", ", genericArgNames)}> either) {{");
+                writer.WriteLine($"return either.Item{i}.Value;");
+                writer.WriteLine("}");
+            }
+            
+            for (var i = 1; i <= arity; i++)
+            {
+                writer.WriteLine($"public static implicit operator Maybe<T{i}>(Either<{string.Join(", ", genericArgNames)}> either) {{");
+                writer.WriteLine($"return (Maybe<T{i}>)either.Item{i};");
+                writer.WriteLine("}");
+            }
         }
 
         private static void GenerateValue(TextWriter writer, int arity)

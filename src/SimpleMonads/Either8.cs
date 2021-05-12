@@ -312,76 +312,79 @@ return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, 
 }
 throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }
-public static implicit operator SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8>(T1 t1) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8>(t1);
+public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T1 t1) {
+return new(t1);
 }
-public static implicit operator T1(SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
+public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T2 t2) {
+return new(t2);
+}
+public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T3 t3) {
+return new(t3);
+}
+public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T4 t4) {
+return new(t4);
+}
+public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T5 t5) {
+return new(t5);
+}
+public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T6 t6) {
+return new(t6);
+}
+public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T7 t7) {
+return new(t7);
+}
+public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T8 t8) {
+return new(t8);
+}
+public static implicit operator TBase(Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
+return either.Value;
+}
+public static implicit operator T1(Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
 return either.Item1.Value;
 }
-public static implicit operator Maybe<T1>(SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
-return (Maybe<T1>)either.Item1;
-}
-public static implicit operator SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8>(T2 t2) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8>(t2);
-}
-public static implicit operator T2(SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
+public static implicit operator T2(Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
 return either.Item2.Value;
 }
-public static implicit operator Maybe<T2>(SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
-return (Maybe<T2>)either.Item2;
-}
-public static implicit operator SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8>(T3 t3) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8>(t3);
-}
-public static implicit operator T3(SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
+public static implicit operator T3(Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
 return either.Item3.Value;
 }
-public static implicit operator Maybe<T3>(SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
-return (Maybe<T3>)either.Item3;
-}
-public static implicit operator SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8>(T4 t4) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8>(t4);
-}
-public static implicit operator T4(SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
+public static implicit operator T4(Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
 return either.Item4.Value;
 }
-public static implicit operator Maybe<T4>(SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
-return (Maybe<T4>)either.Item4;
-}
-public static implicit operator SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8>(T5 t5) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8>(t5);
-}
-public static implicit operator T5(SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
+public static implicit operator T5(Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
 return either.Item5.Value;
 }
-public static implicit operator Maybe<T5>(SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
-return (Maybe<T5>)either.Item5;
-}
-public static implicit operator SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8>(T6 t6) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8>(t6);
-}
-public static implicit operator T6(SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
+public static implicit operator T6(Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
 return either.Item6.Value;
 }
-public static implicit operator Maybe<T6>(SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
-return (Maybe<T6>)either.Item6;
-}
-public static implicit operator SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8>(T7 t7) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8>(t7);
-}
-public static implicit operator T7(SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
+public static implicit operator T7(Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
 return either.Item7.Value;
 }
-public static implicit operator Maybe<T7>(SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
-return (Maybe<T7>)either.Item7;
-}
-public static implicit operator SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8>(T8 t8) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8>(t8);
-}
-public static implicit operator T8(SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
+public static implicit operator T8(Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
 return either.Item8.Value;
 }
-public static implicit operator Maybe<T8>(SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
+public static implicit operator Maybe<T1>(Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
+return (Maybe<T1>)either.Item1;
+}
+public static implicit operator Maybe<T2>(Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
+return (Maybe<T2>)either.Item2;
+}
+public static implicit operator Maybe<T3>(Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
+return (Maybe<T3>)either.Item3;
+}
+public static implicit operator Maybe<T4>(Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
+return (Maybe<T4>)either.Item4;
+}
+public static implicit operator Maybe<T5>(Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
+return (Maybe<T5>)either.Item5;
+}
+public static implicit operator Maybe<T6>(Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
+return (Maybe<T6>)either.Item6;
+}
+public static implicit operator Maybe<T7>(Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
+return (Maybe<T7>)either.Item7;
+}
+public static implicit operator Maybe<T8>(Either<T1, T2, T3, T4, T5, T6, T7, T8> either) {
 return (Maybe<T8>)either.Item8;
 }
 }
@@ -404,5 +407,29 @@ public Either(T7 item7) : base(item7) { }
 
 public Either(T8 item8) : base(item8) { }
 
+public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T1 t1) {
+return new(t1);
+}
+public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T2 t2) {
+return new(t2);
+}
+public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T3 t3) {
+return new(t3);
+}
+public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T4 t4) {
+return new(t4);
+}
+public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T5 t5) {
+return new(t5);
+}
+public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T6 t6) {
+return new(t6);
+}
+public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T7 t7) {
+return new(t7);
+}
+public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T8 t8) {
+return new(t8);
+}
 }
 }

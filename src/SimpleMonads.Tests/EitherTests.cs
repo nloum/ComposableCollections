@@ -1,3 +1,4 @@
+using System.IO;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -10,7 +11,14 @@ namespace SimpleMonads.Tests
         public void ToStringShouldReturnValidResult()
         {
             var uut = new Either<string, int>("Hi there");
-            uut.ToString().Should().Be("Either<Object, string, int>(string Item1: Hi there)");
+            uut.ToString().Should().Be("Either<string, int>(string Item1: Hi there)");
+        }
+
+        [TestMethod]
+        public void CastShouldWork()
+        {
+            var uut = new MemoryStream().Either<MemoryStream, FileStream>().Cast<Stream>().Safely();
+            uut.Value.Should().NotBeNull();
         }
         
         [TestMethod]

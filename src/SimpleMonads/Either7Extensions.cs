@@ -192,6 +192,27 @@ else {
 throw new InvalidOperationException();
 }
 }
+public static IEither<T1, T2, T3, T4, T5, T6, T7> Either<T1, T2, T3, T4, T5, T6, T7>(this T1 item) {
+return new Either<T1, T2, T3, T4, T5, T6, T7>(item);
+}
+public static IEither<T1, T2, T3, T4, T5, T6, T7> Either<T1, T2, T3, T4, T5, T6, T7>(this T2 item) {
+return new Either<T1, T2, T3, T4, T5, T6, T7>(item);
+}
+public static IEither<T1, T2, T3, T4, T5, T6, T7> Either<T1, T2, T3, T4, T5, T6, T7>(this T3 item) {
+return new Either<T1, T2, T3, T4, T5, T6, T7>(item);
+}
+public static IEither<T1, T2, T3, T4, T5, T6, T7> Either<T1, T2, T3, T4, T5, T6, T7>(this T4 item) {
+return new Either<T1, T2, T3, T4, T5, T6, T7>(item);
+}
+public static IEither<T1, T2, T3, T4, T5, T6, T7> Either<T1, T2, T3, T4, T5, T6, T7>(this T5 item) {
+return new Either<T1, T2, T3, T4, T5, T6, T7>(item);
+}
+public static IEither<T1, T2, T3, T4, T5, T6, T7> Either<T1, T2, T3, T4, T5, T6, T7>(this T6 item) {
+return new Either<T1, T2, T3, T4, T5, T6, T7>(item);
+}
+public static IEither<T1, T2, T3, T4, T5, T6, T7> Either<T1, T2, T3, T4, T5, T6, T7>(this T7 item) {
+return new Either<T1, T2, T3, T4, T5, T6, T7>(item);
+}
 public static SubTypesOf<object>.IEither<T1B, T2B, T3B, T4B, T5B, T6B, T7B> Select<TBase, T1A, T2A, T3A, T4A, T5A, T6A, T7A, T1B, T2B, T3B, T4B, T5B, T6B, T7B>(this SubTypesOf<TBase>.IEither<T1A, T2A, T3A, T4A, T5A, T6A, T7A> input, Func<T1A, T1B> selector1, Func<T2A, T2B> selector2, Func<T3A, T3B> selector3, Func<T4A, T4B> selector4, Func<T5A, T5B> selector5, Func<T6A, T6B> selector6, Func<T7A, T7B> selector7) where T1A : TBase where T2A : TBase where T3A : TBase where T4A : TBase where T5A : TBase where T6A : TBase where T7A : TBase {
 if (input.Item1.HasValue) {
 return new Either<T1B, T2B, T3B, T4B, T5B, T6B, T7B>(
@@ -226,7 +247,7 @@ throw new InvalidOperationException();
 }
 }
 
-public static SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7> ForEach<TBase, T1, T2, T3, T4, T5, T6, T7>(this SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7> input, Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6, Action<T7> action7) where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6 : TBase where T7 : TBase {
+public static IEitherBase<T1, T2, T3, T4, T5, T6, T7> ForEach<T1, T2, T3, T4, T5, T6, T7>(this IEitherBase<T1, T2, T3, T4, T5, T6, T7> input, Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6, Action<T7> action7) {
 if (input.Item1.HasValue) {
 action1(input.Item1.Value);
 }
@@ -254,5 +275,29 @@ throw new InvalidOperationException();
 return input;
 }
 
+public static SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7> Safely<TBase, T1, T2, T3, T4, T5, T6, T7>(this Cast<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7> either) where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6 : TBase where T7 : TBase {
+if (either.Item1.HasValue) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(either.Item1.Value);
+}
+if (either.Item2.HasValue) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(either.Item2.Value);
+}
+if (either.Item3.HasValue) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(either.Item3.Value);
+}
+if (either.Item4.HasValue) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(either.Item4.Value);
+}
+if (either.Item5.HasValue) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(either.Item5.Value);
+}
+if (either.Item6.HasValue) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(either.Item6.Value);
+}
+if (either.Item7.HasValue) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(either.Item7.Value);
+}
+throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
+}
 }
 }

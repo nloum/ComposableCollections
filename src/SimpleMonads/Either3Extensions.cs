@@ -48,6 +48,15 @@ else {
 throw new InvalidOperationException();
 }
 }
+public static IEither<T1, T2, T3> Either<T1, T2, T3>(this T1 item) {
+return new Either<T1, T2, T3>(item);
+}
+public static IEither<T1, T2, T3> Either<T1, T2, T3>(this T2 item) {
+return new Either<T1, T2, T3>(item);
+}
+public static IEither<T1, T2, T3> Either<T1, T2, T3>(this T3 item) {
+return new Either<T1, T2, T3>(item);
+}
 public static SubTypesOf<object>.IEither<T1B, T2B, T3B> Select<TBase, T1A, T2A, T3A, T1B, T2B, T3B>(this SubTypesOf<TBase>.IEither<T1A, T2A, T3A> input, Func<T1A, T1B> selector1, Func<T2A, T2B> selector2, Func<T3A, T3B> selector3) where T1A : TBase where T2A : TBase where T3A : TBase {
 if (input.Item1.HasValue) {
 return new Either<T1B, T2B, T3B>(
@@ -66,7 +75,7 @@ throw new InvalidOperationException();
 }
 }
 
-public static SubTypesOf<TBase>.IEither<T1, T2, T3> ForEach<TBase, T1, T2, T3>(this SubTypesOf<TBase>.IEither<T1, T2, T3> input, Action<T1> action1, Action<T2> action2, Action<T3> action3) where T1 : TBase where T2 : TBase where T3 : TBase {
+public static IEitherBase<T1, T2, T3> ForEach<T1, T2, T3>(this IEitherBase<T1, T2, T3> input, Action<T1> action1, Action<T2> action2, Action<T3> action3) {
 if (input.Item1.HasValue) {
 action1(input.Item1.Value);
 }
@@ -82,5 +91,17 @@ throw new InvalidOperationException();
 return input;
 }
 
+public static SubTypesOf<TBase>.IEither<T1, T2, T3> Safely<TBase, T1, T2, T3>(this Cast<TBase>.IEither<T1, T2, T3> either) where T1 : TBase where T2 : TBase where T3 : TBase {
+if (either.Item1.HasValue) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3>(either.Item1.Value);
+}
+if (either.Item2.HasValue) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3>(either.Item2.Value);
+}
+if (either.Item3.HasValue) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3>(either.Item3.Value);
+}
+throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
+}
 }
 }

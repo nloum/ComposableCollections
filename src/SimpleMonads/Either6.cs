@@ -404,7 +404,7 @@ return new(t6);
 public static implicit operator TBase(Either<T1, T2, T3, T4, T5, T6> either) {
 return either.Value;
 }
-public TBase Value => Item1.Cast<TBase>().Otherwise(Item2.Cast<TBase>().Otherwise(Item3.Cast<TBase>().Otherwise(Item4.Cast<TBase>().Otherwise(Item5.Cast<TBase>().Otherwise(() => (TBase)Item6.Cast<TBase>().Value)))));
+public virtual TBase Value => Item1.Cast<TBase>().Otherwise(Item2.Cast<TBase>().Otherwise(Item3.Cast<TBase>().Otherwise(Item4.Cast<TBase>().Otherwise(Item5.Cast<TBase>().Otherwise(() => (TBase)Item6.Cast<TBase>().Value)))));
 }
 }
 public partial class SubTypesOf<TBase> {

@@ -231,7 +231,7 @@ namespace SimpleMonads.CodeGeneration
         private static void GenerateValue(TextWriter writer, int arity)
         {
             var selectArguments = string.Join(", ", Enumerable.Repeat(0, arity).Select(_ => "x => (TBase)x"));
-            writer.Write("public TBase Value => Item1.Cast<TBase>()");
+            writer.Write("public virtual TBase Value => Item1.Cast<TBase>()");
             for (var i = 2; i <= arity - 1; i++)
             {
                 writer.Write($".Otherwise(Item{i}.Cast<TBase>()");

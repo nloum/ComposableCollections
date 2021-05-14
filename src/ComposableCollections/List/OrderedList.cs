@@ -7,33 +7,33 @@ using static GenericNumbers.NumbersUtility;
 
 namespace ComposableCollections.List
 {
-    public class OrderedList<T> : ICollection<T>, IReadOnlyList<T>
+    public class OrderedList<T> : IOrderedList<T>, IReadOnlyList<T>
     {
         private readonly IList<T> _wrapped;
-        private Func<T, T, int> _compare;
+        private Func<T, T, int> _comparer;
 
-        public OrderedList(List<T> wrapped, Func<T, T, int> compare)
+        public OrderedList(IList<T> wrapped, Func<T, T, int> comparer)
         {
             _wrapped = wrapped;
-            _compare = compare;
+            _comparer = comparer;
         }
 
-        public OrderedList(List<T> wrapped)
+        public OrderedList(IList<T> wrapped)
         {
             _wrapped = wrapped;
-            _compare = (x, y) => x.CompareTo(y);
+            _comparer = (x, y) => x.CompareTo(y);
         }
 
-        public OrderedList(Func<T, T, int> compare)
+        public OrderedList(Func<T, T, int> comparer)
         {
             _wrapped = new List<T>();
-            _compare = compare;
+            _comparer = comparer;
         }
 
         public OrderedList()
         {
             _wrapped = new List<T>();
-            _compare = (x, y) => x.CompareTo(y);
+            _comparer = (x, y) => x.CompareTo(y);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -79,9 +79,23 @@ namespace ComposableCollections.List
 
         public int Compare(T item1, T item2)
         {
-            return _compare(item1, item2);
+            return _comparer(item1, item2);
         }
-        
+
+        public IOrderedList<T> ThenBy(Func<T, T, int> comparer)
+        {
+            return new OrderedList<T>(this._wrapped, (a, b) =>
+            {
+                var result = _comparer(a, b);
+                if (result != 0)
+                {
+                    return result;
+                }
+
+                return comparer(a, b);
+            });
+        }
+
         /// <summary>
         /// Uses a binary search to find the minimum and maximum indices at which the needle occurs.
         /// For instance, in the list [0, 1, 1, 2, 3, 3, 3, 3, 4], when this function is called with

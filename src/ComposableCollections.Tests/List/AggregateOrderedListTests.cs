@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using ComposableCollections.List;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,6 +24,32 @@ namespace ComposableCollections.Tests.List
             uut.Add(list1);
 
             uut.ToList().Should().BeInAscendingOrder();
+        }
+
+        [TestMethod]
+        public void CompositionShouldWork()
+        {
+            var list1 = new List<int>()
+            {
+                5, 3, 6, 4, 9, 5
+            };
+            var list2 = new List<int>()
+            {
+                2, 6, 3, 8, 1, 9
+            };
+
+            var list1Ordered = list1.OrderBy(x => x);
+            var list2Ordered = list2.OrderBy(x => x);
+
+            list1Ordered.Count.Should().Be(6);
+            list1Ordered.Should().BeInAscendingOrder();
+            list2Ordered.Count.Should().Be(6);
+            list2Ordered.Should().BeInAscendingOrder();
+
+            var result = list1Ordered.Concat(list2Ordered);
+            
+            result.Should().BeInAscendingOrder();
+            result.Count.Should().Be(12);
         }
     }
 }

@@ -7,17 +7,25 @@ namespace ComposableCollections.List
     public class TakeReadOnlyList<T> : IReadOnlyList<T>
     {
         private readonly IReadOnlyList<T> _source;
-        private readonly int _take;
+        private int _take;
+
+        public int Take
+        {
+            get => _take;
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentException($"Cannot take a negative number of items");
+                }
+                _take = value;
+            }
+        }
 
         public TakeReadOnlyList(IReadOnlyList<T> source, int take)
         {
             _source = source;
-            _take = take;
-
-            if (_take < 0)
-            {
-                throw new ArgumentException($"Cannot take a negative number of items");
-            }
+            Take = take;
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -32,21 +40,21 @@ namespace ComposableCollections.List
 
         private IEnumerable<T> Enumerate()
         {
-            for (var i = 0; i < _source.Count && i < _take; i++)
+            for (var i = 0; i < _source.Count && i < Take; i++)
             {
                 yield return _source[i];
             }
         }
 
-        public int Count => Math.Min(_source.Count, _take);
+        public int Count => Math.Min(_source.Count, Take);
 
         public T this[int index]
         {
             get
             {
-                if (index >= _take || index < 0)
+                if (index >= Take || index < 0)
                 {
-                    throw new IndexOutOfRangeException($"The index {index} is out of range of a list that has {_take} elements");
+                    throw new IndexOutOfRangeException($"The index {index} is out of range of a list that has {Take} elements");
                 }
 
                 return _source[index];

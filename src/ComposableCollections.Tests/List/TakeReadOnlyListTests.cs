@@ -21,7 +21,7 @@ namespace MoreCollections.Tests
             source.Add("d");
             source.Add("e");
 
-            var uut = source.TakeEfficiently(GenericNumbers.NumbersUtility.Range(1, 3));
+            var uut = source.Take(GenericNumbers.NumbersUtility.Range(1, 3));
             uut.Count.Should().Be(2);
             uut[0].Should().Be("b");
             uut[1].Should().Be("c");

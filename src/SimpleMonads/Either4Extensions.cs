@@ -128,7 +128,7 @@ throw new InvalidOperationException();
 return input;
 }
 
-public static SubTypesOf<TBase>.IEither<T1, T2, T3, T4> Safely<TBase, T1, T2, T3, T4>(this Cast<TBase>.IEither<T1, T2, T3, T4> either) where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase {
+public static SubTypesOf<TBase>.IEither<T1, T2, T3, T4> AsSubTypes<TBase, T1, T2, T3, T4>(this ConvertibleTo<TBase>.IEither<T1, T2, T3, T4> either) where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase {
 if (either.Item1.HasValue) {
 return new SubTypesOf<TBase>.Either<T1, T2, T3, T4>(either.Item1.Value);
 }

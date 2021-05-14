@@ -197,17 +197,17 @@ return (Maybe<T1>)either.Item1;
 public static implicit operator Maybe<T2>(EitherBase<T1, T2> either) {
 return (Maybe<T2>)either.Item2;
 }
-public Cast<TBase>.IEither<T1, T2> Cast<TBase>() {
+public ConvertibleTo<TBase>.IEither<T1, T2> ConvertTo<TBase>() {
 if (Item1.HasValue) {
-return new Cast<TBase>.Either<T1, T2>(Item1.Value);
+return new ConvertibleTo<TBase>.Either<T1, T2>(Item1.Value);
 }
 if (Item2.HasValue) {
-return new Cast<TBase>.Either<T1, T2>(Item2.Value);
+return new ConvertibleTo<TBase>.Either<T1, T2>(Item2.Value);
 }
 throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }
 }
-public partial class Cast<TBase> {
+public partial class ConvertibleTo<TBase> {
 public class Either<T1, T2> : EitherBase<T1, T2>, IEither<T1, T2>
 {
 protected Either() { }
@@ -228,7 +228,7 @@ public virtual TBase Value => Item1.Cast<TBase>().Otherwise(() => (TBase)Item2.C
 }
 }
 public partial class SubTypesOf<TBase> {
-public class Either<T1, T2> : Cast<TBase>.Either<T1, T2>, IEither<T1, T2> where T1 : TBase where T2 : TBase
+public class Either<T1, T2> : ConvertibleTo<TBase>.Either<T1, T2>, IEither<T1, T2> where T1 : TBase where T2 : TBase
 {
 protected Either() { }
 public Either(T1 item1) : base(item1) { }

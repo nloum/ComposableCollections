@@ -17,7 +17,7 @@ namespace SimpleMonads.Tests
         [TestMethod]
         public void CastSafelyShouldWork()
         {
-            var uut = new MemoryStream().Either<MemoryStream, FileStream>().Cast<Stream>().Safely();
+            var uut = new MemoryStream().Either<MemoryStream, FileStream>().ConvertTo<Stream>().AsSubTypes();
             uut.Value.Should().NotBeNull();
         }
         

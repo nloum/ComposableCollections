@@ -345,29 +345,29 @@ return (Maybe<T5>)either.Item5;
 public static implicit operator Maybe<T6>(EitherBase<T1, T2, T3, T4, T5, T6> either) {
 return (Maybe<T6>)either.Item6;
 }
-public Cast<TBase>.IEither<T1, T2, T3, T4, T5, T6> Cast<TBase>() {
+public ConvertibleTo<TBase>.IEither<T1, T2, T3, T4, T5, T6> ConvertTo<TBase>() {
 if (Item1.HasValue) {
-return new Cast<TBase>.Either<T1, T2, T3, T4, T5, T6>(Item1.Value);
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6>(Item1.Value);
 }
 if (Item2.HasValue) {
-return new Cast<TBase>.Either<T1, T2, T3, T4, T5, T6>(Item2.Value);
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6>(Item2.Value);
 }
 if (Item3.HasValue) {
-return new Cast<TBase>.Either<T1, T2, T3, T4, T5, T6>(Item3.Value);
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6>(Item3.Value);
 }
 if (Item4.HasValue) {
-return new Cast<TBase>.Either<T1, T2, T3, T4, T5, T6>(Item4.Value);
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6>(Item4.Value);
 }
 if (Item5.HasValue) {
-return new Cast<TBase>.Either<T1, T2, T3, T4, T5, T6>(Item5.Value);
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6>(Item5.Value);
 }
 if (Item6.HasValue) {
-return new Cast<TBase>.Either<T1, T2, T3, T4, T5, T6>(Item6.Value);
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6>(Item6.Value);
 }
 throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }
 }
-public partial class Cast<TBase> {
+public partial class ConvertibleTo<TBase> {
 public class Either<T1, T2, T3, T4, T5, T6> : EitherBase<T1, T2, T3, T4, T5, T6>, IEither<T1, T2, T3, T4, T5, T6>
 {
 protected Either() { }
@@ -408,7 +408,7 @@ public virtual TBase Value => Item1.Cast<TBase>().Otherwise(Item2.Cast<TBase>().
 }
 }
 public partial class SubTypesOf<TBase> {
-public class Either<T1, T2, T3, T4, T5, T6> : Cast<TBase>.Either<T1, T2, T3, T4, T5, T6>, IEither<T1, T2, T3, T4, T5, T6> where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6 : TBase
+public class Either<T1, T2, T3, T4, T5, T6> : ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6>, IEither<T1, T2, T3, T4, T5, T6> where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6 : TBase
 {
 protected Either() { }
 public Either(T1 item1) : base(item1) { }

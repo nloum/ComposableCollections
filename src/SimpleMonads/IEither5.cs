@@ -16,9 +16,9 @@ IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Or<T6, T7, T8, T
 IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Or<T6, T7, T8, T9, T10, T11, T12, T13, T14>();
 IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Or<T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>();
 IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Or<T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>();
-Cast<TBase>.IEither<T1, T2, T3, T4, T5> Cast<TBase>();
+ConvertibleTo<TBase>.IEither<T1, T2, T3, T4, T5> ConvertTo<TBase>();
 }
-public partial class Cast<TBase> {
+public partial class ConvertibleTo<TBase> {
 public interface IEither<out T1, out T2, out T3, out T4, out T5> : SubTypesOf<TBase>.IEither5, IEitherBase<T1, T2, T3, T4, T5> 
 {
 }

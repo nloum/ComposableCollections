@@ -393,38 +393,38 @@ return (Maybe<T8>)either.Item8;
 public static implicit operator Maybe<T9>(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9> either) {
 return (Maybe<T9>)either.Item9;
 }
-public Cast<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9> Cast<TBase>() {
+public ConvertibleTo<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9> ConvertTo<TBase>() {
 if (Item1.HasValue) {
-return new Cast<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item1.Value);
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item1.Value);
 }
 if (Item2.HasValue) {
-return new Cast<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item2.Value);
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item2.Value);
 }
 if (Item3.HasValue) {
-return new Cast<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item3.Value);
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item3.Value);
 }
 if (Item4.HasValue) {
-return new Cast<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item4.Value);
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item4.Value);
 }
 if (Item5.HasValue) {
-return new Cast<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item5.Value);
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item5.Value);
 }
 if (Item6.HasValue) {
-return new Cast<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item6.Value);
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item6.Value);
 }
 if (Item7.HasValue) {
-return new Cast<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item7.Value);
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item7.Value);
 }
 if (Item8.HasValue) {
-return new Cast<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item8.Value);
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item8.Value);
 }
 if (Item9.HasValue) {
-return new Cast<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item9.Value);
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item9.Value);
 }
 throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }
 }
-public partial class Cast<TBase> {
+public partial class ConvertibleTo<TBase> {
 public class Either<T1, T2, T3, T4, T5, T6, T7, T8, T9> : EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9>, IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9>
 {
 protected Either() { }
@@ -480,7 +480,7 @@ public virtual TBase Value => Item1.Cast<TBase>().Otherwise(Item2.Cast<TBase>().
 }
 }
 public partial class SubTypesOf<TBase> {
-public class Either<T1, T2, T3, T4, T5, T6, T7, T8, T9> : Cast<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>, IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9> where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6 : TBase where T7 : TBase where T8 : TBase where T9 : TBase
+public class Either<T1, T2, T3, T4, T5, T6, T7, T8, T9> : ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>, IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9> where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6 : TBase where T7 : TBase where T8 : TBase where T9 : TBase
 {
 protected Either() { }
 public Either(T1 item1) : base(item1) { }

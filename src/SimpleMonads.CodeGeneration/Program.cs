@@ -87,10 +87,10 @@ namespace SimpleMonads.CodeGeneration
                 writer.WriteLine($"public interface IEitherBase<{string.Join(", ", genericArgDefinitions)}> : IEither {{");
                 writer.WriteLine(string.Join("\n", interfaceProperties));
                 for (var i = arity + 1; i <= maxArity; i++) GenerateOrDeclaration(writer, arity, i);
-                writer.WriteLine($"Cast<TBase>.IEither<{genericArgNamesString}> Cast<TBase>();");
+                writer.WriteLine($"ConvertibleTo<TBase>.IEither<{genericArgNamesString}> ConvertTo<TBase>();");
                 writer.WriteLine("}");
 
-                writer.WriteLine("public partial class Cast<TBase> {");
+                writer.WriteLine("public partial class ConvertibleTo<TBase> {");
                 writer.WriteLine($"public interface IEither<{string.Join(", ", genericArgDefinitions)}> : SubTypesOf<TBase>.IEither{arity}, IEitherBase<{genericArgNamesString}> \n{{");
                 writer.WriteLine("}");
                 writer.WriteLine("}");
@@ -117,18 +117,18 @@ namespace SimpleMonads.CodeGeneration
                 GenerateEqualityMembers(writer, arity);
                 GenerateToString(writer, arity);
                 GenerateBaseImplicitOperators(writer, "EitherBase", arity, genericArgNames);
-                writer.WriteLine($"public Cast<TBase>.IEither<{genericArgNamesString}> Cast<TBase>() {{");
+                writer.WriteLine($"public ConvertibleTo<TBase>.IEither<{genericArgNamesString}> ConvertTo<TBase>() {{");
                 for (var i = 1; i <= arity; i++)
                 {
                     writer.WriteLine($"if (Item{i}.HasValue) {{");
-                    writer.WriteLine($"return new Cast<TBase>.Either<{genericArgNamesString}>(Item{i}.Value);");
+                    writer.WriteLine($"return new ConvertibleTo<TBase>.Either<{genericArgNamesString}>(Item{i}.Value);");
                     writer.WriteLine("}");
                 }
                 writer.WriteLine("throw new InvalidOperationException(\"None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?\");");
                 writer.WriteLine("}");
                 writer.WriteLine("}");
 
-                writer.WriteLine("public partial class Cast<TBase> {");
+                writer.WriteLine("public partial class ConvertibleTo<TBase> {");
                 writer.WriteLine(
                     $"public class Either<{genericArgNamesString}> : EitherBase<{genericArgNamesString}>, IEither<{genericArgNamesString}>\n{{");
                 writer.WriteLine(string.Join("\n", subClassConstructors));
@@ -142,7 +142,7 @@ namespace SimpleMonads.CodeGeneration
                 
                 writer.WriteLine("public partial class SubTypesOf<TBase> {");
                 writer.WriteLine(
-                    $"public class Either<{genericArgNamesString}> : Cast<TBase>.Either<{genericArgNamesString}>, IEither<{genericArgNamesString}> {baseConstraints}\n{{");
+                    $"public class Either<{genericArgNamesString}> : ConvertibleTo<TBase>.Either<{genericArgNamesString}>, IEither<{genericArgNamesString}> {baseConstraints}\n{{");
                 writer.WriteLine(string.Join("\n", subClassConstructors));
                 GenerateSubClassImplicitOperators(writer, "Either", arity, genericArgNames);
                 writer.WriteLine("}");
@@ -169,17 +169,17 @@ namespace SimpleMonads.CodeGeneration
                 }
                 GenerateFullSelect(writer, arity, genericArgNamesA, genericArgNamesB);
                 GenerateFullForEach(writer, arity, genericArgNames);
-                GenerateSafely(writer, arity, genericArgNames);
+                GenerateSafeCastMethod(writer, arity, genericArgNames);
                 
                 writer.WriteLine("}");
             }
         }
 
-        private static void GenerateSafely(TextWriter writer, int arity, List<string> genericArgNames)
+        private static void GenerateSafeCastMethod(TextWriter writer, int arity, List<string> genericArgNames)
         {
             var args = string.Join(", ", Enumerable.Range(1, arity).Select(i => $"T{i}"));
             var constraints = string.Join(" ", Enumerable.Range(1, arity).Select(i => $"where T{i} : TBase"));
-            writer.WriteLine($"public static SubTypesOf<TBase>.IEither<{args}> Safely<TBase, {args}>(this Cast<TBase>.IEither<{args}> either) {constraints} {{");
+            writer.WriteLine($"public static SubTypesOf<TBase>.IEither<{args}> AsSubTypes<TBase, {args}>(this ConvertibleTo<TBase>.IEither<{args}> either) {constraints} {{");
             for (var i = 1; i <= arity; i++)
             {
                 writer.WriteLine($"if (either.Item{i}.HasValue) {{");

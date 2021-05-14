@@ -16,7 +16,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="GenericNumbers" Version="1.1.0-alpha0031" />
-    <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0052" />
+    <PackageReference Include="PlainOldAlgorithms" Version="1.0.0-alpha0773" />
+    <PackageReference Include="PlainOldDataStructures" Version="1.0.0-alpha0773" />
+    <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0054" />
     <PackageReference Include="UtilityDisposables" Version="1.1.0-alpha0006" />
     <PackageReference Include="Autofac" Version="6.0.0" />
     <PackageReference Include="CommandLineParser" Version="2.8.0" />

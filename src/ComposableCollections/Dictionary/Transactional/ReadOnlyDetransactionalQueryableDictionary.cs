@@ -18,7 +18,7 @@ namespace ComposableCollections.Dictionary.Transactional
             _source = dictionary;
         }
 
-        public IQueryable<TValue> Values
+        public new IQueryable<TValue> Values
         {
             get
             {

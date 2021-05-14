@@ -18,6 +18,6 @@ namespace ComposableCollections.Dictionary.Adapters
             _convertTo2 = convertTo2;
         }
 
-        public IQueryable<TValue> Values => _innerValues.Values.Select(_convertTo2);
+        public new IQueryable<TValue> Values => _innerValues.Values.Select(_convertTo2);
     }
 }

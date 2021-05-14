@@ -11,7 +11,7 @@ namespace ComposableCollections.Dictionary.Interfaces
     public interface IComposableDictionary<TKey, TValue> : IComposableReadOnlyDictionary<TKey, TValue>
     {
         void SetValue(TKey key, TValue value);
-        bool TryGetValue(TKey key, out TValue value);
+        bool TryGetValue(TKey key, out TValue? value);
         new TValue this[TKey key] { get; set; }
         void Write(IEnumerable<DictionaryWrite<TKey, TValue>> writes, out IReadOnlyList<DictionaryWriteResult<TKey, TValue>> results);
         
@@ -68,7 +68,7 @@ namespace ComposableCollections.Dictionary.Interfaces
         
         DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, TValue value);
         DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating);
-        DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue previousValue, out TValue newValue);
+        DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TValue> valueIfAdding, Func<TValue, TValue> valueIfUpdating, out TValue? previousValue, out TValue newValue);
         void AddOrUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddOrUpdate<TValue>> results);
         void AddOrUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddOrUpdate<TValue>> results);
         void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddOrUpdate<TValue>> results);

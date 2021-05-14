@@ -41,7 +41,7 @@ namespace ComposableCollections.DictionaryWithBuiltInKey.Interfaces
             return _source;
         }
 
-        public IQueryable<TValue> Values => _source.Values;
+        public new IQueryable<TValue> Values => _source.Values;
         public IQueryableReadOnlyDictionary<TKey, TValue> AsQueryableReadOnlyDictionary()
         {
             return _source;

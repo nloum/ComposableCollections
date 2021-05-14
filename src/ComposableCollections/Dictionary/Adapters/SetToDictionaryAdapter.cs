@@ -1,14 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Xml;
 using ComposableCollections.Dictionary.Exceptions;
 using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Sources;
 using ComposableCollections.Dictionary.Write;
-using ComposableCollections.Set;
-using ComposableCollections.Set.Write;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary.Adapters
@@ -22,7 +18,7 @@ namespace ComposableCollections.Dictionary.Adapters
             _set = set;
         }
 
-        public bool TryGetValue(TKey key, out TKey value)
+        public bool TryGetValue(TKey key, out TKey? value)
         {
             var result = TryGetValue(key);
             value = result.ValueOrDefault;
@@ -34,9 +30,10 @@ namespace ComposableCollections.Dictionary.Adapters
             this[key] = value;
         }
 
-        public TKey this[TKey key]
+        public new TKey this[TKey key]
         {
             get => TryGetValue(key).Value;
+            // ReSharper disable once ValueParameterNotUsed
             set => _set.TryAdd(key);
         }
 
@@ -93,7 +90,7 @@ namespace ComposableCollections.Dictionary.Adapters
                 {
                     var result = AddOrUpdate(write.Key, write.ValueIfAdding.Value, write.ValueIfUpdating.Value,
                         out var previousValue, out var newValue);
-                    finalResults.Add(DictionaryWriteResult<TKey, TKey>.CreateAddOrUpdate(write.Key, result, previousValue.ToMaybe(), newValue));
+                    finalResults.Add(DictionaryWriteResult<TKey, TKey>.CreateAddOrUpdate(write.Key, result, previousValue == null ? Maybe<TKey>.Nothing() : previousValue.ToMaybe(), newValue));
                 }
             }
         }
@@ -303,6 +300,9 @@ namespace ComposableCollections.Dictionary.Adapters
 
         public void Update(TKey key, TKey value)
         {
+            if (key == null) throw new ArgumentNullException(nameof(key));
+            if (value == null) throw new ArgumentNullException(nameof(value));
+            
             if (_set.Contains(key))
             {
                 _set.Remove(key);
@@ -340,7 +340,8 @@ namespace ComposableCollections.Dictionary.Adapters
 
         public void Update(TKey key, TKey value, out TKey previousValue)
         {
-            previousValue = key;
+            if (value == null) throw new ArgumentNullException(nameof(value));
+            previousValue = key ?? throw new ArgumentNullException(nameof(key));
             
             if (_set.Contains(key))
             {
@@ -365,12 +366,16 @@ namespace ComposableCollections.Dictionary.Adapters
 
         public void UpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TKey> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TKey>> results)
         {
+            if (newItems == null) throw new ArgumentNullException(nameof(newItems));
+            if (key == null) throw new ArgumentNullException(nameof(key));
+            if (value == null) throw new ArgumentNullException(nameof(value));
             var finalResults = new ComposableDictionary<TKey, IDictionaryItemUpdateAttempt<TKey>>();
             results = finalResults;
             
             foreach (var newItem in newItems)
             {
-                var newKey = key(newItem);
+                TKey newKey = key(newItem);
+                if (newKey == null) throw new ArgumentNullException(nameof(newKey));
                 if (!_set.Contains(newKey))
                 {
                     throw new UpdateFailedBecauseNoSuchKeyExistsException(newKey);
@@ -402,7 +407,7 @@ namespace ComposableCollections.Dictionary.Adapters
             return AddOrUpdate(key, valueIfAdding, valueIfUpdating, out var _, out var __);
         }
 
-        public DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TKey> valueIfAdding, Func<TKey, TKey> valueIfUpdating, out TKey previousValue,
+        public DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TKey> valueIfAdding, Func<TKey, TKey> valueIfUpdating, out TKey? previousValue,
             out TKey newValue)
         {
             if (!_set.Contains(key))

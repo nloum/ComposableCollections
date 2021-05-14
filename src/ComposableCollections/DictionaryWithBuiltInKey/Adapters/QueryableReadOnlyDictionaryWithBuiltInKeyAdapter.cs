@@ -14,7 +14,7 @@ namespace ComposableCollections.DictionaryWithBuiltInKey.Adapters
             _source = source;
         }
 
-        public IQueryable<TValue> Values => _source.Values;
+        public new IQueryable<TValue> Values => _source.Values;
         public IQueryableReadOnlyDictionary<TKey, TValue> AsQueryableReadOnlyDictionary()
         {
             return _source;

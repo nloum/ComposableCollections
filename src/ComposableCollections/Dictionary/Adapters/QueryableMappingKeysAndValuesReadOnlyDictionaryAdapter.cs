@@ -22,6 +22,6 @@ namespace ComposableCollections.Dictionary.Adapters
             return (key, value) => new KeyValue<TKey, TValue>(convertToKey2(key), compiled(value));
         }
 
-        public IQueryable<TValue> Values => _innerValues.Values.Select(_convertTo2);
+        public new IQueryable<TValue> Values => _innerValues.Values.Select(_convertTo2);
     }
 }

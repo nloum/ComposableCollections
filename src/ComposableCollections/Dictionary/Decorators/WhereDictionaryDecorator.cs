@@ -117,6 +117,22 @@ namespace ComposableCollections.Dictionary.Decorators
             return _source.TryAdd(key, value);
         }
 
+        public bool TryAdd(TKey key, TValue value, out TValue result, out TValue previousValue)
+        {
+            return TryAdd(key, () => value, out result, out previousValue);
+        }
+
+        public TValue GetOrAdd(TKey key, TValue value)
+        {
+            return GetOrAdd(key, () => value);
+        }
+
+        public TValue GetOrAdd(TKey key, Func<TValue> value)
+        {
+            TryAdd(key, value, out var result, out var previousValue);
+            return result;
+        }
+
         public void Write(IEnumerable<DictionaryWrite<TKey, TValue>> writes, out IReadOnlyList<DictionaryWriteResult<TKey, TValue>> results)
         {
             _source.Write(writes, out results);

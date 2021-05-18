@@ -9,9 +9,9 @@ namespace ComposableCollections.Dictionary.Sources
     {
         private readonly IComposableDictionary<Type, TValue> _values;
 
-        public MultiTypeDictionary(IComposableDictionary<Type, TValue> values)
+        public MultiTypeDictionary(IComposableDictionary<Type, TValue> values = null)
         {
-            _values = values;
+            _values = values ?? new ComposableDictionary<Type, TValue>();
         }
         
         public virtual bool TryAdd<T>(Func<T> value, out T result, out T previousValue) where T : TValue

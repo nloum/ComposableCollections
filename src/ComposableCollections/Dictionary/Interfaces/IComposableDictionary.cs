@@ -19,7 +19,10 @@ namespace ComposableCollections.Dictionary.Interfaces
         
         bool TryAdd(TKey key, TValue value);
         bool TryAdd(TKey key, Func<TValue> value);
-        bool TryAdd(TKey key, Func<TValue> value, out TValue existingValue, out TValue newValue);
+        bool TryAdd(TKey key, Func<TValue> value, out TValue result, out TValue previousValue);
+        bool TryAdd(TKey key, TValue value, out TValue result, out TValue previousValue);
+        TValue GetOrAdd(TKey key, TValue value);
+        TValue GetOrAdd(TKey key, Func<TValue> value);
         void TryAddRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> results);
         void TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> results);
         void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> results);

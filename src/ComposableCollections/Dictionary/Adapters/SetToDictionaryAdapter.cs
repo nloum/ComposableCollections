@@ -112,6 +112,22 @@ namespace ComposableCollections.Dictionary.Adapters
             return _set.TryAdd(key);
         }
 
+        public bool TryAdd(TKey key, TKey value, out TKey result, out TKey previousValue)
+        {
+            return TryAdd(key, () => value, out result, out previousValue);
+        }
+
+        public TKey GetOrAdd(TKey key, TKey value)
+        {
+            return GetOrAdd(key, () => value);
+        }
+
+        public TKey GetOrAdd(TKey key, Func<TKey> value)
+        {
+            TryAdd(key, value, out var result, out var previousValue);
+            return result;
+        }
+
         public void TryAddRange(IEnumerable<IKeyValue<TKey, TKey>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TKey>> results)
         {
             _set.TryAddRange(newItems.Select(kvp => kvp.Key), out var setResults);

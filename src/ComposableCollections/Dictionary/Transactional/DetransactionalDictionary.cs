@@ -162,6 +162,22 @@ namespace ComposableCollections.Dictionary.Transactional
             }
         }
 
+        public bool TryAdd(TKey key, TValue value, out TValue result, out TValue previousValue)
+        {
+            return TryAdd(key, () => value, out result, out previousValue);
+        }
+
+        public TValue GetOrAdd(TKey key, TValue value)
+        {
+            return GetOrAdd(key, () => value);
+        }
+
+        public TValue GetOrAdd(TKey key, Func<TValue> value)
+        {
+            TryAdd(key, value, out var result, out var previousValue);
+            return result;
+        }
+
         public void TryAddRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> results)
         {
             using (var dictionary = _source.CreateWriter())

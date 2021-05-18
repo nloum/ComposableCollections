@@ -1,7 +1,7 @@
 namespace SimpleMonads {
 public interface IEitherBase<out T1, out T2> : IEither {
-IMaybe<T1> Item1 { get; }
-IMaybe<T2> Item2 { get; }
+T1? Item1 { get; }
+T2? Item2 { get; }
 IEither<T1, T2, T3> Or<T3>();
 IEither<T1, T2, T3, T4> Or<T3, T4>();
 IEither<T1, T2, T3, T4, T5> Or<T3, T4, T5>();

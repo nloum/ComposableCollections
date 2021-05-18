@@ -69,10 +69,10 @@ namespace SimpleMonads.CodeGeneration
                 var argName = "T" + i;
                 genericArgNames.Add(argName);
                 genericArgDefinitions.Add($"out {argName}");
-                interfaceProperties.Add($"IMaybe<{argName}> Item{i} {{ get; }}");
-                classProperties.Add($"public IMaybe<{argName}> Item{i} {{ get; init; }} = Utility.Nothing<{argName}>();");
+                interfaceProperties.Add($"{argName}? Item{i} {{ get; }}");
+                classProperties.Add($"public {argName}? Item{i} {{ get; init; }} = default;");
                 baseConstructors.Add($"public EitherBase({argName} item{i}) {{\n" +
-                                           $"Item{i} = item{i}.ToMaybe();\n" +
+                                           $"Item{i} = item{i};\n" +
                                            "}");
                 subClassConstructors.Add($"public Either({argName} item{i}) : base(item{i}) {{ }}\n");
             }
@@ -120,8 +120,8 @@ namespace SimpleMonads.CodeGeneration
                 writer.WriteLine($"public ConvertibleTo<TBase>.IEither<{genericArgNamesString}> ConvertTo<TBase>() {{");
                 for (var i = 1; i <= arity; i++)
                 {
-                    writer.WriteLine($"if (Item{i}.HasValue) {{");
-                    writer.WriteLine($"return new ConvertibleTo<TBase>.Either<{genericArgNamesString}>(Item{i}.Value);");
+                    writer.WriteLine($"if (Item{i} != null) {{");
+                    writer.WriteLine($"return new ConvertibleTo<TBase>.Either<{genericArgNamesString}>(Item{i});");
                     writer.WriteLine("}");
                 }
                 writer.WriteLine("throw new InvalidOperationException(\"None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?\");");
@@ -134,9 +134,9 @@ namespace SimpleMonads.CodeGeneration
                 writer.WriteLine(string.Join("\n", subClassConstructors));
                 GenerateSubClassImplicitOperators(writer, "Either", arity, genericArgNames);
                 writer.WriteLine($"public static implicit operator TBase(Either<{string.Join(", ", genericArgNames)}> either) {{");
-                writer.WriteLine($"return either.Value;");
+                writer.WriteLine($"return either;");
                 writer.WriteLine("}");
-                GenerateValue(writer, arity);
+                GenerateAbstractValue(writer, arity);
                 writer.WriteLine("}");
                 writer.WriteLine("}");
                 
@@ -144,6 +144,7 @@ namespace SimpleMonads.CodeGeneration
                 writer.WriteLine(
                     $"public class Either<{genericArgNamesString}> : ConvertibleTo<TBase>.Either<{genericArgNamesString}>, IEither<{genericArgNamesString}> {baseConstraints}\n{{");
                 writer.WriteLine(string.Join("\n", subClassConstructors));
+                GenerateValue(writer, arity);
                 GenerateSubClassImplicitOperators(writer, "Either", arity, genericArgNames);
                 writer.WriteLine("}");
                 writer.WriteLine("}");
@@ -182,8 +183,8 @@ namespace SimpleMonads.CodeGeneration
             writer.WriteLine($"public static SubTypesOf<TBase>.IEither<{args}> AsSubTypes<TBase, {args}>(this ConvertibleTo<TBase>.IEither<{args}> either) {constraints} {{");
             for (var i = 1; i <= arity; i++)
             {
-                writer.WriteLine($"if (either.Item{i}.HasValue) {{");
-                writer.WriteLine($"return new SubTypesOf<TBase>.Either<{args}>(either.Item{i}.Value);");
+                writer.WriteLine($"if (either.Item{i} != null) {{");
+                writer.WriteLine($"return new SubTypesOf<TBase>.Either<{args}>(either.Item{i});");
                 writer.WriteLine("}");
             }
             writer.WriteLine("throw new InvalidOperationException(\"None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?\");");
@@ -216,31 +217,38 @@ namespace SimpleMonads.CodeGeneration
             for (var i = 1; i <= arity; i++)
             {
                 writer.WriteLine($"public static implicit operator T{i}({className}<{string.Join(", ", genericArgNames)}> either) {{");
-                writer.WriteLine($"return either.Item{i}.Value;");
-                writer.WriteLine("}");
-            }
-            
-            for (var i = 1; i <= arity; i++)
-            {
-                writer.WriteLine($"public static implicit operator Maybe<T{i}>({className}<{string.Join(", ", genericArgNames)}> either) {{");
-                writer.WriteLine($"return (Maybe<T{i}>)either.Item{i};");
+                writer.WriteLine($"return either.Item{i};");
                 writer.WriteLine("}");
             }
         }
 
-        private static void GenerateValue(TextWriter writer, int arity)
+        private static void GenerateAbstractValue(TextWriter writer, int arity)
         {
-            var selectArguments = string.Join(", ", Enumerable.Repeat(0, arity).Select(_ => "x => (TBase)x"));
-            writer.Write("public virtual TBase Value => Item1.Cast<TBase>()");
-            for (var i = 2; i <= arity - 1; i++)
+            for (var i = 1; i <= arity; i++)
             {
-                writer.Write($".Otherwise(Item{i}.Cast<TBase>()");
+                writer.WriteLine($"protected TBase Convert{i}(T{i} item{i}) {{");
+                writer.WriteLine($"if (item{i} is TBase @base) {{");
+                writer.WriteLine("return @base;");
+                writer.WriteLine("}");
+                writer.WriteLine($"throw new NotImplementedException(\"Cannot convert from {{typeof(T{i}).Name}} to {{typeof(TBase).Name}}\");");
+                writer.WriteLine("}");
             }
-            writer.Write($".Otherwise(() => (TBase)Item{arity}.Cast<TBase>().Value");
+            writer.Write("public virtual TBase Value => Convert1(Item1)");
             for (var i = 2; i <= arity; i++)
             {
-                writer.Write(")");
+                writer.Write($" ?? Convert{i}(Item{i})");
             }
+            writer.WriteLine(";");
+        }
+
+        private static void GenerateValue(TextWriter writer, int arity)
+        {
+            writer.Write("public virtual TBase Value => Item1");
+            for (var i = 2; i <= arity - 1; i++)
+            {
+                writer.Write($" ?? Item{i}");
+            }
+            writer.Write($" ?? (TBase)Item{arity}");
             writer.WriteLine(";");
         }
 
@@ -283,8 +291,8 @@ namespace SimpleMonads.CodeGeneration
             var genericParameters = string.Join(", ", Enumerable.Repeat(0, arity).Select((_, i) => $"T{i + 1}"));
             for (var i = 0; i < arity; i++)
             {
-                writer.WriteLine($"if (Item{i+1}.HasValue) {{");
-                writer.WriteLine("return $\"{Utility.ConvertToCSharpTypeName(typeof(Either<" + genericParameters + ">))}({Utility.ConvertToCSharpTypeName(typeof(T" + (i + 1) + "))} Item" + (i+1) + ": {Item" + (i+1) + ".Value})\";");
+                writer.WriteLine($"if (Item{i+1} != null) {{");
+                writer.WriteLine("return $\"{Utility.ConvertToCSharpTypeName(typeof(Either<" + genericParameters + ">))}({Utility.ConvertToCSharpTypeName(typeof(T" + (i + 1) + "))} Item" + (i+1) + ": {Item" + (i+1) + "})\";");
                 writer.WriteLine("}");
             }
             writer.WriteLine("throw new InvalidOperationException(\"None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?\");");
@@ -312,8 +320,8 @@ namespace SimpleMonads.CodeGeneration
 
             for (var i = 1; i <= arity; i++)
             {
-                writer.WriteLine($"if (Item{i}.HasValue) {{");
-                writer.WriteLine($"return new Either<{string.Join(", ", maxArityArgs)}>(Item{i}.Value);");
+                writer.WriteLine($"if (Item{i} != null) {{");
+                writer.WriteLine($"return new Either<{string.Join(", ", maxArityArgs)}>(Item{i});");
                 writer.WriteLine("}");
             }
 
@@ -374,7 +382,7 @@ namespace SimpleMonads.CodeGeneration
             {
                 if (j > 1) writer.Write("else ");
 
-                writer.Write($"if (either.Item{j}.HasValue) {{\nreturn new Either<");
+                writer.Write($"if (either.Item{j} != null) {{\nreturn new Either<");
                 for (var k = 1; k <= arity; k++)
                 {
                     if (k == i)
@@ -388,9 +396,9 @@ namespace SimpleMonads.CodeGeneration
                 writer.Write(">(");
 
                 if (j == i)
-                    writer.Write($"selector(either.Item{j}.Value)");
+                    writer.Write($"selector(either.Item{j})");
                 else
-                    writer.Write($"either.Item{j}.Value");
+                    writer.Write($"either.Item{j}");
 
                 writer.Write(");\n}\n");
             }
@@ -410,9 +418,9 @@ namespace SimpleMonads.CodeGeneration
                 if (i > 1) body.Append("else ");
 
                 body.Append(
-                    $"if (input.Item{i}.HasValue) {{\nreturn new Either<{string.Join(", ", genericArgNamesB)}>(\n");
+                    $"if (input.Item{i} != null) {{\nreturn new Either<{string.Join(", ", genericArgNamesB)}>(\n");
 
-                body.Append($"selector{i}(input.Item{i}.Value)");
+                body.Append($"selector{i}(input.Item{i})");
 
                 body.Append(");\n}\n");
 
@@ -440,9 +448,9 @@ namespace SimpleMonads.CodeGeneration
                 if (i > 1) body.Append("else ");
 
                 body.Append(
-                    $"if (input.Item{i}.HasValue) {{\n");
+                    $"if (input.Item{i} != null) {{\n");
 
-                body.Append($"action{i}(input.Item{i}.Value);\n}}\n");
+                body.Append($"action{i}(input.Item{i});\n}}\n");
 
                 actions.Add($"Action<T{i}> action{i}");
             }

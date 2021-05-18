@@ -5,111 +5,111 @@ public class EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, 
 {
 protected EitherBase() { }
 public EitherBase(T1 item1) {
-Item1 = item1.ToMaybe();
+Item1 = item1;
 }
 public EitherBase(T2 item2) {
-Item2 = item2.ToMaybe();
+Item2 = item2;
 }
 public EitherBase(T3 item3) {
-Item3 = item3.ToMaybe();
+Item3 = item3;
 }
 public EitherBase(T4 item4) {
-Item4 = item4.ToMaybe();
+Item4 = item4;
 }
 public EitherBase(T5 item5) {
-Item5 = item5.ToMaybe();
+Item5 = item5;
 }
 public EitherBase(T6 item6) {
-Item6 = item6.ToMaybe();
+Item6 = item6;
 }
 public EitherBase(T7 item7) {
-Item7 = item7.ToMaybe();
+Item7 = item7;
 }
 public EitherBase(T8 item8) {
-Item8 = item8.ToMaybe();
+Item8 = item8;
 }
 public EitherBase(T9 item9) {
-Item9 = item9.ToMaybe();
+Item9 = item9;
 }
 public EitherBase(T10 item10) {
-Item10 = item10.ToMaybe();
+Item10 = item10;
 }
 public EitherBase(T11 item11) {
-Item11 = item11.ToMaybe();
+Item11 = item11;
 }
 public EitherBase(T12 item12) {
-Item12 = item12.ToMaybe();
+Item12 = item12;
 }
 public EitherBase(T13 item13) {
-Item13 = item13.ToMaybe();
+Item13 = item13;
 }
 public EitherBase(T14 item14) {
-Item14 = item14.ToMaybe();
+Item14 = item14;
 }
 public EitherBase(T15 item15) {
-Item15 = item15.ToMaybe();
+Item15 = item15;
 }
-public IMaybe<T1> Item1 { get; init; } = Utility.Nothing<T1>();
-public IMaybe<T2> Item2 { get; init; } = Utility.Nothing<T2>();
-public IMaybe<T3> Item3 { get; init; } = Utility.Nothing<T3>();
-public IMaybe<T4> Item4 { get; init; } = Utility.Nothing<T4>();
-public IMaybe<T5> Item5 { get; init; } = Utility.Nothing<T5>();
-public IMaybe<T6> Item6 { get; init; } = Utility.Nothing<T6>();
-public IMaybe<T7> Item7 { get; init; } = Utility.Nothing<T7>();
-public IMaybe<T8> Item8 { get; init; } = Utility.Nothing<T8>();
-public IMaybe<T9> Item9 { get; init; } = Utility.Nothing<T9>();
-public IMaybe<T10> Item10 { get; init; } = Utility.Nothing<T10>();
-public IMaybe<T11> Item11 { get; init; } = Utility.Nothing<T11>();
-public IMaybe<T12> Item12 { get; init; } = Utility.Nothing<T12>();
-public IMaybe<T13> Item13 { get; init; } = Utility.Nothing<T13>();
-public IMaybe<T14> Item14 { get; init; } = Utility.Nothing<T14>();
-public IMaybe<T15> Item15 { get; init; } = Utility.Nothing<T15>();
+public T1? Item1 { get; init; } = default;
+public T2? Item2 { get; init; } = default;
+public T3? Item3 { get; init; } = default;
+public T4? Item4 { get; init; } = default;
+public T5? Item5 { get; init; } = default;
+public T6? Item6 { get; init; } = default;
+public T7? Item7 { get; init; } = default;
+public T8? Item8 { get; init; } = default;
+public T9? Item9 { get; init; } = default;
+public T10? Item10 { get; init; } = default;
+public T11? Item11 { get; init; } = default;
+public T12? Item12 { get; init; } = default;
+public T13? Item13 { get; init; } = default;
+public T14? Item14 { get; init; } = default;
+public T15? Item15 { get; init; } = default;
 public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Or<T16>()
 {
-if (Item1.HasValue) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item1.Value);
+if (Item1 != null) {
+return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item1);
 }
-if (Item2.HasValue) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item2.Value);
+if (Item2 != null) {
+return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item2);
 }
-if (Item3.HasValue) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item3.Value);
+if (Item3 != null) {
+return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item3);
 }
-if (Item4.HasValue) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item4.Value);
+if (Item4 != null) {
+return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item4);
 }
-if (Item5.HasValue) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item5.Value);
+if (Item5 != null) {
+return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item5);
 }
-if (Item6.HasValue) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item6.Value);
+if (Item6 != null) {
+return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item6);
 }
-if (Item7.HasValue) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item7.Value);
+if (Item7 != null) {
+return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item7);
 }
-if (Item8.HasValue) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item8.Value);
+if (Item8 != null) {
+return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item8);
 }
-if (Item9.HasValue) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item9.Value);
+if (Item9 != null) {
+return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item9);
 }
-if (Item10.HasValue) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item10.Value);
+if (Item10 != null) {
+return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item10);
 }
-if (Item11.HasValue) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item11.Value);
+if (Item11 != null) {
+return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item11);
 }
-if (Item12.HasValue) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item12.Value);
+if (Item12 != null) {
+return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item12);
 }
-if (Item13.HasValue) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item13.Value);
+if (Item13 != null) {
+return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item13);
 }
-if (Item14.HasValue) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item14.Value);
+if (Item14 != null) {
+return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item14);
 }
-if (Item15.HasValue) {
-return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item15.Value);
+if (Item15 != null) {
+return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item15);
 }
 throw new System.InvalidOperationException("The either has no values");
 }
@@ -145,50 +145,50 @@ return hash;
 }
 }
 public override string ToString() {
-if (Item1.HasValue) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T1))} Item1: {Item1.Value})";
+if (Item1 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T1))} Item1: {Item1})";
 }
-if (Item2.HasValue) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T2))} Item2: {Item2.Value})";
+if (Item2 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T2))} Item2: {Item2})";
 }
-if (Item3.HasValue) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T3))} Item3: {Item3.Value})";
+if (Item3 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T3))} Item3: {Item3})";
 }
-if (Item4.HasValue) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T4))} Item4: {Item4.Value})";
+if (Item4 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T4))} Item4: {Item4})";
 }
-if (Item5.HasValue) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T5))} Item5: {Item5.Value})";
+if (Item5 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T5))} Item5: {Item5})";
 }
-if (Item6.HasValue) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T6))} Item6: {Item6.Value})";
+if (Item6 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T6))} Item6: {Item6})";
 }
-if (Item7.HasValue) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T7))} Item7: {Item7.Value})";
+if (Item7 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T7))} Item7: {Item7})";
 }
-if (Item8.HasValue) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T8))} Item8: {Item8.Value})";
+if (Item8 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T8))} Item8: {Item8})";
 }
-if (Item9.HasValue) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T9))} Item9: {Item9.Value})";
+if (Item9 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T9))} Item9: {Item9})";
 }
-if (Item10.HasValue) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T10))} Item10: {Item10.Value})";
+if (Item10 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T10))} Item10: {Item10})";
 }
-if (Item11.HasValue) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T11))} Item11: {Item11.Value})";
+if (Item11 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T11))} Item11: {Item11})";
 }
-if (Item12.HasValue) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T12))} Item12: {Item12.Value})";
+if (Item12 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T12))} Item12: {Item12})";
 }
-if (Item13.HasValue) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T13))} Item13: {Item13.Value})";
+if (Item13 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T13))} Item13: {Item13})";
 }
-if (Item14.HasValue) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T14))} Item14: {Item14.Value})";
+if (Item14 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T14))} Item14: {Item14})";
 }
-if (Item15.HasValue) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T15))} Item15: {Item15.Value})";
+if (Item15 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>))}({Utility.ConvertToCSharpTypeName(typeof(T15))} Item15: {Item15})";
 }
 throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }
@@ -238,140 +238,95 @@ public static implicit operator EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T
 return new(t15);
 }
 public static implicit operator T1(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return either.Item1.Value;
+return either.Item1;
 }
 public static implicit operator T2(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return either.Item2.Value;
+return either.Item2;
 }
 public static implicit operator T3(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return either.Item3.Value;
+return either.Item3;
 }
 public static implicit operator T4(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return either.Item4.Value;
+return either.Item4;
 }
 public static implicit operator T5(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return either.Item5.Value;
+return either.Item5;
 }
 public static implicit operator T6(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return either.Item6.Value;
+return either.Item6;
 }
 public static implicit operator T7(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return either.Item7.Value;
+return either.Item7;
 }
 public static implicit operator T8(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return either.Item8.Value;
+return either.Item8;
 }
 public static implicit operator T9(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return either.Item9.Value;
+return either.Item9;
 }
 public static implicit operator T10(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return either.Item10.Value;
+return either.Item10;
 }
 public static implicit operator T11(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return either.Item11.Value;
+return either.Item11;
 }
 public static implicit operator T12(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return either.Item12.Value;
+return either.Item12;
 }
 public static implicit operator T13(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return either.Item13.Value;
+return either.Item13;
 }
 public static implicit operator T14(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return either.Item14.Value;
+return either.Item14;
 }
 public static implicit operator T15(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return either.Item15.Value;
-}
-public static implicit operator Maybe<T1>(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return (Maybe<T1>)either.Item1;
-}
-public static implicit operator Maybe<T2>(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return (Maybe<T2>)either.Item2;
-}
-public static implicit operator Maybe<T3>(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return (Maybe<T3>)either.Item3;
-}
-public static implicit operator Maybe<T4>(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return (Maybe<T4>)either.Item4;
-}
-public static implicit operator Maybe<T5>(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return (Maybe<T5>)either.Item5;
-}
-public static implicit operator Maybe<T6>(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return (Maybe<T6>)either.Item6;
-}
-public static implicit operator Maybe<T7>(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return (Maybe<T7>)either.Item7;
-}
-public static implicit operator Maybe<T8>(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return (Maybe<T8>)either.Item8;
-}
-public static implicit operator Maybe<T9>(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return (Maybe<T9>)either.Item9;
-}
-public static implicit operator Maybe<T10>(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return (Maybe<T10>)either.Item10;
-}
-public static implicit operator Maybe<T11>(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return (Maybe<T11>)either.Item11;
-}
-public static implicit operator Maybe<T12>(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return (Maybe<T12>)either.Item12;
-}
-public static implicit operator Maybe<T13>(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return (Maybe<T13>)either.Item13;
-}
-public static implicit operator Maybe<T14>(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return (Maybe<T14>)either.Item14;
-}
-public static implicit operator Maybe<T15>(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return (Maybe<T15>)either.Item15;
+return either.Item15;
 }
 public ConvertibleTo<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> ConvertTo<TBase>() {
-if (Item1.HasValue) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item1.Value);
+if (Item1 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item1);
 }
-if (Item2.HasValue) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item2.Value);
+if (Item2 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item2);
 }
-if (Item3.HasValue) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item3.Value);
+if (Item3 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item3);
 }
-if (Item4.HasValue) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item4.Value);
+if (Item4 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item4);
 }
-if (Item5.HasValue) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item5.Value);
+if (Item5 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item5);
 }
-if (Item6.HasValue) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item6.Value);
+if (Item6 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item6);
 }
-if (Item7.HasValue) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item7.Value);
+if (Item7 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item7);
 }
-if (Item8.HasValue) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item8.Value);
+if (Item8 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item8);
 }
-if (Item9.HasValue) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item9.Value);
+if (Item9 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item9);
 }
-if (Item10.HasValue) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item10.Value);
+if (Item10 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item10);
 }
-if (Item11.HasValue) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item11.Value);
+if (Item11 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item11);
 }
-if (Item12.HasValue) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item12.Value);
+if (Item12 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item12);
 }
-if (Item13.HasValue) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item13.Value);
+if (Item13 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item13);
 }
-if (Item14.HasValue) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item14.Value);
+if (Item14 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item14);
 }
-if (Item15.HasValue) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item15.Value);
+if (Item15 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item15);
 }
 throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }
@@ -456,9 +411,99 @@ public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, 
 return new(t15);
 }
 public static implicit operator TBase(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> either) {
-return either.Value;
+return either;
 }
-public virtual TBase Value => Item1.Cast<TBase>().Otherwise(Item2.Cast<TBase>().Otherwise(Item3.Cast<TBase>().Otherwise(Item4.Cast<TBase>().Otherwise(Item5.Cast<TBase>().Otherwise(Item6.Cast<TBase>().Otherwise(Item7.Cast<TBase>().Otherwise(Item8.Cast<TBase>().Otherwise(Item9.Cast<TBase>().Otherwise(Item10.Cast<TBase>().Otherwise(Item11.Cast<TBase>().Otherwise(Item12.Cast<TBase>().Otherwise(Item13.Cast<TBase>().Otherwise(Item14.Cast<TBase>().Otherwise(() => (TBase)Item15.Cast<TBase>().Value))))))))))))));
+protected TBase Convert1(T1 item1) {
+if (item1 is TBase @base) {
+return @base;
+}
+throw new NotImplementedException("Cannot convert from {typeof(T1).Name} to {typeof(TBase).Name}");
+}
+protected TBase Convert2(T2 item2) {
+if (item2 is TBase @base) {
+return @base;
+}
+throw new NotImplementedException("Cannot convert from {typeof(T2).Name} to {typeof(TBase).Name}");
+}
+protected TBase Convert3(T3 item3) {
+if (item3 is TBase @base) {
+return @base;
+}
+throw new NotImplementedException("Cannot convert from {typeof(T3).Name} to {typeof(TBase).Name}");
+}
+protected TBase Convert4(T4 item4) {
+if (item4 is TBase @base) {
+return @base;
+}
+throw new NotImplementedException("Cannot convert from {typeof(T4).Name} to {typeof(TBase).Name}");
+}
+protected TBase Convert5(T5 item5) {
+if (item5 is TBase @base) {
+return @base;
+}
+throw new NotImplementedException("Cannot convert from {typeof(T5).Name} to {typeof(TBase).Name}");
+}
+protected TBase Convert6(T6 item6) {
+if (item6 is TBase @base) {
+return @base;
+}
+throw new NotImplementedException("Cannot convert from {typeof(T6).Name} to {typeof(TBase).Name}");
+}
+protected TBase Convert7(T7 item7) {
+if (item7 is TBase @base) {
+return @base;
+}
+throw new NotImplementedException("Cannot convert from {typeof(T7).Name} to {typeof(TBase).Name}");
+}
+protected TBase Convert8(T8 item8) {
+if (item8 is TBase @base) {
+return @base;
+}
+throw new NotImplementedException("Cannot convert from {typeof(T8).Name} to {typeof(TBase).Name}");
+}
+protected TBase Convert9(T9 item9) {
+if (item9 is TBase @base) {
+return @base;
+}
+throw new NotImplementedException("Cannot convert from {typeof(T9).Name} to {typeof(TBase).Name}");
+}
+protected TBase Convert10(T10 item10) {
+if (item10 is TBase @base) {
+return @base;
+}
+throw new NotImplementedException("Cannot convert from {typeof(T10).Name} to {typeof(TBase).Name}");
+}
+protected TBase Convert11(T11 item11) {
+if (item11 is TBase @base) {
+return @base;
+}
+throw new NotImplementedException("Cannot convert from {typeof(T11).Name} to {typeof(TBase).Name}");
+}
+protected TBase Convert12(T12 item12) {
+if (item12 is TBase @base) {
+return @base;
+}
+throw new NotImplementedException("Cannot convert from {typeof(T12).Name} to {typeof(TBase).Name}");
+}
+protected TBase Convert13(T13 item13) {
+if (item13 is TBase @base) {
+return @base;
+}
+throw new NotImplementedException("Cannot convert from {typeof(T13).Name} to {typeof(TBase).Name}");
+}
+protected TBase Convert14(T14 item14) {
+if (item14 is TBase @base) {
+return @base;
+}
+throw new NotImplementedException("Cannot convert from {typeof(T14).Name} to {typeof(TBase).Name}");
+}
+protected TBase Convert15(T15 item15) {
+if (item15 is TBase @base) {
+return @base;
+}
+throw new NotImplementedException("Cannot convert from {typeof(T15).Name} to {typeof(TBase).Name}");
+}
+public virtual TBase Value => Convert1(Item1) ?? Convert2(Item2) ?? Convert3(Item3) ?? Convert4(Item4) ?? Convert5(Item5) ?? Convert6(Item6) ?? Convert7(Item7) ?? Convert8(Item8) ?? Convert9(Item9) ?? Convert10(Item10) ?? Convert11(Item11) ?? Convert12(Item12) ?? Convert13(Item13) ?? Convert14(Item14) ?? Convert15(Item15);
 }
 }
 public partial class SubTypesOf<TBase> {
@@ -495,6 +540,7 @@ public Either(T14 item14) : base(item14) { }
 
 public Either(T15 item15) : base(item15) { }
 
+public virtual TBase Value => Item1 ?? Item2 ?? Item3 ?? Item4 ?? Item5 ?? Item6 ?? Item7 ?? Item8 ?? Item9 ?? Item10 ?? Item11 ?? Item12 ?? Item13 ?? Item14 ?? (TBase)Item15;
 public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(T1 t1) {
 return new(t1);
 }

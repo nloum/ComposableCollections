@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using HotChocolate;
 using HotChocolate.Types;
@@ -41,7 +42,7 @@ namespace SimpleMonads.GraphQL.Tests
             }
         }
 
-        public class AnimalRepository
+        public class EitherAnimalRepository
         {
             public IEnumerable<Dog> GetDogs()
             {
@@ -54,6 +55,23 @@ namespace SimpleMonads.GraphQL.Tests
                     }
                 };
             }
+
+            public IEnumerable<AnyAnimal> GetAnimals()
+            {
+                return GetDogs().Select(x => (AnyAnimal)x);
+            }
+        }
+
+        public class MaybeAnimalRepository
+        {
+            public IMaybe<Dog> GetDogs()
+            {
+                return new Dog()
+                {
+                    Name = "Oscar",
+                    IsGoodDog = true
+                }.ToMaybe();
+            }
         }
 
         [TestMethod]
@@ -65,7 +83,35 @@ namespace SimpleMonads.GraphQL.Tests
                 .AddEither<AnyAnimal>()
                 // Add empty query
                 .AddType(new ObjectType(descriptor => descriptor.Name("Query" )))
-                .AddType(new ObjectTypeExtension<AnimalRepository>(x => x.Name("Query")))
+                .AddType(new ObjectTypeExtension<EitherAnimalRepository>(x => x.Name("Query")))
+                .Create();
+
+            return Verify(schema.ToString());
+        }
+        
+        [TestMethod]
+        public Task AddMaybeObjectTypeShouldWork()
+        {
+            var schema = new SchemaBuilder()
+                .AddType<DogType>()
+                .AddMaybe<DogType>()
+                // Add empty query
+                .AddType(new ObjectType(descriptor => descriptor.Name("Query" )))
+                .AddType(new ObjectTypeExtension<MaybeAnimalRepository>(x => x.Name("Query")))
+                .Create();
+
+            return Verify(schema.ToString());
+        }
+        
+        [TestMethod]
+        public Task AddMaybeShouldWork()
+        {
+            var schema = new SchemaBuilder()
+                .AddType<DogType>()
+                .AddMaybe<ObjectType<Dog>>()
+                // Add empty query
+                .AddType(new ObjectType(descriptor => descriptor.Name("Query" )))
+                .AddType(new ObjectTypeExtension<MaybeAnimalRepository>(x => x.Name("Query")))
                 .Create();
 
             return Verify(schema.ToString());

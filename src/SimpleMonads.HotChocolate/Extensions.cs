@@ -12,11 +12,36 @@ namespace SimpleMonads.HotChocolate
     {
         public static IRequestExecutorBuilder AddEmptyQueryType(this IRequestExecutorBuilder builder)
         {
-            return builder.AddType(new ObjectType(descriptor =>
+            return builder.AddType(new ObjectType(descriptor => descriptor.Name("Query")));
+        }
+        
+        public static IRequestExecutorBuilder AddMaybe<T>(this IRequestExecutorBuilder builder)
+        {
+            builder = builder.AddType<MaybeType<T>>();
+            return builder;
+        }
+
+        internal static Type GetObjectTypeOf(this Type type)
+        {
+            if (type.GetGenericTypeDefinitionIfApplicable() == typeof(ObjectType<>))
             {
-                descriptor.Name("Query");
-                descriptor.Field("hello").Type<StringType>().Resolve(rc => "world!");
-            }));
+                return type.GetGenericArguments()[0];
+            }
+
+            if (type.BaseType == null)
+            {
+                return null;
+            }
+            
+            return type.BaseType.GetObjectTypeOf();
+        }
+        
+        public static ISchemaBuilder AddMaybe<T>(this ISchemaBuilder builder)
+        {
+            var type = typeof(T).GetObjectTypeOf() ?? typeof(T);
+            
+            builder = builder.AddType(typeof(MaybeType<>).MakeGenericType(type));
+            return builder;
         }
 
         public static IRequestExecutorBuilder AddEither<TEither>(this IRequestExecutorBuilder builder)

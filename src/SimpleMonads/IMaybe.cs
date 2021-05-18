@@ -18,5 +18,6 @@ namespace SimpleMonads
     {
         bool HasValue { get; }
         object ObjectValue { get; }
+        object? ObjectValueOrDefault { get; }
     }
 }

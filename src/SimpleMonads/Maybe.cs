@@ -62,6 +62,8 @@ namespace SimpleMonads
             }
         }
 
+        public object? ObjectValueOrDefault => ValueOrDefault;
+
         public TMonad2 Bind<TMonad2, TElement2>(Func<T, TMonad2> f) where TMonad2 : IMonad<TElement2>
         {
             return f(Value);

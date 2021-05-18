@@ -9,6 +9,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "..\build\_build.c
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleMonads.Tests", "SimpleMonads.Tests\SimpleMonads.Tests.csproj", "{C62FED5B-DC7B-4F4C-B122-AC0C71ADDEA2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleMonads.HotChocolate", "SimpleMonads.HotChocolate\SimpleMonads.HotChocolate.csproj", "{E8AB518D-077A-48EC-9951-F8421F88DBB3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleMonads.HotChocolate.Tests", "SimpleMonads.HotChocolate.Tests\SimpleMonads.HotChocolate.Tests.csproj", "{6E568CDE-D99E-43F1-96D2-8E008187E774}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,5 +33,13 @@ Global
 		{C62FED5B-DC7B-4F4C-B122-AC0C71ADDEA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C62FED5B-DC7B-4F4C-B122-AC0C71ADDEA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C62FED5B-DC7B-4F4C-B122-AC0C71ADDEA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8AB518D-077A-48EC-9951-F8421F88DBB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8AB518D-077A-48EC-9951-F8421F88DBB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8AB518D-077A-48EC-9951-F8421F88DBB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8AB518D-077A-48EC-9951-F8421F88DBB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E568CDE-D99E-43F1-96D2-8E008187E774}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E568CDE-D99E-43F1-96D2-8E008187E774}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E568CDE-D99E-43F1-96D2-8E008187E774}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E568CDE-D99E-43F1-96D2-8E008187E774}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

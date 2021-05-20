@@ -64,7 +64,11 @@ class Build : NukeBuild
     AbsolutePath WebsiteDirectory => RootDirectory / "website";
     AbsolutePath TestResultDirectory => ArtifactsDirectory / "test-results";
 
-    Project PackageProject => Solution.GetProject("ComposableCollections");
+    Project[] PackageProjects => new[]
+    {
+	    Solution.GetProject("ComposableCollections"),
+	    Solution.GetProject("ComposableCollections.GraphQL")
+    };
     
     IEnumerable<Project> TestProjects => Solution.GetProjects("*.Test");
     
@@ -105,7 +109,7 @@ class Build : NukeBuild
 				.SetFileVersion(GitVersion.AssemblySemFileVer)
 				.SetInformationalVersion(GitVersion.InformationalVersion)
 				.CombineWith(
-					from project in new[] { PackageProject }
+					from project in PackageProjects
 					from framework in project.GetTargetFrameworks()
                     select new { project, framework }, (cs, v) => cs
 						.SetProject(v.project)
@@ -184,12 +188,12 @@ class Build : NukeBuild
             DotNetPack(s => s
                 .EnableNoRestore()
                 .EnableNoBuild()
-				.SetProject(PackageProject)
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
                 .SetVersion(GitVersion.NuGetVersionV2)
 				.SetIncludeSymbols(true)
 				.SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
+                .CombineWith(PackageProjects, (s, p) => s.SetProject(p))
             );
         });
 

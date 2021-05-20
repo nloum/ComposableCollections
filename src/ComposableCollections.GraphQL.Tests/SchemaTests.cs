@@ -3,7 +3,10 @@ using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Sources;
 using ComposableCollections.DictionaryWithBuiltInKey.Interfaces;
 using HotChocolate;
+using HotChocolate.Execution;
 using HotChocolate.Types;
+using LiveLinq.Dictionary;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VerifyMSTest;
 
@@ -18,16 +21,34 @@ namespace ComposableCollections.GraphQL.Tests
         }
         
         [TestMethod]
-        public Task ComposableDictionaryAtRootShouldWork()
+        public async Task ComposableDictionaryAtRootShouldWork()
         {
+            var serviceCollection = new ServiceCollection();
+            var state = new ComposableDictionary<string, Person>();
+            serviceCollection.AddSingleton(state);
+            var services = serviceCollection.BuildServiceProvider();
+
             var schema = new SchemaBuilder()
                 .AddType<ObjectType<Person>>()
                 .AddType(new ObjectType(descriptor => descriptor.Name("Query")))
                 .AddType(new ObjectType(descriptor => descriptor.Name("Mutation")))
                 .AddTopLevelComposableDictionary<ComposableDictionary<string, Person>>("people")
+                .AddServices(services)
                 .Create();
+            
+            await Verify(schema.ToString());
 
-            return Verify(schema.ToString());
+            var executor = schema.MakeExecutable();
+
+            var result = await executor.ExecuteAsync(QueryRequestBuilder.Create(@"mutation {
+    people {
+        tryAdd(key: ""Joe"", value: { name: ""Joe"" }) {
+            name
+        }
+    }
+}
+"));
+            await Verify(result.ToJson(), sourceFile: "MutationResponse.json");
         }
         
         [TestMethod]
@@ -70,5 +91,63 @@ namespace ComposableCollections.GraphQL.Tests
 
             return Verify(schema.ToString());
         }
+
+        [TestMethod]
+        public Task ObservableComposableDictionaryAtRootShouldWork()
+        {
+            var schema = new SchemaBuilder()
+                .AddType<ObjectType<Person>>()
+                .AddType(new ObjectType(descriptor => descriptor.Name("Query")))
+                .AddType(new ObjectType(descriptor => descriptor.Name("Mutation")))
+                .AddType(new ObjectType(descriptor => descriptor.Name("Subscription")))
+                .AddTopLevelComposableDictionary<ObservableDictionary<string, Person>>("people")
+                .Create();
+
+            return Verify(schema.ToString());
+        }
+        
+        [TestMethod]
+        public Task ObservableQueryableComposableDictionaryAtRootShouldWork()
+        {
+            var schema = new SchemaBuilder()
+                .AddFiltering()
+                .AddType<ObjectType<Person>>()
+                .AddType(new ObjectType(descriptor => descriptor.Name("Query")))
+                .AddType(new ObjectType(descriptor => descriptor.Name("Mutation")))
+                .AddType(new ObjectType(descriptor => descriptor.Name("Subscription")))
+                .AddTopLevelComposableDictionary<IObservableQueryableDictionary<string, Person>>("people")
+                .Create();
+
+            return Verify(schema.ToString());
+        }
+        
+        // [TestMethod]
+        // public Task ObservableDictionaryWithBuiltInKeyAtRootShouldWork()
+        // {
+        //     var schema = new SchemaBuilder()
+        //         .AddType<ObjectType<Person>>()
+        //         .AddType(new ObjectType(descriptor => descriptor.Name("Query")))
+        //         .AddType(new ObjectType(descriptor => descriptor.Name("Mutation")))
+        //         .AddType(new ObjectType(descriptor => descriptor.Name("Subscription")))
+        //         .AddTopLevelComposableDictionary<IObservableDictionaryWithBuiltInKey<string, Person>>("people")
+        //         .Create();
+        //
+        //     return Verify(schema.ToString());
+        // }
+        
+        // [TestMethod]
+        // public Task ObservableQueryableDictionaryWithBuiltInKeyAtRootShouldWork()
+        // {
+        //     var schema = new SchemaBuilder()
+        //         .AddFiltering()
+        //         .AddType<ObjectType<Person>>()
+        //         .AddType(new ObjectType(descriptor => descriptor.Name("Query")))
+        //         .AddType(new ObjectType(descriptor => descriptor.Name("Mutation")))
+        //         .AddType(new ObjectType(descriptor => descriptor.Name("Subscription")))
+        //         .AddTopLevelComposableDictionary<IQueryableObservableDictionaryWithBuiltInKey<string, Person>>("people")
+        //         .Create();
+        //
+        //     return Verify(schema.ToString());
+        // }
     }
 }

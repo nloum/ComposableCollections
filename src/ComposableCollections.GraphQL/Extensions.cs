@@ -5,6 +5,7 @@ using ComposableCollections.DictionaryWithBuiltInKey.Interfaces;
 using HotChocolate;
 using HotChocolate.Types;
 using Humanizer;
+using LiveLinq.Dictionary;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ComposableCollections.GraphQL
@@ -48,7 +49,7 @@ namespace ComposableCollections.GraphQL
         {
             var metadata = typeof(TComposableDictionary).GetComposableDictionaryMetadata();
 
-            return builder
+            builder = builder
                 .AddComposableDictionary<TComposableDictionary>(name.Pascalize())
                 .AddType(new ObjectTypeExtension(descriptor =>
                 {
@@ -72,15 +73,30 @@ namespace ComposableCollections.GraphQL
                             return result;
                         });
                 }));
+
+            if (metadata.IsObservable)
+            {
+                builder = builder.AddType((ObjectTypeExtension) Activator.CreateInstance(metadata.SubscriptionObjectType,
+                    "Subscription", name.Camelize()));
+            }
+
+            return builder;
         }
 
         public static ISchemaBuilder AddComposableDictionary<TComposableDictionary>(this ISchemaBuilder builder, string typeName)
         {
             var metadata = typeof(TComposableDictionary).GetComposableDictionaryMetadata();
 
-            return builder
+            builder = builder
                 .AddType((ObjectType)Activator.CreateInstance(metadata.QueryObjectType, typeName + "Query"))
                 .AddType((ObjectType)Activator.CreateInstance(metadata.MutationObjectType, typeName + "Mutation"));
+
+            if (metadata.IsObservable)
+            {
+                builder = builder.AddType((ObjectType)Activator.CreateInstance(metadata.SubscriptionType, typeName + "Change"));
+            }
+            
+            return builder;
         }
     }
 }

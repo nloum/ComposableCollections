@@ -48,15 +48,13 @@ class Build : NukeBuild
 	readonly string NugetSource = "https://api.nuget.org/v3/index.json";
 	[Parameter("API Key for the NuGet server.")]
 	readonly string NugetApiKey;
-	[Parameter("Personal authentication token to push CI website to Netlify")]
-	readonly string NetlifyPat;
 
     [Solution]
 	readonly Solution Solution;
     [GitRepository]
 	readonly GitRepository GitRepository;
- //    [GitVersion]
-	// readonly GitVersion GitVersion;
+    [GitVersion(Framework="net5.0")]
+	readonly GitVersion GitVersion;
 	
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
@@ -157,7 +155,7 @@ class Build : NukeBuild
 	        //var settings = new GitVersionSettings().SetToolPath( package.Directory / "tools/netcoreapp3.1/any/gitversion.dll");
 
 	        ReportGenerator(_ => _
-	            .SetToolPath(package.Directory / "tools/netcoreapp3.1/any/reportgenerator.dll")
+	            .SetProcessToolPath(package.Directory / "tools/netcoreapp3.1/any/reportgenerator.dll")
                 .SetReports(TestResultDirectory / "*.xml")
                 .SetReportTypes(ReportTypes.HtmlInline)
                 .SetTargetDirectory(CoverageReportDirectory)
@@ -207,16 +205,4 @@ class Build : NukeBuild
 				)
             );
         });
-
-
-    public GitVersion GitVersion
-    {
-	    get
-	    {
-		    var package = NuGetPackageResolver.GetGlobalInstalledPackage("GitVersion.Tool", "5.3.3", null);
-		    var settings = new GitVersionSettings().SetToolPath(package.Directory / "tools/netcoreapp3.1/any/gitversion.dll");
-		    var gitVersion = GitVersionTasks.GitVersion(settings).Result;
-		    return gitVersion;
-	    }
-    }
 }

@@ -15,9 +15,9 @@ namespace GenericNumbers.Relational.GreaterThan
             if (GreaterThan == null)
             {
                 if (typeof(T).GetTypeInfo().IsAssignableFrom(typeof(IComparable<TInput>).GetTypeInfo()))
-                    GreaterThan = (arg1, input) => ((IComparable<TInput>)arg1).CompareTo(input) > 0;
+                    GreaterThan = (arg1, input) => ((IComparable<TInput>)arg1!).CompareTo(input) > 0;
                 else if (typeof(T).GetTypeInfo().IsAssignableFrom(typeof(IComparable).GetTypeInfo()))
-                    GreaterThan = (arg1, input) => ((IComparable)arg1).CompareTo(input) > 0;
+                    GreaterThan = (arg1, input) => ((IComparable)arg1!).CompareTo(input) > 0;
                 else
                 {
                     GreaterThan = (arg1, input) =>

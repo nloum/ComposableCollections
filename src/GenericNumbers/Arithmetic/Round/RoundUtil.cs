@@ -9,7 +9,7 @@ namespace GenericNumbers.Arithmetic.Round
             Round = (arg1) =>
             {
                 TOutput output;
-                ((IRound<TOutput>) arg1).Round(out output);
+                ((IRound<TOutput>) arg1!).Round(out output);
                 return output;
             };
         }

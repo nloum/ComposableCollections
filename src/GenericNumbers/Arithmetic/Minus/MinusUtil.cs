@@ -17,7 +17,7 @@ namespace GenericNumbers.Arithmetic.Minus
                 Minus = (arg1, input) =>
                 {
                     TOutput output;
-                    ((IMinus<TInput, TOutput>)arg1).Minus(input, out output);
+                    ((IMinus<TInput, TOutput>)arg1!).Minus(input, out output);
                     return output;
                 };
                 UsedOperators = false;
@@ -113,7 +113,7 @@ namespace GenericNumbers.Arithmetic.Minus
                 return;
         }
 
-        internal static Func<T, TInput, TOutput> TryDirectTypeCombination()
+        internal static Func<T, TInput, TOutput>? TryDirectTypeCombination()
         {
             try
             {
@@ -129,7 +129,7 @@ namespace GenericNumbers.Arithmetic.Minus
             return null;
         }
 
-        internal static Func<T, TInput, TOutput> TryTypeCombination<T1, T2, T3>()
+        internal static Func<T, TInput, TOutput>? TryTypeCombination<T1, T2, T3>()
         {
             try
             {
@@ -152,6 +152,6 @@ namespace GenericNumbers.Arithmetic.Minus
             return Minus(t, input);
         }
 
-        public static Func<T, TInput, TOutput> Minus { get; set; }
+        public static Func<T, TInput, TOutput>? Minus { get; set; }
     }
 }

@@ -17,10 +17,10 @@ namespace GenericNumbers
     {
         public SimpleNumberWrapper(T value)
         {
-            Value = value;
+            Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public T Value { get; private set; }
+        public T Value { get; }
 
         public void Abs(out SimpleNumberWrapper<T> output)
         {
@@ -79,7 +79,7 @@ namespace GenericNumbers
 
         public override string ToString()
         {
-            return Value.ToString();
+            return Value!.ToString();
         }
     }
 }

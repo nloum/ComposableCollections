@@ -9,7 +9,7 @@ namespace GenericNumbers.Arithmetic.Ceiling
             Ceiling = (arg1) =>
             {
                 TOutput output;
-                ((ICeiling<TOutput>) arg1).Ceiling(out output);
+                ((ICeiling<TOutput>) arg1!).Ceiling(out output);
                 return output;
             };
         }

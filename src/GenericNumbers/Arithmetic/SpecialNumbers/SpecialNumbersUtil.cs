@@ -9,19 +9,19 @@ namespace GenericNumbers.Arithmetic.SpecialNumbers
             IsNegativeInfinite = (arg1) =>
             {
                 bool output;
-                ((ISpecialNumbers)arg1).IsNegativeInfinite(out output);
+                ((ISpecialNumbers)arg1!).IsNegativeInfinite(out output);
                 return output;
             };
             IsPositiveInfinite = (arg1) =>
             {
                 bool output;
-                ((ISpecialNumbers)arg1).IsPositiveInfinite(out output);
+                ((ISpecialNumbers)arg1!).IsPositiveInfinite(out output);
                 return output;
             };
             IsNumber = (arg1) =>
             {
                 bool output;
-                ((ISpecialNumbers)arg1).IsNumber(out output);
+                ((ISpecialNumbers)arg1!).IsNumber(out output);
                 return output;
             };
         }

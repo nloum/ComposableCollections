@@ -9,7 +9,7 @@ namespace GenericNumbers.Arithmetic.Floor
             Floor = (arg1) =>
             {
                 TOutput output;
-                ((IFloor<TOutput>) arg1).Floor(out output);
+                ((IFloor<TOutput>) arg1!).Floor(out output);
                 return output;
             };
         }

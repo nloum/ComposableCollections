@@ -16,6 +16,7 @@ using GenericNumbers.Arithmetic.SpecialNumbers;
 using GenericNumbers.Arithmetic.Sqrt;
 using GenericNumbers.Arithmetic.Times;
 using GenericNumbers.ConvertTo;
+using GenericNumbers.Relational;
 using GenericNumbers.Relational.Equal;
 using GenericNumbers.Relational.GreaterThan;
 using GenericNumbers.Relational.GreaterThanOrEqual;
@@ -365,16 +366,23 @@ namespace GenericNumbers
             }
         }
 
-        public static IEnumerable<INumberRange<T>> Union<T>(this IEnumerable<INumberRange<T>> ranges, IComparer<T> comparer = null)
+        public static IEnumerable<INumberRange<T>> Union<T>(this IEnumerable<INumberRange<T>>? ranges, IComparer<T>? comparer = null)
         {
-            if (ranges == null || !ranges.Any())
+            if (ranges == null)
+            {
+                yield break;
+            }
+            
+            var ordered = ranges.ToList();
+            
+            if (ordered.Count == 0)
                 yield break;
 
             if (comparer == null)
                 comparer = Comparer<T>.Default;
 
-            var ordered = ranges.OrderBy(r => r.LowerBound.Value);
-            var firstRange = ordered.First();
+            ordered.Sort((a, b) => a.LowerBound.Value.CompareTo(b.LowerBound));
+            var firstRange = ordered[0];
 
             T min = firstRange.LowerBound.Value;
             T max = firstRange.UpperBound.Value;

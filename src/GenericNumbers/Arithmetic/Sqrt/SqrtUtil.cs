@@ -9,7 +9,7 @@ namespace GenericNumbers.Arithmetic.Sqrt
             Sqrt = (arg1) =>
             {
                 TOutput output;
-                ((ISqrt<TOutput>) arg1).Sqrt(out output);
+                ((ISqrt<TOutput>) arg1!).Sqrt(out output);
                 return output;
             };
         }

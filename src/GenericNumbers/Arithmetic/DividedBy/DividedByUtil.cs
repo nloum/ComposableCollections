@@ -17,7 +17,7 @@ namespace GenericNumbers.Arithmetic.DividedBy
                 DividedBy = (arg1, input) =>
                 {
                     TOutput output;
-                    ((IDividedBy<TInput, TOutput>)arg1).DividedBy(input, out output);
+                    ((IDividedBy<TInput, TOutput>)arg1!).DividedBy(input, out output);
                     return output;
                 };
                 UsedOperators = false;
@@ -113,7 +113,7 @@ namespace GenericNumbers.Arithmetic.DividedBy
                 return;
         }
 
-        internal static Func<T, TInput, TOutput> TryDirectTypeCombination()
+        internal static Func<T, TInput, TOutput>? TryDirectTypeCombination()
         {
             try
             {
@@ -129,7 +129,7 @@ namespace GenericNumbers.Arithmetic.DividedBy
             return null;
         }
 
-        internal static Func<T, TInput, TOutput> TryTypeCombination<T1, T2, T3>()
+        internal static Func<T, TInput, TOutput>? TryTypeCombination<T1, T2, T3>()
         {
             try
             {

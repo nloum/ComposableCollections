@@ -16,7 +16,7 @@ namespace GenericNumbers.Arithmetic.RaisedTo
                 RaisedTo = (arg1, input) =>
                 {
                     TOutput output;
-                    ((IRaisedTo<TInput, TOutput>)arg1).RaisedTo(input, out output);
+                    ((IRaisedTo<TInput, TOutput>)arg1!).RaisedTo(input, out output);
                     return output;
                 };
                 UsedOperators = false;
@@ -112,7 +112,7 @@ namespace GenericNumbers.Arithmetic.RaisedTo
                 return;
         }
 
-        internal static Func<T, TInput, TOutput> TryDirectTypeCombination()
+        internal static Func<T, TInput, TOutput>? TryDirectTypeCombination()
         {
             try
             {
@@ -137,7 +137,7 @@ namespace GenericNumbers.Arithmetic.RaisedTo
             return null;
         }
 
-        internal static Func<T, TInput, TOutput> TryTypeCombination<T1, T2, T3>()
+        internal static Func<T, TInput, TOutput>? TryTypeCombination<T1, T2, T3>()
         {
             try
             {

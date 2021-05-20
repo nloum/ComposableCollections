@@ -17,7 +17,7 @@ namespace GenericNumbers.Arithmetic.Times
                 Times = (arg1, input) =>
                 {
                     TOutput output;
-                    ((ITimes<TInput, TOutput>)arg1).Times(input, out output);
+                    ((ITimes<TInput, TOutput>)arg1!).Times(input, out output);
                     return output;
                 };
                 UsedOperators = false;
@@ -113,7 +113,7 @@ namespace GenericNumbers.Arithmetic.Times
                 return;
         }
 
-        internal static Func<T, TInput, TOutput> TryDirectTypeCombination()
+        internal static Func<T, TInput, TOutput>? TryDirectTypeCombination()
         {
             try
             {
@@ -129,7 +129,7 @@ namespace GenericNumbers.Arithmetic.Times
             return null;
         }
 
-        internal static Func<T, TInput, TOutput> TryTypeCombination<T1, T2, T3>()
+        internal static Func<T, TInput, TOutput>? TryTypeCombination<T1, T2, T3>()
         {
             try
             {
@@ -152,6 +152,6 @@ namespace GenericNumbers.Arithmetic.Times
             return Times(t, input);
         }
 
-        public static Func<T, TInput, TOutput> Times { get; set; }
+        public static Func<T, TInput, TOutput>? Times { get; set; }
     }
 }

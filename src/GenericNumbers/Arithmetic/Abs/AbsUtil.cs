@@ -9,7 +9,7 @@ namespace GenericNumbers.Arithmetic.Abs
             Abs = (arg1) =>
             {
                 TOutput output;
-                ((IAbs<TOutput>) arg1).Abs(out output);
+                ((IAbs<TOutput>) arg1!).Abs(out output);
                 return output;
             };
         }

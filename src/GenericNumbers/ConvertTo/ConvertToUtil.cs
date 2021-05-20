@@ -16,7 +16,7 @@ namespace GenericNumbers.ConvertTo
                 ConvertTo = arg1 =>
                 {
                     TOutput output;
-                    ((IConvertTo<TOutput>)arg1).ConvertTo(out output);
+                    ((IConvertTo<TOutput>)arg1!).ConvertTo(out output);
                     return output;
                 };
                 UsedOperators = false;
@@ -28,25 +28,14 @@ namespace GenericNumbers.ConvertTo
 
         private static void TryInit()
         {
-            ConvertTo = TryDirectTypeCombination();
-            //ConvertTo = TryTypeCombination<T, T, T>();
-            if (ConvertTo != null)
-                return;
-            ConvertTo = TryTypeCombination<T, T>();
-            if (ConvertTo != null)
-                return;
-            ConvertTo = TryTypeCombination<T, TOutput>();
-            if (ConvertTo != null)
-                return;
-            ConvertTo = TryTypeCombination<TOutput, T>();
-            if (ConvertTo != null)
-                return;
-            ConvertTo = TryTypeCombination<TOutput, TOutput>();
-            if (ConvertTo != null)
-                return;
+            ConvertTo = TryDirectTypeCombination()
+                ?? TryTypeCombination<T, T>()
+                ?? TryTypeCombination<T, TOutput>()
+                ?? TryTypeCombination<TOutput, T>()
+                ?? TryTypeCombination<TOutput, TOutput>();
         }
 
-        public static Func<T,  TOutput> TryDirectTypeCombination()
+        public static Func<T,  TOutput>? TryDirectTypeCombination()
         {
             try
             {
@@ -61,7 +50,7 @@ namespace GenericNumbers.ConvertTo
             return null;
         }
 
-        public static Func<T,  TOutput> TryTypeCombination<T1, T2>()
+        public static Func<T,  TOutput>? TryTypeCombination<T1, T2>()
         {
             try
             {
@@ -80,9 +69,9 @@ namespace GenericNumbers.ConvertTo
 
         private static TOutput ConvertToMethod(T t)
         {
-            return ConvertTo(t);
+            return ConvertTo!(t);
         }
 
-        internal static Func<T,  TOutput> ConvertTo { get; set; }
+        internal static Func<T,  TOutput>? ConvertTo { get; set; }
     }
 }

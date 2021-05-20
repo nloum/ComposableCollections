@@ -59,7 +59,7 @@ namespace ComposableCollections.Tests
         [DataRow(DictionaryType.ConcurrentCachingDictionary)]
         public void AddShouldFailIfPreExistingKey(DictionaryType dictionaryType)
         {
-            var uut = CreateUnitUnderTest<string, int>(dictionaryType);
+            var uut = CreateUnitUnderTest<string, int?>(dictionaryType);
             uut.Add("Hi", 2);
             uut.TryGetValue("Hi", out var result).Should().BeTrue();
             result.Should().Be(2);
@@ -78,7 +78,7 @@ namespace ComposableCollections.Tests
         [DataRow(DictionaryType.ConcurrentCachingDictionary)]
         public void ShouldTryAdd(DictionaryType dictionaryType)
         {
-            var uut = CreateUnitUnderTest<string, int>(dictionaryType);
+            var uut = CreateUnitUnderTest<string, int?>(dictionaryType);
             uut.Add("Hi", 2);
             uut.TryGetValue("Hi", out var result).Should().BeTrue();
             result.Should().Be(2);
@@ -92,7 +92,7 @@ namespace ComposableCollections.Tests
         [DataRow(DictionaryType.ConcurrentCachingDictionary)]
         public void ShouldRemove(DictionaryType dictionaryType)
         {
-            var uut = CreateUnitUnderTest<string, int>(dictionaryType);
+            var uut = CreateUnitUnderTest<string, int?>(dictionaryType);
             uut.Add("Hi", 2);
             uut.TryGetValue("Hi", out var result).Should().BeTrue();
             uut.ContainsKey("Hi").Should().BeTrue();
@@ -110,7 +110,7 @@ namespace ComposableCollections.Tests
         [DataRow(DictionaryType.ConcurrentCachingDictionary)]
         public void RemoveShouldFailIfNoSuchKey(DictionaryType dictionaryType)
         {
-            var uut = CreateUnitUnderTest<string, int>(dictionaryType);
+            var uut = CreateUnitUnderTest<string, int?>(dictionaryType);
             Action action = () => uut.Remove("Hi", out var result);
             action.Should().Throw<RemoveFailedBecauseNoSuchKeyExistsException>();
         }
@@ -122,7 +122,7 @@ namespace ComposableCollections.Tests
         [DataRow(DictionaryType.ConcurrentCachingDictionary)]
         public void ShouldTryRemove(DictionaryType dictionaryType)
         {
-            var uut = CreateUnitUnderTest<string, int>(dictionaryType);
+            var uut = CreateUnitUnderTest<string, int?>(dictionaryType);
             uut.Add("Hi", 2);
             uut.TryGetValue("Hi", out var result).Should().BeTrue();
             uut.ContainsKey("Hi").Should().BeTrue();
@@ -159,7 +159,7 @@ namespace ComposableCollections.Tests
         [DataRow(DictionaryType.ConcurrentCachingDictionary)]
         public void UpdateShouldFailIfNoSuchKey(DictionaryType dictionaryType)
         {
-            var uut = CreateUnitUnderTest<string, int>(dictionaryType);
+            var uut = CreateUnitUnderTest<string, int?>(dictionaryType);
             Action action = () => uut.Update("Hi", 3);
             action.Should().Throw<UpdateFailedBecauseNoSuchKeyExistsException>();
         }
@@ -171,7 +171,7 @@ namespace ComposableCollections.Tests
         [DataRow(DictionaryType.ConcurrentCachingDictionary)]
         public void ShouldTryUpdate(DictionaryType dictionaryType)
         {
-            var uut = CreateUnitUnderTest<string, int>(dictionaryType);
+            var uut = CreateUnitUnderTest<string, int?>(dictionaryType);
             uut.Add("Hi", 2);
             uut.TryGetValue("Hi", out var result).Should().BeTrue();
             uut.ContainsKey("Hi").Should().BeTrue();

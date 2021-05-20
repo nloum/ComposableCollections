@@ -12,10 +12,10 @@ namespace ComposableCollections.Tests.Adapters
         {
             var uut = new ComposableDictionary<int, string>();
             uut.Add(2, "Hi");
-            uut.TryAdd(2, () => "Hello", out var result, out var previousValue)
+            uut.TryAdd(2, () => "Hello", out var previousValue, out var result)
                 .Should().BeFalse();
-            result.Should().Be("Hi");
             previousValue.Should().Be("Hi");
+            result.Should().BeNull();
             uut[2].Should().Be("Hi");
         }
         
@@ -24,7 +24,7 @@ namespace ComposableCollections.Tests.Adapters
         {
             var uut = new ComposableDictionary<int, string>();
             uut.Add(2, "Hi");
-            uut.TryAdd(3, () => "Hello", out var result, out var previousValue)
+            uut.TryAdd(3, () => "Hello", out var previousValue, out var result)
                 .Should().BeTrue();
             result.Should().Be("Hello");
             previousValue.Should().BeNull();

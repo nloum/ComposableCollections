@@ -209,10 +209,11 @@ namespace ComposableCollections.Tests
         [DataRow(CachingDictionaryType.ConcurrentCachingDictionaryWithMinimalState)]
         public void AddDuplicateUnderlyingValueShouldFail(CachingDictionaryType cachingDictionaryType)
         {
-            var flushCacheTo = new ComposableDictionary<string, int>();
+            var flushCacheTo = new ComposableDictionary<string, int?>();
             flushCacheTo.Add("Hi", 2);
-            var uut = CreateUnitUnderTest<string, int>(cachingDictionaryType, flushCacheTo);
-            Action action = () => uut.Add("Hi", 2);
+            var uut = CreateUnitUnderTest<string, int?>(cachingDictionaryType, flushCacheTo);
+            Action action = () =>
+                uut.Add("Hi", 2);
             action.Should().Throw<AddFailedBecauseKeyAlreadyExistsException>();
         }
     }

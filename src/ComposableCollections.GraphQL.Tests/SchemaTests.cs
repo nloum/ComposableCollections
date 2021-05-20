@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Sources;
+using ComposableCollections.DictionaryWithBuiltInKey.Interfaces;
 using HotChocolate;
 using HotChocolate.Types;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -38,6 +39,33 @@ namespace ComposableCollections.GraphQL.Tests
                 .AddType(new ObjectType(descriptor => descriptor.Name("Query")))
                 .AddType(new ObjectType(descriptor => descriptor.Name("Mutation")))
                 .AddTopLevelComposableDictionary<SimpleQueryableComposableDictionary<string, Person>>("people")
+                .Create();
+
+            return Verify(schema.ToString());
+        }
+        
+        [TestMethod]
+        public Task DictionaryWithBuiltInKeyAtRootShouldWork()
+        {
+            var schema = new SchemaBuilder()
+                .AddType<ObjectType<Person>>()
+                .AddType(new ObjectType(descriptor => descriptor.Name("Query")))
+                .AddType(new ObjectType(descriptor => descriptor.Name("Mutation")))
+                .AddTopLevelComposableDictionary<IDictionaryWithBuiltInKey<string, Person>>("people")
+                .Create();
+
+            return Verify(schema.ToString());
+        }
+        
+        [TestMethod]
+        public Task QueryableDictionaryWithBuiltInKeyAtRootShouldWork()
+        {
+            var schema = new SchemaBuilder()
+                .AddFiltering()
+                .AddType<ObjectType<Person>>()
+                .AddType(new ObjectType(descriptor => descriptor.Name("Query")))
+                .AddType(new ObjectType(descriptor => descriptor.Name("Mutation")))
+                .AddTopLevelComposableDictionary<IQueryableDictionaryWithBuiltInKey<string, Person>>("people")
                 .Create();
 
             return Verify(schema.ToString());

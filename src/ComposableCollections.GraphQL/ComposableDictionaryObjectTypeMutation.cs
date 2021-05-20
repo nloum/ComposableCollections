@@ -21,7 +21,6 @@ namespace ComposableCollections.GraphQL
             descriptor.Field(x => x.TryUpdate(default, default));
             descriptor.Field(x => x.AddOrUpdate(default, default));
             descriptor.Field(x => x.TryRemove(default));
-
         }
     }
 }

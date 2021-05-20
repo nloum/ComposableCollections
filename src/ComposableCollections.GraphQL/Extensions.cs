@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using ComposableCollections.Dictionary.Interfaces;
+using ComposableCollections.DictionaryWithBuiltInKey.Interfaces;
 using HotChocolate;
 using HotChocolate.Types;
 using Humanizer;
@@ -26,6 +27,12 @@ namespace ComposableCollections.GraphQL
             var interfaces = type.GetInterfaces()
                 .SingleOrDefault(iface => GetGenericTypeDefinitionIfApplicable(iface) == typeof(IComposableReadOnlyDictionary<,>));
 
+            if (interfaces == null)
+            {
+                interfaces = type.GetInterfaces()
+                    .SingleOrDefault(iface => GetGenericTypeDefinitionIfApplicable(iface) == typeof(IReadOnlyDictionaryWithBuiltInKey<,>));
+            }
+            
             var types = interfaces.GetGenericArguments();
 
             return new ComposableDictionaryMetadata()

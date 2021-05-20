@@ -1,5 +1,6 @@
 using System;
 using ComposableCollections.Dictionary.Interfaces;
+using ComposableCollections.DictionaryWithBuiltInKey.Interfaces;
 
 namespace ComposableCollections.GraphQL
 {
@@ -8,6 +9,14 @@ namespace ComposableCollections.GraphQL
         public Type Type { get; init; }
         public Type KeyType { get; init; }
         public Type ValueType { get; init; }
+
+        public bool HasBuiltInKey
+        {
+            get
+            {
+                return Type.IsAssignableTo(typeof(IReadOnlyDictionaryWithBuiltInKey<,>).MakeGenericType(KeyType, ValueType));
+            }
+        }
 
         public bool IsReadOnly
         {
@@ -21,7 +30,8 @@ namespace ComposableCollections.GraphQL
         {
             get
             {
-                return Type.IsAssignableTo(typeof(IQueryableReadOnlyDictionary<,>).MakeGenericType(KeyType, ValueType));
+                return Type.IsAssignableTo(typeof(IQueryableReadOnlyDictionary<,>).MakeGenericType(KeyType, ValueType))
+                    || Type.IsAssignableTo(typeof(IQueryableReadOnlyDictionaryWithBuiltInKey<,>).MakeGenericType(KeyType, ValueType));
             }
         }
 
@@ -29,7 +39,14 @@ namespace ComposableCollections.GraphQL
         {
             get
             {
-                return typeof(ComposableDictionaryObjectTypeMutation<,,>).MakeGenericType(Type, KeyType, ValueType);
+                if (HasBuiltInKey)
+                {
+                    return typeof(DictionaryWithBuiltInKeyObjectTypeMutation<,,>).MakeGenericType(Type, KeyType, ValueType);
+                }
+                else
+                {
+                    return typeof(ComposableDictionaryObjectTypeMutation<,,>).MakeGenericType(Type, KeyType, ValueType);
+                }
             }
         }
 
@@ -37,13 +54,27 @@ namespace ComposableCollections.GraphQL
         {
             get
             {
-                if (!IsQueryable)
+                if (IsQueryable)
                 {
-                    return typeof(ComposableDictionaryObjectTypeQuery<,,>).MakeGenericType(Type, KeyType, ValueType);
+                    if (HasBuiltInKey)
+                    {
+                        return typeof(QueryableDictionaryWithBuiltInKeyObjectTypeQuery<,,>).MakeGenericType(Type, KeyType, ValueType);
+                    }
+                    else
+                    {
+                        return typeof(QueryableDictionaryObjectTypeQuery<,,>).MakeGenericType(Type, KeyType, ValueType);
+                    }
                 }
                 else
                 {
-                    return typeof(QueryableDictionaryObjectTypeQuery<,,>).MakeGenericType(Type, KeyType, ValueType);
+                    if (HasBuiltInKey)
+                    {
+                        return typeof(DictionaryWithBuiltInKeyObjectTypeQuery<,,>).MakeGenericType(Type, KeyType, ValueType);
+                    }
+                    else
+                    {
+                        return typeof(ComposableDictionaryObjectTypeQuery<,,>).MakeGenericType(Type, KeyType, ValueType);
+                    }
                 }
             }
         }

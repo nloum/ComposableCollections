@@ -4,7 +4,7 @@ using HotChocolate.Types;
 
 namespace ComposableCollections.GraphQL
 {
-    public class QueryableDictionaryObjectTypeQuery<TComposableDictionary, TKey, TValue> : ComposableDictionaryObjectTypeQuery<TComposableDictionary, TKey, TValue> where TComposableDictionary : IQueryableDictionary<TKey, TValue>
+    public class QueryableDictionaryObjectTypeQuery<TComposableDictionary, TKey, TValue> : ComposableDictionaryObjectTypeQuery<TComposableDictionary, TKey, TValue> where TComposableDictionary : IQueryableReadOnlyDictionary<TKey, TValue>
     {
         public QueryableDictionaryObjectTypeQuery(string typeName) : base(typeName, false)
         {

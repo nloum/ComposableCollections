@@ -44,7 +44,17 @@ namespace ComposableCollections.DictionaryWithBuiltInKey.Adapters
         {
             return _source.TryGetValue(key, out value);
         }
-        
+
+        public TValue GetOrAdd(TValue value)
+        {
+            if (!TryAdd(GetKey(value), () => value, out var existingValue, out var newValue))
+            {
+                return existingValue;
+            }
+
+            return newValue;
+        }
+
         public bool TryAdd(TValue value)
         {
             return _source.TryAdd(GetKey(value), value);

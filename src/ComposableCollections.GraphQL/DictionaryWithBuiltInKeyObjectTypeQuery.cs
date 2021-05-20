@@ -1,18 +1,18 @@
-using ComposableCollections.Dictionary.Interfaces;
+using ComposableCollections.DictionaryWithBuiltInKey.Interfaces;
 using HotChocolate.Types;
 
 namespace ComposableCollections.GraphQL
 {
-    public class ComposableDictionaryObjectTypeQuery<TComposableDictionary, TKey, TValue> : ObjectType<TComposableDictionary> where TComposableDictionary : IComposableReadOnlyDictionary<TKey, TValue>
+    public class DictionaryWithBuiltInKeyObjectTypeQuery<TComposableDictionary, TKey, TValue> : ObjectType<TComposableDictionary> where TComposableDictionary : IReadOnlyDictionaryWithBuiltInKey<TKey, TValue>
     {
         private readonly string _typeName;
         private readonly bool _allowEnumeration;
 
-        public ComposableDictionaryObjectTypeQuery(string typeName) : this(typeName, true)
+        public DictionaryWithBuiltInKeyObjectTypeQuery(string typeName) : this(typeName, true)
         {
         }
 
-        protected ComposableDictionaryObjectTypeQuery(string typeName, bool allowEnumeration)
+        protected DictionaryWithBuiltInKeyObjectTypeQuery(string typeName, bool allowEnumeration)
         {
             _typeName = typeName;
             _allowEnumeration = allowEnumeration;

@@ -24,7 +24,8 @@ namespace ComposableCollections.DictionaryWithBuiltInKey.Interfaces
         void Add(TValue value);
         void AddRange(IEnumerable<TValue> newItems);
         void AddRange(params TValue[] newItems);
-        
+        TValue GetOrAdd(TValue value);
+
         #endregion
         
         #region Update

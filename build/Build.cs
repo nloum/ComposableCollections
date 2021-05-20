@@ -48,8 +48,6 @@ class Build : NukeBuild
 	readonly string NugetSource = "https://api.nuget.org/v3/index.json";
 	[Parameter("API Key for the NuGet server.")]
 	readonly string NugetApiKey;
-	[Parameter("Personal authentication token to push CI website to Netlify")]
-	readonly string NetlifyPat;
 
     [Solution]
 	readonly Solution Solution;

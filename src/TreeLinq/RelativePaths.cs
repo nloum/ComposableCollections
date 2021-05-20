@@ -79,12 +79,12 @@ namespace TreeLinq
             var stack = components
                 .Select(either =>
                 {
-                    if (either.Item1.HasValue)
+                    if (either.Item1 != null)
                     {
-                        return GetEnumerator(either.Item1.Value);
+                        return GetEnumerator(either.Item1);
                     }
 
-                    return GetEnumerator(either.Item2.Value);
+                    return GetEnumerator(either.Item2);
                 }).ToImmutableList();
 
             return InternalUtilities.CalcCombinationsOfOneFromEach(stack)
@@ -98,22 +98,22 @@ namespace TreeLinq
 
             foreach (var component in Components)
             {
-                if (component.Item1.HasValue)
+                if (component.Item1 != null)
                 {
-                    var result = new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(component.Item1.Value);
+                    var result = new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(component.Item1);
                     absolutePathsSoFar.Add(result);
                 }
 
-                if (component.Item2.HasValue)
+                if (component.Item2 != null)
                 {
-                    var result = new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(component.Item2.Value);
+                    var result = new Either<TNodeName, IEnumerable<RelativePath<TNodeName>>>(component.Item2);
                     absolutePathsSoFar.Add(result);
                 }
 
-                if (component.Item3.HasValue)
+                if (component.Item3 != null)
                 {
                     var newRelativePaths = GetEnumerable(absolutePathsSoFar)
-                        .SelectMany(absolutePath => absolutePath / component.Item3.Value(absolutePath))
+                        .SelectMany(absolutePath => absolutePath / component.Item3(absolutePath))
                         .Select(x => new RelativePath<TNodeName>(x.Components));
                     
                     absolutePathsSoFar.Clear();

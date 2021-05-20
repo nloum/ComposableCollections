@@ -12,22 +12,6 @@ namespace MoreCollections.Tests
     public class TakeReadOnlyListTests
     {
         [TestMethod]
-        public void TakeRangeShouldWork()
-        {
-            var source = new List<string>();
-            source.Add("a");
-            source.Add("b");
-            source.Add("c");
-            source.Add("d");
-            source.Add("e");
-
-            var uut = source.Take(GenericNumbers.NumbersUtility.Range(1, 3));
-            uut.Count.Should().Be(2);
-            uut[0].Should().Be("b");
-            uut[1].Should().Be("c");
-        }
-        
-        [TestMethod]
         public void ShouldLimitItems()
         {
             var source = new List<string>();

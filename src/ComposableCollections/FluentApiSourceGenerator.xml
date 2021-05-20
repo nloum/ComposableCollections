@@ -12,6 +12,7 @@
         <PreExistingInterface>IReadCachedDictionary</PreExistingInterface>
         <PreExistingInterface>IReadCachedReadOnlyDictionary</PreExistingInterface>
         <PreExistingInterface>IWriteCachedDictionary</PreExistingInterface>
+        <PreExistingInterface>IObservableReadOnlyDictionary</PreExistingInterface>
       </PreExistingInterfaces>
       <InterfaceNameBlacklist>
         <Regex>ReadOnly.*Write</Regex>
@@ -24,6 +25,12 @@
         <InterfaceNameBuilder Search="(.+)" Replace="I$1Dictionary" />
       </InterfaceNameBuilders>
       <InterfaceNameModifiers>
+        <InterfaceNameModifier>
+          <OneOf>
+            <Part></Part>
+            <Part>Observable</Part>
+          </OneOf>
+        </InterfaceNameModifier>
         <InterfaceNameModifier>
           <OneOf>
             <Part></Part>
@@ -180,6 +187,7 @@
                                         AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
       <ClassNameBlacklist>
         <ClassName>Queryable</ClassName>
+        <ClassName>Observable</ClassName>
         <ClassName>ReadCached</ClassName>
         <ClassName>ReadWriteCached</ClassName>
       </ClassNameBlacklist>
@@ -191,6 +199,7 @@
                                         AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
       <ClassNameBlacklist>
         <ClassName>Queryable</ClassName>
+        <ClassName>Observable</ClassName>
         <ClassName>ReadCached</ClassName>
         <ClassName>ReadWriteCached</ClassName>
       </ClassNameBlacklist>
@@ -205,6 +214,7 @@
                                         AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
       <ClassNameBlacklist>
         <ClassName>Queryable</ClassName>
+        <ClassName>Observable</ClassName>
       </ClassNameBlacklist>
       <ClassNameModifiers>
         <ClassNameModifier Search="Dictionary" Replace="MappingValuesDictionaryAdapter" />
@@ -214,6 +224,7 @@
                                         AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
       <ClassNameBlacklist>
         <ClassName>Queryable</ClassName>
+        <ClassName>Observable</ClassName>
       </ClassNameBlacklist>
       <ClassNameWhitelist>
         <ClassName>ReadOnly</ClassName>
@@ -230,6 +241,7 @@
       <ClassNameBlacklist>
         <ClassName>ReadCached</ClassName>
         <ClassName>ReadWriteCached</ClassName>
+        <ClassName>Observable</ClassName>
       </ClassNameBlacklist>
       <ClassNameWhitelist>
         <ClassName>Queryable</ClassName>
@@ -243,6 +255,7 @@
       <ClassNameBlacklist>
         <ClassName>ReadCached</ClassName>
         <ClassName>ReadWriteCached</ClassName>
+        <ClassName>Observable</ClassName>
       </ClassNameBlacklist>
       <ClassNameWhitelist>
         <ClassName>ReadOnly</ClassName>
@@ -254,6 +267,9 @@
     </SubclassCombinationImplementations>
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="QueryableMappingValuesDictionaryAdapter"
                                         AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
+      <ClassNameBlacklist>
+        <ClassName>Observable</ClassName>
+      </ClassNameBlacklist>
       <ClassNameWhitelist>
         <ClassName>Queryable</ClassName>
       </ClassNameWhitelist>
@@ -263,6 +279,9 @@
     </SubclassCombinationImplementations>
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="QueryableMappingValuesReadOnlyDictionaryAdapter"
                                         AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
+      <ClassNameBlacklist>
+        <ClassName>Observable</ClassName>
+      </ClassNameBlacklist>
       <ClassNameWhitelist>
         <ClassName>ReadOnly</ClassName>
         <ClassName>Queryable</ClassName>
@@ -277,6 +296,9 @@
 
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="ReadCachedQueryableMappingKeysAndValuesDictionaryAdapter"
                                         AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
+      <ClassNameBlacklist>
+        <ClassName>Observable</ClassName>
+      </ClassNameBlacklist>
       <ClassNameWhitelist>
         <ClassName>Queryable</ClassName>
       </ClassNameWhitelist>
@@ -286,6 +308,9 @@
     </SubclassCombinationImplementations>
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="ReadCachedQueryableMappingKeysAndValuesReadOnlyDictionaryAdapter"
                                         AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
+      <ClassNameBlacklist>
+        <ClassName>Observable</ClassName>
+      </ClassNameBlacklist>
       <ClassNameWhitelist>
         <ClassName>ReadOnly</ClassName>
         <ClassName>Queryable</ClassName>
@@ -297,6 +322,7 @@
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="ReadCachedMappingKeysAndValuesDictionaryAdapter"
                                         AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
       <ClassNameBlacklist>
+        <ClassName>Observable</ClassName>
         <ClassName>Queryable</ClassName>
       </ClassNameBlacklist>
       <ClassNameModifiers>
@@ -306,6 +332,7 @@
     <SubclassCombinationImplementations Namespace="ComposableCollections.Dictionary.Adapters" BaseClass="ReadCachedMappingKeysAndValuesReadOnlyDictionaryAdapter"
                                         AllowDifferentTypeParameters="true" Folder="Dictionary/Adapters">
       <ClassNameBlacklist>
+        <ClassName>Observable</ClassName>
         <ClassName>Queryable</ClassName>
       </ClassNameBlacklist>
       <ClassNameWhitelist>

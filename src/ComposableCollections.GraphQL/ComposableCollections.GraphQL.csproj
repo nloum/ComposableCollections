@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="HotChocolate" Version="11.2.2" />
+      <PackageReference Include="HotChocolate.Data.EntityFramework" Version="11.2.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ComposableCollections\ComposableCollections.csproj" />
+    </ItemGroup>
+
+</Project>

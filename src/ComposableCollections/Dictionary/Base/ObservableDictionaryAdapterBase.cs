@@ -27,26 +27,26 @@ namespace ComposableCollections.Dictionary.Base
             
             foreach (var result in results)
             {
-                if (result.Add.HasValue && result.Add.Value.Added)
+                if (result.Add != default && result.Add!.Added)
                 {
-                    OnAdd(new KeyValue<TKey, TValue>(result.Key, result.Add.Value.NewValue.Value));
+                    OnAdd(new KeyValue<TKey, TValue>(result.Key, result.Add!.NewValue!));
                 }
-                else if (result.Update.HasValue && result.Update.Value.Updated)
+                else if (result.Update != default && result.Update!.Updated)
                 {
-                    OnRemove(new KeyValue<TKey, TValue>(result.Key, result.Update.Value.ExistingValue.Value));
-                    OnAdd(new KeyValue<TKey, TValue>(result.Key, result.Update.Value.NewValue.Value));
+                    OnRemove(new KeyValue<TKey, TValue>(result.Key, result.Update!.ExistingValue!));
+                    OnAdd(new KeyValue<TKey, TValue>(result.Key, result.Update!.NewValue!));
                 }
-                else if (result.Remove.HasValue && result.Remove.Value.HasValue)
+                else if (result.Remove != null)
                 {
-                    OnRemove(new KeyValue<TKey, TValue>(result.Key, result.Remove.Value.Value));
+                    OnRemove(new KeyValue<TKey, TValue>(result.Key, result.Remove!));
                 }
-                else if (result.AddOrUpdate.HasValue)
+                else if (result.AddOrUpdate != default)
                 {
-                    if (result.AddOrUpdate.Value.Result == DictionaryItemAddOrUpdateResult.Update)
+                    if (result.AddOrUpdate!.Result == DictionaryItemAddOrUpdateResult.Update)
                     {
-                        OnRemove(new KeyValue<TKey, TValue>(result.Key, result.AddOrUpdate.Value.ExistingValue.Value));
+                        OnRemove(new KeyValue<TKey, TValue>(result.Key, result.AddOrUpdate!.ExistingValue!));
                     }
-                    OnAdd(new KeyValue<TKey, TValue>(result.Key, result.AddOrUpdate.Value.NewValue));
+                    OnAdd(new KeyValue<TKey, TValue>(result.Key, result.AddOrUpdate!.NewValue));
                 }
             }
         }
@@ -103,7 +103,7 @@ namespace ComposableCollections.Dictionary.Base
             this[key] = value;
         }
 
-        public IMaybe<TValue> TryGetValue(TKey key)
+        public TValue? TryGetValue(TKey key)
         {
             return _state.TryGetValue(key);
         }
@@ -171,49 +171,49 @@ namespace ComposableCollections.Dictionary.Base
         public void TryAddRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> result)
         {
             _state.TryAddRange(newItems, out result);
-            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> result)
         {
             _state.TryAddRange(newItems, out result);
-            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> result)
         {
             _state.TryAddRange(newItems, key, value, out result);
-            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void TryAddRange(IEnumerable<IKeyValue<TKey, TValue>> newItems)
         {
             _state.TryAddRange(newItems, out var result);
-            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void TryAddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
             _state.TryAddRange(newItems, out var result);
-            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
             _state.TryAddRange(newItems, key, value, out var result);
-            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void TryAddRange(params IKeyValue<TKey, TValue>[] newItems)
         {
             _state.TryAddRange(newItems, out var result);
-            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void TryAddRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
             _state.TryAddRange(newItems, out var result);
-            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void Add(TKey key, TValue value)
@@ -225,31 +225,31 @@ namespace ComposableCollections.Dictionary.Base
         public void AddRange(IEnumerable<IKeyValue<TKey, TValue>> newItems)
         {
             _state.TryAddRange(newItems, out var result);
-            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void AddRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
             _state.TryAddRange(newItems, out var result);
-            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void AddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
             _state.TryAddRange(newItems, key, value, out var result);
-            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void AddRange(params IKeyValue<TKey, TValue>[] newItems)
         {
             _state.TryAddRange(newItems, out var result);
-            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void AddRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
             _state.TryAddRange(newItems, out var result);
-            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnAdd(result.Where(x => x.Value.Added).Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public bool TryUpdate(TKey key, TValue value)
@@ -292,64 +292,64 @@ namespace ComposableCollections.Dictionary.Base
         {
             _state.TryUpdateRange(newItems, out var results);
             var resultsList = results.Where(x => x.Value.Updated).ToImmutableList();
-            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue.Value)));
-            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue!)));
+            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void TryUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
             _state.TryUpdateRange(newItems, out var results);
             var resultsList = results.Where(x => x.Value.Updated).ToImmutableList();
-            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue.Value)));
-            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue!)));
+            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
             _state.TryUpdateRange(newItems, key, value, out var results);
             var resultsList = results.Where(x => x.Value.Updated).ToImmutableList();
-            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue.Value)));
-            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue!)));
+            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void TryUpdateRange(params IKeyValue<TKey, TValue>[] newItems)
         {
             _state.TryUpdateRange(newItems, out var results);
             var resultsList = results.Where(x => x.Value.Updated).ToImmutableList();
-            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue.Value)));
-            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue!)));
+            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void TryUpdateRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
             _state.TryUpdateRange(newItems, out var results);
             var resultsList = results.Where(x => x.Value.Updated).ToImmutableList();
-            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue.Value)));
-            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue!)));
+            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void TryUpdateRange(IEnumerable<IKeyValue<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
             _state.TryUpdateRange(newItems, out results);
             var resultsList = results.Where(x => x.Value.Updated).ToImmutableList();
-            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue.Value)));
-            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue!)));
+            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void TryUpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
             _state.TryUpdateRange(newItems, out results);
             var resultsList = results.Where(x => x.Value.Updated).ToImmutableList();
-            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue.Value)));
-            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue!)));
+            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
             _state.TryUpdateRange(newItems, key, value, out results);
             var resultsList = results.Where(x => x.Value.Updated).ToImmutableList();
-            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue.Value)));
-            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue!)));
+            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void Update(TKey key, TValue value)
@@ -363,24 +363,24 @@ namespace ComposableCollections.Dictionary.Base
         {
             _state.UpdateRange(newItems, out var results);
             var resultsList = results.Where(x => x.Value.Updated).ToImmutableList();
-            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue.Value)));
-            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue!)));
+            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void UpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems)
         {
             _state.UpdateRange(newItems, out var results);
             var resultsList = results.Where(x => x.Value.Updated).ToImmutableList();
-            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue.Value)));
-            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue!)));
+            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void UpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value)
         {
             _state.UpdateRange(newItems, key, value, out var results);
             var resultsList = results.Where(x => x.Value.Updated).ToImmutableList();
-            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue.Value)));
-            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue!)));
+            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void Update(TKey key, TValue value, out TValue previousValue)
@@ -394,40 +394,40 @@ namespace ComposableCollections.Dictionary.Base
         {
             _state.UpdateRange(newItems, out results);
             var resultsList = results.Where(x => x.Value.Updated).ToImmutableList();
-            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue.Value)));
-            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue!)));
+            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void UpdateRange(IEnumerable<KeyValuePair<TKey, TValue>> newItems, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
             _state.UpdateRange(newItems, out results);
             var resultsList = results.Where(x => x.Value.Updated).ToImmutableList();
-            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue.Value)));
-            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue!)));
+            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void UpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
             _state.UpdateRange(newItems, key, value, out results);
             var resultsList = results.Where(x => x.Value.Updated).ToImmutableList();
-            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue.Value)));
-            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue!)));
+            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void UpdateRange(params IKeyValue<TKey, TValue>[] newItems)
         {
             _state.UpdateRange(newItems, out var results);
             var resultsList = results.Where(x => x.Value.Updated).ToImmutableList();
-            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue.Value)));
-            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue!)));
+            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public void UpdateRange(params KeyValuePair<TKey, TValue>[] newItems)
         {
             _state.UpdateRange(newItems, out var results);
             var resultsList = results.Where(x => x.Value.Updated).ToImmutableList();
-            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue.Value)));
-            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue.Value)));
+            OnRemove(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue!)));
+            OnAdd(resultsList.Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue!)));
         }
 
         public DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, TValue value)
@@ -481,7 +481,7 @@ namespace ComposableCollections.Dictionary.Base
             var resultsGrouped = results.GroupBy(x => x.Value.Result)
                 .ToImmutableDictionary(x => x.Key, x => x.ToImmutableList());
             OnRemove(resultsGrouped[DictionaryItemAddOrUpdateResult.Update]
-                .Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue.Value)));
+                .Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.ExistingValue!)));
             var addedByUpdate = resultsGrouped[DictionaryItemAddOrUpdateResult.Update]
                 .Select(kvp => new KeyValue<TKey, TValue>(kvp.Key, kvp.Value.NewValue));
             var addedBySimpleAdd = resultsGrouped[DictionaryItemAddOrUpdateResult.Add]

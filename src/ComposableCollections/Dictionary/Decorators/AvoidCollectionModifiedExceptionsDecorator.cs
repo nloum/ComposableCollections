@@ -52,7 +52,7 @@ namespace ComposableCollections.Dictionary.Decorators
             return _innerValues.ContainsKey(key);
         }
 
-        public IMaybe<TValue> TryGetValue(TKey key)
+        public TValue? TryGetValue(TKey key)
         {
             return _innerValues.TryGetValue(key);
         }

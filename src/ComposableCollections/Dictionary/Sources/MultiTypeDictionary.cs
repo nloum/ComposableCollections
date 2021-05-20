@@ -19,9 +19,9 @@ namespace ComposableCollections.Dictionary.Sources
             var key = typeof(T);
             _values.Write(new[] { DictionaryWrite<Type, TValue>.CreateTryAdd(key, () => value()) }, out var results);
             var firstResult = results.First();
-            result = (T) firstResult.Add.Value.NewValue.ValueOrDefault;
-            previousValue = (T) firstResult.Add.Value.ExistingValue.ValueOrDefault;
-            return firstResult.Add.Value.NewValue.HasValue;
+            result = (T) firstResult.Add!.NewValue;
+            previousValue = (T) firstResult.Add!.ExistingValue;
+            return firstResult.Add!.NewValue != null;
         }
 
         public virtual bool TryUpdate<T>(Func<TValue, TValue> value, out TValue previousValue, out TValue newValue) where T : TValue
@@ -29,9 +29,9 @@ namespace ComposableCollections.Dictionary.Sources
             var key = typeof(T);
             _values.Write(new[] {DictionaryWrite<Type, TValue>.CreateTryUpdate(key, value)}, out var results);
             var firstResult = results.First();
-            newValue = firstResult.Update.Value.NewValue.ValueOrDefault;
-            previousValue = firstResult.Update.Value.ExistingValue.ValueOrDefault;
-            return firstResult.Update.Value.NewValue.HasValue;
+            newValue = firstResult.Update!.NewValue;
+            previousValue = firstResult.Update!.ExistingValue;
+            return firstResult.Update!. NewValue != null;
         }
 
         public DictionaryItemAddOrUpdateResult AddOrUpdate<T>(Func<T> valueIfAdding,
@@ -40,9 +40,9 @@ namespace ComposableCollections.Dictionary.Sources
             var key = typeof(T);
             _values.Write(new[] {DictionaryWrite<Type, TValue>.CreateAddOrUpdate(key, () => valueIfAdding(), x => valueIfUpdating((T)x))}, out var results);
             var firstResult = results.First();
-            newValue = (T) firstResult.AddOrUpdate.Value.NewValue;
-            previousValue = (T) firstResult.AddOrUpdate.Value.ExistingValue.ValueOrDefault;
-            return firstResult.AddOrUpdate.Value.Result;
+            newValue = (T) firstResult.AddOrUpdate!.NewValue;
+            previousValue = (T) firstResult.AddOrUpdate!.ExistingValue;
+            return firstResult.AddOrUpdate!.Result;
         }
 
         public virtual bool TryRemove<T>(out T removedItem) where T : TValue
@@ -50,8 +50,8 @@ namespace ComposableCollections.Dictionary.Sources
             var key = typeof(T);
             _values.Write(new[] {DictionaryWrite<Type, TValue>.CreateTryRemove(key)}, out var results);
             var firstResult = results.First();
-            removedItem = (T) firstResult.Remove.Value.ValueOrDefault;
-            return firstResult.Remove.Value.HasValue;
+            removedItem = (T) firstResult.Remove!;
+            return firstResult.Remove!  != null;
         }
 
         public bool TryGetValue<T>(out T result) where T : TValue

@@ -33,14 +33,14 @@ namespace ComposableCollections.Dictionary.Base
             return GetEnumerator();
         }
         
-        public IMaybe<TValue> TryGetValue(TKey key)
+        public TValue? TryGetValue(TKey key)
         {
             if (TryGetValue(key, out var value))
             {
-                return value.ToMaybe();
+                return value;
             }
             
-            return Maybe<TValue>.Nothing();
+            return default(TValue);
         }
 
         public TValue this[TKey key]

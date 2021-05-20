@@ -86,7 +86,7 @@ namespace ComposableCollections.Dictionary.Transactional
             this[key] = value;
         }
 
-        public IMaybe<TValue> TryGetValue(TKey key)
+        public TValue? TryGetValue(TKey key)
         {
             using (var dictionary = _source.CreateReader())
             {
@@ -99,9 +99,9 @@ namespace ComposableCollections.Dictionary.Transactional
             using (var dictionary = _source.CreateReader())
             {
                 var result = dictionary.TryGetValue(key);
-                if (result.HasValue)
+                if ( result != null)
                 {
-                    value = result.Value;
+                    value = result!;
                     return true;
                 }
                 else

@@ -30,16 +30,16 @@ namespace ComposableCollections.Dictionary.Decorators
         public bool TryGetValue(TKey key, out TValue value)
         {
             var maybeValue = _source.TryGetValue(key);
-            if (!maybeValue.HasValue)
+            if ( maybeValue == null )
             {
                 value = default;
                 return false;
             }
             else
             {
-                if (_predicate(key, maybeValue.Value))
+                if (_predicate(key, maybeValue!))
                 {
-                    value = maybeValue.Value;
+                    value = maybeValue!;
                     return true;
                 }
                 else
@@ -50,14 +50,14 @@ namespace ComposableCollections.Dictionary.Decorators
             }
         }
 
-        public IMaybe<TValue> TryGetValue(TKey key)
+        public TValue? TryGetValue(TKey key)
         {
             if (TryGetValue(key, out var value))
             {
-                return value.ToMaybe();
+                return value;
             }
             
-            return Maybe<TValue>.Nothing();
+            return default(TValue);
         }
 
         public bool ContainsKey(TKey key)

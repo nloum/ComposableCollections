@@ -4,7 +4,7 @@ namespace ComposableCollections.Dictionary.Write
 {
     public class DictionaryItemAddOrUpdate<TValue> : IDictionaryItemAddOrUpdate<TValue>
     {
-        public DictionaryItemAddOrUpdate(DictionaryItemAddOrUpdateResult result, IMaybe<TValue> existingValue, TValue newValue)
+        public DictionaryItemAddOrUpdate(DictionaryItemAddOrUpdateResult result, TValue? existingValue, TValue newValue)
         {
             Result = result;
             ExistingValue = existingValue;
@@ -12,7 +12,7 @@ namespace ComposableCollections.Dictionary.Write
         }
 
         public DictionaryItemAddOrUpdateResult Result { get; }
-        public IMaybe<TValue> ExistingValue { get; }
+        public TValue? ExistingValue { get; }
         public TValue NewValue { get; }
 
         public override string ToString()

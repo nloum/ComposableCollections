@@ -75,22 +75,22 @@ namespace ComposableCollections.Dictionary.Sources
                     {
                         case DictionaryWriteType.Add:
                         {
-                            var value = write.ValueIfAdding.Value();
+                            var value = write.ValueIfAdding!();
                             State = State.Add(write.Key, value);
-                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true, Maybe<TValue>.Nothing(), value.ToMaybe()));
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true, default(TValue), value));
                             break;
                         }
                         case DictionaryWriteType.TryAdd:
                         {
                             if (!State.TryGetValue(write.Key, out var existingValue))
                             {
-                                var newValue = write.ValueIfAdding.Value();
+                                var newValue = write.ValueIfAdding!();
                                 State = State.Add(write.Key, newValue);
-                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateTryAdd(write.Key, true, Maybe<TValue>.Nothing(), newValue.ToMaybe()));
+                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateTryAdd(write.Key, true, default(TValue), newValue));
                             }
                             else
                             {
-                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, false, existingValue.ToMaybe(), Maybe<TValue>.Nothing()));
+                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, false, existingValue, default(TValue)));
                             }
                             break;
                         }
@@ -98,9 +98,9 @@ namespace ComposableCollections.Dictionary.Sources
                         {
                             if (State.TryGetValue(write.Key, out var previousValue))
                             {
-                                var newValue = write.ValueIfUpdating.Value(previousValue);
+                                var newValue = write.ValueIfUpdating!(previousValue);
                                 State = State.Add(write.Key, newValue);
-                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true, previousValue.ToMaybe(), newValue.ToMaybe()));
+                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true, previousValue, newValue));
                             }
                             else
                             {
@@ -112,13 +112,13 @@ namespace ComposableCollections.Dictionary.Sources
                         {
                             if (State.TryGetValue(write.Key, out var previousValue))
                             {
-                                var newValue = write.ValueIfUpdating.Value(previousValue);
+                                var newValue = write.ValueIfUpdating!(previousValue);
                                 State = State.Add(write.Key, newValue);
-                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true, previousValue.ToMaybe(), newValue.ToMaybe()));
+                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true, previousValue, newValue));
                             }
                             else
                             {
-                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, false, Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing()));
+                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, false, default(TValue), default(TValue)));
                             }
                             break;
                         }
@@ -126,15 +126,15 @@ namespace ComposableCollections.Dictionary.Sources
                         {
                             if (State.TryGetValue(write.Key, out var previousValue))
                             {
-                                var newValue = write.ValueIfUpdating.Value(previousValue);
+                                var newValue = write.ValueIfUpdating!(previousValue);
                                 State = State.SetItem(write.Key, newValue);
-                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAddOrUpdate(write.Key, DictionaryItemAddOrUpdateResult.Update, previousValue.ToMaybe(), newValue));
+                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAddOrUpdate(write.Key, DictionaryItemAddOrUpdateResult.Update, previousValue, newValue));
                             }
                             else
                             {
-                                var newValue = write.ValueIfAdding.Value();
+                                var newValue = write.ValueIfAdding!();
                                 State = State.Add(write.Key, newValue);
-                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAddOrUpdate(write.Key, DictionaryItemAddOrUpdateResult.Add, Maybe<TValue>.Nothing(), newValue));
+                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAddOrUpdate(write.Key, DictionaryItemAddOrUpdateResult.Add, default(TValue), newValue));
                             }
                             break;
                         }
@@ -143,7 +143,7 @@ namespace ComposableCollections.Dictionary.Sources
                             if (State.TryGetValue(write.Key, out var previousValue))
                             {
                                 State = State.Remove(write.Key);
-                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, previousValue.ToMaybe()));
+                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, previousValue));
                             }
                             else
                             {
@@ -156,11 +156,11 @@ namespace ComposableCollections.Dictionary.Sources
                             if (State.TryGetValue(write.Key, out var previousValue))
                             {
                                 State = State.Remove(write.Key);
-                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, previousValue.ToMaybe()));
+                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, previousValue));
                             }
                             else
                             {
-                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, Maybe<TValue>.Nothing()));
+                                finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, default(TValue)));
                             }
                             break;
                         }
@@ -238,12 +238,12 @@ namespace ComposableCollections.Dictionary.Sources
 
                     if (!TryGetValueInsideLock(newKey, out var previousValue))
                     {
-                        finalResult[newKey] = new DictionaryItemAddAttempt<TValue>(true, Maybe<TValue>.Nothing(), newValue.ToMaybe());
+                        finalResult[newKey] = new DictionaryItemAddAttempt<TValue>(true, default(TValue), newValue);
                         State = State.Add(newKey, newValue);
                     }
                     else
                     {
-                        finalResult[newKey] = new DictionaryItemAddAttempt<TValue>(false, previousValue.ToMaybe(), Maybe<TValue>.Nothing());
+                        finalResult[newKey] = new DictionaryItemAddAttempt<TValue>(false, previousValue, default(TValue));
                     }
                 }
             }
@@ -271,12 +271,12 @@ namespace ComposableCollections.Dictionary.Sources
                     if (TryGetValueInsideLock(newKey, out var previousValue))
                     {
                         var newValue = value(newItem);
-                        finalResult[newKey] = new DictionaryItemUpdateAttempt<TValue>(true, previousValue.ToMaybe(), newValue.ToMaybe());
+                        finalResult[newKey] = new DictionaryItemUpdateAttempt<TValue>(true, previousValue, newValue);
                         State = State.SetItem(newKey, newValue);
                     }
                     else
                     {
-                        finalResult[newKey] = new DictionaryItemUpdateAttempt<TValue>(false, Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing());
+                        finalResult[newKey] = new DictionaryItemUpdateAttempt<TValue>(false, default(TValue), default(TValue));
                     }
                 }
             }
@@ -298,7 +298,7 @@ namespace ComposableCollections.Dictionary.Sources
 
                     var previousValue = state[newKey];
                     state = state.SetItem(newKey, newValue);
-                    finalResults[newKey] = new DictionaryItemUpdateAttempt<TValue>(true, previousValue.ToMaybe(), newValue.ToMaybe());
+                    finalResults[newKey] = new DictionaryItemUpdateAttempt<TValue>(true, previousValue, newValue);
                 }
 
                 State = state;
@@ -320,11 +320,11 @@ namespace ComposableCollections.Dictionary.Sources
                     if (AddOrUpdate(newKey, () => newValue, _ => newValue, out var previousValue, out var _) ==
                         DictionaryItemAddOrUpdateResult.Update)
                     {
-                        finalResults[newKey] = new DictionaryItemAddOrUpdate<TValue>(DictionaryItemAddOrUpdateResult.Update, previousValue.ToMaybe(), newValue);
+                        finalResults[newKey] = new DictionaryItemAddOrUpdate<TValue>(DictionaryItemAddOrUpdateResult.Update, previousValue, newValue);
                     }
                     else
                     {
-                        finalResults[newKey] = new DictionaryItemAddOrUpdate<TValue>(DictionaryItemAddOrUpdateResult.Add, Maybe<TValue>.Nothing(), newValue);
+                        finalResults[newKey] = new DictionaryItemAddOrUpdate<TValue>(DictionaryItemAddOrUpdateResult.Add, default(TValue), newValue);
                     }
                 }
             }

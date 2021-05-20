@@ -52,25 +52,25 @@ namespace ComposableCollections.Dictionary.Sources
                 {
                     case DictionaryWriteType.Add:
                     {
-                        var value = write.ValueIfAdding.Value();
+                        var value = write.ValueIfAdding!();
                         State.Add(write.Key, value);
                         finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true,
-                            Maybe<TValue>.Nothing(), value.ToMaybe()));
+                            default(TValue), value));
                     }
                         break;
                     case DictionaryWriteType.TryAdd:
                     {
                         if (!State.TryGetValue(write.Key, out var existingValue))
                         {
-                            var newValue = write.ValueIfAdding.Value();
+                            var newValue = write.ValueIfAdding!();
                             State.Add(write.Key, newValue);
                             finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateTryAdd(write.Key, true,
-                                Maybe<TValue>.Nothing(), newValue.ToMaybe()));
+                                default(TValue), newValue));
                         }
                         else
                         {
                             finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true,
-                                existingValue.ToMaybe(), Maybe<TValue>.Nothing()));
+                                existingValue, default(TValue)));
                         }
                     }
                         break;
@@ -78,10 +78,10 @@ namespace ComposableCollections.Dictionary.Sources
                     {
                         if (State.TryGetValue(write.Key, out var previousValue))
                         {
-                            var newValue = write.ValueIfUpdating.Value(previousValue);
+                            var newValue = write.ValueIfUpdating!(previousValue);
                             State.Add(write.Key, newValue);
                             finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true,
-                                previousValue.ToMaybe(), newValue.ToMaybe()));
+                                previousValue, newValue));
                         }
                         else
                         {
@@ -93,15 +93,15 @@ namespace ComposableCollections.Dictionary.Sources
                     {
                         if (State.TryGetValue(write.Key, out var previousValue))
                         {
-                            var newValue = write.ValueIfUpdating.Value(previousValue);
+                            var newValue = write.ValueIfUpdating!(previousValue);
                             State[write.Key] = newValue;
                             finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true,
-                                previousValue.ToMaybe(), newValue.ToMaybe()));
+                                previousValue, newValue));
                         }
                         else
                         {
                             finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, false,
-                                Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing()));
+                                default(TValue), default(TValue)));
                         }
                     }
                         break;
@@ -109,17 +109,17 @@ namespace ComposableCollections.Dictionary.Sources
                     {
                         if (State.TryGetValue(write.Key, out var previousValue))
                         {
-                            var newValue = write.ValueIfUpdating.Value(previousValue);
+                            var newValue = write.ValueIfUpdating!(previousValue);
                             State[write.Key] = newValue;
                             finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAddOrUpdate(write.Key, DictionaryItemAddOrUpdateResult.Update,
-                                previousValue.ToMaybe(), newValue));
+                                previousValue, newValue));
                         }
                         else
                         {
-                            var newValue = write.ValueIfAdding.Value();
+                            var newValue = write.ValueIfAdding!();
                             State.Add(write.Key, newValue);
                             finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAddOrUpdate(write.Key, DictionaryItemAddOrUpdateResult.Add,
-                                Maybe<TValue>.Nothing(), newValue));
+                                default(TValue), newValue));
                         }
                     }
                         break;
@@ -130,7 +130,7 @@ namespace ComposableCollections.Dictionary.Sources
                             State.Remove(write.Key);
                             finalResults.Add(
                                 DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key,
-                                    removedValue.ToMaybe()));
+                                    removedValue));
                         }
                     }
                         break;
@@ -141,13 +141,13 @@ namespace ComposableCollections.Dictionary.Sources
                             State.Remove(write.Key);
                             finalResults.Add(
                                 DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key,
-                                    removedValue.ToMaybe()));
+                                    removedValue));
                         }
                         else
                         {
                             finalResults.Add(
                                 DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key,
-                                    Maybe<TValue>.Nothing()));
+                                    default(TValue)));
                         }
                     }
                         break;

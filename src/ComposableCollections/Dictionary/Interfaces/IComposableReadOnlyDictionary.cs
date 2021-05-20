@@ -39,6 +39,6 @@ namespace ComposableCollections.Dictionary.Interfaces
         /// <param name="value">When this method returns, the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
         /// <returns>true if the object that implements the <see cref="T:System.Collections.Generic.IReadOnlyDictionary`2"></see> interface contains an element that has the specified key; otherwise, false.</returns>
         /// <exception cref="T:System.ArgumentNullException"><paramref name="key">key</paramref> is null.</exception>
-        IMaybe<TValue> TryGetValue(TKey key);
+        TValue? TryGetValue(TKey key);
     }
 }

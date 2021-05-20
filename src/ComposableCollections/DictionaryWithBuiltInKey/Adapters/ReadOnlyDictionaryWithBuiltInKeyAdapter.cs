@@ -58,7 +58,7 @@ namespace ComposableCollections.DictionaryWithBuiltInKey.Adapters
             return _source.ContainsKey(key);
         }
 
-        public IMaybe<TValue> TryGetValue(TKey key)
+        public TValue? TryGetValue(TKey key)
         {
             return _source.TryGetValue(key);
         }

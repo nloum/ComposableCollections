@@ -74,7 +74,7 @@ namespace ComposableCollections.Dictionary.Base
             }
         }
 
-        public IMaybe<TValue> TryGetValue(TKey key)
+        public TValue? TryGetValue(TKey key)
         {
             BeginRead();
             try

@@ -4,16 +4,16 @@ namespace ComposableCollections.Dictionary.Write
 {
     public class DictionaryItemRemoveAttempt<TValue> : IDictionaryItemRemoveAttempt<TValue>
     {
-        public DictionaryItemRemoveAttempt(IMaybe<TValue> removedValue)
+        public DictionaryItemRemoveAttempt(TValue? removedValue)
         {
             RemovedValue = removedValue;
         }
 
-        public IMaybe<TValue> RemovedValue { get; }
+        public TValue? RemovedValue { get; }
 
         public override string ToString()
         {
-            return RemovedValue.HasValue ? "remove succeeded" : "remove failed";
+            return RemovedValue != null ? "remove succeeded" : "remove failed";
         }
     }
 }

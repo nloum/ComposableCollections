@@ -68,13 +68,13 @@ namespace ComposableCollections.Dictionary.Adapters
         {
             var convertedKey = ConvertToKey1(key);
             var innerValue = _innerValues.TryGetValue(convertedKey);
-            if (!innerValue.HasValue)
+            if ( innerValue == null)
             {
                 value = default;
                 return false;
             }
 
-            var kvp = Convert(convertedKey, innerValue.Value);
+            var kvp = Convert(convertedKey, innerValue!);
             value = kvp.Value;
             return true;
         }
@@ -96,17 +96,17 @@ namespace ComposableCollections.Dictionary.Adapters
             {
                 Func<TSourceValue> valueIfAdding = () =>
                 {
-                    var result = write.ValueIfAdding.Value();
+                    var result = write.ValueIfAdding!();
                     return Convert(write.Key, result).Value;
                 };
                 Func<TSourceValue, TSourceValue> valueIfUpdating = previousValue =>
                 {
-                    var result = write.ValueIfAdding.Value();
+                    var result = write.ValueIfAdding!();
                     return Convert(write.Key, result).Value;
                 };
                 return new DictionaryWrite<TSourceKey, TSourceValue>(write.Type, ConvertToKey1(write.Key),
-                    valueIfAdding.ToMaybe(),
-                    valueIfUpdating.ToMaybe());
+                    valueIfAdding,
+                    valueIfUpdating);
             }), out var innerResults);
 
             results = innerResults.Select(innerResult =>
@@ -114,31 +114,30 @@ namespace ComposableCollections.Dictionary.Adapters
                 if (innerResult.Type == DictionaryWriteType.Add || innerResult.Type == DictionaryWriteType.TryAdd)
                 {
                     return DictionaryWriteResult<TKey, TValue>.CreateAdd(ConvertToKey2(innerResult.Key),
-                        innerResult.Add.Value.Added,
-                        innerResult.Add.Value.ExistingValue.Select(value => Convert(innerResult.Key, value).Value),
-                        innerResult.Add.Value.NewValue.Select(value => Convert(innerResult.Key, value).Value));
+                        innerResult.Add!.Added,
+                        innerResult.Add!.ExistingValue == null ? default : Convert(innerResult.Key, innerResult.Add!.ExistingValue).Value,
+                        innerResult.Add!.NewValue == null ? default : Convert(innerResult.Key, innerResult.Add!.NewValue).Value);
                 }
                 else if (innerResult.Type == DictionaryWriteType.Remove ||
                          innerResult.Type == DictionaryWriteType.TryRemove)
                 {
                     return DictionaryWriteResult<TKey, TValue>.CreateRemove(ConvertToKey2(innerResult.Key),
-                        innerResult.Remove.Value.Select(value => Convert(innerResult.Key, value).Value));
+                        innerResult.Remove == null ? default : Convert(innerResult.Key, innerResult.Remove).Value);
                 }
                 else if (innerResult.Type == DictionaryWriteType.Update ||
                          innerResult.Type == DictionaryWriteType.TryUpdate)
                 {
                     return DictionaryWriteResult<TKey, TValue>.CreateUpdate(ConvertToKey2(innerResult.Key),
-                        innerResult.Update.Value.Updated,
-                        innerResult.Update.Value.ExistingValue.Select(value => Convert(innerResult.Key, value).Value),
-                        innerResult.Update.Value.NewValue.Select(value => Convert(innerResult.Key, value).Value));
+                        innerResult.Update!.Updated,
+                        innerResult.Update!.ExistingValue == null ? default : Convert(innerResult.Key, innerResult.Update!.ExistingValue).Value,
+                        innerResult.Update!.NewValue == null ? default : Convert(innerResult.Key, innerResult.Update!.NewValue).Value);
                 }
                 else if (innerResult.Type == DictionaryWriteType.AddOrUpdate)
                 {
                     return DictionaryWriteResult<TKey, TValue>.CreateAddOrUpdate(ConvertToKey2(innerResult.Key),
-                        innerResult.AddOrUpdate.Value.Result,
-                        innerResult.AddOrUpdate.Value.ExistingValue.Select(value =>
-                            Convert(innerResult.Key, value).Value),
-                        Convert(innerResult.Key, innerResult.AddOrUpdate.Value.NewValue).Value);
+                        innerResult.AddOrUpdate!.Result,
+                        innerResult.AddOrUpdate!.ExistingValue == null ? default : Convert(innerResult.Key, innerResult.AddOrUpdate!.ExistingValue).Value,
+                        Convert(innerResult.Key, innerResult.AddOrUpdate!.NewValue).Value);
                 }
                 else
                 {

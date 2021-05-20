@@ -35,22 +35,22 @@ namespace ComposableCollections.Dictionary.Adapters
                 {
                     case DictionaryWriteType.Add:
                     {
-                        var value = write.ValueIfAdding.Value();
+                        var value = write.ValueIfAdding!();
                         _source.Add(write.Key, value);
-                        finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true, Maybe<TValue>.Nothing(), value.ToMaybe()));
+                        finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true, default(TValue), value));
                     }
                     break;
                     case DictionaryWriteType.TryAdd:
                     {
                         if (!_source.TryGetValue(write.Key, out var existingValue))
                         {
-                            var newValue = write.ValueIfAdding.Value();
+                            var newValue = write.ValueIfAdding!();
                             _source.Add(write.Key, newValue);
-                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateTryAdd(write.Key, true, Maybe<TValue>.Nothing(), newValue.ToMaybe()));
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateTryAdd(write.Key, true, default(TValue), newValue));
                         }
                         else
                         {
-                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true, existingValue.ToMaybe(), Maybe<TValue>.Nothing()));
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true, existingValue, default(TValue)));
                         }
                     }
                     break;
@@ -58,9 +58,9 @@ namespace ComposableCollections.Dictionary.Adapters
                     {
                         if (_source.TryGetValue(write.Key, out var previousValue))
                         {
-                            var newValue = write.ValueIfUpdating.Value(previousValue);
+                            var newValue = write.ValueIfUpdating!(previousValue);
                             _source.Add(write.Key, newValue);
-                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true, previousValue.ToMaybe(), newValue.ToMaybe()));
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true, previousValue, newValue));
                         }
                         else
                         {
@@ -72,13 +72,13 @@ namespace ComposableCollections.Dictionary.Adapters
                     {
                         if (_source.TryGetValue(write.Key, out var previousValue))
                         {
-                            var newValue = write.ValueIfUpdating.Value(previousValue);
+                            var newValue = write.ValueIfUpdating!(previousValue);
                             _source.Add(write.Key, newValue);
-                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true, previousValue.ToMaybe(), newValue.ToMaybe()));
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true, previousValue, newValue));
                         }
                         else
                         {
-                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, false, Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing()));
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, false, default(TValue), default(TValue)));
                         }
                     }
                     break;
@@ -86,15 +86,15 @@ namespace ComposableCollections.Dictionary.Adapters
                     {
                         if (_source.TryGetValue(write.Key, out var previousValue))
                         {
-                            var newValue = write.ValueIfUpdating.Value(previousValue);
+                            var newValue = write.ValueIfUpdating!(previousValue);
                             _source.Add(write.Key, newValue);
-                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true, previousValue.ToMaybe(), newValue.ToMaybe()));
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true, previousValue, newValue));
                         }
                         else
                         {
-                            var newValue = write.ValueIfAdding.Value();
+                            var newValue = write.ValueIfAdding!();
                             _source[write.Key] = newValue;
-                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, false, Maybe<TValue>.Nothing(), newValue.ToMaybe()));
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, false, default(TValue), newValue));
                         }
                     }
                     break;
@@ -103,7 +103,7 @@ namespace ComposableCollections.Dictionary.Adapters
                         if (_source.TryGetValue(write.Key, out var removedValue))
                         {
                             _source.Remove(write.Key);
-                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, removedValue.ToMaybe()));
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, removedValue));
                         }
                     }
                     break;
@@ -112,7 +112,7 @@ namespace ComposableCollections.Dictionary.Adapters
                         if (_source.TryGetValue(write.Key, out var removedValue))
                         {
                             _source.Remove(write.Key);
-                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, removedValue.ToMaybe()));
+                            finalResults.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, removedValue));
                         }
                     }
                     break;

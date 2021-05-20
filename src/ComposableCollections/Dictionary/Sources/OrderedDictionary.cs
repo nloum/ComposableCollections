@@ -66,10 +66,10 @@ namespace ComposableCollections.Dictionary.Sources
                             throw new AddFailedBecauseKeyAlreadyExistsException(write.Key);
                         }
 
-                        var newValue = write.ValueIfAdding.Value();
+                        var newValue = write.ValueIfAdding();
                         _state.Insert(new KeyValueOrderedByKey<TKey, TValue>(write.Key, newValue, _compareKeysAndValues));
                         finalResult.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true,
-                            Maybe<TValue>.Nothing(), newValue.ToMaybe()));
+                            default(TValue), newValue));
 
                         break;
                     }
@@ -78,14 +78,14 @@ namespace ComposableCollections.Dictionary.Sources
                         if (TryGetValue(write.Key, out var existingValue))
                         {
                             finalResult.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, false,
-                                existingValue.ToMaybe(), Maybe<TValue>.Nothing()));
+                                existingValue, default(TValue)));
                         }
                         else
                         {
-                            var newValue = write.ValueIfAdding.Value();
+                            var newValue = write.ValueIfAdding!();
                             _state.Insert(new KeyValueOrderedByKey<TKey, TValue>(write.Key, newValue, _compareKeysAndValues));
                             finalResult.Add(DictionaryWriteResult<TKey, TValue>.CreateAdd(write.Key, true,
-                                Maybe<TValue>.Nothing(), newValue.ToMaybe()));
+                                default(TValue), newValue));
                         }
 
                         break;
@@ -97,10 +97,10 @@ namespace ComposableCollections.Dictionary.Sources
                             throw new UpdateFailedBecauseNoSuchKeyExistsException(write.Key);
                         }
 
-                        var newValue = write.ValueIfUpdating.Value(existingValue);
+                        var newValue = write.ValueIfUpdating!(existingValue);
                         _state.Insert(new KeyValueOrderedByKey<TKey, TValue>(write.Key, newValue, _compareKeysAndValues));
                         finalResult.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true,
-                            existingValue.ToMaybe(), newValue.ToMaybe()));
+                            existingValue, newValue));
 
                         break;
                     }
@@ -109,14 +109,14 @@ namespace ComposableCollections.Dictionary.Sources
                         if (!TryGetValue(write.Key, out var existingValue))
                         {
                             finalResult.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, false,
-                                Maybe<TValue>.Nothing(), Maybe<TValue>.Nothing()));
+                                default(TValue), default(TValue)));
                         }
                         else
                         {
-                            var newValue = write.ValueIfUpdating.Value(existingValue);
+                            var newValue = write.ValueIfUpdating!(existingValue);
                             _state.Insert(new KeyValueOrderedByKey<TKey, TValue>(write.Key, newValue, _compareKeysAndValues));
                             finalResult.Add(DictionaryWriteResult<TKey, TValue>.CreateUpdate(write.Key, true,
-                                existingValue.ToMaybe(), newValue.ToMaybe()));
+                                existingValue, newValue));
                         }
 
                         break;
@@ -125,17 +125,17 @@ namespace ComposableCollections.Dictionary.Sources
                     {
                         if (!TryGetValue(write.Key, out var existingValue))
                         {
-                            var newValue = write.ValueIfAdding.Value();
+                            var newValue = write.ValueIfAdding!();
                             _state.Insert(new KeyValueOrderedByKey<TKey, TValue>(write.Key, newValue, _compareKeysAndValues));
                             finalResult.Add(DictionaryWriteResult<TKey, TValue>.CreateAddOrUpdate(write.Key, DictionaryItemAddOrUpdateResult.Add,
-                                Maybe<TValue>.Nothing(), newValue));
+                                default(TValue), newValue));
                         }
                         else
                         {
-                            var newValue = write.ValueIfUpdating.Value(existingValue);
+                            var newValue = write.ValueIfUpdating!(existingValue);
                             _state.Insert(new KeyValueOrderedByKey<TKey, TValue>(write.Key, newValue, _compareKeysAndValues));
                             finalResult.Add(DictionaryWriteResult<TKey, TValue>.CreateAddOrUpdate(write.Key, DictionaryItemAddOrUpdateResult.Update,
-                                existingValue.ToMaybe(), newValue));
+                                existingValue, newValue));
                         }
 
                         break;
@@ -148,7 +148,7 @@ namespace ComposableCollections.Dictionary.Sources
                         }
 
                         _state.Remove(new KeyValueOrderedByKey<TKey, TValue>(write.Key, existingValue, _compareKeysAndValues));
-                        finalResult.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, existingValue.ToMaybe()));
+                        finalResult.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, existingValue));
 
                         break;
                     }
@@ -156,12 +156,12 @@ namespace ComposableCollections.Dictionary.Sources
                     {
                         if (!TryGetValue(write.Key, out var existingValue))
                         {
-                            finalResult.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, Maybe<TValue>.Nothing()));
+                            finalResult.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, default(TValue)));
                         }
                         else
                         {
                             _state.Remove(new KeyValueOrderedByKey<TKey, TValue>(write.Key, existingValue, _compareKeysAndValues));
-                            finalResult.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, existingValue.ToMaybe()));
+                            finalResult.Add(DictionaryWriteResult<TKey, TValue>.CreateRemove(write.Key, existingValue));
                         }
 
                         break;

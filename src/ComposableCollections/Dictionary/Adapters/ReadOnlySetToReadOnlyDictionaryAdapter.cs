@@ -33,7 +33,7 @@ namespace ComposableCollections.Dictionary.Adapters
             return this[key];
         }
 
-        public TKey this[TKey key] => TryGetValue(key).Value;
+        public TKey this[TKey key] => TryGetValue(key)!;
 
         public IEnumerable<TKey> Keys => _set;
         public IEnumerable<TKey> Values => _set;
@@ -42,14 +42,14 @@ namespace ComposableCollections.Dictionary.Adapters
             return _set.Contains(key);
         }
 
-        public IMaybe<TKey> TryGetValue(TKey key)
+        public TKey? TryGetValue(TKey key)
         {
             if (ContainsKey(key))
             {
-                return key.ToMaybe();
+                return key;
             }
             
-            return Maybe<TKey>.Nothing();
+            return default;
         }
     }
 }

@@ -25,18 +25,18 @@ namespace ComposableCollections.Dictionary.Base
         {
             Write(new[] { DictionaryWrite<TKey, TValue>.CreateTryAdd(key, value) }, out var results);
             var firstResult = results.First();
-            result = firstResult.Add.Value.NewValue.ValueOrDefault;
-            previousValue = firstResult.Add.Value.ExistingValue.ValueOrDefault;
-            return firstResult.Add.Value.NewValue.HasValue;
+            result = firstResult.Add!.NewValue;
+            previousValue = firstResult.Add!.ExistingValue;
+            return firstResult.Add!.NewValue != null;
         }
 
         public virtual bool TryUpdate(TKey key, Func<TValue, TValue> value, out TValue previousValue, out TValue newValue)
         {
             Write(new[] {DictionaryWrite<TKey, TValue>.CreateTryUpdate(key, value)}, out var results);
             var firstResult = results.First();
-            newValue = firstResult.Update.Value.NewValue.ValueOrDefault;
-            previousValue = firstResult.Update.Value.ExistingValue.ValueOrDefault;
-            return firstResult.Update.Value.NewValue.HasValue;
+            newValue = firstResult.Update!.NewValue;
+            previousValue = firstResult.Update!.ExistingValue;
+            return firstResult.Update.NewValue != null;
         }
 
         public DictionaryItemAddOrUpdateResult AddOrUpdate(TKey key, Func<TValue> valueIfAdding,
@@ -44,17 +44,17 @@ namespace ComposableCollections.Dictionary.Base
         {
             Write(new[] {DictionaryWrite<TKey, TValue>.CreateAddOrUpdate(key, valueIfAdding, valueIfUpdating)}, out var results);
             var firstResult = results.First();
-            newValue = firstResult.AddOrUpdate.Value.NewValue;
-            previousValue = firstResult.AddOrUpdate.Value.ExistingValue.ValueOrDefault;
-            return firstResult.AddOrUpdate.Value.Result;
+            newValue = firstResult.AddOrUpdate!.NewValue;
+            previousValue = firstResult.AddOrUpdate!.ExistingValue;
+            return firstResult.AddOrUpdate!.Result;
         }
 
         public virtual bool TryRemove(TKey key, out TValue removedItem)
         {
             Write(new[] {DictionaryWrite<TKey, TValue>.CreateTryRemove(key)}, out var results);
             var firstResult = results.First();
-            removedItem = firstResult.Remove.Value.ValueOrDefault;
-            return firstResult.Remove.Value.HasValue;
+            removedItem = firstResult.Remove!;
+            return firstResult.Remove!  != null;
         }
 
         #endregion
@@ -66,8 +66,8 @@ namespace ComposableCollections.Dictionary.Base
         {
             Write(keysToRemove.Select(key => DictionaryWrite<TKey, TValue>.CreateTryRemove(key)), out var results);
             removedItems = results
-                .Where(x => x.Remove.Value.HasValue)
-                .ToComposableDictionary(x => x.Key, x => x.Remove.Value.Value);
+                .Where(x => x.Remove!  != null)
+                .ToComposableDictionary(x => x.Key, x => x.Remove!);
         }
 
         public virtual void AddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key,
@@ -82,28 +82,28 @@ namespace ComposableCollections.Dictionary.Base
         {
             Write(newItems.Select(x => DictionaryWrite<TKey, TValue>.CreateUpdate(key(x), _ => value(x))), out var results);
             previousValues = results
-                .ToComposableDictionary(x => x.Key, x => x.Update.Value);
+                .ToComposableDictionary(x => x.Key, x => x.Update!);
         }
 
         public virtual void TryAddRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddAttempt<TValue>> result)
         {
             Write(newItems.Select(x => DictionaryWrite<TKey, TValue>.CreateUpdate(key(x), _ => value(x))), out var results);
             result = results
-                .ToComposableDictionary(x => x.Key, x => x.Add.Value);
+                .ToComposableDictionary(x => x.Key, x => x.Add!);
         }
 
         public virtual void TryUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemUpdateAttempt<TValue>> result)
         {
             Write(newItems.Select(x => DictionaryWrite<TKey, TValue>.CreateUpdate(key(x), _ => value(x))), out var results);
             result = results
-                .ToComposableDictionary(x => x.Key, x => x.Update.Value);
+                .ToComposableDictionary(x => x.Key, x => x.Update!);
         }
 
         public virtual void AddOrUpdateRange<TKeyValuePair>(IEnumerable<TKeyValuePair> newItems, Func<TKeyValuePair, TKey> key, Func<TKeyValuePair, TValue> value, out IComposableReadOnlyDictionary<TKey, IDictionaryItemAddOrUpdate<TValue>> result)
         {
             Write(newItems.Select(x => DictionaryWrite<TKey, TValue>.CreateUpdate(key(x), _ => value(x))), out var results);
             result = results
-                .ToComposableDictionary(x => x.Key, x => x.AddOrUpdate.Value);
+                .ToComposableDictionary(x => x.Key, x => x.AddOrUpdate!);
         }
 
         public virtual void TryRemoveRange(IEnumerable<TKey> keysToRemove,
@@ -111,8 +111,8 @@ namespace ComposableCollections.Dictionary.Base
         {
             Write(keysToRemove.Select(key => DictionaryWrite<TKey, TValue>.CreateTryRemove(key)), out var results);
             removedItems = results
-                .Where(x => x.Remove.Value.HasValue)
-                .ToComposableDictionary(x => x.Key, x => x.Remove.Value.Value);
+                .Where(x => x.Remove!  != null)
+                .ToComposableDictionary(x => x.Key, x => x.Remove!);
         }
 
         #endregion

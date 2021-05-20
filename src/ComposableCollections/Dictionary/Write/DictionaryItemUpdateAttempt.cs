@@ -4,7 +4,7 @@ namespace ComposableCollections.Dictionary.Write
 {
     public class DictionaryItemUpdateAttempt<TValue> : IDictionaryItemUpdateAttempt<TValue>
     {
-        public DictionaryItemUpdateAttempt(bool updated, IMaybe<TValue> existingValue, IMaybe<TValue> newValue)
+        public DictionaryItemUpdateAttempt(bool updated, TValue? existingValue, TValue? newValue)
         {
             Updated = updated;
             ExistingValue = existingValue;
@@ -12,8 +12,8 @@ namespace ComposableCollections.Dictionary.Write
         }
 
         public bool Updated { get; }
-        public IMaybe<TValue> ExistingValue { get; }
-        public IMaybe<TValue> NewValue { get; }
+        public TValue? ExistingValue { get; }
+        public TValue? NewValue { get; }
 
         public override string ToString()
         {

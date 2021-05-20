@@ -113,7 +113,7 @@ namespace ComposableCollections.DictionaryWithBuiltInKey.Adapters
         public void TryUpdateRange(IEnumerable<TValue> newItems, out IReadOnlyDictionaryWithBuiltInKey<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
             _source.TryUpdateRange(newItems, GetKey, x => x, out var resultsInner);
-            results = new ReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, IDictionaryItemUpdateAttempt<TValue>>(resultsInner, x => x.NewValue.Select(GetKey).Otherwise(() => GetKey(x.ExistingValue.Value)));
+            results = new ReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, IDictionaryItemUpdateAttempt<TValue>>(resultsInner, x => x.NewValue != null ? GetKey(x.NewValue) : GetKey(x.ExistingValue!));
         }
 
         public void Update(TValue value)
@@ -139,7 +139,7 @@ namespace ComposableCollections.DictionaryWithBuiltInKey.Adapters
         public void UpdateRange(IEnumerable<TValue> newItems, out IReadOnlyDictionaryWithBuiltInKey<TKey, IDictionaryItemUpdateAttempt<TValue>> results)
         {
             _source.UpdateRange(newItems, GetKey, x => x, out var innerResults);
-            results = new ReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, IDictionaryItemUpdateAttempt<TValue>>(innerResults, x => x.NewValue.Select(GetKey).Otherwise(() => GetKey(x.ExistingValue.Value)));
+            results = new ReadOnlyDictionaryWithBuiltInKeyAdapter<TKey, IDictionaryItemUpdateAttempt<TValue>>(innerResults, x => x.NewValue != null ? GetKey(x.NewValue) : GetKey(x.ExistingValue!));
         }
 
         public DictionaryItemAddOrUpdateResult AddOrUpdate(TValue value)

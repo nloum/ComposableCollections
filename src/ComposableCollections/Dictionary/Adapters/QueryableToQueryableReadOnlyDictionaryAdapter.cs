@@ -65,15 +65,15 @@ namespace ComposableCollections.Dictionary.Adapters
             return _queryable.Where(_compareKey(key)).FirstOrDefault() != null;
         }
 
-        public IMaybe<TValue> TryGetValue(TKey key)
+        public TValue? TryGetValue(TKey key)
         {
             var result = _queryable.Where(_compareKey(key)).FirstOrDefault();
             if (result == null)
             {
-                return Maybe<TValue>.Nothing();
+                return default(TValue);
             }
 
-            return result.ToMaybe();
+            return result;
         }
 
         IQueryable<TValue> IQueryableReadOnlyDictionary<TKey, TValue>.Values => _queryable;

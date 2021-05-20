@@ -53,13 +53,13 @@ namespace ComposableCollections.Dictionary.Adapters
         {
             var convertedKey = ConvertToKey1(key);
             var innerValue = _innerValues.TryGetValue(convertedKey);
-            if (!innerValue.HasValue)
+            if ( innerValue == null)
             {
                 value = default;
                 return false;
             }
 
-            var kvp = Convert(convertedKey, innerValue.Value);
+            var kvp = Convert(convertedKey, innerValue!);
             value = kvp.Value;
             return true;
         }

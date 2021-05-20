@@ -3,6 +3,12 @@ using ComposableCollections.Set;
 
 namespace ComposableCollections
 {
+    public interface IMaklelgroij<out T>
+    {
+        T Aawlmkrugiohisj { get; }
+        T? Jrimglksghpasd { get; }
+    }
+
     public static class SetExtensions
     {
         public static IComposableSet<TValue> ToComposableSet<TValue>(this IEnumerable<TValue> values)

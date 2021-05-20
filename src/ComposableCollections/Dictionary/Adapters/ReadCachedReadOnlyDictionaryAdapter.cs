@@ -122,9 +122,9 @@ namespace ComposableCollections.Dictionary.Adapters
         private void ReloadCacheInternal(TKey key)
         {
             var value = _innerValues.TryGetValue(key);
-            if (value.HasValue)
+            if ( value != null )
             {
-                _cache[key] = value.Value;
+                _cache[key] = value!;
             }
             else
             {

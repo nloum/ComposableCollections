@@ -48,8 +48,6 @@ class Build : NukeBuild
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
     AbsolutePath TestResultDirectory => ArtifactsDirectory / "test-results";
-    Project FluentSourceGenerators => Solution.GetProject("FluentSourceGenerators");
-    Project DebuggableSourceGeneratorsGenerators => Solution.GetProject("DebuggableSourceGenerators");
     IEnumerable<Project> TestProjects => Solution.GetProjects("*.Tests");
     Project[] PackageProjects => new[] {Solution.GetProject("Typewriter")};
     
@@ -90,7 +88,7 @@ class Build : NukeBuild
 				.SetFileVersion(GitVersion.AssemblySemFileVer)
 				.SetInformationalVersion(GitVersion.InformationalVersion)
 				.CombineWith(
-					from project in new[] { FluentSourceGenerators, DebuggableSourceGeneratorsGenerators }
+					from project in PackageProjects
 					from framework in project.GetTargetFrameworks()
                     select new { project, framework }, (cs, v) => cs
 						.SetProject(v.project)

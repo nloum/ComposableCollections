@@ -96,7 +96,7 @@ namespace DebuggableSourceGenerators.Write
 
             foreach (var method in Methods)
             {
-                var methodInfo = method.MethodToOverride ?? method.Implementation.Item1.ValueOrDefault?.StaticMethod;
+                var methodInfo = method.MethodToOverride ?? method.Implementation.Item1?.StaticMethod;
                 method.Implementation.ForEach(_ =>
                 {
                     throw new InvalidOperationException(
@@ -350,14 +350,14 @@ namespace DebuggableSourceGenerators.Write
 
             foreach (var method in Methods)
             {
-                method.Name ??= method.Implementation.Item1.ValueOrDefault?.StaticMethod?.Name;
+                method.Name ??= method.Implementation.Item1?.StaticMethod?.Name;
 
-                method.Implementation.Item1.IfHasValue(value =>
+                if (method.Implementation.Item1 != null)
                 {
                     foreach (var baseType in baseTypes)
                     {
                         method.MethodToOverride = baseType.GetMethod(method.Name,
-                            value.StaticMethod.GetParameters().Select(x => x.ParameterType).Skip(1).ToArray());
+                            method.Implementation.Item1.StaticMethod.GetParameters().Select(x => x.ParameterType).Skip(1).ToArray());
 
                         if (method.MethodToOverride != null)
                         {
@@ -369,7 +369,7 @@ namespace DebuggableSourceGenerators.Write
                             break;
                         }
                     }
-                });
+                }
             }
 
             foreach (var methodThatNeedsToBeOverriden in methodsThatNeedToBeOverriden)
@@ -422,7 +422,7 @@ namespace DebuggableSourceGenerators.Write
                         }
                     }
 
-                    if (method.Implementation?.Item1?.HasValue == true)
+                    if (method.Implementation?.Item1 != null)
                     {
                         break;
                     }

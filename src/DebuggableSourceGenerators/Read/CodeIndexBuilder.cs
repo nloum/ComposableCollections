@@ -9,18 +9,18 @@ namespace DebuggableSourceGenerators.Read
 {
     public class CodeIndexBuilder
     {
-        private readonly IComposableDictionary<TypeIdentifier, Lazy<Type>> _lazyTypes;
-        private readonly IComposableDictionary<TypeIdentifier, Type> _types;
+        private readonly IComposableDictionary<TypeIdentifier, Lazy<TypeBase>> _lazyTypes;
+        private readonly IComposableDictionary<TypeIdentifier, TypeBase> _types;
 
         public CodeIndexBuilder()
         {
-            _lazyTypes = new ComposableDictionary<TypeIdentifier, Lazy<Type>>();
-            _types = _lazyTypes.WithMapping(x => x.Value, x => new Lazy<Type>(x));
+            _lazyTypes = new ComposableDictionary<TypeIdentifier, Lazy<TypeBase>>();
+            _types = _lazyTypes.WithMapping(x => x.Value, x => new Lazy<TypeBase>(x));
         }
 
         public int Count => _lazyTypes.Count;
 
-        public Lazy<Type> GetType(TypeIdentifier key)
+        public Lazy<TypeBase> GetType(TypeIdentifier key)
         {
             return new(() =>
             {
@@ -58,9 +58,9 @@ namespace DebuggableSourceGenerators.Read
             });
         }
 
-        public Lazy<Type> GetOrAdd(TypeIdentifier key, Func<Type> value)
+        public Lazy<TypeBase> GetOrAdd(TypeIdentifier key, Func<TypeBase> value)
         {
-            var lazyValue = new Lazy<Type>(value);
+            var lazyValue = new Lazy<TypeBase>(value);
             if (_lazyTypes.TryAdd(key, lazyValue))
             {
                 return lazyValue;
@@ -71,6 +71,11 @@ namespace DebuggableSourceGenerators.Read
             }
         }
 
+        public Lazy<CodeIndex> LazyBuild()
+        {
+            return new Lazy<CodeIndex>(() => Build());
+        }
+        
         public CodeIndex Build()
         {
             return new CodeIndex(_lazyTypes);

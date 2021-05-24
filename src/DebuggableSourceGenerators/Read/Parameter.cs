@@ -4,7 +4,7 @@ namespace DebuggableSourceGenerators.Read
 {
     public record Parameter
     {
-        public Lazy<Type> Type { get; init; }
+        public Lazy<TypeBase> Type { get; init; }
         public string Name { get; init; }
         public ParameterMode Mode { get; init; }
 

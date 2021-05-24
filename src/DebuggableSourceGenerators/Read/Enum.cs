@@ -2,7 +2,7 @@
 
 namespace DebuggableSourceGenerators.Read
 {
-    public record Enum : Type
+    public record Enum : TypeBase
     {
         public ImmutableList<string> Values { get; init; }
     }

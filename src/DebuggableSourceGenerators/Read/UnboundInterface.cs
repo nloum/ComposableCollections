@@ -1,6 +1,6 @@
 ﻿namespace DebuggableSourceGenerators.Read
 {
-    public record Interface : StructuredType
+    public record UnboundInterface : UnboundStructuredType
     {
         
     }

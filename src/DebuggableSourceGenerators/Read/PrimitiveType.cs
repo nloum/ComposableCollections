@@ -1,6 +1,6 @@
 ﻿namespace DebuggableSourceGenerators.Read
 {
-    public record PrimitiveType : Type
+    public record PrimitiveType : TypeBase
     {
         
     }

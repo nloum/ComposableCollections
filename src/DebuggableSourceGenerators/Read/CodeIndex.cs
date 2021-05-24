@@ -8,11 +8,11 @@ using SimpleMonads;
 
 namespace DebuggableSourceGenerators.Read
 {
-    public class CodeIndex : IEnumerable<IKeyValue<TypeIdentifier, Type>>
+    public class CodeIndex : IEnumerable<IKeyValue<TypeIdentifier, TypeBase>>
     {
-        private readonly IComposableReadOnlyDictionary<TypeIdentifier, Type> _types;
+        private readonly IComposableReadOnlyDictionary<TypeIdentifier, TypeBase> _types;
 
-        public CodeIndex(IComposableDictionary<TypeIdentifier, Lazy<Type>> lazyTypes)
+        public CodeIndex(IComposableDictionary<TypeIdentifier, Lazy<TypeBase>> lazyTypes)
         {
             _types = lazyTypes.WithMapping(x => x.Value);
             
@@ -96,14 +96,14 @@ namespace DebuggableSourceGenerators.Read
             // }
         }
 
-        public IEnumerator<IKeyValue<TypeIdentifier, Type>> GetEnumerator()
+        public IEnumerator<IKeyValue<TypeIdentifier, TypeBase>> GetEnumerator()
         {
             return _types.GetEnumerator();
         }
 
         public int Count => _types.Count;
 
-        public Type GetValue(TypeIdentifier key)
+        public TypeBase GetValue(TypeIdentifier key)
         {
             return _types.GetValue(key);
         }
@@ -113,16 +113,16 @@ namespace DebuggableSourceGenerators.Read
             return _types.ContainsKey(key);
         }
 
-        public IMaybe<Type> TryGetValue(TypeIdentifier key)
+        public IMaybe<TypeBase> TryGetValue(TypeIdentifier key)
         {
             return _types.TryGetValue(key);
         }
 
         public IEnumerable<TypeIdentifier> Keys => _types.Keys;
 
-        public IEnumerable<Type> Values => _types.Values;
+        public IEnumerable<TypeBase> Values => _types.Values;
 
-        public bool TryGetValue(TypeIdentifier key, out Type value)
+        public bool TryGetValue(TypeIdentifier key, out TypeBase value)
         {
             var maybe = _types.TryGetValue(key);
             if (maybe.HasValue)
@@ -135,7 +135,7 @@ namespace DebuggableSourceGenerators.Read
             return false;
         }
 
-        public Type this[TypeIdentifier key]
+        public TypeBase this[TypeIdentifier key]
         {
             get => _types[key];
         }

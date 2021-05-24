@@ -27,6 +27,164 @@ namespace DebuggableSourceGenerators.Read
         {
             MSBuildLocator.RegisterDefaults();
         }
+
+        public static TypeIdentifier GetTypeIdentifier(this Type type)
+        {
+            return new TypeIdentifier()
+            {
+                Namespace = type.Namespace,
+                Name = type.Name,
+                Arity = type.GetGenericArguments().Length,
+            };
+        }
+
+        public static CodeIndexBuilder Add(this CodeIndexBuilder codeIndexBuilder, Type type)
+        {
+            codeIndexBuilder.GetOrAdd(type);
+            return codeIndexBuilder;
+        }
+        
+        public static Lazy<TypeBase> GetOrAdd(this CodeIndexBuilder codeIndexBuilder, Type type)
+        {
+            var identifier = type.GetTypeIdentifier();
+
+            return codeIndexBuilder.GetOrAdd(identifier, () =>
+            {
+                if (type.IsClass)
+                {
+                    return new Class
+                    {
+                        Identifier = identifier,
+                        CodeIndex = codeIndexBuilder.LazyBuild(),
+                        Constructors = type.GetConstructors().Select(constructor =>
+                        {
+                            return new Constructor()
+                            {
+                                Parameters = constructor.GetParameters().Select(parameter => new Parameter
+                                {
+                                    Type = codeIndexBuilder.GetOrAdd(parameter.ParameterType)
+                                }).ToImmutableList(),
+                            };
+                        }).ToImmutableList(),
+                        Fields = type.GetFields().Select(field =>
+                        {
+                            return new Field()
+                            {
+                                Type = codeIndexBuilder.GetOrAdd(field.FieldType)
+                            };
+                        }).ToImmutableList(),
+                        Indexers = type.GetProperties().Where(prop => prop.GetIndexParameters().Length > 0).Select(
+                            indexer =>
+                            {
+                                return new Indexer()
+                                {
+                                    Parameters = indexer.GetIndexParameters().Select(parameter => new Parameter
+                                    {
+                                        Type = codeIndexBuilder.GetOrAdd(parameter.ParameterType)
+                                    }).ToImmutableList(),
+                                    ReturnType = codeIndexBuilder.GetOrAdd(indexer.PropertyType)
+                                };
+                            }).ToImmutableList(),
+                        Properties = type.GetProperties().Where(prop => prop.GetIndexParameters().Length == 0).Select(
+                            property =>
+                            {
+                                return new Property()
+                                {
+                                    Type = codeIndexBuilder.GetOrAdd(property.PropertyType)
+                                };
+                            }).ToImmutableList(),
+                        Interfaces = type.GetInterfaces().Select(iface => new Lazy<Interface>(() => (Interface)codeIndexBuilder.GetOrAdd(iface).Value))
+                            .ToImmutableList(),
+                        Methods = type.GetMethods().Select(
+                            method =>
+                            {
+                                return new Method()
+                                {
+                                    Parameters = method.GetParameters().Select(parameter => new Parameter
+                                    {
+                                        Type = codeIndexBuilder.GetOrAdd(parameter.ParameterType)
+                                    }).ToImmutableList(),
+                                    ReturnType = codeIndexBuilder.GetOrAdd(method.ReturnType)
+                                };
+                            }).ToImmutableList(),
+                        BaseClass = new Lazy<Class>(() => (Class) codeIndexBuilder.GetOrAdd(type.BaseType).Value),
+                        TypeParameters = type.GenericTypeArguments.Select(arg => new Lazy<TypeParameter>(() =>
+                            new TypeParameter()
+                            {
+                                Identifier = new TypeIdentifier()
+                                {
+                                    Name = arg.Name,
+                                    Namespace = null,
+                                    Arity = 0
+                                },
+                            })).ToImmutableList(),
+                    };
+                }
+                if (type.IsInterface)
+                {
+                    return new Interface
+                    {
+                        Identifier = identifier,
+                        CodeIndex = codeIndexBuilder.LazyBuild(),
+                        Indexers = type.GetProperties().Where(prop => prop.GetIndexParameters().Length > 0).Select(
+                            indexer =>
+                            {
+                                return new Indexer()
+                                {
+                                    Parameters = indexer.GetIndexParameters().Select(parameter => new Parameter
+                                    {
+                                        Type = codeIndexBuilder.GetOrAdd(parameter.ParameterType)
+                                    }).ToImmutableList(),
+                                    ReturnType = codeIndexBuilder.GetOrAdd(indexer.PropertyType)
+                                };
+                            }).ToImmutableList(),
+                        Properties = type.GetProperties().Where(prop => prop.GetIndexParameters().Length == 0).Select(
+                            property =>
+                            {
+                                return new Property()
+                                {
+                                    Type = codeIndexBuilder.GetOrAdd(property.PropertyType)
+                                };
+                            }).ToImmutableList(),
+                        Interfaces = type.GetInterfaces().Select(iface => new Lazy<Interface>(() => (Interface)codeIndexBuilder.GetOrAdd(iface).Value))
+                            .ToImmutableList(),
+                        Methods = type.GetMethods().Select(
+                            method =>
+                            {
+                                return new Method()
+                                {
+                                    Parameters = method.GetParameters().Select(parameter => new Parameter
+                                    {
+                                        Type = codeIndexBuilder.GetOrAdd(parameter.ParameterType)
+                                    }).ToImmutableList(),
+                                    ReturnType = codeIndexBuilder.GetOrAdd(method.ReturnType)
+                                };
+                            }).ToImmutableList(),
+                        TypeParameters = type.GenericTypeArguments.Select(arg => new Lazy<TypeParameter>(() =>
+                            new TypeParameter()
+                            {
+                                Identifier = new TypeIdentifier()
+                                {
+                                    Name = arg.Name,
+                                    Namespace = null,
+                                    Arity = 0
+                                },
+                            })).ToImmutableList(),
+                    };
+                }
+                if (type.IsEnum)
+                {
+                    return new Enum
+                    {
+                        Identifier = identifier,
+                        CodeIndex = codeIndexBuilder.LazyBuild(),
+                        Values = type.GetFields().Select(field => field.Name).ToImmutableList(),
+                    };
+                }
+                
+                throw new NotImplementedException();
+            });
+        }
         
         public static CodeIndexBuilder AddNugetPackage(this CodeIndexBuilder codeIndexBuilder, string packageName, string packageVersion, string targetFramework)
         {
@@ -190,12 +348,12 @@ namespace DebuggableSourceGenerators.Read
             return codeIndexBuilder;
         }
 
-        public static TypeIdentifier GetTypeIdentifier(TypeDefinition typeDefinition)
+        public static TypeIdentifier GetTypeIdentifier(Mono.Cecil.TypeDefinition typeDefinition)
         {
             return TypeIdentifier.Parse(typeDefinition.Namespace, typeDefinition.Name);
         }
 
-        public static Lazy<Type> GetOrAdd(this CodeIndexBuilder codeIndexBuilder, TypeDefinition typeDefinition)
+        public static Lazy<TypeBase> GetOrAdd(this CodeIndexBuilder codeIndexBuilder, Mono.Cecil.TypeDefinition typeDefinition)
         {
             var identifier = GetTypeIdentifier(typeDefinition);
             
@@ -211,6 +369,7 @@ namespace DebuggableSourceGenerators.Read
                 typeParameters[genericParameter.Name] = new Lazy<TypeParameter>(() => new TypeParameter()
                 {
                     Identifier = new TypeIdentifier() {Name = genericParameter.Name},
+                    CodeIndex = codeIndexBuilder.LazyBuild(),
                     VarianceMode = genericParameter.IsContravariant
                         ? VarianceMode.In
                         : (genericParameter.IsCovariant ? VarianceMode.Out : VarianceMode.None),
@@ -220,16 +379,16 @@ namespace DebuggableSourceGenerators.Read
                 });
             }
             
-            Lazy<Type> GetType(TypeReference typeRef)
+            Lazy<TypeBase> GetType(TypeReference typeRef)
             {
-                TypeDefinition typeDef = null;
+                Mono.Cecil.TypeDefinition typeDef = null;
                 try
                 {
                     typeDef = typeRef.Resolve();
                     
                     if (typeDef == null)
                     {
-                        return new Lazy<Type>(() => typeParameters[typeRef.Name].Value);
+                        return new Lazy<TypeBase>(() => typeParameters[typeRef.Name].Value);
                     }
 
                     return codeIndexBuilder.GetOrAdd(typeDef);
@@ -237,7 +396,7 @@ namespace DebuggableSourceGenerators.Read
                 catch (AssemblyResolutionException e)
                 {
                     Console.WriteLine(e);
-                    return new Lazy<Type>(() => null);
+                    return new Lazy<TypeBase>(() => null);
                 }
             }
             
@@ -246,6 +405,7 @@ namespace DebuggableSourceGenerators.Read
                 return codeIndexBuilder.GetOrAdd(identifier, () => new Class()
                 {
                     Identifier = identifier,
+                    CodeIndex = codeIndexBuilder.LazyBuild(),
                     BaseClass = new Lazy<Class>(() => (Class)codeIndexBuilder.GetOrAdd(typeDefinition.BaseType.Resolve()).Value),
                     Interfaces = typeDefinition.Interfaces.Select(iface => new Lazy<Interface>(() => (Interface)codeIndexBuilder.GetOrAdd(iface.InterfaceType.Resolve()).Value)).ToImmutableList(),
                     Constructors = typeDefinition.GetConstructors().Select(constructor => new Constructor()
@@ -302,6 +462,7 @@ namespace DebuggableSourceGenerators.Read
                 return codeIndexBuilder.GetOrAdd(identifier, () => new Interface()
                 {
                     Identifier = identifier,
+                    CodeIndex = codeIndexBuilder.LazyBuild(),
                     Interfaces = typeDefinition.Interfaces.Select(iface => new Lazy<Interface>(() => (Interface)codeIndexBuilder.GetOrAdd(iface.InterfaceType.Resolve()).Value)).ToImmutableList(),
                     Indexers = typeDefinition.Properties.Where(prop => prop.HasParameters).Select(prop =>
                     {
@@ -350,7 +511,7 @@ namespace DebuggableSourceGenerators.Read
             }
         }
         
-        public static CodeIndexBuilder AddType(this CodeIndexBuilder codeIndexBuilder, TypeDefinition typeDefinition)
+        public static CodeIndexBuilder AddType(this CodeIndexBuilder codeIndexBuilder, Mono.Cecil.TypeDefinition typeDefinition)
         {
             codeIndexBuilder.GetOrAdd(typeDefinition);
             
@@ -391,8 +552,8 @@ namespace DebuggableSourceGenerators.Read
             var result = namespaceSymbol.ToString();
             return result;
         }
-        
-        public static Lazy<Type> GetOrAdd(this CodeIndexBuilder codeIndexBuilder, INamedTypeSymbol symbol)
+
+        public static Lazy<TypeBase> GetOrAdd(this CodeIndexBuilder codeIndexBuilder, INamedTypeSymbol symbol)
         {
             var typeIdentifier = new TypeIdentifier()
             {
@@ -550,6 +711,7 @@ namespace DebuggableSourceGenerators.Read
                     return new Class()
                     {
                         Identifier = typeIdentifier,
+                        CodeIndex = codeIndexBuilder.LazyBuild(),
                         Interfaces = interfaces,
                         BaseClass = baseClass,
                         Constructors = constructors.ToImmutableList(),
@@ -564,6 +726,7 @@ namespace DebuggableSourceGenerators.Read
                     return new Interface()
                     {
                         Identifier = typeIdentifier,
+                        CodeIndex = codeIndexBuilder.LazyBuild(),
                         Interfaces = interfaces,
                         Methods = methods.ToImmutableList(),
                         Indexers = indexers.ToImmutableList(),
@@ -575,6 +738,7 @@ namespace DebuggableSourceGenerators.Read
                     return new Enum()
                     {
                         Identifier = typeIdentifier,
+                        CodeIndex = codeIndexBuilder.LazyBuild(),
                         Values = fields.Select(f => f.Name).ToImmutableList(),
                     };
                 }

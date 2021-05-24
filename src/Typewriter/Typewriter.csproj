@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="ComposableCollections" Version="1.0.0-alpha0171" />
+      <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0059" />
+    </ItemGroup>
+
+</Project>

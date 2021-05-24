@@ -7,7 +7,7 @@ namespace DebuggableSourceGenerators.Read
     public class Indexer
     {
         public bool IsStatic { get; init; }
-        public Lazy<Type> ReturnType { get; init; }
+        public Lazy<TypeBase> ReturnType { get; init; }
 
         public IReadOnlyList<Parameter> Parameters { get; init; }
         public Visibility GetterVisibility { get; init; }

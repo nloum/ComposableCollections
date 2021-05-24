@@ -3,12 +3,12 @@ using System.Collections.Immutable;
 
 namespace DebuggableSourceGenerators.Read
 {
-    public record TypeParameter : Type
+    public record TypeParameter : TypeBase
     {
         public override bool IsGenericParameter => true;
         public VarianceMode VarianceMode { get; init; }
         public bool MustHaveEmptyConstructor { get; init; }
-        public ImmutableList<Lazy<Type>> MustBeAssignedTo { get; init; }
+        public ImmutableList<Lazy<TypeBase>> MustBeAssignedTo { get; init; }
 
         public override string ToString()
         {

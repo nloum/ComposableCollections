@@ -7,7 +7,7 @@ namespace DebuggableSourceGenerators.Read
     public record Method
     {
         public bool IsStatic { get; init; }
-        public Lazy<Type> ReturnType { get; init; }
+        public Lazy<TypeBase> ReturnType { get; init; }
         public string Name { get; init; }
         public IReadOnlyList<Parameter> Parameters { get; init; }
         public Visibility Visibility { get; init; }

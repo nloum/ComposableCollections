@@ -39,7 +39,9 @@ class Build : NukeBuild
 	readonly string NugetSource = "https://api.nuget.org/v3/index.json";
 	[Parameter("API Key for the NuGet server.")]
 	readonly string NugetApiKey;
-
+	[GitVersion(Framework = "net5.0")]
+	readonly GitVersion GitVersion;
+	
     [Solution]
 	readonly Solution Solution;
 	
@@ -49,6 +51,7 @@ class Build : NukeBuild
     Project FluentSourceGenerators => Solution.GetProject("FluentSourceGenerators");
     Project DebuggableSourceGeneratorsGenerators => Solution.GetProject("DebuggableSourceGenerators");
     IEnumerable<Project> TestProjects => Solution.GetProjects("*.Tests");
+    Project[] PackageProjects => new[] {Solution.GetProject("Typewriter")};
     
     Target Clean => _ => _
         .Before(Restore)
@@ -132,7 +135,7 @@ class Build : NukeBuild
 				.SetIncludeSymbols(true)
 				.SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
                 .CombineWith(
-	                from project in new[] { FluentSourceGenerators, DebuggableSourceGeneratorsGenerators }
+	                from project in PackageProjects
 	                select new { project }, (cs, v) => cs
 		                .SetProject(v.project))
             );
@@ -153,15 +156,4 @@ class Build : NukeBuild
 				)
             );
         });
-    
-    public GitVersion GitVersion
-    {
-	    get
-	    {
-		    var package = NuGetPackageResolver.GetGlobalInstalledPackage("GitVersion.Tool", "5.6.0", null);
-		    var settings = new GitVersionSettings().SetProcessToolPath(package.Directory / "tools/net5.0/any/gitversion.dll");
-		    var gitVersion = GitVersionTasks.GitVersion(settings).Result;
-		    return gitVersion;
-	    }
-    }
 }

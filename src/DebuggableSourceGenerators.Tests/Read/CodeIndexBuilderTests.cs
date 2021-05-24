@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Immutable;
 using System.Linq;
 using DebuggableSourceGenerators.Read;
 using FluentAssertions;
@@ -11,6 +12,24 @@ namespace DebuggableSourceGenerators.Tests
     [TestClass]
     public class CodeIndexBuilderTests
     {
+        public interface ITestInterface<T1, T2>
+        {
+            
+        }
+
+        [TestMethod]
+        public void ShouldIndexUnboundedGenericProperly()
+        {
+            var uut = new CodeIndexBuilder();
+            uut.Add(typeof(ITestInterface<,>));
+            var codeIndex = uut.Build();
+            var testInterface = (Interface)codeIndex[typeof(ITestInterface<>).GetTypeIdentifier()];
+            testInterface.Should().NotBeNull();
+            testInterface.Identifier.Name.Should().Be("ITestInterface");
+            var typeArgs = testInterface.TypeArguments.Select(typeArg => typeArg.Value).ToImmutableList();
+            typeArgs.Count.Should().Be(testInterface.)
+        }
+        
         [TestMethod]
         public void ShouldIndexSourceInCSharpProject()
         {

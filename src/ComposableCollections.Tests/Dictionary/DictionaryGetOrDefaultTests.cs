@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ComposableCollections.Dictionary;
+using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Sources;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -38,7 +39,7 @@ namespace ComposableCollections.Tests
         [TestMethod]
         public void NonExistentItemShouldBeCreatedAndPersistedIfSpecified()
         {
-            var uut = new DictionaryGetOrDefault<string, Guid>((string key, out Guid value, out bool persist) =>
+            var uut = new DictionaryGetOrDefault<string, Guid>((string key, IComposableReadOnlyDictionary<string, Guid> state, out Guid value, out bool persist) =>
             {
                 value = Guid.NewGuid();
                 persist = true;
@@ -54,7 +55,7 @@ namespace ComposableCollections.Tests
         [TestMethod]
         public void NonExistentItemShouldBeCreatedAndNotPersistedIfSpecified()
         {
-            var uut = new DictionaryGetOrDefault<string, Guid>((string key, out Guid value, out bool persist) =>
+            var uut = new DictionaryGetOrDefault<string, Guid>((string key, IComposableReadOnlyDictionary<string, Guid> state, out Guid value, out bool persist) =>
             {
                 value = Guid.NewGuid();
                 persist = false;
@@ -70,7 +71,7 @@ namespace ComposableCollections.Tests
         [TestMethod]
         public void NonExistentItemShouldNotBeCreatedIfSpecified()
         {
-            var uut = new DictionaryGetOrDefault<string, Guid>((string key, out Guid value, out bool persist) =>
+            var uut = new DictionaryGetOrDefault<string, Guid>((string key, IComposableReadOnlyDictionary<string, Guid> state, out Guid value, out bool persist) =>
             {
                 value = default;
                 persist = false;

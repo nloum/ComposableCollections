@@ -4,7 +4,7 @@ using System.Reflection.Emit;
 
 namespace CodeIO.LoadedTypes.Write
 {
-    public class Property
+    public class PropertyWriter
     {
         public string Name { get; init; }
         public Type Type { get; init; }

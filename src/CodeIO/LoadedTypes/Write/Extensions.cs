@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -9,20 +9,11 @@ using SimpleMonads;
 
 namespace CodeIO.LoadedTypes.Write
 {
-    public class ClassBuilder
+    public static class Extensions
     {
-        public System.Type? BaseClass { get; set; }
-        public List<Type> Interfaces { get; } = new List<Type>();
-        public string Name { get; set; }
-        public List<Constructor> Constructors { get; } = new List<Constructor>();
-        public List<Property> Properties { get; } = new List<Property>();
-        public List<Method> Methods { get; } = new List<Method>();
-        public List<Type> StaticMethodImplementationSources { get; } = new List<Type>();
-        public bool IncludeConstructorForAllProperties { get; set; }
-
-        public Type Build()
+        public static Type Write(this ClassWriter classWriter)
         {
-            BaseClass ??= typeof(object);
+            var baseClass = classWriter.BaseClass ?? typeof(object);
 
             var assemblyName = new AssemblyName("DynamicAssemblyExample");
             var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(Guid.NewGuid().ToString()),
@@ -32,12 +23,12 @@ namespace CodeIO.LoadedTypes.Write
             // the assembly name plus an extension.
             var moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name);
 
-            var typeBuilder = moduleBuilder.DefineType(Name, TypeAttributes.Public, BaseClass, Interfaces.ToArray());
+            var typeBuilder = moduleBuilder.DefineType(classWriter.Name, TypeAttributes.Public, baseClass, classWriter.Interfaces.ToArray());
 
-            var baseTypes = Interfaces.ToList();
-            if (BaseClass != null)
+            var baseTypes = classWriter.Interfaces.ToList();
+            if (baseClass != null)
             {
-                baseTypes.Insert(0, BaseClass);
+                baseTypes.Insert(0, baseClass);
             }
 
             var propertiesThatNeedToBeOverriden = new HashSet<PropertyInfo>();
@@ -53,7 +44,7 @@ namespace CodeIO.LoadedTypes.Write
                 }
             }
 
-            foreach (var property in Properties)
+            foreach (var property in classWriter.Properties)
             {
                 foreach (var baseType in baseTypes)
                 {
@@ -78,23 +69,23 @@ namespace CodeIO.LoadedTypes.Write
 
             foreach (var propertyThatNeedsToBeOverriden in propertiesThatNeedToBeOverriden)
             {
-                var property = new Property()
+                var property = new PropertyWriter()
                 {
                     Name = propertyThatNeedsToBeOverriden.Name,
                     Type = propertyThatNeedsToBeOverriden.PropertyType,
                     PropertyToOverride = propertyThatNeedsToBeOverriden,
                 };
 
-                Properties.Add(property);
+                classWriter.Properties.Add(property);
             }
 
-            foreach (var property in Properties)
+            foreach (var property in classWriter.Properties)
             {
                 property.Field = typeBuilder.DefineField("_" + property.Name.Camelize(), property.Type,
                     FieldAttributes.Private);
             }
 
-            foreach (var method in Methods)
+            foreach (var method in classWriter.Methods)
             {
                 var methodInfo = method.MethodToOverride ?? method.Implementation.Item1?.StaticMethod;
                 method.Implementation.ForEach(_ =>
@@ -112,14 +103,14 @@ namespace CodeIO.LoadedTypes.Write
                 });
             }
 
-            if (IncludeConstructorForAllProperties)
+            if (classWriter.IncludeConstructorForAllProperties)
             {
-                var constructor = new Constructor();
-                constructor.PropertiesToInitialize.AddRange(Properties);
-                Constructors.Add(constructor);
+                var constructor = new ConstructorWriter();
+                constructor.PropertiesToInitialize.AddRange(classWriter.Properties);
+                classWriter.Constructors.Add(constructor);
             }
 
-            foreach (var constructor in Constructors)
+            foreach (var constructor in classWriter.Constructors)
             {
                 var parameterTypes = new List<Type>();
 
@@ -179,7 +170,7 @@ namespace CodeIO.LoadedTypes.Write
                 }
                 else
                 {
-                    ctor1IL.Emit(OpCodes.Call, BaseClass.GetConstructor(Type.EmptyTypes));
+                    ctor1IL.Emit(OpCodes.Call, baseClass.GetConstructor(Type.EmptyTypes));
                 }
 
                 for (var i = 0; i < constructor.PropertiesToInitialize.Count; i++)
@@ -241,7 +232,7 @@ namespace CodeIO.LoadedTypes.Write
                 ctor1IL.Emit(OpCodes.Ret);
             }
 
-            foreach (var property in Properties)
+            foreach (var property in classWriter.Properties)
             {
                 // Define a property named Number that gets and sets the private
                 // field.
@@ -348,7 +339,7 @@ namespace CodeIO.LoadedTypes.Write
                 }
             }
 
-            foreach (var method in Methods)
+            foreach (var method in classWriter.Methods)
             {
                 method.Name ??= method.Implementation.Item1?.StaticMethod?.Name;
 
@@ -374,12 +365,12 @@ namespace CodeIO.LoadedTypes.Write
 
             foreach (var methodThatNeedsToBeOverriden in methodsThatNeedToBeOverriden)
             {
-                var method = new Method()
+                var method = new MethodWriter()
                 {
                     MethodToOverride = methodThatNeedsToBeOverriden,
                 };
 
-                foreach (var staticMethodImplementationSource in StaticMethodImplementationSources)
+                foreach (var staticMethodImplementationSource in classWriter.StaticMethodImplementationSources)
                 {
                     foreach (var possibleImplementation in staticMethodImplementationSource.GetMethods()
                         .Where(x => x.IsStatic))
@@ -414,7 +405,7 @@ namespace CodeIO.LoadedTypes.Write
 
                         if (match)
                         {
-                            method.Implementation = new Method.MethodImpl(new Method.MethodImpl.Static()
+                            method.Implementation = new MethodWriter.MethodImpl(new MethodWriter.MethodImpl.Static()
                             {
                                 StaticMethod = possibleImplementation
                             });
@@ -428,10 +419,10 @@ namespace CodeIO.LoadedTypes.Write
                     }
                 }
 
-                Methods.Add(method);
+                classWriter.Methods.Add(method);
             }
 
-            foreach (var method in Methods)
+            foreach (var method in classWriter.Methods)
             {
                 method.Implementation.ForEach(staticMethodImplementation =>
                 {
@@ -501,7 +492,7 @@ namespace CodeIO.LoadedTypes.Write
             return t;
         }
 
-        private Type GetDelegateType(MethodInfo methodInfo)
+        private static Type GetDelegateType(MethodInfo methodInfo)
         {
             var parameters = methodInfo.GetParameters();
             var parameterTypes = parameters.Select(x => x.ParameterType).ToArray();

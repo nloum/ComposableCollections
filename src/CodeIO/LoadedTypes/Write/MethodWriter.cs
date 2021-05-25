@@ -6,7 +6,7 @@ using SimpleMonads;
 
 namespace CodeIO.LoadedTypes.Write
 {
-    public class Method
+    public class MethodWriter
     {
         public string Name { get; set; }
         public MethodBuilder Builder { get; set; }

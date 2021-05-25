@@ -4,10 +4,10 @@ using System.Reflection.Emit;
 
 namespace CodeIO.LoadedTypes.Write
 {
-    public class Constructor
+    public class ConstructorWriter
     {
-        public List<Property> PropertiesToInitialize { get; } = new List<Property>();
-        public List<Method> MethodsToInitialize { get; } = new List<Method>();
+        public List<PropertyWriter> PropertiesToInitialize { get; } = new List<PropertyWriter>();
+        public List<MethodWriter> MethodsToInitialize { get; } = new List<MethodWriter>();
         public ConstructorBuilder Builder { get; set; }
         public ConstructorInfo BaseConstructor { get; set; }
     }

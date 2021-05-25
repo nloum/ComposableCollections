@@ -10,14 +10,24 @@ namespace CodeIO.Tests
         public ClassWithRecursiveProperty Parent { get; set; }
     }
 
-    public interface IInterface
+    public interface IInterfaceWithProperty
     {
         public string Name { get; set; }
     }
     
-    public class Implementation : IInterface
+    public class ImplementationWithProperty : IInterfaceWithProperty
     {
         public string Name { get; set; }
+    }
+
+    public interface IInterfaceWithMethod
+    {
+        public string Hello();
+    }
+    
+    public class ImplementationWithMethod : IInterfaceWithMethod
+    {
+        public string Hello() => "World";
     }
 
     public interface IInterface<T>

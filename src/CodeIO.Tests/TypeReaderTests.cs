@@ -28,9 +28,9 @@ namespace CodeIO.Tests
         {
             var uut = new TypeReader();
             uut.AddReflection();
-            var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(Implementation)].Value;
+            var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(ImplementationWithProperty)].Value;
 
-            clazz.Identifier.Name.Should().Be(nameof(Implementation));
+            clazz.Identifier.Name.Should().Be(nameof(ImplementationWithProperty));
             clazz.Visibility.Should().Be(Visibility.Public);
             
             clazz.Properties.Count.Should().Be(1);
@@ -38,7 +38,7 @@ namespace CodeIO.Tests
             clazz.Properties[0].Visibility.Should().Be(Visibility.Public);
             clazz.Properties[0].Type.Identifier.Name.Should().Be("String");
 
-            var iface = (INonGenericInterface) uut.GetTypeFormat<Type>()[typeof(IInterface)].Value;
+            var iface = (INonGenericInterface) uut.GetTypeFormat<Type>()[typeof(IInterfaceWithProperty)].Value;
             object.ReferenceEquals(iface, clazz.Interfaces[0]).Should().BeTrue();
             iface.Visibility.Should().Be(Visibility.Public);
             
@@ -158,7 +158,7 @@ namespace CodeIO.Tests
             uut.AddReflection();
             var clazz = (IUnboundGenericClass)uut.GetTypeFormat<Type>()[typeof(Implementation<>)].Value;
 
-            clazz.Identifier.Name.Should().Be(nameof(Implementation));
+            clazz.Identifier.Name.Should().Be(nameof(ImplementationWithProperty));
             clazz.Visibility.Should().Be(Visibility.Public);
             
             clazz.Properties.Count.Should().Be(1);
@@ -183,7 +183,7 @@ namespace CodeIO.Tests
             uut.AddReflection();
             var clazz = (IBoundGenericClass)uut.GetTypeFormat<Type>()[typeof(Implementation<string>)].Value;
 
-            clazz.Identifier.Name.Should().Be(nameof(Implementation));
+            clazz.Identifier.Name.Should().Be(nameof(ImplementationWithProperty));
             clazz.Visibility.Should().Be(Visibility.Public);
             
             clazz.Properties.Count.Should().Be(1);
@@ -191,7 +191,7 @@ namespace CodeIO.Tests
             clazz.Properties[0].Visibility.Should().Be(Visibility.Public);
             clazz.Properties[0].Type.Identifier.Name.Should().Be("String");
             
-            clazz.Unbound.Identifier.Name.Should().Be(nameof(Implementation));
+            clazz.Unbound.Identifier.Name.Should().Be(nameof(ImplementationWithProperty));
             clazz.Unbound.Visibility.Should().Be(Visibility.Public);
             
             clazz.Unbound.Properties.Count.Should().Be(1);

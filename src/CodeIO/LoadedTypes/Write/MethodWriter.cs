@@ -24,8 +24,7 @@ namespace CodeIO.LoadedTypes.Write
             var methodInfo = MethodToOverride ?? Implementation.Item1?.StaticMethod;
             Implementation.ForEach(_ =>
             {
-                throw new InvalidOperationException(
-                    $"There is supposed to be a constructor to setup the {Name} method but the implementation mode {Implementation} is invalid for this");
+                // Do nothing because we don't need a field for this type of implementation.
             }, delegateFromConstructorParameter =>
             {
                 Field = typeBuilder.DefineField("_" + Name.Camelize(), GetDelegateType(methodInfo),

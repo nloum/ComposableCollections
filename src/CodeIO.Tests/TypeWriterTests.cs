@@ -34,17 +34,34 @@ namespace CodeIO.Tests
         {
             var typeReader = new TypeReader();
             typeReader.AddReflection();
-            var iface = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IInterface)].Value;
+            var iface = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IInterfaceWithProperty)].Value;
 
             var classWriter = iface
                 .Implement()
                 .ImplementMissingProperties()
-                .ImplementMissingMethods()
                 .AddConstructorThatInitializesAllProperties();
             var type = classWriter.Write();
 
-            var instance = (IInterface)Activator.CreateInstance(type, "Hi");
+            var instance = (IInterfaceWithProperty)Activator.CreateInstance(type, "Hi");
             instance.Name.Should().Be("Hi");
         }
+        
+        [TestMethod]
+        public void ShouldBuildClassThatImplementsInterfaceWithMethod()
+        {
+            var typeReader = new TypeReader();
+            typeReader.AddReflection();
+            var iface = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IInterfaceWithMethod)].Value;
+
+            var classWriter = iface
+                .Implement()
+                .ImplementMissingMethodsStatically(typeof(TypeWriterTests));
+            var type = classWriter.Write();
+
+            var instance = (IInterfaceWithMethod)Activator.CreateInstance(type);
+            instance.Hello().Should().Be("World");
+        }
+
+        public static string Hello(IInterfaceWithMethod _) => "World";
     }
 }

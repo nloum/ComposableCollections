@@ -46,7 +46,7 @@ namespace CodeIO.LoadedTypes.Write
             return classWriter with {Constructors = classWriter.Constructors.Add(constructor)};
         }
 
-        public static ClassWriter ImplementMissingMethods(this ClassWriter classWriter, params Type[] staticMethodImplementationSources)
+        public static ClassWriter ImplementMissingMethodsStatically(this ClassWriter classWriter, params Type[] staticMethodImplementationSources)
         {
             var methods = classWriter.Methods;
             

@@ -1,16 +1,20 @@
+using ComposableCollections.Dictionary.Interfaces;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary.Sources
 {
     public delegate bool GetDefaultValueWithOptionalPersistence<TKey, TValue>(TKey key, out TValue value, out bool persist);
+    public delegate bool GetDefaultValueWithOptionalPersistenceWithPossibleRecursion<TKey, TValue>(TKey key, IComposableReadOnlyDictionary<TKey, TValue> withDefaultValues, out TValue value, out bool persist);
     public delegate bool GetDefaultValue<TKey, TValue>(TKey key, out TValue value);
+    public delegate bool GetDefaultValueWithPossibleRecursion<TKey, TValue>(TKey key, IComposableReadOnlyDictionary<TKey, TValue> withDefaultValues, out TValue value);
     public delegate TValue AlwaysGetDefaultValue<TKey, TValue>(TKey key);
+    public delegate TValue AlwaysGetDefaultValueWithPossibleRecursion<TKey, TValue>(TKey key, IComposableReadOnlyDictionary<TKey, TValue> withDefaultValues);
     
     public class DictionaryGetOrDefault<TKey, TValue> : ComposableDictionary<TKey, TValue>
     {
-        private readonly GetDefaultValueWithOptionalPersistence<TKey, TValue> _getDefaultValue;
+        private readonly GetDefaultValueWithOptionalPersistenceWithPossibleRecursion<TKey, TValue> _getDefaultValue;
 
-        public DictionaryGetOrDefault(GetDefaultValueWithOptionalPersistence<TKey, TValue> getDefaultValue)
+        public DictionaryGetOrDefault(GetDefaultValueWithOptionalPersistenceWithPossibleRecursion<TKey, TValue> getDefaultValue)
         {
             _getDefaultValue = getDefaultValue;
         }
@@ -19,7 +23,7 @@ namespace ComposableCollections.Dictionary.Sources
         {
             if (!base.TryGetValue(key, out value))
             {
-                var hasValue = _getDefaultValue(key, out value, out var persist);
+                var hasValue = _getDefaultValue(key, this, out value, out var persist);
                 
                 if (hasValue)
                 {

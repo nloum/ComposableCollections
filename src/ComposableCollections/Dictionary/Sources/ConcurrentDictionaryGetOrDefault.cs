@@ -2,9 +2,9 @@ namespace ComposableCollections.Dictionary.Sources
 {
     public class ConcurrentDictionaryGetOrDefault<TKey, TValue> : ConcurrentDictionary<TKey, TValue>
     {
-        private readonly GetDefaultValueWithOptionalPersistence<TKey, TValue> _getDefaultValue;
+        private readonly GetDefaultValueWithOptionalPersistenceWithPossibleRecursion<TKey, TValue> _getDefaultValue;
 
-        public ConcurrentDictionaryGetOrDefault(GetDefaultValueWithOptionalPersistence<TKey, TValue> getDefaultValue)
+        public ConcurrentDictionaryGetOrDefault(GetDefaultValueWithOptionalPersistenceWithPossibleRecursion<TKey, TValue> getDefaultValue)
         {
             _getDefaultValue = getDefaultValue;
         }
@@ -15,7 +15,7 @@ namespace ComposableCollections.Dictionary.Sources
             {
                 if (!base.TryGetValue(key, out value))
                 {
-                    var hasValue = _getDefaultValue(key, out value, out var persist);
+                    var hasValue = _getDefaultValue(key, this, out value, out var persist);
                 
                     if (hasValue)
                     {
@@ -40,7 +40,7 @@ namespace ComposableCollections.Dictionary.Sources
         {
             if (!State.TryGetValue(key, out value))
             {
-                var hasValue = _getDefaultValue(key, out value, out var persist);
+                var hasValue = _getDefaultValue(key, this, out value, out var persist);
 
                 if (hasValue)
                 {

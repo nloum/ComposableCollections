@@ -11,31 +11,58 @@ namespace ComposableCollections.Dictionary.Decorators
     public class DictionaryGetOrDefaultDecorator<TKey, TValue> : IComposableDictionary<TKey, TValue>
     {
         private readonly IComposableDictionary<TKey, TValue> _source;
-        private readonly GetDefaultValueWithOptionalPersistence<TKey, TValue> _getDefaultValue;
+        private readonly GetDefaultValueWithOptionalPersistenceWithPossibleRecursion<TKey, TValue> _getDefaultValue;
 
-        public DictionaryGetOrDefaultDecorator(IComposableDictionary<TKey, TValue> source, GetDefaultValueWithOptionalPersistence<TKey, TValue> getDefaultValue)
+        public DictionaryGetOrDefaultDecorator(IComposableDictionary<TKey, TValue> source, GetDefaultValueWithOptionalPersistenceWithPossibleRecursion<TKey, TValue> getDefaultValue)
         {
             _source = source;
             _getDefaultValue = getDefaultValue;
         }
 
+        public DictionaryGetOrDefaultDecorator(IComposableDictionary<TKey, TValue> source, GetDefaultValueWithOptionalPersistence<TKey, TValue> getDefaultValue)
+        {
+            _source = source;
+            _getDefaultValue = (TKey key, IComposableReadOnlyDictionary<TKey, TValue> values, out TValue value, out bool persist) => getDefaultValue(key, out value, out persist);
+        }
+
         public DictionaryGetOrDefaultDecorator(IComposableDictionary<TKey, TValue> source, GetDefaultValue<TKey, TValue> getDefaultValue)
         {
             _source = source;
-            _getDefaultValue = (TKey key, out TValue value, out bool persist) =>
+            _getDefaultValue = (TKey key, IComposableReadOnlyDictionary<TKey, TValue> values, out TValue value, out bool persist) =>
             {
                 persist = true;
                 return getDefaultValue(key, out value);
             };
         }
 
+        public DictionaryGetOrDefaultDecorator(IComposableDictionary<TKey, TValue> source, GetDefaultValueWithPossibleRecursion<TKey, TValue> getDefaultValue)
+        {
+            _source = source;
+            _getDefaultValue = (TKey key, IComposableReadOnlyDictionary<TKey, TValue> values, out TValue value, out bool persist) =>
+            {
+                persist = true;
+                return getDefaultValue(key, values, out value);
+            };
+        }
+
         public DictionaryGetOrDefaultDecorator(IComposableDictionary<TKey, TValue> source, AlwaysGetDefaultValue<TKey, TValue> getDefaultValue)
         {
             _source = source;
-            _getDefaultValue = (TKey key, out TValue value, out bool persist) =>
+            _getDefaultValue = (TKey key, IComposableReadOnlyDictionary<TKey, TValue> values, out TValue value, out bool persist) =>
             {
                 persist = true;
                 value = getDefaultValue(key);
+                return true;
+            };
+        }
+
+        public DictionaryGetOrDefaultDecorator(IComposableDictionary<TKey, TValue> source, AlwaysGetDefaultValueWithPossibleRecursion<TKey, TValue> getDefaultValue)
+        {
+            _source = source;
+            _getDefaultValue = (TKey key, IComposableReadOnlyDictionary<TKey, TValue> values, out TValue value, out bool persist) =>
+            {
+                persist = true;
+                value = getDefaultValue(key, values);
                 return true;
             };
         }
@@ -49,7 +76,7 @@ namespace ComposableCollections.Dictionary.Decorators
         {
             if (!_source.TryGetValue(key, out value))
             {
-                var hasValue = _getDefaultValue(key, out value, out var persist);
+                var hasValue = _getDefaultValue(key, this, out value, out var persist);
                 
                 if (hasValue)
                 {

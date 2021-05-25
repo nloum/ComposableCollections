@@ -1,16 +1,20 @@
+using ComposableCollections.Dictionary.Interfaces;
 using SimpleMonads;
 
 namespace ComposableCollections.Dictionary.Sources
 {
     public delegate bool RefreshValueWithOptionalPersistence<TKey, TValue>(TKey key, TValue previousValue, out TValue refreshedValue, out bool persist);
+    public delegate bool RefreshValueWithOptionalPersistenceWithPossibleRecursion<TKey, TValue>(TKey key, TValue previousValue, IComposableReadOnlyDictionary<TKey, TValue> withRefreshedValues, out TValue refreshedValue, out bool persist);
     public delegate bool RefreshValue<TKey, TValue>(TKey key, TValue previousValue, out TValue refreshedValue);
+    public delegate bool RefreshValueWithPossibleRecursion<TKey, TValue>(TKey key, TValue previousValue, IComposableReadOnlyDictionary<TKey, TValue> withRefreshedValues, out TValue refreshedValue);
     public delegate TValue AlwaysRefreshValue<TKey, TValue>(TKey key, TValue previousValue);
+    public delegate TValue AlwaysRefreshValueWithPossibleRecursion<TKey, TValue>(TKey key, TValue previousValue, IComposableReadOnlyDictionary<TKey, TValue> withRefreshedValues);
     
     public class DictionaryGetOrRefresh<TKey, TValue> : ComposableDictionary<TKey, TValue>
     {
-        private readonly RefreshValueWithOptionalPersistence<TKey, TValue> _refreshValue;
+        private readonly RefreshValueWithOptionalPersistenceWithPossibleRecursion<TKey, TValue> _refreshValue;
 
-        public DictionaryGetOrRefresh(RefreshValueWithOptionalPersistence<TKey, TValue> refreshValue)
+        public DictionaryGetOrRefresh(RefreshValueWithOptionalPersistenceWithPossibleRecursion<TKey, TValue> refreshValue)
         {
             _refreshValue = refreshValue;
         }
@@ -19,7 +23,7 @@ namespace ComposableCollections.Dictionary.Sources
         {
             if (base.TryGetValue(key, out value))
             {
-                var hasValue = _refreshValue(key, value, out value, out var persist);
+                var hasValue = _refreshValue(key, value, this, out value, out var persist);
                 
                 if (hasValue)
                 {

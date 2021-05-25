@@ -11,31 +11,62 @@ namespace ComposableCollections.Dictionary.Decorators
     public class DictionaryGetOrRefreshDecorator<TKey, TValue> : IComposableDictionary<TKey, TValue>
     {
         private readonly IComposableDictionary<TKey, TValue> _source;
-        private readonly RefreshValueWithOptionalPersistence<TKey, TValue> _refreshValue;
+        private readonly RefreshValueWithOptionalPersistenceWithPossibleRecursion<TKey, TValue> _refreshValue;
 
-        public DictionaryGetOrRefreshDecorator(IComposableDictionary<TKey, TValue> source, RefreshValueWithOptionalPersistence<TKey, TValue> refreshValue)
+        public DictionaryGetOrRefreshDecorator(IComposableDictionary<TKey, TValue> source, RefreshValueWithOptionalPersistenceWithPossibleRecursion<TKey, TValue> refreshValue)
         {
             _source = source;
             _refreshValue = refreshValue;
         }
 
+        public DictionaryGetOrRefreshDecorator(IComposableDictionary<TKey, TValue> source, RefreshValueWithOptionalPersistence<TKey, TValue> refreshValue)
+        {
+            _source = source;
+            _refreshValue = (TKey key, TValue value, IComposableReadOnlyDictionary<TKey, TValue> withRefreshingValues, out TValue refreshedValue, out bool persist) =>
+            {
+                persist = true;
+                return refreshValue(key, value, out refreshedValue, out persist);
+            };
+        }
+
         public DictionaryGetOrRefreshDecorator(IComposableDictionary<TKey, TValue> source, RefreshValue<TKey, TValue> refreshValue)
         {
             _source = source;
-            _refreshValue = (TKey key, TValue value, out TValue refreshedValue, out bool persist) =>
+            _refreshValue = (TKey key, TValue value, IComposableReadOnlyDictionary<TKey, TValue> withRefreshingValues, out TValue refreshedValue, out bool persist) =>
             {
                 persist = true;
                 return refreshValue(key, value, out refreshedValue);
             };
         }
 
+        public DictionaryGetOrRefreshDecorator(IComposableDictionary<TKey, TValue> source, RefreshValueWithPossibleRecursion<TKey, TValue> refreshValue)
+        {
+            _source = source;
+            _refreshValue = (TKey key, TValue value, IComposableReadOnlyDictionary<TKey, TValue> withRefreshingValues, out TValue refreshedValue, out bool persist) =>
+            {
+                persist = true;
+                return refreshValue(key, value, withRefreshingValues, out refreshedValue);
+            };
+        }
+
         public DictionaryGetOrRefreshDecorator(IComposableDictionary<TKey, TValue> source, AlwaysRefreshValue<TKey, TValue> refreshValue)
         {
             _source = source;
-            _refreshValue = (TKey key, TValue value, out TValue refreshedValue, out bool persist) =>
+            _refreshValue = (TKey key, TValue value, IComposableReadOnlyDictionary<TKey, TValue> withRefreshingValues, out TValue refreshedValue, out bool persist) =>
             {
                 persist = true;
                 refreshedValue = refreshValue(key, value);
+                return true;
+            };
+        }
+
+        public DictionaryGetOrRefreshDecorator(IComposableDictionary<TKey, TValue> source, AlwaysRefreshValueWithPossibleRecursion<TKey, TValue> refreshValue)
+        {
+            _source = source;
+            _refreshValue = (TKey key, TValue value, IComposableReadOnlyDictionary<TKey, TValue> withRefreshingValues, out TValue refreshedValue, out bool persist) =>
+            {
+                persist = true;
+                refreshedValue = refreshValue(key, value, withRefreshingValues);
                 return true;
             };
         }
@@ -49,7 +80,7 @@ namespace ComposableCollections.Dictionary.Decorators
         {
             if (_source.TryGetValue(key, out value))
             {
-                var hasValue = _refreshValue(key, value, out value, out var persist);
+                var hasValue = _refreshValue(key, value, this, out value, out var persist);
                 
                 if (hasValue)
                 {

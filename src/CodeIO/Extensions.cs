@@ -1,4 +1,5 @@
 using System;
+using CodeIO.LoadedTypes.Read;
 
 namespace CodeIO
 {
@@ -33,14 +34,21 @@ namespace CodeIO
                         }
                     });
                 }
-
-                var identifier = type.GetTypeIdentifier();
-
+                
                 if (type.IsClass)
                 {
                     return new Lazy<IType>(() =>
                     {
-                        var result=new ReflectionNonGenericClass(type, lazyTypes);
+                        var result = new ReflectionNonGenericClass(type, lazyTypes);
+                        return result;
+                    });
+                }
+
+                if (type.IsInterface)
+                {
+                    return new Lazy<IType>(() =>
+                    {
+                        var result = new ReflectionNonGenericInterface(type, lazyTypes);
                         return result;
                     });
                 }

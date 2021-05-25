@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace CodeIO.ExpressionDecoder
+namespace CodeIO.LoadedTypes.ExpressionDecoder
 {
     public interface IFormatProvider
     {

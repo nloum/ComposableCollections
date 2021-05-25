@@ -2,7 +2,7 @@ using System;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace CodeIO.ExpressionDecoder
+namespace CodeIO.LoadedTypes.ExpressionDecoder
 {
     public class DynamicMethodILProvider : IILProvider
     {

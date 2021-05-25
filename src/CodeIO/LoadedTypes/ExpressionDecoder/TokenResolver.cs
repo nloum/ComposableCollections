@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace CodeIO.ExpressionDecoder
+namespace CodeIO.LoadedTypes.ExpressionDecoder
 {
     public interface ITokenResolver
     {

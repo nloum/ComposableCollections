@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace CodeIO.ExpressionDecoder
+namespace CodeIO.LoadedTypes.ExpressionDecoder
 {
     internal class DynamicScopeTokenResolver : ITokenResolver
     {

@@ -5,18 +5,17 @@ using System.Linq;
 using ComposableCollections;
 using ComposableCollections.Dictionary.Interfaces;
 
-namespace CodeIO
+namespace CodeIO.LoadedTypes.Read
 {
-    public class ReflectionNonGenericClass : INonGenericClass
+    public class ReflectionNonGenericInterface : INonGenericInterface
     {
         public TypeIdentifier Identifier { get; }
         public Visibility Visibility { get; }
-        public IReadOnlyList<IConstructor> Constructors { get; }
         public IReadOnlyList<IMethod> Methods { get; }
         public IReadOnlyList<IIndexer> Indexers { get; }
         public IReadOnlyList<IProperty> Properties { get; }
 
-        public ReflectionNonGenericClass(Type type, IComposableReadOnlyDictionary<Type, Lazy<IType>> typeFormat)
+        public ReflectionNonGenericInterface(Type type, IComposableReadOnlyDictionary<Type, Lazy<IType>> typeFormat)
         {
             Identifier = type.GetTypeIdentifier();
             Visibility = type.GetTypeVisibility();

@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 
-namespace CodeIO.ExpressionDecoder
+namespace CodeIO.LoadedTypes.ExpressionDecoder
 {
     public sealed class ILReader : IEnumerable<ILInstruction>
     {

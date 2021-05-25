@@ -13,7 +13,17 @@ namespace CodeIO.Tests
     {
         public ClassWithRecursiveProperty Parent { get; set; }
     }
+
+    public interface IInterface
+    {
+        public string Name { get; set; }
+    }
     
+    public class Implementation : IInterface
+    {
+        public string Name { get; set; }
+    }
+
     [TestClass]
     public class TypeReaderTests
     {
@@ -31,6 +41,30 @@ namespace CodeIO.Tests
             type.Properties[0].Name.Should().Be("MyProp");
             type.Properties[0].Visibility.Should().Be(Visibility.Public);
             type.Properties[0].Type.Identifier.Name.Should().Be("String");
+        }
+
+        [TestMethod]
+        public void ShouldReadInterfaceImplementation()
+        {
+            var uut = new TypeReader();
+            uut.AddReflection();
+            var type = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(Implementation)].Value;
+
+            type.Identifier.Name.Should().Be(nameof(Implementation));
+            type.Visibility.Should().Be(Visibility.Public);
+            
+            type.Properties.Count.Should().Be(1);
+            type.Properties[0].Name.Should().Be("Name");
+            type.Properties[0].Visibility.Should().Be(Visibility.Public);
+            type.Properties[0].Type.Identifier.Name.Should().Be("String");
+
+            var iface = (INonGenericInterface) uut.GetTypeFormat<Type>()[typeof(IInterface)].Value;
+            iface.Visibility.Should().Be(Visibility.Public);
+            
+            iface.Properties.Count.Should().Be(1);
+            iface.Properties[0].Name.Should().Be("Name");
+            iface.Properties[0].Visibility.Should().Be(Visibility.Public);
+            iface.Properties[0].Type.Identifier.Name.Should().Be("String");
         }
 
         [TestMethod]

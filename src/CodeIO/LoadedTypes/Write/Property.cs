@@ -2,7 +2,7 @@ using System;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace CodeIO.Write
+namespace CodeIO.LoadedTypes.Write
 {
     public class Property
     {

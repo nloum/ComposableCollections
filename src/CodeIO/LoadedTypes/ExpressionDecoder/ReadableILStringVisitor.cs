@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace CodeIO.ExpressionDecoder
+namespace CodeIO.LoadedTypes.ExpressionDecoder
 {
     public interface IILStringCollector
     {

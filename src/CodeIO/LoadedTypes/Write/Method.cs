@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using SimpleMonads;
 
-namespace CodeIO.Write
+namespace CodeIO.LoadedTypes.Write
 {
     public class Method
     {

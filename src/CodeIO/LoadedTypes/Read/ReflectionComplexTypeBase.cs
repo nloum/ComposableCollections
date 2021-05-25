@@ -9,6 +9,7 @@ namespace CodeIO.LoadedTypes.Read
 {
     public abstract class ReflectionComplexTypeBase : IComplexType
     {
+        public Type Type { get; }
         public TypeIdentifier Identifier { get; }
         public Visibility Visibility { get; }
         public IReadOnlyList<IMethod> Methods { get; }
@@ -18,6 +19,7 @@ namespace CodeIO.LoadedTypes.Read
 
         protected ReflectionComplexTypeBase(Type type, IComposableReadOnlyDictionary<Type, Lazy<IType>> typeFormat)
         {
+            Type = type;
             Identifier = type.GetTypeIdentifier();
             Visibility = type.GetTypeVisibility();
             Properties = type.GetProperties().Where(property => property.GetIndexParameters().Length == 0)

@@ -13,7 +13,7 @@ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 # CONFIGURATION
 ###########################################################################
 
-$BuildProjectFile = "$PSScriptRoot\src\FluentSourceGenerators.Build\FluentSourceGenerators.Build.csproj"
+$BuildProjectFile = "$PSScriptRoot\src\CodeIO.Build\CodeIO.Build.csproj"
 $TempDirectory = "$PSScriptRoot\\.tmp"
 
 $DotNetGlobalFile = "$PSScriptRoot\\global.json"

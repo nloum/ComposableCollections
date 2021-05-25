@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeIO", "CodeIO\CodeIO.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeIO.Tests", "CodeIO.Tests\CodeIO.Tests.csproj", "{AA8B403A-4240-4E5B-84EE-2E7A3288B193}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentSourceGenerators.Build", "FluentSourceGenerators.Build\FluentSourceGenerators.Build.csproj", "{8F18C8F6-65E3-418E-95C5-A7F408E200FC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeIO.Build", "CodeIO.Build\CodeIO.Build.csproj", "{8F18C8F6-65E3-418E-95C5-A7F408E200FC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

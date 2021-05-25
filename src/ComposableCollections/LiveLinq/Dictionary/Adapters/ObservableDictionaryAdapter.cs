@@ -40,16 +40,16 @@ namespace LiveLinq.Dictionary
             _onChange = onChange;
         }
 
-        protected override void OnRemove(IKeyValue<TKey, TValue> keyValue)
+        protected override void OnRemove(IKeyValue<TKey, TValue> removedItem)
         {
             _onChange(new DictionaryChangeStrict<TKey, TValue>(CollectionChangeType.Remove,
-                ImmutableDictionary<TKey, TValue>.Empty.Add(keyValue.Key, keyValue.Value)));
+                ImmutableDictionary<TKey, TValue>.Empty.Add(removedItem.Key, removedItem.Value)));
         }
 
-        protected override void OnAdd(IKeyValue<TKey, TValue> added)
+        protected override void OnAdd(IKeyValue<TKey, TValue> addedItem)
         {
             _onChange(new DictionaryChangeStrict<TKey, TValue>(CollectionChangeType.Add,
-                ImmutableDictionary<TKey, TValue>.Empty.Add(added.Key, added.Value)));
+                ImmutableDictionary<TKey, TValue>.Empty.Add(addedItem.Key, addedItem.Value)));
         }
 
         public IDictionaryChangesStrict<TKey, TValue> ToLiveLinq()

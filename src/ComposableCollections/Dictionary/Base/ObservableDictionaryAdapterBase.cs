@@ -51,13 +51,13 @@ namespace ComposableCollections.Dictionary.Base
             }
         }
 
-        protected abstract void OnRemove(IKeyValue<TKey,TValue> keyValue);
+        protected abstract void OnRemove(IKeyValue<TKey,TValue> removedItem);
 
-        protected virtual void OnRemove(IEnumerable<IKeyValue<TKey, TValue>> keyValues)
+        protected virtual void OnRemove(IEnumerable<IKeyValue<TKey, TValue>> removedItems)
         {
-            foreach (var keyValue in keyValues)
+            foreach (var removedItem in removedItems)
             {
-                OnRemove(keyValue);
+                OnRemove(removedItem);
             }
         }
 
@@ -66,11 +66,11 @@ namespace ComposableCollections.Dictionary.Base
             OnRemove(removedItems.AsEnumerable());
         }
         
-        protected abstract void OnAdd(IKeyValue<TKey, TValue> added);
+        protected abstract void OnAdd(IKeyValue<TKey, TValue> addedItem);
 
-        protected virtual void OnAdd(IEnumerable<IKeyValue<TKey, TValue>> keyValues)
+        protected virtual void OnAdd(IEnumerable<IKeyValue<TKey, TValue>> addedItems)
         {
-            foreach (var keyValue in keyValues)
+            foreach (var keyValue in addedItems)
             {
                 OnAdd(keyValue);
             }

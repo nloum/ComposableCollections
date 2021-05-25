@@ -34,7 +34,7 @@ class Build : NukeBuild
     public static int Main() => Execute<Build>(x => x.Compile);
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
-    readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
+    readonly Configuration Configuration = Configuration.Release;
     [Parameter("NuGet server URL.")]
 	readonly string NugetSource = "https://api.nuget.org/v3/index.json";
 	[Parameter("API Key for the NuGet server.")]
@@ -49,7 +49,7 @@ class Build : NukeBuild
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
     AbsolutePath TestResultDirectory => ArtifactsDirectory / "test-results";
     IEnumerable<Project> TestProjects => Solution.GetProjects("*.Tests");
-    Project[] PackageProjects => new[] {Solution.GetProject("Typewriter")};
+    Project[] PackageProjects => new[] {Solution.GetProject("CodeIO")};
     
     Target Clean => _ => _
         .Before(Restore)

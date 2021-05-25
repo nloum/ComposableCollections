@@ -1,5 +1,9 @@
 using System;
+using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using CodeIO.LoadedTypes.Read;
+using ComposableCollections;
 
 namespace CodeIO
 {
@@ -34,13 +38,32 @@ namespace CodeIO
                         }
                     });
                 }
+
+                if (type.IsGenericParameter)
+                {
+                    return new Lazy<IType>(new GenericParameter()
+                    {
+                        Identifier = type.GetTypeIdentifier(),
+                        MustExtend = type.GetGenericParameterConstraints()
+                            .Select(type => lazyTypes[type].Value)
+                    });
+                }
                 
                 if (type.IsClass)
                 {
                     return new Lazy<IType>(() =>
                     {
-                        var result = new ReflectionNonGenericClass(type, lazyTypes);
-                        return result;
+                        if (type.IsConstructedGenericType)
+                        {
+                            return new ReflectionBoundGenericClass(type, lazyTypes);
+                        }
+
+                        if (type.ContainsGenericParameters)
+                        {
+                            return new ReflectionUnboundGenericClass(type, lazyTypes);
+                        }
+                        
+                        return new ReflectionNonGenericClass(type, lazyTypes);
                     });
                 }
 
@@ -48,6 +71,16 @@ namespace CodeIO
                 {
                     return new Lazy<IType>(() =>
                     {
+                        if (type.IsConstructedGenericType)
+                        {
+                            return new ReflectionBoundGenericInterface(type, lazyTypes);
+                        }
+
+                        if (type.ContainsGenericParameters)
+                        {
+                            return new ReflectionUnboundGenericInterface(type, lazyTypes);
+                        }
+
                         var result = new ReflectionNonGenericInterface(type, lazyTypes);
                         return result;
                     });
@@ -59,14 +92,40 @@ namespace CodeIO
         
         public static TypeIdentifier GetTypeIdentifier(this Type type)
         {
+            var name = type.Name;
+            var lastIndex = name.LastIndexOf('`');
+            if (lastIndex != -1)
+            {
+                name = name.Substring(0, lastIndex);
+            }
             return new TypeIdentifier()
             {
-                Name = type.Name,
+                Name = name,
                 Namespace = type.Namespace,
                 Arity = type.GetGenericArguments().Length,
             };
         }
 
+        public static Visibility GetVisibility(this ConstructorInfo constructor)
+        {
+            if (constructor.IsPublic)
+            {
+                return Visibility.Public;
+            }
+
+            if (constructor.IsPrivate)
+            {
+                return Visibility.Private;
+            }
+
+            if (constructor.IsFamily)
+            {
+                return Visibility.Protected;
+            }
+            
+            return Visibility.Internal;
+        }
+        
         public static Visibility GetTypeVisibility(this Type t)
         {
             if (t.IsVisible

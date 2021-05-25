@@ -18,7 +18,7 @@ namespace CodeIO
                     Reader = reader,
                     LazyTypes = new AnonymousObservableDictionaryAdapter<T, Lazy<IType>>(
                         kvp => LazyTypes.Remove(typeIdentifier(kvp.Key)),
-                            kvp => LazyTypes.Add(typeIdentifier(kvp.Key), kvp.Value))
+                            kvp => LazyTypes.TryAdd(typeIdentifier(kvp.Key), kvp.Value))
                         .WithDefaultValue((key, state) => reader(key, state)),
                 }, out var previousValue,
                 out var result);

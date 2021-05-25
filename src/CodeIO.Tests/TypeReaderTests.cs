@@ -73,6 +73,19 @@ namespace CodeIO.Tests
             
         }
     }
+
+    public class NestingParentGeneric<T>
+    {
+        public class PublicNestingChildNonGeneric
+        {
+            public T Value { get; init; }
+        }
+
+        public interface IPublicNestingChildNonGeneric
+        {
+            public T Value { get; init; }
+        }
+    }
     
     [TestClass]
     public class TypeReaderTests
@@ -82,15 +95,15 @@ namespace CodeIO.Tests
         {
             var uut = new TypeReader();
             uut.AddReflection();
-            var type = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(ClassWithProperty)].Value;
+            var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(ClassWithProperty)].Value;
 
-            type.Identifier.Name.Should().Be(nameof(ClassWithProperty));
-            type.Visibility.Should().Be(Visibility.Public);
+            clazz.Identifier.Name.Should().Be(nameof(ClassWithProperty));
+            clazz.Visibility.Should().Be(Visibility.Public);
             
-            type.Properties.Count.Should().Be(1);
-            type.Properties[0].Name.Should().Be("MyProp");
-            type.Properties[0].Visibility.Should().Be(Visibility.Public);
-            type.Properties[0].Type.Identifier.Name.Should().Be("String");
+            clazz.Properties.Count.Should().Be(1);
+            clazz.Properties[0].Name.Should().Be("MyProp");
+            clazz.Properties[0].Visibility.Should().Be(Visibility.Public);
+            clazz.Properties[0].Type.Identifier.Name.Should().Be("String");
         }
 
         [TestMethod]
@@ -98,17 +111,18 @@ namespace CodeIO.Tests
         {
             var uut = new TypeReader();
             uut.AddReflection();
-            var type = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(Implementation)].Value;
+            var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(Implementation)].Value;
 
-            type.Identifier.Name.Should().Be(nameof(Implementation));
-            type.Visibility.Should().Be(Visibility.Public);
+            clazz.Identifier.Name.Should().Be(nameof(Implementation));
+            clazz.Visibility.Should().Be(Visibility.Public);
             
-            type.Properties.Count.Should().Be(1);
-            type.Properties[0].Name.Should().Be("Name");
-            type.Properties[0].Visibility.Should().Be(Visibility.Public);
-            type.Properties[0].Type.Identifier.Name.Should().Be("String");
+            clazz.Properties.Count.Should().Be(1);
+            clazz.Properties[0].Name.Should().Be("Name");
+            clazz.Properties[0].Visibility.Should().Be(Visibility.Public);
+            clazz.Properties[0].Type.Identifier.Name.Should().Be("String");
 
             var iface = (INonGenericInterface) uut.GetTypeFormat<Type>()[typeof(IInterface)].Value;
+            object.ReferenceEquals(iface, clazz.Interfaces[0]).Should().BeTrue();
             iface.Visibility.Should().Be(Visibility.Public);
             
             iface.Properties.Count.Should().Be(1);
@@ -122,26 +136,54 @@ namespace CodeIO.Tests
         {
             var uut = new TypeReader();
             uut.AddReflection();
-            var type = (IUnboundGenericInterface)uut.GetTypeFormat<Type>()[typeof(IInterfaceTMustHaveDefaultConstructor<>)].Value;
+            var iface = (IUnboundGenericInterface)uut.GetTypeFormat<Type>()[typeof(IInterfaceTMustHaveDefaultConstructor<>)].Value;
 
-            type.Identifier.Name.Should().Be("IInterfaceTMustHaveDefaultConstructor");
-            type.Visibility.Should().Be(Visibility.Public);
+            iface.Identifier.Name.Should().Be("IInterfaceTMustHaveDefaultConstructor");
+            iface.Visibility.Should().Be(Visibility.Public);
         }
         
+        [TestMethod]
+        public void ShouldReadNestedClassUnderGeneric()
+        {
+            var uut = new TypeReader();
+            uut.AddReflection();
+            var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(NestingParentGeneric<>.PublicNestingChildNonGeneric)].Value;
+
+            clazz.Identifier.Name.Should().Be("NestingParentNonGeneric");
+            clazz.Visibility.Should().Be(Visibility.Public);
+            clazz.Properties.Count.Should().Be(1);
+            clazz.Properties[0].Name.Should().Be("Value");
+            clazz.Properties[0].Type.Should().Be("T");
+        }
+
+        [TestMethod]
+        public void ShouldReadNestedInterfaceUnderGeneric()
+        {
+            var uut = new TypeReader();
+            uut.AddReflection();
+            var clazz = (INonGenericInterface)uut.GetTypeFormat<Type>()[typeof(NestingParentGeneric<>.IPublicNestingChildNonGeneric)].Value;
+
+            clazz.Identifier.Name.Should().Be("INestingParentNonGeneric");
+            clazz.Visibility.Should().Be(Visibility.Public);
+            clazz.Properties.Count.Should().Be(1);
+            clazz.Properties[0].Name.Should().Be("Value");
+            clazz.Properties[0].Type.Should().Be("T");
+        }
+
         [TestMethod]
         public void ShouldReadTypeWithPublicConstructor()
         {
             var uut = new TypeReader();
             uut.AddReflection();
-            var type = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(HasPublicConstructor)].Value;
+            var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(HasPublicConstructor)].Value;
 
-            type.Identifier.Name.Should().Be(nameof(HasPublicConstructor));
-            type.Visibility.Should().Be(Visibility.Public);
-            type.Constructors.Count.Should().Be(1);
-            type.Constructors[0].Visibility.Should().Be(Visibility.Public);
-            type.Constructors[0].Parameters.Count.Should().Be(1);
-            type.Constructors[0].Parameters[0].Name.Should().Be("name");
-            type.Constructors[0].Parameters[0].Type.Identifier.Name.Should().Be("String");
+            clazz.Identifier.Name.Should().Be(nameof(HasPublicConstructor));
+            clazz.Visibility.Should().Be(Visibility.Public);
+            clazz.Constructors.Count.Should().Be(1);
+            clazz.Constructors[0].Visibility.Should().Be(Visibility.Public);
+            clazz.Constructors[0].Parameters.Count.Should().Be(1);
+            clazz.Constructors[0].Parameters[0].Name.Should().Be("name");
+            clazz.Constructors[0].Parameters[0].Type.Identifier.Name.Should().Be("String");
         }
         
         [TestMethod]
@@ -149,15 +191,15 @@ namespace CodeIO.Tests
         {
             var uut = new TypeReader();
             uut.AddReflection();
-            var type = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(HasPrivateConstructor)].Value;
+            var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(HasPrivateConstructor)].Value;
 
-            type.Identifier.Name.Should().Be(nameof(HasPrivateConstructor));
-            type.Visibility.Should().Be(Visibility.Public);
-            type.Constructors.Count.Should().Be(1);
-            type.Constructors[0].Visibility.Should().Be(Visibility.Private);
-            type.Constructors[0].Parameters.Count.Should().Be(1);
-            type.Constructors[0].Parameters[0].Name.Should().Be("name");
-            type.Constructors[0].Parameters[0].Type.Identifier.Name.Should().Be("String");
+            clazz.Identifier.Name.Should().Be(nameof(HasPrivateConstructor));
+            clazz.Visibility.Should().Be(Visibility.Public);
+            clazz.Constructors.Count.Should().Be(1);
+            clazz.Constructors[0].Visibility.Should().Be(Visibility.Private);
+            clazz.Constructors[0].Parameters.Count.Should().Be(1);
+            clazz.Constructors[0].Parameters[0].Name.Should().Be("name");
+            clazz.Constructors[0].Parameters[0].Type.Identifier.Name.Should().Be("String");
         }
         
         [TestMethod]
@@ -165,15 +207,15 @@ namespace CodeIO.Tests
         {
             var uut = new TypeReader();
             uut.AddReflection();
-            var type = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(HasProtectedConstructor)].Value;
+            var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(HasProtectedConstructor)].Value;
 
-            type.Identifier.Name.Should().Be(nameof(HasProtectedConstructor));
-            type.Visibility.Should().Be(Visibility.Public);
-            type.Constructors.Count.Should().Be(1);
-            type.Constructors[0].Visibility.Should().Be(Visibility.Protected);
-            type.Constructors[0].Parameters.Count.Should().Be(1);
-            type.Constructors[0].Parameters[0].Name.Should().Be("name");
-            type.Constructors[0].Parameters[0].Type.Identifier.Name.Should().Be("String");
+            clazz.Identifier.Name.Should().Be(nameof(HasProtectedConstructor));
+            clazz.Visibility.Should().Be(Visibility.Public);
+            clazz.Constructors.Count.Should().Be(1);
+            clazz.Constructors[0].Visibility.Should().Be(Visibility.Protected);
+            clazz.Constructors[0].Parameters.Count.Should().Be(1);
+            clazz.Constructors[0].Parameters[0].Name.Should().Be("name");
+            clazz.Constructors[0].Parameters[0].Type.Identifier.Name.Should().Be("String");
         }
         
         [TestMethod]
@@ -181,15 +223,15 @@ namespace CodeIO.Tests
         {
             var uut = new TypeReader();
             uut.AddReflection();
-            var type = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(HasInternalConstructor)].Value;
+            var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(HasInternalConstructor)].Value;
 
-            type.Identifier.Name.Should().Be(nameof(HasInternalConstructor));
-            type.Visibility.Should().Be(Visibility.Public);
-            type.Constructors.Count.Should().Be(1);
-            type.Constructors[0].Visibility.Should().Be(Visibility.Internal);
-            type.Constructors[0].Parameters.Count.Should().Be(1);
-            type.Constructors[0].Parameters[0].Name.Should().Be("name");
-            type.Constructors[0].Parameters[0].Type.Identifier.Name.Should().Be("String");
+            clazz.Identifier.Name.Should().Be(nameof(HasInternalConstructor));
+            clazz.Visibility.Should().Be(Visibility.Public);
+            clazz.Constructors.Count.Should().Be(1);
+            clazz.Constructors[0].Visibility.Should().Be(Visibility.Internal);
+            clazz.Constructors[0].Parameters.Count.Should().Be(1);
+            clazz.Constructors[0].Parameters[0].Name.Should().Be("name");
+            clazz.Constructors[0].Parameters[0].Type.Identifier.Name.Should().Be("String");
         }
 
         [TestMethod]
@@ -197,17 +239,18 @@ namespace CodeIO.Tests
         {
             var uut = new TypeReader();
             uut.AddReflection();
-            var type = (IUnboundGenericClass)uut.GetTypeFormat<Type>()[typeof(Implementation<>)].Value;
+            var clazz = (IUnboundGenericClass)uut.GetTypeFormat<Type>()[typeof(Implementation<>)].Value;
 
-            type.Identifier.Name.Should().Be(nameof(Implementation));
-            type.Visibility.Should().Be(Visibility.Public);
+            clazz.Identifier.Name.Should().Be(nameof(Implementation));
+            clazz.Visibility.Should().Be(Visibility.Public);
             
-            type.Properties.Count.Should().Be(1);
-            type.Properties[0].Name.Should().Be("Value");
-            type.Properties[0].Visibility.Should().Be(Visibility.Public);
-            type.Properties[0].Type.Identifier.Name.Should().Be("T");
+            clazz.Properties.Count.Should().Be(1);
+            clazz.Properties[0].Name.Should().Be("Value");
+            clazz.Properties[0].Visibility.Should().Be(Visibility.Public);
+            clazz.Properties[0].Type.Identifier.Name.Should().Be("T");
 
             var iface = (IUnboundGenericInterface) uut.GetTypeFormat<Type>()[typeof(IInterface<>)].Value;
+            object.ReferenceEquals(iface, clazz.Interfaces[0]).Should().BeFalse();
             iface.Visibility.Should().Be(Visibility.Public);
             
             iface.Properties.Count.Should().Be(1);
@@ -221,23 +264,40 @@ namespace CodeIO.Tests
         {
             var uut = new TypeReader();
             uut.AddReflection();
-            var type = (IBoundGenericClass)uut.GetTypeFormat<Type>()[typeof(Implementation<string>)].Value;
+            var clazz = (IBoundGenericClass)uut.GetTypeFormat<Type>()[typeof(Implementation<string>)].Value;
 
-            type.Identifier.Name.Should().Be(nameof(Implementation));
-            type.Visibility.Should().Be(Visibility.Public);
+            clazz.Identifier.Name.Should().Be(nameof(Implementation));
+            clazz.Visibility.Should().Be(Visibility.Public);
             
-            type.Properties.Count.Should().Be(1);
-            type.Properties[0].Name.Should().Be("Value");
-            type.Properties[0].Visibility.Should().Be(Visibility.Public);
-            type.Properties[0].Type.Identifier.Name.Should().Be("String");
+            clazz.Properties.Count.Should().Be(1);
+            clazz.Properties[0].Name.Should().Be("Value");
+            clazz.Properties[0].Visibility.Should().Be(Visibility.Public);
+            clazz.Properties[0].Type.Identifier.Name.Should().Be("String");
+            
+            clazz.Unbound.Identifier.Name.Should().Be(nameof(Implementation));
+            clazz.Unbound.Visibility.Should().Be(Visibility.Public);
+            
+            clazz.Unbound.Properties.Count.Should().Be(1);
+            clazz.Unbound.Properties[0].Name.Should().Be("Value");
+            clazz.Unbound.Properties[0].Visibility.Should().Be(Visibility.Public);
+            clazz.Unbound.Properties[0].Type.Identifier.Name.Should().Be("T");
 
             var iface = (IBoundGenericInterface) uut.GetTypeFormat<Type>()[typeof(IInterface<string>)].Value;
+            object.ReferenceEquals(iface, clazz.Interfaces[0]).Should().BeTrue();
             iface.Visibility.Should().Be(Visibility.Public);
             
             iface.Properties.Count.Should().Be(1);
             iface.Properties[0].Name.Should().Be("Value");
             iface.Properties[0].Visibility.Should().Be(Visibility.Public);
             iface.Properties[0].Type.Identifier.Name.Should().Be("String");
+            
+            iface.Unbound.Identifier.Name.Should().Be("IInterface");
+            iface.Unbound.Visibility.Should().Be(Visibility.Public);
+            
+            iface.Unbound.Properties.Count.Should().Be(1);
+            iface.Unbound.Properties[0].Name.Should().Be("Value");
+            iface.Unbound.Properties[0].Visibility.Should().Be(Visibility.Public);
+            iface.Unbound.Properties[0].Type.Identifier.Name.Should().Be("T");
         }
 
         [TestMethod]
@@ -246,14 +306,14 @@ namespace CodeIO.Tests
             var uut = new TypeReader();
             uut.AddReflection();
 
-            var type = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(string)].Value;
-            type.Identifier.Name.Should().Be("String");
-            type.Visibility.Should().Be(Visibility.Public);
+            var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(string)].Value;
+            clazz.Identifier.Name.Should().Be("String");
+            clazz.Visibility.Should().Be(Visibility.Public);
             
-            type.Properties.Count.Should().Be(1);
-            type.Properties[0].Name.Should().Be("Length");
-            type.Properties[0].Visibility.Should().Be(Visibility.Public);
-            var lengthType = (Primitive)type.Properties[0].Type;
+            clazz.Properties.Count.Should().Be(1);
+            clazz.Properties[0].Name.Should().Be("Length");
+            clazz.Properties[0].Visibility.Should().Be(Visibility.Public);
+            var lengthType = (Primitive)clazz.Properties[0].Type;
             lengthType.Type.Should().Be(PrimitiveType.Int);
         }
 
@@ -263,14 +323,14 @@ namespace CodeIO.Tests
             var uut = new TypeReader();
             uut.AddReflection();
 
-            var type = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(ClassWithRecursiveProperty)].Value;
-            type.Identifier.Name.Should().Be(nameof(ClassWithRecursiveProperty));
-            type.Visibility.Should().Be(Visibility.Public);
+            var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(ClassWithRecursiveProperty)].Value;
+            clazz.Identifier.Name.Should().Be(nameof(ClassWithRecursiveProperty));
+            clazz.Visibility.Should().Be(Visibility.Public);
             
-            type.Properties.Count.Should().Be(1);
-            type.Properties[0].Name.Should().Be("Parent");
-            type.Properties[0].Visibility.Should().Be(Visibility.Public);
-            object.ReferenceEquals(type.Properties[0].Type, type).Should().BeTrue();
+            clazz.Properties.Count.Should().Be(1);
+            clazz.Properties[0].Name.Should().Be("Parent");
+            clazz.Properties[0].Visibility.Should().Be(Visibility.Public);
+            object.ReferenceEquals(clazz.Properties[0].Type, clazz).Should().BeTrue();
         }
     }
 }

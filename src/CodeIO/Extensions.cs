@@ -184,6 +184,11 @@ namespace CodeIO
                 return Visibility.Protected;
             }
 
+            if (t.IsNestedPublic)
+            {
+                return Visibility.Public;
+            }
+
             throw new NotImplementedException();
         }
     }

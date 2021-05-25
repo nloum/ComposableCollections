@@ -21,7 +21,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 	ImportSecrets = new[]{ "NUGET_API_KEY" },
 	AutoGenerate = true,
 	On = new [] { GitHubActionsTrigger.Push },
-	InvokedTargets = new [] {"Test"}
+	InvokedTargets = new [] {"Test", "Push"}
 	)]
 class Build : NukeBuild
 {

@@ -30,12 +30,12 @@ namespace CodeIO.Tests
         public string Hello() => "World";
     }
 
-    public interface IInterface<T>
+    public interface IInterfaceWithProperty<T>
     {
         public T Value { get; set; }
     }
 
-    public class Implementation<T> : IInterface<T>
+    public class ImplementationWithProperty<T> : IInterfaceWithProperty<T>
     {
         public T Value { get; set; }
     }

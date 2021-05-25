@@ -5,7 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="ComposableCollections" Version="1.0.0-alpha0171" />
+      <PackageReference Include="ComposableCollections" Version="1.0.0-alpha0174" />
       <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0059" />
       <PackageReference Include="Mono.Cecil" Version="0.11.3" />
       <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />

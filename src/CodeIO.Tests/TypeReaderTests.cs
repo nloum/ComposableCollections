@@ -1,3 +1,4 @@
+using System;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -20,9 +21,9 @@ namespace CodeIO.Tests
         public void ShouldReadClassWithProperty()
         {
             var uut = new TypeReader();
-            uut.Add<ClassWithProperty>();
+            uut.AddReflection();
+            var type = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(ClassWithProperty)].Value;
 
-            var type = (INonGenericClass)uut.Types[typeof(ClassWithProperty).GetTypeIdentifier()];
             type.Identifier.Name.Should().Be(nameof(ClassWithProperty));
             type.Visibility.Should().Be(Visibility.Public);
             
@@ -36,9 +37,9 @@ namespace CodeIO.Tests
         public void ShouldReadString()
         {
             var uut = new TypeReader();
-            uut.Add<string>();
+            uut.AddReflection();
 
-            var type = (INonGenericClass)uut.Types[typeof(string).GetTypeIdentifier()];
+            var type = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(string)].Value;
             type.Identifier.Name.Should().Be("String");
             type.Visibility.Should().Be(Visibility.Public);
             
@@ -53,9 +54,9 @@ namespace CodeIO.Tests
         public void ShouldClassWithRecursiveProperty()
         {
             var uut = new TypeReader();
-            uut.Add<ClassWithRecursiveProperty>();
+            uut.AddReflection();
 
-            var type = (INonGenericClass)uut.Types[typeof(ClassWithRecursiveProperty).GetTypeIdentifier()];
+            var type = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(ClassWithRecursiveProperty)].Value;
             type.Identifier.Name.Should().Be(nameof(ClassWithRecursiveProperty));
             type.Visibility.Should().Be(Visibility.Public);
             

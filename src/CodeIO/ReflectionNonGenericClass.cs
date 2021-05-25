@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using ComposableCollections;
+using ComposableCollections.Dictionary.Interfaces;
 
 namespace CodeIO
 {
@@ -15,13 +16,13 @@ namespace CodeIO
         public IReadOnlyList<IIndexer> Indexers { get; }
         public IReadOnlyList<IProperty> Properties { get; }
 
-        public ReflectionNonGenericClass(Type type, TypeReader typeReader)
+        public ReflectionNonGenericClass(Type type, IComposableReadOnlyDictionary<Type, Lazy<IType>> typeFormat)
         {
             Identifier = type.GetTypeIdentifier();
             Visibility = type.GetTypeVisibility();
             Properties = type.GetProperties().Where(property => property.GetIndexParameters().Length == 0)
                 .ToImmutableList()
-                .Select(property => new LazyProperty(typeReader.LazyTypes.GetOrAdd(property.PropertyType.GetTypeIdentifier(), () => typeReader.Add(property.PropertyType)), property.Name, Visibility.Public));
+                .Select(property => new LazyProperty(typeFormat[property.PropertyType], property.Name, Visibility.Public));
         }
     }
 }

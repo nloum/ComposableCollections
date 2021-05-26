@@ -1,28 +1,5 @@
 ﻿schema {
   query: Query
-  mutation: Mutation
-  subscription: Subscription
-}
-
-type KeyValuePair {
-  key: String!
-  value: Person!
-}
-
-type Mutation {
-  people: PeopleMutation
-}
-
-type PeopleChange {
-  keyValuePairs: [KeyValuePair!]!
-}
-
-type PeopleMutation {
-  getOrAdd(key: String! value: PersonInput!): Person!
-  tryAdd(key: String! value: PersonInput!): Boolean!
-  tryUpdate(key: String! value: PersonInput!): Boolean!
-  addOrUpdate(key: String! value: PersonInput!): DictionaryItemAddOrUpdateResult!
-  tryRemove(key: String!): Boolean!
 }
 
 type PeopleQuery {
@@ -30,7 +7,7 @@ type PeopleQuery {
   containsKey(key: String!): Boolean!
   count: Int!
   keys: [String!]!
-  values(where: PersonFilterInput): [Person]
+  values: [Person!]!
 }
 
 type Person {
@@ -39,40 +16,6 @@ type Person {
 
 type Query {
   people: PeopleQuery
-}
-
-type Subscription {
-  people: PeopleChange
-}
-
-input PersonFilterInput {
-  and: [PersonFilterInput!]
-  or: [PersonFilterInput!]
-  name: StringOperationFilterInput
-}
-
-input PersonInput {
-  name: String
-}
-
-input StringOperationFilterInput {
-  and: [StringOperationFilterInput!]
-  or: [StringOperationFilterInput!]
-  eq: String
-  neq: String
-  contains: String
-  ncontains: String
-  in: [String]
-  nin: [String]
-  startsWith: String
-  nstartsWith: String
-  endsWith: String
-  nendsWith: String
-}
-
-enum DictionaryItemAddOrUpdateResult {
-  ADD
-  UPDATE
 }
 
 "The `@defer` directive may be provided for fragment spreads and inline fragments to inform the executor to delay the execution of the current fragment to indicate deprioritization of the current fragment. A query with `@defer` directive will cause the request to potentially return multiple responses, where non-deferred data is delivered in the initial response and data deferred is delivered in a subsequent response. `@include` and `@skip` take precedence over `@defer`."

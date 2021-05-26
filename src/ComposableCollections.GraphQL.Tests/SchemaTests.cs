@@ -48,7 +48,6 @@ namespace ComposableCollections.GraphQL.Tests
     }
 }
 "));
-            await Verify(result.ToJson(), sourceFile: "MutationResponse.json");
         }
         
         [TestMethod]
@@ -116,6 +115,19 @@ namespace ComposableCollections.GraphQL.Tests
                 .AddType(new ObjectType(descriptor => descriptor.Name("Mutation")))
                 .AddType(new ObjectType(descriptor => descriptor.Name("Subscription")))
                 .AddTopLevelComposableDictionary<IObservableQueryableDictionary<string, Person>>("people")
+                .Create();
+
+            return Verify(schema.ToString());
+        }
+        
+        [TestMethod]
+        public Task ReadOnlyComposableDictionaryAtRootShouldWork()
+        {
+            var schema = new SchemaBuilder()
+                .AddFiltering()
+                .AddType<ObjectType<Person>>()
+                .AddType(new ObjectType(descriptor => descriptor.Name("Query")))
+                .AddTopLevelComposableDictionary<IComposableReadOnlyDictionary<string, Person>>("people")
                 .Create();
 
             return Verify(schema.ToString());

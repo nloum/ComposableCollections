@@ -31,6 +31,11 @@ namespace ComposableCollections.GraphQL
         {
             get
             {
+                if (HasBuiltInKey)
+                {
+                    return false;
+                }
+                
                 return !Type.IsAssignableTo(typeof(IComposableDictionary<,>).MakeGenericType(KeyType, ValueType));
             }
         }
@@ -54,7 +59,14 @@ namespace ComposableCollections.GraphQL
                 }
                 else
                 {
-                    return typeof(ComposableDictionaryObjectTypeMutation<,,>).MakeGenericType(Type, KeyType, ValueType);
+                    if (IsReadOnly)
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        return typeof(ComposableDictionaryObjectTypeMutation<,,>).MakeGenericType(Type, KeyType, ValueType);
+                    }
                 }
             }
         }

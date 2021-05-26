@@ -26,15 +26,15 @@ namespace ComposableCollections.GraphQL
 
         internal static ComposableDictionaryMetadata GetComposableDictionaryMetadata(this Type type)
         {
-            var interfaces = type.GetInterfaces()
+            var interfaces = type.GetInterfaces().Concat(new[]{type})
                 .SingleOrDefault(iface => GetGenericTypeDefinitionIfApplicable(iface) == typeof(IComposableReadOnlyDictionary<,>));
 
             if (interfaces == null)
             {
-                interfaces = type.GetInterfaces()
+                interfaces = type.GetInterfaces().Concat(new[]{type})
                     .SingleOrDefault(iface => GetGenericTypeDefinitionIfApplicable(iface) == typeof(IReadOnlyDictionaryWithBuiltInKey<,>));
             }
-            
+
             var types = interfaces.GetGenericArguments();
 
             return new ComposableDictionaryMetadata()
@@ -101,8 +101,11 @@ namespace ComposableCollections.GraphQL
                             var result = rc.Services.GetRequiredService<TComposableDictionary>();
                             return result;
                         });
-                }))
-                .AddType(new ObjectTypeExtension(descriptor =>
+                }));
+
+            if (!metadata.IsReadOnly)
+            {
+                builder = builder.AddType(new ObjectTypeExtension(descriptor =>
                 {
                     descriptor.Name("Mutation");
                     descriptor.Field(name.Camelize())
@@ -113,6 +116,7 @@ namespace ComposableCollections.GraphQL
                             return result;
                         });
                 }));
+            }
 
             if (metadata.IsObservable)
             {
@@ -144,8 +148,13 @@ namespace ComposableCollections.GraphQL
             var metadata = typeof(TComposableDictionary).GetComposableDictionaryMetadata();
 
             builder = builder
-                .AddType((ObjectType)Activator.CreateInstance(metadata.QueryObjectType, typeName + "Query"))
-                .AddType((ObjectType)Activator.CreateInstance(metadata.MutationObjectType, typeName + "Mutation"));
+                .AddType((ObjectType)Activator.CreateInstance(metadata.QueryObjectType, typeName + "Query"));
+
+            if (metadata.MutationObjectType != null)
+            {
+                builder = builder.AddType(
+                    (ObjectType) Activator.CreateInstance(metadata.MutationObjectType, typeName + "Mutation"));
+            }
 
             if (metadata.IsObservable)
             {

@@ -62,8 +62,11 @@ namespace ComposableCollections.GraphQL
                             var result = rc.Services.GetRequiredService<TComposableDictionary>();
                             return result;
                         });
-                }))
-                .AddTypeExtension(new ObjectTypeExtension(descriptor =>
+                }));
+
+            if (!metadata.IsReadOnly)
+            {
+                builder = builder.AddTypeExtension(new ObjectTypeExtension(descriptor =>
                 {
                     descriptor.Name("Mutation");
                     descriptor.Field(name.Camelize())
@@ -74,7 +77,8 @@ namespace ComposableCollections.GraphQL
                             return result;
                         });
                 }));
-
+            }
+            
             if (metadata.IsObservable)
             {
                 builder = builder.AddTypeExtension((ObjectTypeExtension) Activator.CreateInstance(metadata.SubscriptionObjectType,
@@ -131,9 +135,13 @@ namespace ComposableCollections.GraphQL
         {
             var metadata = typeof(TComposableDictionary).GetComposableDictionaryMetadata();
 
-            builder = builder
-                .AddType((ObjectType)Activator.CreateInstance(metadata.QueryObjectType, typeName + "Query"))
-                .AddType((ObjectType)Activator.CreateInstance(metadata.MutationObjectType, typeName + "Mutation"));
+            builder = builder.AddType((ObjectType)Activator.CreateInstance(metadata.QueryObjectType, typeName + "Query"));
+
+            if (!metadata.IsReadOnly)
+            {
+                builder = builder.AddType(
+                    (ObjectType) Activator.CreateInstance(metadata.MutationObjectType, typeName + "Mutation"));
+            }
 
             if (metadata.IsObservable)
             {

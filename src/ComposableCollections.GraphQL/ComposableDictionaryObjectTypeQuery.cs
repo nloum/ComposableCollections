@@ -23,14 +23,14 @@ namespace ComposableCollections.GraphQL
         {
             descriptor.BindFieldsExplicitly();
             descriptor.Name( _parameters.CollectionName.Pascalize() + "Query" );
-            descriptor.Field(x => x.TryGetValue(default)).Name(_parameters.ValueNameSingular);
+            descriptor.Field(x => x.TryGetValue(default)).Name(_parameters.ValueNameSingular.Camelize());
             descriptor.Field(x => x.ContainsKey(default)).Name("contains" + _parameters.ValueNameSingular.Pascalize());
             descriptor.Field(x => x.Count);
-            descriptor.Field(x => x.Keys).Name(_parameters.KeyNamePlural);
+            descriptor.Field(x => x.Keys).Name(_parameters.KeyNamePlural.Camelize());
             
             if (_allowEnumeration)
             {
-                descriptor.Field(x => x.Values).Name(_parameters.ValueNamePlural);
+                descriptor.Field(x => x.Values).Name(_parameters.ValueNamePlural.Camelize());
             }
         }
     }

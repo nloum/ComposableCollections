@@ -3,11 +3,11 @@
 }
 
 type PeopleQuery {
-  value(key: String!): Person
-  containsKey(key: String!): Boolean!
+  person(key: String!): Person
+  containsPerson(key: String!): Boolean!
   count: Int!
-  keys: [String!]!
-  values: [Person!]!
+  names: [String!]!
+  people: [Person!]!
 }
 
 type Person {

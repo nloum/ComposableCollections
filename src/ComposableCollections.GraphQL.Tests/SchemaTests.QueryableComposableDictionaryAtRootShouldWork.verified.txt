@@ -8,19 +8,19 @@ type Mutation {
 }
 
 type PeopleMutation {
-  getOrAdd(key: String! value: PersonInput!): Person!
-  tryAdd(key: String! value: PersonInput!): Boolean!
-  tryUpdate(key: String! value: PersonInput!): Boolean!
-  addOrUpdate(key: String! value: PersonInput!): DictionaryItemAddOrUpdateResult!
-  tryRemove(key: String!): Boolean!
+  getOrAddPerson(key: String! value: PersonInput!): Person!
+  tryAddPerson(key: String! value: PersonInput!): Boolean!
+  tryUpdatePerson(key: String! value: PersonInput!): Boolean!
+  addOrUpdatePerson(key: String! value: PersonInput!): DictionaryItemAddOrUpdateResult!
+  tryRemovePerson(key: String!): Boolean!
 }
 
 type PeopleQuery {
-  value(key: String!): Person
-  containsKey(key: String!): Boolean!
+  person(key: String!): Person
+  containsPerson(key: String!): Boolean!
   count: Int!
-  keys: [String!]!
-  values(where: PersonFilterInput): [Person]
+  names: [String!]!
+  people(where: PersonFilterInput): [Person]
 }
 
 type Person {

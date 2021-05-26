@@ -4,33 +4,33 @@
   subscription: Subscription
 }
 
-type KeyValuePair {
-  key: String!
-  value: Person!
-}
-
 type Mutation {
   people: PeopleMutation
 }
 
-type PeopleChange {
-  keyValuePairs: [KeyValuePair!]!
+type NamePersonPair {
+  name: String!
+  person: Person!
 }
 
 type PeopleMutation {
-  getOrAdd(key: String! value: PersonInput!): Person!
-  tryAdd(key: String! value: PersonInput!): Boolean!
-  tryUpdate(key: String! value: PersonInput!): Boolean!
-  addOrUpdate(key: String! value: PersonInput!): DictionaryItemAddOrUpdateResult!
-  tryRemove(key: String!): Boolean!
+  getOrAddPerson(key: String! value: PersonInput!): Person!
+  tryAddPerson(key: String! value: PersonInput!): Boolean!
+  tryUpdatePerson(key: String! value: PersonInput!): Boolean!
+  addOrUpdatePerson(key: String! value: PersonInput!): DictionaryItemAddOrUpdateResult!
+  tryRemovePerson(key: String!): Boolean!
 }
 
 type PeopleQuery {
-  value(key: String!): Person
-  containsKey(key: String!): Boolean!
+  person(key: String!): Person
+  containsPerson(key: String!): Boolean!
   count: Int!
-  keys: [String!]!
-  values: [Person!]!
+  names: [String!]!
+  people: [Person!]!
+}
+
+type PeopleSubscription {
+  people: [NamePersonPair!]!
 }
 
 type Person {
@@ -42,7 +42,7 @@ type Query {
 }
 
 type Subscription {
-  people: PeopleChange
+  people: PeopleSubscription
 }
 
 input PersonInput {

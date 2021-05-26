@@ -32,7 +32,14 @@ namespace ComposableCollections.GraphQL.Tests
                 .AddType<ObjectType<Person>>()
                 .AddType(new ObjectType(descriptor => descriptor.Name("Query")))
                 .AddType(new ObjectType(descriptor => descriptor.Name("Mutation")))
-                .AddTopLevelComposableDictionary<ComposableDictionary<string, Person>>("people")
+                .AddTopLevelComposableDictionary<ComposableDictionary<string, Person>>(new ComposableDictionaryObjectTypeParameters()
+                {
+                    CollectionName = "people",
+                    ValueNameSingular = "person",
+                    ValueNamePlural = "people",
+                    KeyNameSingular = "name",
+                    KeyNamePlural = "names",
+                })
                 .AddServices(services)
                 .Create();
             
@@ -58,7 +65,14 @@ namespace ComposableCollections.GraphQL.Tests
                 .AddType<ObjectType<Person>>()
                 .AddType(new ObjectType(descriptor => descriptor.Name("Query")))
                 .AddType(new ObjectType(descriptor => descriptor.Name("Mutation")))
-                .AddTopLevelComposableDictionary<SimpleQueryableComposableDictionary<string, Person>>("people")
+                .AddTopLevelComposableDictionary<SimpleQueryableComposableDictionary<string, Person>>(new ComposableDictionaryObjectTypeParameters()
+                {
+                    CollectionName = "people",
+                    ValueNameSingular = "person",
+                    ValueNamePlural = "people",
+                    KeyNameSingular = "name",
+                    KeyNamePlural = "names",
+                })
                 .Create();
 
             return Verify(schema.ToString());
@@ -71,7 +85,14 @@ namespace ComposableCollections.GraphQL.Tests
                 .AddType<ObjectType<Person>>()
                 .AddType(new ObjectType(descriptor => descriptor.Name("Query")))
                 .AddType(new ObjectType(descriptor => descriptor.Name("Mutation")))
-                .AddTopLevelComposableDictionary<IDictionaryWithBuiltInKey<string, Person>>("people")
+                .AddTopLevelComposableDictionary<IDictionaryWithBuiltInKey<string, Person>>(new ComposableDictionaryObjectTypeParameters()
+                {
+                    CollectionName = "people",
+                    ValueNameSingular = "person",
+                    ValueNamePlural = "people",
+                    KeyNameSingular = "name",
+                    KeyNamePlural = "names",
+                })
                 .Create();
 
             return Verify(schema.ToString());
@@ -85,7 +106,14 @@ namespace ComposableCollections.GraphQL.Tests
                 .AddType<ObjectType<Person>>()
                 .AddType(new ObjectType(descriptor => descriptor.Name("Query")))
                 .AddType(new ObjectType(descriptor => descriptor.Name("Mutation")))
-                .AddTopLevelComposableDictionary<IQueryableDictionaryWithBuiltInKey<string, Person>>("people")
+                .AddTopLevelComposableDictionary<IQueryableDictionaryWithBuiltInKey<string, Person>>(new ComposableDictionaryObjectTypeParameters()
+                {
+                    CollectionName = "people",
+                    ValueNameSingular = "person",
+                    ValueNamePlural = "people",
+                    KeyNameSingular = "name",
+                    KeyNamePlural = "names",
+                })
                 .Create();
 
             return Verify(schema.ToString());
@@ -99,7 +127,14 @@ namespace ComposableCollections.GraphQL.Tests
                 .AddType(new ObjectType(descriptor => descriptor.Name("Query")))
                 .AddType(new ObjectType(descriptor => descriptor.Name("Mutation")))
                 .AddType(new ObjectType(descriptor => descriptor.Name("Subscription")))
-                .AddTopLevelComposableDictionary<ObservableDictionary<string, Person>>("people")
+                .AddTopLevelComposableDictionary<ObservableDictionary<string, Person>>(new ComposableDictionaryObjectTypeParameters()
+                {
+                    CollectionName = "people",
+                    ValueNameSingular = "person",
+                    ValueNamePlural = "people",
+                    KeyNameSingular = "name",
+                    KeyNamePlural = "names",
+                })
                 .Create();
 
             return Verify(schema.ToString());
@@ -114,7 +149,14 @@ namespace ComposableCollections.GraphQL.Tests
                 .AddType(new ObjectType(descriptor => descriptor.Name("Query")))
                 .AddType(new ObjectType(descriptor => descriptor.Name("Mutation")))
                 .AddType(new ObjectType(descriptor => descriptor.Name("Subscription")))
-                .AddTopLevelComposableDictionary<IObservableQueryableDictionary<string, Person>>("people")
+                .AddTopLevelComposableDictionary<IObservableQueryableDictionary<string, Person>>(new ComposableDictionaryObjectTypeParameters()
+                {
+                    CollectionName = "people",
+                    ValueNameSingular = "person",
+                    ValueNamePlural = "people",
+                    KeyNameSingular = "name",
+                    KeyNamePlural = "names",
+                })
                 .Create();
 
             return Verify(schema.ToString());
@@ -127,7 +169,14 @@ namespace ComposableCollections.GraphQL.Tests
                 .AddFiltering()
                 .AddType<ObjectType<Person>>()
                 .AddType(new ObjectType(descriptor => descriptor.Name("Query")))
-                .AddTopLevelComposableDictionary<IComposableReadOnlyDictionary<string, Person>>("people")
+                .AddTopLevelComposableDictionary<IComposableReadOnlyDictionary<string, Person>>(new ComposableDictionaryObjectTypeParameters()
+                {
+                    CollectionName = "people",
+                    ValueNameSingular = "person",
+                    ValueNamePlural = "people",
+                    KeyNameSingular = "name",
+                    KeyNamePlural = "names",
+                })
                 .Create();
 
             return Verify(schema.ToString());

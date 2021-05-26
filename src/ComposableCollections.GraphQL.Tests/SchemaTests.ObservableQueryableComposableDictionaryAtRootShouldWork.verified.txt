@@ -26,7 +26,7 @@ type PeopleMutation {
 }
 
 type PeopleQuery {
-  get(key: String!): Person
+  value(key: String!): Person
   containsKey(key: String!): Boolean!
   count: Int!
   keys: [String!]!

@@ -22,7 +22,7 @@ namespace ComposableCollections.GraphQL
         {
             descriptor.BindFieldsExplicitly();
             descriptor.Name(_typeName );
-            descriptor.Field(x => x.TryGetValue(default)).Name("get");
+            descriptor.Field(x => x.TryGetValue(default)).Name("value");
             descriptor.Field(x => x.ContainsKey(default));
             descriptor.Field(x => x.Count);
             descriptor.Field(x => x.Keys);

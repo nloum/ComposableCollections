@@ -12,6 +12,11 @@ Item2 = item2;
 }
 public T1? Item1 { get; init; } = default;
 public T2? Item2 { get; init; } = default;
+public TOutput Collapse<TOutput>(Func<T1, TOutput> selector1, Func<T2, TOutput> selector2) {
+if (Item1 != null) return selector1(Item1);
+if (Item2 != null) return selector2(Item2);
+throw new InvalidOperationException();
+}
 public IEither<T1, T2, T3> Or<T3>()
 {
 if (Item1 != null) {

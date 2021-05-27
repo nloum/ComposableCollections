@@ -24,6 +24,14 @@ public T2? Item2 { get; init; } = default;
 public T3? Item3 { get; init; } = default;
 public T4? Item4 { get; init; } = default;
 public T5? Item5 { get; init; } = default;
+public TOutput Collapse<TOutput>(Func<T1, TOutput> selector1, Func<T2, TOutput> selector2, Func<T3, TOutput> selector3, Func<T4, TOutput> selector4, Func<T5, TOutput> selector5) {
+if (Item1 != null) return selector1(Item1);
+if (Item2 != null) return selector2(Item2);
+if (Item3 != null) return selector3(Item3);
+if (Item4 != null) return selector4(Item4);
+if (Item5 != null) return selector5(Item5);
+throw new InvalidOperationException();
+}
 public IEither<T1, T2, T3, T4, T5, T6> Or<T6>()
 {
 if (Item1 != null) {

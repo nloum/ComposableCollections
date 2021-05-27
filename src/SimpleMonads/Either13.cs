@@ -56,6 +56,22 @@ public T10? Item10 { get; init; } = default;
 public T11? Item11 { get; init; } = default;
 public T12? Item12 { get; init; } = default;
 public T13? Item13 { get; init; } = default;
+public TOutput Collapse<TOutput>(Func<T1, TOutput> selector1, Func<T2, TOutput> selector2, Func<T3, TOutput> selector3, Func<T4, TOutput> selector4, Func<T5, TOutput> selector5, Func<T6, TOutput> selector6, Func<T7, TOutput> selector7, Func<T8, TOutput> selector8, Func<T9, TOutput> selector9, Func<T10, TOutput> selector10, Func<T11, TOutput> selector11, Func<T12, TOutput> selector12, Func<T13, TOutput> selector13) {
+if (Item1 != null) return selector1(Item1);
+if (Item2 != null) return selector2(Item2);
+if (Item3 != null) return selector3(Item3);
+if (Item4 != null) return selector4(Item4);
+if (Item5 != null) return selector5(Item5);
+if (Item6 != null) return selector6(Item6);
+if (Item7 != null) return selector7(Item7);
+if (Item8 != null) return selector8(Item8);
+if (Item9 != null) return selector9(Item9);
+if (Item10 != null) return selector10(Item10);
+if (Item11 != null) return selector11(Item11);
+if (Item12 != null) return selector12(Item12);
+if (Item13 != null) return selector13(Item13);
+throw new InvalidOperationException();
+}
 public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Or<T14>()
 {
 if (Item1 != null) {

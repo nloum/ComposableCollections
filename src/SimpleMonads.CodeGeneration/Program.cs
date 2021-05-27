@@ -31,7 +31,7 @@ namespace SimpleMonads.CodeGeneration
 
                 using (var writer = interfacePath.OpenWriter())
                 {
-                    writer.WriteLine("namespace SimpleMonads {");
+                    writer.WriteLine("using System;\n\nnamespace SimpleMonads {");
                     GenerateEither(writer, i, maxArity, CodePart.Interface);
                     writer.WriteLine("}");
                 }
@@ -60,6 +60,7 @@ namespace SimpleMonads.CodeGeneration
             var classProperties = new List<string>();
             var baseConstructors = new List<string>();
             var subClassConstructors = new List<string>();
+            var collapseArgs = new List<string>();
             
             baseConstructors.Add("protected EitherBase() { }");
             subClassConstructors.Add("protected Either() { }");
@@ -75,18 +76,21 @@ namespace SimpleMonads.CodeGeneration
                                            $"Item{i} = item{i};\n" +
                                            "}");
                 subClassConstructors.Add($"public Either({argName} item{i}) : base(item{i}) {{ }}\n");
+                collapseArgs.Add($"Func<{argName}, TOutput> selector{i}");
             }
 
             var genericArgNamesA = genericArgNames.Select(x => x + "A").ToList();
             var genericArgNamesB = genericArgNames.Select(x => x + "B").ToList();
             var genericArgNamesString = string.Join(", ", genericArgNames);
             var baseConstraints = string.Join(" ", genericArgNames.Select(arg => $"where {arg} : TBase"));
+            var collapseArgsString = string.Join(", ", collapseArgs);
 
             if (part == CodePart.Interface)
             {
                 writer.WriteLine($"public interface IEitherBase<{string.Join(", ", genericArgDefinitions)}> : IEither {{");
                 writer.WriteLine(string.Join("\n", interfaceProperties));
                 for (var i = arity + 1; i <= maxArity; i++) GenerateOrDeclaration(writer, arity, i);
+                writer.WriteLine($"TOutput Collapse<TOutput>({collapseArgsString});");
                 writer.WriteLine($"ConvertibleTo<TBase>.IEither<{genericArgNamesString}> ConvertTo<TBase>();");
                 writer.WriteLine("}");
 
@@ -113,6 +117,13 @@ namespace SimpleMonads.CodeGeneration
                     $"public class EitherBase<{string.Join(", ", genericArgNames)}> : IEitherBase<{genericArgNamesString}>, IEquatable<IEither<{genericArgNamesString}>>\n{{");
                 writer.WriteLine(string.Join("\n", baseConstructors));
                 writer.WriteLine(string.Join("\n", classProperties));
+                writer.WriteLine($"public TOutput Collapse<TOutput>({collapseArgsString}) {{");
+                for (var i = 1; i <= arity; i++)
+                {
+                    writer.WriteLine($"if (Item{i} != null) return selector{i}(Item{i});");
+                }
+                writer.WriteLine("throw new InvalidOperationException();");
+                writer.WriteLine("}");
                 for (var i = arity + 1; i <= maxArity; i++) GenerateOrImplementation(writer, arity, i);
                 GenerateEqualityMembers(writer, arity);
                 GenerateToString(writer, arity);

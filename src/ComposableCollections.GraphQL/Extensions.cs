@@ -4,6 +4,7 @@ using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.DictionaryWithBuiltInKey.Interfaces;
 using HotChocolate;
 using HotChocolate.Execution.Configuration;
+using HotChocolate.Resolvers;
 using HotChocolate.Types;
 using Humanizer;
 using LiveLinq.Dictionary;
@@ -46,8 +47,10 @@ namespace ComposableCollections.GraphQL
         }
 
         public static IRequestExecutorBuilder AddTopLevelComposableDictionary<TComposableDictionary>(
-            this IRequestExecutorBuilder builder, string name)
+            this IRequestExecutorBuilder builder, string name, Func<IResolverContext, TComposableDictionary>? resolve = null)
         {
+            resolve ??= rc => rc.Services.GetRequiredService<TComposableDictionary>();
+            
             return builder.AddTopLevelComposableDictionary<TComposableDictionary>(new ComposableDictionaryObjectTypeParameters()
             {
                 CollectionName = name,
@@ -55,12 +58,14 @@ namespace ComposableCollections.GraphQL
                 ValueNamePlural = "values",
                 KeyNameSingular = "value",
                 KeyNamePlural = "values",
-            });
+            }, resolve);
         }
 
         public static IRequestExecutorBuilder AddTopLevelComposableDictionary<TComposableDictionary>(
-            this IRequestExecutorBuilder builder, ComposableDictionaryObjectTypeParameters parameters)
+            this IRequestExecutorBuilder builder, ComposableDictionaryObjectTypeParameters parameters, Func<IResolverContext, TComposableDictionary>? resolve = null)
         {
+            resolve ??= rc => rc.Services.GetRequiredService<TComposableDictionary>();
+            
             var metadata = typeof(TComposableDictionary).GetComposableDictionaryMetadata();
 
             builder = builder
@@ -72,7 +77,7 @@ namespace ComposableCollections.GraphQL
                         .Type(metadata.QueryObjectType)
                         .Resolve(rc =>
                         {
-                            var result = rc.Services.GetRequiredService<TComposableDictionary>();
+                            var result = resolve(rc);
                             return result;
                         });
                 }));
@@ -86,7 +91,7 @@ namespace ComposableCollections.GraphQL
                         .Type(metadata.MutationObjectType)
                         .Resolve(rc =>
                         {
-                            var result = rc.Services.GetRequiredService<TComposableDictionary>();
+                            var result = resolve(rc);
                             return result;
                         });
                 }));
@@ -101,8 +106,10 @@ namespace ComposableCollections.GraphQL
         }
 
         public static ISchemaBuilder AddTopLevelComposableDictionary<TComposableDictionary>(
-            this ISchemaBuilder builder, string name)
+            this ISchemaBuilder builder, string name, Func<IResolverContext, TComposableDictionary>? resolve = null)
         {
+            resolve ??= rc => rc.Services.GetRequiredService<TComposableDictionary>();
+            
             return builder.AddTopLevelComposableDictionary<TComposableDictionary>(new ComposableDictionaryObjectTypeParameters()
             {
                 CollectionName = name,
@@ -110,12 +117,14 @@ namespace ComposableCollections.GraphQL
                 ValueNamePlural = "values",
                 KeyNameSingular = "value",
                 KeyNamePlural = "values",
-            });
+            }, resolve);
         }
 
         public static ISchemaBuilder AddTopLevelComposableDictionary<TComposableDictionary>(
-            this ISchemaBuilder builder, ComposableDictionaryObjectTypeParameters parameters)
+            this ISchemaBuilder builder, ComposableDictionaryObjectTypeParameters parameters, Func<IResolverContext, TComposableDictionary>? resolve = null)
         {
+            resolve ??= rc => rc.Services.GetRequiredService<TComposableDictionary>();
+            
             var metadata = typeof(TComposableDictionary).GetComposableDictionaryMetadata();
 
             builder = builder
@@ -127,7 +136,7 @@ namespace ComposableCollections.GraphQL
                         .Type(metadata.QueryObjectType)
                         .Resolve(rc =>
                         {
-                            var result = rc.Services.GetRequiredService<TComposableDictionary>();
+                            var result = resolve(rc);
                             return result;
                         });
                 }));
@@ -141,7 +150,7 @@ namespace ComposableCollections.GraphQL
                         .Type(metadata.MutationObjectType)
                         .Resolve(rc =>
                         {
-                            var result = rc.Services.GetRequiredService<TComposableDictionary>();
+                            var result = resolve(rc);
                             return result;
                         });
                 }));

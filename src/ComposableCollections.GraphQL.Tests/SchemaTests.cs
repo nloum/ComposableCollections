@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using ComposableCollections.Dictionary.Interfaces;
 using ComposableCollections.Dictionary.Sources;
 using ComposableCollections.DictionaryWithBuiltInKey.Interfaces;
+using FluentAssertions;
 using HotChocolate;
 using HotChocolate.Execution;
 using HotChocolate.Types;
@@ -23,11 +24,8 @@ namespace ComposableCollections.GraphQL.Tests
         [TestMethod]
         public async Task ComposableDictionaryAtRootShouldWork()
         {
-            var serviceCollection = new ServiceCollection();
             var state = new ComposableDictionary<string, Person>();
-            serviceCollection.AddSingleton(state);
-            var services = serviceCollection.BuildServiceProvider();
-
+            
             var schema = new SchemaBuilder()
                 .AddType<ObjectType<Person>>()
                 .AddType(new ObjectType(descriptor => descriptor.Name("Query")))
@@ -35,26 +33,33 @@ namespace ComposableCollections.GraphQL.Tests
                 .AddTopLevelComposableDictionary<ComposableDictionary<string, Person>>(new ComposableDictionaryObjectTypeParameters()
                 {
                     CollectionName = "people",
-                    ValueNameSingular = "person",
-                    ValueNamePlural = "people",
+                    ValueNameSingular = "one",
+                    ValueNamePlural = "all",
                     KeyNameSingular = "name",
                     KeyNamePlural = "names",
-                })
-                .AddServices(services)
+                }, rc => state)
                 .Create();
             
             await Verify(schema.ToString());
 
             var executor = schema.MakeExecutable();
 
-            var result = await executor.ExecuteAsync(QueryRequestBuilder.Create(@"mutation {
+            var mutationResult = (await executor.ExecuteAsync(QueryRequestBuilder.Create(@"mutation {
     people {
-        tryAdd(key: ""Joe"", value: { name: ""Joe"" }) {
+        tryAddOne(key: ""Joe"", value: { name: ""Joe"" })
+    }
+}
+"))).ToJson();
+            await Verify(mutationResult).UseFileName(nameof(ComposableDictionaryAtRootShouldWork) + "_Mutation_Result");
+
+            var queryResult = (await executor.ExecuteAsync(QueryRequestBuilder.Create(@"query {
+    people {
+        all {
             name
         }
     }
-}
-"));
+}"))).ToJson();
+            await Verify(queryResult).UseFileName(nameof(ComposableDictionaryAtRootShouldWork) + "_Query_Result");
         }
         
         [TestMethod]

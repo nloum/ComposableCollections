@@ -5,9 +5,16 @@ namespace SimpleMonads.HotChocolate
 {
     public class EitherUnion<TEither> : UnionType<TEither>
     {
+        private readonly EitherObjectTypeParameters _parameters;
+
+        public EitherUnion(EitherObjectTypeParameters parameters)
+        {
+            _parameters = parameters;
+        }
+
         protected override void Configure(IUnionTypeDescriptor descriptor)
         {
-            descriptor.Name(typeof(TEither).Name);
+            descriptor.Name(_parameters.UnionTypeName);
 
             var metadata = typeof(TEither).GetEitherMetadata();
 

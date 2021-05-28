@@ -10,74 +10,6 @@ namespace SimpleMonads.HotChocolate
 {
     public static class Extensions
     {
-        public static IRequestExecutorBuilder AddEmptyQueryType(this IRequestExecutorBuilder builder)
-        {
-            return builder.AddType(new ObjectType(descriptor => descriptor.Name("Query")));
-        }
-        
-        public static IRequestExecutorBuilder AddMaybe<T>(this IRequestExecutorBuilder builder)
-        {
-            builder = builder.AddType<MaybeType<T>>();
-            return builder;
-        }
-
-        internal static Type GetObjectTypeOf(this Type type)
-        {
-            if (type.GetGenericTypeDefinitionIfApplicable() == typeof(ObjectType<>))
-            {
-                return type.GetGenericArguments()[0];
-            }
-
-            if (type.BaseType == null)
-            {
-                return null;
-            }
-            
-            return type.BaseType.GetObjectTypeOf();
-        }
-        
-        public static ISchemaBuilder AddMaybe<T>(this ISchemaBuilder builder)
-        {
-            var type = typeof(T).GetObjectTypeOf() ?? typeof(T);
-            
-            builder = builder.AddType(typeof(MaybeType<>).MakeGenericType(type));
-            return builder;
-        }
-
-        public static IRequestExecutorBuilder AddEither<TEither>(this IRequestExecutorBuilder builder)
-            where TEither : IEither
-        {
-            builder = builder.AddType<EitherUnion<TEither>>();
-            
-            var metadata = typeof(TEither).GetEitherMetadata();
-
-            var baseType = metadata.ConvertibleTo ?? metadata.SubTypesOf;
-            if (baseType != null)
-            {
-                var interfaceType = (InterfaceType)Activator.CreateInstance(typeof(EitherInterface<>).MakeGenericType(baseType));
-                builder = builder.AddType(interfaceType);
-            }
-
-            return builder;
-        }
-        
-        public static ISchemaBuilder AddEither<TEither>(this ISchemaBuilder builder)
-            where TEither : IEither
-        {
-            builder = builder.AddType<EitherUnion<TEither>>();
-            
-            var metadata = typeof(TEither).GetEitherMetadata();
-
-            var baseType = metadata.ConvertibleTo ?? metadata.SubTypesOf;
-            if (baseType != null)
-            {
-                var interfaceType = (InterfaceType)Activator.CreateInstance(typeof(EitherInterface<>).MakeGenericType(baseType));
-                builder = builder.AddType(interfaceType);
-            }
-
-            return builder;
-        }
-
         internal static Type GetGenericTypeDefinitionIfApplicable(this Type type)
         {
             if (type.IsConstructedGenericType)
@@ -137,6 +69,114 @@ namespace SimpleMonads.HotChocolate
                 ConvertibleTo = castedTo,
                 Types = iface.GenericTypeArguments.Skip(subTypeOf == null && castedTo == null ? 0 : 1).ToArray(),
             };
+        }
+        
+        internal static Type GetObjectTypeOf(this Type type)
+        {
+            if (type.GetGenericTypeDefinitionIfApplicable() == typeof(ObjectType<>))
+            {
+                return type.GetGenericArguments()[0];
+            }
+
+            if (type.BaseType == null)
+            {
+                return null;
+            }
+            
+            return type.BaseType.GetObjectTypeOf();
+        }
+
+        public static IRequestExecutorBuilder AddEmptyQueryType(this IRequestExecutorBuilder builder)
+        {
+            return builder.AddType(new ObjectType(descriptor => descriptor.Name("Query")));
+        }
+        
+        public static IRequestExecutorBuilder AddMaybe<T>(this IRequestExecutorBuilder builder)
+        {
+            builder = builder.AddType<MaybeType<T>>();
+            return builder;
+        }
+
+        public static ISchemaBuilder AddMaybe<T>(this ISchemaBuilder builder)
+        {
+            var type = typeof(T).GetObjectTypeOf() ?? typeof(T);
+            
+            builder = builder.AddType(typeof(MaybeType<>).MakeGenericType(type));
+            return builder;
+        }
+
+        public static IRequestExecutorBuilder AddEither<TEither>(this IRequestExecutorBuilder builder, string unionTypeName = null, string interfaceTypeName = null)
+            where TEither : IEither
+        {
+            return builder.AddEither<TEither>(out var _, out var __, unionTypeName, interfaceTypeName);
+        }
+        
+        public static IRequestExecutorBuilder AddEither<TEither>(this IRequestExecutorBuilder builder, out UnionType<TEither> unionType, out InterfaceType interfaceType, string unionTypeName = null, string interfaceTypeName = null)
+            where TEither : IEither
+        {
+            var metadata = typeof(TEither).GetEitherMetadata();
+
+            unionTypeName ??= typeof(TEither).Name;
+            interfaceTypeName ??= (metadata.ConvertibleTo ?? metadata.SubTypesOf)?.Name;
+            
+            var parameters = new EitherObjectTypeParameters()
+            {
+                UnionTypeName = unionTypeName,
+                InterfaceTypeName = interfaceTypeName,
+            };
+
+            unionType = new EitherUnion<TEither>(parameters);
+            builder = builder.AddType(unionType);
+            
+            var baseType = metadata.ConvertibleTo ?? metadata.SubTypesOf;
+            if (baseType != null)
+            {
+                interfaceType = (InterfaceType)Activator.CreateInstance(typeof(EitherInterface<>).MakeGenericType(baseType), parameters);
+                builder = builder.AddType(interfaceType);
+            }
+            else
+            {
+                interfaceType = null;
+            }
+
+            return builder;
+        }
+
+        public static ISchemaBuilder AddEither<TEither>(this ISchemaBuilder builder, string unionTypeName = null, string interfaceTypeName = null)
+            where TEither : IEither
+        {
+            return builder.AddEither<TEither>(out var _, out var __, unionTypeName, interfaceTypeName);
+        }
+        
+        public static ISchemaBuilder AddEither<TEither>(this ISchemaBuilder builder, out UnionType<TEither> unionType, out InterfaceType interfaceType, string unionTypeName = null, string interfaceTypeName = null)
+            where TEither : IEither
+        {
+            var metadata = typeof(TEither).GetEitherMetadata();
+
+            unionTypeName ??= typeof(TEither).Name;
+            interfaceTypeName ??= (metadata.ConvertibleTo ?? metadata.SubTypesOf)?.Name;
+            
+            var parameters = new EitherObjectTypeParameters()
+            {
+                UnionTypeName = unionTypeName,
+                InterfaceTypeName = interfaceTypeName,
+            };
+
+            unionType = new EitherUnion<TEither>(parameters);
+            builder = builder.AddType(unionType);
+            
+            var baseType = metadata.ConvertibleTo ?? metadata.SubTypesOf;
+            if (baseType != null)
+            {
+                interfaceType = (InterfaceType)Activator.CreateInstance(typeof(EitherInterface<>).MakeGenericType(baseType), parameters);
+                builder = builder.AddType(interfaceType);
+            }
+            else
+            {
+                interfaceType = null;
+            }
+
+            return builder;
         }
     }
 }

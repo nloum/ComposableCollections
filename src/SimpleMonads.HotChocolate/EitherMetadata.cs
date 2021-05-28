@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SimpleMonads.HotChocolate
 {
-    internal class EitherMetadata
+    public class EitherMetadata
     {
         public Type ConvertibleTo { get; init; }
         public Type SubTypesOf { get; init; }

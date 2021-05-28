@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using HotChocolate;
 using HotChocolate.Execution.Configuration;
 using HotChocolate.Types;
@@ -177,6 +179,72 @@ namespace SimpleMonads.HotChocolate
             }
 
             return builder;
+        }
+        
+        public static IInputFieldDescriptor FieldFromPropertyInfo<T, TProperty>(IInputObjectTypeDescriptor<T> descriptor, PropertyInfo property)
+        {
+            var param = LambdaExpression.Parameter(property.DeclaringType);
+            var lambda = LambdaExpression.Lambda<Func<T, TProperty>>(LambdaExpression.MakeMemberAccess(param, property), param);
+            var result = descriptor.Field(lambda);
+            return result;
+        }
+        
+        public static IInputFieldDescriptor Field<T>(this IInputObjectTypeDescriptor<T> descriptor,
+            PropertyInfo property)
+        {
+            var method = typeof(Extensions).GetMethod("FieldFromPropertyInfo").MakeGenericMethod(typeof(T), property.PropertyType);
+            var result = method.Invoke(null, new object[] {descriptor, property});
+            return (IInputFieldDescriptor) result;
+        }
+
+        public static IRequestExecutorBuilder AddEitherInputType<TEither>(this IRequestExecutorBuilder builder, bool useTypesAsNames = true) where TEither : IEither
+        {
+            return builder.AddType(new InputObjectType<TEither>(descriptor =>
+            {
+                var type = typeof(TEither);
+                descriptor.Name(type.Name);
+                descriptor.BindFieldsExplicitly();
+                descriptor.Directive(new OneFieldDirective());
+                //descriptor.Field(type.GetProperty("Value")).Ignore();
+                var metadata = type.GetEitherMetadata();
+                var types = metadata.Types;
+                for (var i = 0; i < types.Count; i++)
+                {
+                    if (useTypesAsNames)
+                    {
+                        descriptor.Field(type.GetProperty($"Item{i + 1}")).Name(types[i].Name);
+                    }
+                    else
+                    {
+                        descriptor.Field(type.GetProperty($"Item{i + 1}"));
+                    }
+                }
+            }));
+        }
+        
+        public static ISchemaBuilder AddEitherInputType<TEither>(this ISchemaBuilder builder, string typeName = null, bool useTypesAsNames = true) where TEither : IEither
+        {
+            return builder.AddType(new InputObjectType<TEither>(descriptor =>
+            {
+                var type = typeof(TEither);
+                descriptor.Name(typeName ?? type.Name);
+                descriptor.BindFieldsExplicitly();
+                descriptor.Directive(new OneFieldDirective());
+                //descriptor.Field(type.GetProperty("Value")).Ignore();
+                var metadata = type.GetEitherMetadata();
+                var types = metadata.Types;
+                for (var i = 0; i < types.Count; i++)
+                {
+                    if (useTypesAsNames)
+                    {
+                        descriptor.Field(type.GetProperty($"Item{i + 1}")).Name(types[i].Name);
+                    }
+                    else
+                    {
+                        descriptor.Field(type.GetProperty($"Item{i + 1}"));
+                    }
+                }
+            }));
         }
     }
 }

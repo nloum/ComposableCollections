@@ -116,5 +116,21 @@ namespace SimpleMonads.GraphQL.Tests
 
             return Verify(schema.ToString());
         }
+
+        [TestMethod]
+        public async Task AddEitherInputShouldWork()
+        {
+            var schema = new SchemaBuilder()
+                .AddObjectType(desc =>
+                {
+                    desc.Name("Query");
+                    desc.Field("hello").Type<StringType>().Resolve(rc => "world");
+                })
+                .AddDirectiveType<OneFieldDirectiveType>()
+                .AddEitherInputType<AnyAnimal>()
+                .Create();
+            
+            await Verify(schema.ToString());
+        }
     }
 }

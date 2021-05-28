@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using Humanizer;
 using IoFluently;
 using ReactiveProcesses;
 
@@ -84,6 +85,14 @@ namespace SimpleMonads.CodeGeneration
             var genericArgNamesString = string.Join(", ", genericArgNames);
             var baseConstraints = string.Join(" ", genericArgNames.Select(arg => $"where {arg} : TBase"));
             var collapseArgsString = string.Join(", ", collapseArgs);
+            
+            baseConstructors.Add($"public EitherBase(EitherBase<{genericArgNamesString}> other) {{\n" +
+                                 string.Join("\n", Enumerable.Range(1, arity).Select(i => $"Item{i} = other.Item{i};")) +
+                                 "\n}");
+
+            subClassConstructors.Add($"public Either(Either<{genericArgNamesString}> other) {{\n" +
+                                     string.Join("\n", Enumerable.Range(1, arity).Select(i => $"Item{i} = other.Item{i};")) +
+                                     "\n}");
 
             if (part == CodePart.Interface)
             {
@@ -155,6 +164,12 @@ namespace SimpleMonads.CodeGeneration
                 writer.WriteLine(
                     $"public class Either<{genericArgNamesString}> : ConvertibleTo<TBase>.Either<{genericArgNamesString}>, IEither<{genericArgNamesString}> {baseConstraints}\n{{");
                 writer.WriteLine(string.Join("\n", subClassConstructors));
+                var typeArgs = genericArgNames.Select(arg => $"{{typeof({arg}).Name}}").Humanize("or");
+                writer.WriteLine($"public Either(TBase item) {{\n" +
+                                        "if (item == null) throw new ArgumentNullException(\"item\");\n" +
+                                         string.Join("\n", Enumerable.Range(1, arity).Select(i => $"if (item is T{i} item{i}) {{\nItem{i} = item{i};\nreturn;\n}}")) +
+                                         $"\nthrow new ArgumentException($\"Expected argument to be either a {typeArgs} but instead got a type of {{typeof(TBase).Name}}: {{item.GetType().Name}}\", \"name\");" +
+                                         "\n}");
                 GenerateValue(writer, arity);
                 GenerateSubClassImplicitOperators(writer, "Either", arity, genericArgNames);
                 writer.WriteLine("}");
@@ -241,13 +256,13 @@ namespace SimpleMonads.CodeGeneration
                 writer.WriteLine($"if (item{i} is TBase @base) {{");
                 writer.WriteLine("return @base;");
                 writer.WriteLine("}");
-                writer.WriteLine($"throw new NotImplementedException(\"Cannot convert from {{typeof(T{i}).Name}} to {{typeof(TBase).Name}}\");");
+                writer.WriteLine($"throw new NotImplementedException($\"Cannot convert from {{typeof(T{i}).Name}} to {{typeof(TBase).Name}}\");");
                 writer.WriteLine("}");
             }
-            writer.Write("public virtual TBase Value => Convert1(Item1)");
+            writer.Write("public virtual TBase Value => (TBase)(Item1 != null ? Convert1(Item1) : default)");
             for (var i = 2; i <= arity; i++)
             {
-                writer.Write($" ?? Convert{i}(Item{i})");
+                writer.Write($" ?? (TBase)(Item{i} != null ? Convert{i}(Item{i}) : default)");
             }
             writer.WriteLine(";");
         }

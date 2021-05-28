@@ -52,6 +52,24 @@ Item15 = item15;
 public EitherBase(T16 item16) {
 Item16 = item16;
 }
+public EitherBase(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> other) {
+Item1 = other.Item1;
+Item2 = other.Item2;
+Item3 = other.Item3;
+Item4 = other.Item4;
+Item5 = other.Item5;
+Item6 = other.Item6;
+Item7 = other.Item7;
+Item8 = other.Item8;
+Item9 = other.Item9;
+Item10 = other.Item10;
+Item11 = other.Item11;
+Item12 = other.Item12;
+Item13 = other.Item13;
+Item14 = other.Item14;
+Item15 = other.Item15;
+Item16 = other.Item16;
+}
 public T1? Item1 { get; init; } = default;
 public T2? Item2 { get; init; } = default;
 public T3? Item3 { get; init; } = default;
@@ -354,6 +372,24 @@ public Either(T15 item15) : base(item15) { }
 
 public Either(T16 item16) : base(item16) { }
 
+public Either(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> other) {
+Item1 = other.Item1;
+Item2 = other.Item2;
+Item3 = other.Item3;
+Item4 = other.Item4;
+Item5 = other.Item5;
+Item6 = other.Item6;
+Item7 = other.Item7;
+Item8 = other.Item8;
+Item9 = other.Item9;
+Item10 = other.Item10;
+Item11 = other.Item11;
+Item12 = other.Item12;
+Item13 = other.Item13;
+Item14 = other.Item14;
+Item15 = other.Item15;
+Item16 = other.Item16;
+}
 public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(T1 t1) {
 return new(t1);
 }
@@ -409,99 +445,99 @@ protected TBase Convert1(T1 item1) {
 if (item1 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T1).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T1).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert2(T2 item2) {
 if (item2 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T2).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T2).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert3(T3 item3) {
 if (item3 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T3).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T3).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert4(T4 item4) {
 if (item4 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T4).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T4).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert5(T5 item5) {
 if (item5 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T5).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T5).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert6(T6 item6) {
 if (item6 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T6).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T6).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert7(T7 item7) {
 if (item7 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T7).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T7).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert8(T8 item8) {
 if (item8 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T8).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T8).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert9(T9 item9) {
 if (item9 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T9).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T9).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert10(T10 item10) {
 if (item10 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T10).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T10).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert11(T11 item11) {
 if (item11 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T11).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T11).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert12(T12 item12) {
 if (item12 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T12).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T12).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert13(T13 item13) {
 if (item13 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T13).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T13).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert14(T14 item14) {
 if (item14 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T14).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T14).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert15(T15 item15) {
 if (item15 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T15).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T15).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert16(T16 item16) {
 if (item16 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T16).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T16).Name} to {typeof(TBase).Name}");
 }
-public virtual TBase Value => Convert1(Item1) ?? Convert2(Item2) ?? Convert3(Item3) ?? Convert4(Item4) ?? Convert5(Item5) ?? Convert6(Item6) ?? Convert7(Item7) ?? Convert8(Item8) ?? Convert9(Item9) ?? Convert10(Item10) ?? Convert11(Item11) ?? Convert12(Item12) ?? Convert13(Item13) ?? Convert14(Item14) ?? Convert15(Item15) ?? Convert16(Item16);
+public virtual TBase Value => (TBase)(Item1 != null ? Convert1(Item1) : default) ?? (TBase)(Item2 != null ? Convert2(Item2) : default) ?? (TBase)(Item3 != null ? Convert3(Item3) : default) ?? (TBase)(Item4 != null ? Convert4(Item4) : default) ?? (TBase)(Item5 != null ? Convert5(Item5) : default) ?? (TBase)(Item6 != null ? Convert6(Item6) : default) ?? (TBase)(Item7 != null ? Convert7(Item7) : default) ?? (TBase)(Item8 != null ? Convert8(Item8) : default) ?? (TBase)(Item9 != null ? Convert9(Item9) : default) ?? (TBase)(Item10 != null ? Convert10(Item10) : default) ?? (TBase)(Item11 != null ? Convert11(Item11) : default) ?? (TBase)(Item12 != null ? Convert12(Item12) : default) ?? (TBase)(Item13 != null ? Convert13(Item13) : default) ?? (TBase)(Item14 != null ? Convert14(Item14) : default) ?? (TBase)(Item15 != null ? Convert15(Item15) : default) ?? (TBase)(Item16 != null ? Convert16(Item16) : default);
 }
 }
 public partial class SubTypesOf<TBase> {
@@ -540,6 +576,92 @@ public Either(T15 item15) : base(item15) { }
 
 public Either(T16 item16) : base(item16) { }
 
+public Either(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> other) {
+Item1 = other.Item1;
+Item2 = other.Item2;
+Item3 = other.Item3;
+Item4 = other.Item4;
+Item5 = other.Item5;
+Item6 = other.Item6;
+Item7 = other.Item7;
+Item8 = other.Item8;
+Item9 = other.Item9;
+Item10 = other.Item10;
+Item11 = other.Item11;
+Item12 = other.Item12;
+Item13 = other.Item13;
+Item14 = other.Item14;
+Item15 = other.Item15;
+Item16 = other.Item16;
+}
+public Either(TBase item) {
+if (item == null) throw new ArgumentNullException("item");
+if (item is T1 item1) {
+Item1 = item1;
+return;
+}
+if (item is T2 item2) {
+Item2 = item2;
+return;
+}
+if (item is T3 item3) {
+Item3 = item3;
+return;
+}
+if (item is T4 item4) {
+Item4 = item4;
+return;
+}
+if (item is T5 item5) {
+Item5 = item5;
+return;
+}
+if (item is T6 item6) {
+Item6 = item6;
+return;
+}
+if (item is T7 item7) {
+Item7 = item7;
+return;
+}
+if (item is T8 item8) {
+Item8 = item8;
+return;
+}
+if (item is T9 item9) {
+Item9 = item9;
+return;
+}
+if (item is T10 item10) {
+Item10 = item10;
+return;
+}
+if (item is T11 item11) {
+Item11 = item11;
+return;
+}
+if (item is T12 item12) {
+Item12 = item12;
+return;
+}
+if (item is T13 item13) {
+Item13 = item13;
+return;
+}
+if (item is T14 item14) {
+Item14 = item14;
+return;
+}
+if (item is T15 item15) {
+Item15 = item15;
+return;
+}
+if (item is T16 item16) {
+Item16 = item16;
+return;
+}
+throw new ArgumentException($"Expected argument to be either a {typeof(T1).Name}, {typeof(T2).Name}, {typeof(T3).Name}, {typeof(T4).Name}, {typeof(T5).Name}, {typeof(T6).Name}, {typeof(T7).Name}, {typeof(T8).Name}, {typeof(T9).Name}, {typeof(T10).Name}, {typeof(T11).Name}, {typeof(T12).Name}, {typeof(T13).Name}, {typeof(T14).Name}, {typeof(T15).Name} or {typeof(T16).Name} but instead got a type of {typeof(TBase).Name}: {item.GetType().Name}", "name");
+}
 public virtual TBase Value => Item1 ?? Item2 ?? Item3 ?? Item4 ?? Item5 ?? Item6 ?? Item7 ?? Item8 ?? Item9 ?? Item10 ?? Item11 ?? Item12 ?? Item13 ?? Item14 ?? Item15 ?? (TBase)Item16;
 public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(T1 t1) {
 return new(t1);
@@ -626,6 +748,24 @@ public Either(T15 item15) : base(item15) { }
 
 public Either(T16 item16) : base(item16) { }
 
+public Either(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> other) {
+Item1 = other.Item1;
+Item2 = other.Item2;
+Item3 = other.Item3;
+Item4 = other.Item4;
+Item5 = other.Item5;
+Item6 = other.Item6;
+Item7 = other.Item7;
+Item8 = other.Item8;
+Item9 = other.Item9;
+Item10 = other.Item10;
+Item11 = other.Item11;
+Item12 = other.Item12;
+Item13 = other.Item13;
+Item14 = other.Item14;
+Item15 = other.Item15;
+Item16 = other.Item16;
+}
 public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(T1 t1) {
 return new(t1);
 }

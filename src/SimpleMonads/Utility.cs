@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SimpleMonads
 {
-    public static class Utility
+    public static partial class Utility
     {
         /// <summary>
         /// Converts a <see cref="Type"/> to its C# name. E.g., if you pass in typeof(<see cref="IEnumerable{int}"/>) this

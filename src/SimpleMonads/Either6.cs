@@ -22,6 +22,14 @@ Item5 = item5;
 public EitherBase(T6 item6) {
 Item6 = item6;
 }
+public EitherBase(EitherBase<T1, T2, T3, T4, T5, T6> other) {
+Item1 = other.Item1;
+Item2 = other.Item2;
+Item3 = other.Item3;
+Item4 = other.Item4;
+Item5 = other.Item5;
+Item6 = other.Item6;
+}
 public T1? Item1 { get; init; } = default;
 public T2? Item2 { get; init; } = default;
 public T3? Item3 { get; init; } = default;
@@ -374,6 +382,14 @@ public Either(T5 item5) : base(item5) { }
 
 public Either(T6 item6) : base(item6) { }
 
+public Either(Either<T1, T2, T3, T4, T5, T6> other) {
+Item1 = other.Item1;
+Item2 = other.Item2;
+Item3 = other.Item3;
+Item4 = other.Item4;
+Item5 = other.Item5;
+Item6 = other.Item6;
+}
 public static implicit operator Either<T1, T2, T3, T4, T5, T6>(T1 t1) {
 return new(t1);
 }
@@ -399,39 +415,39 @@ protected TBase Convert1(T1 item1) {
 if (item1 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T1).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T1).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert2(T2 item2) {
 if (item2 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T2).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T2).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert3(T3 item3) {
 if (item3 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T3).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T3).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert4(T4 item4) {
 if (item4 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T4).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T4).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert5(T5 item5) {
 if (item5 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T5).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T5).Name} to {typeof(TBase).Name}");
 }
 protected TBase Convert6(T6 item6) {
 if (item6 is TBase @base) {
 return @base;
 }
-throw new NotImplementedException("Cannot convert from {typeof(T6).Name} to {typeof(TBase).Name}");
+throw new NotImplementedException($"Cannot convert from {typeof(T6).Name} to {typeof(TBase).Name}");
 }
-public virtual TBase Value => Convert1(Item1) ?? Convert2(Item2) ?? Convert3(Item3) ?? Convert4(Item4) ?? Convert5(Item5) ?? Convert6(Item6);
+public virtual TBase Value => (TBase)(Item1 != null ? Convert1(Item1) : default) ?? (TBase)(Item2 != null ? Convert2(Item2) : default) ?? (TBase)(Item3 != null ? Convert3(Item3) : default) ?? (TBase)(Item4 != null ? Convert4(Item4) : default) ?? (TBase)(Item5 != null ? Convert5(Item5) : default) ?? (TBase)(Item6 != null ? Convert6(Item6) : default);
 }
 }
 public partial class SubTypesOf<TBase> {
@@ -450,6 +466,42 @@ public Either(T5 item5) : base(item5) { }
 
 public Either(T6 item6) : base(item6) { }
 
+public Either(Either<T1, T2, T3, T4, T5, T6> other) {
+Item1 = other.Item1;
+Item2 = other.Item2;
+Item3 = other.Item3;
+Item4 = other.Item4;
+Item5 = other.Item5;
+Item6 = other.Item6;
+}
+public Either(TBase item) {
+if (item == null) throw new ArgumentNullException("item");
+if (item is T1 item1) {
+Item1 = item1;
+return;
+}
+if (item is T2 item2) {
+Item2 = item2;
+return;
+}
+if (item is T3 item3) {
+Item3 = item3;
+return;
+}
+if (item is T4 item4) {
+Item4 = item4;
+return;
+}
+if (item is T5 item5) {
+Item5 = item5;
+return;
+}
+if (item is T6 item6) {
+Item6 = item6;
+return;
+}
+throw new ArgumentException($"Expected argument to be either a {typeof(T1).Name}, {typeof(T2).Name}, {typeof(T3).Name}, {typeof(T4).Name}, {typeof(T5).Name} or {typeof(T6).Name} but instead got a type of {typeof(TBase).Name}: {item.GetType().Name}", "name");
+}
 public virtual TBase Value => Item1 ?? Item2 ?? Item3 ?? Item4 ?? Item5 ?? (TBase)Item6;
 public static implicit operator Either<T1, T2, T3, T4, T5, T6>(T1 t1) {
 return new(t1);
@@ -486,6 +538,14 @@ public Either(T5 item5) : base(item5) { }
 
 public Either(T6 item6) : base(item6) { }
 
+public Either(Either<T1, T2, T3, T4, T5, T6> other) {
+Item1 = other.Item1;
+Item2 = other.Item2;
+Item3 = other.Item3;
+Item4 = other.Item4;
+Item5 = other.Item5;
+Item6 = other.Item6;
+}
 public static implicit operator Either<T1, T2, T3, T4, T5, T6>(T1 t1) {
 return new(t1);
 }

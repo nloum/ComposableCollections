@@ -197,12 +197,12 @@ namespace SimpleMonads.HotChocolate
             return (IInputFieldDescriptor) result;
         }
 
-        public static IRequestExecutorBuilder AddEitherInputType<TEither>(this IRequestExecutorBuilder builder, bool useTypesAsNames = true) where TEither : IEither
+        public static IRequestExecutorBuilder AddEitherInputType<TEither>(this IRequestExecutorBuilder builder, string typeName = null, bool useTypesAsNames = true) where TEither : IEither
         {
             return builder.AddType(new InputObjectType<TEither>(descriptor =>
             {
                 var type = typeof(TEither);
-                descriptor.Name(type.Name);
+                descriptor.Name(typeName ?? (type.Name + "Input"));
                 descriptor.BindFieldsExplicitly();
                 descriptor.Directive(new OneFieldDirective());
                 //descriptor.Field(type.GetProperty("Value")).Ignore();
@@ -227,7 +227,7 @@ namespace SimpleMonads.HotChocolate
             return builder.AddType(new InputObjectType<TEither>(descriptor =>
             {
                 var type = typeof(TEither);
-                descriptor.Name(typeName ?? type.Name);
+                descriptor.Name(typeName ?? (type.Name + "Input"));
                 descriptor.BindFieldsExplicitly();
                 descriptor.Directive(new OneFieldDirective());
                 //descriptor.Field(type.GetProperty("Value")).Ignore();

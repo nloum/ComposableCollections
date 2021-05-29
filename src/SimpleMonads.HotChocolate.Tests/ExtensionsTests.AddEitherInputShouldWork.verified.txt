@@ -6,7 +6,7 @@ type Query {
   hello: String
 }
 
-input AnyAnimal @oneField {
+input AnyAnimalInput @oneField {
   Cat: CatInput
   Dog: DogInput
 }

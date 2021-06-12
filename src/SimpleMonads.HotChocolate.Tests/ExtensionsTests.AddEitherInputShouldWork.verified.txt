@@ -7,8 +7,8 @@ type Query {
 }
 
 input AnyAnimalInput @oneField {
-  Cat: CatInput
-  Dog: DogInput
+  cat: CatInput
+  dog: DogInput
 }
 
 input CatInput {

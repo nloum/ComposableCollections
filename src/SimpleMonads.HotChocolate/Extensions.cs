@@ -6,6 +6,7 @@ using System.Reflection;
 using HotChocolate;
 using HotChocolate.Execution.Configuration;
 using HotChocolate.Types;
+using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace SimpleMonads.HotChocolate
@@ -213,7 +214,7 @@ namespace SimpleMonads.HotChocolate
                 {
                     if (useTypesAsNames)
                     {
-                        descriptor.Field(type.GetProperty($"Item{i + 1}")).Name(types[i].Name);
+                        descriptor.Field(type.GetProperty($"Item{i + 1}")).Name(types[i].Name.Camelize());
                     }
                     else
                     {
@@ -238,7 +239,7 @@ namespace SimpleMonads.HotChocolate
                 {
                     if (useTypesAsNames)
                     {
-                        descriptor.Field(type.GetProperty($"Item{i + 1}")).Name(types[i].Name);
+                        descriptor.Field(type.GetProperty($"Item{i + 1}")).Name(types[i].Name.Camelize());
                     }
                     else
                     {

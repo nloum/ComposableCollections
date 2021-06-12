@@ -88,7 +88,22 @@ namespace SimpleMonads.GraphQL.Tests
 
             return Verify(schema.ToString());
         }
-        
+
+        [TestMethod]
+        public Task AddEitherWithoutInterfacesShouldWork()
+        {
+            var schema = new SchemaBuilder()
+                .AddType<DogType>()
+                .AddType<ObjectType<Cat>>()
+                .AddEither<AnyAnimal>(includeInterface: false)
+                // Add empty query
+                .AddType(new ObjectType(descriptor => descriptor.Name("Query" )))
+                .AddType(new ObjectTypeExtension<EitherAnimalRepository>(x => x.Name("Query")))
+                .Create();
+
+            return Verify(schema.ToString());
+        }
+
         [TestMethod]
         public Task AddMaybeObjectTypeShouldWork()
         {

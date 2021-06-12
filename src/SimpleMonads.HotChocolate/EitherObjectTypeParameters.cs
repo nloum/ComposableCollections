@@ -5,5 +5,6 @@ namespace SimpleMonads.HotChocolate
         public string InterfaceTypeName { get; init; }
         public string UnionTypeName { get; init; }
         public bool UseTypeNamesForProperties { get; init; }
+        public bool IncludeInterface { get; init; }
     }
 }

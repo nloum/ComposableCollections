@@ -107,13 +107,13 @@ namespace SimpleMonads.HotChocolate
             return builder;
         }
 
-        public static IRequestExecutorBuilder AddEither<TEither>(this IRequestExecutorBuilder builder, string unionTypeName = null, string interfaceTypeName = null)
+        public static IRequestExecutorBuilder AddEither<TEither>(this IRequestExecutorBuilder builder, string unionTypeName = null, string interfaceTypeName = null, bool includeInterface = true)
             where TEither : IEither
         {
-            return builder.AddEither<TEither>(out var _, out var __, unionTypeName, interfaceTypeName);
+            return builder.AddEither<TEither>(out var _, out var __, unionTypeName, interfaceTypeName, includeInterface);
         }
         
-        public static IRequestExecutorBuilder AddEither<TEither>(this IRequestExecutorBuilder builder, out UnionType<TEither> unionType, out InterfaceType interfaceType, string unionTypeName = null, string interfaceTypeName = null)
+        public static IRequestExecutorBuilder AddEither<TEither>(this IRequestExecutorBuilder builder, out UnionType<TEither> unionType, out InterfaceType interfaceType, string unionTypeName = null, string interfaceTypeName = null, bool includeInterface = true)
             where TEither : IEither
         {
             var metadata = typeof(TEither).GetEitherMetadata();
@@ -131,7 +131,7 @@ namespace SimpleMonads.HotChocolate
             builder = builder.AddType(unionType);
             
             var baseType = metadata.ConvertibleTo ?? metadata.SubTypesOf;
-            if (baseType != null)
+            if (baseType != null && includeInterface)
             {
                 interfaceType = (InterfaceType)Activator.CreateInstance(typeof(EitherInterface<>).MakeGenericType(baseType), parameters);
                 builder = builder.AddType(interfaceType);
@@ -144,13 +144,13 @@ namespace SimpleMonads.HotChocolate
             return builder;
         }
 
-        public static ISchemaBuilder AddEither<TEither>(this ISchemaBuilder builder, string unionTypeName = null, string interfaceTypeName = null)
+        public static ISchemaBuilder AddEither<TEither>(this ISchemaBuilder builder, string unionTypeName = null, string interfaceTypeName = null, bool includeInterface = true)
             where TEither : IEither
         {
-            return builder.AddEither<TEither>(out var _, out var __, unionTypeName, interfaceTypeName);
+            return builder.AddEither<TEither>(out var _, out var __, unionTypeName, interfaceTypeName, includeInterface);
         }
         
-        public static ISchemaBuilder AddEither<TEither>(this ISchemaBuilder builder, out UnionType<TEither> unionType, out InterfaceType interfaceType, string unionTypeName = null, string interfaceTypeName = null)
+        public static ISchemaBuilder AddEither<TEither>(this ISchemaBuilder builder, out UnionType<TEither> unionType, out InterfaceType interfaceType, string unionTypeName = null, string interfaceTypeName = null, bool includeInterface = true)
             where TEither : IEither
         {
             var metadata = typeof(TEither).GetEitherMetadata();
@@ -162,13 +162,14 @@ namespace SimpleMonads.HotChocolate
             {
                 UnionTypeName = unionTypeName,
                 InterfaceTypeName = interfaceTypeName,
+                IncludeInterface = includeInterface,
             };
 
             unionType = new EitherUnion<TEither>(parameters);
             builder = builder.AddType(unionType);
             
             var baseType = metadata.ConvertibleTo ?? metadata.SubTypesOf;
-            if (baseType != null)
+            if (baseType != null && includeInterface)
             {
                 interfaceType = (InterfaceType)Activator.CreateInstance(typeof(EitherInterface<>).MakeGenericType(baseType), parameters);
                 builder = builder.AddType(interfaceType);

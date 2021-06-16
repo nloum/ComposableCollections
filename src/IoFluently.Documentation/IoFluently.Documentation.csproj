@@ -10,9 +10,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="LiveLinq" Version="1.1.0-alpha0190" />
+      <PackageReference Include="ComposableCollections" Version="1.0.0-alpha0182" />
       <PackageReference Include="Markdig" Version="0.22.1" />
-      <PackageReference Include="TreeLinq" Version="1.0.0-alpha0019" />
+      <PackageReference Include="TreeLinq" Version="1.0.0-alpha0022" />
     </ItemGroup>
 
 </Project>

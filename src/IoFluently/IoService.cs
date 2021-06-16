@@ -22,6 +22,8 @@ namespace IoFluently
 {
     public class IoService : IoServiceBase
     {
+        public static IIoService Default { get; } = new IoService(false);
+    
         private bool? _isCaseSensitiveByDefault = null;
 
         public override IQueryable<AbsolutePath> Query()

@@ -22,7 +22,11 @@ namespace IoFluently
 {
     public class IoService : IoServiceBase
     {
-        public static IIoService Default { get; } = new IoService(false);
+        /// <summary>
+        /// The default IoService. Use this for environments where dependency injection isn't necessary.
+        /// E.g., Nuke.build scripts or bootstrapping a larger program.
+        /// </summary>
+        public static IIoService Default { get; set; }
     
         private bool? _isCaseSensitiveByDefault = null;
 

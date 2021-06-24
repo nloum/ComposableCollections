@@ -507,8 +507,19 @@ namespace IoFluently
             {
                 if (path.GetPathType() == PathType.Folder)
                     return path;
-                path.TryParent().IfHasValue(parent => parent.CreateFolder());
-                AsDirectoryInfo(path).Create();
+                var ancestors = path.Ancestors(true).ToList();
+                ancestors.Reverse();
+                foreach (var ancestor in ancestors)
+                {
+                    switch (ancestor.GetPathType())
+                    {
+                        case PathType.File:
+                            throw new IOException($"The path {ancestor} is a file, not a folder");
+                        case PathType.None:
+                            Directory.CreateDirectory(path);
+                            break;
+                    }
+                }
             }
             catch (IOException)
             {

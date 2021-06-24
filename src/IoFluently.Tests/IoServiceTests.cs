@@ -76,6 +76,18 @@ namespace IoFluently.Tests
         }
         
         [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        public void ShouldCreateFullPath(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, true);
+            var testFolder = uut.CurrentDirectory / "test1" / "test2" / "test3";
+            testFolder.EnsureIsFolder();
+            testFolder.IsFolder().Should().BeTrue();
+            (uut.CurrentDirectory / "test1").EnsureIsNotFolder(true);
+            (uut.CurrentDirectory / "test1").Exists().Should().BeFalse();
+        }
+
+        [TestMethod]
         //[DataRow(IoServiceType.IoService)]
         [DataRow(IoServiceType.InMemoryZipIoService)]
         public void CreateTemporaryFileShouldWork(IoServiceType type)

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -237,7 +238,7 @@ namespace CodeIO.Tests
         }
 
         [TestMethod]
-        public void ShouldClassWithRecursiveProperty()
+        public void ShouldReadClassWithRecursiveProperty()
         {
             var uut = new TypeReader();
             uut.AddReflection();
@@ -250,6 +251,44 @@ namespace CodeIO.Tests
             clazz.Properties[0].Name.Should().Be("Parent");
             clazz.Properties[0].Visibility.Should().Be(Visibility.Public);
             object.ReferenceEquals(clazz.Properties[0].Type, clazz).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ShouldReadClassWithIndexer()
+        {
+            var uut = new TypeReader();
+            uut.AddReflection();
+
+            var clazz = (INonGenericClass) uut.GetTypeFormat<Type>()[typeof(ClassWithIndexer)].Value;
+            clazz.Identifier.Name.Should().Be(nameof(ClassWithIndexer));
+            clazz.Visibility.Should().Be(Visibility.Public);
+            var strin = (INonGenericClass) uut.GetTypeFormat<Type>()[typeof(string)].Value;
+
+            clazz.Indexers.Count.Should().Be(1);
+            clazz.Indexers[0].Visibility.Should().Be(Visibility.Public);
+            clazz.Indexers[0].Parameters.Count.Should().Be(1);
+            clazz.Indexers[0].Parameters[0].Name.Should().Be("a");
+            object.ReferenceEquals(clazz.Indexers[0].Parameters[0].Type, strin).Should().BeTrue();
+        }
+        
+        
+        [TestMethod]
+        public void ShouldReadClassWithMethod()
+        {
+            var uut = new TypeReader();
+            uut.AddReflection();
+
+            var clazz = (INonGenericClass) uut.GetTypeFormat<Type>()[typeof(ClassWithMethod)].Value;
+            clazz.Identifier.Name.Should().Be(nameof(ClassWithMethod));
+            clazz.Visibility.Should().Be(Visibility.Public);
+            var inttype = (Primitive) uut.GetTypeFormat<Type>()[typeof(int)].Value;
+
+            var method = clazz.Methods.First(method => method.Name == "GetSomething");
+            method.Visibility.Should().Be(Visibility.Public);
+            method.Name.Should().Be("GetSomething");
+            method.Parameters.Count.Should().Be(1);
+            method.Parameters[0].Name.Should().Be("a");
+            object.ReferenceEquals(method.Parameters[0].Type, inttype).Should().BeTrue();
         }
     }
 }

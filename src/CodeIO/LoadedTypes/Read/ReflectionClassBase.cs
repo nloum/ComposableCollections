@@ -27,7 +27,7 @@ namespace CodeIO.LoadedTypes.Read
             Constructors = type.GetDeclaredConstructors().Select(constructor => new Constructor()
             {
                 Parameters = constructor.GetParameters().Select(parameter =>
-                    new LazyConstructorParameter(parameter.Name, typeFormat[parameter.ParameterType])),
+                    new LazyConstructorParameter(parameter.Name, typeFormat[parameter.ParameterType], parameter.HasDefaultValue, parameter.DefaultValue)),
                 Visibility = constructor.GetVisibility()
             });
         }

@@ -10,6 +10,25 @@ namespace CodeIO.Tests
         public ClassWithRecursiveProperty Parent { get; set; }
     }
 
+    public class ClassWithIndexer
+    {
+        public string this[string a]
+        {
+            get => "";
+            set {
+            
+            }
+        }
+    }
+    
+    public class ClassWithMethod
+    {
+        public string GetSomething(int a)
+        {
+            return "";
+        }
+    }
+
     public interface IInterfaceWithProperty
     {
         public string Name { get; set; }

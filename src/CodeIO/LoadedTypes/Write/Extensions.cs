@@ -12,7 +12,7 @@ namespace CodeIO.LoadedTypes.Write
 {
     public static class Extensions
     {
-        public static ClassWriter Implement(this ReflectionNonGenericInterface iface)
+        public static ClassWriter ImplementClass(this ReflectionNonGenericInterface iface)
         {
             var result = new ClassWriter()
             {
@@ -21,7 +21,7 @@ namespace CodeIO.LoadedTypes.Write
             return result;
         }
         
-        public static ClassWriter ImplementMissingProperties(this ClassWriter classWriter)
+        public static ClassWriter WithDefaultImplementationsForMissingProperties(this ClassWriter classWriter)
         {
             var properties = classWriter.Properties;
             foreach (var propertyThatNeedsToBeOverriden in classWriter.PropertiesNotYetOverriden)
@@ -39,14 +39,14 @@ namespace CodeIO.LoadedTypes.Write
             return classWriter with {Properties = properties};
         }
 
-        public static ClassWriter AddConstructorThatInitializesAllProperties(this ClassWriter classWriter)
+        public static ClassWriter WithConstructorThatInitializesAllProperties(this ClassWriter classWriter)
         {
             var constructor = new ConstructorWriter();
             constructor.PropertiesToInitialize.AddRange(classWriter.Properties);
             return classWriter with {Constructors = classWriter.Constructors.Add(constructor)};
         }
 
-        public static ClassWriter ImplementMissingMethodsStatically(this ClassWriter classWriter, params Type[] staticMethodImplementationSources)
+        public static ClassWriter WithStaticImplementationsForMissingMethods(this ClassWriter classWriter, params Type[] staticMethodImplementationSources)
         {
             var methods = classWriter.Methods;
             

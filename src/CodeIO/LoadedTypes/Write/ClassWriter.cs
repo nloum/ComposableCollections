@@ -16,7 +16,7 @@ namespace CodeIO.LoadedTypes.Write
         public ImmutableList<ConstructorWriter> Constructors { get; init; } = ImmutableList<ConstructorWriter>.Empty;
         public ImmutableList<PropertyWriter> Properties { get; init; } = ImmutableList<PropertyWriter>.Empty;
         public ImmutableList<MethodWriter> Methods { get; init; } = ImmutableList<MethodWriter>.Empty;
-
+        
         public IEnumerable<Type> BaseTypes
         {
             get

@@ -21,7 +21,7 @@ namespace CodeIO.Tests
                     Name = "Value",
                     Type = typeof(string)
                 }),
-            }.AddConstructorThatInitializesAllProperties();
+            }.WithConstructorThatInitializesAllProperties();
 
             var type = uut.Write();
 
@@ -37,9 +37,9 @@ namespace CodeIO.Tests
             var iface = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IInterfaceWithProperty)].Value;
 
             var classWriter = iface
-                .Implement()
-                .ImplementMissingProperties()
-                .AddConstructorThatInitializesAllProperties();
+                .ImplementClass()
+                .WithDefaultImplementationsForMissingProperties()
+                .WithConstructorThatInitializesAllProperties();
             var type = classWriter.Write();
 
             var instance = (IInterfaceWithProperty)Activator.CreateInstance(type, "Hi");
@@ -54,8 +54,8 @@ namespace CodeIO.Tests
             var iface = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IInterfaceWithMethod)].Value;
 
             var classWriter = iface
-                .Implement()
-                .ImplementMissingMethodsStatically(typeof(TypeWriterTests));
+                .ImplementClass()
+                .WithStaticImplementationsForMissingMethods(typeof(TypeWriterTests));
             var type = classWriter.Write();
 
             var instance = (IInterfaceWithMethod)Activator.CreateInstance(type);

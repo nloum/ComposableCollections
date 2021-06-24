@@ -25,6 +25,12 @@ namespace CodeIO.LoadedTypes.Read
             Properties = type.GetProperties().Where(property => property.GetIndexParameters().Length == 0)
                 .ToImmutableList()
                 .Select(property => new LazyProperty(typeFormat[property.PropertyType], property.Name, Visibility.Public));
+            Methods = type.GetMethods()
+                .ToImmutableList()
+                .Select(method => new LazyMethod(typeFormat[method.ReturnType], method.Name, Visibility.Public, method.GetParameters().Select(parameter => new LazyParameter(parameter.Name, typeFormat[parameter.ParameterType], parameter.IsOut, parameter.HasDefaultValue, parameter.DefaultValue))));
+            Indexers = type.GetProperties().Where(property => property.GetIndexParameters().Length > 0)
+                .ToImmutableList()
+                .Select(property => new LazyIndexer(typeFormat[property.PropertyType], Visibility.Public, property.GetIndexParameters().Select(parameter => new LazyParameter(parameter.Name, typeFormat[parameter.ParameterType], false, parameter.HasDefaultValue, parameter.DefaultValue))));
             Interfaces = type.GetInterfaces()
                 .Select(type => typeFormat[type])
                 .Select(type => type.Value);

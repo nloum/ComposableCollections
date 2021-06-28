@@ -231,7 +231,7 @@ namespace CodeIO
 
                 if (type == typeof(void))
                 {
-	                return new Lazy<IType>(Void.Instance);
+	                return new Lazy<IType>(ReflectionVoid.Instance);
                 }
 
                 throw new NotImplementedException($"Cannot process type: {type.GetCSharpTypeName()}");

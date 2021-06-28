@@ -1,10 +1,8 @@
 namespace CodeIO
 {
-    public class Void : IType
+    public abstract class Void : IType
     {
-        public static Void Instance { get; } = new Void();
-        
-        private Void()
+        protected Void()
         {
             
         }

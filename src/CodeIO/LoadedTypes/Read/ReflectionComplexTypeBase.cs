@@ -7,7 +7,7 @@ using ComposableCollections.Dictionary.Interfaces;
 
 namespace CodeIO.LoadedTypes.Read
 {
-    public abstract class ReflectionComplexTypeBase : IComplexType
+    public abstract class ReflectionComplexTypeBase : IComplexType, IReflectionType
     {
         public Type Type { get; }
         public TypeIdentifier Identifier { get; }

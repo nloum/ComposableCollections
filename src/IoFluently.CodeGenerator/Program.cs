@@ -6,48 +6,11 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using CodeIO;
+using CodeIO.LoadedTypes.Read;
 
 namespace IoFluently.CodeGenerator
 {
-    // [XmlRoot("doc")]
-    // public class CSharpDocumentationXmlDto
-    // {
-    //     [XmlElement("assembly")]
-    //     public AssemblyXmlDto Assembly { get; set; }
-    //     [XmlArray( "members" )]
-    //     [XmlArrayItem(typeof( MemberXmlDto), ElementName = "member" )]
-    //     public List<MemberXmlDto> Members { get; set; }
-    // }
-    //
-    // public class MemberXmlDto
-    // {
-    //     [XmlAttribute("name")]
-    //     public string Name { get; set; }
-    //     [XmlElement("summary")]
-    //     public string Summary { get; set; }
-    //     [XmlElement("remarks")]
-    //     public string Remarks { get; set; }
-    //     [XmlArray]
-    //     [XmlArrayItem("param", typeof(ParameterXmlDto))]
-    //     public List<ParameterXmlDto> Parameters { get; set; }
-    //     [XmlElement("returns")]
-    //     public string Returns { get; set; }
-    // }
-    //
-    // public class ParameterXmlDto
-    // {
-    //     [XmlAttribute("name")]
-    //     public string Name { get; set; }
-    //     [XmlText]
-    //     public string Content { get; set; }
-    // }
-    //
-    // public class AssemblyXmlDto
-    // {
-    //     [XmlElement("name")]
-    //     public string Name { get; set; }
-    // }
-    
     class Program
     {
         static void Main(string[] args)
@@ -91,10 +54,77 @@ namespace IoFluently
         
         private static void GenerateIoExtensions(AbsolutePath repoRoot, TextWriter textWriter)
         {
-            var ioServiceType = typeof(IIoService);
+            var typeReader = new TypeReader();
+            typeReader.AddReflection();
+            var ioServiceType = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IIoService)].Value;
+            var absolutePath = typeReader.GetTypeFormat<Type>()[typeof(AbsolutePath)].Value;
+            var relativePath = typeReader.GetTypeFormat<Type>()[typeof(RelativePath)].Value;
+            var absolutePathTranslation = typeReader.GetTypeFormat<Type>()[typeof(IAbsolutePathTranslation)].Value;
+
+            foreach (var method in ioServiceType.Methods)
+            {
+                if (method.Parameters.Count == 0)
+                {
+                    continue;
+                }
+
+                var firstParameter = method.Parameters[0];
+                
+                if (!Equals(firstParameter.Type, absolutePath) &&
+                    !Equals(firstParameter.Type, relativePath) &&
+                    !Equals(firstParameter.Type, absolutePathTranslation))
+                {
+                    continue;
+                }
+                
+                
+                var parameters = new List<string>();
+                var arguments = new List<string>();
+
+                foreach (var parameter in method.Parameters)
+                {
+                    var parameterString = "";
+                    if (parameters.Count == 0)
+                    {
+                        parameterString = "this " + parameterString;
+                    }
+                    else
+                    {
+                        if (parameter.IsOut)
+                        {
+                            parameterString = "out " + parameterString;
+                        }
+                    }
+
+                    parameterString += $"{ConvertToCSharpTypeName(((ReflectionComplexTypeBase)parameter.Type).Type)} {parameter.Name}";
+
+                    if (parameter.HasDefaultValue)
+                    {
+                        parameterString += $" = {ConvertToCSharpValue(parameter.DefaultValue)}";
+                    }
+                    
+                    parameters.Add(parameterString.Trim());
+
+                    if (parameter.IsOut)
+                    {
+                        arguments.Add($"out {parameter.Name}");
+                    }
+                    else
+                    {
+                        arguments.Add(parameter.Name);
+                    }
+                }
+
+                textWriter.WriteLine($"public static {ConvertToCSharpTypeName(((ReflectionComplexTypeBase)method.ReturnType).Type)} {method.Name}({string.Join(", ",  parameters)}) {{");
+                if (method.ReturnType != typeof(void))
+                {
+                    textWriter.Write("return ");
+                }
+                textWriter.WriteLine($"{arguments[0]}.IoService.{method.Name}({string.Join(", ", arguments)});");
+                textWriter.WriteLine("}\n");
+            }
             
-            var methods = ioServiceType.GetMethods();
-            foreach (var method in methods.OrderBy(method => method.Name).ThenBy(method => method.GetParameters().Length).ThenBy(method => method.GetHashCode()))
+            foreach (var method in ioServiceType.Methods.OrderBy(method => method.Name).ThenBy(method => method.Parameters.Count).ThenBy(method => method.GetHashCode()))
             {
                 if (method.IsStatic || !method.IsPublic)
                 {

@@ -19,29 +19,26 @@ namespace IoFluently
 {
     public abstract class IoServiceBase : IIoService
     {
+        #region Environmental stuff
+        
+        /// <summary>
+        /// The newline character(s)
+        /// </summary>
+        protected string _newline;
+
+        public virtual string GetNewlineCharacter()
+        {
+            return _newline;
+        }
+
         public string DefaultDirectorySeparator { get; }
         public bool IsCaseSensitiveByDefault { get; }
-
-        public IOpenFilesTrackingService OpenFilesTrackingService { get; }
-
         public abstract AbsolutePath CurrentDirectory { get; }
 
         public abstract IObservableReadOnlySet<AbsolutePath> Roots { get; }
 
-        public abstract IQueryable<AbsolutePath> Query();
-
-        public abstract ISetChanges<AbsolutePath> ToLiveLinq(AbsolutePath path, bool includeFileContentChanges,
-            bool includeSubFolders, string pattern);
-
-        public abstract IMaybe<StreamWriter> TryOpenWriter(AbsolutePath pathSpec);
-
-        protected IoServiceBase(IOpenFilesTrackingService openFilesTrackingService, bool isCaseSensitiveByDefault, string defaultDirectorySeparator, string newline)
-        {
-            IsCaseSensitiveByDefault = isCaseSensitiveByDefault;
-            OpenFilesTrackingService = openFilesTrackingService ?? throw new ArgumentNullException(nameof(openFilesTrackingService));
-            DefaultDirectorySeparator = defaultDirectorySeparator ?? throw new ArgumentNullException(nameof(defaultDirectorySeparator));
-            _newline = newline ?? throw new ArgumentNullException(nameof(newline));
-        }
+        /// <inheritdoc />
+        public abstract void UpdateRoots();
 
         protected static string GetDefaultDirectorySeparatorForThisEnvironment()
         {
@@ -57,147 +54,50 @@ namespace IoFluently
             File.Delete(file);
             return caseSensitive;
         }
-
-        public IEnumerable<AbsolutePath> Ancestors(AbsolutePath path)
-        {
-            return Ancestors(path, false);
-        }
         
-        public IFileInfo GetFileInfo( string subpath ) => new AbsolutePathFileInfoAdapter(ParseAbsolutePath( subpath ));
+        /// <inheritdoc />
+        public abstract AbsolutePath GetTemporaryFolder();
 
-        public IDirectoryContents GetDirectoryContents( string subpath ) => new AbsolutePathDirectoryContents( ParseAbsolutePath( subpath ) );
+        #endregion
+        #region Creating
+        
+        /// <inheritdoc />
+        public abstract AbsolutePath CreateFolder(AbsolutePath path);
 
-        public IChangeToken Watch( string filter )
+        /// <inheritdoc />
+        public virtual bool MayCreateFile(FileMode fileMode)
         {
-            // TODO - implement this properly
-            return new EmptyChangeToken();
+            return fileMode.HasFlag(FileMode.Append) || fileMode.HasFlag(FileMode.Create) ||
+                   fileMode.HasFlag(FileMode.CreateNew) || fileMode.HasFlag(FileMode.OpenOrCreate);
         }
 
-        public virtual IEnumerable<string> ReadLines(AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
-            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
-            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
-            bool leaveOpen = false)
+        /// <inheritdoc />
+        public virtual AbsolutePath Create(AbsolutePath path, PathType pathType)
         {
-            var maybeStream = pathSpec.TryOpen(fileMode, fileAccess, fileShare);
-            if (maybeStream.HasValue)
+            if (pathType == PathType.File)
             {
-                using (maybeStream.Value)
-                {
-                    return ReadLines(maybeStream.Value, encoding, detectEncodingFromByteOrderMarks, bufferSize,
-                        leaveOpen);
-                }
+                CreateEmptyFile(path);
             }
-
-            return Enumerable.Empty<string>();
-        }
-
-        public virtual IMaybe<string> TryReadText(AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
-            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
-            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
-            bool leaveOpen = false)
-        {
-            return pathSpec.TryOpen(fileMode, fileAccess, fileShare).Select(
-                fs =>
-                {
-                    using (fs)
-                    {
-                        return TryReadText(fs, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
-                    }
-                });
-        }
-
-        public virtual void WriteText(AbsolutePath pathSpec, IEnumerable<string> lines, FileMode fileMode = FileMode.Create,
-            FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
-            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
-        {
-            var maybeStream = pathSpec.TryOpen(fileMode, fileAccess, fileShare);
-            if (maybeStream.HasValue)
-                using (maybeStream.Value)
-                {
-                    WriteLines(maybeStream.Value, lines, encoding, bufferSize, leaveOpen);
-                }
-        }
-
-        public virtual void WriteText(AbsolutePath pathSpec, string text, FileMode fileMode = FileMode.Create,
-            FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
-            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
-        {
-            var maybeStream = pathSpec.TryOpen(fileMode, fileAccess, fileShare);
-            if (maybeStream.HasValue)
-                using (maybeStream.Value)
-                {
-                    WriteText(maybeStream.Value, text, encoding, bufferSize, leaveOpen);
-                }
-        }
-
-        public virtual IEnumerable<string> ReadLines(Stream stream, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
-        {
-            if (encoding == null)
-                encoding = Encoding.UTF8;
-            using (var sr = new StreamReader(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen))
+            else
             {
-                string line;
-                while ((line = sr.ReadLine()) != null) yield return line;
+                CreateFolder(path);
             }
+            
+            return path;
         }
 
-        public virtual IEnumerable<string> ReadLinesBackwards(Stream stream, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
+        /// <inheritdoc />
+        public virtual Stream CreateFile(AbsolutePath path)
         {
-            if (encoding == null)
-                encoding = Encoding.UTF8;
-
-            var content = string.Empty;
-            // Seek file pointer to end
-            stream.Seek(0, SeekOrigin.End);
-
-            var buffer = new byte[bufferSize];
-
-            //loop now and read backwards
-            while (stream.Position > 0)
-            {
-                buffer.Initialize();
-
-                int bytesRead;
-
-                if (stream.Position - bufferSize >= 0)
-                {
-                    stream.Seek(-bufferSize, SeekOrigin.Current);
-                    bytesRead = stream.Read(buffer, 0, bufferSize);
-                    stream.Seek(-bufferSize, SeekOrigin.Current);
-                }
-                else
-                {
-                    var finalBufferSize = stream.Position;
-                    stream.Seek(0, SeekOrigin.Begin);
-                    bytesRead = stream.Read(buffer, 0, (int) finalBufferSize);
-                    stream.Seek(0, SeekOrigin.Begin);
-                }
-
-                var strBuffer = encoding.GetString(buffer, 0, bytesRead);
-
-                // lines is equal to what we just read, with the leftover content from last iteration appended to it.
-                var lines = (strBuffer + content).Split('\n');
-
-                // Loop through lines backwards, ignoring the first element, and yield each value
-                for (var i = lines.Length - 1; i > 0; i--) yield return lines[i].Trim('\r');
-
-                // Leftover content is part of a line defined on the line(s) that we'll read next iteration of while loop
-                // so we must save leftover content for later
-                content = lines[0];
-            }
+            var stream = TryOpen(path, FileMode.CreateNew, FileAccess.ReadWrite).Value;
+            return stream;
         }
 
-        public virtual string TryReadText(Stream stream, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
-            int bufferSize = 4096, bool leaveOpen = false)
+        /// <inheritdoc />
+        public virtual AbsolutePath CreateEmptyFile(AbsolutePath path)
         {
-            if (encoding == null)
-                encoding = Encoding.UTF8;
-            using (var sr = new StreamReader(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen))
-            {
-                return ReadText(sr);
-            }
+            path.CreateFile().Dispose();
+            return path;
         }
 
         /// <inheritdoc />
@@ -211,10 +111,362 @@ namespace IoFluently
             return spec;
         }
 
+        #endregion
+        #region Deleting
+        
         /// <inheritdoc />
-        public abstract AbsolutePath GetTemporaryFolder();
+        public virtual AbsolutePath ClearFolder(AbsolutePath path)
+        {
+            foreach (var item in path.Descendants())
+            {
+                item.Delete();
+            }
+
+            return path;
+        }
+
+        /// <inheritdoc />
+        public abstract AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false);
+
+        /// <inheritdoc />
+        public abstract AbsolutePath DeleteFile(AbsolutePath path);
+
+        /// <inheritdoc />
+        public virtual AbsolutePath Delete(AbsolutePath path, bool recursiveDeleteIfFolder = false)
+        {
+            if (path.GetPathType() == PathType.File) return path.DeleteFile();
+
+            if (path.GetPathType() == PathType.Folder) return path.DeleteFolder(recursiveDeleteIfFolder);
+
+            return path;
+        }
+
+        #endregion
+        #region Ensuring is
+        
+        /// <inheritdoc />
+        public AbsolutePath EnsureIsFolder(AbsolutePath path, bool createRecursively = false)
+        {
+            if (!IsFolder(path))
+            {
+                path.CreateFolder();
+            }
+
+            return path;
+        }
+        
+        /// <inheritdoc />
+        public AbsolutePath EnsureIsFile(AbsolutePath path, bool createRecursively = false)
+        {
+            if (!IsFile(path))
+            {
+                path.CreateEmptyFile();
+            }
+
+            return path;
+        }
+
+        /// <inheritdoc />
+        public AbsolutePath EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = false, bool createRecursively = false)
+        {
+            if (path.Exists())
+            {
+                path.Delete(recursiveDeleteIfFolder);
+            }
+
+            path.CreateFolder();
+
+            return path;
+        }
+
+        #endregion
+        #region Ensuring is not
+        
+        /// <inheritdoc />
+        public AbsolutePath EnsureIsNotFile(AbsolutePath path)
+        {
+            if (IsFile(path))
+            {
+                path.DeleteFile();
+            }
+
+            return path;
+        }
+
+        /// <inheritdoc />
+        public AbsolutePath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = false)
+        {
+            if (path.Exists())
+            {
+                path.Delete(recursiveDeleteIfFolder);
+            }
+
+            return path;
+        }
+
+        /// <inheritdoc />
+        public AbsolutePath EnsureIsNotFolder(AbsolutePath path, bool recursive = false)
+        {
+            if (IsFolder(path))
+            {
+                path.DeleteFolder(recursive);
+            }
+
+            return path;
+        }
+
+
+        #endregion
+        #region Utilities
+        
+        /// <inheritdoc />
+        public bool IsFile(AbsolutePath absolutePath)
+        {
+            return absolutePath.GetPathType() == PathType.File;
+        }
+
+        /// <inheritdoc />
+        public bool IsFolder(AbsolutePath absolutePath)
+        {
+            return absolutePath.GetPathType() == PathType.Folder;
+        }
+        
+        /// <inheritdoc />
+        public bool HasExtension(AbsolutePath path)
+        {
+            return path.Extension.HasValue;
+        }
+
+        /// <inheritdoc />
+        public virtual bool CanBeSimplified(AbsolutePath path)
+        {
+            return path.Path.SkipWhile(str => str == "..").Any(str => str == "..");
+        }
+
+        /// <inheritdoc />
+        public virtual bool IsImageUri(Uri uri)
+        {
+            if (uri == null)
+                return false;
+            var str = uri.ToString();
+            if (!str.Contains("."))
+                return false;
+            var extension = str.Substring(str.LastIndexOf('.') + 1);
+            return ImageFileExtensions.Any(curExtension => extension == curExtension);
+        }
+
+        /// <inheritdoc />
+        public virtual bool IsVideoUri(Uri uri)
+        {
+            if (uri == null)
+                return false;
+            var str = uri.ToString();
+            if (!str.Contains("."))
+                return false;
+            var extension = str.Substring(str.LastIndexOf('.') + 1);
+            return VideoFileExtensions.Any(curExtension => extension == curExtension);
+        }
+
+        /// <inheritdoc />
+        public virtual string StripQuotes(string str)
+        {
+            if (str.StartsWith("\"") && str.EndsWith("\""))
+                return str.Substring(1, str.Length - 2);
+            if (str.StartsWith("'") && str.EndsWith("'"))
+                return str.Substring(1, str.Length - 2);
+            return str;
+        }
+
+
+        /// <inheritdoc />
+        public virtual Uri Child(Uri parent, Uri child)
+        {
+            var parentLocalPath = parent.ToString();
+            if (!parentLocalPath.EndsWith(Path.DirectorySeparatorChar.ToString())
+                && !parentLocalPath.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
+                parentLocalPath += Path.DirectorySeparatorChar;
+            return new Uri(parentLocalPath).MakeRelativeUri(child);
+        }
 
         /// <summary>
+        /// List of video file extensions
+        /// </summary>
+        public readonly List<string> VideoFileExtensions = new List<string>
+        {
+            "3gpp",
+            "3g2",
+            "3gp",
+            "3gp2",
+            "asf",
+            "mov",
+            "avi",
+            "mts",
+            "m2ts",
+            "m2t",
+            "m4v",
+            "m3u",
+            "asx",
+            "mpe",
+            "mpeg",
+            "mpg",
+            "m1v",
+            "m2v",
+            "mp2v",
+            "mpv2",
+            "mp4",
+            "mp4v",
+            "ts",
+            "wm",
+            "wpl",
+            "wmx",
+            "wmv",
+            "wvx"
+        };
+
+        /// <summary>
+        /// List of image file extensions
+        /// </summary>
+        public readonly List<string> ImageFileExtensions = new List<string>
+        {
+            "ani",
+            "b3d",
+            "bmp",
+            "dib",
+            "cam",
+            "clp",
+            "crw",
+            "cr2",
+            "cur",
+            "dcm",
+            "acr",
+            "ima",
+            "dcx",
+            "dds",
+            "djvu",
+            "iw44",
+            "dxf",
+            "ecw",
+            "emf",
+            "eps",
+            "ps",
+            "exr",
+            "fpx",
+            "g3",
+            "gif",
+            "hdp",
+            "jxr",
+            "wdp",
+            "icl",
+            "ico",
+            "iff",
+            "lbm",
+            "img",
+            "jls",
+            "jp2",
+            "jpc",
+            "j2k",
+            "jpf",
+            "jpg",
+            "jpeg",
+            "jpe",
+            "jpm",
+            "kdc",
+            "mng",
+            "jng",
+            "pbm",
+            "pcd",
+            "pcx",
+            "pgm",
+            "png",
+            "ppm",
+            "psd",
+            "psp",
+            "ras",
+            "sun",
+            "raw",
+            "rle",
+            "sff",
+            "sfw",
+            "sgi",
+            "rgb",
+            "sid",
+            "tga",
+            "tif",
+            "tiff",
+            "wbmp",
+            "webp",
+            "wmf",
+            "xbm",
+            "xpm"
+        };
+
+        /// <inheritdoc />
+        public virtual bool ContainsFiles(AbsolutePath path)
+        {
+            if (path.GetPathType() == PathType.File)
+                return true;
+            return path.Children().All(child => child.ContainsFiles());
+        }
+
+        /// <inheritdoc />
+        public virtual bool FolderContainsFiles(AbsolutePath path)
+        {
+            if (path.GetPathType() == PathType.File)
+                return false;
+            return path.ContainsFiles();
+        }
+
+        /// <inheritdoc />
+        public virtual bool IsAncestorOf(AbsolutePath path, AbsolutePath possibleDescendant)
+        {
+            return IsDescendantOf(possibleDescendant, path);
+        }
+
+        /// <inheritdoc />
+        public virtual bool IsDescendantOf(AbsolutePath path, AbsolutePath possibleAncestor)
+        {
+            var possibleDescendantStr = Path.GetFullPath(path.ToString()).ToLower();
+            var possibleAncestorStr = Path.GetFullPath(possibleAncestor.ToString()).ToLower();
+            return possibleDescendantStr.StartsWith(possibleAncestorStr);
+        }
+
+        /// <inheritdoc />
+        public virtual bool HasExtension(AbsolutePath path, string extension)
+        {
+            if (!extension.StartsWith(".")) {
+                extension = "." + extension;
+            }
+
+            var actualExtension = Path.GetExtension(path.ToString());
+            if (actualExtension == extension)
+                return true;
+            if (actualExtension == null)
+                return false;
+            return actualExtension.Equals(extension, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <inheritdoc />
+        public virtual string SurroundWithDoubleQuotesIfNecessary(string str)
+        {
+            if (str.Contains(" "))
+            {
+                if (!str.StartsWith("\""))
+                    str = "\"" + str;
+                if (!str.EndsWith("\""))
+                    str = str + "\"";
+            }
+
+            return str;
+        }
+
+        /// <inheritdoc />
+        public abstract AbsolutePath Decrypt(AbsolutePath path);
+
+        /// <inheritdoc />
+        public abstract AbsolutePath Encrypt(AbsolutePath path);
+
+        public IOpenFilesTrackingService OpenFilesTrackingService { get; }
+                /// <summary>
         ///     Returns a regex that filters files the same as the specified pattern.
         ///     From here: http://www.java2s.com/Code/CSharp/Regular-Expressions/Checksifnamematchespatternwithandwildcards.htm
         ///     Copyright:   Julijan ?ribar, 2004-2007
@@ -274,6 +526,93 @@ namespace IoFluently
 
             var regex = new Regex(pattern, RegexOptions.IgnoreCase);
             return regex;
+        }
+
+        #endregion
+        #region Parsing paths
+        
+        /// <inheritdoc />
+        public virtual bool IsAbsoluteWindowsPath(string path)
+        {
+            return char.IsLetter(path[0]) && path[1] == ':';
+        }
+
+        /// <inheritdoc />
+        public virtual bool IsAbsoluteUnixPath(string path)
+        {
+            return path.StartsWith("/");
+        }
+
+        /// <summary>
+        ///     Checks for invalid relative paths, like C:\.. (Windows) or /.. (Unix)
+        /// </summary>
+        internal bool IsAncestorOfRoot(IReadOnlyList<string> pathComponents)
+        {
+            var result = new List<string>();
+            var numberOfComponentsToSkip = 0;
+            var isRelative = !ComponentsAreAbsolute(pathComponents);
+            for (var i = pathComponents.Count - 1; i >= 0; i--)
+                if (!isRelative && i == 0)
+                    result.Insert(0, pathComponents[i]);
+                else if (pathComponents[i] == ".")
+                    continue;
+                else if (pathComponents[i] == "..")
+                    numberOfComponentsToSkip++;
+                else if (numberOfComponentsToSkip > 0)
+                    numberOfComponentsToSkip--;
+                else
+                    result.Insert(0, pathComponents[i]);
+
+            return numberOfComponentsToSkip > 0 && !isRelative;
+        }
+
+        /// <inheritdoc />
+        public virtual bool ComponentsAreAbsolute(IReadOnlyList<string> path)
+        {
+            if (path[0] == "/")
+                return true;
+            if (char.IsLetter(path[0][0]) && path[0][1] == ':')
+                return true;
+            if (path[0] == "\\")
+                return true;
+            return false;
+        }
+
+        /// <inheritdoc />
+        public AbsolutePath ParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo,
+            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
+        {
+            var relativePath = TryParseRelativePath(path, flags);
+            if (relativePath.HasValue)
+            {
+                return optionallyRelativeTo / path;
+            }
+
+            return ParseAbsolutePath(path, flags);
+        }
+
+        /// <inheritdoc />
+        public IEither<AbsolutePath, RelativePath> ParsePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
+        {
+            var relativePath = TryParseRelativePath(path, flags);
+            if (relativePath.HasValue)
+            {
+                return new Either<AbsolutePath, RelativePath>(relativePath.Value);
+            }
+            
+            return new Either<AbsolutePath, RelativePath>(ParseAbsolutePath(path, flags));
+        }
+
+        /// <inheritdoc />
+        public bool IsRelativePath(string path)
+        {
+            return TryParseRelativePath(path, CaseSensitivityMode.UseDefaultsForGivenPath).HasValue;
+        }
+
+        /// <inheritdoc />
+        public bool IsAbsolutePath(string path)
+        {
+            return TryParseAbsolutePath(path, CaseSensitivityMode.UseDefaultsForGivenPath).HasValue;
         }
 
         /// <inheritdoc />
@@ -853,286 +1192,49 @@ namespace IoFluently
             return false;
         }
 
+        #endregion
+        #region Translation stuff
+        
         /// <inheritdoc />
-        public abstract void UpdateRoots();
-
-        private string ReadText(StreamReader streamReader)
+        public virtual void RenameTo(AbsolutePath source, AbsolutePath target)
         {
-            return streamReader.ReadToEnd();
-        }
-
-        /// <summary>
-        /// Writes the specified lines lazily to the specified stream.
-        /// </summary>
-        /// <param name="stream">The stream to write the text to</param>
-        /// <param name="lines">The lazily-enumerated lines of text to write to the stream</param>
-        /// <param name="encoding">The text encoding to be used</param>
-        /// <param name="bufferSize">The number of bytes in the StreamWriter buffer to be used</param>
-        /// <param name="leaveOpen">Whether to leave the stream open after writing the lines</param>
-        public virtual void WriteLines(Stream stream, IEnumerable<string> lines, Encoding encoding = null,
-            int bufferSize = 4096, bool leaveOpen = false)
-        {
-            if (encoding == null)
-                encoding = Encoding.UTF8;
-            using (var sw = new StreamWriter(stream, encoding, bufferSize, leaveOpen))
-            {
-                WriteLines(sw, lines);
-            }
-        }
-
-        private void WriteLines(StreamWriter streamWriter, IEnumerable<string> lines)
-        {
-            foreach (var line in lines) streamWriter.WriteLine(line);
-        }
-
-        /// <summary>
-        /// Write the specified text to the specified stream
-        /// </summary>
-        /// <param name="stream">The stream to write the text to</param>
-        /// <param name="text">The text to write to the stream</param>
-        /// <param name="encoding">The text encoding to be used</param>
-        /// <param name="bufferSize">The number of bytes in the StreamWriter buffer to be used</param>
-        /// <param name="leaveOpen">Whether to leave the stream open after writing the lines</param>
-        public virtual void WriteText(Stream stream, string text, Encoding encoding = null, int bufferSize = 4096,
-            bool leaveOpen = false)
-        {
-            if (encoding == null)
-                encoding = Encoding.UTF8;
-            using (var sw = new StreamWriter(stream, encoding, bufferSize, leaveOpen))
-            {
-                WriteText(sw, text);
-            }
-        }
-
-        private void WriteText(StreamWriter streamWriter, string text)
-        {
-            streamWriter.Write(text);
-        }
-
-        #region File and folder extension methods
-
-        /// <inheritdoc />
-        public virtual IEnumerable<KeyValuePair<AbsolutePath, string>> ProposeUniqueNamesForMovingPathsToSameFolder(
-            IEnumerable<AbsolutePath> paths)
-        {
-            var alreadyProposedNames = new HashSet<string>();
-            foreach (var path in paths)
-            {
-                var enumerator = ProposeSuccessivelyMoreSpecificNames(path).GetEnumerator();
-                enumerator.MoveNext();
-                while (alreadyProposedNames.Contains(enumerator.Current)) enumerator.MoveNext();
-
-                alreadyProposedNames.Add(enumerator.Current);
-                yield return new KeyValuePair<AbsolutePath, string>(path, enumerator.Current);
-                enumerator.Dispose();
-            }
-        }
-
-        private IEnumerable<string> ProposeSuccessivelyMoreSpecificNames(AbsolutePath path)
-        {
-            string filename = null;
-            foreach (var parentPath in path.Ancestors())
-            {
-                if (filename == null)
-                    filename = parentPath.Name;
-                else
-                    filename = $"{parentPath.Name}.{filename}";
-
-                yield return filename;
-            }
-        }
-
-        /// <summary>
-        /// Return lazily-enumerated list of child paths (optionally including both files and folders) of the specified
-        /// path.
-        /// </summary>
-        /// <remarks>
-        /// Note: because this method uses the term Children, you know that it won't return nested files and folders.
-        /// The term Descendants would be used if that were the case.
-        /// </remarks>
-        /// <param name="path">The path whose children will be enumerated</param>
-        /// <param name="includeFolders">Whether to include folders in the results</param>
-        /// <param name="includeFiles">Whether to include files in the results</param>
-        /// <returns>The child files and/or folders of the specified path</returns>
-        public abstract IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, bool includeFolders = true,
-            bool includeFiles = true);
-
-        /// <summary>
-        /// Returns lazily-eumerated list of files contained in the specified folder.
-        /// </summary>
-        /// <remarks>
-        /// Note: because this method uses the term Children, you know that it won't return nested files.
-        /// The term Descendants would be used if that were the case.
-        /// </remarks>
-        /// <param name="path">The path whose file children will be enumerated.</param>
-        /// <returns>The lazily-enumerated list of files contained in the specified folder.</returns>
-        public virtual IEnumerable<AbsolutePath> EnumerateFileChildren(AbsolutePath path)
-        {
-            return EnumerateChildren(path, false);
-        }
-
-        /// <summary>
-        /// Returns lazily-eumerated list of folders contained in the specified folder.
-        /// </summary>
-        /// <remarks>
-        /// Note: because this method uses the term Children, you know that it won't return nested folders.
-        /// The term Descendants would be used if that were the case.
-        /// </remarks>
-        /// <param name="path">The path whose folder children will be enumerated.</param>
-        /// <returns>The lazily-enumerated list of folders contained in the specified folder.</returns>
-        public virtual IEnumerable<AbsolutePath> EnumerateChildrenFolders(AbsolutePath path)
-        {
-            return EnumerateChildren(path, true, false);
+            Move(source.Translate(target));
         }
 
         /// <inheritdoc />
-        public virtual AbsolutePath CreateEmptyFile(AbsolutePath path)
+        public IAbsolutePathTranslation Copy(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination)
         {
-            path.CreateFile().Dispose();
-            return path;
+            return pathToBeCopied.Translate(source, destination).Copy();
         }
 
         /// <inheritdoc />
-        public virtual Stream CreateFile(AbsolutePath path)
+        public IAbsolutePathTranslation Copy(AbsolutePath source, AbsolutePath destination)
         {
-            var stream = TryOpen(path, FileMode.CreateNew, FileAccess.ReadWrite).Value;
-            return stream;
+            return source.Translate(destination).Copy();
         }
 
         /// <inheritdoc />
-        public abstract AbsolutePath DeleteFile(AbsolutePath path);
-
-        /// <inheritdoc />
-        public abstract AbsolutePath Decrypt(AbsolutePath path);
-
-        /// <inheritdoc />
-        public abstract AbsolutePath Encrypt(AbsolutePath path);
-
-        /// <inheritdoc />
-        public virtual AbsolutePath Delete(AbsolutePath path, bool recursiveDeleteIfFolder = false)
+        public IAbsolutePathTranslation Move(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination)
         {
-            if (path.GetPathType() == PathType.File) return path.DeleteFile();
-
-            if (path.GetPathType() == PathType.Folder) return path.DeleteFolder(recursiveDeleteIfFolder);
-
-            return path;
+            return pathToBeCopied.Translate(source, destination).Move();
         }
 
         /// <inheritdoc />
-        public virtual string SurroundWithDoubleQuotesIfNecessary(string str)
+        public IAbsolutePathTranslation Move(AbsolutePath source, AbsolutePath destination)
         {
-            if (str.Contains(" "))
-            {
-                if (!str.StartsWith("\""))
-                    str = "\"" + str;
-                if (!str.EndsWith("\""))
-                    str = str + "\"";
-            }
-
-            return str;
+            return source.Translate(destination).Move();
         }
 
         /// <inheritdoc />
-        public virtual bool IsAncestorOf(AbsolutePath path, AbsolutePath possibleDescendant)
+        public virtual IAbsolutePathTranslation Translate(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination)
         {
-            return IsDescendantOf(possibleDescendant, path);
+            return new CalculatedAbsolutePathTranslation(pathToBeCopied, source, destination, this);
         }
 
         /// <inheritdoc />
-        public virtual bool IsDescendantOf(AbsolutePath path, AbsolutePath possibleAncestor)
+        public virtual IAbsolutePathTranslation Translate(AbsolutePath source, AbsolutePath destination)
         {
-            var possibleDescendantStr = Path.GetFullPath(path.ToString()).ToLower();
-            var possibleAncestorStr = Path.GetFullPath(possibleAncestor.ToString()).ToLower();
-            return possibleDescendantStr.StartsWith(possibleAncestorStr);
-        }
-
-        /// <summary>
-        ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
-        ///     For example, the ancestors of the path C:\Users\myusername\Documents would be these, in order:
-        ///     C:\Users\myusername
-        ///     C:\Users
-        ///     C:
-        /// </summary>
-        /// <param name="path">The path whose ancestors will be returned.</param>
-        /// <param name="includeItself">True if the first item in the enumeration should be the path you specified,
-        /// false if the first path to be returned should be the parent of the specified path.</param>
-        /// <returns></returns>
-        public virtual IEnumerable<AbsolutePath> Ancestors(AbsolutePath path, bool includeItself)
-        {
-            if (includeItself)
-                yield return path;
-            while (true)
-            {
-                var maybePath = path.TryParent();
-                if (maybePath.HasValue)
-                {
-                    yield return maybePath.Value;
-                    path = maybePath.Value;
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-
-        /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryDescendant(AbsolutePath path, params AbsolutePath[] paths)
-        {
-            return path.TryDescendant(paths.Select(p => p.ToString()).ToArray());
-        }
-
-        /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryDescendant(AbsolutePath path, params string[] paths)
-        {
-            var pathStr = path.ToString();
-            // Make sure that pathStr is treated as a directory.
-            if (!pathStr.EndsWith(path.DirectorySeparator))
-                pathStr += path.DirectorySeparator;
-
-            var result = path.Path.Concat(paths).ToArray();
-            var combinedResult = Path.Combine(result);
-            var pathResult = TryParseAbsolutePath(combinedResult);
-            return pathResult;
-        }
-
-        /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryAncestor(AbsolutePath path, int level)
-        {
-            var maybePath = path.ToMaybe();
-            for (var i = 0; i < level; i++)
-            {
-                maybePath = maybePath.Select(p => p.TryParent()).SelectMany(x => x);
-                if (!maybePath.HasValue)
-                    return Nothing<AbsolutePath>(() => throw new InvalidOperationException($"The path {path} has no ancestor"));
-            }
-
-            return maybePath;
-        }
-
-        /// <inheritdoc />
-        public virtual bool HasExtension(AbsolutePath path, string extension)
-        {
-            if (!extension.StartsWith(".")) {
-                extension = "." + extension;
-            }
-
-            var actualExtension = Path.GetExtension(path.ToString());
-            if (actualExtension == extension)
-                return true;
-            if (actualExtension == null)
-                return false;
-            return actualExtension.Equals(extension, StringComparison.OrdinalIgnoreCase);
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="path"></param>
-        /// <param name="differentExtension">Must include the "." part of the extension (e.g., ".avi" not "avi")</param>
-        /// <returns></returns>
-        public virtual IMaybe<AbsolutePath> TryWithExtension(AbsolutePath path, string differentExtension)
-        {
-            return TryParseAbsolutePath(Path.ChangeExtension(path.ToString(), differentExtension));
+            return new AbsolutePathTranslation(source, destination, this);
         }
 
         /// <inheritdoc />
@@ -1253,592 +1355,110 @@ namespace IoFluently
             return translation;
         }
 
-        /// <inheritdoc />
-        public virtual bool ContainsFiles(AbsolutePath path)
-        {
-            if (path.GetPathType() == PathType.File)
-                return true;
-            return path.Children().All(child => child.ContainsFiles());
-        }
-
-        /// <inheritdoc />
-        public virtual bool FolderContainsFiles(AbsolutePath path)
-        {
-            if (path.GetPathType() == PathType.File)
-                return false;
-            return path.ContainsFiles();
-        }
-
-        /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryGetCommonAncestry(AbsolutePath path1, AbsolutePath path2)
-        {
-            return TryParseAbsolutePath(path1.ToString().GetCommonBeginning(path2.ToString()).Trim('\\'));
-        }
-
-        /// <inheritdoc />
-        public virtual IMaybe<Uri> TryGetCommonDescendants(AbsolutePath path1, AbsolutePath path2)
-        {
-            return MaybeCatch(() => new Uri(path1.ToString().GetCommonEnding(path2.ToString()).Trim('\\'),
-                    UriKind.Relative));
-        }
-
-        /// <inheritdoc />
-        public virtual IMaybe<Tuple<Uri, Uri>> TryGetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2)
-        {
-            return MaybeCatch(() =>
-            {
-                var commonAncestry = path1.ToString().GetCommonBeginning(path2.ToString()).Trim('\\');
-                return new Tuple<Uri, Uri>(
-                    new Uri(path1.ToString().Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative),
-                    new Uri(path2.ToString().Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative));
-            });
-        }
-
-        /// <inheritdoc />
-        public virtual IMaybe<Tuple<Uri, Uri>> TryGetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2)
-        {
-            return MaybeCatch(() =>
-            {
-                var commonDescendants = path1.ToString().GetCommonEnding(path2.ToString()).Trim('\\');
-                return new Tuple<Uri, Uri>(
-                    new Uri(
-                        path1.ToString().Substring(0, path1.ToString().Length - commonDescendants.Length).Trim('\\')),
-                    new Uri(
-                        path2.ToString().Substring(0, path2.ToString().Length - commonDescendants.Length).Trim('\\')));
-            });
-        }
-
-        /// <inheritdoc />
-        public IAbsolutePathTranslation Copy(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination)
-        {
-            return pathToBeCopied.Translate(source, destination).Copy();
-        }
-
-        /// <inheritdoc />
-        public IAbsolutePathTranslation Copy(AbsolutePath source, AbsolutePath destination)
-        {
-            return source.Translate(destination).Copy();
-        }
-
-        /// <inheritdoc />
-        public IAbsolutePathTranslation Move(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination)
-        {
-            return pathToBeCopied.Translate(source, destination).Move();
-        }
-
-        /// <inheritdoc />
-        public IAbsolutePathTranslation Move(AbsolutePath source, AbsolutePath destination)
-        {
-            return source.Translate(destination).Move();
-        }
-
-        /// <inheritdoc />
-        public virtual IAbsolutePathTranslation Translate(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination)
-        {
-            return new CalculatedAbsolutePathTranslation(pathToBeCopied, source, destination, this);
-        }
-
-        /// <inheritdoc />
-        public virtual IAbsolutePathTranslation Translate(AbsolutePath source, AbsolutePath destination)
-        {
-            return new AbsolutePathTranslation(source, destination, this);
-        }
-
-        /// <inheritdoc />
-        public AbsolutePath ParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo,
-            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
-        {
-            var relativePath = TryParseRelativePath(path, flags);
-            if (relativePath.HasValue)
-            {
-                return optionallyRelativeTo / path;
-            }
-
-            return ParseAbsolutePath(path, flags);
-        }
-
-        /// <inheritdoc />
-        public IEither<AbsolutePath, RelativePath> ParsePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
-        {
-            var relativePath = TryParseRelativePath(path, flags);
-            if (relativePath.HasValue)
-            {
-                return new Either<AbsolutePath, RelativePath>(relativePath.Value);
-            }
-            
-            return new Either<AbsolutePath, RelativePath>(ParseAbsolutePath(path, flags));
-        }
-
-        /// <inheritdoc />
-        public bool IsRelativePath(string path)
-        {
-            return TryParseRelativePath(path, CaseSensitivityMode.UseDefaultsForGivenPath).HasValue;
-        }
-
-        /// <inheritdoc />
-        public bool IsAbsolutePath(string path)
-        {
-            return TryParseAbsolutePath(path, CaseSensitivityMode.UseDefaultsForGivenPath).HasValue;
-        }
-
-        /// <inheritdoc />
-        public virtual Uri Child(Uri parent, Uri child)
-        {
-            var parentLocalPath = parent.ToString();
-            if (!parentLocalPath.EndsWith(Path.DirectorySeparatorChar.ToString())
-                && !parentLocalPath.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
-                parentLocalPath += Path.DirectorySeparatorChar;
-            return new Uri(parentLocalPath).MakeRelativeUri(child);
-        }
-
-        /// <summary>
-        /// List of video file extensions
-        /// </summary>
-        public readonly List<string> VideoFileExtensions = new List<string>
-        {
-            "3gpp",
-            "3g2",
-            "3gp",
-            "3gp2",
-            "asf",
-            "mov",
-            "avi",
-            "mts",
-            "m2ts",
-            "m2t",
-            "m4v",
-            "m3u",
-            "asx",
-            "mpe",
-            "mpeg",
-            "mpg",
-            "m1v",
-            "m2v",
-            "mp2v",
-            "mpv2",
-            "mp4",
-            "mp4v",
-            "ts",
-            "wm",
-            "wpl",
-            "wmx",
-            "wmv",
-            "wvx"
-        };
-
-        /// <summary>
-        /// List of image file extensions
-        /// </summary>
-        public readonly List<string> ImageFileExtensions = new List<string>
-        {
-            "ani",
-            "b3d",
-            "bmp",
-            "dib",
-            "cam",
-            "clp",
-            "crw",
-            "cr2",
-            "cur",
-            "dcm",
-            "acr",
-            "ima",
-            "dcx",
-            "dds",
-            "djvu",
-            "iw44",
-            "dxf",
-            "ecw",
-            "emf",
-            "eps",
-            "ps",
-            "exr",
-            "fpx",
-            "g3",
-            "gif",
-            "hdp",
-            "jxr",
-            "wdp",
-            "icl",
-            "ico",
-            "iff",
-            "lbm",
-            "img",
-            "jls",
-            "jp2",
-            "jpc",
-            "j2k",
-            "jpf",
-            "jpg",
-            "jpeg",
-            "jpe",
-            "jpm",
-            "kdc",
-            "mng",
-            "jng",
-            "pbm",
-            "pcd",
-            "pcx",
-            "pgm",
-            "png",
-            "ppm",
-            "psd",
-            "psp",
-            "ras",
-            "sun",
-            "raw",
-            "rle",
-            "sff",
-            "sfw",
-            "sgi",
-            "rgb",
-            "sid",
-            "tga",
-            "tif",
-            "tiff",
-            "wbmp",
-            "webp",
-            "wmf",
-            "xbm",
-            "xpm"
-        };
-
-        /// <summary>
-        /// The newline character(s)
-        /// </summary>
-        protected string _newline;
-
-        public virtual string GetNewlineCharacter()
-        {
-            return _newline;
-        }
+        #endregion
+        #region Path building
         
         /// <inheritdoc />
-        public virtual IMaybe<bool> TryIsReadOnly(AbsolutePath path)
+        public AbsolutePath CommonWith(AbsolutePath path, AbsolutePath that)
         {
-            return TryAttributes(path).Select(attr => attr.HasFlag(FileAttributes.ReadOnly));
+            return path.IoService.TryCommonWith(path, that).Value;
         }
 
         /// <inheritdoc />
-        public abstract IMaybe<Information> TryFileSize(AbsolutePath path);
-
-        /// <inheritdoc />
-        public abstract IMaybe<FileAttributes> TryAttributes(AbsolutePath attributes);
-
-        /// <inheritdoc />
-        public abstract IMaybe<DateTimeOffset> TryCreationTime(AbsolutePath attributes);
-
-        /// <inheritdoc />
-        public abstract IMaybe<DateTimeOffset> TryLastAccessTime(AbsolutePath attributes);
-
-        /// <inheritdoc />
-        public abstract IMaybe<DateTimeOffset> TryLastWriteTime(AbsolutePath attributes);
-
-        /// <inheritdoc />
-        public virtual bool IsImageUri(Uri uri)
+        public AbsolutePath Parent(AbsolutePath path)
         {
-            if (uri == null)
-                return false;
-            var str = uri.ToString();
-            if (!str.Contains("."))
-                return false;
-            var extension = str.Substring(str.LastIndexOf('.') + 1);
-            return ImageFileExtensions.Any(curExtension => extension == curExtension);
+            return path.IoService.TryParent(path).Value;
         }
 
         /// <inheritdoc />
-        public virtual bool IsVideoUri(Uri uri)
+        public AbsolutePaths GlobFiles(AbsolutePath path, string pattern)
         {
-            if (uri == null)
-                return false;
-            var str = uri.ToString();
-            if (!str.Contains("."))
-                return false;
-            var extension = str.Substring(str.LastIndexOf('.') + 1);
-            return VideoFileExtensions.Any(curExtension => extension == curExtension);
+            Func<AbsolutePath, IEnumerable<RelativePath>> patternFunc = absPath => absPath.Children(pattern).Select(x => new RelativePath(x.IsCaseSensitive, x.DirectorySeparator, x.IoService, new[]{x.Name}));
+            return path / patternFunc;
+        }
+
+        /// <summary>
+        /// Equivalent to Path.Combine. You can also use the / operator to build paths, like this:
+        /// _ioService.CurrentDirectory / "folder1" / "folder2" / "file.txt"
+        /// </summary>
+        public AbsolutePath Combine(AbsolutePath path, params string[] subsequentPathParts)
+        {
+            return Descendant(path, subsequentPathParts);
         }
 
         /// <inheritdoc />
-        public virtual string StripQuotes(string str)
+        public AbsolutePath WithoutExtension(AbsolutePath path)
         {
-            if (str.StartsWith("\"") && str.EndsWith("\""))
-                return str.Substring(1, str.Length - 2);
-            if (str.StartsWith("'") && str.EndsWith("'"))
-                return str.Substring(1, str.Length - 2);
-            return str;
-        }
-
-
-        /// <inheritdoc />
-        public virtual AbsolutePath Root(AbsolutePath path)
-        {
-            var ancestor = path;
-            IMaybe<AbsolutePath> cachedParent;
-            while ((cachedParent = ancestor.TryParent()).HasValue) ancestor = cachedParent.Value;
-
-            return ancestor;
-        }
-
-        /// <inheritdoc />
-        public virtual void RenameTo(AbsolutePath source, AbsolutePath target)
-        {
-            Move(source.Translate(target));
-        }
-
-        /// <inheritdoc />
-        public virtual bool Exists(AbsolutePath path)
-        {
-            return path.GetPathType() != PathType.None;
-        }
-
-        /// <inheritdoc />
-        public abstract PathType GetPathType(AbsolutePath path);
-
-        /// <inheritdoc />
-        public virtual AbsolutePath ClearFolder(AbsolutePath path)
-        {
-            foreach (var item in path.Descendants())
+            if (!HasExtension(path))
             {
-                item.Delete();
+                return path;
             }
 
-            return path;
-        }
+            var newComponents = new List<string>();
 
-        /// <inheritdoc />
-        public abstract AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false);
-
-        /// <inheritdoc />
-        public virtual bool MayCreateFile(FileMode fileMode)
-        {
-            return fileMode.HasFlag(FileMode.Append) || fileMode.HasFlag(FileMode.Create) ||
-                   fileMode.HasFlag(FileMode.CreateNew) || fileMode.HasFlag(FileMode.OpenOrCreate);
-        }
-
-        /// <inheritdoc />
-        public virtual AbsolutePath Create(AbsolutePath path, PathType pathType)
-        {
-            if (pathType == PathType.File)
+            for (var i = 0; i < path.Path.Components.Count - 1; i++)
             {
-                CreateEmptyFile(path);
+                newComponents.Add(path.Path.Components[i]);
             }
-            else
-            {
-                CreateFolder(path);
-            }
+
+            var name = path.Name;
+            newComponents.Add(name.Substring(0, name.LastIndexOf('.')));
             
-            return path;
+            return new AbsolutePath(path.IsCaseSensitive, path.DirectorySeparator, path.IoService, newComponents);
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode)
+        public AbsolutePath Descendant(AbsolutePath path, params AbsolutePath[] paths)
         {
-            return TryOpen(path, fileMode, FileAccess.ReadWrite);
+            return path.IoService.TryDescendant(path, paths).Value;
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
-            FileAccess fileAccess)
+        public AbsolutePath Descendant(AbsolutePath path, params string[] paths)
         {
-            var fileShare = fileAccess == FileAccess.Read ? FileShare.Read : FileShare.None;
-            return TryOpen(path, fileMode, fileAccess, fileShare);
+            return path.IoService.TryDescendant(path, paths).Value;
         }
 
         /// <inheritdoc />
-        public abstract IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
-            FileAccess fileAccess, FileShare fileShare);
-
-        /// <inheritdoc />
-        public abstract AbsolutePath CreateFolder(AbsolutePath path);
-
-        /// <inheritdoc />
-        public virtual void WriteAllText(AbsolutePath path, string text)
+        public AbsolutePath Ancestor(AbsolutePath path, int level)
         {
-            var bytes = Encoding.Default.GetBytes(text);
-            WriteAllBytes(path, bytes);
+            return path.IoService.TryAncestor(path, level).Value;
         }
 
         /// <inheritdoc />
-        public virtual void WriteAllLines(AbsolutePath path, IEnumerable<string> lines)
+        public AbsolutePath WithExtension(AbsolutePath path, string differentExtension)
         {
-            var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite);
-            using (var stream = maybeStream.Value)
-            {
-                foreach (var line in lines)
-                {
-                    var bytes = Encoding.Default.GetBytes(line + _newline);
-                    stream.Write(bytes, 0, bytes.Length);
-                }
-            }
+            return path.IoService.TryWithExtension(path, differentExtension).Value;
         }
 
         /// <inheritdoc />
-        public virtual void WriteAllBytes(AbsolutePath path, byte[] bytes)
+        public AbsolutePath WithExtension(AbsolutePath path, Func<string, string> differentExtension)
         {
-            var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite);
-            using (var stream = maybeStream.Value)
-            {
-                stream.Write(bytes, 0, bytes.Length);
-            }
+            return path.IoService.TryWithExtension(path, differentExtension(path.Extension.ValueOrDefault ?? string.Empty)).Value;
         }
 
         /// <inheritdoc />
-        public virtual IEnumerable<string> ReadLines(AbsolutePath path)
+        public AbsolutePath GetCommonAncestry(AbsolutePath path1, AbsolutePath path2)
         {
-            var maybeStream = TryOpen(path, FileMode.Open, FileAccess.Read);
-            using (var stream = maybeStream.Value)
-            {
-                using (var reader = new StreamReader(stream))
-                {
-                    while (!reader.EndOfStream)
-                    {
-                        yield return reader.ReadLine();
-                    }
-                }
-            }
+            return path1.IoService.TryGetCommonAncestry(path1, path2).Value;
         }
 
         /// <inheritdoc />
-        public virtual string ReadAllText(AbsolutePath path)
+        public Uri GetCommonDescendants(AbsolutePath path1, AbsolutePath path2)
         {
-            var maybeStream = TryOpen(path, FileMode.Open, FileAccess.Read);
-            using (var stream = maybeStream.Value)
-            {
-                using (var reader = new StreamReader(stream))
-                {
-                    return reader.ReadToEnd();
-                }
-            }
-        }
-
-        #endregion
-
-        #region FileSystemWatcher extension methods
-
-        /// <inheritdoc />
-        public virtual IObservable<Unit> ObserveChanges(AbsolutePath path)
-        {
-            return path.ObserveChanges(NotifyFilters.Attributes | NotifyFilters.CreationTime |
-                                       NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastAccess |
-                                       NotifyFilters.LastWrite | NotifyFilters.Security | NotifyFilters.Size);
+            return path1.IoService.TryGetCommonDescendants(path1, path2).Value;
         }
 
         /// <inheritdoc />
-        public virtual IObservable<Unit> ObserveChanges(AbsolutePath path, NotifyFilters filters)
+        public Tuple<Uri, Uri> GetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2)
         {
-            var parent = path.Parent();
-            return parent.Children().ToLiveLinq().Where(x => x == path).AsObservable().SelectUnit();
+            return path1.IoService.TryGetNonCommonDescendants(path1, path2).Value;
         }
 
         /// <inheritdoc />
-        public virtual IObservable<PathType> ObservePathType(AbsolutePath path)
+        public Tuple<Uri, Uri> GetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2)
         {
-            var parent = path.TryParent();
-            if (!parent.HasValue) return Observable.Return(path.GetPathType());
-            return parent.Value.Children(path.Name).ToLiveLinq().AsObservable().Select(_ => path.GetPathType())
-                .DistinctUntilChanged();
-        }
-
-        /// <inheritdoc />
-        public abstract IObservable<AbsolutePath> Renamings(AbsolutePath path);
-
-        #endregion
-
-        #region Internal extension methods
-
-        /// <inheritdoc />
-        public virtual StringComparison ToStringComparison(CaseSensitivityMode caseSensitivityMode)
-        {
-            if (caseSensitivityMode.HasFlag(CaseSensitivityMode.CaseSensitive))
-                return StringComparison.Ordinal;
-            return StringComparison.OrdinalIgnoreCase;
-        }
-
-        /// <inheritdoc />
-        public virtual StringComparison ToStringComparison(CaseSensitivityMode caseSensitivityMode, CaseSensitivityMode otherCaseSensitivityMode)
-        {
-            if (caseSensitivityMode.HasFlag(CaseSensitivityMode.CaseSensitive) && otherCaseSensitivityMode.HasFlag(CaseSensitivityMode.CaseSensitive))
-                return StringComparison.Ordinal;
-            return StringComparison.OrdinalIgnoreCase;
-        }
-
-        #endregion
-
-        #region AbsolutePath extension methods
-
-        /// <inheritdoc />
-        public virtual RelativePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo)
-        {
-            var simplified = path.Simplify();
-            var pathStr = simplified.ToString();
-            var relativeToStr = relativeTo.Simplify().ToString();
-
-            var common = path.TryCommonWith(relativeTo);
-
-            if (!common.HasValue)
-                throw new InvalidOperationException("No common ancestor");
-            //return path;
-
-            var sb = new StringBuilder();
-
-            for (var i = 0; i < relativeTo.Path.Count - common.Value.Path.Count; i++)
-            {
-                sb.Append("..");
-                sb.Append(path.DirectorySeparator);
-            }
-
-            var restOfRelativePath = pathStr.Substring(common.Value.ToString().Length);
-            while (restOfRelativePath.StartsWith(path.DirectorySeparator))
-                restOfRelativePath = restOfRelativePath.Substring(path.DirectorySeparator.Length);
-
-            sb.Append(restOfRelativePath);
-
-            return TryParseRelativePath(sb.ToString()).Value;
-
-            //if (pathStr.StartsWith(relativeToStr))
-            //{
-            //    var result = pathStr.Substring(relativeToStr.Length);
-            //    if (result.StartsWith(path.DirectorySeparator))
-            //        return ToAbsolutePath(result.Substring(path.DirectorySeparator.Length)).Value;
-            //}
-            //throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryCommonWith(AbsolutePath path, AbsolutePath that)
-        {
-            var path1Str = path.ToString();
-            var path2Str = that.ToString();
-
-            if (!path.IsCaseSensitive || !that.IsCaseSensitive)
-            {
-                path1Str = path1Str.ToUpper();
-                path2Str = path2Str.ToUpper();
-            }
-
-            var caseSensitive = path.IsCaseSensitive ||
-                                that.IsCaseSensitive;
-            var zippedComponents = path.Path.Components.SkipWhile(x => x == path.DirectorySeparator).Zip(that.Path.Components.SkipWhile(x => x == path.DirectorySeparator), (comp1, comp2) => 
-                new
-                {
-                    equals = comp1.Equals(comp2, !caseSensitive ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal),
-                    component = comp1
-                });
-
-            if (path.DirectorySeparator == "/")
-            {
-                return TryParseAbsolutePath("/" + string.Join(path.DirectorySeparator, zippedComponents.TakeWhile(x => x.equals).Select(x => x.component)));
-            }
-            else
-            {
-                return TryParseAbsolutePath(string.Join(path.DirectorySeparator, zippedComponents.TakeWhile(x => x.equals).Select(x => x.component)));
-            }
-        }
-
-        /// <inheritdoc />
-        public virtual bool CanBeSimplified(AbsolutePath path)
-        {
-            return path.Path.SkipWhile(str => str == "..").Any(str => str == "..");
+            return path1.IoService.TryGetNonCommonAncestry(path1, path2).Value;
         }
 
         /// <inheritdoc />
@@ -1918,149 +1538,280 @@ namespace IoFluently
             }
         }
         
-        #endregion
-
-        #region String extension methods
-
         /// <inheritdoc />
-        public virtual bool IsAbsoluteWindowsPath(string path)
+        public virtual RelativePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo)
         {
-            return char.IsLetter(path[0]) && path[1] == ':';
+            var simplified = path.Simplify();
+            var pathStr = simplified.ToString();
+            var relativeToStr = relativeTo.Simplify().ToString();
+
+            var common = path.TryCommonWith(relativeTo);
+
+            if (!common.HasValue)
+                throw new InvalidOperationException("No common ancestor");
+            //return path;
+
+            var sb = new StringBuilder();
+
+            for (var i = 0; i < relativeTo.Path.Count - common.Value.Path.Count; i++)
+            {
+                sb.Append("..");
+                sb.Append(path.DirectorySeparator);
+            }
+
+            var restOfRelativePath = pathStr.Substring(common.Value.ToString().Length);
+            while (restOfRelativePath.StartsWith(path.DirectorySeparator))
+                restOfRelativePath = restOfRelativePath.Substring(path.DirectorySeparator.Length);
+
+            sb.Append(restOfRelativePath);
+
+            return TryParseRelativePath(sb.ToString()).Value;
+
+            //if (pathStr.StartsWith(relativeToStr))
+            //{
+            //    var result = pathStr.Substring(relativeToStr.Length);
+            //    if (result.StartsWith(path.DirectorySeparator))
+            //        return ToAbsolutePath(result.Substring(path.DirectorySeparator.Length)).Value;
+            //}
+            //throw new NotImplementedException();
         }
 
         /// <inheritdoc />
-        public virtual bool IsAbsoluteUnixPath(string path)
+        public virtual IMaybe<AbsolutePath> TryCommonWith(AbsolutePath path, AbsolutePath that)
         {
-            return path.StartsWith("/");
+            var path1Str = path.ToString();
+            var path2Str = that.ToString();
+
+            if (!path.IsCaseSensitive || !that.IsCaseSensitive)
+            {
+                path1Str = path1Str.ToUpper();
+                path2Str = path2Str.ToUpper();
+            }
+
+            var caseSensitive = path.IsCaseSensitive ||
+                                that.IsCaseSensitive;
+            var zippedComponents = path.Path.Components.SkipWhile(x => x == path.DirectorySeparator).Zip(that.Path.Components.SkipWhile(x => x == path.DirectorySeparator), (comp1, comp2) => 
+                new
+                {
+                    equals = comp1.Equals(comp2, !caseSensitive ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal),
+                    component = comp1
+                });
+
+            if (path.DirectorySeparator == "/")
+            {
+                return TryParseAbsolutePath("/" + string.Join(path.DirectorySeparator, zippedComponents.TakeWhile(x => x.equals).Select(x => x.component)));
+            }
+            else
+            {
+                return TryParseAbsolutePath(string.Join(path.DirectorySeparator, zippedComponents.TakeWhile(x => x.equals).Select(x => x.component)));
+            }
+        }
+
+        /// <inheritdoc />
+        public virtual AbsolutePath Root(AbsolutePath path)
+        {
+            var ancestor = path;
+            IMaybe<AbsolutePath> cachedParent;
+            while ((cachedParent = ancestor.TryParent()).HasValue) ancestor = cachedParent.Value;
+
+            return ancestor;
+        }
+
+        public IEnumerable<AbsolutePath> Ancestors(AbsolutePath path)
+        {
+            return Ancestors(path, false);
+        }
+
+        /// <inheritdoc />
+        public virtual IMaybe<AbsolutePath> TryGetCommonAncestry(AbsolutePath path1, AbsolutePath path2)
+        {
+            return TryParseAbsolutePath(path1.ToString().GetCommonBeginning(path2.ToString()).Trim('\\'));
+        }
+
+        /// <inheritdoc />
+        public virtual IMaybe<Uri> TryGetCommonDescendants(AbsolutePath path1, AbsolutePath path2)
+        {
+            return MaybeCatch(() => new Uri(path1.ToString().GetCommonEnding(path2.ToString()).Trim('\\'),
+                UriKind.Relative));
+        }
+
+        /// <inheritdoc />
+        public virtual IMaybe<Tuple<Uri, Uri>> TryGetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2)
+        {
+            return MaybeCatch(() =>
+            {
+                var commonAncestry = path1.ToString().GetCommonBeginning(path2.ToString()).Trim('\\');
+                return new Tuple<Uri, Uri>(
+                    new Uri(path1.ToString().Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative),
+                    new Uri(path2.ToString().Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative));
+            });
+        }
+
+        /// <inheritdoc />
+        public virtual IMaybe<Tuple<Uri, Uri>> TryGetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2)
+        {
+            return MaybeCatch(() =>
+            {
+                var commonDescendants = path1.ToString().GetCommonEnding(path2.ToString()).Trim('\\');
+                return new Tuple<Uri, Uri>(
+                    new Uri(
+                        path1.ToString().Substring(0, path1.ToString().Length - commonDescendants.Length).Trim('\\')),
+                    new Uri(
+                        path2.ToString().Substring(0, path2.ToString().Length - commonDescendants.Length).Trim('\\')));
+            });
         }
 
         /// <summary>
-        ///     Checks for invalid relative paths, like C:\.. (Windows) or /.. (Unix)
         /// </summary>
-        internal bool IsAncestorOfRoot(IReadOnlyList<string> pathComponents)
+        /// <param name="path"></param>
+        /// <param name="differentExtension">Must include the "." part of the extension (e.g., ".avi" not "avi")</param>
+        /// <returns></returns>
+        public virtual IMaybe<AbsolutePath> TryWithExtension(AbsolutePath path, string differentExtension)
         {
-            var result = new List<string>();
-            var numberOfComponentsToSkip = 0;
-            var isRelative = !ComponentsAreAbsolute(pathComponents);
-            for (var i = pathComponents.Count - 1; i >= 0; i--)
-                if (!isRelative && i == 0)
-                    result.Insert(0, pathComponents[i]);
-                else if (pathComponents[i] == ".")
-                    continue;
-                else if (pathComponents[i] == "..")
-                    numberOfComponentsToSkip++;
-                else if (numberOfComponentsToSkip > 0)
-                    numberOfComponentsToSkip--;
+            return TryParseAbsolutePath(Path.ChangeExtension(path.ToString(), differentExtension));
+        }
+
+        /// <summary>
+        ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
+        ///     For example, the ancestors of the path C:\Users\myusername\Documents would be these, in order:
+        ///     C:\Users\myusername
+        ///     C:\Users
+        ///     C:
+        /// </summary>
+        /// <param name="path">The path whose ancestors will be returned.</param>
+        /// <param name="includeItself">True if the first item in the enumeration should be the path you specified,
+        /// false if the first path to be returned should be the parent of the specified path.</param>
+        /// <returns></returns>
+        public virtual IEnumerable<AbsolutePath> Ancestors(AbsolutePath path, bool includeItself)
+        {
+            if (includeItself)
+                yield return path;
+            while (true)
+            {
+                var maybePath = path.TryParent();
+                if (maybePath.HasValue)
+                {
+                    yield return maybePath.Value;
+                    path = maybePath.Value;
+                }
                 else
-                    result.Insert(0, pathComponents[i]);
-
-            return numberOfComponentsToSkip > 0 && !isRelative;
+                {
+                    break;
+                }
+            }
         }
 
         /// <inheritdoc />
-        public virtual bool ComponentsAreAbsolute(IReadOnlyList<string> path)
+        public virtual IMaybe<AbsolutePath> TryDescendant(AbsolutePath path, params AbsolutePath[] paths)
         {
-            if (path[0] == "/")
-                return true;
-            if (char.IsLetter(path[0][0]) && path[0][1] == ':')
-                return true;
-            if (path[0] == "\\")
-                return true;
-            return false;
+            return path.TryDescendant(paths.Select(p => p.ToString()).ToArray());
+        }
+
+        /// <inheritdoc />
+        public virtual IMaybe<AbsolutePath> TryDescendant(AbsolutePath path, params string[] paths)
+        {
+            var pathStr = path.ToString();
+            // Make sure that pathStr is treated as a directory.
+            if (!pathStr.EndsWith(path.DirectorySeparator))
+                pathStr += path.DirectorySeparator;
+
+            var result = path.Path.Concat(paths).ToArray();
+            var combinedResult = Path.Combine(result);
+            var pathResult = TryParseAbsolutePath(combinedResult);
+            return pathResult;
+        }
+
+        /// <inheritdoc />
+        public virtual IMaybe<AbsolutePath> TryAncestor(AbsolutePath path, int level)
+        {
+            var maybePath = path.ToMaybe();
+            for (var i = 0; i < level; i++)
+            {
+                maybePath = maybePath.Select(p => p.TryParent()).SelectMany(x => x);
+                if (!maybePath.HasValue)
+                    return Nothing<AbsolutePath>(() => throw new InvalidOperationException($"The path {path} has no ancestor"));
+            }
+
+            return maybePath;
+        }
+
+        /// <inheritdoc />
+        public virtual IEnumerable<KeyValuePair<AbsolutePath, string>> ProposeUniqueNamesForMovingPathsToSameFolder(
+            IEnumerable<AbsolutePath> paths)
+        {
+            var alreadyProposedNames = new HashSet<string>();
+            foreach (var path in paths)
+            {
+                var enumerator = ProposeSuccessivelyMoreSpecificNames(path).GetEnumerator();
+                enumerator.MoveNext();
+                while (alreadyProposedNames.Contains(enumerator.Current)) enumerator.MoveNext();
+
+                alreadyProposedNames.Add(enumerator.Current);
+                yield return new KeyValuePair<AbsolutePath, string>(path, enumerator.Current);
+                enumerator.Dispose();
+            }
+        }
+
+        private IEnumerable<string> ProposeSuccessivelyMoreSpecificNames(AbsolutePath path)
+        {
+            string filename = null;
+            foreach (var parentPath in path.Ancestors())
+            {
+                if (filename == null)
+                    filename = parentPath.Name;
+                else
+                    filename = $"{parentPath.Name}.{filename}";
+
+                yield return filename;
+            }
+        }
+
+        /// <summary>
+        /// Return lazily-enumerated list of child paths (optionally including both files and folders) of the specified
+        /// path.
+        /// </summary>
+        /// <remarks>
+        /// Note: because this method uses the term Children, you know that it won't return nested files and folders.
+        /// The term Descendants would be used if that were the case.
+        /// </remarks>
+        /// <param name="path">The path whose children will be enumerated</param>
+        /// <param name="includeFolders">Whether to include folders in the results</param>
+        /// <param name="includeFiles">Whether to include files in the results</param>
+        /// <returns>The child files and/or folders of the specified path</returns>
+        public abstract IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, bool includeFolders = true,
+            bool includeFiles = true);
+
+        /// <summary>
+        /// Returns lazily-eumerated list of files contained in the specified folder.
+        /// </summary>
+        /// <remarks>
+        /// Note: because this method uses the term Children, you know that it won't return nested files.
+        /// The term Descendants would be used if that were the case.
+        /// </remarks>
+        /// <param name="path">The path whose file children will be enumerated.</param>
+        /// <returns>The lazily-enumerated list of files contained in the specified folder.</returns>
+        public virtual IEnumerable<AbsolutePath> EnumerateFileChildren(AbsolutePath path)
+        {
+            return EnumerateChildren(path, false);
+        }
+
+        /// <summary>
+        /// Returns lazily-eumerated list of folders contained in the specified folder.
+        /// </summary>
+        /// <remarks>
+        /// Note: because this method uses the term Children, you know that it won't return nested folders.
+        /// The term Descendants would be used if that were the case.
+        /// </remarks>
+        /// <param name="path">The path whose folder children will be enumerated.</param>
+        /// <returns>The lazily-enumerated list of folders contained in the specified folder.</returns>
+        public virtual IEnumerable<AbsolutePath> EnumerateChildrenFolders(AbsolutePath path)
+        {
+            return EnumerateChildren(path, true, false);
         }
 
         #endregion
+        #region File metadata
         
-        /// <summary>
-        /// Equivalent to Path.Combine. You can also use the / operator to build paths, like this:
-        /// _ioService.CurrentDirectory / "folder1" / "folder2" / "file.txt"
-        /// </summary>
-        public AbsolutePath Combine(AbsolutePath path, params string[] subsequentPathParts)
-        {
-            return Descendant(path, subsequentPathParts);
-        }
-
-        /// <inheritdoc />
-        public AbsolutePath WithoutExtension(AbsolutePath path)
-        {
-            if (!HasExtension(path))
-            {
-                return path;
-            }
-
-            var newComponents = new List<string>();
-
-            for (var i = 0; i < path.Path.Components.Count - 1; i++)
-            {
-                newComponents.Add(path.Path.Components[i]);
-            }
-
-            var name = path.Name;
-            newComponents.Add(name.Substring(0, name.LastIndexOf('.')));
-            
-            return new AbsolutePath(path.IsCaseSensitive, path.DirectorySeparator, path.IoService, newComponents);
-        }
-
-        /// <inheritdoc />
-        public bool HasExtension(AbsolutePath path)
-        {
-            return path.Extension.HasValue;
-        }
-
-        /// <inheritdoc />
-        public AbsolutePath Descendant(AbsolutePath path, params AbsolutePath[] paths)
-        {
-            return path.IoService.TryDescendant(path, paths).Value;
-        }
-
-        /// <inheritdoc />
-        public AbsolutePath Descendant(AbsolutePath path, params string[] paths)
-        {
-            return path.IoService.TryDescendant(path, paths).Value;
-        }
-
-        /// <inheritdoc />
-        public AbsolutePath Ancestor(AbsolutePath path, int level)
-        {
-            return path.IoService.TryAncestor(path, level).Value;
-        }
-
-        /// <inheritdoc />
-        public AbsolutePath WithExtension(AbsolutePath path, string differentExtension)
-        {
-            return path.IoService.TryWithExtension(path, differentExtension).Value;
-        }
-
-        /// <inheritdoc />
-        public AbsolutePath WithExtension(AbsolutePath path, Func<string, string> differentExtension)
-        {
-            return path.IoService.TryWithExtension(path, differentExtension(path.Extension.ValueOrDefault ?? string.Empty)).Value;
-        }
-
-        /// <inheritdoc />
-        public AbsolutePath GetCommonAncestry(AbsolutePath path1, AbsolutePath path2)
-        {
-            return path1.IoService.TryGetCommonAncestry(path1, path2).Value;
-        }
-
-        /// <inheritdoc />
-        public Uri GetCommonDescendants(AbsolutePath path1, AbsolutePath path2)
-        {
-            return path1.IoService.TryGetCommonDescendants(path1, path2).Value;
-        }
-
-        /// <inheritdoc />
-        public Tuple<Uri, Uri> GetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2)
-        {
-            return path1.IoService.TryGetNonCommonDescendants(path1, path2).Value;
-        }
-
-        /// <inheritdoc />
-        public Tuple<Uri, Uri> GetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2)
-        {
-            return path1.IoService.TryGetNonCommonAncestry(path1, path2).Value;
-        }
-
         /// <inheritdoc />
         public bool IsReadOnly(AbsolutePath path)
         {
@@ -2098,117 +1849,40 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public AbsolutePaths GlobFiles(AbsolutePath path, string pattern)
+        public virtual bool Exists(AbsolutePath path)
         {
-            Func<AbsolutePath, IEnumerable<RelativePath>> patternFunc = absPath => absPath.Children(pattern).Select(x => new RelativePath(x.IsCaseSensitive, x.DirectorySeparator, x.IoService, new[]{x.Name}));
-            return path / patternFunc;
+            return path.GetPathType() != PathType.None;
         }
 
         /// <inheritdoc />
-        public AbsolutePath EnsureIsFolder(AbsolutePath path)
-        {
-            if (!IsFolder(path))
-            {
-                path.CreateFolder();
-            }
+        public abstract PathType GetPathType(AbsolutePath path);
 
-            return path;
+        /// <inheritdoc />
+        public virtual IMaybe<bool> TryIsReadOnly(AbsolutePath path)
+        {
+            return TryAttributes(path).Select(attr => attr.HasFlag(FileAttributes.ReadOnly));
         }
 
         /// <inheritdoc />
-        public AbsolutePath EnsureIsNotFolder(AbsolutePath path, bool recursive = false)
-        {
-            if (IsFolder(path))
-            {
-                path.DeleteFolder(recursive);
-            }
-
-            return path;
-        }
+        public abstract IMaybe<Information> TryFileSize(AbsolutePath path);
 
         /// <inheritdoc />
-        public AbsolutePath EnsureIsFile(AbsolutePath path)
-        {
-            if (!IsFile(path))
-            {
-                path.CreateEmptyFile();
-            }
-
-            return path;
-        }
+        public abstract IMaybe<FileAttributes> TryAttributes(AbsolutePath attributes);
 
         /// <inheritdoc />
-        public AbsolutePath EnsureIsNotFile(AbsolutePath path)
-        {
-            if (IsFile(path))
-            {
-                path.DeleteFile();
-            }
-
-            return path;
-        }
+        public abstract IMaybe<DateTimeOffset> TryCreationTime(AbsolutePath attributes);
 
         /// <inheritdoc />
-        public AbsolutePath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = false)
-        {
-            if (path.Exists())
-            {
-                path.Delete(recursiveDeleteIfFolder);
-            }
-
-            return path;
-        }
+        public abstract IMaybe<DateTimeOffset> TryLastAccessTime(AbsolutePath attributes);
 
         /// <inheritdoc />
-        public AbsolutePath EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = false)
-        {
-            if (path.Exists())
-            {
-                path.Delete(recursiveDeleteIfFolder);
-            }
+        public abstract IMaybe<DateTimeOffset> TryLastWriteTime(AbsolutePath attributes);
 
-            path.CreateFolder();
+        public IFileInfo GetFileInfo( string subpath ) => new AbsolutePathFileInfoAdapter(ParseAbsolutePath( subpath ));
 
-            return path;
-        }
-
-        /// <inheritdoc />
-        public Stream Open(AbsolutePath path, FileMode fileMode)
-        {
-            return path.IoService.TryOpen(path, fileMode).Value;
-        }
-
-        /// <inheritdoc />
-        public Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess)
-        {
-            return path.IoService.TryOpen(path, fileMode, fileAccess).Value;
-        }
-
-        /// <inheritdoc />
-        public Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess,
-            FileShare fileShare)
-        {
-            return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare).Value;
-        }
-
-        /// <inheritdoc />
-        public AbsolutePath CommonWith(AbsolutePath path, AbsolutePath that)
-        {
-            return path.IoService.TryCommonWith(path, that).Value;
-        }
-
-        /// <inheritdoc />
-        public AbsolutePath Parent(AbsolutePath path)
-        {
-            return path.IoService.TryParent(path).Value;
-        }
-
-        /// <inheritdoc />
-        public StreamWriter OpenWriter(AbsolutePath absolutePath)
-        {
-            return absolutePath.IoService.TryOpenWriter(absolutePath).Value;
-        }
-
+        #endregion
+        #region File reading
+        
         /// <inheritdoc />
         public IMaybe<StreamReader> TryOpenReader(AbsolutePath path)
         {
@@ -2232,15 +1906,366 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public bool IsFile(AbsolutePath absolutePath)
+        public virtual IEnumerable<string> ReadLines(AbsolutePath path)
         {
-            return absolutePath.GetPathType() == PathType.File;
+            var maybeStream = TryOpen(path, FileMode.Open, FileAccess.Read);
+            using (var stream = maybeStream.Value)
+            {
+                using (var reader = new StreamReader(stream))
+                {
+                    while (!reader.EndOfStream)
+                    {
+                        yield return reader.ReadLine();
+                    }
+                }
+            }
         }
 
         /// <inheritdoc />
-        public bool IsFolder(AbsolutePath absolutePath)
+        public virtual string ReadAllText(AbsolutePath path)
         {
-            return absolutePath.GetPathType() == PathType.Folder;
+            var maybeStream = TryOpen(path, FileMode.Open, FileAccess.Read);
+            using (var stream = maybeStream.Value)
+            {
+                using (var reader = new StreamReader(stream))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
         }
+
+        private string ReadText(StreamReader streamReader)
+        {
+            return streamReader.ReadToEnd();
+        }
+
+        public virtual IEnumerable<string> ReadLines(AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
+            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
+            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            bool leaveOpen = false)
+        {
+            var maybeStream = pathSpec.TryOpen(fileMode, fileAccess, fileShare);
+            if (maybeStream.HasValue)
+            {
+                using (maybeStream.Value)
+                {
+                    return ReadLines(maybeStream.Value, encoding, detectEncodingFromByteOrderMarks, bufferSize,
+                        leaveOpen);
+                }
+            }
+
+            return Enumerable.Empty<string>();
+        }
+
+        public virtual IMaybe<string> TryReadText(AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
+            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
+            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            bool leaveOpen = false)
+        {
+            return pathSpec.TryOpen(fileMode, fileAccess, fileShare).Select(
+                fs =>
+                {
+                    using (fs)
+                    {
+                        return TryReadText(fs, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
+                    }
+                });
+        }
+
+        public virtual IEnumerable<string> ReadLines(Stream stream, Encoding encoding = null,
+            bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
+        {
+            if (encoding == null)
+                encoding = Encoding.UTF8;
+            using (var sr = new StreamReader(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen))
+            {
+                string line;
+                while ((line = sr.ReadLine()) != null) yield return line;
+            }
+        }
+
+        public virtual IEnumerable<string> ReadLinesBackwards(Stream stream, Encoding encoding = null,
+            bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
+        {
+            if (encoding == null)
+                encoding = Encoding.UTF8;
+
+            var content = string.Empty;
+            // Seek file pointer to end
+            stream.Seek(0, SeekOrigin.End);
+
+            var buffer = new byte[bufferSize];
+
+            //loop now and read backwards
+            while (stream.Position > 0)
+            {
+                buffer.Initialize();
+
+                int bytesRead;
+
+                if (stream.Position - bufferSize >= 0)
+                {
+                    stream.Seek(-bufferSize, SeekOrigin.Current);
+                    bytesRead = stream.Read(buffer, 0, bufferSize);
+                    stream.Seek(-bufferSize, SeekOrigin.Current);
+                }
+                else
+                {
+                    var finalBufferSize = stream.Position;
+                    stream.Seek(0, SeekOrigin.Begin);
+                    bytesRead = stream.Read(buffer, 0, (int) finalBufferSize);
+                    stream.Seek(0, SeekOrigin.Begin);
+                }
+
+                var strBuffer = encoding.GetString(buffer, 0, bytesRead);
+
+                // lines is equal to what we just read, with the leftover content from last iteration appended to it.
+                var lines = (strBuffer + content).Split('\n');
+
+                // Loop through lines backwards, ignoring the first element, and yield each value
+                for (var i = lines.Length - 1; i > 0; i--) yield return lines[i].Trim('\r');
+
+                // Leftover content is part of a line defined on the line(s) that we'll read next iteration of while loop
+                // so we must save leftover content for later
+                content = lines[0];
+            }
+        }
+
+        public virtual string TryReadText(Stream stream, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
+            int bufferSize = 4096, bool leaveOpen = false)
+        {
+            if (encoding == null)
+                encoding = Encoding.UTF8;
+            using (var sr = new StreamReader(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen))
+            {
+                return ReadText(sr);
+            }
+        }
+
+        #endregion
+        #region File writing
+        
+        /// <inheritdoc />
+        public StreamWriter OpenWriter(AbsolutePath absolutePath, bool createRecursively = false)
+        {
+            return absolutePath.IoService.TryOpenWriter(absolutePath).Value;
+        }
+
+        /// <inheritdoc />
+        public virtual void WriteAllText(AbsolutePath path, string text)
+        {
+            var bytes = Encoding.Default.GetBytes(text);
+            WriteAllBytes(path, bytes);
+        }
+
+        /// <inheritdoc />
+        public virtual void WriteAllLines(AbsolutePath path, IEnumerable<string> lines)
+        {
+            var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite);
+            using (var stream = maybeStream.Value)
+            {
+                foreach (var line in lines)
+                {
+                    var bytes = Encoding.Default.GetBytes(line + _newline);
+                    stream.Write(bytes, 0, bytes.Length);
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public virtual void WriteAllBytes(AbsolutePath path, byte[] bytes)
+        {
+            var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite);
+            using (var stream = maybeStream.Value)
+            {
+                stream.Write(bytes, 0, bytes.Length);
+            }
+        }
+
+        /// <summary>
+        /// Writes the specified lines lazily to the specified stream.
+        /// </summary>
+        /// <param name="stream">The stream to write the text to</param>
+        /// <param name="lines">The lazily-enumerated lines of text to write to the stream</param>
+        /// <param name="encoding">The text encoding to be used</param>
+        /// <param name="bufferSize">The number of bytes in the StreamWriter buffer to be used</param>
+        /// <param name="leaveOpen">Whether to leave the stream open after writing the lines</param>
+        public virtual void WriteLines(Stream stream, IEnumerable<string> lines, Encoding encoding = null,
+            int bufferSize = 4096, bool leaveOpen = false, bool createRecursively = false)
+        {
+            if (encoding == null)
+                encoding = Encoding.UTF8;
+            using (var sw = new StreamWriter(stream, encoding, bufferSize, leaveOpen))
+            {
+                WriteLines(sw, lines);
+            }
+        }
+
+        private void WriteLines(StreamWriter streamWriter, IEnumerable<string> lines, bool createRecursively = false)
+        {
+            foreach (var line in lines) streamWriter.WriteLine(line);
+        }
+
+        /// <summary>
+        /// Write the specified text to the specified stream
+        /// </summary>
+        /// <param name="stream">The stream to write the text to</param>
+        /// <param name="text">The text to write to the stream</param>
+        /// <param name="encoding">The text encoding to be used</param>
+        /// <param name="bufferSize">The number of bytes in the StreamWriter buffer to be used</param>
+        /// <param name="leaveOpen">Whether to leave the stream open after writing the lines</param>
+        public virtual void WriteText(Stream stream, string text, Encoding encoding = null, int bufferSize = 4096,
+            bool leaveOpen = false, bool createRecursively = false)
+        {
+            if (encoding == null)
+                encoding = Encoding.UTF8;
+            using (var sw = new StreamWriter(stream, encoding, bufferSize, leaveOpen))
+            {
+                WriteText(sw, text);
+            }
+        }
+
+        private void WriteText(StreamWriter streamWriter, string text, bool createRecursively = false)
+        {
+            streamWriter.Write(text);
+        }
+
+        public virtual void WriteText(AbsolutePath pathSpec, IEnumerable<string> lines, FileMode fileMode = FileMode.Create,
+            FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
+            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
+        {
+            var maybeStream = pathSpec.TryOpen(fileMode, fileAccess, fileShare);
+            if (maybeStream.HasValue)
+                using (maybeStream.Value)
+                {
+                    WriteLines(maybeStream.Value, lines, encoding, bufferSize, leaveOpen);
+                }
+        }
+
+        public virtual void WriteText(AbsolutePath pathSpec, string text, FileMode fileMode = FileMode.Create,
+            FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
+            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
+        {
+            var maybeStream = pathSpec.TryOpen(fileMode, fileAccess, fileShare);
+            if (maybeStream.HasValue)
+                using (maybeStream.Value)
+                {
+                    WriteText(maybeStream.Value, text, encoding, bufferSize, leaveOpen);
+                }
+        }
+
+        public abstract IMaybe<StreamWriter> TryOpenWriter(AbsolutePath pathSpec);
+        #endregion
+        #region File open for reading or writing
+        
+        /// <inheritdoc />
+        public Stream Open(AbsolutePath path, FileMode fileMode, bool createRecursively = false)
+        {
+            return path.IoService.TryOpen(path, fileMode).Value;
+        }
+
+        /// <inheritdoc />
+        public Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, bool createRecursively = false)
+        {
+            return path.IoService.TryOpen(path, fileMode, fileAccess).Value;
+        }
+
+        /// <inheritdoc />
+        public Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess,
+            FileShare fileShare, bool createRecursively = false)
+        {
+            return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare).Value;
+        }
+
+        /// <inheritdoc />
+        public virtual IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode)
+        {
+            return TryOpen(path, fileMode, FileAccess.ReadWrite);
+        }
+
+        /// <inheritdoc />
+        public virtual IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
+            FileAccess fileAccess)
+        {
+            var fileShare = fileAccess == FileAccess.Read ? FileShare.Read : FileShare.None;
+            return TryOpen(path, fileMode, fileAccess, fileShare);
+        }
+
+        /// <inheritdoc />
+        public abstract IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
+            FileAccess fileAccess, FileShare fileShare);
+
+        #endregion
+        #region LINQ-style APIs
+        
+        /// <inheritdoc />
+        public virtual IObservable<Unit> ObserveChanges(AbsolutePath path)
+        {
+            return path.ObserveChanges(NotifyFilters.Attributes | NotifyFilters.CreationTime |
+                                       NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastAccess |
+                                       NotifyFilters.LastWrite | NotifyFilters.Security | NotifyFilters.Size);
+        }
+
+        /// <inheritdoc />
+        public virtual IObservable<Unit> ObserveChanges(AbsolutePath path, NotifyFilters filters)
+        {
+            var parent = path.Parent();
+            return parent.Children().ToLiveLinq().Where(x => x == path).AsObservable().SelectUnit();
+        }
+
+        /// <inheritdoc />
+        public virtual IObservable<PathType> ObservePathType(AbsolutePath path)
+        {
+            var parent = path.TryParent();
+            if (!parent.HasValue) return Observable.Return(path.GetPathType());
+            return parent.Value.Children(path.Name).ToLiveLinq().AsObservable().Select(_ => path.GetPathType())
+                .DistinctUntilChanged();
+        }
+
+        /// <inheritdoc />
+        public abstract IObservable<AbsolutePath> Renamings(AbsolutePath path);
+
+        public abstract IQueryable<AbsolutePath> Query();
+
+        public abstract ISetChanges<AbsolutePath> ToLiveLinq(AbsolutePath path, bool includeFileContentChanges,
+            bool includeSubFolders, string pattern);
+        #endregion
+        #region IFileProvider implementation
+        public IDirectoryContents GetDirectoryContents( string subpath ) => new AbsolutePathDirectoryContents( ParseAbsolutePath( subpath ) );
+
+        public IChangeToken Watch( string filter )
+        {
+            // TODO - implement this properly
+            return new EmptyChangeToken();
+        }
+        #endregion
+
+        protected IoServiceBase(IOpenFilesTrackingService openFilesTrackingService, bool isCaseSensitiveByDefault, string defaultDirectorySeparator, string newline)
+        {
+            IsCaseSensitiveByDefault = isCaseSensitiveByDefault;
+            OpenFilesTrackingService = openFilesTrackingService ?? throw new ArgumentNullException(nameof(openFilesTrackingService));
+            DefaultDirectorySeparator = defaultDirectorySeparator ?? throw new ArgumentNullException(nameof(defaultDirectorySeparator));
+            _newline = newline ?? throw new ArgumentNullException(nameof(newline));
+        }
+        
+        #region Internal extension methods
+
+        /// <inheritdoc />
+        public virtual StringComparison ToStringComparison(CaseSensitivityMode caseSensitivityMode)
+        {
+            if (caseSensitivityMode.HasFlag(CaseSensitivityMode.CaseSensitive))
+                return StringComparison.Ordinal;
+            return StringComparison.OrdinalIgnoreCase;
+        }
+
+        /// <inheritdoc />
+        public virtual StringComparison ToStringComparison(CaseSensitivityMode caseSensitivityMode, CaseSensitivityMode otherCaseSensitivityMode)
+        {
+            if (caseSensitivityMode.HasFlag(CaseSensitivityMode.CaseSensitive) && otherCaseSensitivityMode.HasFlag(CaseSensitivityMode.CaseSensitive))
+                return StringComparison.Ordinal;
+            return StringComparison.OrdinalIgnoreCase;
+        }
+
+        #endregion
     }
 }

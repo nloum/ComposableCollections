@@ -16,25 +16,85 @@ namespace IoFluently
 {
     public interface IIoService : IFileProvider
     {
-        /// <summary>
-        /// Returns an IQueryable that converts expressions like AbsolutePaths.Where(path => path.Contains("test")) into
-        /// efficient calls to the .NET file system APIs.
-        /// </summary>
-        IQueryable<AbsolutePath> Query();
+        #region Regions - for implementations
         
+        #region Environmental stuff
+        #endregion
+        #region Creating
+        #endregion
+        #region Deleting
+        #endregion
+        #region Ensuring is
+        #endregion
+        #region Ensuring is not
+        #endregion
+        #region Utilities
+        #endregion
+        #region Parsing paths
+        #endregion
+        #region Translation stuff
+        #endregion
+        #region Path building
+        #endregion
+        #region File metadata
+        #endregion
+        #region File reading
+        #endregion
+        #region File writing
+        #endregion
+        #region File open for reading or writing
+        #endregion
+        #region LINQ-style APIs
+        #endregion
+        
+        #endregion
+        
+        #region Environmental stuff
+
         /// <summary>
         /// Lists the file system roots. On Unix-like operating systems, there's only one file system root, and it is '/'.
         /// </summary>
         IObservableReadOnlySet<AbsolutePath> Roots { get; }
-        
-        #region Environmental stuff
-        
+
         string DefaultDirectorySeparator { get; }
         bool IsCaseSensitiveByDefault { get; }
         
+        /// <summary>
+        /// Returns the path to the user's temporary folder
+        /// </summary>
+        /// <returns>The path to the user's temporary folder</returns>
+        AbsolutePath GetTemporaryFolder();
+
         #endregion
         
-        #region Creating and deleting
+        #region Creating
+        
+        AbsolutePath Create(AbsolutePath path, PathType pathType, bool createRecursively = false);
+        AbsolutePath CreateFolder(AbsolutePath path, bool createRecursively = false);
+        /// <summary>
+        /// Creates a file or folder in the temporary folder
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        AbsolutePath CreateTemporaryPath(PathType type);
+        /// <summary>
+        /// Creates an empty file at the specified path
+        /// </summary>
+        /// <param name="path">The path that should become an empty file</param>
+        /// <returns>The same path that was specified</returns>
+        AbsolutePath CreateEmptyFile(AbsolutePath path, bool createRecursively = false);
+        
+        /// <summary>
+        /// Creates an empty file at the specified path, and opens it for writing
+        /// </summary>
+        /// <param name="path">The path that should become a file</param>
+        /// <returns>The stream to be used to write to the specified file</returns>
+        Stream CreateFile(AbsolutePath path, bool createRecursively = false);
+
+
+        #endregion
+
+        #region Deleting
         
         /// <summary>
         /// Delete the specified folder. This throws an exception if the path is a file, doesn't exist, or the current
@@ -45,37 +105,6 @@ namespace IoFluently
         /// <param name="recursive">Whether to delete the folder recursively.</param>
         /// <returns>The path that was deleted</returns>
         AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false);
-        
-        AbsolutePath Create(AbsolutePath path, PathType pathType);
-        AbsolutePath CreateFolder(AbsolutePath path);
-        
-        /// <summary>
-        /// Creates a file or folder in the temporary folder
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        AbsolutePath CreateTemporaryPath(PathType type);
-
-        /// <summary>
-        /// Returns the path to the user's temporary folder
-        /// </summary>
-        /// <returns>The path to the user's temporary folder</returns>
-        AbsolutePath GetTemporaryFolder();
-        
-        /// <summary>
-        /// Creates an empty file at the specified path
-        /// </summary>
-        /// <param name="path">The path that should become an empty file</param>
-        /// <returns>The same path that was specified</returns>
-        AbsolutePath CreateEmptyFile(AbsolutePath path);
-        
-        /// <summary>
-        /// Creates an empty file at the specified path, and opens it for writing
-        /// </summary>
-        /// <param name="path">The path that should become a file</param>
-        /// <returns>The stream to be used to write to the specified file</returns>
-        Stream CreateFile(AbsolutePath path);
-        
         /// <summary>
         /// Deletes the specified file
         /// </summary>
@@ -89,7 +118,6 @@ namespace IoFluently
         /// <param name="path">The path that should become an empty folder</param>
         /// <returns>The same path that was specified</returns>
         AbsolutePath ClearFolder(AbsolutePath path);
-        
         /// <summary>
         /// Deletes the specified file or folder
         /// </summary>
@@ -100,14 +128,27 @@ namespace IoFluently
         /// is ignored.</param>
         /// <returns>The path that was just deleted</returns>
         AbsolutePath Delete(AbsolutePath path, bool recursiveDeleteIfFolder = false);
+
+        
+        #endregion
+        
+        #region Ensuring is
         
         /// <summary>
         /// Creates the path as a folder if it isn't already. If the path is a file, throws an IOException.
         /// </summary>
         /// <param name="path">The path that should be a folder</param>
         /// <returns>The same path that was specified</returns>
-        AbsolutePath EnsureIsFolder(AbsolutePath path);
+        AbsolutePath EnsureIsFolder(AbsolutePath path, bool createRecursively = false);
 
+        AbsolutePath EnsureIsFile(AbsolutePath path, bool createRecursively = false);
+
+        AbsolutePath EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = false, bool createRecursively = false);
+
+        #endregion
+        
+        #region Ensuring is not
+        
         /// <summary>
         /// Deletes the specified path if it is a folder. If the path is a file or doesn't exist, this returns without
         /// throwing an exception. If recursive is false and the path is a non-empty folder, throws an IOException.
@@ -117,16 +158,12 @@ namespace IoFluently
         /// <returns>The same path that was specified</returns>
         AbsolutePath EnsureIsNotFolder(AbsolutePath path, bool recursive = false);
 
-        AbsolutePath EnsureIsFile(AbsolutePath path);
-
         AbsolutePath EnsureIsNotFile(AbsolutePath path);
 
         AbsolutePath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = false);
 
-        AbsolutePath EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = false);
-
         #endregion
-        
+
         #region Utilities
         
         /// <summary>
@@ -338,19 +375,9 @@ namespace IoFluently
 
         #endregion
         
-        #region File open, write, and read
-
-        IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode);
-        IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
-            FileAccess fileAccess);
-        IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
-            FileAccess fileAccess, FileShare fileShare);
-        void WriteAllText(AbsolutePath path, string text);
-        void WriteAllLines(AbsolutePath path, IEnumerable<string> lines);
-        void WriteAllBytes(AbsolutePath path, byte[] bytes);
+        #region File reading
         IEnumerable<string> ReadLines(AbsolutePath path);
         string ReadAllText(AbsolutePath path);
-        IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath);
         IEnumerable<string> ReadLines(AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
@@ -359,13 +386,6 @@ namespace IoFluently
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
             int bufferSize = 4096, bool leaveOpen = false);
-        void WriteText(AbsolutePath absolutePath, IEnumerable<string> lines,
-            FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write,
-            FileShare fileShare = FileShare.None,
-            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false);
-        void WriteText(AbsolutePath absolutePath, string text, FileMode fileMode = FileMode.Create,
-            FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
-            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false);
         IEnumerable<string> ReadLines(Stream stream, Encoding encoding = null,
             bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false);
@@ -375,22 +395,46 @@ namespace IoFluently
         string TryReadText(Stream stream, Encoding encoding = null,
             bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false);
-        Stream Open(AbsolutePath path, FileMode fileMode);
-        Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess);
-        Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess,
-            FileShare fileShare);
-        StreamWriter OpenWriter(AbsolutePath absolutePath);
         IMaybe<StreamReader> TryOpenReader(AbsolutePath path);
         StreamReader OpenReader(AbsolutePath path);
         string ReadText(AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false);
-
         #endregion
         
-        #region Observable changes
+        #region File writing
+        void WriteAllText(AbsolutePath path, string text, bool createRecursively = false);
+        void WriteAllLines(AbsolutePath path, IEnumerable<string> lines, bool createRecursively = false);
+        void WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = false);
+        IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, bool createRecursively = false);
+        void WriteText(AbsolutePath absolutePath, IEnumerable<string> lines,
+            FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write,
+            FileShare fileShare = FileShare.None,
+            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false, bool createRecursively = false);
+        void WriteText(AbsolutePath absolutePath, string text, FileMode fileMode = FileMode.Create,
+            FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
+            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false, bool createRecursively = false);
+        StreamWriter OpenWriter(AbsolutePath absolutePath, bool createRecursively = false);
+        #endregion
         
+        #region File open for reading or writing
+        IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, bool createRecursively = false);
+        IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, bool createRecursively = false);
+        IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, FileShare fileShare, bool createRecursively = false);
+        Stream Open(AbsolutePath path, FileMode fileMode, bool createRecursively = false);
+        Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, bool createRecursively = false);
+        Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, FileShare fileShare, bool createRecursively = false);
+        #endregion
+        
+        #region LINQ-style APIs
+        
+        /// <summary>
+        /// Returns an IQueryable that converts expressions like AbsolutePaths.Where(path => path.Contains("test")) into
+        /// efficient calls to the .NET file system APIs.
+        /// </summary>
+        IQueryable<AbsolutePath> Query();
+
         ISetChanges<AbsolutePath> ToLiveLinq(AbsolutePath path, bool includeFileContentChanges,
             bool includeSubFolders, string pattern);
         IObservable<Unit> ObserveChanges(AbsolutePath path);

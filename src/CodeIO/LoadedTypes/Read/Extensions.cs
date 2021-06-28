@@ -158,10 +158,10 @@ namespace CodeIO
             {
 	            if (type.IsPrimitive)
                 {
-                    return new Lazy<IType>(new Primitive()
+                    return new Lazy<IType>(new ReflectionPrimitive()
                     {
                         Identifier = type.GetTypeIdentifier(),
-                        Type = type.Name switch
+                        PrimitiveType = type.Name switch
                         {
                             "Int32" => PrimitiveType.Int,
                             "UInt32" => PrimitiveType.UInt,
@@ -178,7 +178,8 @@ namespace CodeIO
                             "Char" => PrimitiveType.Char,
                             "IntPtr" => PrimitiveType.NInt,
                             "UIntPtr" => PrimitiveType.NUint,
-                        }
+                        },
+                        Type = type,
                     });
                 }
 

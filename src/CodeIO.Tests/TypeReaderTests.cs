@@ -234,7 +234,7 @@ namespace CodeIO.Tests
             clazz.Properties[0].Name.Should().Be("Length");
             clazz.Properties[0].GetterVisibility.Should().Be(Visibility.Public);
             var lengthType = (Primitive)clazz.Properties[0].Type;
-            lengthType.Type.Should().Be(PrimitiveType.Int);
+            lengthType.PrimitiveType.Should().Be(PrimitiveType.Int);
         }
 
         [TestMethod]

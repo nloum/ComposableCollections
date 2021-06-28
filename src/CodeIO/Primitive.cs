@@ -4,6 +4,6 @@ namespace CodeIO
     {
         public TypeIdentifier Identifier { get; init; }
         public Visibility Visibility => Visibility.Public;
-        public PrimitiveType Type { get; init; }
+        public PrimitiveType PrimitiveType { get; init; }
     }
 }

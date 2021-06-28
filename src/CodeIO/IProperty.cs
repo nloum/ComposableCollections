@@ -4,6 +4,8 @@ namespace CodeIO
     {
         string Name { get; }
         IType Type { get; }
-        Visibility Visibility { get; }
+        Visibility? GetterVisibility { get; }
+        Visibility? SetterVisibility { get; }
+        bool IsStatic { get; }
     }
 }

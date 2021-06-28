@@ -126,6 +126,26 @@ namespace CodeIO
             return Visibility.Internal;
         }
         
+        public static Visibility GetVisibility(this MethodInfo constructor)
+        {
+            if (constructor.IsPublic)
+            {
+                return Visibility.Public;
+            }
+
+            if (constructor.IsPrivate)
+            {
+                return Visibility.Private;
+            }
+
+            if (constructor.IsFamily)
+            {
+                return Visibility.Protected;
+            }
+            
+            return Visibility.Internal;
+        }
+
         public static Visibility GetTypeVisibility(this Type t)
         {
             if (t.IsVisible

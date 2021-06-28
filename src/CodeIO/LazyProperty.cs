@@ -6,15 +6,19 @@ namespace CodeIO
     {
         private Lazy<IType> _type;
 
-        public LazyProperty(Lazy<IType> type, string name, Visibility visibility)
+        public LazyProperty(Lazy<IType> type, string name, Visibility? getterVisibility, Visibility? setterVisibility, bool isStatic)
         {
             _type = type;
             Name = name;
-            Visibility = visibility;
+            GetterVisibility = getterVisibility;
+            SetterVisibility = setterVisibility;
+            IsStatic = isStatic;
         }
 
         public string Name { get; }
         public IType Type => _type.Value;
-        public Visibility Visibility { get; }
+        public Visibility? GetterVisibility { get; }
+        public Visibility? SetterVisibility { get; }
+        public bool IsStatic { get; }
     }
 }

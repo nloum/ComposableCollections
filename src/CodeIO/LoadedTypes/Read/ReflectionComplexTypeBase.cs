@@ -24,13 +24,20 @@ namespace CodeIO.LoadedTypes.Read
             Visibility = type.GetTypeVisibility();
             Properties = type.GetProperties().Where(property => property.GetIndexParameters().Length == 0)
                 .ToImmutableList()
-                .Select(property => new LazyProperty(typeFormat[property.PropertyType], property.Name, Visibility.Public));
+                .Select(property => new LazyProperty(typeFormat[property.PropertyType], property.Name, 
+                    property.GetMethod?.GetVisibility(), 
+                    property.SetMethod?.GetVisibility(), 
+                    property.GetMethod?.IsStatic ?? property.SetMethod.IsStatic));
             Methods = type.GetMethods()
                 .ToImmutableList()
-                .Select(method => new LazyMethod(typeFormat[method.ReturnType], method.Name, Visibility.Public, method.GetParameters().Select(parameter => new LazyParameter(parameter.Name, typeFormat[parameter.ParameterType], parameter.IsOut, parameter.HasDefaultValue, parameter.DefaultValue))));
+                .Select(method => new LazyMethod(typeFormat[method.ReturnType], method.Name, method.GetVisibility(), method.GetParameters().Select(parameter => new LazyParameter(parameter.Name, typeFormat[parameter.ParameterType], parameter.IsOut, parameter.HasDefaultValue, parameter.DefaultValue)), method.IsStatic));
             Indexers = type.GetProperties().Where(property => property.GetIndexParameters().Length > 0)
                 .ToImmutableList()
-                .Select(property => new LazyIndexer(typeFormat[property.PropertyType], Visibility.Public, property.GetIndexParameters().Select(parameter => new LazyParameter(parameter.Name, typeFormat[parameter.ParameterType], false, parameter.HasDefaultValue, parameter.DefaultValue))));
+                .Select(property => new LazyIndexer(typeFormat[property.PropertyType],
+                    property.GetIndexParameters().Select(parameter => new LazyParameter(parameter.Name, typeFormat[parameter.ParameterType], false, parameter.HasDefaultValue, parameter.DefaultValue)),
+                    property.GetMethod?.GetVisibility(), 
+                    property.SetMethod?.GetVisibility(), 
+                    property.GetMethod?.IsStatic ?? property.SetMethod.IsStatic));
             Interfaces = type.GetInterfaces()
                 .Select(type => typeFormat[type])
                 .Select(type => type.Value);

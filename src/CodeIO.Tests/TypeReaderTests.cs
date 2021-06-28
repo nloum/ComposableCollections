@@ -20,7 +20,7 @@ namespace CodeIO.Tests
             
             clazz.Properties.Count.Should().Be(1);
             clazz.Properties[0].Name.Should().Be("MyProp");
-            clazz.Properties[0].Visibility.Should().Be(Visibility.Public);
+            clazz.Properties[0].GetterVisibility.Should().Be(Visibility.Public);
             clazz.Properties[0].Type.Identifier.Name.Should().Be("String");
         }
 
@@ -36,7 +36,7 @@ namespace CodeIO.Tests
             
             clazz.Properties.Count.Should().Be(1);
             clazz.Properties[0].Name.Should().Be("Name");
-            clazz.Properties[0].Visibility.Should().Be(Visibility.Public);
+            clazz.Properties[0].GetterVisibility.Should().Be(Visibility.Public);
             clazz.Properties[0].Type.Identifier.Name.Should().Be("String");
 
             var iface = (INonGenericInterface) uut.GetTypeFormat<Type>()[typeof(IInterfaceWithProperty)].Value;
@@ -45,7 +45,7 @@ namespace CodeIO.Tests
             
             iface.Properties.Count.Should().Be(1);
             iface.Properties[0].Name.Should().Be("Name");
-            iface.Properties[0].Visibility.Should().Be(Visibility.Public);
+            iface.Properties[0].GetterVisibility.Should().Be(Visibility.Public);
             iface.Properties[0].Type.Identifier.Name.Should().Be("String");
         }
 
@@ -166,7 +166,7 @@ namespace CodeIO.Tests
             
             clazz.Properties.Count.Should().Be(1);
             clazz.Properties[0].Name.Should().Be("Value");
-            clazz.Properties[0].Visibility.Should().Be(Visibility.Public);
+            clazz.Properties[0].GetterVisibility.Should().Be(Visibility.Public);
             clazz.Properties[0].Type.Identifier.Name.Should().Be("T");
 
             var iface = (IUnboundGenericInterface) uut.GetTypeFormat<Type>()[typeof(IInterfaceWithProperty<>)].Value;
@@ -175,7 +175,7 @@ namespace CodeIO.Tests
             
             iface.Properties.Count.Should().Be(1);
             iface.Properties[0].Name.Should().Be("Value");
-            iface.Properties[0].Visibility.Should().Be(Visibility.Public);
+            iface.Properties[0].GetterVisibility.Should().Be(Visibility.Public);
             iface.Properties[0].Type.Identifier.Name.Should().Be("T");
         }
 
@@ -191,7 +191,7 @@ namespace CodeIO.Tests
             
             clazz.Properties.Count.Should().Be(1);
             clazz.Properties[0].Name.Should().Be("Value");
-            clazz.Properties[0].Visibility.Should().Be(Visibility.Public);
+            clazz.Properties[0].GetterVisibility.Should().Be(Visibility.Public);
             clazz.Properties[0].Type.Identifier.Name.Should().Be("String");
             
             clazz.Unbound.Identifier.Name.Should().Be(nameof(ImplementationWithProperty));
@@ -199,7 +199,7 @@ namespace CodeIO.Tests
             
             clazz.Unbound.Properties.Count.Should().Be(1);
             clazz.Unbound.Properties[0].Name.Should().Be("Value");
-            clazz.Unbound.Properties[0].Visibility.Should().Be(Visibility.Public);
+            clazz.Unbound.Properties[0].GetterVisibility.Should().Be(Visibility.Public);
             clazz.Unbound.Properties[0].Type.Identifier.Name.Should().Be("T");
 
             var iface = (IBoundGenericInterface) uut.GetTypeFormat<Type>()[typeof(IInterfaceWithProperty<string>)].Value;
@@ -208,7 +208,7 @@ namespace CodeIO.Tests
             
             iface.Properties.Count.Should().Be(1);
             iface.Properties[0].Name.Should().Be("Value");
-            iface.Properties[0].Visibility.Should().Be(Visibility.Public);
+            iface.Properties[0].GetterVisibility.Should().Be(Visibility.Public);
             iface.Properties[0].Type.Identifier.Name.Should().Be("String");
             
             iface.Unbound.Identifier.Name.Should().Be(nameof(IInterfaceWithProperty));
@@ -216,7 +216,7 @@ namespace CodeIO.Tests
             
             iface.Unbound.Properties.Count.Should().Be(1);
             iface.Unbound.Properties[0].Name.Should().Be("Value");
-            iface.Unbound.Properties[0].Visibility.Should().Be(Visibility.Public);
+            iface.Unbound.Properties[0].GetterVisibility.Should().Be(Visibility.Public);
             iface.Unbound.Properties[0].Type.Identifier.Name.Should().Be("T");
         }
 
@@ -232,7 +232,7 @@ namespace CodeIO.Tests
             
             clazz.Properties.Count.Should().Be(1);
             clazz.Properties[0].Name.Should().Be("Length");
-            clazz.Properties[0].Visibility.Should().Be(Visibility.Public);
+            clazz.Properties[0].GetterVisibility.Should().Be(Visibility.Public);
             var lengthType = (Primitive)clazz.Properties[0].Type;
             lengthType.Type.Should().Be(PrimitiveType.Int);
         }
@@ -249,7 +249,7 @@ namespace CodeIO.Tests
             
             clazz.Properties.Count.Should().Be(1);
             clazz.Properties[0].Name.Should().Be("Parent");
-            clazz.Properties[0].Visibility.Should().Be(Visibility.Public);
+            clazz.Properties[0].GetterVisibility.Should().Be(Visibility.Public);
             object.ReferenceEquals(clazz.Properties[0].Type, clazz).Should().BeTrue();
         }
 
@@ -265,13 +265,12 @@ namespace CodeIO.Tests
             var strin = (INonGenericClass) uut.GetTypeFormat<Type>()[typeof(string)].Value;
 
             clazz.Indexers.Count.Should().Be(1);
-            clazz.Indexers[0].Visibility.Should().Be(Visibility.Public);
+            clazz.Indexers[0].GetterVisibility.Should().Be(Visibility.Public);
             clazz.Indexers[0].Parameters.Count.Should().Be(1);
             clazz.Indexers[0].Parameters[0].Name.Should().Be("a");
             object.ReferenceEquals(clazz.Indexers[0].Parameters[0].Type, strin).Should().BeTrue();
         }
-        
-        
+
         [TestMethod]
         public void ShouldReadClassWithMethod()
         {

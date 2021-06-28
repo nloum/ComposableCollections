@@ -15,7 +15,7 @@ namespace IoFluently
 
         public IDisposable RegisterChangeCallback( Action<object> callback, object state ) {
             _numActiveChangeCallbacks++;
-            var disposable = _absolutePath.ObserveChanges().Subscribe( _ => callback( state ) );
+            var disposable = _absolutePath.IoService.ObserveChanges(_absolutePath).Subscribe( _ => callback( state ) );
             return new AnonymousDisposable( () => {
                 disposable.Dispose();
                 _numActiveChangeCallbacks--;

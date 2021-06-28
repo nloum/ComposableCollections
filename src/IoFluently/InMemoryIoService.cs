@@ -152,7 +152,7 @@ namespace IoFluently
 
         private IMaybe<File> GetFile(AbsolutePath path)
         {
-            path = path.Simplify();
+            path = Simplify(path);
             var components = path.Path.Components;
             if (RootFolders.ContainsKey(components[0]))
             {
@@ -188,7 +188,7 @@ namespace IoFluently
         
         private IMaybe<Folder> GetFolder(AbsolutePath path)
         {
-            path = path.Simplify();
+            path = Simplify(path);
             var components = path.Path.Components;
             if (RootFolders.ContainsKey(components[0]))
             {
@@ -238,8 +238,8 @@ namespace IoFluently
         /// <inheritdoc />
         public override AbsolutePath DeleteFile(AbsolutePath path)
         {
-            path = path.Simplify();
-            var parentFolder = GetFolder(path.Parent()).Value;
+            path = Simplify(path);
+            var parentFolder = GetFolder(Parent(path)).Value;
             parentFolder.Files.Remove(path.Name);
             return path;
         }
@@ -302,7 +302,7 @@ namespace IoFluently
         /// <inheritdoc />
         public override PathType GetPathType(AbsolutePath path)
         {
-            path = path.Simplify();
+            path = Simplify(path);
 
             var file = GetFile(path);
             if (file.HasValue)
@@ -322,8 +322,8 @@ namespace IoFluently
         /// <inheritdoc />
         public override AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false)
         {
-            var parentFolder = GetFolder(path.Parent());
-            parentFolder.Value.Folders.Remove(path.Simplify().Name);
+            var parentFolder = GetFolder(Parent(path));
+            parentFolder.Value.Folders.Remove(Simplify(path).Name);
             return path;
         }
 
@@ -337,7 +337,7 @@ namespace IoFluently
                 if (fileMode == FileMode.Create || fileMode == FileMode.CreateNew ||
                     fileMode == FileMode.OpenOrCreate)
                 {
-                    var pathParent = path.Parent();
+                    var pathParent = Parent(path);
                     Folder parentFolder = null;
                     var maybeParentFolder = GetFolder(pathParent);
                     if (!maybeParentFolder.HasValue)
@@ -404,7 +404,7 @@ namespace IoFluently
         /// <inheritdoc />
         public override AbsolutePath CreateFolder(AbsolutePath path, bool createRecursively = false)
         {
-            var folder = GetFolder(path.Parent()).Value;
+            var folder = GetFolder(Parent(path)).Value;
             EnsureFolderExists(folder, new[]{path.Name});
             return path;
         }

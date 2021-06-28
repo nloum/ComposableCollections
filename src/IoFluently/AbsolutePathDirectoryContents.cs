@@ -14,9 +14,9 @@ namespace IoFluently
 
         public IEnumerator<IFileInfo> GetEnumerator() => _absolutePath
             .Children()
-            .Where( x => IoExtensions.IsFile(x) ).Select( x => new AbsolutePathFileInfoAdapter( x ) )
+            .Where( x => x.IoService.IsFile(x) ).Select( x => new AbsolutePathFileInfoAdapter( x ) )
             .GetEnumerator();
 
-        public bool Exists => _absolutePath.Exists();
+        public bool Exists => _absolutePath.IoService.Exists(_absolutePath);
     }
 }

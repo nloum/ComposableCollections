@@ -378,11 +378,11 @@ namespace IoFluently
         #region File reading
         IEnumerable<string> ReadLines(AbsolutePath path);
         string ReadAllText(AbsolutePath path);
-        IEnumerable<string> ReadLines(AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
+        IEnumerable<string> ReadLines(AbsolutePath path, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false);
-        IMaybe<string> TryReadText(AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
+        IMaybe<string> TryReadText(AbsolutePath path, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
             int bufferSize = 4096, bool leaveOpen = false);

@@ -103,12 +103,12 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual AbsolutePath CreateTemporaryPath(PathType type)
         {
-            var spec = GetTemporaryFolder() / Guid.NewGuid().ToString();
+            var path = GetTemporaryFolder() / Guid.NewGuid().ToString();
             if (type == PathType.File)
-                spec.Create(PathType.File);
+                path.IoService.Create(path, PathType.File);
             if (type == PathType.Folder)
-                spec.Create(PathType.Folder);
-            return spec;
+                path.IoService.Create(path, PathType.Folder);
+            return path;
         }
 
         #endregion
@@ -119,7 +119,7 @@ namespace IoFluently
         {
             foreach (var item in path.Descendants())
             {
-                item.Delete();
+                item.IoService.Delete(item, true);
             }
 
             return path;
@@ -134,9 +134,9 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual AbsolutePath Delete(AbsolutePath path, bool recursiveDeleteIfFolder = false)
         {
-            if (path.GetPathType() == PathType.File) return path.DeleteFile();
+            if (path.IoService.GetPathType(path) == PathType.File) return path.IoService.DeleteFile(path);
 
-            if (path.GetPathType() == PathType.Folder) return path.DeleteFolder(recursiveDeleteIfFolder);
+            if (path.IoService.GetPathType(path) == PathType.Folder) return path.IoService.DeleteFolder(path, recursiveDeleteIfFolder);
 
             return path;
         }
@@ -149,7 +149,7 @@ namespace IoFluently
         {
             if (!IsFolder(path))
             {
-                path.CreateFolder();
+                path.IoService.CreateFolder(path);
             }
 
             return path;
@@ -160,7 +160,7 @@ namespace IoFluently
         {
             if (!IsFile(path))
             {
-                path.CreateEmptyFile();
+                path.IoService.CreateEmptyFile(path);
             }
 
             return path;
@@ -169,12 +169,12 @@ namespace IoFluently
         /// <inheritdoc />
         public AbsolutePath EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = false, bool createRecursively = false)
         {
-            if (path.Exists())
+            if (path.IoService.Exists(path))
             {
-                path.Delete(recursiveDeleteIfFolder);
+                path.IoService.Delete(path, recursiveDeleteIfFolder);
             }
 
-            path.CreateFolder();
+            path.IoService.CreateFolder(path);
 
             return path;
         }
@@ -187,7 +187,7 @@ namespace IoFluently
         {
             if (IsFile(path))
             {
-                path.DeleteFile();
+                path.IoService.DeleteFile(path);
             }
 
             return path;
@@ -196,9 +196,9 @@ namespace IoFluently
         /// <inheritdoc />
         public AbsolutePath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = false)
         {
-            if (path.Exists())
+            if (path.IoService.Exists(path))
             {
-                path.Delete(recursiveDeleteIfFolder);
+                path.IoService.Delete(path, recursiveDeleteIfFolder);
             }
 
             return path;
@@ -209,7 +209,7 @@ namespace IoFluently
         {
             if (IsFolder(path))
             {
-                path.DeleteFolder(recursive);
+                path.IoService.DeleteFolder(path, recursive);
             }
 
             return path;
@@ -222,13 +222,13 @@ namespace IoFluently
         /// <inheritdoc />
         public bool IsFile(AbsolutePath absolutePath)
         {
-            return absolutePath.GetPathType() == PathType.File;
+            return absolutePath.IoService.GetPathType(absolutePath) == PathType.File;
         }
 
         /// <inheritdoc />
         public bool IsFolder(AbsolutePath absolutePath)
         {
-            return absolutePath.GetPathType() == PathType.Folder;
+            return absolutePath.IoService.GetPathType(absolutePath) == PathType.Folder;
         }
         
         /// <inheritdoc />
@@ -403,17 +403,17 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual bool ContainsFiles(AbsolutePath path)
         {
-            if (path.GetPathType() == PathType.File)
+            if (path.IoService.GetPathType(path) == PathType.File)
                 return true;
-            return path.Children().All(child => child.ContainsFiles());
+            return path.Children().All(child => child.IoService.ContainsFiles(child));
         }
 
         /// <inheritdoc />
         public virtual bool FolderContainsFiles(AbsolutePath path)
         {
-            if (path.GetPathType() == PathType.File)
+            if (path.IoService.GetPathType(path) == PathType.File)
                 return false;
-            return path.ContainsFiles();
+            return path.IoService.ContainsFiles(path);
         }
 
         /// <inheritdoc />
@@ -1198,31 +1198,31 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual void RenameTo(AbsolutePath source, AbsolutePath target)
         {
-            Move(source.Translate(target));
+            Move(source.IoService.Translate(source, target));
         }
 
         /// <inheritdoc />
         public IAbsolutePathTranslation Copy(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination)
         {
-            return pathToBeCopied.Translate(source, destination).Copy();
+            return Copy(pathToBeCopied.IoService.Translate(pathToBeCopied, source, destination));
         }
 
         /// <inheritdoc />
         public IAbsolutePathTranslation Copy(AbsolutePath source, AbsolutePath destination)
         {
-            return source.Translate(destination).Copy();
+            return Copy(source.IoService.Translate(source, destination));
         }
 
         /// <inheritdoc />
         public IAbsolutePathTranslation Move(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination)
         {
-            return pathToBeCopied.Translate(source, destination).Move();
+            return Move(pathToBeCopied.IoService.Translate(pathToBeCopied, source, destination));
         }
 
         /// <inheritdoc />
         public IAbsolutePathTranslation Move(AbsolutePath source, AbsolutePath destination)
         {
-            return source.Translate(destination).Move();
+            return Move(source.IoService.Translate(source, destination));
         }
 
         /// <inheritdoc />
@@ -1240,7 +1240,7 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation, bool overwrite = false)
         {
-            switch (translation.Source.GetPathType())
+            switch (translation.Source.IoService.GetPathType(translation.Source))
             {
                 case PathType.File:
                     CopyFile(translation, overwrite);
@@ -1260,8 +1260,8 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation, bool overwrite = false)
         {
-            using (var source = translation.Source.Open(FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (var destination = translation.Destination.Open(overwrite ? FileMode.OpenOrCreate : FileMode.CreateNew, FileAccess.Write))
+            using (var source = translation.Source.IoService.Open(translation.Source, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var destination = translation.Destination.IoService.Open(translation.Destination, overwrite ? FileMode.OpenOrCreate : FileMode.CreateNew, FileAccess.Write))
             {
                 byte[] buffer = new byte[32768];
                 int read;
@@ -1277,7 +1277,7 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation, bool overwrite = false)
         {
-            if (translation.Destination.Exists())
+            if (translation.Destination.IoService.Exists(translation.Destination))
             {
                 if (!overwrite)
                 {
@@ -1285,20 +1285,20 @@ namespace IoFluently
                 }
                 else
                 {
-                    translation.Destination.Delete();
+                    translation.Destination.IoService.Delete(translation.Destination);
                 }
             }
-            if (translation.Source.GetPathType() != PathType.Folder)
+            if (translation.Source.IoService.GetPathType(translation.Source) != PathType.Folder)
                 throw new IOException(string.Format(
                     $"An attempt was made to copy a folder from \"{translation.Source}\" to \"{translation.Destination}\" but the source path is not a folder."));
-            translation.Destination.Create(PathType.Folder);
+            translation.Destination.IoService.Create(translation.Destination, PathType.Folder);
             return translation;
         }
 
         /// <inheritdoc />
         public virtual IAbsolutePathTranslation Move(IAbsolutePathTranslation translation, bool overwrite = false)
         {
-            switch (translation.Source.GetPathType())
+            switch (translation.Source.IoService.GetPathType(translation.Source))
             {
                 case PathType.File:
                     MoveFile(translation, overwrite);
@@ -1319,14 +1319,14 @@ namespace IoFluently
         public virtual IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation, bool overwrite = false)
         {
             Copy(translation, overwrite);
-            translation.Source.Delete();
+            translation.Source.IoService.Delete(translation.Source);
             return translation;
         }
 
         /// <inheritdoc />
         public virtual IAbsolutePathTranslation MoveFolder(IAbsolutePathTranslation translation, bool overwrite = false)
         {
-            if (translation.Destination.Exists())
+            if (translation.Destination.IoService.Exists(translation.Destination))
             {
                 if (!overwrite)
                 {
@@ -1334,24 +1334,24 @@ namespace IoFluently
                 }
                 else
                 {
-                    translation.Destination.Delete();
+                    translation.Destination.IoService.Delete(translation.Destination);
                 }
             }
-            if (translation.Source.GetPathType() != PathType.Folder)
+            if (translation.Source.IoService.GetPathType(translation.Source) != PathType.Folder)
                 throw new IOException(string.Format(
                     $"An attempt was made to move a folder from \"{translation.Source}\" to \"{translation.Destination}\" but the source path is not a folder."));
-            if (translation.Destination.GetPathType() == PathType.File)
+            if (translation.Destination.IoService.GetPathType(translation.Destination) == PathType.File)
                 throw new IOException(string.Format(
                     $"An attempt was made to move \"{translation.Source}\" to \"{translation.Destination}\" but the destination path is a file."));
-            if (translation.Destination.IsDescendantOf(translation.Source))
+            if (translation.Destination.IoService.IsDescendantOf(translation.Destination, translation.Source))
                 throw new IOException(string.Format(
                     $"An attempt was made to move a file from \"{translation.Source}\" to \"{translation.Destination}\" but the destination path is a sub-path of the source path."));
             if (translation.Source.Children().Any())
                 throw new IOException(string.Format(
                     $"An attempt was made to move the non-empty folder \"{translation.Source}\". This is not allowed because all the files should be moved first, and only then can the folder be moved, because the move operation deletes the source folder, which would of course also delete the files and folders within the source folder."));
-            translation.Destination.Create(PathType.Folder);
+            translation.Destination.IoService.Create(translation.Destination, PathType.Folder);
             if (!translation.Source.Children().Any())
-                translation.Source.DeleteFolder();
+                translation.Source.IoService.DeleteFolder(translation.Source);
             return translation;
         }
 
@@ -1541,11 +1541,9 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual RelativePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo)
         {
-            var simplified = path.Simplify();
+            var simplified = Simplify(path);
             var pathStr = simplified.ToString();
-            var relativeToStr = relativeTo.Simplify().ToString();
-
-            var common = path.TryCommonWith(relativeTo);
+            var common = path.IoService.TryCommonWith(path, relativeTo);
 
             if (!common.HasValue)
                 throw new InvalidOperationException("No common ancestor");
@@ -1612,7 +1610,7 @@ namespace IoFluently
         {
             var ancestor = path;
             IMaybe<AbsolutePath> cachedParent;
-            while ((cachedParent = ancestor.TryParent()).HasValue) ancestor = cachedParent.Value;
+            while ((cachedParent = ancestor.IoService.TryParent(ancestor)).HasValue) ancestor = cachedParent.Value;
 
             return ancestor;
         }
@@ -1688,7 +1686,7 @@ namespace IoFluently
                 yield return path;
             while (true)
             {
-                var maybePath = path.TryParent();
+                var maybePath = path.IoService.TryParent(path);
                 if (maybePath.HasValue)
                 {
                     yield return maybePath.Value;
@@ -1704,7 +1702,7 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual IMaybe<AbsolutePath> TryDescendant(AbsolutePath path, params AbsolutePath[] paths)
         {
-            return path.TryDescendant(paths.Select(p => p.ToString()).ToArray());
+            return path.IoService.TryDescendant(path, paths.Select(p => p.ToString()).ToArray());
         }
 
         /// <inheritdoc />
@@ -1727,7 +1725,7 @@ namespace IoFluently
             var maybePath = path.ToMaybe();
             for (var i = 0; i < level; i++)
             {
-                maybePath = maybePath.Select(p => p.TryParent()).SelectMany(x => x);
+                maybePath = maybePath.Select(p => p.IoService.TryParent(p)).SelectMany(x => x);
                 if (!maybePath.HasValue)
                     return Nothing<AbsolutePath>(() => throw new InvalidOperationException($"The path {path} has no ancestor"));
             }
@@ -1755,7 +1753,7 @@ namespace IoFluently
         private IEnumerable<string> ProposeSuccessivelyMoreSpecificNames(AbsolutePath path)
         {
             string filename = null;
-            foreach (var parentPath in path.Ancestors())
+            foreach (var parentPath in path.IoService.Ancestors(path))
             {
                 if (filename == null)
                     filename = parentPath.Name;
@@ -1851,7 +1849,7 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual bool Exists(AbsolutePath path)
         {
-            return path.GetPathType() != PathType.None;
+            return path.IoService.GetPathType(path) != PathType.None;
         }
 
         /// <inheritdoc />
@@ -1886,7 +1884,7 @@ namespace IoFluently
         /// <inheritdoc />
         public IMaybe<StreamReader> TryOpenReader(AbsolutePath path)
         {
-            return path.TryOpen(FileMode.Open, FileAccess.Read, FileShare.Read).Select(stream => new StreamReader(stream));
+            return path.IoService.TryOpen(path, FileMode.Open, FileAccess.Read, FileShare.Read).Select(stream => new StreamReader(stream));
         }
 
         /// <inheritdoc />
@@ -1939,12 +1937,12 @@ namespace IoFluently
             return streamReader.ReadToEnd();
         }
 
-        public virtual IEnumerable<string> ReadLines(AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
+        public virtual IEnumerable<string> ReadLines(AbsolutePath path, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false)
         {
-            var maybeStream = pathSpec.TryOpen(fileMode, fileAccess, fileShare);
+            var maybeStream = path.IoService.TryOpen(path, fileMode, fileAccess, fileShare);
             if (maybeStream.HasValue)
             {
                 using (maybeStream.Value)
@@ -1957,12 +1955,12 @@ namespace IoFluently
             return Enumerable.Empty<string>();
         }
 
-        public virtual IMaybe<string> TryReadText(AbsolutePath pathSpec, FileMode fileMode = FileMode.Open,
+        public virtual IMaybe<string> TryReadText(AbsolutePath path, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false)
         {
-            return pathSpec.TryOpen(fileMode, fileAccess, fileShare).Select(
+            return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare).Select(
                 fs =>
                 {
                     using (fs)
@@ -2204,7 +2202,7 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual IObservable<Unit> ObserveChanges(AbsolutePath path)
         {
-            return path.ObserveChanges(NotifyFilters.Attributes | NotifyFilters.CreationTime |
+            return path.IoService.ObserveChanges(path, NotifyFilters.Attributes | NotifyFilters.CreationTime |
                                        NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastAccess |
                                        NotifyFilters.LastWrite | NotifyFilters.Security | NotifyFilters.Size);
         }
@@ -2212,16 +2210,16 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual IObservable<Unit> ObserveChanges(AbsolutePath path, NotifyFilters filters)
         {
-            var parent = path.Parent();
+            var parent = path.IoService.Parent(path);
             return parent.Children().ToLiveLinq().Where(x => x == path).AsObservable().SelectUnit();
         }
 
         /// <inheritdoc />
         public virtual IObservable<PathType> ObservePathType(AbsolutePath path)
         {
-            var parent = path.TryParent();
-            if (!parent.HasValue) return Observable.Return(path.GetPathType());
-            return parent.Value.Children(path.Name).ToLiveLinq().AsObservable().Select(_ => path.GetPathType())
+            var parent = path.IoService.TryParent(path);
+            if (!parent.HasValue) return Observable.Return(path.IoService.GetPathType(path));
+            return parent.Value.Children(path.Name).ToLiveLinq().AsObservable().Select(_ => path.IoService.GetPathType(path))
                 .DistinctUntilChanged();
         }
 

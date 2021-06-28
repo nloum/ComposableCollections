@@ -38,7 +38,7 @@ namespace IoFluently
             }, (AbsolutePath node, string name, out AbsolutePath child) =>
             {
                 child = node / name;
-                var result = child.Exists();
+                var result = child.IoService.Exists(child);
                 return result;
             });
         }

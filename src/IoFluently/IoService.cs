@@ -60,7 +60,7 @@ namespace IoFluently
             if (PathObservationMethod == PathObservationMethod.FileSystemWatcher)
             {
                 return ToLiveLinqWithFileSystemWatcher(path, includeFileContentChanges, includeSubFolders, pattern)
-                    .ToDictionaryLiveLinq(x => x, x => x.GetPathType()).KeysAsSet();
+                    .ToDictionaryLiveLinq(x => x, x => GetPathType(x)).KeysAsSet();
             }
 
             return ToLiveLinqWithFsWatch(path, includeFileContentChanges, includeSubFolders, pattern);
@@ -110,8 +110,8 @@ namespace IoFluently
             process.Start();
 
             var initialState = includeSubFolders ? root.Descendants()
-                .ToImmutableDictionary(x => x, x => x.GetPathType())
-                : root.Children().ToImmutableDictionary(x => x, x => x.GetPathType());
+                .ToImmutableDictionary(x => x, x => GetPathType(x))
+                : root.Children().ToImmutableDictionary(x => x, x => GetPathType(x));
 
             var resultObservable = process.StandardOutput
                 .Observe(new []{ (char)0 })
@@ -131,7 +131,7 @@ namespace IoFluently
                                         LastEvents = new []
                                         {
                                             LiveLinq.Utility.DictionaryRemove(new KeyValue<AbsolutePath, PathType>(item, state.State[item])),
-                                            LiveLinq.Utility.DictionaryAdd(new KeyValue<AbsolutePath, PathType>(item, item.GetPathType()))
+                                            LiveLinq.Utility.DictionaryAdd(new KeyValue<AbsolutePath, PathType>(item, GetPathType(item)))
                                         }
                                     };
                                 }
@@ -162,10 +162,10 @@ namespace IoFluently
                         {
                             return new
                             {
-                                State = state.State.Add(item, item.GetPathType()),
+                                State = state.State.Add(item, GetPathType(item)),
                                 LastEvents = new IDictionaryChangeStrict<AbsolutePath, PathType>[]
                                 {
-                                    LiveLinq.Utility.DictionaryAdd(new KeyValue<AbsolutePath, PathType>(item, item.GetPathType())),
+                                    LiveLinq.Utility.DictionaryAdd(new KeyValue<AbsolutePath, PathType>(item, GetPathType(item))),
                                 }
                             };
                         }
@@ -274,7 +274,7 @@ namespace IoFluently
             {
                 if (createRecursively)
                 {
-                    var parent = absolutePath.TryParent();
+                    var parent = TryParent(absolutePath);
                     if (parent.HasValue)
                     {
                         CreateFolder(parent.Value, true);
@@ -294,16 +294,8 @@ namespace IoFluently
         {
             try
             {
-                if (createRecursively)
-                {
-                    var parent = path.TryParent();
-                    if (parent.HasValue)
-                    {
-                        CreateFolder(parent.Value, true);
-                    }
-                }
                 if (MayCreateFile(fileMode))
-                    path.TryParent().IfHasValue(parent => parent.Create(PathType.Folder));
+                    TryParent(path).IfHasValue(parent => Create(parent, PathType.Folder, createRecursively));
                 return Something<Stream>(AsFileInfo(path).Open(fileMode, fileAccess, fileShare));
             }
             catch (Exception ex)
@@ -396,7 +388,7 @@ namespace IoFluently
 
         public override AbsolutePath DeleteFile(AbsolutePath path)
         {
-            if (path.GetPathType() == PathType.None)
+            if (GetPathType(path) == PathType.None)
                 return path;
             try
             {
@@ -477,7 +469,7 @@ namespace IoFluently
 
         public override IObservable<AbsolutePath> Renamings(AbsolutePath path)
         {
-            var parent = path.TryParent();
+            var parent = TryParent(path);
             if (!parent.HasValue) return Observable.Return(path);
 
             return Observable.Create<AbsolutePath>(
@@ -486,7 +478,7 @@ namespace IoFluently
                     var currentPath = path;
                     while (!token.IsCancellationRequested)
                     {
-                        var watcher = new FileSystemWatcher(currentPath.Parent().ToString())
+                        var watcher = new FileSystemWatcher(Parent(currentPath).ToString())
                         {
                             IncludeSubdirectories = false,
                             Filter = currentPath.Name
@@ -524,15 +516,15 @@ namespace IoFluently
         {
             try
             {
-                if (path.GetPathType() == PathType.Folder)
+                if (GetPathType(path) == PathType.Folder)
                     return path;
                 if (createRecursively)
                 {
-                    var ancestors = path.Ancestors(true).ToList();
+                    var ancestors = Ancestors(path, true).ToList();
                     ancestors.Reverse();
                     foreach (var ancestor in ancestors)
                     {
-                        switch (ancestor.GetPathType())
+                        switch (GetPathType(ancestor))
                         {
                             case PathType.File:
                                 throw new IOException($"The path {ancestor} is a file, not a folder");
@@ -549,11 +541,11 @@ namespace IoFluently
             }
             catch (IOException)
             {
-                if (path.GetPathType() != PathType.Folder)
+                if (GetPathType(path) != PathType.Folder)
                     throw;
             }
 
-            if (path.GetPathType() != PathType.Folder)
+            if (GetPathType(path) != PathType.Folder)
                 throw new IOException("Failed to create folder " + path);
             return path;
         }
@@ -562,7 +554,7 @@ namespace IoFluently
         {
             if (createRecursively)
             {
-                var parent = path.TryParent();
+                var parent = TryParent(path);
                 if (parent.HasValue)
                 {
                     CreateFolder(parent.Value, true);
@@ -575,7 +567,7 @@ namespace IoFluently
         {
             if (createRecursively)
             {
-                var parent = path.TryParent();
+                var parent = TryParent(path);
                 if (parent.HasValue)
                 {
                     CreateFolder(parent.Value, true);
@@ -588,7 +580,7 @@ namespace IoFluently
         {
             if (createRecursively)
             {
-                var parent = path.TryParent();
+                var parent = TryParent(path);
                 if (parent.HasValue)
                 {
                     CreateFolder(parent.Value, true);
@@ -613,7 +605,7 @@ namespace IoFluently
             try
             {
                 if (MayCreateFile(fileMode))
-                    path.TryParent().IfHasValue(parent => Create(parent, PathType.Folder, createRecursively));
+                    TryParent(path).IfHasValue(parent => Create(parent, PathType.Folder, createRecursively));
                 return Something(AsFileInfo(path).Open(fileMode, fileAccess));
             }
             catch (Exception ex)
@@ -641,7 +633,7 @@ namespace IoFluently
 
         public override IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation, bool overwrite = false)
         {
-            if (translation.Destination.Exists())
+            if (translation.Destination.IoService.Exists(translation.Destination))
             {
                 if (!overwrite)
                 {
@@ -649,19 +641,20 @@ namespace IoFluently
                 }
                 else
                 {
-                    translation.Destination.Delete();
+                    translation.Destination.IoService.Delete(translation.Destination);
                 }
             }
-            if (translation.Source.GetPathType() != PathType.File)
+            if (translation.Source.IoService.GetPathType(translation.Source) != PathType.File)
                 throw new IOException(string.Format(
                     $"An attempt was made to move a file from \"{translation.Source}\" to \"{translation.Destination}\" but the source path is not a file."));
-            if (translation.Destination.GetPathType() != PathType.None)
+            if (translation.Destination.IoService.GetPathType(translation.Destination) != PathType.None)
                 throw new IOException(string.Format(
                     $"An attempt was made to move \"{translation.Source}\" to \"{translation.Destination}\" but the destination path exists."));
-            if (translation.Destination.IsDescendantOf(translation.Source))
+            if (translation.Destination.IoService.IsDescendantOf(translation.Destination, translation.Source))
                 throw new IOException(string.Format(
                     $"An attempt was made to move a file from \"{translation.Source}\" to \"{translation.Destination}\" but the destination path is a sub-path of the source path."));
-            translation.Destination.TryParent().Value.Create(PathType.Folder);
+            var parent = translation.Destination.IoService.TryParent(translation.Destination).Value;
+            parent.IoService.Create(parent, PathType.Folder);
             File.Move(translation.Source.ToString(), translation.Destination.ToString());
             return translation;
         }

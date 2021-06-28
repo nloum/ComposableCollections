@@ -33,7 +33,7 @@ namespace IoFluently
         public override string ToString()
         {
             return string.Format("Translate {0} from {1} to {2}",
-                AncestorSource.TryGetNonCommonDescendants(Source).Value.Item2.OriginalString, AncestorSource,
+                AncestorSource.IoService.TryGetNonCommonDescendants(AncestorSource, Source).Value.Item2.OriginalString, AncestorSource,
                 AncestorDestination);
         }
 
@@ -44,14 +44,14 @@ namespace IoFluently
                     string.Format(
                         "An attempt was made to calculate the path if a file (\"{0}\") was copied from \"{1}\" to \"{2}\". It is illegal to have the destination and source directories be the same, which is true in this case.",
                         AbsoluteAbsolutePath, AncestorSource, AncestorDestination));
-            if (!AbsoluteAbsolutePath.IsDescendantOf(AncestorSource))
+            if (!AbsoluteAbsolutePath.IoService.IsDescendantOf(AbsoluteAbsolutePath, AncestorSource))
                 throw new InvalidOperationException(
                     string.Format(
                         "The path \"{2}\" cannot be copied to \"{1}\" because the path isn't under the source path: \"{0}\"",
                         AncestorSource, AncestorDestination, AbsoluteAbsolutePath));
             if (AncestorSource.Equals(AbsoluteAbsolutePath))
                 return new AbsolutePathTranslation(AncestorSource, AncestorDestination, IoService);
-            var relativePath = AbsoluteAbsolutePath.RelativeTo(AncestorSource);
+            var relativePath = AbsoluteAbsolutePath.IoService.RelativeTo(AbsoluteAbsolutePath, AncestorSource);
             var pathToBeCopiedDestination = AncestorDestination / relativePath;
             return new AbsolutePathTranslation(AbsoluteAbsolutePath, pathToBeCopiedDestination, IoService);
         }

@@ -23,6 +23,23 @@ namespace CodeIO.Tests
             clazz.Properties[0].GetterVisibility.Should().Be(Visibility.Public);
             clazz.Properties[0].Type.Identifier.Name.Should().Be("String");
         }
+        
+        [TestMethod]
+        public void ShouldReadEnum()
+        {
+            var uut = new TypeReader();
+            uut.AddReflection();
+            var type = (IEnum)uut.GetTypeFormat<Type>()[typeof(TestEnum)].Value;
+
+            type.Identifier.Name.Should().Be(nameof(TestEnum));
+            type.Visibility.Should().Be(Visibility.Public);
+
+            type.Values.Count.Should().Be(2);
+            type.Values[0].Name.Should().Be("A");
+            type.Values[0].Value.Should().Be((ulong)1);
+            type.Values[1].Name.Should().Be("B");
+            type.Values[1].Value.Should().Be((ulong)5);
+        }
 
         [TestMethod]
         public void ShouldReadInterfaceImplementation()

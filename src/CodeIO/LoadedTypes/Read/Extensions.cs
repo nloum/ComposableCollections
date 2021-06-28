@@ -158,29 +158,7 @@ namespace CodeIO
             {
 	            if (type.IsPrimitive)
                 {
-                    return new Lazy<IType>(new ReflectionPrimitive()
-                    {
-                        Identifier = type.GetTypeIdentifier(),
-                        PrimitiveType = type.Name switch
-                        {
-                            "Int32" => PrimitiveType.Int,
-                            "UInt32" => PrimitiveType.UInt,
-                            "Int16" => PrimitiveType.Short,
-                            "UInt16" => PrimitiveType.UShort,
-                            "Int64" => PrimitiveType.Long,
-                            "UInt64" => PrimitiveType.ULong,
-                            "Double" => PrimitiveType.Double,
-                            "Float" => PrimitiveType.Float,
-                            "Decimal" => PrimitiveType.Decimal,
-                            "Boolean" => PrimitiveType.Bool,
-                            "Byte" => PrimitiveType.Byte,
-                            "SByte" => PrimitiveType.SByte,
-                            "Char" => PrimitiveType.Char,
-                            "IntPtr" => PrimitiveType.NInt,
-                            "UIntPtr" => PrimitiveType.NUint,
-                        },
-                        Type = type,
-                    });
+                    return new Lazy<IType>(new ReflectionPrimitive(type));
                 }
 
                 if (type.IsGenericParameter)
@@ -228,6 +206,11 @@ namespace CodeIO
                         var result = new ReflectionNonGenericInterface(type, lazyTypes);
                         return result;
                     });
+                }
+
+                if (type.IsEnum)
+                {
+	                return new Lazy<IType>(new ReflectionEnum(type, lazyTypes));
                 }
 
                 if (type == typeof(void))

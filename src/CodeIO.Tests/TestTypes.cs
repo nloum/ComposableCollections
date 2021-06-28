@@ -10,6 +10,12 @@ namespace CodeIO.Tests
         public ClassWithRecursiveProperty Parent { get; set; }
     }
 
+    public enum TestEnum : ulong
+    {
+        A=1,
+        B=5,
+    }
+    
     public class ClassWithIndexer
     {
         public string this[string a]

@@ -267,10 +267,19 @@ namespace IoFluently
             return observable.ToLiveLinq();
         }
 
-        public override IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath)
+        /// <inheritdoc />
+        public override IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, bool createRecursively = false)
         {
             try
             {
+                if (createRecursively)
+                {
+                    var parent = absolutePath.TryParent();
+                    if (parent.HasValue)
+                    {
+                        CreateFolder(parent.Value, true);
+                    }
+                }
                 return Something(AsFileInfo(absolutePath).CreateText());
             }
             catch (Exception ex)
@@ -279,11 +288,20 @@ namespace IoFluently
             }
         }
 
+        /// <inheritdoc />
         public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
-            FileAccess fileAccess, FileShare fileShare)
+            FileAccess fileAccess, FileShare fileShare, bool createRecursively = false)
         {
             try
             {
+                if (createRecursively)
+                {
+                    var parent = path.TryParent();
+                    if (parent.HasValue)
+                    {
+                        CreateFolder(parent.Value, true);
+                    }
+                }
                 if (MayCreateFile(fileMode))
                     path.TryParent().IfHasValue(parent => parent.Create(PathType.Folder));
                 return Something<Stream>(AsFileInfo(path).Open(fileMode, fileAccess, fileShare));
@@ -500,25 +518,33 @@ namespace IoFluently
         {
             return ParseAbsolutePath(Path.GetTempPath());
         }
-        
-        public override AbsolutePath CreateFolder(AbsolutePath path)
+
+        /// <inheritdoc />
+        public override AbsolutePath CreateFolder(AbsolutePath path, bool createRecursively = true)
         {
             try
             {
                 if (path.GetPathType() == PathType.Folder)
                     return path;
-                var ancestors = path.Ancestors(true).ToList();
-                ancestors.Reverse();
-                foreach (var ancestor in ancestors)
+                if (createRecursively)
                 {
-                    switch (ancestor.GetPathType())
+                    var ancestors = path.Ancestors(true).ToList();
+                    ancestors.Reverse();
+                    foreach (var ancestor in ancestors)
                     {
-                        case PathType.File:
-                            throw new IOException($"The path {ancestor} is a file, not a folder");
-                        case PathType.None:
-                            Directory.CreateDirectory(path);
-                            break;
+                        switch (ancestor.GetPathType())
+                        {
+                            case PathType.File:
+                                throw new IOException($"The path {ancestor} is a file, not a folder");
+                            case PathType.None:
+                                Directory.CreateDirectory(path);
+                                break;
+                        }
                     }
+                }
+                else
+                {
+                    Directory.CreateDirectory(path);
                 }
             }
             catch (IOException)
@@ -532,18 +558,42 @@ namespace IoFluently
             return path;
         }
 
-        public override void WriteAllText(AbsolutePath path, string text)
+        public override void WriteAllText(AbsolutePath path, string text, bool createRecursively = true)
         {
+            if (createRecursively)
+            {
+                var parent = path.TryParent();
+                if (parent.HasValue)
+                {
+                    CreateFolder(parent.Value, true);
+                }
+            }
             File.WriteAllText(path.ToString(), text);
         }
 
-        public override void WriteAllLines(AbsolutePath path, IEnumerable<string> lines)
+        public override void WriteAllLines(AbsolutePath path, IEnumerable<string> lines, bool createRecursively = true)
         {
+            if (createRecursively)
+            {
+                var parent = path.TryParent();
+                if (parent.HasValue)
+                {
+                    CreateFolder(parent.Value, true);
+                }
+            }
             File.WriteAllLines(path.ToString(), lines);
         }
 
-        public override void WriteAllBytes(AbsolutePath path, byte[] bytes)
+        public override void WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = true)
         {
+            if (createRecursively)
+            {
+                var parent = path.TryParent();
+                if (parent.HasValue)
+                {
+                    CreateFolder(parent.Value, true);
+                }
+            }
             File.WriteAllBytes(path.ToString(), bytes);
         }
 
@@ -558,12 +608,12 @@ namespace IoFluently
         }
 
         public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
-            FileAccess fileAccess)
+            FileAccess fileAccess, bool createRecursively = true)
         {
             try
             {
                 if (MayCreateFile(fileMode))
-                    path.TryParent().IfHasValue(parent => parent.Create(PathType.Folder));
+                    path.TryParent().IfHasValue(parent => Create(parent, PathType.Folder, createRecursively));
                 return Something(AsFileInfo(path).Open(fileMode, fileAccess));
             }
             catch (Exception ex)

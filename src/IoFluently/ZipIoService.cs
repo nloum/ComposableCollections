@@ -58,8 +58,13 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IMaybe<StreamWriter> TryOpenWriter(AbsolutePath pathSpec)
+        public override IMaybe<StreamWriter> TryOpenWriter(AbsolutePath pathSpec, bool createRecursively = true)
         {
+            if (!createRecursively)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(createRecursively)} must always be true for {nameof(ZipIoService)}");
+            }
             return TryOpen(pathSpec, FileMode.OpenOrCreate, FileAccess.Write).Select(stream => new StreamWriter(stream));
         }
 
@@ -229,8 +234,13 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, FileShare fileShare)
+        public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, FileShare fileShare, bool createRecursively = true)
         {
+            if (!createRecursively)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(createRecursively)} must always be true for {nameof(ZipIoService)}");
+            }
             var archive = OpenZipArchive(fileAccess != FileAccess.Read, true);
             
             var entry = archive.GetEntry(path.RelativeTo(CurrentDirectory).ToString());
@@ -264,8 +274,13 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override AbsolutePath CreateFolder(AbsolutePath path)
+        public override AbsolutePath CreateFolder(AbsolutePath path, bool createRecursively = true)
         {
+            if (!createRecursively)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(createRecursively)} must always be true for {nameof(ZipIoService)}");
+            }
             // Zip files don't have folders, they just include a path in their name.
             // https://archive.fo/qIIIZ#24.12%
             return path;

@@ -62,7 +62,7 @@ namespace IoFluently
         #region Creating
         
         /// <inheritdoc />
-        public abstract AbsolutePath CreateFolder(AbsolutePath path);
+        public abstract AbsolutePath CreateFolder(AbsolutePath path, bool createRecursively = false);
 
         /// <inheritdoc />
         public virtual bool MayCreateFile(FileMode fileMode)
@@ -72,31 +72,31 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual AbsolutePath Create(AbsolutePath path, PathType pathType)
+        public virtual AbsolutePath Create(AbsolutePath path, PathType pathType, bool createRecursively = false)
         {
             if (pathType == PathType.File)
             {
-                CreateEmptyFile(path);
+                CreateEmptyFile(path, createRecursively);
             }
             else
             {
-                CreateFolder(path);
+                CreateFolder(path, createRecursively);
             }
             
             return path;
         }
 
         /// <inheritdoc />
-        public virtual Stream CreateFile(AbsolutePath path)
+        public virtual Stream CreateFile(AbsolutePath path, bool createRecursively = false)
         {
-            var stream = TryOpen(path, FileMode.CreateNew, FileAccess.ReadWrite).Value;
+            var stream = TryOpen(path, FileMode.CreateNew, FileAccess.ReadWrite, createRecursively).Value;
             return stream;
         }
 
         /// <inheritdoc />
-        public virtual AbsolutePath CreateEmptyFile(AbsolutePath path)
+        public virtual AbsolutePath CreateEmptyFile(AbsolutePath path, bool createRecursively = false)
         {
-            path.CreateFile().Dispose();
+            CreateFile(path, createRecursively).Dispose();
             return path;
         }
 
@@ -2048,20 +2048,20 @@ namespace IoFluently
         /// <inheritdoc />
         public StreamWriter OpenWriter(AbsolutePath absolutePath, bool createRecursively = false)
         {
-            return absolutePath.IoService.TryOpenWriter(absolutePath).Value;
+            return TryOpenWriter(absolutePath, createRecursively).Value;
         }
 
         /// <inheritdoc />
-        public virtual void WriteAllText(AbsolutePath path, string text)
+        public virtual void WriteAllText(AbsolutePath path, string text, bool createRecursively = false)
         {
             var bytes = Encoding.Default.GetBytes(text);
-            WriteAllBytes(path, bytes);
+            WriteAllBytes(path, bytes, createRecursively);
         }
 
         /// <inheritdoc />
-        public virtual void WriteAllLines(AbsolutePath path, IEnumerable<string> lines)
+        public virtual void WriteAllLines(AbsolutePath path, IEnumerable<string> lines, bool createRecursively = false)
         {
-            var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite);
+            var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite, createRecursively);
             using (var stream = maybeStream.Value)
             {
                 foreach (var line in lines)
@@ -2073,9 +2073,9 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual void WriteAllBytes(AbsolutePath path, byte[] bytes)
+        public virtual void WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = false)
         {
-            var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite);
+            var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite, createRecursively);
             using (var stream = maybeStream.Value)
             {
                 stream.Write(bytes, 0, bytes.Length);
@@ -2091,7 +2091,7 @@ namespace IoFluently
         /// <param name="bufferSize">The number of bytes in the StreamWriter buffer to be used</param>
         /// <param name="leaveOpen">Whether to leave the stream open after writing the lines</param>
         public virtual void WriteLines(Stream stream, IEnumerable<string> lines, Encoding encoding = null,
-            int bufferSize = 4096, bool leaveOpen = false, bool createRecursively = false)
+            int bufferSize = 4096, bool leaveOpen = false)
         {
             if (encoding == null)
                 encoding = Encoding.UTF8;
@@ -2101,7 +2101,7 @@ namespace IoFluently
             }
         }
 
-        private void WriteLines(StreamWriter streamWriter, IEnumerable<string> lines, bool createRecursively = false)
+        private void WriteLines(StreamWriter streamWriter, IEnumerable<string> lines)
         {
             foreach (var line in lines) streamWriter.WriteLine(line);
         }
@@ -2130,11 +2130,12 @@ namespace IoFluently
             streamWriter.Write(text);
         }
 
+        /// <inheritdoc />
         public virtual void WriteText(AbsolutePath pathSpec, IEnumerable<string> lines, FileMode fileMode = FileMode.Create,
             FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
-            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
+            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false, bool createRecursively = false)
         {
-            var maybeStream = pathSpec.TryOpen(fileMode, fileAccess, fileShare);
+            var maybeStream = TryOpen(pathSpec, fileMode, fileAccess, fileShare, createRecursively);
             if (maybeStream.HasValue)
                 using (maybeStream.Value)
                 {
@@ -2142,11 +2143,12 @@ namespace IoFluently
                 }
         }
 
+        /// <inheritdoc />
         public virtual void WriteText(AbsolutePath pathSpec, string text, FileMode fileMode = FileMode.Create,
             FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
-            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false)
+            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false, bool createRecursively = false)
         {
-            var maybeStream = pathSpec.TryOpen(fileMode, fileAccess, fileShare);
+            var maybeStream = TryOpen(pathSpec, fileMode, fileAccess, fileShare, createRecursively);
             if (maybeStream.HasValue)
                 using (maybeStream.Value)
                 {
@@ -2154,46 +2156,47 @@ namespace IoFluently
                 }
         }
 
-        public abstract IMaybe<StreamWriter> TryOpenWriter(AbsolutePath pathSpec);
+        /// <inheritdoc />
+        public abstract IMaybe<StreamWriter> TryOpenWriter(AbsolutePath pathSpec, bool createRecursively = false);
         #endregion
         #region File open for reading or writing
         
         /// <inheritdoc />
         public Stream Open(AbsolutePath path, FileMode fileMode, bool createRecursively = false)
         {
-            return path.IoService.TryOpen(path, fileMode).Value;
+            return TryOpen(path, fileMode, createRecursively).Value;
         }
 
         /// <inheritdoc />
         public Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, bool createRecursively = false)
         {
-            return path.IoService.TryOpen(path, fileMode, fileAccess).Value;
+            return TryOpen(path, fileMode, fileAccess, createRecursively).Value;
         }
 
         /// <inheritdoc />
         public Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess,
             FileShare fileShare, bool createRecursively = false)
         {
-            return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare).Value;
+            return TryOpen(path, fileMode, fileAccess, fileShare, createRecursively).Value;
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode)
+        public virtual IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, bool createRecursively = false)
         {
-            return TryOpen(path, fileMode, FileAccess.ReadWrite);
+            return TryOpen(path, fileMode, FileAccess.ReadWrite, createRecursively);
         }
 
         /// <inheritdoc />
         public virtual IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
-            FileAccess fileAccess)
+            FileAccess fileAccess, bool createRecursively = false)
         {
             var fileShare = fileAccess == FileAccess.Read ? FileShare.Read : FileShare.None;
-            return TryOpen(path, fileMode, fileAccess, fileShare);
+            return TryOpen(path, fileMode, fileAccess, fileShare, createRecursively);
         }
 
         /// <inheritdoc />
         public abstract IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
-            FileAccess fileAccess, FileShare fileShare);
+            FileAccess fileAccess, FileShare fileShare, bool createRecursively = false);
 
         #endregion
         #region LINQ-style APIs

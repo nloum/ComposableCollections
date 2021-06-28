@@ -218,7 +218,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath)
+        public override IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, bool createRecursively = false)
         {
             throw new NotImplementedException();
         }
@@ -328,7 +328,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, FileShare fileShare)
+        public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, FileShare fileShare, bool createRecursively = false)
         {
             File file = null;
             var maybeFile = GetFile(path);
@@ -402,7 +402,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override AbsolutePath CreateFolder(AbsolutePath path)
+        public override AbsolutePath CreateFolder(AbsolutePath path, bool createRecursively = false)
         {
             var folder = GetFolder(path.Parent()).Value;
             EnsureFolderExists(folder, new[]{path.Name});

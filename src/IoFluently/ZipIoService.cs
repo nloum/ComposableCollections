@@ -23,6 +23,11 @@ namespace IoFluently
         /// </summary>
         public AbsolutePath ZipFilePath { get; }
 
+        public ZipFolderMode FolderMode { get; set; } = ZipFolderMode.AllNonExistentPathsAreFolders;
+        public override bool CanEmptyDirectoriesExist => FolderMode == ZipFolderMode.EmptyFilesAreDirectories;
+
+        public CompressionLevel CompressionLevel { get; set; } = CompressionLevel.Fastest;
+
         /// <summary>
         /// Creates a zip file IIoService
         /// </summary>
@@ -35,8 +40,28 @@ namespace IoFluently
             DefaultRelativePathBase = ParseAbsolutePath("/");
         }
 
+        public void Unzip(AbsolutePath targetDirectory)
+        {
+            Copy(ParseAbsolutePath("/"), targetDirectory);
+        }
+
+        public void Zip(AbsolutePath sourcePath, AbsolutePath relativeTo)
+        {
+            Copy(sourcePath, relativeTo, ParseAbsolutePath("/"));
+        }
+
         /// <inheritdoc />
-        public override AbsolutePath DefaultRelativePathBase { get; }
+        public override AbsolutePath DefaultRelativePathBase { get; protected set; }
+
+        public override void SetDefaultRelativePathBase(AbsolutePath defaultRelativePathBase)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void UnsetDefaultRelativePathBase()
+        {
+            throw new NotImplementedException();
+        }
 
         /// <inheritdoc />
         public override IObservableReadOnlySet<AbsolutePath> Roots { get; } = new ObservableSet<AbsolutePath>();
@@ -62,8 +87,9 @@ namespace IoFluently
         {
             if (!createRecursively)
             {
-                throw new InvalidOperationException(
-                    $"{nameof(createRecursively)} must always be true for {nameof(ZipIoService)}");
+                // Ignore this flag because the default is true and it's impractical to pay attention to it
+                // throw new InvalidOperationException(
+                //     $"{nameof(createRecursively)} must always be true for {nameof(ZipIoService)}");
             }
             return TryOpen(pathSpec, FileMode.OpenOrCreate, FileAccess.Write).Select(stream => new StreamWriter(stream));
         }
@@ -100,12 +126,19 @@ namespace IoFluently
             }
         }
 
+        private ZipArchiveEntry GetZipArchiveEntry(ZipArchive archive, AbsolutePath path)
+        {
+            var result = archive.GetEntry(path.RelativeTo(DefaultRelativePathBase).Simplify())
+                ?? archive.GetEntry(path.Simplify());
+            return result;
+        }
+
         /// <inheritdoc />
         public override AbsolutePath DeleteFile(AbsolutePath path)
         {
             using (var archive = OpenZipArchive(true, true))
             {
-                var zipEntry = archive.GetEntry(path.RelativeTo(DefaultRelativePathBase).ToString());
+                var zipEntry = GetZipArchiveEntry(archive, path);
                 if (zipEntry == null)
                 {
                     throw new IOException($"Cannot delete {path} because it doesn't exist");
@@ -133,7 +166,7 @@ namespace IoFluently
         {
             using (var archive = OpenZipArchive(false, true))
             {
-                var zipEntry = archive.GetEntry(path.RelativeTo(DefaultRelativePathBase).ToString());
+                var zipEntry = GetZipArchiveEntry(archive, path);
                 if (zipEntry == null)
                 {
                     return Maybe<Information>.Nothing();
@@ -147,7 +180,7 @@ namespace IoFluently
         {
             using (var archive = OpenZipArchive(false, true))
             {
-                var zipEntry = archive.GetEntry(ZipFilePath.RelativeTo(DefaultRelativePathBase).ToString());
+                var zipEntry = GetZipArchiveEntry(archive, attributes);
                 if (zipEntry == null)
                 {
                     return Maybe<FileAttributes>.Nothing();
@@ -173,7 +206,7 @@ namespace IoFluently
         {
             using (var archive = OpenZipArchive(false, true))
             {
-                var zipEntry = archive.GetEntry(path.RelativeTo(DefaultRelativePathBase).ToString());
+                var zipEntry = GetZipArchiveEntry(archive, path);
                 if (zipEntry == null)
                 {
                     return Maybe<DateTimeOffset>.Nothing();
@@ -187,21 +220,34 @@ namespace IoFluently
         {
             using (var archive = OpenZipArchive(false, true))
             {
-                var zipEntry = archive.GetEntry(path.RelativeTo(DefaultRelativePathBase).ToString());
+                var zipEntry = GetZipArchiveEntry(archive, path);
                 if (zipEntry == null)
                 {
-                    var hasDescendants = archive.Entries.Any(entry =>
+                    if (FolderMode == ZipFolderMode.AllNonExistentPathsAreFolders)
+                    {
+                        return PathType.Folder;
+                    }
+
+                    if (FolderMode == ZipFolderMode.DirectoriesExistIfTheyContainFiles)
+                    {
+                        var hasDescendants = archive.Entries.Any(entry =>
                             ParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Ancestors()
                                 .Any(ancestor => ancestor == path));
 
-                    if (hasDescendants)
-                    {
-                        return PathType.Folder;
+                        if (hasDescendants)
+                        {
+                            return PathType.Folder;
+                        }
                     }
 
                     return PathType.None;
                 }
 
+                if (FolderMode == ZipFolderMode.EmptyFilesAreDirectories && zipEntry.Length == 0)
+                {
+                    return PathType.Folder;
+                }
+                
                 return PathType.File;
             }
         }
@@ -238,18 +284,20 @@ namespace IoFluently
         {
             if (!createRecursively)
             {
-                throw new InvalidOperationException(
-                    $"{nameof(createRecursively)} must always be true for {nameof(ZipIoService)}");
+                // Ignore this flag because the default is true and it's impractical to pay attention to it
+                // throw new InvalidOperationException(
+                //     $"{nameof(createRecursively)} must always be true for {nameof(ZipIoService)}");
             }
             var archive = OpenZipArchive(fileAccess != FileAccess.Read, true);
             
-            var entry = archive.GetEntry(path.RelativeTo(DefaultRelativePathBase).ToString());
+            var entry = GetZipArchiveEntry(archive, path);
 
             if (entry == null)
             {
                 if (fileMode == FileMode.Create || fileMode == FileMode.CreateNew || fileMode == FileMode.OpenOrCreate)
                 {
-                    entry = archive.CreateEntry(path.RelativeTo(DefaultRelativePathBase).ToString());
+                    var entryName = path.Simplify();
+                    entry = archive.CreateEntry(entryName.ToString(), CompressionLevel);
                     
                     return new StreamCloseDecorator(entry.Open(), () =>
                     {
@@ -278,8 +326,9 @@ namespace IoFluently
         {
             if (!createRecursively)
             {
-                throw new InvalidOperationException(
-                    $"{nameof(createRecursively)} must always be true for {nameof(ZipIoService)}");
+                // Ignore this flag because the default is true and it's impractical to pay attention to it
+                // throw new InvalidOperationException(
+                //     $"{nameof(createRecursively)} must always be true for {nameof(ZipIoService)}");
             }
             // Zip files don't have folders, they just include a path in their name.
             // https://archive.fo/qIIIZ#24.12%

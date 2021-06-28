@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using CodeIO;
 using CodeIO.LoadedTypes.Read;
+using Void = CodeIO.Void;
 
 namespace IoFluently.CodeGenerator
 {
@@ -16,7 +17,7 @@ namespace IoFluently.CodeGenerator
         static void Main(string[] args)
         {
             var ioService = new IoService();
-            var repoRoot = ioService.CurrentDirectory.Ancestors().First(ancestor => ioService.IsFolder(ancestor / ".git"));
+            var repoRoot = ioService.DefaultRelativePathBase.Ancestors().First(ancestor => ioService.IsFolder(ancestor / ".git"));
 
             using (var ioExtensionsWriter = ioService.OpenWriter(repoRoot / "src" / "IoFluently" / "IoExtensions.g.cs"))
             {
@@ -96,7 +97,7 @@ namespace IoFluently
                         }
                     }
 
-                    parameterString += $"{ConvertToCSharpTypeName(((ReflectionComplexTypeBase)parameter.Type).Type)} {parameter.Name}";
+                    parameterString += $"{ConvertToCSharpTypeName(((IReflectionType)parameter.Type).Type)} {parameter.Name}";
 
                     if (parameter.HasDefaultValue)
                     {
@@ -115,8 +116,8 @@ namespace IoFluently
                     }
                 }
 
-                textWriter.WriteLine($"public static {ConvertToCSharpTypeName(((ReflectionComplexTypeBase)method.ReturnType).Type)} {method.Name}({string.Join(", ",  parameters)}) {{");
-                if (method.ReturnType != typeof(void))
+                textWriter.WriteLine($"public static {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {method.Name}({string.Join(", ",  parameters)}) {{");
+                if (method.ReturnType is not ReflectionVoid)
                 {
                     textWriter.Write("return ");
                 }
@@ -126,20 +127,20 @@ namespace IoFluently
             
             foreach (var method in ioServiceType.Methods.OrderBy(method => method.Name).ThenBy(method => method.Parameters.Count).ThenBy(method => method.GetHashCode()))
             {
-                if (method.IsStatic || !method.IsPublic)
+                if (method.IsStatic || method.Visibility != Visibility.Public)
                 {
                     continue;
                 }
 
-                if (method.GetParameters().Length == 0)
+                if (method.Parameters.Count == 0)
                 {
                     continue;
                 }
 
-                var firstParameter = method.GetParameters()[0];
-                if (firstParameter.ParameterType != typeof(AbsolutePath) &&
-                    firstParameter.ParameterType != typeof(RelativePath) &&
-                    firstParameter.ParameterType != typeof(IAbsolutePathTranslation))
+                var firstParameter = method.Parameters[0];
+                if (firstParameter.Type != typeof(AbsolutePath) &&
+                    firstParameter.Type != typeof(RelativePath) &&
+                    firstParameter.Type != typeof(IAbsolutePathTranslation))
                 {
                     continue;
                 }
@@ -147,7 +148,7 @@ namespace IoFluently
                 var parameters = new List<string>();
                 var arguments = new List<string>();
 
-                foreach (var parameter in method.GetParameters())
+                foreach (var parameter in method.Parameters)
                 {
                     var parameterString = "";
                     if (parameters.Count == 0)
@@ -160,13 +161,9 @@ namespace IoFluently
                         {
                             parameterString = "out " + parameterString;
                         }
-                        else if (parameter.IsIn)
-                        {
-                            parameterString = "in " + parameterString;
-                        }
                     }
 
-                    parameterString += $"{ConvertToCSharpTypeName(parameter.ParameterType)} {parameter.Name}";
+                    parameterString += $"{ConvertToCSharpTypeName(((IReflectionType)parameter.Type).Type)} {parameter.Name}";
 
                     if (parameter.HasDefaultValue)
                     {
@@ -179,17 +176,13 @@ namespace IoFluently
                     {
                         arguments.Add($"out {parameter.Name}");
                     }
-                    else if (parameter.IsIn)
-                    {
-                        arguments.Add($"in {parameter.Name}");
-                    }
                     else
                     {
                         arguments.Add(parameter.Name);
                     }
                 }
 
-                textWriter.WriteLine($"public static {ConvertToCSharpTypeName(method.ReturnType)} {method.Name}({string.Join(", ",  parameters)}) {{");
+                textWriter.WriteLine($"public static {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {method.Name}({string.Join(", ",  parameters)}) {{");
                 if (method.ReturnType != typeof(void))
                 {
                     textWriter.Write("return ");

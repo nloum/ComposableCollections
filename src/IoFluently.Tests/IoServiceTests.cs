@@ -96,7 +96,7 @@ namespace IoFluently.Tests
             var temporaryPath = uut.CreateTemporaryPath(PathType.File);
             temporaryPath.IsFile().Should().BeTrue();
             temporaryPath.DeleteFile();
-            temporaryPath.IsFile().Should().BeFalse();
+            temporaryPath.Exists().Should().BeFalse();
         }
         
         [TestMethod]

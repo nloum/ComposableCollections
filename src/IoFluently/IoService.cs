@@ -30,6 +30,8 @@ namespace IoFluently
     
         private bool? _isCaseSensitiveByDefault = null;
 
+        public override bool CanEmptyDirectoriesExist => true;
+        
         public override IQueryable<AbsolutePath> Query()
         {
             return new Queryable<AbsolutePath>(new QueryContext());
@@ -39,12 +41,12 @@ namespace IoFluently
         
         public override AbsolutePath DefaultRelativePathBase => _defaultRelativePathBase ?? TryParseAbsolutePath(Environment.CurrentDirectory).Value;
 
-        public void SetDefaultRelativePathBase(AbsolutePath defaultRelativePathBase)
+        public override void SetDefaultRelativePathBase(AbsolutePath defaultRelativePathBase)
         {
             _defaultRelativePathBase = defaultRelativePathBase;
         }
 
-        public void UseCurrentDirectoryAsDefaultRelativePathBase()
+        public override void UnsetDefaultRelativePathBase()
         {
             _defaultRelativePathBase = null;
         }

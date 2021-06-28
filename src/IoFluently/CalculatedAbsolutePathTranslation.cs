@@ -12,9 +12,9 @@ namespace IoFluently
         internal CalculatedAbsolutePathTranslation(AbsolutePath absolutePath, AbsolutePath ancestorSource, AbsolutePath ancestorDestination,
             IIoService ioService)
         {
-            AbsoluteAbsolutePath = absolutePath;
-            AncestorSource = ancestorSource;
-            AncestorDestination = ancestorDestination;
+            AbsoluteAbsolutePath = absolutePath.Simplify();
+            AncestorSource = ancestorSource.Simplify();
+            AncestorDestination = ancestorDestination.Simplify();
             IoService = ioService;
             _actualValues = Calculate();
         }
@@ -39,7 +39,7 @@ namespace IoFluently
 
         private AbsolutePathTranslation Calculate()
         {
-            if (AncestorSource.Equals(AncestorDestination))
+            if (AncestorSource.Equals(AncestorDestination) && object.ReferenceEquals(AncestorSource.IoService, AncestorDestination.IoService))
                 throw new InvalidOperationException(
                     string.Format(
                         "An attempt was made to calculate the path if a file (\"{0}\") was copied from \"{1}\" to \"{2}\". It is illegal to have the destination and source directories be the same, which is true in this case.",

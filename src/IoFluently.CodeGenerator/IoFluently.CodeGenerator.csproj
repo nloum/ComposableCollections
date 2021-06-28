@@ -10,7 +10,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="CodeIO" Version="1.0.0-alpha0066" />
+      <PackageReference Include="CodeIO" Version="1.0.0-alpha0075" />
       <PackageReference Include="ComposableCollections" Version="1.0.0-alpha0182" />
     </ItemGroup>
 

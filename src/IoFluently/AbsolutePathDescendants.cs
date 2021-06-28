@@ -32,14 +32,19 @@ namespace IoFluently
         {
             return _path.TraverseTree(x =>
             {
-                var children = GetChildren(x);
+                var children = x.IoService.EnumerateChildren(x);
                 var childrenNames = children.Select(child => child.Name);
                 return childrenNames;
             }, (AbsolutePath node, string name, out AbsolutePath child) =>
             {
                 child = node / name;
-                var result = child.IoService.Exists(child);
-                return result;
+                if (IoService.CanEmptyDirectoriesExist)
+                {
+                    var result = child.IoService.Exists(child);
+                    return result;
+                }
+
+                return true;
             });
         }
         

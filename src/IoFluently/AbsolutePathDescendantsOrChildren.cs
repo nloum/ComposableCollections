@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using LiveLinq.Set;
 
@@ -40,16 +41,5 @@ namespace IoFluently
         }
 
         public abstract IEnumerator<AbsolutePath> GetEnumerator();
-
-        protected IEnumerable<AbsolutePath> GetChildren(AbsolutePath parent)
-        {
-            var parentString = parent.ToString();
-            if (Directory.Exists(parentString))
-            {
-                return Directory.GetFileSystemEntries(parentString).Select(x => IoService.ParseAbsolutePath(x, _path.IsCaseSensitive ? CaseSensitivityMode.CaseSensitive : CaseSensitivityMode.CaseInsensitive));
-            }
-            
-            return Enumerable.Empty<AbsolutePath>();
-        }
     }
 }

@@ -50,7 +50,14 @@ namespace IoFluently
         #endregion
         
         #region Environmental stuff
-        
+
+        /// <summary>
+        /// Indicates that empty directories can exist. This is true for every built-in implementation except the ZipIoService,
+        /// because in zip files directories don't exist.
+        /// </summary>
+        bool CanEmptyDirectoriesExist { get; }
+        void SetDefaultRelativePathBase(AbsolutePath defaultRelativePathBase);
+        void UnsetDefaultRelativePathBase();
         AbsolutePath DefaultRelativePathBase { get; }
         /// <summary>
         /// Lists the file system roots. On Unix-like operating systems, there's only one file system root, and it is '/'.
@@ -276,7 +283,16 @@ namespace IoFluently
         #endregion
 
         #region Path building
-        
+
+        /// <summary>
+        /// Returns a lazily-enumerated list of child files and/or folders
+        /// </summary>
+        /// <param name="path">The parent folder</param>
+        /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
+        /// <param name="includeFiles">Whether to include sub-files in the return value</param>
+        /// <returns>The children of this path</returns>
+        IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, bool includeFolders = true,
+            bool includeFiles = true);
         bool CanBeSimplified(AbsolutePath path);
         AbsolutePath Root(AbsolutePath path);
         RelativePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo);

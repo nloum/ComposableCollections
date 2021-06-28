@@ -90,7 +90,9 @@ namespace IoFluently
             throw new NotImplementedException();
         }
 
-        private AbsolutePath _currentDirectory = null;
+        public override bool CanEmptyDirectoriesExist => true;
+
+        private AbsolutePath _currentDirectory;
         private AbsolutePath _temporaryFolder = null;
         
         /// <summary>
@@ -124,6 +126,7 @@ namespace IoFluently
         public InMemoryIoService(string newline = null, bool? isCaseSensitiveByDefault = null, string defaultDirectorySeparatorForThisEnvironment = null, bool enableOpenFilesTracking = false)
             : base(new OpenFilesTrackingService(enableOpenFilesTracking), isCaseSensitiveByDefault ?? ShouldBeCaseSensitiveByDefault(), defaultDirectorySeparatorForThisEnvironment ?? GetDefaultDirectorySeparatorForThisEnvironment(), newline ?? Environment.NewLine)
         {
+            _currentDirectory = defaultDirectorySeparatorForThisEnvironment == "/" ? ParseAbsolutePath("/") : null;
         }
 
         /// <inheritdoc />
@@ -232,7 +235,14 @@ namespace IoFluently
         /// <inheritdoc />
         public override IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, bool includeFolders = true, bool includeFiles = true)
         {
-            throw new NotImplementedException();
+            var folder = GetFolder(path);
+            if (!folder.HasValue)
+            {
+                return Enumerable.Empty<AbsolutePath>();
+            }
+
+            return folder.Value.Files.Select(file => path / file.Key)
+                .Concat(folder.Value.Folders.Select(subfolder => path / subfolder.Key));
         }
 
         /// <inheritdoc />

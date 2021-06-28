@@ -20,7 +20,9 @@ namespace IoFluently
     public abstract class IoServiceBase : IIoService
     {
         #region Environmental stuff
-        
+
+        public abstract bool CanEmptyDirectoriesExist { get; }
+
         /// <summary>
         /// The newline character(s)
         /// </summary>
@@ -33,7 +35,17 @@ namespace IoFluently
 
         public string DefaultDirectorySeparator { get; }
         public bool IsCaseSensitiveByDefault { get; }
-        public abstract AbsolutePath DefaultRelativePathBase { get; }
+        public virtual AbsolutePath DefaultRelativePathBase { get; protected set; }
+
+        public virtual void SetDefaultRelativePathBase(AbsolutePath defaultRelativePathBase)
+        {
+            DefaultRelativePathBase = defaultRelativePathBase;
+        }
+
+        public virtual void UnsetDefaultRelativePathBase()
+        {
+            throw new NotImplementedException();
+        }
 
         public abstract IObservableReadOnlySet<AbsolutePath> Roots { get; }
 
@@ -569,12 +581,26 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual bool ComponentsAreAbsolute(IReadOnlyList<string> path)
         {
+            if (path.Count == 0)
+            {
+                return true;
+            }
+
             if (path[0] == "/")
+            {
                 return true;
-            if (char.IsLetter(path[0][0]) && path[0][1] == ':')
+            }
+
+            if (path[0].Length >= 2 && char.IsLetter(path[0][0]) && path[0][1] == ':')
+            {
                 return true;
+            }
+
             if (path[0] == "\\")
+            {
                 return true;
+            }
+            
             return false;
         }
 
@@ -1292,6 +1318,10 @@ namespace IoFluently
                 throw new IOException(string.Format(
                     $"An attempt was made to copy a folder from \"{translation.Source}\" to \"{translation.Destination}\" but the source path is not a folder."));
             translation.Destination.IoService.Create(translation.Destination, PathType.Folder);
+            foreach (var item in translation)
+            {
+                item.Copy();
+            }
             return translation;
         }
 
@@ -1350,8 +1380,19 @@ namespace IoFluently
                 throw new IOException(string.Format(
                     $"An attempt was made to move the non-empty folder \"{translation.Source}\". This is not allowed because all the files should be moved first, and only then can the folder be moved, because the move operation deletes the source folder, which would of course also delete the files and folders within the source folder."));
             translation.Destination.IoService.Create(translation.Destination, PathType.Folder);
+            foreach (var item in translation)
+            {
+                item.Move();
+            }
+
             if (!translation.Source.Children().Any())
+            {
                 translation.Source.IoService.DeleteFolder(translation.Source);
+            }
+            else
+            {
+                throw new IOException($"Files were still present in {translation.Source} after moving");
+            }
             return translation;
         }
 
@@ -1849,7 +1890,13 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual bool Exists(AbsolutePath path)
         {
-            return path.IoService.GetPathType(path) != PathType.None;
+            var pathType = path.IoService.GetPathType(path);
+            if (pathType == PathType.Folder && !CanEmptyDirectoriesExist)
+            {
+                return false;
+            }
+
+            return pathType != PathType.None;
         }
 
         /// <inheritdoc />

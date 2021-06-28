@@ -15,6 +15,7 @@ namespace CodeIO.LoadedTypes.Read
         public IReadOnlyList<IMethod> Methods { get; }
         public IReadOnlyList<IIndexer> Indexers { get; }
         public IReadOnlyList<IProperty> Properties { get; }
+        public IReadOnlyList<IField> Fields { get; }
         public IReadOnlyList<IType> Interfaces { get; }
 
         protected ReflectionComplexTypeBase(Type type, IComposableReadOnlyDictionary<Type, Lazy<IType>> typeFormat)
@@ -38,6 +39,11 @@ namespace CodeIO.LoadedTypes.Read
                     property.GetMethod?.GetVisibility(), 
                     property.SetMethod?.GetVisibility(), 
                     property.GetMethod?.IsStatic ?? property.SetMethod.IsStatic));
+            Fields = type.GetFields()
+                .ToImmutableList()
+                .Select(field => new LazyField(typeFormat[field.FieldType], field.Name, 
+                    field.GetVisibility(), 
+                    field.IsStatic));
             Interfaces = type.GetInterfaces()
                 .Select(type => typeFormat[type])
                 .Select(type => type.Value);

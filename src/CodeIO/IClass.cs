@@ -9,5 +9,6 @@ namespace CodeIO
         IReadOnlyList<IMethod> Methods { get; }
         IReadOnlyList<IIndexer> Indexers { get; }
         IReadOnlyList<IProperty> Properties { get; }
+        IReadOnlyList<IField> Fields { get; }
     }
 }

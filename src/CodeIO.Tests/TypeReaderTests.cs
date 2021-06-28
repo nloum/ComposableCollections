@@ -25,6 +25,26 @@ namespace CodeIO.Tests
         }
         
         [TestMethod]
+        public void ShouldReadStructureWithFields()
+        {
+            var uut = new TypeReader();
+            uut.AddReflection();
+            var type = (IStructure)uut.GetTypeFormat<Type>()[typeof(TestStruct)].Value;
+
+            type.Identifier.Name.Should().Be(nameof(TestStruct));
+            type.Visibility.Should().Be(Visibility.Public);
+            
+            type.Fields.Count.Should().Be(2);
+            type.Fields[0].Name.Should().Be("_field1");
+            type.Fields[0].Visibility.Should().Be(Visibility.Public);
+            type.Fields[0].Type.Identifier.Name.Should().Be("Int32");
+            
+            type.Fields[1].Name.Should().Be("_field2");
+            type.Fields[1].Visibility.Should().Be(Visibility.Public);
+            type.Fields[1].Type.Identifier.Name.Should().Be("String");
+        }
+
+        [TestMethod]
         public void ShouldReadEnum()
         {
             var uut = new TypeReader();

@@ -213,12 +213,17 @@ namespace CodeIO
 	                return new Lazy<IType>(new ReflectionEnum(type, lazyTypes));
                 }
 
+                if (!type.IsPrimitive && type.IsValueType)
+                {
+	                return new Lazy<IType>(() => new ReflectionStructure(type, lazyTypes));
+                }
+
                 if (type == typeof(void))
                 {
 	                return new Lazy<IType>(ReflectionVoid.Instance);
                 }
 
-                throw new NotImplementedException($"Cannot process type: {type.GetCSharpTypeName()}");
+                throw new NotImplementedException($"Cannot process type: {type.GetCSharpTypeName(true)}");
             });
         }
         
@@ -258,24 +263,44 @@ namespace CodeIO
             return Visibility.Internal;
         }
         
-        public static Visibility GetVisibility(this MethodInfo constructor)
+        public static Visibility GetVisibility(this MethodInfo method)
         {
-            if (constructor.IsPublic)
+            if (method.IsPublic)
             {
                 return Visibility.Public;
             }
 
-            if (constructor.IsPrivate)
+            if (method.IsPrivate)
             {
                 return Visibility.Private;
             }
 
-            if (constructor.IsFamily)
+            if (method.IsFamily)
             {
                 return Visibility.Protected;
             }
             
             return Visibility.Internal;
+        }
+
+        public static Visibility GetVisibility(this FieldInfo field)
+        {
+	        if (field.IsPublic)
+	        {
+		        return Visibility.Public;
+	        }
+
+	        if (field.IsPrivate)
+	        {
+		        return Visibility.Private;
+	        }
+
+	        if (field.IsFamily)
+	        {
+		        return Visibility.Protected;
+	        }
+            
+	        return Visibility.Internal;
         }
 
         public static Visibility GetTypeVisibility(this Type t)

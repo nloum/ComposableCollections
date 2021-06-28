@@ -10,6 +10,12 @@ namespace CodeIO.Tests
         public ClassWithRecursiveProperty Parent { get; set; }
     }
 
+    public struct TestStruct
+    {
+        public int _field1;
+        public string _field2;
+    }
+
     public enum TestEnum : ulong
     {
         A=1,

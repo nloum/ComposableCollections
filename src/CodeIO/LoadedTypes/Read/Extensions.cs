@@ -156,7 +156,7 @@ namespace CodeIO
         {
             return typeReader.AddTypeFormat<Type>(type => type.GetTypeIdentifier(), (type, lazyTypes) =>
             {
-                if (type.IsPrimitive)
+	            if (type.IsPrimitive)
                 {
                     return new Lazy<IType>(new Primitive()
                     {
@@ -227,6 +227,11 @@ namespace CodeIO
                         var result = new ReflectionNonGenericInterface(type, lazyTypes);
                         return result;
                     });
+                }
+
+                if (type == typeof(void))
+                {
+	                return new Lazy<IType>(Void.Instance);
                 }
 
                 throw new NotImplementedException($"Cannot process type: {type.GetCSharpTypeName()}");

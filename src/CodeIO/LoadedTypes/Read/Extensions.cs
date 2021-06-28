@@ -213,14 +213,14 @@ namespace CodeIO
 	                return new Lazy<IType>(new ReflectionEnum(type, lazyTypes));
                 }
 
-                if (!type.IsPrimitive && type.IsValueType)
-                {
-	                return new Lazy<IType>(() => new ReflectionStructure(type, lazyTypes));
-                }
-
                 if (type == typeof(void))
                 {
 	                return new Lazy<IType>(ReflectionVoid.Instance);
+                }
+
+                if (!type.IsPrimitive && type.IsValueType)
+                {
+	                return new Lazy<IType>(() => new ReflectionStructure(type, lazyTypes));
                 }
 
                 throw new NotImplementedException($"Cannot process type: {type.GetCSharpTypeName(true)}");

@@ -32,11 +32,11 @@ namespace IoFluently
         public ZipIoService(AbsolutePath zipFilePath, string newline = null, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), true, "/", newline ?? Environment.NewLine)
         {
             ZipFilePath = zipFilePath;
-            CurrentDirectory = ParseAbsolutePath("/");
+            DefaultRelativePathBase = ParseAbsolutePath("/");
         }
 
         /// <inheritdoc />
-        public override AbsolutePath CurrentDirectory { get; }
+        public override AbsolutePath DefaultRelativePathBase { get; }
 
         /// <inheritdoc />
         public override IObservableReadOnlySet<AbsolutePath> Roots { get; } = new ObservableSet<AbsolutePath>();
@@ -46,7 +46,7 @@ namespace IoFluently
         {
             var archive = OpenZipArchive(false, true);
             var queryable = archive.Entries
-                .Select(zipEntry => ParseAbsolutePath(zipEntry.FullName, CurrentDirectory))
+                .Select(zipEntry => ParseAbsolutePath(zipEntry.FullName, DefaultRelativePathBase))
                 .AsQueryable();
             return new QueryableWithDisposable<AbsolutePath>(queryable, archive);
         }
@@ -95,7 +95,7 @@ namespace IoFluently
             using (var archive = OpenZipArchive(false, true))
             {
                 return archive.Entries.Select(entry =>
-                    ParseAbsolutePath(entry.FullName, CurrentDirectory)).Where(child => child.Ancestors()
+                    ParseAbsolutePath(entry.FullName, DefaultRelativePathBase)).Where(child => child.Ancestors()
                         .Any(ancestor => ancestor == path));
             }
         }
@@ -105,7 +105,7 @@ namespace IoFluently
         {
             using (var archive = OpenZipArchive(true, true))
             {
-                var zipEntry = archive.GetEntry(path.RelativeTo(CurrentDirectory).ToString());
+                var zipEntry = archive.GetEntry(path.RelativeTo(DefaultRelativePathBase).ToString());
                 if (zipEntry == null)
                 {
                     throw new IOException($"Cannot delete {path} because it doesn't exist");
@@ -133,7 +133,7 @@ namespace IoFluently
         {
             using (var archive = OpenZipArchive(false, true))
             {
-                var zipEntry = archive.GetEntry(path.RelativeTo(CurrentDirectory).ToString());
+                var zipEntry = archive.GetEntry(path.RelativeTo(DefaultRelativePathBase).ToString());
                 if (zipEntry == null)
                 {
                     return Maybe<Information>.Nothing();
@@ -147,7 +147,7 @@ namespace IoFluently
         {
             using (var archive = OpenZipArchive(false, true))
             {
-                var zipEntry = archive.GetEntry(ZipFilePath.RelativeTo(CurrentDirectory).ToString());
+                var zipEntry = archive.GetEntry(ZipFilePath.RelativeTo(DefaultRelativePathBase).ToString());
                 if (zipEntry == null)
                 {
                     return Maybe<FileAttributes>.Nothing();
@@ -173,7 +173,7 @@ namespace IoFluently
         {
             using (var archive = OpenZipArchive(false, true))
             {
-                var zipEntry = archive.GetEntry(path.RelativeTo(CurrentDirectory).ToString());
+                var zipEntry = archive.GetEntry(path.RelativeTo(DefaultRelativePathBase).ToString());
                 if (zipEntry == null)
                 {
                     return Maybe<DateTimeOffset>.Nothing();
@@ -187,11 +187,11 @@ namespace IoFluently
         {
             using (var archive = OpenZipArchive(false, true))
             {
-                var zipEntry = archive.GetEntry(path.RelativeTo(CurrentDirectory).ToString());
+                var zipEntry = archive.GetEntry(path.RelativeTo(DefaultRelativePathBase).ToString());
                 if (zipEntry == null)
                 {
                     var hasDescendants = archive.Entries.Any(entry =>
-                            ParseAbsolutePath(entry.FullName, CurrentDirectory).Ancestors()
+                            ParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Ancestors()
                                 .Any(ancestor => ancestor == path));
 
                     if (hasDescendants)
@@ -217,7 +217,7 @@ namespace IoFluently
             using (var zipArchive = OpenZipArchive(true, true))
             {
                 foreach (var subZipEntry in zipArchive.Entries.Where(entry =>
-                    ParseAbsolutePath(entry.FullName, CurrentDirectory).Ancestors().Any(ancestor => ancestor == path)))
+                    ParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Ancestors().Any(ancestor => ancestor == path)))
                 {
                     if (!recursive)
                     {
@@ -243,13 +243,13 @@ namespace IoFluently
             }
             var archive = OpenZipArchive(fileAccess != FileAccess.Read, true);
             
-            var entry = archive.GetEntry(path.RelativeTo(CurrentDirectory).ToString());
+            var entry = archive.GetEntry(path.RelativeTo(DefaultRelativePathBase).ToString());
 
             if (entry == null)
             {
                 if (fileMode == FileMode.Create || fileMode == FileMode.CreateNew || fileMode == FileMode.OpenOrCreate)
                 {
-                    entry = archive.CreateEntry(path.RelativeTo(CurrentDirectory).ToString());
+                    entry = archive.CreateEntry(path.RelativeTo(DefaultRelativePathBase).ToString());
                     
                     return new StreamCloseDecorator(entry.Open(), () =>
                     {

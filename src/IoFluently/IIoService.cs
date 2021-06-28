@@ -50,7 +50,8 @@ namespace IoFluently
         #endregion
         
         #region Environmental stuff
-
+        
+        AbsolutePath DefaultRelativePathBase { get; }
         /// <summary>
         /// Lists the file system roots. On Unix-like operating systems, there's only one file system root, and it is '/'.
         /// </summary>
@@ -277,7 +278,6 @@ namespace IoFluently
         #region Path building
         
         bool CanBeSimplified(AbsolutePath path);
-        AbsolutePath CurrentDirectory { get; }
         AbsolutePath Root(AbsolutePath path);
         RelativePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo);
         IMaybe<AbsolutePath> TryCommonWith(AbsolutePath path, AbsolutePath that);

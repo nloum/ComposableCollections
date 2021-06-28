@@ -100,7 +100,7 @@ namespace IoFluently
         public ObservableDictionary<string, Folder> RootFolders { get; } = new ObservableDictionary<string, Folder>();
 
         /// <inheritdoc />
-        public override AbsolutePath CurrentDirectory => _currentDirectory;
+        public override AbsolutePath DefaultRelativePathBase => _currentDirectory;
 
         /// <summary>
         /// Changes the current working directory

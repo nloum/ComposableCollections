@@ -34,9 +34,21 @@ namespace IoFluently
         {
             return new Queryable<AbsolutePath>(new QueryContext());
         }
-        
-        public override AbsolutePath CurrentDirectory => TryParseAbsolutePath(Environment.CurrentDirectory).Value;
 
+        private AbsolutePath _defaultRelativePathBase;
+        
+        public override AbsolutePath DefaultRelativePathBase => _defaultRelativePathBase ?? TryParseAbsolutePath(Environment.CurrentDirectory).Value;
+
+        public void SetDefaultRelativePathBase(AbsolutePath defaultRelativePathBase)
+        {
+            _defaultRelativePathBase = defaultRelativePathBase;
+        }
+
+        public void UseCurrentDirectoryAsDefaultRelativePathBase()
+        {
+            _defaultRelativePathBase = null;
+        }
+        
         public IoService() : this(false)
         {
             UpdateRoots();

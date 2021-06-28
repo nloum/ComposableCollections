@@ -80,11 +80,11 @@ namespace IoFluently.Tests
         public void ShouldCreateFullPath(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, true);
-            var testFolder = uut.CurrentDirectory / "test1" / "test2" / "test3";
+            var testFolder = uut.DefaultRelativePathBase / "test1" / "test2" / "test3";
             testFolder.EnsureIsFolder();
             testFolder.IsFolder().Should().BeTrue();
-            (uut.CurrentDirectory / "test1").EnsureIsNotFolder(true);
-            (uut.CurrentDirectory / "test1").Exists().Should().BeFalse();
+            (uut.DefaultRelativePathBase / "test1").EnsureIsNotFolder(true);
+            (uut.DefaultRelativePathBase / "test1").Exists().Should().BeFalse();
         }
 
         [TestMethod]
@@ -128,8 +128,8 @@ namespace IoFluently.Tests
         public void SimplifyShouldNotChangeSimplePath(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, true);
-            var simplified = uut.CurrentDirectory.Simplify();
-            uut.CurrentDirectory.ToString().Should().Be(simplified.ToString());
+            var simplified = uut.DefaultRelativePathBase.Simplify();
+            uut.DefaultRelativePathBase.ToString().Should().Be(simplified.ToString());
         }
 
         [TestMethod]
@@ -256,7 +256,7 @@ namespace IoFluently.Tests
         {
             var ioService = CreateUnitUnderTest(type, false);
 
-            var repoRoot = ioService.CurrentDirectory.Ancestors().First(ancestor => (ancestor / ".git").IsFolder());
+            var repoRoot = ioService.DefaultRelativePathBase.Ancestors().First(ancestor => (ancestor / ".git").IsFolder());
             var testFolder = repoRoot / "test_folder";
             var results = ioService.Query().Where(path => path.Parent() == testFolder).AsEnumerable().ToImmutableList();
             results.Count.Should().BeGreaterThan(0);
@@ -272,7 +272,7 @@ namespace IoFluently.Tests
         {
             var ioService = CreateUnitUnderTest(type, false);
 
-            var repoRoot = ioService.CurrentDirectory.Ancestors().First(ancestor => (ancestor / ".git").IsFolder());
+            var repoRoot = ioService.DefaultRelativePathBase.Ancestors().First(ancestor => (ancestor / ".git").IsFolder());
             var testFolder = repoRoot / "test_folder";
             var results = ioService.Query().Where(path => path.Ancestors().Contains(testFolder)).AsEnumerable().ToImmutableHashSet();
             results.Count.Should().BeGreaterThan(0);
@@ -426,7 +426,7 @@ namespace IoFluently.Tests
         {
             var ioService = CreateUnitUnderTest(type1, false);
 
-            var sourceFolder = ioService.CurrentDirectory / "test1";
+            var sourceFolder = ioService.DefaultRelativePathBase / "test1";
 
             sourceFolder.CreateFolder()
                 .ClearFolder();
@@ -435,7 +435,7 @@ namespace IoFluently.Tests
 
             textFileInSourceFolder.WriteText("testing 1 2 3");
 
-            var targetFolder = (ioService.CurrentDirectory / "test2")
+            var targetFolder = (ioService.DefaultRelativePathBase / "test2")
                 .CreateFolder()
                 .ClearFolder();
 

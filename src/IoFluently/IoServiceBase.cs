@@ -33,7 +33,7 @@ namespace IoFluently
 
         public string DefaultDirectorySeparator { get; }
         public bool IsCaseSensitiveByDefault { get; }
-        public abstract AbsolutePath CurrentDirectory { get; }
+        public abstract AbsolutePath DefaultRelativePathBase { get; }
 
         public abstract IObservableReadOnlySet<AbsolutePath> Roots { get; }
 

@@ -35,6 +35,11 @@ namespace CodeIO
             return state.LazyTypes;
         }
 
+        public void Add<T>(T type)
+        {
+            var result = this.GetTypeFormat<T>()[type];
+        }
+
         private class TypeFormat<T>
         {
             public Func<T, TypeIdentifier> TypeIdentifier { get; init; }

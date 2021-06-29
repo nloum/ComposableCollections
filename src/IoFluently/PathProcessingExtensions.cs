@@ -21,7 +21,7 @@ namespace IoFluently
         /// <returns>An object that, when disposed of, undoes any changes made to the specified path.</returns>
         public static IDisposable TemporaryChanges(this AbsolutePath path)
         {
-            var backupPath = path.WithExtension(x => x + ".backup");
+            var backupPath = path.IoService.TryWithExtension(path, x => x + ".backup").Value;
             var translation = path.Translate(backupPath);
             translation.Copy(true);
 
@@ -220,7 +220,7 @@ namespace IoFluently
             return path.AsPathFormat<TModel, TModel>(() =>
             {
                 var serializer = new XmlSerializer(typeof(TModel));
-                using (var reader = path.OpenReader())
+                using (var reader = path.TryOpenReader().Value)
                 {
                     var result = (TModel) serializer.Deserialize(reader);
                     postDeserialize?.Invoke(result);

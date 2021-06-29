@@ -87,7 +87,23 @@ namespace IoFluently
                 textWriter.WriteLine($"    public partial class {groupedByPartialClass.Key.Name} {{");
                 foreach (var method in groupedByPartialClass)
                 {
-                    textWriter.WriteLine($"        public {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {method.Name} => IoService.{method.Name}(this);");
+                    if (method.ReturnType is IBoundGenericInterface boundIface && boundIface.Identifier.Name == "IMaybe" && method.Name.StartsWith("Try"))
+                    {
+                        var withoutTry = method.Name.Substring(3);
+                        var returnValue = (IReflectionType) boundIface.Arguments[0];
+                        if (returnValue is IValueType)
+                        {
+                            textWriter.WriteLine($"        public {ConvertToCSharpTypeName((returnValue).Type)}? {withoutTry} => IoService.{method.Name}(this).ValueOrDefault;");
+                        }
+                        else
+                        {
+                            textWriter.WriteLine($"        public {ConvertToCSharpTypeName((returnValue).Type)} {withoutTry} => IoService.{method.Name}(this).ValueOrDefault;");
+                        }
+                    }
+                    else
+                    {
+                        textWriter.WriteLine($"        public {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {method.Name} => IoService.{method.Name}(this);");
+                    }
                 }
                 textWriter.WriteLine("    }");
                 textWriter.WriteLine("}");
@@ -111,12 +127,11 @@ namespace IoFluently
             }
 
             if (method.Name.Contains("Open")
-                || method.Name.Contains("Try")
                 || method.Name.Contains("Clear")
                 || method.Name.Contains("Delete")
                 || method.Name.Contains("Ensure")
                 || method.Name.Contains("Observe")
-                || method.Name.Contains("Read")
+                || (method.Name.Contains("Read") && !method.Name.Contains("ReadOnly"))
                 || method.Name.Contains("Set")
                 || method.Name.Equals("Decrypt")
                 || method.Name.Equals("Encrypt")
@@ -206,18 +221,20 @@ namespace IoFluently
                 textWriter.WriteLine($"{arguments[0]}.IoService.{method.Name}({string.Join(", ", arguments)});");
                 textWriter.WriteLine("        }\n");
 
-                if (method.ReturnType is IBoundGenericInterface boundIface &&
-                    boundIface.Arguments[0].Identifier.Name == "IMaybe" && method.Name.StartsWith("Try"))
+                if (method.ReturnType is IBoundGenericInterface boundIface)
                 {
-                    var methodName = method.Name.Substring(3);
-                    textWriter.WriteLine($"        public static {ConvertToCSharpTypeName(((IReflectionType)boundIface.Arguments[0]).Type)} {methodName}({string.Join(", ",  parameters)}) {{");
-                    textWriter.Write("            ");
-                    if (method.ReturnType is not ReflectionVoid)
+                    if (boundIface.Identifier.Name == "IMaybe" && method.Name.StartsWith("Try"))
                     {
-                        textWriter.Write("return ");
+                        var methodName = method.Name.Substring(3);
+                        textWriter.WriteLine($"        public static {ConvertToCSharpTypeName(((IReflectionType)boundIface.Arguments[0]).Type)} {methodName}({string.Join(", ",  parameters)}) {{");
+                        textWriter.Write("            ");
+                        if (method.ReturnType is not ReflectionVoid)
+                        {
+                            textWriter.Write("return ");
+                        }
+                        textWriter.WriteLine($"{arguments[0]}.IoService.{method.Name}({string.Join(", ", arguments)}).Value;");
+                        textWriter.WriteLine("        }\n");
                     }
-                    textWriter.WriteLine($"{arguments[0]}.IoService.{method.Name}({string.Join(", ", arguments)}).Value;");
-                    textWriter.WriteLine("        }\n");
                 }
             }
         }

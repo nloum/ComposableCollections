@@ -123,7 +123,7 @@ namespace IoFluently
                 var regex = FileNamePatternToRegex(searchPattern);
                 
                 return archive.Entries.Select(entry =>
-                    TryParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Value).Where(child => child.TryParent().Value == path)
+                    TryParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Value).Where(child => child.IoService.TryParent(child).Value == path)
                     .Where(x => regex.IsMatch(x));
             }
         }
@@ -201,7 +201,7 @@ namespace IoFluently
                 {
                     return Maybe<FileAttributes>.Nothing();
                 }
-                return ZipFilePath.TryAttributes();
+                return ZipFilePath.IoService.TryAttributes(ZipFilePath);
             }
         }
 

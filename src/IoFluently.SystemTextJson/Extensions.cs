@@ -11,11 +11,11 @@ namespace IoFluently.SystemTextJson
             {
                 Value = absolutePath,
                 Type = absolutePath.Type,
-                FileSize = absolutePath.TryFileSize().Select(x => x.ToString()).Otherwise((string) null),
-                ReadOnly = absolutePath.TryIsReadOnly().ValueOrDefault,
-                CreationTime = absolutePath.TryCreationTime().Select(x => (DateTimeOffset?)x).ValueOrDefault,
-                LastAccessTime = absolutePath.TryLastAccessTime().Select(x => (DateTimeOffset?)x).ValueOrDefault,
-                LastWriteTime = absolutePath.TryLastWriteTime().Select(x => (DateTimeOffset?)x).ValueOrDefault
+                FileSize = absolutePath.FileSize?.ToString(),
+                ReadOnly = absolutePath.IsReadOnly,
+                CreationTime = absolutePath.CreationTime,
+                LastAccessTime = absolutePath.LastAccessTime,
+                LastWriteTime = absolutePath.LastWriteTime
             };
         }
     }

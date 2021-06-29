@@ -247,6 +247,9 @@ namespace IoFluently
         IMaybe<RelativePath> TryParseRelativePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         IMaybe<AbsolutePath> TryParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         IMaybe<AbsolutePath> TryParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
+        RelativePath ParseRelativePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
+        AbsolutePath ParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
+        AbsolutePath ParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         
         #endregion
         
@@ -297,15 +300,6 @@ namespace IoFluently
         /// </summary>
         AbsolutePath Combine(AbsolutePath path, params string[] subsequentPathParts);
         AbsolutePath WithoutExtension(AbsolutePath path);
-        AbsolutePath Descendant(AbsolutePath path, params AbsolutePath[] paths);
-        AbsolutePath Descendant(AbsolutePath path, params string[] paths);
-        AbsolutePath Ancestor(AbsolutePath path, int level);
-        AbsolutePath WithExtension(AbsolutePath path, string differentExtension);
-        AbsolutePath WithExtension(AbsolutePath path, Func<string, string> differentExtension);
-        AbsolutePath GetCommonAncestry(AbsolutePath path1, AbsolutePath path2);
-        Uri GetCommonDescendants(AbsolutePath path1, AbsolutePath path2);
-        Tuple<Uri, Uri> GetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2);
-        Tuple<Uri, Uri> GetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2);
         Uri Child(Uri parent, Uri child);
         AbsolutePaths GlobFiles(AbsolutePath path, string pattern);
 
@@ -355,6 +349,13 @@ namespace IoFluently
         /// <returns></returns>
         IMaybe<AbsolutePath> TryWithExtension(AbsolutePath path, string differentExtension);
 
+        /// <summary>
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="differentExtension">Must include the "." part of the extension (e.g., ".avi" not "avi")</param>
+        /// <returns></returns>
+        IMaybe<AbsolutePath> TryWithExtension(AbsolutePath path, Func<string, string> differentExtension);
+
         #endregion
 
         #region File metadata
@@ -362,12 +363,6 @@ namespace IoFluently
         bool Exists(AbsolutePath path);
         PathType Type(AbsolutePath path);
         bool HasExtension(AbsolutePath path);
-        bool IsReadOnly(AbsolutePath path);
-        Information FileSize(AbsolutePath path);
-        FileAttributes Attributes(AbsolutePath path);
-        DateTimeOffset CreationTime(AbsolutePath path);
-        DateTimeOffset LastAccessTime(AbsolutePath path);
-        DateTimeOffset LastWriteTime(AbsolutePath path);
         bool IsFile(AbsolutePath path);
         bool IsFolder(AbsolutePath path);
         IMaybe<bool> TryIsReadOnly(AbsolutePath path);
@@ -400,11 +395,6 @@ namespace IoFluently
             bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
             bool leaveOpen = false);
         IMaybe<StreamReader> TryOpenReader(AbsolutePath path);
-        StreamReader OpenReader(AbsolutePath path);
-        string ReadText(AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
-            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
-            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
-            bool leaveOpen = false);
         #endregion
         
         #region File writing

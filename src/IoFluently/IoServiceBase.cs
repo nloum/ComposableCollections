@@ -1203,6 +1203,12 @@ namespace IoFluently
             return false;
         }
 
+        public AbsolutePath ParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo,
+            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
+        {
+            return TryParseAbsolutePath(path, optionallyRelativeTo, flags).Value;
+        }
+
         #endregion
         #region Translation stuff
         
@@ -1452,15 +1458,9 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public AbsolutePath WithExtension(AbsolutePath path, string differentExtension)
+        public IMaybe<AbsolutePath> TryWithExtension(AbsolutePath path, Func<string, string> differentExtension)
         {
-            return path.IoService.TryWithExtension(path, differentExtension).Value;
-        }
-
-        /// <inheritdoc />
-        public AbsolutePath WithExtension(AbsolutePath path, Func<string, string> differentExtension)
-        {
-            return path.IoService.TryWithExtension(path, differentExtension(path.Extension.ValueOrDefault ?? string.Empty)).Value;
+            return path.IoService.TryWithExtension(path, differentExtension(path.Extension.ValueOrDefault ?? string.Empty));
         }
 
         /// <inheritdoc />

@@ -182,7 +182,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.InMemoryZipIoService)]
         public void HasExtensionShouldWorkWithAndWithoutTheDot(IoServiceType type) {
             var uut = CreateUnitUnderTest(type, false);
-            var testTxt = uut.ParseAbsolutePath("/test.txt");
+            var testTxt = uut.TryParseAbsolutePath("/test.txt").Value;
             testTxt.HasExtension(".txt").Should().BeTrue();
             testTxt.HasExtension("txt").Should().BeTrue();
         }
@@ -195,7 +195,7 @@ namespace IoFluently.Tests
         public void WithoutExtensionsShouldWork(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, false);
-            var testTxt = uut.ParseAbsolutePath("/test.test.txt");
+            var testTxt = uut.TryParseAbsolutePath("/test.test.txt").Value;
             var test = testTxt.WithoutExtension;
             test.ToString().Should().Be("/test.test");
         }
@@ -209,11 +209,11 @@ namespace IoFluently.Tests
         {
             var ioService = CreateUnitUnderTest(type, false);
 
-            var parent = ioService.ParseAbsolutePath("C:\\test1\\test2");
+            var parent = ioService.TryParseAbsolutePath("C:\\test1\\test2").Value;
             var item1 = parent / "test3" / "test.csproj";
             var item2 = parent / "test4";
 
-            var result = item1.CommonWith(item2);
+            var result = item1.TryCommonWith(item2).Value;
 
             result.ToString().Should().Be(parent.ToString());
         }

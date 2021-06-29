@@ -152,7 +152,7 @@ namespace CodeIO
 		    return baseName.ToString();
 	    }
 
-        public static TypeReader AddReflection(this TypeReader typeReader)
+        public static TypeReader AddSupportForReflection(this TypeReader typeReader)
         {
             return typeReader.AddTypeFormat<Type>(type => type.GetTypeIdentifier(), (type, lazyTypes) =>
             {

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using CodeIO.LoadedTypes.Read;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -12,7 +13,7 @@ namespace CodeIO.Tests
         public void ShouldReadClassWithProperty()
         {
             var uut = new TypeReader();
-            uut.AddReflection();
+            uut.AddSupportForReflection();
             var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(ClassWithProperty)].Value;
 
             clazz.Identifier.Name.Should().Be(nameof(ClassWithProperty));
@@ -28,7 +29,7 @@ namespace CodeIO.Tests
         public void ShouldReadStructureWithFields()
         {
             var uut = new TypeReader();
-            uut.AddReflection();
+            uut.AddSupportForReflection();
             var type = (IStructure)uut.GetTypeFormat<Type>()[typeof(TestStruct)].Value;
 
             type.Identifier.Name.Should().Be(nameof(TestStruct));
@@ -48,7 +49,7 @@ namespace CodeIO.Tests
         public void ShouldReadEnum()
         {
             var uut = new TypeReader();
-            uut.AddReflection();
+            uut.AddSupportForReflection();
             var type = (IEnum)uut.GetTypeFormat<Type>()[typeof(TestEnum)].Value;
 
             type.Identifier.Name.Should().Be(nameof(TestEnum));
@@ -65,7 +66,7 @@ namespace CodeIO.Tests
         public void ShouldReadInterfaceImplementation()
         {
             var uut = new TypeReader();
-            uut.AddReflection();
+            uut.AddSupportForReflection();
             var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(ImplementationWithProperty)].Value;
 
             clazz.Identifier.Name.Should().Be(nameof(ImplementationWithProperty));
@@ -90,19 +91,84 @@ namespace CodeIO.Tests
         public void ShouldReadGenericParameterThatMustHaveDefaultConstructor()
         {
             var uut = new TypeReader();
-            uut.AddReflection();
+            uut.AddSupportForReflection();
             var iface = (IUnboundGenericInterface)uut.GetTypeFormat<Type>()[typeof(IInterfaceTMustHaveDefaultConstructor<>)].Value;
 
             iface.Identifier.Name.Should().Be("IInterfaceTMustHaveDefaultConstructor");
             iface.Visibility.Should().Be(Visibility.Public);
         }
         
+        [TestMethod]
+        public void ShouldReadUnboundGenericClass()
+        {
+            var uut = new TypeReader();
+            uut.AddSupportForReflection();
+            var clazz = (IUnboundGenericClass)uut.GetTypeFormat<Type>()[typeof(NestingParentGeneric<>)].Value;
+
+            clazz.Identifier.Name.Should().Be("NestingParentGeneric");
+            clazz.Visibility.Should().Be(Visibility.Public);
+            clazz.Properties.Count.Should().Be(1);
+            clazz.Properties[0].Name.Should().Be("Value");
+            clazz.Properties[0].Type.Identifier.Name.Should().Be("T");
+
+            clazz.Parameters.Count.Should().Be(1);
+            clazz.Parameters[0].MustBeReferenceType.Should().BeTrue();
+            clazz.Parameters[0].MustHaveDefaultConstructor.Should().BeTrue();
+            clazz.Parameters[0].IsCovariant.Should().BeFalse();
+            clazz.Parameters[0].IsContravariant.Should().BeFalse();
+            clazz.Parameters[0].MustBeNonNullable.Should().BeFalse();
+        }
+
+        [TestMethod]
+        public void ShouldReadBoundGenericClass()
+        {
+            var uut = new TypeReader();
+            uut.AddSupportForReflection();
+            var clazz = (IBoundGenericClass)uut.GetTypeFormat<Type>()[typeof(NestingParentGeneric<ImplementationWithMethod>)].Value;
+
+            clazz.Identifier.Name.Should().Be("NestingParentGeneric");
+            clazz.Visibility.Should().Be(Visibility.Public);
+            clazz.Properties.Count.Should().Be(1);
+            clazz.Properties[0].Name.Should().Be("Value");
+            ((IReflectionType)clazz.Properties[0].Type).Type.Should().Be(typeof(ImplementationWithMethod));
+
+            var unbound = clazz.Unbound;
+            
+            unbound.Parameters.Count.Should().Be(1);
+            unbound.Parameters[0].MustBeReferenceType.Should().BeTrue();
+            unbound.Parameters[0].MustHaveDefaultConstructor.Should().BeTrue();
+            unbound.Parameters[0].IsCovariant.Should().BeFalse();
+            unbound.Parameters[0].IsContravariant.Should().BeFalse();
+            unbound.Parameters[0].MustBeNonNullable.Should().BeFalse();
+        }
+
+        [TestMethod]
+        public void ShouldReadUnboundGenericInterface()
+        {
+            var uut = new TypeReader();
+            uut.AddSupportForReflection();
+            var clazz = (IUnboundGenericInterface)uut.GetTypeFormat<Type>()[typeof(IGenericInterface<>)].Value;
+
+            clazz.Identifier.Name.Should().Be("IGenericInterface");
+            clazz.Visibility.Should().Be(Visibility.Public);
+            clazz.Properties.Count.Should().Be(1);
+            clazz.Properties[0].Name.Should().Be("Value");
+            clazz.Properties[0].Type.Identifier.Name.Should().Be("T");
+
+            clazz.Parameters.Count.Should().Be(1);
+            clazz.Parameters[0].MustBeReferenceType.Should().BeFalse();
+            clazz.Parameters[0].MustHaveDefaultConstructor.Should().BeFalse();
+            clazz.Parameters[0].IsCovariant.Should().BeTrue();
+            clazz.Parameters[0].IsContravariant.Should().BeFalse();
+            clazz.Parameters[0].MustBeNonNullable.Should().BeFalse();
+        }
+
         [Ignore] // Ignore this because nested types aren't supported yet
         [TestMethod]
         public void ShouldReadNestedClassUnderGeneric()
         {
             var uut = new TypeReader();
-            uut.AddReflection();
+            uut.AddSupportForReflection();
             var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(NestingParentGeneric<>.PublicNestingChildNonGeneric)].Value;
 
             clazz.Identifier.Name.Should().Be("NestingParentNonGeneric");
@@ -117,7 +183,7 @@ namespace CodeIO.Tests
         public void ShouldReadNestedInterfaceUnderGeneric()
         {
             var uut = new TypeReader();
-            uut.AddReflection();
+            uut.AddSupportForReflection();
             var clazz = (INonGenericInterface)uut.GetTypeFormat<Type>()[typeof(NestingParentGeneric<>.IPublicNestingChildNonGeneric)].Value;
 
             clazz.Identifier.Name.Should().Be("INestingParentNonGeneric");
@@ -131,7 +197,7 @@ namespace CodeIO.Tests
         public void ShouldReadTypeWithPublicConstructor()
         {
             var uut = new TypeReader();
-            uut.AddReflection();
+            uut.AddSupportForReflection();
             var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(HasPublicConstructor)].Value;
 
             clazz.Identifier.Name.Should().Be(nameof(HasPublicConstructor));
@@ -147,7 +213,7 @@ namespace CodeIO.Tests
         public void ShouldReadTypeWithPrivateConstructor()
         {
             var uut = new TypeReader();
-            uut.AddReflection();
+            uut.AddSupportForReflection();
             var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(HasPrivateConstructor)].Value;
 
             clazz.Identifier.Name.Should().Be(nameof(HasPrivateConstructor));
@@ -163,7 +229,7 @@ namespace CodeIO.Tests
         public void ShouldReadTypeWithProtectedConstructor()
         {
             var uut = new TypeReader();
-            uut.AddReflection();
+            uut.AddSupportForReflection();
             var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(HasProtectedConstructor)].Value;
 
             clazz.Identifier.Name.Should().Be(nameof(HasProtectedConstructor));
@@ -179,7 +245,7 @@ namespace CodeIO.Tests
         public void ShouldReadTypeWithInternalConstructor()
         {
             var uut = new TypeReader();
-            uut.AddReflection();
+            uut.AddSupportForReflection();
             var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(HasInternalConstructor)].Value;
 
             clazz.Identifier.Name.Should().Be(nameof(HasInternalConstructor));
@@ -195,7 +261,7 @@ namespace CodeIO.Tests
         public void ShouldReadUnboundGenericInterfaceImplementation()
         {
             var uut = new TypeReader();
-            uut.AddReflection();
+            uut.AddSupportForReflection();
             var clazz = (IUnboundGenericClass)uut.GetTypeFormat<Type>()[typeof(ImplementationWithProperty<>)].Value;
 
             clazz.Identifier.Name.Should().Be(nameof(ImplementationWithProperty));
@@ -220,7 +286,7 @@ namespace CodeIO.Tests
         public void ShouldReadBoundGenericInterfaceImplementation()
         {
             var uut = new TypeReader();
-            uut.AddReflection();
+            uut.AddSupportForReflection();
             var clazz = (IBoundGenericClass)uut.GetTypeFormat<Type>()[typeof(ImplementationWithProperty<string>)].Value;
 
             clazz.Identifier.Name.Should().Be(nameof(ImplementationWithProperty));
@@ -261,7 +327,7 @@ namespace CodeIO.Tests
         public void ShouldReadString()
         {
             var uut = new TypeReader();
-            uut.AddReflection();
+            uut.AddSupportForReflection();
 
             var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(string)].Value;
             clazz.Identifier.Name.Should().Be("String");
@@ -278,7 +344,7 @@ namespace CodeIO.Tests
         public void ShouldReadClassWithRecursiveProperty()
         {
             var uut = new TypeReader();
-            uut.AddReflection();
+            uut.AddSupportForReflection();
 
             var clazz = (INonGenericClass)uut.GetTypeFormat<Type>()[typeof(ClassWithRecursiveProperty)].Value;
             clazz.Identifier.Name.Should().Be(nameof(ClassWithRecursiveProperty));
@@ -294,7 +360,7 @@ namespace CodeIO.Tests
         public void ShouldReadClassWithIndexer()
         {
             var uut = new TypeReader();
-            uut.AddReflection();
+            uut.AddSupportForReflection();
 
             var clazz = (INonGenericClass) uut.GetTypeFormat<Type>()[typeof(ClassWithIndexer)].Value;
             clazz.Identifier.Name.Should().Be(nameof(ClassWithIndexer));
@@ -312,7 +378,7 @@ namespace CodeIO.Tests
         public void ShouldReadClassWithMethod()
         {
             var uut = new TypeReader();
-            uut.AddReflection();
+            uut.AddSupportForReflection();
 
             var clazz = (INonGenericClass) uut.GetTypeFormat<Type>()[typeof(ClassWithMethod)].Value;
             clazz.Identifier.Name.Should().Be(nameof(ClassWithMethod));

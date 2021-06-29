@@ -33,7 +33,7 @@ namespace CodeIO.Tests
         public void ShouldBuildClassThatImplementsInterfaceWithProperty()
         {
             var typeReader = new TypeReader();
-            typeReader.AddReflection();
+            typeReader.AddSupportForReflection();
             var iface = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IInterfaceWithProperty)].Value;
 
             var classWriter = iface
@@ -50,7 +50,7 @@ namespace CodeIO.Tests
         public void ShouldBuildClassThatImplementsInterfaceWithMethod()
         {
             var typeReader = new TypeReader();
-            typeReader.AddReflection();
+            typeReader.AddSupportForReflection();
             var iface = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IInterfaceWithMethod)].Value;
 
             var classWriter = iface

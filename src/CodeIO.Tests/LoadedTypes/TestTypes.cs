@@ -1,3 +1,5 @@
+using System;
+
 namespace CodeIO.Tests
 {
     public class ClassWithProperty
@@ -111,8 +113,15 @@ namespace CodeIO.Tests
         }
     }
 
-    public class NestingParentGeneric<T>
+    public interface IGenericInterface<out T> where T : IDisposable
     {
+        T Value { get; }
+    }
+    
+    public class NestingParentGeneric<T> where T : class, new()
+    {
+        public T Value { get; set; }
+        
         public class PublicNestingChildNonGeneric
         {
             public T Value { get; init; }

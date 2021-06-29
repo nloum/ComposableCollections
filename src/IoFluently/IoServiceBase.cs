@@ -1829,6 +1829,7 @@ namespace IoFluently
 
                 return true;
             })
+                .Skip(1)
                 .Where(tt => tt.Type != TreeTraversalType.ExitBranch)
                 .Select(tt => tt.Value);
         }

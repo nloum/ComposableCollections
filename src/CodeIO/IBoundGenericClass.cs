@@ -2,9 +2,8 @@ using System.Collections.Generic;
 
 namespace CodeIO
 {
-    public interface IBoundGenericClass : IClass
+    public interface IBoundGenericClass : IClass, IBoundComplexType
     {
-        IReadOnlyList<IType> Arguments { get; }
         IUnboundGenericClass Unbound { get; }
     }
 }

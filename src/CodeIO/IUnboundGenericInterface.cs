@@ -2,8 +2,7 @@ using System.Collections.Generic;
 
 namespace CodeIO
 {
-    public interface IUnboundGenericInterface : IDefinedInterface
+    public interface IUnboundGenericInterface : IDefinedInterface, IUnboundComplexType
     {
-        IReadOnlyList<IGenericParameter> Parameters { get; }
     }
 }

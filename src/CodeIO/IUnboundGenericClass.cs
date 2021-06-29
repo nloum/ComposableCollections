@@ -1,9 +1,6 @@
-using System.Collections.Generic;
-
 namespace CodeIO
 {
-    public interface IUnboundGenericClass : IDefinedClass
+    public interface IUnboundGenericClass : IDefinedClass, IUnboundComplexType
     {
-        IReadOnlyList<IGenericParameter> Parameters { get; }
     }
 }

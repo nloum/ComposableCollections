@@ -12,26 +12,26 @@ namespace TreeLinq.Tests
         [TestMethod]
         public void CombinationTests()
         {
-            Func<RelativePath<string>, IEnumerable<RelativePath<string>>> func = absPath => new[]
+            Func<RelativeTreePath<string>, IEnumerable<RelativeTreePath<string>>> func = absPath => new[]
             {
-                RelativePath<string>.Empty / "c1" / "c2",
-                RelativePath<string>.Empty / "d1" / "d2"
+                RelativeTreePath<string>.Empty / "c1" / "c2",
+                RelativeTreePath<string>.Empty / "d1" / "d2"
             };
             
             var paths = new[]
             {
-                RelativePath<string>.Empty / "a1" / "a2",
-                RelativePath<string>.Empty / "b1" / "b2"
+                RelativeTreePath<string>.Empty / "a1" / "a2",
+                RelativeTreePath<string>.Empty / "b1" / "b2"
             };
             
-            var uut = RelativePath<string>.Empty / "blahblah" / "blob" / paths / func;
+            var uut = RelativeTreePath<string>.Empty / "blahblah" / "blob" / paths / func;
             
             var relativePaths = uut.ToImmutableList();
             relativePaths.Count.Should().Be(4);
-            relativePaths[0].Should<RelativePath<string>>().Be(new RelativePath<string>("blahblah", "blob", "a1", "a2", "c1", "c2"));
-            relativePaths[1].Should<RelativePath<string>>().Be(new RelativePath<string>("blahblah", "blob", "a1", "a2", "d1", "d2"));
-            relativePaths[2].Should<RelativePath<string>>().Be(new RelativePath<string>("blahblah", "blob", "b1", "b2", "c1", "c2"));
-            relativePaths[3].Should<RelativePath<string>>().Be(new RelativePath<string>("blahblah", "blob", "b1", "b2", "d1", "d2"));
+            relativePaths[0].Should<RelativeTreePath<string>>().Be(new RelativeTreePath<string>("blahblah", "blob", "a1", "a2", "c1", "c2"));
+            relativePaths[1].Should<RelativeTreePath<string>>().Be(new RelativeTreePath<string>("blahblah", "blob", "a1", "a2", "d1", "d2"));
+            relativePaths[2].Should<RelativeTreePath<string>>().Be(new RelativeTreePath<string>("blahblah", "blob", "b1", "b2", "c1", "c2"));
+            relativePaths[3].Should<RelativeTreePath<string>>().Be(new RelativeTreePath<string>("blahblah", "blob", "b1", "b2", "d1", "d2"));
         }
     }
 }

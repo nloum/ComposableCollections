@@ -77,8 +77,8 @@ namespace TreeLinq
 
 		public TNodeName this[int index] => Components[index];
 
-		public RelativePath<TNodeName> SkipAncestors( int skipAncestors ) {
-			return new RelativePath<TNodeName>( Components.Skip(skipAncestors) );
+		public RelativeTreePath<TNodeName> SkipAncestors( int skipAncestors ) {
+			return new RelativeTreePath<TNodeName>( Components.Skip(skipAncestors) );
 		}
 
 		public TNodeName Last => this[this.Count - 1];

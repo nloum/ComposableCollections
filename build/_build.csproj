@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nuke.Common" Version="5.1.2" />
+    <PackageReference Include="Nuke.Common" Version="5.2.1" />
     <PackageDownload Include="GitVersion.Tool" Version="[5.6.9]" />
     <PackageDownload Include="dotnet-reportgenerator-globaltool" Version="[4.5.8]" />
   </ItemGroup>

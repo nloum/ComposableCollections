@@ -95,18 +95,18 @@ namespace TreeLinq
 
 		private IEnumerable<TreeTraversal<TNodeName, TNode>> GetEnumerable() {
 			if (IsLeaf) {
-				yield return new TreeTraversal<TNodeName, TNode>( TreeTraversalType.Leaf, AbsolutePath<TNodeName>.Root, Value );
+				yield return new TreeTraversal<TNodeName, TNode>( TreeTraversalType.Leaf, AbsoluteTreePath<TNodeName>.Root, Value );
 				yield break;
 			}
 
 			var traversalStack = new Stack<TreeTraversalState<TNodeName, PreComputedTree<TNodeName, TNode>>>();
-			traversalStack.Push( new TreeTraversalState<TNodeName, PreComputedTree<TNodeName, TNode>>( AbsolutePath<TNodeName>.Root, this, ChildrenNames ) );
+			traversalStack.Push( new TreeTraversalState<TNodeName, PreComputedTree<TNodeName, TNode>>( AbsoluteTreePath<TNodeName>.Root, this, ChildrenNames ) );
 
 			var hasYieldedInitialIteration = false;
 
 			while ( traversalStack.Count > 0 ) {
 				if ( !hasYieldedInitialIteration ) {
-					yield return new TreeTraversal<TNodeName, TNode>( TreeTraversalType.EnterBranch, AbsolutePath<TNodeName>.Root );
+					yield return new TreeTraversal<TNodeName, TNode>( TreeTraversalType.EnterBranch, AbsoluteTreePath<TNodeName>.Root );
 					hasYieldedInitialIteration = true;
 				}
 

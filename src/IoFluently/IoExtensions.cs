@@ -66,5 +66,13 @@ namespace IoFluently
                     return new {state.StringBuilder, BuiltString = (string) null};
                 }).Where(state => state.BuiltString != null).Select(state => state.BuiltString);
         }
+
+        /// <summary>
+        /// Parses the path. If the path is a relative path, assumes that it is relative to <see cref="IoService.DefaultRelativePathBase"/>.
+        /// </summary>
+        public static AbsolutePath ParsePathRelativeToDefault(this IIoService ioService, string path)
+        {
+            return ioService.ParseAbsolutePath(path, ioService.DefaultRelativePathBase);
+        }
     }
 }

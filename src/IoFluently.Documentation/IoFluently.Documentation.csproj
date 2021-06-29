@@ -11,7 +11,7 @@
 
     <ItemGroup>
       <PackageReference Include="ComposableCollections" Version="1.0.0-alpha0182" />
-      <PackageReference Include="Markdig" Version="0.22.1" />
+      <PackageReference Include="Markdig" Version="0.25.0" />
       <PackageReference Include="TreeLinq" Version="1.0.0-alpha0022" />
     </ItemGroup>
 

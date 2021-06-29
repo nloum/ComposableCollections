@@ -16,7 +16,7 @@
     <PackageReference Include="ComposableCollections" Version="1.0.0-alpha0182" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="5.0.0" />
     <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0067" />
-    <PackageReference Include="TreeLinq" Version="1.0.0-alpha0022" />
+    <PackageReference Include="TreeLinq" Version="1.0.0-alpha0023" />
     <PackageReference Include="UnitsNet" Version="4.96.0" />
     <PackageReference Include="UtilityDisposables" Version="1.1.0-alpha0006" />
   </ItemGroup>

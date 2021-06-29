@@ -33,14 +33,14 @@ namespace IoFluently
         /// <summary>
         /// The TreeLinq relative path that this object represents
         /// </summary>
-        public RelativePath<string> Path { get; }
+        public RelativeTreePath<string> Path { get; }
 
         internal RelativePath(bool isCaseSensitive, string directorySeparator, IIoService ioService, IEnumerable<string> path)
         {
             IsCaseSensitive = isCaseSensitive;
             DirectorySeparator = directorySeparator;
             IoService = ioService;
-            Path = new RelativePath<string>(path);
+            Path = new RelativeTreePath<string>(path);
             if (ioService.ComponentsAreAbsolute(Path.Components))
             {
                 throw new ArgumentException($"The path {Path} is not relative");

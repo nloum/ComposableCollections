@@ -33,14 +33,14 @@ namespace IoFluently
         /// <summary>
         /// The TreeLinq absolute path that this object represents
         /// </summary>
-        public AbsolutePath<string> Path { get; }
+        public AbsoluteTreePath<string> Path { get; }
 
         internal AbsolutePath(bool isCaseSensitive, string directorySeparator, IIoService ioService, IEnumerable<string> path)
         {
             IsCaseSensitive = isCaseSensitive;
             DirectorySeparator = directorySeparator;
             IoService = ioService;
-            Path = new AbsolutePath<string>(path);
+            Path = new AbsoluteTreePath<string>(path);
             if (!ioService.ComponentsAreAbsolute(Path.Components))
             {
                 throw new ArgumentException($"The path {Path} is not absolute");

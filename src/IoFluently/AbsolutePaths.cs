@@ -27,9 +27,9 @@ namespace IoFluently
         /// <summary>
         /// The TreeLinq absolute paths that this object represents
         /// </summary>
-        public AbsolutePaths<string> Paths { get; }
+        public AbsoluteTreePaths<string> Paths { get; }
 
-        internal AbsolutePaths(bool isCaseSensitive, string directorySeparator, IIoService ioService, AbsolutePaths<string> paths)
+        internal AbsolutePaths(bool isCaseSensitive, string directorySeparator, IIoService ioService, AbsoluteTreePaths<string> paths)
         {
             IsCaseSensitive = isCaseSensitive;
             IsCaseSensitive = isCaseSensitive;

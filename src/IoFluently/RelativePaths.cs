@@ -33,7 +33,7 @@ namespace IoFluently
         /// <summary>
         /// The TreeLinq relative paths that this object represents
         /// </summary>
-        public RelativePaths<string> Paths { get; }
+        public RelativeTreePaths<string> Paths { get; }
 
         /// <summary>
         /// Constructs a new object that represents a set of relative paths
@@ -42,7 +42,7 @@ namespace IoFluently
         /// <param name="directorySeparator">What the directory separator is for the relative paths (e.g. '/' or '\')</param>
         /// <param name="ioService">The IIoService used for these relative paths</param>
         /// <param name="paths">The TreeLinq paths that this object will represent</param>
-        public RelativePaths(bool isCaseSensitive, string directorySeparator, IIoService ioService, RelativePaths<string> paths)
+        public RelativePaths(bool isCaseSensitive, string directorySeparator, IIoService ioService, RelativeTreePaths<string> paths)
         {
             IsCaseSensitive = isCaseSensitive;
             DirectorySeparator = directorySeparator;

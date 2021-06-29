@@ -329,23 +329,23 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override PathType GetPathType(AbsolutePath path)
+        public override PathType Type(AbsolutePath path)
         {
             path = Simplify(path);
 
             var file = GetFile(path);
             if (file.HasValue)
             {
-                return PathType.File;
+                return IoFluently.PathType.File;
             }
 
             var folder = GetFolder(path);
             if (folder.HasValue)
             {
-                return PathType.Folder;
+                return IoFluently.PathType.Folder;
             }
             
-            return PathType.None;
+            return IoFluently.PathType.None;
         }
 
         /// <inheritdoc />

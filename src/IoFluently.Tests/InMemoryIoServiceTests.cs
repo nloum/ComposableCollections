@@ -14,11 +14,11 @@ namespace IoFluently.Tests
             var uut = new InMemoryIoService("\n", true, "/");
             uut.RootFolders.Add("/", new InMemoryIoService.Folder());
             var root = uut.ParseAbsolutePath("/");
-            root.IsFolder().Should().Be(true);
+            root.IsFolder.Should().Be(true);
             root.ToString().Should().Be("/");
             var testTxt = uut.ParseAbsolutePath("/test1.txt");
             testTxt.ToString().Should().Be("/test1.txt");
-            testTxt.Parent().ToString().Should().Be("/");
+            testTxt.Parent.ToString().Should().Be("/");
         }
 
         [TestMethod]

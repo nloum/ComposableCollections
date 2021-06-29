@@ -17,8 +17,28 @@ namespace IoFluently.CodeGenerator
         static void Main(string[] args)
         {
             var ioService = new IoService();
-            var repoRoot = ioService.DefaultRelativePathBase.Ancestors().First(ancestor => ioService.IsFolder(ancestor / ".git"));
+            var repoRoot = ioService.DefaultRelativePathBase.Ancestors.First(ancestor => ioService.IsFolder(ancestor / ".git"));
 
+            using (var partialClassesWriter = ioService.OpenWriter(repoRoot / "src" / "IoFluently" / "PartialClasses.g.cs"))
+            {
+                partialClassesWriter.WriteLine(@"using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Http.Headers;
+using System.Reactive;
+using System.Text;
+using LiveLinq.Dictionary;
+using LiveLinq.Set;
+using SimpleMonads;
+using TreeLinq;
+using UnitsNet;
+
+");
+                
+                GeneratePartialClassesWithProperties(repoRoot, partialClassesWriter);
+            }
+            
             using (var ioExtensionsWriter = ioService.OpenWriter(repoRoot / "src" / "IoFluently" / "IoExtensions.g.cs"))
             {
                 ioExtensionsWriter.WriteLine(@"using System;
@@ -52,6 +72,62 @@ namespace IoFluently
         }
 
         private static Regex _memberRegex = new Regex(@"M\:(?<type_name>[0-9][a-z][A-Z]\.)\.(?<member_name>[0-9][a-z][A-Z])(\((?<parameters>.+)\))?");
+
+        private static void GeneratePartialClassesWithProperties(AbsolutePath repoRoot, TextWriter textWriter)
+        {
+            var typeReader = new TypeReader();
+            typeReader.AddReflection();
+            var ioServiceType = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IIoService)].Value;
+
+            foreach (var groupedByPartialClass in ioServiceType.Methods.OrderBy(method => method.Name).ThenBy(method => method.Parameters.Count).ThenBy(method => method.GetHashCode())
+                .Where(x => ShouldBeProperty(x))
+                .GroupBy(x => x.Parameters[0].Type.Identifier))
+            {
+                textWriter.WriteLine($"namespace {groupedByPartialClass.Key.Namespace} {{");
+                textWriter.WriteLine($"public partial class {groupedByPartialClass.Key.Name} {{");
+                foreach (var method in groupedByPartialClass)
+                {
+                    textWriter.WriteLine($"public {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {method.Name} => IoService.{method.Name}(this);");
+                }
+                textWriter.WriteLine("}");
+                textWriter.WriteLine("}");
+            }
+        }
+
+        private static bool ShouldBeProperty(IMethod method)
+        {
+            if (method.Parameters.Count != 1 || method.ReturnType is ReflectionVoid && method.IsStatic ||
+                  method.Visibility != Visibility.Public)
+            {
+                return false;
+            }
+
+            var onlyParam = method.Parameters[0];
+            var onlyParamTypeName = onlyParam.Type.Identifier.Name;
+            if (onlyParamTypeName != "AbsolutePath" && onlyParamTypeName != "RelativePath" &&
+                onlyParamTypeName != "IAbsolutePathTranslation")
+            {
+                return false;
+            }
+
+            if (method.Name.Contains("Open")
+                || method.Name.Contains("Try")
+                || method.Name.Contains("Clear")
+                || method.Name.Contains("Delete")
+                || method.Name.Contains("Ensure")
+                || method.Name.Contains("Observe")
+                || method.Name.Contains("Read")
+                || method.Name.Contains("Set")
+                || method.Name.Equals("Decrypt")
+                || method.Name.Equals("Encrypt")
+                || method.Name.Equals("Renamings")
+                || method.Name.Equals("Simplify"))
+            {
+                return false;
+            }
+            
+            return true;
+        }
         
         private static void GenerateIoExtensions(AbsolutePath repoRoot, TextWriter textWriter)
         {
@@ -64,6 +140,11 @@ namespace IoFluently
 
             foreach (var method in ioServiceType.Methods)
             {
+                if (ShouldBeProperty(method))
+                {
+                    continue;
+                }
+                
                 if (method.Parameters.Count == 0)
                 {
                     continue;

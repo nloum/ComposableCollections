@@ -37,7 +37,7 @@ namespace IoFluently.Tests
             textFilePath.WriteAllText("Test 1 2 3");
             var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip");
             var result = testZipFilePath.AsZipFile(true);
-            result.Zip(textFilePath, textFilePath.Parent());
+            result.Zip(textFilePath, textFilePath.Parent);
             
             using (var stream = result.ZipFilePath.Open(FileMode.Open, FileAccess.Read))
             {
@@ -63,7 +63,7 @@ namespace IoFluently.Tests
             textFilePath.WriteAllText("Test 1 2 3");
             var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip");
             var result = testZipFilePath.AsZipFile(true);
-            result.Zip(folder, folder.Parent());
+            result.Zip(folder, folder.Parent);
             
             using (var stream = result.ZipFilePath.Open(FileMode.Open, FileAccess.Read))
             {

@@ -376,7 +376,7 @@ namespace IoFluently
         #region File metadata
         
         bool Exists(AbsolutePath path);
-        PathType GetPathType(AbsolutePath path);
+        PathType Type(AbsolutePath path);
         bool HasExtension(AbsolutePath path);
         bool IsReadOnly(AbsolutePath path);
         Information FileSize(AbsolutePath path);

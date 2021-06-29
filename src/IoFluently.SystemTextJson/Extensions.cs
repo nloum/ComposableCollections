@@ -10,7 +10,7 @@ namespace IoFluently.SystemTextJson
             return new AbsolutePathJsonDto()
             {
                 Value = absolutePath,
-                Type = absolutePath.GetPathType(),
+                Type = absolutePath.Type,
                 FileSize = absolutePath.TryFileSize().Select(x => x.ToString()).Otherwise((string) null),
                 ReadOnly = absolutePath.TryIsReadOnly().ValueOrDefault,
                 CreationTime = absolutePath.TryCreationTime().Select(x => (DateTimeOffset?)x).ValueOrDefault,

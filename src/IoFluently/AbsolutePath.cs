@@ -13,7 +13,7 @@ namespace IoFluently
     /// <summary>
     /// Represents an absolute path to a file or folder (the file or folder doesn't have to exist)
     /// </summary>
-    public class AbsolutePath : IComparable, IComparable<AbsolutePath>, IEquatable<AbsolutePath>
+    public partial class AbsolutePath : IComparable, IComparable<AbsolutePath>, IEquatable<AbsolutePath>
     {
         /// <summary>
         /// Indicates whether or not the absolute path is case sensitive

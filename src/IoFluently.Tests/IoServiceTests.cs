@@ -74,7 +74,7 @@ namespace IoFluently.Tests
         public async Task FindChildrenWithoutPatternShouldWork()
         {
             var uut = CreateUnitUnderTest(IoServiceType.IoService, true);
-            var repoRoot = uut.DefaultRelativePathBase.Ancestors().First(ancestor => (ancestor / ".git").Exists());
+            var repoRoot = uut.DefaultRelativePathBase.Ancestors.First(ancestor => (ancestor / ".git").Exists);
             var testFolder = repoRoot / "test_folder";
             var children = testFolder.Children().Select(x => x.ToJsonDto()).ToList();
             await Verify(children);
@@ -84,7 +84,7 @@ namespace IoFluently.Tests
         public async Task FindDescendantsWithoutPatternShouldWork()
         {
             var uut = CreateUnitUnderTest(IoServiceType.IoService, true);
-            var repoRoot = uut.DefaultRelativePathBase.Ancestors().First(ancestor => (ancestor / ".git").Exists());
+            var repoRoot = uut.DefaultRelativePathBase.Ancestors.First(ancestor => (ancestor / ".git").Exists);
             var testFolder = repoRoot / "test_folder";
             var children = testFolder.Descendants().Select(x => x.ToJsonDto()).ToList();
             await Verify(children);
@@ -94,7 +94,7 @@ namespace IoFluently.Tests
         public async Task FindChildrenByPatternShouldWork()
         {
             var uut = CreateUnitUnderTest(IoServiceType.IoService, true);
-            var repoRoot = uut.DefaultRelativePathBase.Ancestors().First(ancestor => (ancestor / ".git").Exists());
+            var repoRoot = uut.DefaultRelativePathBase.Ancestors.First(ancestor => (ancestor / ".git").Exists);
             var testFolder = repoRoot / "test_folder";
             var children = testFolder.Children("*.md").Select(x => x.ToJsonDto()).ToList();
             await Verify(children);
@@ -104,7 +104,7 @@ namespace IoFluently.Tests
         public async Task FindDescendantsByPatternShouldWork()
         {
             var uut = CreateUnitUnderTest(IoServiceType.IoService, true);
-            var repoRoot = uut.DefaultRelativePathBase.Ancestors().First(ancestor => (ancestor / ".git").Exists());
+            var repoRoot = uut.DefaultRelativePathBase.Ancestors.First(ancestor => (ancestor / ".git").Exists);
             var testFolder = repoRoot / "test_folder";
             var children = testFolder.Descendants("*.md").Select(x => x.ToJsonDto()).ToList();
             await Verify(children);
@@ -125,9 +125,9 @@ namespace IoFluently.Tests
             var uut = CreateUnitUnderTest(type, true);
             var testFolder = uut.DefaultRelativePathBase / "test1" / "test2" / "test3";
             testFolder.EnsureIsFolder();
-            testFolder.IsFolder().Should().BeTrue();
+            testFolder.IsFolder.Should().BeTrue();
             (uut.DefaultRelativePathBase / "test1").EnsureIsNotFolder(true);
-            (uut.DefaultRelativePathBase / "test1").Exists().Should().BeFalse();
+            (uut.DefaultRelativePathBase / "test1").Exists.Should().BeFalse();
         }
 
         [TestMethod]
@@ -137,9 +137,9 @@ namespace IoFluently.Tests
         {
             var uut = CreateUnitUnderTest(type, true);
             var temporaryPath = uut.CreateTemporaryPath(PathType.File);
-            temporaryPath.IsFile().Should().BeTrue();
+            temporaryPath.IsFile.Should().BeTrue();
             temporaryPath.DeleteFile();
-            temporaryPath.Exists().Should().BeFalse();
+            temporaryPath.Exists.Should().BeFalse();
         }
         
         [TestMethod]
@@ -148,9 +148,9 @@ namespace IoFluently.Tests
         {
             var uut = CreateUnitUnderTest(type, true);
             var temporaryPath = uut.CreateTemporaryPath(PathType.Folder);
-            temporaryPath.IsFolder().Should().BeTrue();
+            temporaryPath.IsFolder.Should().BeTrue();
             temporaryPath.DeleteFolder();
-            temporaryPath.IsFolder().Should().BeFalse();
+            temporaryPath.IsFolder.Should().BeFalse();
         }
         
         [TestMethod]
@@ -159,8 +159,8 @@ namespace IoFluently.Tests
         {
             var uut = CreateUnitUnderTest(type, true);
             var temporaryPath = uut.CreateTemporaryPath(PathType.None);
-            temporaryPath.IsFolder().Should().BeFalse();
-            temporaryPath.IsFile().Should().BeFalse();
+            temporaryPath.IsFolder.Should().BeFalse();
+            temporaryPath.IsFile.Should().BeFalse();
         }
         
         [TestMethod]
@@ -196,7 +196,7 @@ namespace IoFluently.Tests
         {
             var uut = CreateUnitUnderTest(type, false);
             var testTxt = uut.ParseAbsolutePath("/test.test.txt");
-            var test = testTxt.WithoutExtension();
+            var test = testTxt.WithoutExtension;
             test.ToString().Should().Be("/test.test");
         }
 
@@ -299,9 +299,9 @@ namespace IoFluently.Tests
         {
             var ioService = CreateUnitUnderTest(type, false);
 
-            var repoRoot = ioService.DefaultRelativePathBase.Ancestors().First(ancestor => (ancestor / ".git").IsFolder());
+            var repoRoot = ioService.DefaultRelativePathBase.Ancestors.First(ancestor => (ancestor / ".git").IsFolder);
             var testFolder = repoRoot / "test_folder";
-            var results = ioService.Query().Where(path => path.Parent() == testFolder).AsEnumerable().ToImmutableList();
+            var results = ioService.Query().Where(path => path.Parent == testFolder).AsEnumerable().ToImmutableList();
             results.Count.Should().BeGreaterThan(0);
             results.Count.Should().BeLessThan(10);
             results.Any(result => result.Name == "readme.md").Should().BeTrue();
@@ -315,9 +315,9 @@ namespace IoFluently.Tests
         {
             var ioService = CreateUnitUnderTest(type, false);
 
-            var repoRoot = ioService.DefaultRelativePathBase.Ancestors().First(ancestor => (ancestor / ".git").IsFolder());
+            var repoRoot = ioService.DefaultRelativePathBase.Ancestors.First(ancestor => (ancestor / ".git").IsFolder);
             var testFolder = repoRoot / "test_folder";
-            var results = ioService.Query().Where(path => path.Ancestors().Contains(testFolder)).AsEnumerable().ToImmutableHashSet();
+            var results = ioService.Query().Where(path => path.Ancestors.Contains(testFolder)).AsEnumerable().ToImmutableHashSet();
             results.Count.Should().BeGreaterThan(0);
             results.Count.Should().BeLessThan(10);
             results.Any(result => result.Name == "readme.md").Should().BeTrue();
@@ -484,13 +484,13 @@ namespace IoFluently.Tests
 
             var textFileMovePlan = textFileInSourceFolder.Translate(sourceFolder, targetFolder);
 
-            textFileInSourceFolder.Exists().Should().BeTrue();
-            textFileMovePlan.Destination.Exists().Should().BeFalse();
+            textFileInSourceFolder.Exists.Should().BeTrue();
+            textFileMovePlan.Destination.Exists.Should().BeFalse();
             
             textFileMovePlan.Move();
 
-            textFileInSourceFolder.Exists().Should().BeFalse();
-            textFileMovePlan.Destination.Exists().Should().BeTrue();
+            textFileInSourceFolder.Exists.Should().BeFalse();
+            textFileMovePlan.Destination.Exists.Should().BeTrue();
         }
     }
 }

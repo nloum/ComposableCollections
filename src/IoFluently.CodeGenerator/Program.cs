@@ -76,7 +76,7 @@ namespace IoFluently
         private static void GeneratePartialClassesWithProperties(AbsolutePath repoRoot, TextWriter textWriter)
         {
             var typeReader = new TypeReader();
-            typeReader.AddReflection();
+            typeReader.AddSupportForReflection();
             var ioServiceType = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IIoService)].Value;
 
             foreach (var groupedByPartialClass in ioServiceType.Methods.OrderBy(method => method.Name).ThenBy(method => method.Parameters.Count).ThenBy(method => method.GetHashCode())
@@ -132,7 +132,7 @@ namespace IoFluently
         private static void GenerateIoExtensions(AbsolutePath repoRoot, TextWriter textWriter)
         {
             var typeReader = new TypeReader();
-            typeReader.AddReflection();
+            typeReader.AddSupportForReflection();
             var ioServiceType = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IIoService)].Value;
             var absolutePath = typeReader.GetTypeFormat<Type>()[typeof(AbsolutePath)].Value;
             var relativePath = typeReader.GetTypeFormat<Type>()[typeof(RelativePath)].Value;

@@ -419,16 +419,12 @@ namespace IoFluently
         void WriteText(AbsolutePath absolutePath, string text, FileMode fileMode = FileMode.Create,
             FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
             Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false, bool createRecursively = false);
-        StreamWriter OpenWriter(AbsolutePath absolutePath, bool createRecursively = false);
         #endregion
         
         #region File open for reading or writing
         IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, bool createRecursively = false);
         IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, bool createRecursively = false);
         IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, FileShare fileShare, bool createRecursively = false);
-        Stream Open(AbsolutePath path, FileMode fileMode, bool createRecursively = false);
-        Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, bool createRecursively = false);
-        Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, FileShare fileShare, bool createRecursively = false);
         #endregion
         
         #region LINQ-style APIs

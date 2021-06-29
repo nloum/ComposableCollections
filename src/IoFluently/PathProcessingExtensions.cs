@@ -200,7 +200,7 @@ namespace IoFluently
                 return doc;
             }, (doc) =>
             {
-                using (var stream = path.Open(FileMode.Create, FileAccess.Write))
+                using (var stream = path.TryOpen(FileMode.Create, FileAccess.Write).Value)
                 {
                     doc.Save(stream);
                 }
@@ -229,7 +229,7 @@ namespace IoFluently
             }, (model) =>
             {
                 var serializer = new XmlSerializer(typeof(TModel));
-                using (var writer = path.OpenWriter())
+                using (var writer = path.TryOpenWriter().Value)
                 {
                     preSerialize?.Invoke(model);
                     serializer.Serialize(writer, model);

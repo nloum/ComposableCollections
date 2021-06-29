@@ -21,60 +21,12 @@ namespace IoFluently
     /// </summary>
     public static partial class IoExtensions
     {
-        public static string ReadText(this AbsolutePath absolutePath, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, Boolean leaveOpen = false) {
-            return absolutePath.IoService.ReadText(absolutePath, fileMode, fileAccess, fileShare, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
-        }
-
-        public static void WriteAllText(this AbsolutePath path, string text, Boolean createRecursively = false) {
-            path.IoService.WriteAllText(path, text, createRecursively);
-        }
-
-        public static void WriteAllLines(this AbsolutePath path, IEnumerable<string> lines, Boolean createRecursively = false) {
-            path.IoService.WriteAllLines(path, lines, createRecursively);
-        }
-
-        public static void WriteAllBytes(this AbsolutePath path, Byte[] bytes, Boolean createRecursively = false) {
-            path.IoService.WriteAllBytes(path, bytes, createRecursively);
-        }
-
-        public static IMaybe<StreamWriter> TryOpenWriter(this AbsolutePath absolutePath, Boolean createRecursively = false) {
-            return absolutePath.IoService.TryOpenWriter(absolutePath, createRecursively);
-        }
-
-        public static void WriteText(this AbsolutePath absolutePath, IEnumerable<string> lines, FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None, Encoding encoding = null, int bufferSize = 4096, Boolean leaveOpen = false, Boolean createRecursively = false) {
-            absolutePath.IoService.WriteText(absolutePath, lines, fileMode, fileAccess, fileShare, encoding, bufferSize, leaveOpen, createRecursively);
-        }
-
-        public static void WriteText(this AbsolutePath absolutePath, string text, FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None, Encoding encoding = null, int bufferSize = 4096, Boolean leaveOpen = false, Boolean createRecursively = false) {
-            absolutePath.IoService.WriteText(absolutePath, text, fileMode, fileAccess, fileShare, encoding, bufferSize, leaveOpen, createRecursively);
-        }
-
-        public static StreamWriter OpenWriter(this AbsolutePath absolutePath, Boolean createRecursively = false) {
-            return absolutePath.IoService.OpenWriter(absolutePath, createRecursively);
-        }
-
-        public static IMaybe<Stream> TryOpen(this AbsolutePath path, FileMode fileMode, Boolean createRecursively = false) {
-            return path.IoService.TryOpen(path, fileMode, createRecursively);
-        }
-
         public static IMaybe<Stream> TryOpen(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess, Boolean createRecursively = false) {
             return path.IoService.TryOpen(path, fileMode, fileAccess, createRecursively);
         }
 
         public static IMaybe<Stream> TryOpen(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess, FileShare fileShare, Boolean createRecursively = false) {
             return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare, createRecursively);
-        }
-
-        public static Stream Open(this AbsolutePath path, FileMode fileMode, Boolean createRecursively = false) {
-            return path.IoService.Open(path, fileMode, createRecursively);
-        }
-
-        public static Stream Open(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess, Boolean createRecursively = false) {
-            return path.IoService.Open(path, fileMode, fileAccess, createRecursively);
-        }
-
-        public static Stream Open(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess, FileShare fileShare, Boolean createRecursively = false) {
-            return path.IoService.Open(path, fileMode, fileAccess, fileShare, createRecursively);
         }
 
         public static ISetChanges<AbsolutePath> ToLiveLinq(this AbsolutePath path, Boolean includeFileContentChanges, Boolean includeSubFolders, string pattern) {
@@ -387,6 +339,38 @@ namespace IoFluently
 
         public static StreamReader OpenReader(this AbsolutePath path) {
             return path.IoService.OpenReader(path);
+        }
+
+        public static string ReadText(this AbsolutePath absolutePath, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, Boolean leaveOpen = false) {
+            return absolutePath.IoService.ReadText(absolutePath, fileMode, fileAccess, fileShare, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
+        }
+
+        public static void WriteAllText(this AbsolutePath path, string text, Boolean createRecursively = false) {
+            path.IoService.WriteAllText(path, text, createRecursively);
+        }
+
+        public static void WriteAllLines(this AbsolutePath path, IEnumerable<string> lines, Boolean createRecursively = false) {
+            path.IoService.WriteAllLines(path, lines, createRecursively);
+        }
+
+        public static void WriteAllBytes(this AbsolutePath path, Byte[] bytes, Boolean createRecursively = false) {
+            path.IoService.WriteAllBytes(path, bytes, createRecursively);
+        }
+
+        public static IMaybe<StreamWriter> TryOpenWriter(this AbsolutePath absolutePath, Boolean createRecursively = false) {
+            return absolutePath.IoService.TryOpenWriter(absolutePath, createRecursively);
+        }
+
+        public static void WriteText(this AbsolutePath absolutePath, IEnumerable<string> lines, FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None, Encoding encoding = null, int bufferSize = 4096, Boolean leaveOpen = false, Boolean createRecursively = false) {
+            absolutePath.IoService.WriteText(absolutePath, lines, fileMode, fileAccess, fileShare, encoding, bufferSize, leaveOpen, createRecursively);
+        }
+
+        public static void WriteText(this AbsolutePath absolutePath, string text, FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None, Encoding encoding = null, int bufferSize = 4096, Boolean leaveOpen = false, Boolean createRecursively = false) {
+            absolutePath.IoService.WriteText(absolutePath, text, fileMode, fileAccess, fileShare, encoding, bufferSize, leaveOpen, createRecursively);
+        }
+
+        public static IMaybe<Stream> TryOpen(this AbsolutePath path, FileMode fileMode, Boolean createRecursively = false) {
+            return path.IoService.TryOpen(path, fileMode, createRecursively);
         }
 
     }

@@ -1271,8 +1271,8 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation, bool overwrite = false)
         {
-            using (var source = translation.Source.IoService.Open(translation.Source, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (var destination = translation.Destination.IoService.Open(translation.Destination, overwrite ? FileMode.OpenOrCreate : FileMode.CreateNew, FileAccess.Write))
+            using (var source = translation.Source.IoService.TryOpen(translation.Source, FileMode.Open, FileAccess.Read, FileShare.Read).Value)
+            using (var destination = translation.Destination.IoService.TryOpen(translation.Destination, overwrite ? FileMode.OpenOrCreate : FileMode.CreateNew, FileAccess.Write).Value)
             {
                 byte[] buffer = new byte[32768];
                 int read;

@@ -205,73 +205,21 @@ namespace IoFluently
                 }
                 textWriter.WriteLine($"{arguments[0]}.IoService.{method.Name}({string.Join(", ", arguments)});");
                 textWriter.WriteLine("        }\n");
+
+                if (method.ReturnType is IBoundGenericInterface boundIface &&
+                    boundIface.Arguments[0].Identifier.Name == "IMaybe" && method.Name.StartsWith("Try"))
+                {
+                    var methodName = method.Name.Substring(3);
+                    textWriter.WriteLine($"        public static {ConvertToCSharpTypeName(((IReflectionType)boundIface.Arguments[0]).Type)} {methodName}({string.Join(", ",  parameters)}) {{");
+                    textWriter.Write("            ");
+                    if (method.ReturnType is not ReflectionVoid)
+                    {
+                        textWriter.Write("return ");
+                    }
+                    textWriter.WriteLine($"{arguments[0]}.IoService.{method.Name}({string.Join(", ", arguments)}).Value;");
+                    textWriter.WriteLine("        }\n");
+                }
             }
-            
-            // foreach (var method in ioServiceType.Methods.OrderBy(method => method.Name).ThenBy(method => method.Parameters.Count).ThenBy(method => method.GetHashCode()))
-            // {
-            //     if (method.IsStatic || method.Visibility != Visibility.Public)
-            //     {
-            //         continue;
-            //     }
-            //
-            //     if (method.Parameters.Count == 0)
-            //     {
-            //         continue;
-            //     }
-            //
-            //     var firstParameter = method.Parameters[0];
-            //     if (firstParameter.Type != typeof(AbsolutePath) &&
-            //         firstParameter.Type != typeof(RelativePath) &&
-            //         firstParameter.Type != typeof(IAbsolutePathTranslation))
-            //     {
-            //         continue;
-            //     }
-            //
-            //     var parameters = new List<string>();
-            //     var arguments = new List<string>();
-            //
-            //     foreach (var parameter in method.Parameters)
-            //     {
-            //         var parameterString = "";
-            //         if (parameters.Count == 0)
-            //         {
-            //             parameterString = "this " + parameterString;
-            //         }
-            //         else
-            //         {
-            //             if (parameter.IsOut)
-            //             {
-            //                 parameterString = "out " + parameterString;
-            //             }
-            //         }
-            //
-            //         parameterString += $"{ConvertToCSharpTypeName(((IReflectionType)parameter.Type).Type)} {parameter.Name}";
-            //
-            //         if (parameter.HasDefaultValue)
-            //         {
-            //             parameterString += $" = {ConvertToCSharpValue(parameter.DefaultValue)}";
-            //         }
-            //         
-            //         parameters.Add(parameterString.Trim());
-            //
-            //         if (parameter.IsOut)
-            //         {
-            //             arguments.Add($"out {parameter.Name}");
-            //         }
-            //         else
-            //         {
-            //             arguments.Add(parameter.Name);
-            //         }
-            //     }
-            //
-            //     textWriter.WriteLine($"public static {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {method.Name}({string.Join(", ",  parameters)}) {{");
-            //     if (method.ReturnType != typeof(void))
-            //     {
-            //         textWriter.Write("return ");
-            //     }
-            //     textWriter.WriteLine($"{arguments[0]}.IoService.{method.Name}({string.Join(", ", arguments)});");
-            //     textWriter.WriteLine("}\n");
-            // }
         }
 
         private static string ConvertToCSharpValue(object parameterDefaultValue)

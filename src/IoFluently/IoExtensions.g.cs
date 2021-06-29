@@ -333,10 +333,6 @@ namespace IoFluently
             return path1.IoService.TryGetNonCommonAncestry(path1, path2);
         }
 
-        public static AbsolutePath CommonWith(this AbsolutePath path, AbsolutePath that) {
-            return path.IoService.CommonWith(path, that);
-        }
-
         public static IMaybe<AbsolutePath> TryWithExtension(this AbsolutePath path, string differentExtension) {
             return path.IoService.TryWithExtension(path, differentExtension);
         }

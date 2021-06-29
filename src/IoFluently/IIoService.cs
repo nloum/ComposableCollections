@@ -241,23 +241,12 @@ namespace IoFluently
         StringComparison ToStringComparison(CaseSensitivityMode caseSensitivityMode);
         StringComparison ToStringComparison(CaseSensitivityMode caseSensitivityMode, CaseSensitivityMode otherCaseSensitivityMode);
 
-        bool ComponentsAreAbsolute(IReadOnlyList<string> path);
-        RelativePath ParseRelativePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
-        IMaybe<RelativePath> TryParseRelativePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
-        bool TryParseRelativePath(string path, out RelativePath relativePath,
-            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
-        bool TryParseRelativePath(string path, out RelativePath relativePath, out string error,
-            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
-        AbsolutePath ParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
-        IEither<AbsolutePath, RelativePath> ParsePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         bool IsRelativePath(string path);
         bool IsAbsolutePath(string path);
-        AbsolutePath ParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
+        bool ComponentsAreAbsolute(IReadOnlyList<string> path);
+        IMaybe<RelativePath> TryParseRelativePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
+        IMaybe<AbsolutePath> TryParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         IMaybe<AbsolutePath> TryParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
-        bool TryParseAbsolutePath(string path, out AbsolutePath absolutePath,
-            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
-        bool TryParseAbsolutePath(string path, out AbsolutePath absolutePath, out string error,
-            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         
         #endregion
         
@@ -293,8 +282,7 @@ namespace IoFluently
             bool includeFolders = true, bool includeFiles = true);
         IEnumerable<AbsolutePath> EnumerateDescendants(AbsolutePath path, string searchPattern = null,
             bool includeFolders = true, bool includeFiles = true);
-
-
+        
         bool CanBeSimplified(AbsolutePath path);
         AbsolutePath Root(AbsolutePath path);
         RelativePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo);
@@ -353,8 +341,6 @@ namespace IoFluently
         IMaybe<Uri> TryGetCommonDescendants(AbsolutePath path1, AbsolutePath path2);
         IMaybe<Tuple<Uri, Uri>> TryGetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2);
         IMaybe<Tuple<Uri, Uri>> TryGetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2);
-        AbsolutePath CommonWith(AbsolutePath path, AbsolutePath that);
-        AbsolutePath Parent(AbsolutePath path);
 
         /// <summary>
         /// Returns the newline character used by this IIoService when writing text to a file (e.g., '\n' or '\r\n')

@@ -71,7 +71,7 @@ namespace IoFluently
         {
             var archive = OpenZipArchive(false, true);
             var queryable = archive.Entries
-                .Select(zipEntry => ParseAbsolutePath(zipEntry.FullName, DefaultRelativePathBase))
+                .Select(zipEntry => TryParseAbsolutePath(zipEntry.FullName, DefaultRelativePathBase).Value)
                 .AsQueryable();
             return new QueryableWithDisposable<AbsolutePath>(queryable, archive);
         }
@@ -123,7 +123,7 @@ namespace IoFluently
                 var regex = FileNamePatternToRegex(searchPattern);
                 
                 return archive.Entries.Select(entry =>
-                    ParseAbsolutePath(entry.FullName, DefaultRelativePathBase)).Where(child => child.Parent == path)
+                    TryParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Value).Where(child => child.TryParent().Value == path)
                     .Where(x => regex.IsMatch(x));
             }
         }
@@ -136,7 +136,7 @@ namespace IoFluently
                 var regex = FileNamePatternToRegex(searchPattern);
                 
                 return archive.Entries.Select(entry =>
-                        ParseAbsolutePath(entry.FullName, DefaultRelativePathBase)).Where(child => child.Ancestors
+                        TryParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Value).Where(child => child.Ancestors
                         .Any(ancestor => ancestor == path))
                     .Where(x => regex.IsMatch(x));
             }
@@ -247,7 +247,7 @@ namespace IoFluently
                     if (FolderMode == ZipFolderMode.DirectoriesExistIfTheyContainFiles)
                     {
                         var hasDescendants = archive.Entries.Any(entry =>
-                            ParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Ancestors
+                            TryParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Value.Ancestors
                                 .Any(ancestor => ancestor == path));
 
                         if (hasDescendants)
@@ -279,7 +279,7 @@ namespace IoFluently
             using (var zipArchive = OpenZipArchive(true, true))
             {
                 foreach (var subZipEntry in zipArchive.Entries.Where(entry =>
-                    ParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Ancestors.Any(ancestor => ancestor == path)))
+                    TryParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Value.Ancestors.Any(ancestor => ancestor == path)))
                 {
                     if (!recursive)
                     {

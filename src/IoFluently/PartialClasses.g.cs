@@ -25,7 +25,6 @@ namespace IoFluently {
         public Boolean IsFolder => IoService.IsFolder(this);
         public DateTimeOffset LastAccessTime => IoService.LastAccessTime(this);
         public DateTimeOffset LastWriteTime => IoService.LastWriteTime(this);
-        public AbsolutePath Parent => IoService.Parent(this);
         public AbsolutePath Root => IoService.Root(this);
         public PathType Type => IoService.Type(this);
         public AbsolutePath WithoutExtension => IoService.WithoutExtension(this);

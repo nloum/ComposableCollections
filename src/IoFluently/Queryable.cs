@@ -100,7 +100,7 @@ namespace IoFluently {
                                 if (IsParentExpression(parentExpr, parentOf))
                                 {
                                     return Directory.GetFileSystemEntries(absolutePath.ToString()).Select(fse => 
-                                        absolutePath.IoService.ParseAbsolutePath(fse));
+                                        absolutePath.IoService.TryParseAbsolutePath(fse).Value);
                                 }
                             }
                         }
@@ -141,7 +141,7 @@ namespace IoFluently {
                                             .Where(x => x.Type != TreeTraversalType.ExitBranch && !x.Path.IsRoot)
                                             .Select(x =>
                                             {
-                                                return ancestor.IoService.ParseAbsolutePath(x.Value);
+                                                return ancestor.IoService.TryParseAbsolutePath(x.Value).Value;
                                             });
                                     }
                                 }

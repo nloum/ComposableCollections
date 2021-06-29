@@ -590,16 +590,16 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public AbsolutePath ParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo,
+        public IMaybe<AbsolutePath> TryParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo,
             CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             var relativePath = TryParseRelativePath(path, flags);
             if (relativePath.HasValue)
             {
-                return optionallyRelativeTo / path;
+                return (optionallyRelativeTo / path).ToMaybe();
             }
 
-            return ParseAbsolutePath(path, flags);
+            return TryParseAbsolutePath(path, flags);
         }
 
         /// <inheritdoc />
@@ -2227,7 +2227,7 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual IObservable<Unit> ObserveChanges(AbsolutePath path, NotifyFilters filters)
         {
-            var parent = path.IoService.Parent(path);
+            var parent = path.IoService.TryParent(path).Value;
             return parent.Children().ToLiveLinq().Where(x => x == path).AsObservable().SelectUnit();
         }
 

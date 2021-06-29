@@ -72,7 +72,7 @@ namespace IoFluently
         /// </summary>
         public static AbsolutePath ParsePathRelativeToDefault(this IIoService ioService, string path)
         {
-            return ioService.ParseAbsolutePath(path, ioService.DefaultRelativePathBase);
+            return ioService.TryParseAbsolutePath(path, ioService.DefaultRelativePathBase).Value;
         }
     }
 }

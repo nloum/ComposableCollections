@@ -414,22 +414,6 @@ namespace IoFluently
         };
 
         /// <inheritdoc />
-        public virtual bool ContainsFiles(AbsolutePath path)
-        {
-            if (path.IoService.Type(path) == IoFluently.PathType.File)
-                return true;
-            return path.Children().All(child => child.IoService.ContainsFiles(child));
-        }
-
-        /// <inheritdoc />
-        public virtual bool FolderContainsFiles(AbsolutePath path)
-        {
-            if (path.IoService.Type(path) == IoFluently.PathType.File)
-                return false;
-            return path.IoService.ContainsFiles(path);
-        }
-
-        /// <inheritdoc />
         public virtual bool IsAncestorOf(AbsolutePath path, AbsolutePath possibleDescendant)
         {
             return IsDescendantOf(possibleDescendant, path);

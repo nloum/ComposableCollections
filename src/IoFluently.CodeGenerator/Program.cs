@@ -84,12 +84,12 @@ namespace IoFluently
                 .GroupBy(x => x.Parameters[0].Type.Identifier))
             {
                 textWriter.WriteLine($"namespace {groupedByPartialClass.Key.Namespace} {{");
-                textWriter.WriteLine($"public partial class {groupedByPartialClass.Key.Name} {{");
+                textWriter.WriteLine($"    public partial class {groupedByPartialClass.Key.Name} {{");
                 foreach (var method in groupedByPartialClass)
                 {
-                    textWriter.WriteLine($"public {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {method.Name} => IoService.{method.Name}(this);");
+                    textWriter.WriteLine($"        public {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {method.Name} => IoService.{method.Name}(this);");
                 }
-                textWriter.WriteLine("}");
+                textWriter.WriteLine("    }");
                 textWriter.WriteLine("}");
             }
         }
@@ -197,80 +197,81 @@ namespace IoFluently
                     }
                 }
 
-                textWriter.WriteLine($"public static {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {method.Name}({string.Join(", ",  parameters)}) {{");
+                textWriter.WriteLine($"        public static {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {method.Name}({string.Join(", ",  parameters)}) {{");
+                textWriter.Write("            ");
                 if (method.ReturnType is not ReflectionVoid)
                 {
                     textWriter.Write("return ");
                 }
                 textWriter.WriteLine($"{arguments[0]}.IoService.{method.Name}({string.Join(", ", arguments)});");
-                textWriter.WriteLine("}\n");
+                textWriter.WriteLine("        }\n");
             }
             
-            foreach (var method in ioServiceType.Methods.OrderBy(method => method.Name).ThenBy(method => method.Parameters.Count).ThenBy(method => method.GetHashCode()))
-            {
-                if (method.IsStatic || method.Visibility != Visibility.Public)
-                {
-                    continue;
-                }
-
-                if (method.Parameters.Count == 0)
-                {
-                    continue;
-                }
-
-                var firstParameter = method.Parameters[0];
-                if (firstParameter.Type != typeof(AbsolutePath) &&
-                    firstParameter.Type != typeof(RelativePath) &&
-                    firstParameter.Type != typeof(IAbsolutePathTranslation))
-                {
-                    continue;
-                }
-
-                var parameters = new List<string>();
-                var arguments = new List<string>();
-
-                foreach (var parameter in method.Parameters)
-                {
-                    var parameterString = "";
-                    if (parameters.Count == 0)
-                    {
-                        parameterString = "this " + parameterString;
-                    }
-                    else
-                    {
-                        if (parameter.IsOut)
-                        {
-                            parameterString = "out " + parameterString;
-                        }
-                    }
-
-                    parameterString += $"{ConvertToCSharpTypeName(((IReflectionType)parameter.Type).Type)} {parameter.Name}";
-
-                    if (parameter.HasDefaultValue)
-                    {
-                        parameterString += $" = {ConvertToCSharpValue(parameter.DefaultValue)}";
-                    }
-                    
-                    parameters.Add(parameterString.Trim());
-
-                    if (parameter.IsOut)
-                    {
-                        arguments.Add($"out {parameter.Name}");
-                    }
-                    else
-                    {
-                        arguments.Add(parameter.Name);
-                    }
-                }
-
-                textWriter.WriteLine($"public static {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {method.Name}({string.Join(", ",  parameters)}) {{");
-                if (method.ReturnType != typeof(void))
-                {
-                    textWriter.Write("return ");
-                }
-                textWriter.WriteLine($"{arguments[0]}.IoService.{method.Name}({string.Join(", ", arguments)});");
-                textWriter.WriteLine("}\n");
-            }
+            // foreach (var method in ioServiceType.Methods.OrderBy(method => method.Name).ThenBy(method => method.Parameters.Count).ThenBy(method => method.GetHashCode()))
+            // {
+            //     if (method.IsStatic || method.Visibility != Visibility.Public)
+            //     {
+            //         continue;
+            //     }
+            //
+            //     if (method.Parameters.Count == 0)
+            //     {
+            //         continue;
+            //     }
+            //
+            //     var firstParameter = method.Parameters[0];
+            //     if (firstParameter.Type != typeof(AbsolutePath) &&
+            //         firstParameter.Type != typeof(RelativePath) &&
+            //         firstParameter.Type != typeof(IAbsolutePathTranslation))
+            //     {
+            //         continue;
+            //     }
+            //
+            //     var parameters = new List<string>();
+            //     var arguments = new List<string>();
+            //
+            //     foreach (var parameter in method.Parameters)
+            //     {
+            //         var parameterString = "";
+            //         if (parameters.Count == 0)
+            //         {
+            //             parameterString = "this " + parameterString;
+            //         }
+            //         else
+            //         {
+            //             if (parameter.IsOut)
+            //             {
+            //                 parameterString = "out " + parameterString;
+            //             }
+            //         }
+            //
+            //         parameterString += $"{ConvertToCSharpTypeName(((IReflectionType)parameter.Type).Type)} {parameter.Name}";
+            //
+            //         if (parameter.HasDefaultValue)
+            //         {
+            //             parameterString += $" = {ConvertToCSharpValue(parameter.DefaultValue)}";
+            //         }
+            //         
+            //         parameters.Add(parameterString.Trim());
+            //
+            //         if (parameter.IsOut)
+            //         {
+            //             arguments.Add($"out {parameter.Name}");
+            //         }
+            //         else
+            //         {
+            //             arguments.Add(parameter.Name);
+            //         }
+            //     }
+            //
+            //     textWriter.WriteLine($"public static {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {method.Name}({string.Join(", ",  parameters)}) {{");
+            //     if (method.ReturnType != typeof(void))
+            //     {
+            //         textWriter.Write("return ");
+            //     }
+            //     textWriter.WriteLine($"{arguments[0]}.IoService.{method.Name}({string.Join(", ", arguments)});");
+            //     textWriter.WriteLine("}\n");
+            // }
         }
 
         private static string ConvertToCSharpValue(object parameterDefaultValue)

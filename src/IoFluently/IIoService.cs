@@ -180,8 +180,6 @@ namespace IoFluently
         /// </summary>
         void UpdateRoots();
         bool HasExtension(AbsolutePath path, string extension);
-        bool ContainsFiles(AbsolutePath path);
-        bool FolderContainsFiles(AbsolutePath path);
         bool MayCreateFile(FileMode fileMode);
         bool IsImageUri(Uri uri);
         bool IsVideoUri(Uri uri);

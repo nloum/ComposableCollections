@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
+using IoFluently.SystemTextJson;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using VerifyMSTest;
 
 namespace IoFluently.Tests
 {
     [TestClass]
-    public class IoServiceTests
+    public class IoServiceTests : VerifyBase
     {
         public enum IoServiceType
         {
@@ -65,6 +68,46 @@ namespace IoFluently.Tests
             {
                 throw new ArgumentException($"Unknown IoServiceType {type}");
             }
+        }
+
+        [TestMethod]
+        public async Task FindChildrenWithoutPatternShouldWork()
+        {
+            var uut = CreateUnitUnderTest(IoServiceType.IoService, true);
+            var repoRoot = uut.DefaultRelativePathBase.Ancestors().First(ancestor => (ancestor / ".git").Exists());
+            var testFolder = repoRoot / "test_folder";
+            var children = testFolder.Children().Select(x => x.ToJsonDto()).ToList();
+            await Verify(children);
+        }
+        
+        [TestMethod]
+        public async Task FindDescendantsWithoutPatternShouldWork()
+        {
+            var uut = CreateUnitUnderTest(IoServiceType.IoService, true);
+            var repoRoot = uut.DefaultRelativePathBase.Ancestors().First(ancestor => (ancestor / ".git").Exists());
+            var testFolder = repoRoot / "test_folder";
+            var children = testFolder.Descendants().Select(x => x.ToJsonDto()).ToList();
+            await Verify(children);
+        }
+
+        [TestMethod]
+        public async Task FindChildrenByPatternShouldWork()
+        {
+            var uut = CreateUnitUnderTest(IoServiceType.IoService, true);
+            var repoRoot = uut.DefaultRelativePathBase.Ancestors().First(ancestor => (ancestor / ".git").Exists());
+            var testFolder = repoRoot / "test_folder";
+            var children = testFolder.Children("*.md").Select(x => x.ToJsonDto()).ToList();
+            await Verify(children);
+        }
+        
+        [TestMethod]
+        public async Task FindDescendantsByPatternShouldWork()
+        {
+            var uut = CreateUnitUnderTest(IoServiceType.IoService, true);
+            var repoRoot = uut.DefaultRelativePathBase.Ancestors().First(ancestor => (ancestor / ".git").Exists());
+            var testFolder = repoRoot / "test_folder";
+            var children = testFolder.Descendants("*.md").Select(x => x.ToJsonDto()).ToList();
+            await Verify(children);
         }
 
         [TestMethod]

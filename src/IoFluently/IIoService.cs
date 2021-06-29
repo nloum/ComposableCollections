@@ -291,8 +291,12 @@ namespace IoFluently
         /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
         /// <param name="includeFiles">Whether to include sub-files in the return value</param>
         /// <returns>The children of this path</returns>
-        IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, bool includeFolders = true,
-            bool includeFiles = true);
+        IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, string searchPattern = null,
+            bool includeFolders = true, bool includeFiles = true);
+        IEnumerable<AbsolutePath> EnumerateDescendants(AbsolutePath path, string searchPattern = null,
+            bool includeFolders = true, bool includeFiles = true);
+
+
         bool CanBeSimplified(AbsolutePath path);
         AbsolutePath Root(AbsolutePath path);
         RelativePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo);

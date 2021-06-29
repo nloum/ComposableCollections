@@ -112,17 +112,33 @@ namespace IoFluently
         /// <inheritdoc />
         public override void UpdateRoots()
         {
-            // There is never any storage, so simply ignore this call
+            // There is only one root in a Zip file, so simply ignore this call
         }
 
         /// <inheritdoc />
-        public override IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             using (var archive = OpenZipArchive(false, true))
             {
+                var regex = FileNamePatternToRegex(searchPattern);
+                
                 return archive.Entries.Select(entry =>
-                    ParseAbsolutePath(entry.FullName, DefaultRelativePathBase)).Where(child => child.Ancestors()
-                        .Any(ancestor => ancestor == path));
+                    ParseAbsolutePath(entry.FullName, DefaultRelativePathBase)).Where(child => child.Parent() == path)
+                    .Where(x => regex.IsMatch(x));
+            }
+        }
+
+        /// <inheritdoc />
+        public override IEnumerable<AbsolutePath> EnumerateDescendants(AbsolutePath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        {
+            using (var archive = OpenZipArchive(false, true))
+            {
+                var regex = FileNamePatternToRegex(searchPattern);
+                
+                return archive.Entries.Select(entry =>
+                        ParseAbsolutePath(entry.FullName, DefaultRelativePathBase)).Where(child => child.Ancestors()
+                        .Any(ancestor => ancestor == path))
+                    .Where(x => regex.IsMatch(x));
             }
         }
 

@@ -1,0 +1,10 @@
+﻿[
+  {
+    Value: /Users/family/src/GitHub/IoFluently/test_folder/readme.md,
+    FileSize: 47 B,
+    ReadOnly: false,
+    CreationTime: DateTimeOffset_1,
+    LastAccessTime: DateTimeOffset_2,
+    LastWriteTime: DateTimeOffset_3
+  }
+]

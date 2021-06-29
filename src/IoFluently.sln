@@ -10,6 +10,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "..\build\_build.c
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoFluently.CodeGenerator", "IoFluently.CodeGenerator\IoFluently.CodeGenerator.csproj", "{91E8BB7C-3E32-40EA-A5D3-11592751D791}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoFluently.SystemTextJson", "IoFluently.SystemTextJson\IoFluently.SystemTextJson.csproj", "{877B6FFF-DBEA-464D-9053-37791889D2A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,5 +36,9 @@ Global
 		{91E8BB7C-3E32-40EA-A5D3-11592751D791}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91E8BB7C-3E32-40EA-A5D3-11592751D791}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91E8BB7C-3E32-40EA-A5D3-11592751D791}.Release|Any CPU.Build.0 = Release|Any CPU
+		{877B6FFF-DBEA-464D-9053-37791889D2A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{877B6FFF-DBEA-464D-9053-37791889D2A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{877B6FFF-DBEA-464D-9053-37791889D2A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{877B6FFF-DBEA-464D-9053-37791889D2A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

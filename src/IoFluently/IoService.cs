@@ -436,19 +436,38 @@ namespace IoFluently
 
         private readonly ObservableSet<AbsolutePath> _storage = new ObservableSet<AbsolutePath>();
 
-        public override IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<AbsolutePath> EnumerateDescendants(AbsolutePath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        {
+            return EnumerateDescendantsOrChildren(path, searchPattern ?? "*", SearchOption.AllDirectories,
+                includeFolders, includeFiles);
+        }
+
+        public override IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        {
+            return EnumerateDescendantsOrChildren(path, searchPattern ?? "*", SearchOption.TopDirectoryOnly,
+                includeFolders, includeFiles);
+        }
+
+        private IEnumerable<AbsolutePath> EnumerateDescendantsOrChildren(AbsolutePath path, string searchPattern, SearchOption searchOption, bool includeFolders, bool includeFiles)
         {
             if (!IsFolder(path)) return ImmutableArray<AbsolutePath>.Empty;
 
             var fullName = AsDirectoryInfo(path).FullName;
 
             if (includeFiles && includeFolders)
-                return Directory.GetFileSystemEntries(fullName).Select(x => ParseAbsolutePath(x));
+            {
+                return Directory.GetFileSystemEntries(fullName, searchPattern, searchOption).Select(x => ParseAbsolutePath(x));
+            }
 
-            if (includeFiles) return Directory.GetFiles(fullName).Select(x => ParseAbsolutePath(x));
-
+            if (includeFiles)
+            {
+                return Directory.GetFiles(fullName, searchPattern, searchOption).Select(x => ParseAbsolutePath(x));
+            }
+            
             if (includeFolders)
-                return Directory.GetDirectories(fullName).Select(x => ParseAbsolutePath(x));
+            {
+                return Directory.GetDirectories(fullName, searchPattern, searchOption).Select(x => ParseAbsolutePath(x));
+            }
 
             return ImmutableArray<AbsolutePath>.Empty;
         }

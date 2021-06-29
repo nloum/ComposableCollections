@@ -233,7 +233,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             var folder = GetFolder(path);
             if (!folder.HasValue)
@@ -241,8 +241,27 @@ namespace IoFluently
                 return Enumerable.Empty<AbsolutePath>();
             }
 
+            var regex = FileNamePatternToRegex(searchPattern);
+            
             return folder.Value.Files.Select(file => path / file.Key)
-                .Concat(folder.Value.Folders.Select(subfolder => path / subfolder.Key));
+                .Concat(folder.Value.Folders.Select(subfolder => path / subfolder.Key))
+                .Where(x => regex.IsMatch(x));
+        }
+
+        public override IEnumerable<AbsolutePath> EnumerateDescendants(AbsolutePath path, string searchPattern = null, bool includeFolders = true,
+            bool includeFiles = true)
+        {
+            var folder = GetFolder(path);
+            if (!folder.HasValue)
+            {
+                return Enumerable.Empty<AbsolutePath>();
+            }
+
+            var regex = FileNamePatternToRegex(searchPattern);
+            
+            return folder.Value.Files.Select(file => path / file.Key)
+                .Concat(folder.Value.Folders.Select(subfolder => path / subfolder.Key))
+                .Where(x => regex.IsMatch(x));
         }
 
         /// <inheritdoc />

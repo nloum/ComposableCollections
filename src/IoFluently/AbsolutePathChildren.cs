@@ -10,7 +10,7 @@ namespace IoFluently
 
         public override IEnumerator<AbsolutePath> GetEnumerator()
         {
-            return _path.IoService.EnumerateChildren(_path).GetEnumerator();
+            return _path.IoService.EnumerateChildren(_path, _pattern).GetEnumerator();
         }
     }
 }

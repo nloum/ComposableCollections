@@ -12,6 +12,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 using MoreCollections;
 using SimpleMonads;
+using TreeLinq;
 using UnitsNet;
 using static SimpleMonads.Utility;
 
@@ -1805,47 +1806,31 @@ namespace IoFluently
             }
         }
 
-        /// <summary>
-        /// Return lazily-enumerated list of child paths (optionally including both files and folders) of the specified
-        /// path.
-        /// </summary>
-        /// <remarks>
-        /// Note: because this method uses the term Children, you know that it won't return nested files and folders.
-        /// The term Descendants would be used if that were the case.
-        /// </remarks>
-        /// <param name="path">The path whose children will be enumerated</param>
-        /// <param name="includeFolders">Whether to include folders in the results</param>
-        /// <param name="includeFiles">Whether to include files in the results</param>
-        /// <returns>The child files and/or folders of the specified path</returns>
-        public abstract IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, bool includeFolders = true,
+        public abstract IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, string searchPattern = null, bool includeFolders = true,
             bool includeFiles = true);
 
-        /// <summary>
-        /// Returns lazily-eumerated list of files contained in the specified folder.
-        /// </summary>
-        /// <remarks>
-        /// Note: because this method uses the term Children, you know that it won't return nested files.
-        /// The term Descendants would be used if that were the case.
-        /// </remarks>
-        /// <param name="path">The path whose file children will be enumerated.</param>
-        /// <returns>The lazily-enumerated list of files contained in the specified folder.</returns>
-        public virtual IEnumerable<AbsolutePath> EnumerateFileChildren(AbsolutePath path)
+        public virtual IEnumerable<AbsolutePath> EnumerateDescendants(AbsolutePath path, string searchPattern = null,
+            bool includeFolders = true,
+            bool includeFiles = true)
         {
-            return EnumerateChildren(path, false);
-        }
+            return path.TraverseTree(x =>
+            {
+                var children = EnumerateChildren(x);
+                var childrenNames = children.Select(child => child.Name);
+                return childrenNames;
+            }, (AbsolutePath node, string name, out AbsolutePath child) =>
+            {
+                child = node / name;
+                if (CanEmptyDirectoriesExist)
+                {
+                    var result = child.IoService.Exists(child);
+                    return result;
+                }
 
-        /// <summary>
-        /// Returns lazily-eumerated list of folders contained in the specified folder.
-        /// </summary>
-        /// <remarks>
-        /// Note: because this method uses the term Children, you know that it won't return nested folders.
-        /// The term Descendants would be used if that were the case.
-        /// </remarks>
-        /// <param name="path">The path whose folder children will be enumerated.</param>
-        /// <returns>The lazily-enumerated list of folders contained in the specified folder.</returns>
-        public virtual IEnumerable<AbsolutePath> EnumerateChildrenFolders(AbsolutePath path)
-        {
-            return EnumerateChildren(path, true, false);
+                return true;
+            })
+                .Where(tt => tt.Type != TreeTraversalType.ExitBranch)
+                .Select(tt => tt.Value);
         }
 
         #endregion

@@ -27,30 +27,10 @@ namespace IoFluently
             // TODO - implement this properly
             return new EmptyChangeToken();
         }
-
-        public IEnumerable<TreeTraversal<string, AbsolutePath>> Traverse()
-        {
-            return _path.TraverseTree(x =>
-            {
-                var children = x.IoService.EnumerateChildren(x);
-                var childrenNames = children.Select(child => child.Name);
-                return childrenNames;
-            }, (AbsolutePath node, string name, out AbsolutePath child) =>
-            {
-                child = node / name;
-                if (IoService.CanEmptyDirectoriesExist)
-                {
-                    var result = child.IoService.Exists(child);
-                    return result;
-                }
-
-                return true;
-            });
-        }
         
         public override IEnumerator<AbsolutePath> GetEnumerator()
         {
-            return Traverse().Skip(1).Where(x => x.Type != TreeTraversalType.ExitBranch).Select(x => x.Value).GetEnumerator();
+            return _path.IoService.EnumerateDescendants(_path, _pattern).GetEnumerator();
         }
     }
 }

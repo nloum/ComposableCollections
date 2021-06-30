@@ -24,7 +24,7 @@ namespace IoFluently
         }
 
         /// <summary>
-        /// If <see cref="mainPath"/> doesn't exist, then creates it by copying from <see cref="fallbackPath"/>.
+        /// If <see cref="mainPath"/> exists, then return <see cref="mainPath"/>. Otherwise, return <see cref="fallbackPath"/>.
         /// </summary>
         public static AbsolutePath FallbackTo(this AbsolutePath mainPath, string fallbackPath)
         {
@@ -32,7 +32,7 @@ namespace IoFluently
         }
 
         /// <summary>
-        /// If <see cref="mainPath"/> doesn't exist, then creates it by copying from <see cref="fallbackPath"/>.
+        /// If <see cref="mainPath"/> exists, then return <see cref="mainPath"/>. Otherwise, return <see cref="fallbackPath"/>.
         /// </summary>
         public static AbsolutePath FallbackTo(this AbsolutePath mainPath, AbsolutePath fallbackPath)
         {

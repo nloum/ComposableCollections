@@ -1,25 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Xml;
-using CodeIO.LoadedTypes.Read;
-using CodeIO.UnloadedAssemblies.Read;
 using Humanizer;
-using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.MSBuild;
-using Mono.Cecil;
-using Mono.Cecil.Rocks;
-using NuGet.Common;
-using NuGet.Packaging.Core;
-using NuGet.Protocol;
-using NuGet.Protocol.Core.Types;
-using NuGet.Versioning;
 
-namespace CodeIO.CSharp.Read
+namespace CodeIO.SourceCode.Read
 {
     public static class Extensions
     {

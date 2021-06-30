@@ -2,11 +2,9 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
-using CodeIO.LoadedTypes.Read;
 using ComposableCollections;
 
-namespace CodeIO
+namespace CodeIO.LoadedTypes.Read
 {
     public static class Extensions
     {

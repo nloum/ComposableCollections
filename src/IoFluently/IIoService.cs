@@ -263,7 +263,12 @@ namespace IoFluently
         bool IsAbsoluteUnixPath(string path);
         StringComparison ToStringComparison(CaseSensitivityMode caseSensitivityMode);
         StringComparison ToStringComparison(CaseSensitivityMode caseSensitivityMode, CaseSensitivityMode otherCaseSensitivityMode);
-
+        
+        /// <summary>
+        /// Parses the path. If the path is a relative path, assumes that it is relative to <see cref="IoService.DefaultRelativePathBase"/>.
+        /// </summary>
+        AbsolutePath ParsePathRelativeToDefault(string path);
+        
         bool IsRelativePath(string path);
         bool IsAbsolutePath(string path);
         bool ComponentsAreAbsolute(IReadOnlyList<string> path);

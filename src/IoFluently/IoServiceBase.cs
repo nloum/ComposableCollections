@@ -936,6 +936,12 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
+        public virtual AbsolutePath ParsePathRelativeToDefault(string path)
+        {
+            return TryParseAbsolutePath(path, DefaultRelativePathBase).Value;
+        }
+        
+        /// <inheritdoc />
         public virtual AbsolutePath ParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             var error = string.Empty;

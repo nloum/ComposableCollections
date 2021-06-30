@@ -97,7 +97,7 @@ namespace IoFluently
                         var returnValue = (IReflectionType) boundIface.Arguments[0];
                         if (returnValue is IValueType)
                         {
-                            textWriter.WriteLine($"        public {ConvertToCSharpTypeName((returnValue).Type)}? {withoutTry} => IoService.{method.Name}(this).ValueOrDefault;");
+                            textWriter.WriteLine($"        public {ConvertToCSharpTypeName((returnValue).Type)}? {withoutTry} => IoService.{method.Name}(this).Select(x => ({ConvertToCSharpTypeName((returnValue).Type)}?)x).ValueOrDefault;");
                         }
                         else
                         {
@@ -259,7 +259,10 @@ namespace IoFluently
             }
             else if (parameterDefaultValue.GetType().IsEnum)
             {
-                return $"{ConvertToCSharpTypeName(parameterDefaultValue.GetType())}.{parameterDefaultValue}";
+                var values = Enum.Format(parameterDefaultValue.GetType(), parameterDefaultValue, "g");
+                var typeName = ConvertToCSharpTypeName(parameterDefaultValue.GetType());
+                var result = string.Join(" | ", values.Split(',').Select(item => $"{typeName}.{item.Trim()}"));
+                return result;
             }   
             else
             {

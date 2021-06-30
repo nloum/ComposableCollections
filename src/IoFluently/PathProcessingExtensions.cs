@@ -183,7 +183,7 @@ namespace IoFluently
         /// <returns>An object that allows the path to be read from.</returns>
         public static IPathWithKnownFormatSync<string, string> AsSmallTextFile(this AbsolutePath path)
         {
-            return path.AsPathFormat(() => path.ReadAllText(), (text) => path.IoService.WriteText(path, text));
+            return path.AsPathFormat(() => path.ReadAllText(), (text) => path.IoService.WriteAllText(path, text));
         }
         
         /// <summary>

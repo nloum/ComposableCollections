@@ -55,7 +55,7 @@ namespace IoFluently
             return path.IoService.DeleteFile(path);
         }
 
-        public static AbsolutePath Delete(this AbsolutePath path, Boolean recursiveDeleteIfFolder = false) {
+        public static AbsolutePath Delete(this AbsolutePath path, Boolean recursiveDeleteIfFolder = true) {
             return path.IoService.Delete(path, recursiveDeleteIfFolder);
         }
 
@@ -67,7 +67,7 @@ namespace IoFluently
             return path.IoService.DeleteFileAsync(path, cancellationToken);
         }
 
-        public static Task<AbsolutePath> DeleteAsync(this AbsolutePath path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = false) {
+        public static Task<AbsolutePath> DeleteAsync(this AbsolutePath path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = true) {
             return path.IoService.DeleteAsync(path, cancellationToken, recursiveDeleteIfFolder);
         }
 
@@ -75,7 +75,7 @@ namespace IoFluently
             return path.IoService.EnsureIsFolder(path, createRecursively);
         }
 
-        public static AbsolutePath EnsureIsEmptyFolder(this AbsolutePath path, Boolean recursiveDeleteIfFolder = false, Boolean createRecursively = false) {
+        public static AbsolutePath EnsureIsEmptyFolder(this AbsolutePath path, Boolean recursiveDeleteIfFolder = true, Boolean createRecursively = false) {
             return path.IoService.EnsureIsEmptyFolder(path, recursiveDeleteIfFolder, createRecursively);
         }
 
@@ -83,7 +83,7 @@ namespace IoFluently
             return path.IoService.EnsureIsFolderAsync(path, cancellationToken, createRecursively);
         }
 
-        public static Task<AbsolutePath> EnsureIsEmptyFolderAsync(this AbsolutePath path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = false, Boolean createRecursively = false) {
+        public static Task<AbsolutePath> EnsureIsEmptyFolderAsync(this AbsolutePath path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = true, Boolean createRecursively = false) {
             return path.IoService.EnsureIsEmptyFolderAsync(path, cancellationToken, recursiveDeleteIfFolder, createRecursively);
         }
 
@@ -95,7 +95,7 @@ namespace IoFluently
             return path.IoService.EnsureIsNotFile(path);
         }
 
-        public static AbsolutePath EnsureDoesNotExist(this AbsolutePath path, Boolean recursiveDeleteIfFolder = false) {
+        public static AbsolutePath EnsureDoesNotExist(this AbsolutePath path, Boolean recursiveDeleteIfFolder = true) {
             return path.IoService.EnsureDoesNotExist(path, recursiveDeleteIfFolder);
         }
 
@@ -107,7 +107,7 @@ namespace IoFluently
             return path.IoService.EnsureIsNotFileAsync(path, cancellationToken);
         }
 
-        public static Task<AbsolutePath> EnsureDoesNotExistAsync(this AbsolutePath path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = false) {
+        public static Task<AbsolutePath> EnsureDoesNotExistAsync(this AbsolutePath path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = true) {
             return path.IoService.EnsureDoesNotExistAsync(path, cancellationToken, recursiveDeleteIfFolder);
         }
 
@@ -367,10 +367,6 @@ namespace IoFluently
             return path.IoService.TryOpenReader(path).Value;
         }
 
-        public static void WriteAllBytes(this AbsolutePath path, Byte[] bytes, Boolean createRecursively = false) {
-            path.IoService.WriteAllBytes(path, bytes, createRecursively);
-        }
-
         public static IMaybe<StreamWriter> TryOpenWriter(this AbsolutePath absolutePath, int bufferSize = 4096, Boolean createRecursively = false) {
             return absolutePath.IoService.TryOpenWriter(absolutePath, bufferSize, createRecursively);
         }
@@ -379,12 +375,16 @@ namespace IoFluently
             return absolutePath.IoService.TryOpenWriter(absolutePath, bufferSize, createRecursively).Value;
         }
 
+        public static void WriteAllBytes(this AbsolutePath path, Byte[] bytes, Boolean createRecursively = false) {
+            path.IoService.WriteAllBytes(path, bytes, createRecursively);
+        }
+
         public static void WriteAllLines(this AbsolutePath absolutePath, IEnumerable<string> lines, Encoding encoding = null, int bufferSize = 4096, Boolean createRecursively = false) {
             absolutePath.IoService.WriteAllLines(absolutePath, lines, encoding, bufferSize, createRecursively);
         }
 
-        public static void WriteText(this AbsolutePath absolutePath, string text, Encoding encoding = null, Boolean createRecursively = false) {
-            absolutePath.IoService.WriteText(absolutePath, text, encoding, createRecursively);
+        public static void WriteAllText(this AbsolutePath absolutePath, string text, Encoding encoding = null, Boolean createRecursively = false) {
+            absolutePath.IoService.WriteAllText(absolutePath, text, encoding, createRecursively);
         }
 
         public static IMaybe<Stream> TryOpen(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None, FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.Asynchronous, int bufferSize = 4096, Boolean createRecursively = false) {

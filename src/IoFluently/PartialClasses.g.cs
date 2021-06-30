@@ -23,12 +23,12 @@ namespace IoFluently {
         public Boolean IsFile => IoService.IsFile(this);
         public Boolean IsFolder => IoService.IsFolder(this);
         public AbsolutePath Root => IoService.Root(this);
-        public FileAttributes? Attributes => IoService.TryAttributes(this).ValueOrDefault;
-        public DateTimeOffset? CreationTime => IoService.TryCreationTime(this).ValueOrDefault;
-        public Information? FileSize => IoService.TryFileSize(this).ValueOrDefault;
-        public Boolean? IsReadOnly => IoService.TryIsReadOnly(this).ValueOrDefault;
-        public DateTimeOffset? LastAccessTime => IoService.TryLastAccessTime(this).ValueOrDefault;
-        public DateTimeOffset? LastWriteTime => IoService.TryLastWriteTime(this).ValueOrDefault;
+        public FileAttributes? Attributes => IoService.TryAttributes(this).Select(x => (FileAttributes?)x).ValueOrDefault;
+        public DateTimeOffset? CreationTime => IoService.TryCreationTime(this).Select(x => (DateTimeOffset?)x).ValueOrDefault;
+        public Information? FileSize => IoService.TryFileSize(this).Select(x => (Information?)x).ValueOrDefault;
+        public Boolean? IsReadOnly => IoService.TryIsReadOnly(this).Select(x => (Boolean?)x).ValueOrDefault;
+        public DateTimeOffset? LastAccessTime => IoService.TryLastAccessTime(this).Select(x => (DateTimeOffset?)x).ValueOrDefault;
+        public DateTimeOffset? LastWriteTime => IoService.TryLastWriteTime(this).Select(x => (DateTimeOffset?)x).ValueOrDefault;
         public AbsolutePath Parent => IoService.TryParent(this).ValueOrDefault;
         public PathType Type => IoService.Type(this);
         public AbsolutePath WithoutExtension => IoService.WithoutExtension(this);

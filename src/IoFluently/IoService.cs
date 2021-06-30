@@ -430,20 +430,7 @@ namespace IoFluently
 
         public override AbsolutePath DeleteFile(AbsolutePath path)
         {
-            if (Type(path) == IoFluently.PathType.None)
-                return path;
-            try
-            {
-                AsFileInfo(path).Delete();
-            }
-            catch (IOException)
-            {
-                AsFileInfo(path).Delete();
-            }
-            catch (UnauthorizedAccessException)
-            {
-                AsFileInfo(path).Delete();
-            }
+            File.Delete(path);
 
             return path;
         }

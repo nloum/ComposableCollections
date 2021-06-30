@@ -363,14 +363,14 @@ namespace IoFluently
             var pathType = ZipFilePath.Type;
             if (pathType == IoFluently.PathType.None)
             {
-                var stream = ZipFilePath.IoService.TryOpen(ZipFilePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None).Value;
+                var stream = ZipFilePath.IoService.TryOpen(ZipFilePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, FileOptions.None).Value;
                 var zipArchive = new ZipArchive(stream, ZipArchiveMode.Create, false);
                 zipArchive.Dispose();
                 
                 if (willBeReading)
                 {
                     zipArchive.Dispose();
-                    stream = ZipFilePath.IoService.TryOpen(ZipFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None).Value;
+                    stream = ZipFilePath.IoService.TryOpen(ZipFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None, FileOptions.None).Value;
                     zipArchive = new ZipArchive(stream, ZipArchiveMode.Update, false);
                     return zipArchive;
                 }
@@ -386,7 +386,7 @@ namespace IoFluently
             else
             {
                 var stream = ZipFilePath.IoService.TryOpen(ZipFilePath, FileMode.Open, willBeWriting ? FileAccess.ReadWrite : FileAccess.Read,
-                    willBeWriting ? FileShare.None : FileShare.Read).Value;
+                    willBeWriting ? FileShare.None : FileShare.Read, FileOptions.None).Value;
                 return new ZipArchive(stream, willBeWriting ? ZipArchiveMode.Update : ZipArchiveMode.Read, false);
             }
         }

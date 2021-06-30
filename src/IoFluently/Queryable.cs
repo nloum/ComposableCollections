@@ -112,15 +112,15 @@ namespace IoFluently {
 
                             if (methodCallExpression2.Method.GetGenericMethodDefinition() == containsMethod)
                             {
-                                if (methodCallExpression2.Arguments[0] is MethodCallExpression methodCallExpression3)
+                                if (methodCallExpression2.Arguments[0] is MemberExpression memberExpression)
                                 {
-                                    var ancestorsMethod = typeof(IoExtensions).GetMethods()
-                                        .Where(method => method.Name == "Ancestors")
-                                        .Single(method => method.GetParameters().Length == 1);
+                                    var ancestorsMethod = typeof(AbsolutePath)
+                                        .GetProperties()
+                                        .Single(property => property.Name == "Ancestors");
 
                                     var ancestor = (AbsolutePath)GetConstant(methodCallExpression2.Arguments[1]);
                                     
-                                    if (methodCallExpression3.Method == ancestorsMethod)
+                                    if (memberExpression.Member == ancestorsMethod)
                                     {
                                         var root = ancestor.ToString();
                                         return root.TraverseTree<string>(
@@ -156,11 +156,11 @@ namespace IoFluently {
         
         private static bool IsParentExpression(Expression parentExpr, ParameterExpression parentOf)
         {
-            if (parentExpr is MethodCallExpression mce)
+            if (parentExpr is MemberExpression mce)
             {
-                if (mce.Arguments[0] == parentOf)
+                if (mce.Expression == parentOf)
                 {
-                    if (mce.Method == typeof(IoExtensions).GetMethod("Parent"))
+                    if (mce.Member == typeof(AbsolutePath).GetProperty("Parent"))
                     {
                         return true;
                     }

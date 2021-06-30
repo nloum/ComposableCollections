@@ -111,7 +111,7 @@ namespace IoFluently
         /// folder contains other files or folders, then an IOException is thrown. If the path is a file, this parameter
         /// is ignored.</param>
         /// <returns>The path that was just deleted</returns>
-        AbsolutePath Delete(AbsolutePath path, bool recursiveDeleteIfFolder = false);
+        AbsolutePath Delete(AbsolutePath path, bool recursiveDeleteIfFolder = true);
 
         /// <summary>
         /// Delete the specified folder. This throws an exception if the path is a file, doesn't exist, or the current
@@ -139,7 +139,7 @@ namespace IoFluently
         /// folder contains other files or folders, then an IOException is thrown. If the path is a file, this parameter
         /// is ignored.</param>
         /// <returns>The path that was just deleted</returns>
-        Task<AbsolutePath> DeleteAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = false);
+        Task<AbsolutePath> DeleteAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true);
         
         #endregion
         
@@ -152,7 +152,7 @@ namespace IoFluently
         /// <returns>The same path that was specified</returns>
         AbsolutePath EnsureIsFolder(AbsolutePath path, bool createRecursively = false);
 
-        AbsolutePath EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = false, bool createRecursively = false);
+        AbsolutePath EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = true, bool createRecursively = false);
 
         /// <summary>
         /// Creates the path as a folder if it isn't already. If the path is a file, throws an IOException.
@@ -161,7 +161,7 @@ namespace IoFluently
         /// <returns>The same path that was specified</returns>
         Task<AbsolutePath> EnsureIsFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool createRecursively = false);
 
-        Task<AbsolutePath> EnsureIsEmptyFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = false, bool createRecursively = false);
+        Task<AbsolutePath> EnsureIsEmptyFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true, bool createRecursively = false);
 
         #endregion
         
@@ -178,7 +178,7 @@ namespace IoFluently
 
         AbsolutePath EnsureIsNotFile(AbsolutePath path);
 
-        AbsolutePath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = false);
+        AbsolutePath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = true);
 
         /// <summary>
         /// Deletes the specified path if it is a folder. If the path is a file or doesn't exist, this returns without
@@ -191,7 +191,7 @@ namespace IoFluently
 
         Task<AbsolutePath> EnsureIsNotFileAsync(AbsolutePath path, CancellationToken cancellationToken);
 
-        Task<AbsolutePath> EnsureDoesNotExistAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = false);
+        Task<AbsolutePath> EnsureDoesNotExistAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true);
 
         #endregion
 
@@ -473,10 +473,10 @@ namespace IoFluently
         #endregion
         
         #region File writing
-        void WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = false);
         IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false);
+        void WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = false);
         void WriteAllLines(AbsolutePath absolutePath, IEnumerable<string> lines, Encoding encoding = null, int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false);
-        void WriteText(AbsolutePath absolutePath, string text, Encoding encoding = null, bool createRecursively = false);
+        void WriteAllText(AbsolutePath absolutePath, string text, Encoding encoding = null, bool createRecursively = false);
         #endregion
         
         #region File open for reading or writing

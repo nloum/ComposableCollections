@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using IoFluently.SystemTextJson;
@@ -131,14 +132,15 @@ namespace IoFluently.Tests
         }
 
         [TestMethod]
-        //[DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.IoService)]
         [DataRow(IoServiceType.InMemoryZipIoService)]
         public void CreateTemporaryFileShouldWork(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, true);
-            var temporaryPath = uut.CreateTemporaryPath(PathType.File);
+            var temporaryPath = uut.GenerateUniqueTemporaryPath();
+            temporaryPath.WriteAllText("");
             temporaryPath.IsFile.Should().BeTrue();
-            temporaryPath.DeleteFile();
+            temporaryPath.DeleteFileAsync(CancellationToken.None).Wait();
             temporaryPath.Exists.Should().BeFalse();
         }
         
@@ -147,7 +149,7 @@ namespace IoFluently.Tests
         public void CreateTemporaryFolderShouldWork(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, true);
-            var temporaryPath = uut.CreateTemporaryPath(PathType.Folder);
+            var temporaryPath = uut.GenerateUniqueTemporaryPath().CreateFolder();
             temporaryPath.IsFolder.Should().BeTrue();
             temporaryPath.DeleteFolder();
             temporaryPath.IsFolder.Should().BeFalse();
@@ -158,7 +160,7 @@ namespace IoFluently.Tests
         public void CreateTemporaryNonExistentPathShouldWork(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, true);
-            var temporaryPath = uut.CreateTemporaryPath(PathType.None);
+            var temporaryPath = uut.GenerateUniqueTemporaryPath();
             temporaryPath.IsFolder.Should().BeFalse();
             temporaryPath.IsFile.Should().BeFalse();
         }
@@ -471,16 +473,14 @@ namespace IoFluently.Tests
 
             var sourceFolder = ioService.DefaultRelativePathBase / "test1";
 
-            sourceFolder.CreateFolder()
-                .ClearFolder();
+            sourceFolder.EnsureIsEmptyFolder();
 
             var textFileInSourceFolder = sourceFolder / "test.txt";
 
-            textFileInSourceFolder.WriteText("testing 1 2 3");
+            textFileInSourceFolder.WriteAllText("testing 1 2 3");
 
             var targetFolder = (ioService.DefaultRelativePathBase / "test2")
-                .CreateFolder()
-                .ClearFolder();
+                .EnsureIsEmptyFolder();
 
             var textFileMovePlan = textFileInSourceFolder.Translate(sourceFolder, targetFolder);
 

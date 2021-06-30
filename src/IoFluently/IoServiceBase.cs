@@ -96,7 +96,7 @@ namespace IoFluently
         public abstract AbsolutePath DeleteFile(AbsolutePath path);
 
         /// <inheritdoc />
-        public virtual AbsolutePath Delete(AbsolutePath path, bool recursiveDeleteIfFolder = false)
+        public virtual AbsolutePath Delete(AbsolutePath path, bool recursiveDeleteIfFolder = true)
         {
             if (path.IoService.Type(path) == IoFluently.PathType.File) return path.IoService.DeleteFile(path);
 
@@ -113,7 +113,7 @@ namespace IoFluently
         public abstract Task<AbsolutePath> DeleteFileAsync(AbsolutePath path, CancellationToken cancellationToken);
 
         /// <inheritdoc />
-        public Task<AbsolutePath> DeleteAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = false)
+        public Task<AbsolutePath> DeleteAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true)
         {
             if (path.IoService.Type(path) == IoFluently.PathType.File) return path.IoService.DeleteFileAsync(path, cancellationToken);
 
@@ -150,7 +150,7 @@ namespace IoFluently
 
         /// <inheritdoc />
         public Task<AbsolutePath> EnsureIsEmptyFolderAsync(AbsolutePath path, CancellationToken cancellationToken,
-            bool recursiveDeleteIfFolder = false, bool createRecursively = false)
+            bool recursiveDeleteIfFolder = true, bool createRecursively = false)
         {
             throw new NotImplementedException();
         }
@@ -167,7 +167,7 @@ namespace IoFluently
         }
         
         /// <inheritdoc />
-        public AbsolutePath EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = false, bool createRecursively = false)
+        public AbsolutePath EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = true, bool createRecursively = false)
         {
             if (path.IoService.Exists(path))
             {
@@ -206,7 +206,7 @@ namespace IoFluently
 
         /// <inheritdoc />
         public async Task<AbsolutePath> EnsureDoesNotExistAsync(AbsolutePath path, CancellationToken cancellationToken,
-            bool recursiveDeleteIfFolder = false)
+            bool recursiveDeleteIfFolder = true)
         {
             if (path.IoService.Exists(path))
             {
@@ -228,7 +228,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public AbsolutePath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = false)
+        public AbsolutePath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = true)
         {
             if (path.IoService.Exists(path))
             {
@@ -1307,7 +1307,7 @@ namespace IoFluently
 
             using var sourceStream = translation.Source.IoService.TryOpen(translation.Source, FileMode.Open, FileAccess.Read,
                 FileShare.Read, fileOptions, bufferSize).Value;
-            using var destinationStream = translation.Destination.IoService.TryOpen(translation.Destination, FileMode.Open,
+            using var destinationStream = translation.Destination.IoService.TryOpen(translation.Destination, overwrite ? FileMode.Create : FileMode.CreateNew,
                 FileAccess.Write, FileShare.None, fileOptions, bufferSize).Value;
 
             sourceStream.CopyTo(destinationStream, bufferSize);
@@ -2114,20 +2114,16 @@ namespace IoFluently
             var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.WriteThrough, bytes.Length, createRecursively);
             using (var stream = maybeStream.Value)
             {
-                stream.Write(bytes, 0, bytes.Length);
+                stream.Write(bytes, 0, Math.Max(bytes.Length, 1));
             }
         }
 
         /// <inheritdoc />
-        public void WriteText(AbsolutePath absolutePath, string text, Encoding encoding = null, bool createRecursively = false)
+        public void WriteAllText(AbsolutePath absolutePath, string text, Encoding encoding = null, bool createRecursively = false)
         {
-            using var writer = TryOpenWriter(absolutePath, encoding.GetByteCount(text), createRecursively).Value;
+            encoding ??= Encoding.Default;
+            using var writer = TryOpenWriter(absolutePath, Math.Max(encoding.GetByteCount(text), 1), createRecursively).Value;
             writer.Write(text);
-        }
-
-        private void WriteLines(StreamWriter streamWriter, IEnumerable<string> lines)
-        {
-            foreach (var line in lines) streamWriter.WriteLine(line);
         }
         
         #endregion

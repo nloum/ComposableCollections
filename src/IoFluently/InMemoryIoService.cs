@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using GenericNumbers;
 using LiveLinq;
 using LiveLinq.Dictionary;
@@ -221,12 +222,6 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, bool createRecursively = false)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
         public override void UpdateRoots()
         {
             throw new NotImplementedException();
@@ -268,7 +263,7 @@ namespace IoFluently
         public override AbsolutePath DeleteFile(AbsolutePath path)
         {
             path = Simplify(path);
-            var parentFolder = GetFolder(Parent(path)).Value;
+            var parentFolder = GetFolder(TryParent(path).Value).Value;
             parentFolder.Files.Remove(path.Name);
             return path;
         }
@@ -349,15 +344,29 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
+        public override Task<AbsolutePath> DeleteFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursive = false)
+        {
+            return Task.Run(() => DeleteFolder(path, recursive), cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public override Task<AbsolutePath> DeleteFileAsync(AbsolutePath path, CancellationToken cancellationToken)
+        {
+            return Task.Run(() => DeleteFile(path), cancellationToken);
+        }
+
+        /// <inheritdoc />
         public override AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false)
         {
-            var parentFolder = GetFolder(Parent(path));
+            var parentFolder = GetFolder(TryParent(path).Value);
             parentFolder.Value.Folders.Remove(Simplify(path).Name);
             return path;
         }
 
-        /// <inheritdoc />
-        public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, FileShare fileShare, bool createRecursively = false)
+        public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,
+            FileShare fileShare = FileShare.None,
+            FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.None | FileOptions.SequentialScan,
+            int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false)
         {
             File file = null;
             var maybeFile = GetFile(path);
@@ -366,7 +375,7 @@ namespace IoFluently
                 if (fileMode == FileMode.Create || fileMode == FileMode.CreateNew ||
                     fileMode == FileMode.OpenOrCreate)
                 {
-                    var pathParent = Parent(path);
+                    var pathParent = TryParent(path).Value;
                     Folder parentFolder = null;
                     var maybeParentFolder = GetFolder(pathParent);
                     if (!maybeParentFolder.HasValue)
@@ -433,7 +442,7 @@ namespace IoFluently
         /// <inheritdoc />
         public override AbsolutePath CreateFolder(AbsolutePath path, bool createRecursively = false)
         {
-            var folder = GetFolder(Parent(path)).Value;
+            var folder = GetFolder(TryParent(path).Value).Value;
             EnsureFolderExists(folder, new[]{path.Name});
             return path;
         }

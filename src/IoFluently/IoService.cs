@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using ComposableCollections.Dictionary;
 using LiveLinq;
@@ -40,6 +41,8 @@ namespace IoFluently
         private AbsolutePath _defaultRelativePathBase;
         
         public override AbsolutePath DefaultRelativePathBase => _defaultRelativePathBase ?? TryParseAbsolutePath(Environment.CurrentDirectory).Value;
+        public TimeSpan DeleteOrCreateSpinPeriod { get; set; } = TimeSpan.FromMilliseconds(100);
+        public TimeSpan DeleteOrCreateTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
         public override void SetDefaultRelativePathBase(AbsolutePath defaultRelativePathBase)
         {
@@ -68,7 +71,8 @@ namespace IoFluently
         }
         
         public PathObservationMethod PathObservationMethod { get; set; }
-        
+
+        /// <inheritdoc />
         public override ISetChanges<AbsolutePath> ToLiveLinq(AbsolutePath path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             if (PathObservationMethod == PathObservationMethod.FileSystemWatcher)
@@ -281,36 +285,59 @@ namespace IoFluently
             return observable.ToLiveLinq();
         }
 
-        /// <inheritdoc />
-        public override IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, bool createRecursively = false)
+        public override async Task<AbsolutePath> DeleteFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursive = false)
         {
-            try
+            Directory.Delete(path, recursive);
+
+            var timeoutTimeSpan = DeleteOrCreateTimeout;
+            var start = DateTimeOffset.UtcNow;
+            while ( Directory.Exists(path) && !cancellationToken.IsCancellationRequested )
             {
-                if (createRecursively)
+                var processingTime = DateTimeOffset.UtcNow - start;
+                if ( processingTime > timeoutTimeSpan )
                 {
-                    var parent = TryParent(absolutePath);
-                    if (parent.HasValue)
-                    {
-                        CreateFolder(parent.Value, true);
-                    }
+                    throw new TimeoutException($"The delete operation on {path} timed out.");
                 }
-                return Something(AsFileInfo(absolutePath).CreateText());
+
+                await Task.Delay(DeleteOrCreateSpinPeriod, cancellationToken);
             }
-            catch (Exception ex)
+
+            return path;
+        }
+
+        public override async Task<AbsolutePath> DeleteFileAsync(AbsolutePath path, CancellationToken cancellationToken)
+        {
+            File.Delete(path);
+
+            var timeoutTimeSpan = DeleteOrCreateTimeout;
+            var start = DateTimeOffset.UtcNow;
+            while ( File.Exists(path) && !cancellationToken.IsCancellationRequested )
             {
-                return Nothing<StreamWriter>(() => throw ex);
+                var processingTime = DateTimeOffset.UtcNow - start;
+                if (processingTime > timeoutTimeSpan)
+                {
+                    throw new TimeoutException($"The delete operation on {path} timed out.");
+                }
+
+                await Task.Delay(DeleteOrCreateSpinPeriod, cancellationToken);
             }
+            
+            return path;
         }
 
         /// <inheritdoc />
         public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
-            FileAccess fileAccess, FileShare fileShare, bool createRecursively = false)
+            FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None,
+            FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.SequentialScan,
+            int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false)
         {
             try
             {
                 if (MayCreateFile(fileMode))
-                    TryParent(path).IfHasValue(parent => Create(parent, IoFluently.PathType.Folder, createRecursively));
-                return Something<Stream>(AsFileInfo(path).Open(fileMode, fileAccess, fileShare));
+                    TryParent(path).IfHasValue(parent => CreateFolder(parent, createRecursively));
+                var fileStream = new FileStream(path, fileMode, fileAccess, fileShare,
+                    bufferSize, fileOptions);
+                return Something<Stream>(fileStream);
             }
             catch (Exception ex)
             {
@@ -318,6 +345,7 @@ namespace IoFluently
             }
         }
 
+        /// <inheritdoc />
         public override IMaybe<FileAttributes> TryAttributes(AbsolutePath attributes)
         {
             try
@@ -472,6 +500,7 @@ namespace IoFluently
             return ImmutableArray<AbsolutePath>.Empty;
         }
 
+        /// <inheritdoc />
         public override void UpdateRoots()
         {
             if (DefaultDirectorySeparator == "/")
@@ -511,7 +540,7 @@ namespace IoFluently
                     var currentPath = path;
                     while (!token.IsCancellationRequested)
                     {
-                        var watcher = new FileSystemWatcher(Parent(currentPath).ToString())
+                        var watcher = new FileSystemWatcher(TryParent(currentPath).Value.ToString())
                         {
                             IncludeSubdirectories = false,
                             Filter = currentPath.Name
@@ -583,32 +612,6 @@ namespace IoFluently
             return path;
         }
 
-        public override void WriteAllText(AbsolutePath path, string text, bool createRecursively = true)
-        {
-            if (createRecursively)
-            {
-                var parent = TryParent(path);
-                if (parent.HasValue)
-                {
-                    CreateFolder(parent.Value, true);
-                }
-            }
-            File.WriteAllText(path.ToString(), text);
-        }
-
-        public override void WriteAllLines(AbsolutePath path, IEnumerable<string> lines, bool createRecursively = true)
-        {
-            if (createRecursively)
-            {
-                var parent = TryParent(path);
-                if (parent.HasValue)
-                {
-                    CreateFolder(parent.Value, true);
-                }
-            }
-            File.WriteAllLines(path.ToString(), lines);
-        }
-
         public override void WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = true)
         {
             if (createRecursively)
@@ -632,21 +635,6 @@ namespace IoFluently
             return File.ReadAllText(path.ToString());
         }
 
-        public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
-            FileAccess fileAccess, bool createRecursively = true)
-        {
-            try
-            {
-                if (MayCreateFile(fileMode))
-                    TryParent(path).IfHasValue(parent => Create(parent, IoFluently.PathType.Folder, createRecursively));
-                return Something(AsFileInfo(path).Open(fileMode, fileAccess));
-            }
-            catch (Exception ex)
-            {
-                return Nothing<Stream>(() => throw ex);
-            }
-        }
-        
         public override AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false)
         {
             Directory.Delete(path.ToString(), recursive);
@@ -664,32 +652,5 @@ namespace IoFluently
             return IoFluently.PathType.None;
         }
 
-        public override IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation, bool overwrite = false)
-        {
-            if (translation.Destination.IoService.Exists(translation.Destination))
-            {
-                if (!overwrite)
-                {
-                    throw new IOException($"An attempt was made to move a file from \"{translation.Source}\" to \"{translation.Destination}\" without overwriting the destination, but the destination already exists");
-                }
-                else
-                {
-                    translation.Destination.IoService.Delete(translation.Destination);
-                }
-            }
-            if (translation.Source.IoService.Type(translation.Source) != IoFluently.PathType.File)
-                throw new IOException(string.Format(
-                    $"An attempt was made to move a file from \"{translation.Source}\" to \"{translation.Destination}\" but the source path is not a file."));
-            if (translation.Destination.IoService.Type(translation.Destination) != IoFluently.PathType.None)
-                throw new IOException(string.Format(
-                    $"An attempt was made to move \"{translation.Source}\" to \"{translation.Destination}\" but the destination path exists."));
-            if (translation.Destination.IoService.IsDescendantOf(translation.Destination, translation.Source))
-                throw new IOException(string.Format(
-                    $"An attempt was made to move a file from \"{translation.Source}\" to \"{translation.Destination}\" but the destination path is a sub-path of the source path."));
-            var parent = translation.Destination.IoService.TryParent(translation.Destination).Value;
-            parent.IoService.Create(parent, IoFluently.PathType.Folder);
-            File.Move(translation.Source.ToString(), translation.Destination.ToString());
-            return translation;
-        }
     }
 }

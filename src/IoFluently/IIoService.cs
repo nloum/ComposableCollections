@@ -5,6 +5,8 @@ using System.Linq;
 using System.Reactive;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using LiveLinq.Dictionary;
 using LiveLinq.Set;
 using Microsoft.Extensions.FileProviders;
@@ -77,28 +79,7 @@ namespace IoFluently
         
         #region Creating
         
-        AbsolutePath Create(AbsolutePath path, PathType pathType, bool createRecursively = false);
         AbsolutePath CreateFolder(AbsolutePath path, bool createRecursively = false);
-        /// <summary>
-        /// Creates a file or folder in the temporary folder
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        AbsolutePath CreateTemporaryPath(PathType type);
-        /// <summary>
-        /// Creates an empty file at the specified path
-        /// </summary>
-        /// <param name="path">The path that should become an empty file</param>
-        /// <returns>The same path that was specified</returns>
-        AbsolutePath CreateEmptyFile(AbsolutePath path, bool createRecursively = false);
-        
-        /// <summary>
-        /// Creates an empty file at the specified path, and opens it for writing
-        /// </summary>
-        /// <param name="path">The path that should become a file</param>
-        /// <returns>The stream to be used to write to the specified file</returns>
-        Stream CreateFile(AbsolutePath path, bool createRecursively = false);
-
 
         #endregion
 
@@ -113,6 +94,7 @@ namespace IoFluently
         /// <param name="recursive">Whether to delete the folder recursively.</param>
         /// <returns>The path that was deleted</returns>
         AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false);
+        
         /// <summary>
         /// Deletes the specified file
         /// </summary>
@@ -120,12 +102,6 @@ namespace IoFluently
         /// <returns>The same path that was specified</returns>
         AbsolutePath DeleteFile(AbsolutePath path);
         
-        /// <summary>
-        /// Empties the specified folder
-        /// </summary>
-        /// <param name="path">The path that should become an empty folder</param>
-        /// <returns>The same path that was specified</returns>
-        AbsolutePath ClearFolder(AbsolutePath path);
         /// <summary>
         /// Deletes the specified file or folder
         /// </summary>
@@ -137,6 +113,33 @@ namespace IoFluently
         /// <returns>The path that was just deleted</returns>
         AbsolutePath Delete(AbsolutePath path, bool recursiveDeleteIfFolder = false);
 
+        /// <summary>
+        /// Delete the specified folder. This throws an exception if the path is a file, doesn't exist, or the current
+        /// process doesn't have permission to delete the folder. Also, if the directory still contains files or folders
+        /// and recursive is false, then this will throw an exception as well.
+        /// </summary>
+        /// <param name="path">The folder to delete</param>
+        /// <param name="recursive">Whether to delete the folder recursively.</param>
+        /// <returns>The path that was deleted</returns>
+        Task<AbsolutePath> DeleteFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursive = false);
+        
+        /// <summary>
+        /// Deletes the specified file
+        /// </summary>
+        /// <param name="path">The file that should be deleted</param>
+        /// <returns>The same path that was specified</returns>
+        Task<AbsolutePath> DeleteFileAsync(AbsolutePath path, CancellationToken cancellationToken);
+        
+        /// <summary>
+        /// Deletes the specified file or folder
+        /// </summary>
+        /// <param name="path">The path to the file or folder that should be deleted</param>
+        /// <param name="recursiveDeleteIfFolder">If true and the specified path is a folder, then the folder contents are
+        /// recursively deleted before the folder itself is deleted. If false and the specified path is a folder, and that
+        /// folder contains other files or folders, then an IOException is thrown. If the path is a file, this parameter
+        /// is ignored.</param>
+        /// <returns>The path that was just deleted</returns>
+        Task<AbsolutePath> DeleteAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = false);
         
         #endregion
         
@@ -149,9 +152,16 @@ namespace IoFluently
         /// <returns>The same path that was specified</returns>
         AbsolutePath EnsureIsFolder(AbsolutePath path, bool createRecursively = false);
 
-        AbsolutePath EnsureIsFile(AbsolutePath path, bool createRecursively = false);
-
         AbsolutePath EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = false, bool createRecursively = false);
+
+        /// <summary>
+        /// Creates the path as a folder if it isn't already. If the path is a file, throws an IOException.
+        /// </summary>
+        /// <param name="path">The path that should be a folder</param>
+        /// <returns>The same path that was specified</returns>
+        Task<AbsolutePath> EnsureIsFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool createRecursively = false);
+
+        Task<AbsolutePath> EnsureIsEmptyFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = false, bool createRecursively = false);
 
         #endregion
         
@@ -169,6 +179,19 @@ namespace IoFluently
         AbsolutePath EnsureIsNotFile(AbsolutePath path);
 
         AbsolutePath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = false);
+
+        /// <summary>
+        /// Deletes the specified path if it is a folder. If the path is a file or doesn't exist, this returns without
+        /// throwing an exception. If recursive is false and the path is a non-empty folder, throws an IOException.
+        /// </summary>
+        /// <param name="path">The path that may be a folder</param>
+        /// <param name="recursive">Whether to recursively delete the contents of the path if the path is a non-empty folder</param>
+        /// <returns>The same path that was specified</returns>
+        Task<AbsolutePath> EnsureIsNotFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursive = false);
+
+        Task<AbsolutePath> EnsureIsNotFileAsync(AbsolutePath path, CancellationToken cancellationToken);
+
+        Task<AbsolutePath> EnsureDoesNotExistAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = false);
 
         #endregion
 
@@ -255,24 +278,76 @@ namespace IoFluently
         
         #region Translation stuff
         
-        IAbsolutePathTranslation Copy(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination);
-        IAbsolutePathTranslation Copy(AbsolutePath source, AbsolutePath destination);
-        IAbsolutePathTranslation Move(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination);
-        IAbsolutePathTranslation Move(AbsolutePath source, AbsolutePath destination);
+        #region Stuff that needs to be implemented
+        
+        Task<IAbsolutePathTranslation> CopyFileAsync(IAbsolutePathTranslation translation, CancellationToken cancellationToken,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+        Task<IAbsolutePathTranslation> CopyFolderAsync(IAbsolutePathTranslation translation, CancellationToken cancellationToken,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+        Task<IAbsolutePathTranslation> MoveFileAsync(IAbsolutePathTranslation translation, CancellationToken cancellationToken,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+        Task<IAbsolutePathTranslation> MoveFolderAsync(IAbsolutePathTranslation translation, CancellationToken cancellationToken,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+        
+        IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+        IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+        IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+        IAbsolutePathTranslation MoveFolder(IAbsolutePathTranslation translation,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
 
+        #endregion
+        
         IAbsolutePathTranslation Translate(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination);
         IAbsolutePathTranslation Translate(AbsolutePath source, AbsolutePath destination);
-        void RenameTo(AbsolutePath source, AbsolutePath target);
-        IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation, bool overwrite = false);
-        IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation, bool overwrite = false);
-        IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation, bool overwrite = false);
-        IAbsolutePathTranslation Move(IAbsolutePathTranslation translation, bool overwrite = false);
-        IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation, bool overwrite = false);
-        IAbsolutePathTranslation MoveFolder(IAbsolutePathTranslation translation, bool overwrite = false);
+
+        IAbsolutePathTranslation Copy(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+        IAbsolutePathTranslation Copy(AbsolutePath source, AbsolutePath destination,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+        IAbsolutePathTranslation Move(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+        IAbsolutePathTranslation Move(AbsolutePath source, AbsolutePath destination,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+
+        IAbsolutePathTranslation RenameTo(AbsolutePath source, AbsolutePath target,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
         
+        IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+        IAbsolutePathTranslation Move(IAbsolutePathTranslation translation,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+        
+        Task<IAbsolutePathTranslation> CopyAsync(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
+            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+        Task<IAbsolutePathTranslation> CopyAsync(AbsolutePath source, AbsolutePath destination,
+            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+        Task<IAbsolutePathTranslation> MoveAsync(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
+            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+        Task<IAbsolutePathTranslation> MoveAsync(AbsolutePath source, AbsolutePath destination,
+            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+
+        Task<IAbsolutePathTranslation> RenameToAsync(AbsolutePath source, AbsolutePath target,
+            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+        
+        Task<IAbsolutePathTranslation> CopyAsync(IAbsolutePathTranslation translation,
+            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+        Task<IAbsolutePathTranslation> MoveAsync(IAbsolutePathTranslation translation,
+            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+
         #endregion
 
         #region Path building
+
+        /// <summary>
+        /// Creates a non-existent path that is unique. The parent folder of this path is guaranteed to exist.
+        /// This does not create a file or folder for this path.
+        /// </summary>
+        /// <param name="extension">The file extension for the path. If null, the resulting path has no extension.</param>
+        /// <returns>A path that does not exist but whose parent folder exists</returns>
+        AbsolutePath GenerateUniqueTemporaryPath(string extension = null);
 
         /// <summary>
         /// Returns a lazily-enumerated list of child files and/or folders
@@ -379,42 +454,36 @@ namespace IoFluently
         string ReadAllText(AbsolutePath path);
         IEnumerable<string> ReadLines(AbsolutePath path, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
-            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = Constants.DefaultBufferSize,
             bool leaveOpen = false);
         IMaybe<string> TryReadText(AbsolutePath path, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
-            int bufferSize = 4096, bool leaveOpen = false);
+            int bufferSize = Constants.DefaultBufferSize, bool leaveOpen = false);
         IEnumerable<string> ReadLines(Stream stream, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            bool detectEncodingFromByteOrderMarks = true, int bufferSize = Constants.DefaultBufferSize,
             bool leaveOpen = false);
         IEnumerable<string> ReadLinesBackwards(Stream stream, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            bool detectEncodingFromByteOrderMarks = true, int bufferSize = Constants.DefaultBufferSize,
             bool leaveOpen = false);
         string TryReadText(Stream stream, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            bool detectEncodingFromByteOrderMarks = true, int bufferSize = Constants.DefaultBufferSize,
             bool leaveOpen = false);
         IMaybe<StreamReader> TryOpenReader(AbsolutePath path);
         #endregion
         
         #region File writing
-        void WriteAllText(AbsolutePath path, string text, bool createRecursively = false);
-        void WriteAllLines(AbsolutePath path, IEnumerable<string> lines, bool createRecursively = false);
         void WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = false);
-        IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, bool createRecursively = false);
-        void WriteText(AbsolutePath absolutePath, IEnumerable<string> lines,
-            FileMode fileMode = FileMode.Create, FileAccess fileAccess = FileAccess.Write,
-            FileShare fileShare = FileShare.None,
-            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false, bool createRecursively = false);
-        void WriteText(AbsolutePath absolutePath, string text, FileMode fileMode = FileMode.Create,
-            FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
-            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false, bool createRecursively = false);
+        IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false);
+        void WriteAllLines(AbsolutePath absolutePath, IEnumerable<string> lines, Encoding encoding = null, int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false);
+        void WriteText(AbsolutePath absolutePath, string text, Encoding encoding = null, bool createRecursively = false);
         #endregion
         
         #region File open for reading or writing
-        IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, bool createRecursively = false);
-        IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, bool createRecursively = false);
-        IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, FileShare fileShare, bool createRecursively = false);
+        IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
+            FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None,
+            FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.SequentialScan,
+            int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false);
         #endregion
         
         #region LINQ-style APIs

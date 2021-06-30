@@ -19,10 +19,12 @@ namespace IoFluently.CodeGenerator
             var ioService = new IoService();
             var repoRoot = ioService.DefaultRelativePathBase.Ancestors.First(ancestor => ioService.IsFolder(ancestor / ".git"));
 
-            using (var partialClassesWriter = ioService.OpenWriter(repoRoot / "src" / "IoFluently" / "PartialClasses.g.cs"))
+            using (var partialClassesWriter = ioService.TryOpenWriter(repoRoot / "src" / "IoFluently" / "PartialClasses.g.cs").Value)
             {
                 partialClassesWriter.WriteLine(@"using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Threading;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -39,10 +41,12 @@ using UnitsNet;
                 GeneratePartialClassesWithProperties(repoRoot, partialClassesWriter);
             }
             
-            using (var ioExtensionsWriter = ioService.OpenWriter(repoRoot / "src" / "IoFluently" / "IoExtensions.g.cs"))
+            using (var ioExtensionsWriter = ioService.TryOpenWriter(repoRoot / "src" / "IoFluently" / "IoExtensions.g.cs").Value)
             {
                 ioExtensionsWriter.WriteLine(@"using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Threading;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;

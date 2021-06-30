@@ -6,6 +6,8 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using LiveLinq;
 using LiveLinq.Set;
 using Microsoft.Extensions.FileProviders;
@@ -22,6 +24,7 @@ namespace IoFluently
     {
         #region Environmental stuff
 
+        /// <inheritdoc />
         public abstract bool CanEmptyDirectoriesExist { get; }
 
         /// <summary>
@@ -29,20 +32,26 @@ namespace IoFluently
         /// </summary>
         protected string _newline;
 
+        /// <inheritdoc />
         public virtual string GetNewlineCharacter()
         {
             return _newline;
         }
 
+        /// <inheritdoc />
         public string DefaultDirectorySeparator { get; }
+        /// <inheritdoc />
         public bool IsCaseSensitiveByDefault { get; }
+        /// <inheritdoc />
         public virtual AbsolutePath DefaultRelativePathBase { get; protected set; }
 
+        /// <inheritdoc />
         public virtual void SetDefaultRelativePathBase(AbsolutePath defaultRelativePathBase)
         {
             DefaultRelativePathBase = defaultRelativePathBase;
         }
 
+        /// <inheritdoc />
         public virtual void UnsetDefaultRelativePathBase()
         {
             throw new NotImplementedException();
@@ -77,67 +86,9 @@ namespace IoFluently
         /// <inheritdoc />
         public abstract AbsolutePath CreateFolder(AbsolutePath path, bool createRecursively = false);
 
-        /// <inheritdoc />
-        public virtual bool MayCreateFile(FileMode fileMode)
-        {
-            return fileMode.HasFlag(FileMode.Append) || fileMode.HasFlag(FileMode.Create) ||
-                   fileMode.HasFlag(FileMode.CreateNew) || fileMode.HasFlag(FileMode.OpenOrCreate);
-        }
-
-        /// <inheritdoc />
-        public virtual AbsolutePath Create(AbsolutePath path, PathType pathType, bool createRecursively = false)
-        {
-            if (pathType == IoFluently.PathType.File)
-            {
-                CreateEmptyFile(path, createRecursively);
-            }
-            else
-            {
-                CreateFolder(path, createRecursively);
-            }
-            
-            return path;
-        }
-
-        /// <inheritdoc />
-        public virtual Stream CreateFile(AbsolutePath path, bool createRecursively = false)
-        {
-            var stream = TryOpen(path, FileMode.CreateNew, FileAccess.ReadWrite, createRecursively).Value;
-            return stream;
-        }
-
-        /// <inheritdoc />
-        public virtual AbsolutePath CreateEmptyFile(AbsolutePath path, bool createRecursively = false)
-        {
-            CreateFile(path, createRecursively).Dispose();
-            return path;
-        }
-
-        /// <inheritdoc />
-        public virtual AbsolutePath CreateTemporaryPath(PathType type)
-        {
-            var path = GetTemporaryFolder() / Guid.NewGuid().ToString();
-            if (type == IoFluently.PathType.File)
-                path.IoService.Create(path, IoFluently.PathType.File);
-            if (type == IoFluently.PathType.Folder)
-                path.IoService.Create(path, IoFluently.PathType.Folder);
-            return path;
-        }
-
         #endregion
         #region Deleting
         
-        /// <inheritdoc />
-        public virtual AbsolutePath ClearFolder(AbsolutePath path)
-        {
-            foreach (var item in path.Descendants())
-            {
-                item.IoService.Delete(item, true);
-            }
-
-            return path;
-        }
-
         /// <inheritdoc />
         public abstract AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false);
 
@@ -154,9 +105,56 @@ namespace IoFluently
             return path;
         }
 
+        /// <inheritdoc />
+        public abstract Task<AbsolutePath> DeleteFolderAsync(AbsolutePath path, CancellationToken cancellationToken,
+            bool recursive = false);
+
+        /// <inheritdoc />
+        public abstract Task<AbsolutePath> DeleteFileAsync(AbsolutePath path, CancellationToken cancellationToken);
+
+        /// <inheritdoc />
+        public Task<AbsolutePath> DeleteAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = false)
+        {
+            if (path.IoService.Type(path) == IoFluently.PathType.File) return path.IoService.DeleteFileAsync(path, cancellationToken);
+
+            if (path.IoService.Type(path) == IoFluently.PathType.Folder) return path.IoService.DeleteFolderAsync(path, cancellationToken, recursiveDeleteIfFolder);
+
+            return Task.FromResult(path);
+        }
+
         #endregion
         #region Ensuring is
-        
+
+        /// <inheritdoc />
+        public async Task<AbsolutePath> EnsureIsFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool createRecursively = false)
+        {
+            switch (path.IoService.Type(path))
+            {
+                case PathType.Folder:
+                    break;
+                case PathType.File:
+                    await DeleteAsync(path, cancellationToken, true);
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        break;
+                    }
+                    CreateFolder(path);
+                    break;
+                case PathType.None:
+                    CreateFolder(path);
+                    break;
+            }
+
+            return path;
+        }
+
+        /// <inheritdoc />
+        public Task<AbsolutePath> EnsureIsEmptyFolderAsync(AbsolutePath path, CancellationToken cancellationToken,
+            bool recursiveDeleteIfFolder = false, bool createRecursively = false)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <inheritdoc />
         public AbsolutePath EnsureIsFolder(AbsolutePath path, bool createRecursively = false)
         {
@@ -168,17 +166,6 @@ namespace IoFluently
             return path;
         }
         
-        /// <inheritdoc />
-        public AbsolutePath EnsureIsFile(AbsolutePath path, bool createRecursively = false)
-        {
-            if (!IsFile(path))
-            {
-                path.IoService.CreateEmptyFile(path);
-            }
-
-            return path;
-        }
-
         /// <inheritdoc />
         public AbsolutePath EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = false, bool createRecursively = false)
         {
@@ -194,7 +181,41 @@ namespace IoFluently
 
         #endregion
         #region Ensuring is not
-        
+
+        /// <inheritdoc />
+        public async Task<AbsolutePath> EnsureIsNotFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursive = false)
+        {
+            if (path.IoService.IsFolder(path))
+            {
+                await path.IoService.DeleteFolderAsync(path, cancellationToken, recursive);
+            }
+
+            return path;
+        }
+
+        /// <inheritdoc />
+        public async Task<AbsolutePath> EnsureIsNotFileAsync(AbsolutePath path, CancellationToken cancellationToken)
+        {
+            if (path.IoService.IsFile(path))
+            {
+                await path.IoService.DeleteFileAsync(path, cancellationToken);
+            }
+
+            return path;
+        }
+
+        /// <inheritdoc />
+        public async Task<AbsolutePath> EnsureDoesNotExistAsync(AbsolutePath path, CancellationToken cancellationToken,
+            bool recursiveDeleteIfFolder = false)
+        {
+            if (path.IoService.Exists(path))
+            {
+                await path.IoService.DeleteAsync(path, cancellationToken, recursiveDeleteIfFolder);
+            }
+
+            return path;
+        }
+
         /// <inheritdoc />
         public AbsolutePath EnsureIsNotFile(AbsolutePath path)
         {
@@ -232,6 +253,13 @@ namespace IoFluently
         #endregion
         #region Utilities
         
+        /// <inheritdoc />
+        public virtual bool MayCreateFile(FileMode fileMode)
+        {
+            return fileMode.HasFlag(FileMode.Append) || fileMode.HasFlag(FileMode.Create) ||
+                   fileMode.HasFlag(FileMode.CreateNew) || fileMode.HasFlag(FileMode.OpenOrCreate);
+        }
+
         /// <inheritdoc />
         public bool IsFile(AbsolutePath absolutePath)
         {
@@ -462,7 +490,9 @@ namespace IoFluently
         /// <inheritdoc />
         public abstract AbsolutePath Encrypt(AbsolutePath path);
 
+        /// <inheritdoc />
         public IOpenFilesTrackingService OpenFilesTrackingService { get; }
+        
                 /// <summary>
         ///     Returns a regex that filters files the same as the specified pattern.
         ///     From here: http://www.java2s.com/Code/CSharp/Regular-Expressions/Checksifnamematchespatternwithandwildcards.htm
@@ -526,6 +556,7 @@ namespace IoFluently
         }
 
         #endregion
+        
         #region Parsing paths
         
         /// <inheritdoc />
@@ -545,20 +576,30 @@ namespace IoFluently
         /// </summary>
         internal bool IsAncestorOfRoot(IReadOnlyList<string> pathComponents)
         {
-            var result = new List<string>();
             var numberOfComponentsToSkip = 0;
             var isRelative = !ComponentsAreAbsolute(pathComponents);
             for (var i = pathComponents.Count - 1; i >= 0; i--)
+            {
                 if (!isRelative && i == 0)
-                    result.Insert(0, pathComponents[i]);
+                {
+
+                }
                 else if (pathComponents[i] == ".")
+                {
                     continue;
+                }
                 else if (pathComponents[i] == "..")
+                {
                     numberOfComponentsToSkip++;
+                }
                 else if (numberOfComponentsToSkip > 0)
+                {
                     numberOfComponentsToSkip--;
+                }
                 else
-                    result.Insert(0, pathComponents[i]);
+                {
+                }
+            }
 
             return numberOfComponentsToSkip > 0 && !isRelative;
         }
@@ -603,18 +644,6 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public IEither<AbsolutePath, RelativePath> ParsePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
-        {
-            var relativePath = TryParseRelativePath(path, flags);
-            if (relativePath.HasValue)
-            {
-                return new Either<AbsolutePath, RelativePath>(relativePath.Value);
-            }
-            
-            return new Either<AbsolutePath, RelativePath>(ParseAbsolutePath(path, flags));
-        }
-
-        /// <inheritdoc />
         public bool IsRelativePath(string path)
         {
             return TryParseRelativePath(path, CaseSensitivityMode.UseDefaultsForGivenPath).HasValue;
@@ -646,16 +675,7 @@ namespace IoFluently
             return Something(pathSpec);
         }
 
-        /// <inheritdoc />
-        public virtual bool TryParseRelativePath(string path, out RelativePath relativePath,
-            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
-        {
-            var error = string.Empty;
-            return TryParseRelativePath(path, out relativePath, out error, flags);
-        }
-
-        /// <inheritdoc />
-        public virtual bool TryParseRelativePath(string path, out RelativePath relativePath, out string error,
+        private bool TryParseRelativePath(string path, out RelativePath relativePath, out string error,
             CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             if (flags == CaseSensitivityMode.UseDefaultsFromEnvironment && flags.HasFlag(CaseSensitivityMode.UseDefaultsForGivenPath))
@@ -935,16 +955,7 @@ namespace IoFluently
             return Something(pathSpec);
         }
 
-        /// <inheritdoc />
-        public virtual bool TryParseAbsolutePath(string path, out AbsolutePath pathSpec,
-            CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
-        {
-            var error = string.Empty;
-            return TryParseAbsolutePath(path, out pathSpec, out error, flags);
-        }
-
-        /// <inheritdoc />
-        public virtual bool TryParseAbsolutePath(string path, out AbsolutePath pathSpec, out string error,
+        private bool TryParseAbsolutePath(string path, out AbsolutePath pathSpec, out string error,
             CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             if (flags.HasFlag(CaseSensitivityMode.UseDefaultsFromEnvironment) && flags.HasFlag(CaseSensitivityMode.UseDefaultsForGivenPath))
@@ -1203,6 +1214,7 @@ namespace IoFluently
             return false;
         }
 
+        /// <inheritdoc />
         public AbsolutePath ParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo,
             CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
@@ -1212,194 +1224,309 @@ namespace IoFluently
         #endregion
         #region Translation stuff
         
-        /// <inheritdoc />
-        public virtual void RenameTo(AbsolutePath source, AbsolutePath target)
-        {
-            Move(source.IoService.Translate(source, target));
-        }
+        #region Stuff that must be implemented
 
         /// <inheritdoc />
-        public IAbsolutePathTranslation Copy(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination)
+        public virtual async Task<IAbsolutePathTranslation> CopyFileAsync(IAbsolutePathTranslation translation,
+            CancellationToken cancellationToken,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
         {
-            return Copy(pathToBeCopied.IoService.Translate(pathToBeCopied, source, destination));
-        }
-
-        /// <inheritdoc />
-        public IAbsolutePathTranslation Copy(AbsolutePath source, AbsolutePath destination)
-        {
-            return Copy(source.IoService.Translate(source, destination));
-        }
-
-        /// <inheritdoc />
-        public IAbsolutePathTranslation Move(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination)
-        {
-            return Move(pathToBeCopied.IoService.Translate(pathToBeCopied, source, destination));
-        }
-
-        /// <inheritdoc />
-        public IAbsolutePathTranslation Move(AbsolutePath source, AbsolutePath destination)
-        {
-            return Move(source.IoService.Translate(source, destination));
-        }
-
-        /// <inheritdoc />
-        public virtual IAbsolutePathTranslation Translate(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination)
-        {
-            return new CalculatedAbsolutePathTranslation(pathToBeCopied, source, destination, this);
-        }
-
-        /// <inheritdoc />
-        public virtual IAbsolutePathTranslation Translate(AbsolutePath source, AbsolutePath destination)
-        {
-            return new AbsolutePathTranslation(source, destination, this);
-        }
-
-        /// <inheritdoc />
-        public virtual IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation, bool overwrite = false)
-        {
-            switch (translation.Source.IoService.Type(translation.Source))
+            if (overwrite && translation.Destination.Exists)
             {
-                case IoFluently.PathType.File:
-                    CopyFile(translation, overwrite);
-                    break;
-                case IoFluently.PathType.Folder:
-                    CopyFolder(translation, overwrite);
-                    break;
-                case IoFluently.PathType.None:
-                    throw new IOException(
-                        string.Format(
-                            $"An attempt was made to copy \"{translation.Source}\" to \"{translation.Destination}\", but the source path doesn't exist."));
+                await translation.Destination.IoService.DeleteAsync(translation.Destination, cancellationToken, true);
             }
 
-            return translation;
-        }
-
-        /// <inheritdoc />
-        public virtual IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation, bool overwrite = false)
-        {
-            using (var source = translation.Source.IoService.TryOpen(translation.Source, FileMode.Open, FileAccess.Read, FileShare.Read).Value)
-            using (var destination = translation.Destination.IoService.TryOpen(translation.Destination, overwrite ? FileMode.OpenOrCreate : FileMode.CreateNew, FileAccess.Write).Value)
+            if (cancellationToken.IsCancellationRequested)
             {
-                byte[] buffer = new byte[32768];
-                int read;
-                while ((read = source.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    destination.Write (buffer, 0, read);
-                }
+                return translation;
             }
+            
+            var fileOptions = FileOptions.Asynchronous | FileOptions.SequentialScan;
+
+            using var sourceStream = translation.Source.IoService.TryOpen(translation.Source, FileMode.Open, FileAccess.Read,
+                FileShare.Read, fileOptions, bufferSize).Value;
+            using var destinationStream = translation.Destination.IoService.TryOpen(translation.Destination, FileMode.Open,
+                FileAccess.Write, FileShare.None, fileOptions, bufferSize).Value;
+
+            await sourceStream.CopyToAsync(destinationStream, bufferSize, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
             
             return translation;
         }
 
         /// <inheritdoc />
-        public virtual IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation, bool overwrite = false)
+        public virtual async Task<IAbsolutePathTranslation> CopyFolderAsync(IAbsolutePathTranslation translation,
+            CancellationToken cancellationToken,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
         {
-            if (translation.Destination.IoService.Exists(translation.Destination))
+            if (overwrite && translation.Destination.Exists)
             {
-                if (!overwrite)
-                {
-                    throw new IOException($"An attempt was made to move a file from \"{translation.Source}\" to \"{translation.Destination}\" without overwriting the destination, but the destination already exists");
-                }
-                else
-                {
-                    translation.Destination.IoService.Delete(translation.Destination);
-                }
+                await translation.Destination.IoService.DeleteAsync(translation.Destination, cancellationToken, true);
             }
-            if (translation.Source.IoService.Type(translation.Source) != IoFluently.PathType.Folder)
-                throw new IOException(string.Format(
-                    $"An attempt was made to copy a folder from \"{translation.Source}\" to \"{translation.Destination}\" but the source path is not a folder."));
-            translation.Destination.IoService.Create(translation.Destination, IoFluently.PathType.Folder);
-            foreach (var item in translation)
+
+            translation.Destination.IoService.CreateFolder(translation.Destination);
+
+            foreach (var child in translation)
             {
-                item.Copy();
+                // TODO - investigate if there's a more efficient way to do this.
+                await CopyAsync(child, cancellationToken, bufferSize, overwrite);
             }
+
             return translation;
         }
 
         /// <inheritdoc />
-        public virtual IAbsolutePathTranslation Move(IAbsolutePathTranslation translation, bool overwrite = false)
+        public virtual async Task<IAbsolutePathTranslation> MoveFileAsync(IAbsolutePathTranslation translation,
+            CancellationToken cancellationToken,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
         {
-            switch (translation.Source.IoService.Type(translation.Source))
+            await CopyFileAsync(translation, cancellationToken, bufferSize, overwrite);
+            await translation.Source.IoService.DeleteAsync(translation.Source, cancellationToken, true);
+            return translation;
+        }
+
+        /// <inheritdoc />
+        public virtual async Task<IAbsolutePathTranslation> MoveFolderAsync(IAbsolutePathTranslation translation,
+            CancellationToken cancellationToken,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+        {
+            await CopyFolderAsync(translation, cancellationToken, bufferSize, overwrite);
+            await translation.Source.IoService.DeleteAsync(translation.Source, cancellationToken, true);
+            return translation;
+        }
+
+        /// <inheritdoc />
+        public virtual IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+        {
+            if (overwrite && translation.Destination.Exists)
             {
-                case IoFluently.PathType.File:
-                    MoveFile(translation, overwrite);
+                translation.Destination.IoService.Delete(translation.Destination, true);
+            }
+
+            var fileOptions = FileOptions.SequentialScan;
+
+            using var sourceStream = translation.Source.IoService.TryOpen(translation.Source, FileMode.Open, FileAccess.Read,
+                FileShare.Read, fileOptions, bufferSize).Value;
+            using var destinationStream = translation.Destination.IoService.TryOpen(translation.Destination, FileMode.Open,
+                FileAccess.Write, FileShare.None, fileOptions, bufferSize).Value;
+
+            sourceStream.CopyTo(destinationStream, bufferSize);
+            
+            return translation;
+        }
+
+        /// <inheritdoc />
+        public virtual IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+        {
+            if (overwrite && translation.Destination.Exists)
+            {
+                translation.Destination.IoService.Delete(translation.Destination, true);
+            }
+
+            translation.Destination.IoService.CreateFolder(translation.Destination);
+
+            foreach (var child in translation)
+            {
+                Copy(child, bufferSize, overwrite);
+            }
+
+            return translation;
+        }
+
+        /// <inheritdoc />
+        public virtual IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+        {
+            CopyFile(translation, bufferSize, overwrite);
+            translation.Source.IoService.Delete(translation.Source, true);
+            return translation;
+        }
+
+        /// <inheritdoc />
+        public virtual IAbsolutePathTranslation MoveFolder(IAbsolutePathTranslation translation,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+        {
+            CopyFolder(translation, bufferSize, overwrite);
+            translation.Source.IoService.Delete(translation.Source, true);
+            return translation;
+        }
+
+        #endregion
+
+        /// <inheritdoc />
+        public IAbsolutePathTranslation Translate(AbsolutePath pathToBeCopied, AbsolutePath source,
+            AbsolutePath destination)
+        {
+            return new CalculatedAbsolutePathTranslation(pathToBeCopied, source, destination, this);
+        }
+
+        /// <inheritdoc />
+        public IAbsolutePathTranslation Translate(AbsolutePath source, AbsolutePath destination)
+        {
+            return new AbsolutePathTranslation(source, destination, this);
+        }
+
+        /// <inheritdoc />
+        public IAbsolutePathTranslation Copy(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+        {
+            return Copy(Translate(pathToBeCopied, source, destination), bufferSize, overwrite);
+        }
+        
+        /// <inheritdoc />
+        public IAbsolutePathTranslation Copy(AbsolutePath source, AbsolutePath destination,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false) {
+            return Copy(Translate(source, destination), bufferSize, overwrite);
+        }
+
+        /// <inheritdoc />
+        public IAbsolutePathTranslation Move(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+        {
+            return Move(Translate(pathToBeCopied, source, destination), bufferSize, overwrite);
+        }
+
+        /// <inheritdoc />
+        public IAbsolutePathTranslation Move(AbsolutePath source, AbsolutePath destination,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+        {
+            return Move(Translate(source, destination), bufferSize, overwrite);
+        }
+
+        /// <inheritdoc />
+        public IAbsolutePathTranslation RenameTo(AbsolutePath source, AbsolutePath target,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+        {
+            return Move(Translate(source, target), bufferSize, overwrite);
+        }
+
+        /// <inheritdoc />
+        public IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+        {
+            switch (translation.Source.Type)
+            {
+                case PathType.File:
+                    CopyFile(translation, bufferSize, overwrite);
                     break;
-                case IoFluently.PathType.Folder:
-                    MoveFolder(translation, overwrite);
+                case PathType.Folder:
+                    CopyFolder(translation, bufferSize, overwrite);
                     break;
-                case IoFluently.PathType.None:
-                    throw new IOException(
-                        string.Format(
-                            $"An attempt was made to move \"{translation.Source}\" to \"{translation.Destination}\", but the source path doesn't exist."));
+                default:
+                    throw new InvalidOperationException($"Cannot copy non-existent path {translation.Source}");
             }
 
             return translation;
         }
 
         /// <inheritdoc />
-        public virtual IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation, bool overwrite = false)
+        public IAbsolutePathTranslation Move(IAbsolutePathTranslation translation,
+            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
         {
-            Copy(translation, overwrite);
-            translation.Source.IoService.Delete(translation.Source);
+            switch (translation.Source.Type)
+            {
+                case PathType.File:
+                    MoveFile(translation, bufferSize, overwrite);
+                    break;
+                case PathType.Folder:
+                    MoveFolder(translation, bufferSize, overwrite);
+                    break;
+                default:
+                    throw new InvalidOperationException($"Cannot move non-existent path {translation.Source}");
+            }
+
             return translation;
         }
 
         /// <inheritdoc />
-        public virtual IAbsolutePathTranslation MoveFolder(IAbsolutePathTranslation translation, bool overwrite = false)
+        public Task<IAbsolutePathTranslation> CopyAsync(AbsolutePath pathToBeCopied, AbsolutePath source,
+            AbsolutePath destination,
+            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
         {
-            if (translation.Destination.IoService.Exists(translation.Destination))
+            return CopyAsync(Translate(pathToBeCopied, source, destination), cancellationToken, bufferSize, overwrite);
+        }
+
+        /// <inheritdoc />
+        public Task<IAbsolutePathTranslation> CopyAsync(AbsolutePath source, AbsolutePath destination,
+            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+        {
+            return CopyAsync(Translate(source, destination), cancellationToken, bufferSize, overwrite);
+        }
+
+        /// <inheritdoc />
+        public Task<IAbsolutePathTranslation> MoveAsync(AbsolutePath pathToBeCopied, AbsolutePath source,
+            AbsolutePath destination,
+            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+        {
+            return MoveAsync(Translate(pathToBeCopied, source, destination), cancellationToken, bufferSize, overwrite);
+        }
+
+        /// <inheritdoc />
+        public Task<IAbsolutePathTranslation> MoveAsync(AbsolutePath source, AbsolutePath destination,
+            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+        {
+            return MoveAsync(Translate(source, destination), cancellationToken, bufferSize, overwrite);
+        }
+
+        /// <inheritdoc />
+        public Task<IAbsolutePathTranslation> RenameToAsync(AbsolutePath source, AbsolutePath target,
+            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+        {
+            return MoveAsync(Translate(source, target), cancellationToken, bufferSize, overwrite);
+        }
+
+        /// <inheritdoc />
+        public async Task<IAbsolutePathTranslation> CopyAsync(IAbsolutePathTranslation translation,
+            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+        {
+            switch (translation.Source.Type)
             {
-                if (!overwrite)
-                {
-                    throw new IOException($"An attempt was made to move a file from \"{translation.Source}\" to \"{translation.Destination}\" without overwriting the destination, but the destination already exists");
-                }
-                else
-                {
-                    translation.Destination.IoService.Delete(translation.Destination);
-                }
-            }
-            if (translation.Source.IoService.Type(translation.Source) != IoFluently.PathType.Folder)
-                throw new IOException(string.Format(
-                    $"An attempt was made to move a folder from \"{translation.Source}\" to \"{translation.Destination}\" but the source path is not a folder."));
-            if (translation.Destination.IoService.Type(translation.Destination) == IoFluently.PathType.File)
-                throw new IOException(string.Format(
-                    $"An attempt was made to move \"{translation.Source}\" to \"{translation.Destination}\" but the destination path is a file."));
-            if (translation.Destination.IoService.IsDescendantOf(translation.Destination, translation.Source))
-                throw new IOException(string.Format(
-                    $"An attempt was made to move a file from \"{translation.Source}\" to \"{translation.Destination}\" but the destination path is a sub-path of the source path."));
-            if (translation.Source.Children().Any())
-                throw new IOException(string.Format(
-                    $"An attempt was made to move the non-empty folder \"{translation.Source}\". This is not allowed because all the files should be moved first, and only then can the folder be moved, because the move operation deletes the source folder, which would of course also delete the files and folders within the source folder."));
-            translation.Destination.IoService.Create(translation.Destination, IoFluently.PathType.Folder);
-            foreach (var item in translation)
-            {
-                item.Move();
+                case PathType.File:
+                    await CopyFileAsync(translation, cancellationToken, bufferSize, overwrite);
+                    break;
+                case PathType.Folder:
+                    await CopyFolderAsync(translation, cancellationToken, bufferSize, overwrite);
+                    break;
+                default:
+                    throw new InvalidOperationException($"Cannot copy non-existent path {translation.Source}");
             }
 
-            if (!translation.Source.Children().Any())
+            return translation;
+        }
+
+        /// <inheritdoc />
+        public async Task<IAbsolutePathTranslation> MoveAsync(IAbsolutePathTranslation translation,
+            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+        {
+            switch (translation.Source.Type)
             {
-                translation.Source.IoService.DeleteFolder(translation.Source);
+                case PathType.File:
+                    await MoveFileAsync(translation, cancellationToken, bufferSize, overwrite);
+                    break;
+                case PathType.Folder:
+                    await MoveFolderAsync(translation, cancellationToken, bufferSize, overwrite);
+                    break;
+                default:
+                    throw new InvalidOperationException($"Cannot copy non-existent path {translation.Source}");
             }
-            else
-            {
-                throw new IOException($"Files were still present in {translation.Source} after moving");
-            }
+
             return translation;
         }
 
         #endregion
         #region Path building
-        
-        /// <inheritdoc />
-        public AbsolutePath CommonWith(AbsolutePath path, AbsolutePath that)
-        {
-            return path.IoService.TryCommonWith(path, that).Value;
-        }
 
         /// <inheritdoc />
-        public AbsolutePath Parent(AbsolutePath path)
+        public AbsolutePath GenerateUniqueTemporaryPath(string extension = null)
         {
-            return path.IoService.TryParent(path).Value;
+            var result = GetTemporaryFolder() / Guid.NewGuid().ToString();
+            if (!string.IsNullOrEmpty(extension))
+            {
+                result = result.WithExtension(extension);
+            }
+
+            return result;
         }
 
         /// <inheritdoc />
@@ -1409,13 +1536,10 @@ namespace IoFluently
             return path / patternFunc;
         }
 
-        /// <summary>
-        /// Equivalent to Path.Combine. You can also use the / operator to build paths, like this:
-        /// _ioService.CurrentDirectory / "folder1" / "folder2" / "file.txt"
-        /// </summary>
+        /// <inheritdoc />
         public AbsolutePath Combine(AbsolutePath path, params string[] subsequentPathParts)
         {
-            return Descendant(path, subsequentPathParts);
+            return TryDescendant(path, subsequentPathParts).Value;
         }
 
         /// <inheritdoc />
@@ -1440,51 +1564,9 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public AbsolutePath Descendant(AbsolutePath path, params AbsolutePath[] paths)
-        {
-            return path.IoService.TryDescendant(path, paths).Value;
-        }
-
-        /// <inheritdoc />
-        public AbsolutePath Descendant(AbsolutePath path, params string[] paths)
-        {
-            return path.IoService.TryDescendant(path, paths).Value;
-        }
-
-        /// <inheritdoc />
-        public AbsolutePath Ancestor(AbsolutePath path, int level)
-        {
-            return path.IoService.TryAncestor(path, level).Value;
-        }
-
-        /// <inheritdoc />
         public IMaybe<AbsolutePath> TryWithExtension(AbsolutePath path, Func<string, string> differentExtension)
         {
             return path.IoService.TryWithExtension(path, differentExtension(path.Extension.ValueOrDefault ?? string.Empty));
-        }
-
-        /// <inheritdoc />
-        public AbsolutePath GetCommonAncestry(AbsolutePath path1, AbsolutePath path2)
-        {
-            return path1.IoService.TryGetCommonAncestry(path1, path2).Value;
-        }
-
-        /// <inheritdoc />
-        public Uri GetCommonDescendants(AbsolutePath path1, AbsolutePath path2)
-        {
-            return path1.IoService.TryGetCommonDescendants(path1, path2).Value;
-        }
-
-        /// <inheritdoc />
-        public Tuple<Uri, Uri> GetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2)
-        {
-            return path1.IoService.TryGetNonCommonDescendants(path1, path2).Value;
-        }
-
-        /// <inheritdoc />
-        public Tuple<Uri, Uri> GetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2)
-        {
-            return path1.IoService.TryGetNonCommonAncestry(path1, path2).Value;
         }
 
         /// <inheritdoc />
@@ -1641,11 +1723,6 @@ namespace IoFluently
             return ancestor;
         }
 
-        public IEnumerable<AbsolutePath> Ancestors(AbsolutePath path)
-        {
-            return Ancestors(path, false);
-        }
-
         /// <inheritdoc />
         public virtual IMaybe<AbsolutePath> TryGetCommonAncestry(AbsolutePath path1, AbsolutePath path2)
         {
@@ -1685,27 +1762,13 @@ namespace IoFluently
             });
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="path"></param>
-        /// <param name="differentExtension">Must include the "." part of the extension (e.g., ".avi" not "avi")</param>
-        /// <returns></returns>
+        /// <inheritdoc />
         public virtual IMaybe<AbsolutePath> TryWithExtension(AbsolutePath path, string differentExtension)
         {
             return TryParseAbsolutePath(Path.ChangeExtension(path.ToString(), differentExtension));
         }
 
-        /// <summary>
-        ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
-        ///     For example, the ancestors of the path C:\Users\myusername\Documents would be these, in order:
-        ///     C:\Users\myusername
-        ///     C:\Users
-        ///     C:
-        /// </summary>
-        /// <param name="path">The path whose ancestors will be returned.</param>
-        /// <param name="includeItself">True if the first item in the enumeration should be the path you specified,
-        /// false if the first path to be returned should be the parent of the specified path.</param>
-        /// <returns></returns>
+        /// <inheritdoc />
         public virtual IEnumerable<AbsolutePath> Ancestors(AbsolutePath path, bool includeItself)
         {
             if (includeItself)
@@ -1745,6 +1808,12 @@ namespace IoFluently
             return pathResult;
         }
 
+        /// <inheritdoc />
+        public IEnumerable<AbsolutePath> Ancestors(AbsolutePath path)
+        {
+            return Ancestors(path, false);
+        }
+        
         /// <inheritdoc />
         public virtual IMaybe<AbsolutePath> TryAncestor(AbsolutePath path, int level)
         {
@@ -1790,9 +1859,11 @@ namespace IoFluently
             }
         }
 
+        /// <inheritdoc />
         public abstract IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, string searchPattern = null, bool includeFolders = true,
             bool includeFiles = true);
 
+        /// <inheritdoc />
         public virtual IEnumerable<AbsolutePath> EnumerateDescendants(AbsolutePath path, string searchPattern = null,
             bool includeFolders = true,
             bool includeFiles = true)
@@ -1821,42 +1892,6 @@ namespace IoFluently
         #endregion
         #region File metadata
         
-        /// <inheritdoc />
-        public bool IsReadOnly(AbsolutePath path)
-        {
-            return path.IoService.TryIsReadOnly(path).Value;
-        }
-
-        /// <inheritdoc />
-        public Information FileSize(AbsolutePath path)
-        {
-            return path.IoService.TryFileSize(path).Value;
-        }
-
-        /// <inheritdoc />
-        public FileAttributes Attributes(AbsolutePath attributes)
-        {
-            return attributes.IoService.TryAttributes(attributes).Value;
-        }
-
-        /// <inheritdoc />
-        public DateTimeOffset CreationTime(AbsolutePath attributes)
-        {
-            return attributes.IoService.TryCreationTime(attributes).Value;
-        }
-
-        /// <inheritdoc />
-        public DateTimeOffset LastAccessTime(AbsolutePath attributes)
-        {
-            return attributes.IoService.TryLastAccessTime(attributes).Value;
-        }
-
-        /// <inheritdoc />
-        public DateTimeOffset LastWriteTime(AbsolutePath attributes)
-        {
-            return attributes.IoService.TryLastWriteTime(attributes).Value;
-        }
-
         /// <inheritdoc />
         public virtual bool Exists(AbsolutePath path)
         {
@@ -1893,6 +1928,7 @@ namespace IoFluently
         /// <inheritdoc />
         public abstract IMaybe<DateTimeOffset> TryLastWriteTime(AbsolutePath attributes);
 
+        /// <inheritdoc />
         public IFileInfo GetFileInfo( string subpath ) => new AbsolutePathFileInfoAdapter(ParseAbsolutePath( subpath ));
 
         #endregion
@@ -1902,22 +1938,6 @@ namespace IoFluently
         public IMaybe<StreamReader> TryOpenReader(AbsolutePath path)
         {
             return path.IoService.TryOpen(path, FileMode.Open, FileAccess.Read, FileShare.Read).Select(stream => new StreamReader(stream));
-        }
-
-        /// <inheritdoc />
-        public StreamReader OpenReader(AbsolutePath path)
-        {
-            return TryOpenReader(path).Value;
-        }
-
-        /// <inheritdoc />
-        public string ReadText(AbsolutePath absolutePath, FileMode fileMode = FileMode.Open,
-            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
-            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
-            bool leaveOpen = false)
-        {
-            return absolutePath.IoService.TryReadText(absolutePath, fileMode, fileAccess, fileShare, encoding,
-                detectEncodingFromByteOrderMarks, bufferSize, leaveOpen).Value;
         }
 
         /// <inheritdoc />
@@ -1954,9 +1974,10 @@ namespace IoFluently
             return streamReader.ReadToEnd();
         }
 
+        /// <inheritdoc />
         public virtual IEnumerable<string> ReadLines(AbsolutePath path, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
-            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = Constants.DefaultBufferSize,
             bool leaveOpen = false)
         {
             var maybeStream = path.IoService.TryOpen(path, fileMode, fileAccess, fileShare);
@@ -1972,9 +1993,10 @@ namespace IoFluently
             return Enumerable.Empty<string>();
         }
 
+        /// <inheritdoc />
         public virtual IMaybe<string> TryReadText(AbsolutePath path, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
-            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096,
+            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = Constants.DefaultBufferSize,
             bool leaveOpen = false)
         {
             return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare).Select(
@@ -1987,8 +2009,9 @@ namespace IoFluently
                 });
         }
 
+        /// <inheritdoc />
         public virtual IEnumerable<string> ReadLines(Stream stream, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
+            bool detectEncodingFromByteOrderMarks = true, int bufferSize = Constants.DefaultBufferSize, bool leaveOpen = false)
         {
             if (encoding == null)
                 encoding = Encoding.UTF8;
@@ -1999,8 +2022,9 @@ namespace IoFluently
             }
         }
 
+        /// <inheritdoc />
         public virtual IEnumerable<string> ReadLinesBackwards(Stream stream, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, bool leaveOpen = false)
+            bool detectEncodingFromByteOrderMarks = true, int bufferSize = Constants.DefaultBufferSize, bool leaveOpen = false)
         {
             if (encoding == null)
                 encoding = Encoding.UTF8;
@@ -2046,8 +2070,9 @@ namespace IoFluently
             }
         }
 
+        /// <inheritdoc />
         public virtual string TryReadText(Stream stream, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
-            int bufferSize = 4096, bool leaveOpen = false)
+            int bufferSize = Constants.DefaultBufferSize, bool leaveOpen = false)
         {
             if (encoding == null)
                 encoding = Encoding.UTF8;
@@ -2059,24 +2084,20 @@ namespace IoFluently
 
         #endregion
         #region File writing
-        
+
         /// <inheritdoc />
-        public StreamWriter OpenWriter(AbsolutePath absolutePath, bool createRecursively = false)
+        public IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, int bufferSize = Constants.DefaultBufferSize,
+            bool createRecursively = false)
         {
-            return TryOpenWriter(absolutePath, createRecursively).Value;
+            return TryOpen(absolutePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None,
+                FileOptions.WriteThrough, bufferSize, createRecursively)
+                .Select(stream => new StreamWriter(stream));
         }
 
         /// <inheritdoc />
-        public virtual void WriteAllText(AbsolutePath path, string text, bool createRecursively = false)
+        public virtual void WriteAllLines(AbsolutePath path, IEnumerable<string> lines, Encoding encoding = null, int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false)
         {
-            var bytes = Encoding.Default.GetBytes(text);
-            WriteAllBytes(path, bytes, createRecursively);
-        }
-
-        /// <inheritdoc />
-        public virtual void WriteAllLines(AbsolutePath path, IEnumerable<string> lines, bool createRecursively = false)
-        {
-            var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite, createRecursively);
+            var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite, FileShare.Write, FileOptions.WriteThrough, bufferSize, createRecursively);
             using (var stream = maybeStream.Value)
             {
                 foreach (var line in lines)
@@ -2090,128 +2111,34 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual void WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = false)
         {
-            var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite, createRecursively);
+            var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.WriteThrough, bytes.Length, createRecursively);
             using (var stream = maybeStream.Value)
             {
                 stream.Write(bytes, 0, bytes.Length);
             }
         }
 
-        /// <summary>
-        /// Writes the specified lines lazily to the specified stream.
-        /// </summary>
-        /// <param name="stream">The stream to write the text to</param>
-        /// <param name="lines">The lazily-enumerated lines of text to write to the stream</param>
-        /// <param name="encoding">The text encoding to be used</param>
-        /// <param name="bufferSize">The number of bytes in the StreamWriter buffer to be used</param>
-        /// <param name="leaveOpen">Whether to leave the stream open after writing the lines</param>
-        public virtual void WriteLines(Stream stream, IEnumerable<string> lines, Encoding encoding = null,
-            int bufferSize = 4096, bool leaveOpen = false)
+        /// <inheritdoc />
+        public void WriteText(AbsolutePath absolutePath, string text, Encoding encoding = null, bool createRecursively = false)
         {
-            if (encoding == null)
-                encoding = Encoding.UTF8;
-            using (var sw = new StreamWriter(stream, encoding, bufferSize, leaveOpen))
-            {
-                WriteLines(sw, lines);
-            }
+            using var writer = TryOpenWriter(absolutePath, encoding.GetByteCount(text), createRecursively).Value;
+            writer.Write(text);
         }
 
         private void WriteLines(StreamWriter streamWriter, IEnumerable<string> lines)
         {
             foreach (var line in lines) streamWriter.WriteLine(line);
         }
-
-        /// <summary>
-        /// Write the specified text to the specified stream
-        /// </summary>
-        /// <param name="stream">The stream to write the text to</param>
-        /// <param name="text">The text to write to the stream</param>
-        /// <param name="encoding">The text encoding to be used</param>
-        /// <param name="bufferSize">The number of bytes in the StreamWriter buffer to be used</param>
-        /// <param name="leaveOpen">Whether to leave the stream open after writing the lines</param>
-        public virtual void WriteText(Stream stream, string text, Encoding encoding = null, int bufferSize = 4096,
-            bool leaveOpen = false, bool createRecursively = false)
-        {
-            if (encoding == null)
-                encoding = Encoding.UTF8;
-            using (var sw = new StreamWriter(stream, encoding, bufferSize, leaveOpen))
-            {
-                WriteText(sw, text);
-            }
-        }
-
-        private void WriteText(StreamWriter streamWriter, string text, bool createRecursively = false)
-        {
-            streamWriter.Write(text);
-        }
-
-        /// <inheritdoc />
-        public virtual void WriteText(AbsolutePath pathSpec, IEnumerable<string> lines, FileMode fileMode = FileMode.Create,
-            FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
-            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false, bool createRecursively = false)
-        {
-            var maybeStream = TryOpen(pathSpec, fileMode, fileAccess, fileShare, createRecursively);
-            if (maybeStream.HasValue)
-                using (maybeStream.Value)
-                {
-                    WriteLines(maybeStream.Value, lines, encoding, bufferSize, leaveOpen);
-                }
-        }
-
-        /// <inheritdoc />
-        public virtual void WriteText(AbsolutePath pathSpec, string text, FileMode fileMode = FileMode.Create,
-            FileAccess fileAccess = FileAccess.Write, FileShare fileShare = FileShare.None,
-            Encoding encoding = null, int bufferSize = 4096, bool leaveOpen = false, bool createRecursively = false)
-        {
-            var maybeStream = TryOpen(pathSpec, fileMode, fileAccess, fileShare, createRecursively);
-            if (maybeStream.HasValue)
-                using (maybeStream.Value)
-                {
-                    WriteText(maybeStream.Value, text, encoding, bufferSize, leaveOpen);
-                }
-        }
-
-        /// <inheritdoc />
-        public abstract IMaybe<StreamWriter> TryOpenWriter(AbsolutePath pathSpec, bool createRecursively = false);
+        
         #endregion
         #region File open for reading or writing
-        
-        /// <inheritdoc />
-        public Stream Open(AbsolutePath path, FileMode fileMode, bool createRecursively = false)
-        {
-            return TryOpen(path, fileMode, createRecursively).Value;
-        }
-
-        /// <inheritdoc />
-        public Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, bool createRecursively = false)
-        {
-            return TryOpen(path, fileMode, fileAccess, createRecursively).Value;
-        }
-
-        /// <inheritdoc />
-        public Stream Open(AbsolutePath path, FileMode fileMode, FileAccess fileAccess,
-            FileShare fileShare, bool createRecursively = false)
-        {
-            return TryOpen(path, fileMode, fileAccess, fileShare, createRecursively).Value;
-        }
-
-        /// <inheritdoc />
-        public virtual IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, bool createRecursively = false)
-        {
-            return TryOpen(path, fileMode, FileAccess.ReadWrite, createRecursively);
-        }
-
-        /// <inheritdoc />
-        public virtual IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
-            FileAccess fileAccess, bool createRecursively = false)
-        {
-            var fileShare = fileAccess == FileAccess.Read ? FileShare.Read : FileShare.None;
-            return TryOpen(path, fileMode, fileAccess, fileShare, createRecursively);
-        }
 
         /// <inheritdoc />
         public abstract IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
-            FileAccess fileAccess, FileShare fileShare, bool createRecursively = false);
+            FileAccess fileAccess = FileAccess.ReadWrite,
+            FileShare fileShare = FileShare.None,
+            FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.None | FileOptions.SequentialScan,
+            int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false);
 
         #endregion
         #region LINQ-style APIs

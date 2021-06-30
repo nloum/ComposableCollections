@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using LiveLinq.Set;
 using SimpleMonads;
 using UnitsNet;
@@ -80,18 +81,6 @@ namespace IoFluently
         public override ISetChanges<AbsolutePath> ToLiveLinq(AbsolutePath path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public override IMaybe<StreamWriter> TryOpenWriter(AbsolutePath pathSpec, bool createRecursively = true)
-        {
-            if (!createRecursively)
-            {
-                // Ignore this flag because the default is true and it's impractical to pay attention to it
-                // throw new InvalidOperationException(
-                //     $"{nameof(createRecursively)} must always be true for {nameof(ZipIoService)}");
-            }
-            return TryOpen(pathSpec, FileMode.OpenOrCreate, FileAccess.Write).Select(stream => new StreamWriter(stream));
         }
 
         /// <summary>
@@ -268,6 +257,16 @@ namespace IoFluently
             }
         }
 
+        public override async Task<AbsolutePath> DeleteFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursive = false)
+        {
+            return DeleteFolder(path, recursive);
+        }
+
+        public override async Task<AbsolutePath> DeleteFileAsync(AbsolutePath path, CancellationToken cancellationToken)
+        {
+            return DeleteFile(path);
+        }
+
         /// <inheritdoc />
         public override AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false)
         {
@@ -295,8 +294,10 @@ namespace IoFluently
             return path;
         }
 
-        /// <inheritdoc />
-        public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess, FileShare fileShare, bool createRecursively = true)
+        public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,
+            FileShare fileShare = FileShare.None,
+            FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.None | FileOptions.SequentialScan,
+            int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false)
         {
             if (!createRecursively)
             {
@@ -362,14 +363,14 @@ namespace IoFluently
             var pathType = ZipFilePath.Type;
             if (pathType == IoFluently.PathType.None)
             {
-                var stream = ZipFilePath.TryOpen(FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None).Value;
+                var stream = ZipFilePath.IoService.TryOpen(ZipFilePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None).Value;
                 var zipArchive = new ZipArchive(stream, ZipArchiveMode.Create, false);
                 zipArchive.Dispose();
                 
                 if (willBeReading)
                 {
                     zipArchive.Dispose();
-                    stream = ZipFilePath.TryOpen(FileMode.Open, FileAccess.ReadWrite, FileShare.None).Value;
+                    stream = ZipFilePath.IoService.TryOpen(ZipFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None).Value;
                     zipArchive = new ZipArchive(stream, ZipArchiveMode.Update, false);
                     return zipArchive;
                 }
@@ -384,7 +385,7 @@ namespace IoFluently
             }
             else
             {
-                var stream = ZipFilePath.TryOpen(FileMode.Open, willBeWriting ? FileAccess.ReadWrite : FileAccess.Read,
+                var stream = ZipFilePath.IoService.TryOpen(ZipFilePath, FileMode.Open, willBeWriting ? FileAccess.ReadWrite : FileAccess.Read,
                     willBeWriting ? FileShare.None : FileShare.Read).Value;
                 return new ZipArchive(stream, willBeWriting ? ZipArchiveMode.Update : ZipArchiveMode.Read, false);
             }

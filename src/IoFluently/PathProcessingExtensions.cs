@@ -23,9 +23,9 @@ namespace IoFluently
         {
             var backupPath = path.IoService.TryWithExtension(path, x => x + ".backup").Value;
             var translation = path.Translate(backupPath);
-            translation.Copy(true);
+            translation.IoService.Copy(translation, overwrite: true);
 
-            return new AnonymousDisposable(() => translation.Invert().Move(true));
+            return new AnonymousDisposable(() => translation.IoService.Move(translation.Invert(), overwrite: true));
         }
         
         /// <summary>
@@ -172,7 +172,7 @@ namespace IoFluently
         public static IPathWithKnownFormatSync<Text, Text> AsTextFile(this AbsolutePath path)
         {
             return path.AsPathFormat(() => new Text(path.ReadLines()),
-                (text) => path.WriteAllLines(text.Lines));
+                (text) => path.IoService.WriteAllLines(path, text.Lines));
         }
 
         /// <summary>
@@ -183,7 +183,7 @@ namespace IoFluently
         /// <returns>An object that allows the path to be read from.</returns>
         public static IPathWithKnownFormatSync<string, string> AsSmallTextFile(this AbsolutePath path)
         {
-            return path.AsPathFormat(() => path.ReadAllText(), (text) => path.WriteAllText(text));
+            return path.AsPathFormat(() => path.ReadAllText(), (text) => path.IoService.WriteText(path, text));
         }
         
         /// <summary>
@@ -200,7 +200,7 @@ namespace IoFluently
                 return doc;
             }, (doc) =>
             {
-                using (var stream = path.TryOpen(FileMode.Create, FileAccess.Write).Value)
+                using (var stream = path.IoService.TryOpen(path, FileMode.Create, FileAccess.Write, FileShare.None).Value)
                 {
                     doc.Save(stream);
                 }
@@ -229,7 +229,7 @@ namespace IoFluently
             }, (model) =>
             {
                 var serializer = new XmlSerializer(typeof(TModel));
-                using (var writer = path.TryOpenWriter().Value)
+                using (var writer = path.IoService.TryOpenWriter(path).Value)
                 {
                     preSerialize?.Invoke(model);
                     serializer.Serialize(writer, model);

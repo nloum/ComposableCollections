@@ -134,6 +134,19 @@ namespace IoFluently.Tests
         [TestMethod]
         [DataRow(IoServiceType.IoService)]
         [DataRow(IoServiceType.InMemoryZipIoService)]
+        public void WriteAllTextCreateRecursivelyShouldWork(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, true);
+            var temporaryPath = uut.GenerateUniqueTemporaryPath() / "test1"  / "test2";
+            temporaryPath.WriteAllText("", createRecursively: true);
+            temporaryPath.IsFile.Should().BeTrue();
+            temporaryPath.DeleteFileAsync(CancellationToken.None).Wait();
+            temporaryPath.Exists.Should().BeFalse();
+        }
+
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void CreateTemporaryFileShouldWork(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, true);
@@ -281,6 +294,20 @@ namespace IoFluently.Tests
             var ioService = CreateUnitUnderTest(type, false);
             var result = ioService.ParseAbsolutePath("C:\\test1\\./test2\\");
             result.ToString().Should().Be("C:\\test1\\test2");
+            result.Path.Components.Should().BeEquivalentTo("C:", "test1", "test2");
+        }
+        
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryWindowsIoService)]
+        [DataRow(IoServiceType.InMemoryUnixIoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
+        public void ShouldParseDescendantWithComplexMixedDirectorySeparators(IoServiceType type)
+        {
+            var ioService = CreateUnitUnderTest(type, false);
+            var result = ioService.ParseAbsolutePath("C:\\test1") / "test2/test3";
+            result.ToString().Should().Be("C:\\test1\\test2\\test3");
+            result.Path.Components.Should().BeEquivalentTo(new[] {"C:", "test1", "test2", "test3"});
         }
         
         [TestMethod]

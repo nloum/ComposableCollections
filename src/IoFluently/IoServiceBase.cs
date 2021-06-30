@@ -637,7 +637,7 @@ namespace IoFluently
             var relativePath = TryParseRelativePath(path, flags);
             if (relativePath.HasValue)
             {
-                return (optionallyRelativeTo / path).ToMaybe();
+                return (optionallyRelativeTo / relativePath.Value).ToMaybe();
             }
 
             return TryParseAbsolutePath(path, flags);

@@ -192,7 +192,7 @@ namespace IoFluently
                 return absPath;
             }
             
-            return new AbsolutePath(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd);
+            return new AbsolutePath(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Path / new RelativeTreePath<string>(whatToAdd.Split('/', '\\')));
         }
 
         /// <summary>
@@ -241,7 +241,7 @@ namespace IoFluently
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
         public static AbsolutePaths operator / (AbsolutePath absPath, IEnumerable<string> whatToAdd)
         {
-            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd);
+            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd.Select(x => new RelativeTreePath<string>(x.Split('/', '\\'))));
         }
 
         /// <summary>

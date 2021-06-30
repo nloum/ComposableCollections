@@ -197,7 +197,7 @@ namespace IoFluently
                 return relPath;
             }
             
-            return new RelativePath(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, relPath.Path / whatToAdd);
+            return new RelativePath(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, relPath.Path / new RelativeTreePath<string>(whatToAdd.Split('/', '\\')));
         }
 
         /// <summary>
@@ -246,7 +246,7 @@ namespace IoFluently
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
         public static RelativePaths operator / (RelativePath relPath, IEnumerable<string> whatToAdd)
         {
-            return new RelativePaths(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, relPath.Path / whatToAdd);
+            return new RelativePaths(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, relPath.Path / whatToAdd.Select(x => new RelativeTreePath<string>(x.Split('/', '\\'))));
         }
         
         /// <summary>

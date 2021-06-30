@@ -14,21 +14,6 @@ namespace IoFluently
     public static class PathProcessingExtensions
     {
         /// <summary>
-        /// Backs up the specified path and then when the IDisposable is disposed of, the backup file is restored, overwriting
-        /// any changes that were made to the path. This is useful for making temporary changes to the path.
-        /// </summary>
-        /// <param name="path">The path that temporary changes will be made to.</param>
-        /// <returns>An object that, when disposed of, undoes any changes made to the specified path.</returns>
-        public static IDisposable TemporaryChanges(this AbsolutePath path)
-        {
-            var backupPath = path.IoService.TryWithExtension(path, x => x + ".backup").Value;
-            var translation = path.Translate(backupPath);
-            translation.IoService.Copy(translation, overwrite: true);
-
-            return new AnonymousDisposable(() => translation.IoService.Move(translation.Invert(), overwrite: true));
-        }
-        
-        /// <summary>
         /// Tells IoFluently how to read data from the specified path.
         /// </summary>
         /// <param name="path">The path to be read from</param>

@@ -599,7 +599,7 @@ namespace IoFluently
             return path;
         }
 
-        public override void WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = true)
+        public override AbsolutePath WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = true)
         {
             if (createRecursively)
             {
@@ -610,6 +610,7 @@ namespace IoFluently
                 }
             }
             File.WriteAllBytes(path.ToString(), bytes);
+            return path;
         }
 
         public override IEnumerable<string> ReadLines(AbsolutePath path)

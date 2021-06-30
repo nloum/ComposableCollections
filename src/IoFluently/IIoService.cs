@@ -474,9 +474,9 @@ namespace IoFluently
         
         #region File writing
         IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false);
-        void WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = false);
-        void WriteAllLines(AbsolutePath absolutePath, IEnumerable<string> lines, Encoding encoding = null, int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false);
-        void WriteAllText(AbsolutePath absolutePath, string text, Encoding encoding = null, bool createRecursively = false);
+        AbsolutePath WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = false);
+        AbsolutePath WriteAllLines(AbsolutePath absolutePath, IEnumerable<string> lines, Encoding encoding = null, int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false);
+        AbsolutePath WriteAllText(AbsolutePath absolutePath, string text, Encoding encoding = null, bool createRecursively = false);
         #endregion
         
         #region File open for reading or writing

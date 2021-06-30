@@ -2095,7 +2095,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual void WriteAllLines(AbsolutePath path, IEnumerable<string> lines, Encoding encoding = null, int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false)
+        public virtual AbsolutePath WriteAllLines(AbsolutePath path, IEnumerable<string> lines, Encoding encoding = null, int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false)
         {
             var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite, FileShare.Write, FileOptions.WriteThrough, bufferSize, createRecursively);
             using (var stream = maybeStream.Value)
@@ -2106,24 +2106,30 @@ namespace IoFluently
                     stream.Write(bytes, 0, bytes.Length);
                 }
             }
+
+            return path;
         }
 
         /// <inheritdoc />
-        public virtual void WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = false)
+        public virtual AbsolutePath WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = false)
         {
             var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.WriteThrough, bytes.Length, createRecursively);
             using (var stream = maybeStream.Value)
             {
                 stream.Write(bytes, 0, Math.Max(bytes.Length, 1));
             }
+
+            return path;
         }
 
         /// <inheritdoc />
-        public void WriteAllText(AbsolutePath absolutePath, string text, Encoding encoding = null, bool createRecursively = false)
+        public AbsolutePath WriteAllText(AbsolutePath absolutePath, string text, Encoding encoding = null, bool createRecursively = false)
         {
             encoding ??= Encoding.Default;
             using var writer = TryOpenWriter(absolutePath, Math.Max(encoding.GetByteCount(text), 1), createRecursively).Value;
             writer.Write(text);
+
+            return absolutePath;
         }
         
         #endregion

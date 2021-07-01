@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -47,6 +48,22 @@ namespace IoFluently
         public bool IsCaseSensitiveByDefault { get; }
         /// <inheritdoc />
         public virtual AbsolutePath DefaultRelativePathBase { get; protected set; }
+        
+        /// <summary>
+        /// The default buffer size for this <see cref="IIoService"/>, used in calls where the buffer size is an optional
+        /// parameter.
+        /// </summary>
+        public Information DefaultBufferSize { get; set; } = Information.FromBytes(4096);
+        
+        protected int GetBufferSizeInBytes(Information? bufferSize)
+        {
+            if (bufferSize != null)
+            {
+                return (int)Math.Round(bufferSize.Value.Bytes);
+            }
+
+            return (int)Math.Round(DefaultBufferSize.Bytes);
+        }
 
         /// <inheritdoc />
         public virtual void SetDefaultRelativePathBase(AbsolutePath defaultRelativePathBase)
@@ -1240,7 +1257,7 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual async Task<IAbsolutePathTranslation> CopyFileAsync(IAbsolutePathTranslation translation,
             CancellationToken cancellationToken,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            Information? bufferSize = default, bool overwrite = false)
         {
             if (overwrite && translation.Destination.Exists)
             {
@@ -1259,7 +1276,7 @@ namespace IoFluently
             using var destinationStream = translation.Destination.IoService.TryOpen(translation.Destination, FileMode.Open,
                 FileAccess.Write, FileShare.None, fileOptions, bufferSize).Value;
 
-            await sourceStream.CopyToAsync(destinationStream, bufferSize, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+            await sourceStream.CopyToAsync(destinationStream, GetBufferSizeInBytes(bufferSize), cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
             
             return translation;
         }
@@ -1267,7 +1284,7 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual async Task<IAbsolutePathTranslation> CopyFolderAsync(IAbsolutePathTranslation translation,
             CancellationToken cancellationToken,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            Information? bufferSize = default, bool overwrite = false)
         {
             if (overwrite && translation.Destination.Exists)
             {
@@ -1288,7 +1305,7 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual async Task<IAbsolutePathTranslation> MoveFileAsync(IAbsolutePathTranslation translation,
             CancellationToken cancellationToken,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            Information? bufferSize = default, bool overwrite = false)
         {
             await CopyFileAsync(translation, cancellationToken, bufferSize, overwrite);
             await translation.Source.IoService.DeleteAsync(translation.Source, cancellationToken, true);
@@ -1298,7 +1315,7 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual async Task<IAbsolutePathTranslation> MoveFolderAsync(IAbsolutePathTranslation translation,
             CancellationToken cancellationToken,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            Information? bufferSize = default, bool overwrite = false)
         {
             await CopyFolderAsync(translation, cancellationToken, bufferSize, overwrite);
             await translation.Source.IoService.DeleteAsync(translation.Source, cancellationToken, true);
@@ -1307,7 +1324,7 @@ namespace IoFluently
 
         /// <inheritdoc />
         public virtual IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            Information? bufferSize = default, bool overwrite = false)
         {
             if (overwrite && translation.Destination.Exists)
             {
@@ -1321,14 +1338,14 @@ namespace IoFluently
             using var destinationStream = translation.Destination.IoService.TryOpen(translation.Destination, overwrite ? FileMode.Create : FileMode.CreateNew,
                 FileAccess.Write, FileShare.None, fileOptions, bufferSize).Value;
 
-            sourceStream.CopyTo(destinationStream, bufferSize);
+            sourceStream.CopyTo(destinationStream, GetBufferSizeInBytes(bufferSize));
             
             return translation;
         }
 
         /// <inheritdoc />
         public virtual IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            Information? bufferSize = default, bool overwrite = false)
         {
             if (overwrite && translation.Destination.Exists)
             {
@@ -1347,7 +1364,7 @@ namespace IoFluently
 
         /// <inheritdoc />
         public virtual IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            Information? bufferSize = default, bool overwrite = false)
         {
             CopyFile(translation, bufferSize, overwrite);
             translation.Source.IoService.Delete(translation.Source, true);
@@ -1356,7 +1373,7 @@ namespace IoFluently
 
         /// <inheritdoc />
         public virtual IAbsolutePathTranslation MoveFolder(IAbsolutePathTranslation translation,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            Information? bufferSize = default, bool overwrite = false)
         {
             CopyFolder(translation, bufferSize, overwrite);
             translation.Source.IoService.Delete(translation.Source, true);
@@ -1380,41 +1397,41 @@ namespace IoFluently
 
         /// <inheritdoc />
         public IAbsolutePathTranslation Copy(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            Information? bufferSize = default, bool overwrite = false)
         {
             return Copy(Translate(pathToBeCopied, source, destination), bufferSize, overwrite);
         }
         
         /// <inheritdoc />
         public IAbsolutePathTranslation Copy(AbsolutePath source, AbsolutePath destination,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false) {
+            Information? bufferSize = default, bool overwrite = false) {
             return Copy(Translate(source, destination), bufferSize, overwrite);
         }
 
         /// <inheritdoc />
         public IAbsolutePathTranslation Move(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            Information? bufferSize = default, bool overwrite = false)
         {
             return Move(Translate(pathToBeCopied, source, destination), bufferSize, overwrite);
         }
 
         /// <inheritdoc />
         public IAbsolutePathTranslation Move(AbsolutePath source, AbsolutePath destination,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            Information? bufferSize = default, bool overwrite = false)
         {
             return Move(Translate(source, destination), bufferSize, overwrite);
         }
 
         /// <inheritdoc />
         public IAbsolutePathTranslation RenameTo(AbsolutePath source, AbsolutePath target,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            Information? bufferSize = default, bool overwrite = false)
         {
             return Move(Translate(source, target), bufferSize, overwrite);
         }
 
         /// <inheritdoc />
         public IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            Information? bufferSize = default, bool overwrite = false)
         {
             switch (translation.Source.Type)
             {
@@ -1433,7 +1450,7 @@ namespace IoFluently
 
         /// <inheritdoc />
         public IAbsolutePathTranslation Move(IAbsolutePathTranslation translation,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            Information? bufferSize = default, bool overwrite = false)
         {
             switch (translation.Source.Type)
             {
@@ -1453,14 +1470,14 @@ namespace IoFluently
         /// <inheritdoc />
         public Task<IAbsolutePathTranslation> CopyAsync(AbsolutePath pathToBeCopied, AbsolutePath source,
             AbsolutePath destination,
-            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             return CopyAsync(Translate(pathToBeCopied, source, destination), cancellationToken, bufferSize, overwrite);
         }
 
         /// <inheritdoc />
         public Task<IAbsolutePathTranslation> CopyAsync(AbsolutePath source, AbsolutePath destination,
-            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             return CopyAsync(Translate(source, destination), cancellationToken, bufferSize, overwrite);
         }
@@ -1468,28 +1485,28 @@ namespace IoFluently
         /// <inheritdoc />
         public Task<IAbsolutePathTranslation> MoveAsync(AbsolutePath pathToBeCopied, AbsolutePath source,
             AbsolutePath destination,
-            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             return MoveAsync(Translate(pathToBeCopied, source, destination), cancellationToken, bufferSize, overwrite);
         }
 
         /// <inheritdoc />
         public Task<IAbsolutePathTranslation> MoveAsync(AbsolutePath source, AbsolutePath destination,
-            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             return MoveAsync(Translate(source, destination), cancellationToken, bufferSize, overwrite);
         }
 
         /// <inheritdoc />
         public Task<IAbsolutePathTranslation> RenameToAsync(AbsolutePath source, AbsolutePath target,
-            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             return MoveAsync(Translate(source, target), cancellationToken, bufferSize, overwrite);
         }
 
         /// <inheritdoc />
         public async Task<IAbsolutePathTranslation> CopyAsync(IAbsolutePathTranslation translation,
-            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             switch (translation.Source.Type)
             {
@@ -1508,7 +1525,7 @@ namespace IoFluently
 
         /// <inheritdoc />
         public async Task<IAbsolutePathTranslation> MoveAsync(IAbsolutePathTranslation translation,
-            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false)
+            CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             switch (translation.Source.Type)
             {
@@ -1946,7 +1963,7 @@ namespace IoFluently
         #region File reading
         
         /// <inheritdoc />
-        public IMaybe<StreamReader> TryOpenReader(AbsolutePath path, FileOptions fileOptions = FileOptions.SequentialScan, Encoding encoding = null, int bufferSize = Constants.DefaultBufferSize)
+        public IMaybe<StreamReader> TryOpenReader(AbsolutePath path, FileOptions fileOptions = FileOptions.SequentialScan, Encoding encoding = null, Information? bufferSize = default)
         {
             return path.IoService.TryOpen(path, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan, bufferSize).Select(stream =>
             {
@@ -1985,11 +2002,11 @@ namespace IoFluently
 
         /// <inheritdoc />
         public BufferEnumerator ReadBuffers(AbsolutePath path, FileShare fileShare = FileShare.None,
-            int bufferSize = Constants.DefaultBufferSize, int paddingAtStart = 0, int paddingAtEnd = 0)
+            Information? bufferSize = default, int paddingAtStart = 0, int paddingAtEnd = 0)
         {
             var stream = TryOpen(path, FileMode.Open, FileAccess.Read, fileShare, FileOptions.SequentialScan,
                 bufferSize).Value;
-            var result = new BufferEnumerator(stream, 0, bufferSize, paddingAtStart, paddingAtEnd);
+            var result = new BufferEnumerator(stream, 0, GetBufferSizeInBytes(bufferSize), paddingAtStart, paddingAtEnd);
             return result;
         }
 
@@ -2027,13 +2044,13 @@ namespace IoFluently
 
         /// <inheritdoc />
         public IMaybe<IEnumerable<Line>> TryReadLines(AbsolutePath path, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
-            int minByteBufferSize = Constants.DefaultBufferSize, ulong startingByteOffset = 0)
+            Information? bufferSize = default, ulong startingByteOffset = 0)
         {
             if (path.Exists)
             {
                 try
                 {
-                    return ReadLines(path, encoding, detectEncodingFromByteOrderMarks, minByteBufferSize, startingByteOffset).ToMaybe();
+                    return ReadLines(path, encoding, detectEncodingFromByteOrderMarks, bufferSize, startingByteOffset).ToMaybe();
                 }
                 catch (Exception e)
                 {
@@ -2045,7 +2062,7 @@ namespace IoFluently
         }
 
         private IEnumerable<Line> ReadLines(AbsolutePath path, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, int minByteBufferSize = Constants.DefaultBufferSize, ulong startingByteOffset = 0)
+            bool detectEncodingFromByteOrderMarks = true, Information? bufferSize = default, ulong startingByteOffset = 0)
         {
             if (detectEncodingFromByteOrderMarks)
             {
@@ -2057,7 +2074,7 @@ namespace IoFluently
                 throw new ArgumentException(nameof(detectEncodingFromByteOrderMarks));
             }
 
-            var maybeStream = path.IoService.TryOpen(path, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan, minByteBufferSize);
+            var maybeStream = path.IoService.TryOpen(path, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan, bufferSize);
             if (maybeStream.HasValue)
             {
                 using (var stream = maybeStream.Value)
@@ -2076,7 +2093,7 @@ namespace IoFluently
 
                     var lastLine = new List<Line>();
                     
-                    foreach (var buffer in new StreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), minByteBufferSize, encoding))
+                    foreach (var buffer in new StreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), GetBufferSizeInBytes(bufferSize), encoding))
                     {
                         var innerEnumerator = new LineSplitEnumerator(buffer.Value,
                             buffer.ByteOffsetOfStart, buffer.CharOffsetOfStart,
@@ -2126,27 +2143,27 @@ namespace IoFluently
 
         public IMaybe<string> TryReadAllText(AbsolutePath path, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read,
             FileShare fileShare = FileShare.Read, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
-            int minByteBufferSize = Constants.DefaultBufferSize)
+            Information? bufferSize = default)
         {
             return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare).Select(
                 fs =>
                 {
                     using (fs)
                     {
-                        return TryReadText(fs, encoding, detectEncodingFromByteOrderMarks, minByteBufferSize);
+                        return TryReadText(fs, encoding, detectEncodingFromByteOrderMarks, bufferSize);
                     }
                 });
         }
         
         /// <inheritdoc />
         public IMaybe<IEnumerable<Line>> TryReadLinesBackwards(AbsolutePath path, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
-            FileShare fileShare = FileShare.Read, int minByteBufferSize = Constants.DefaultBufferSize, ulong startingByteOffset = UInt64.MaxValue)
+            FileShare fileShare = FileShare.Read, Information? bufferSize = default, ulong startingByteOffset = UInt64.MaxValue)
         {
             if (path.Exists)
             {
                 try
                 {
-                    return ReadLinesBackwards(path, encoding, detectEncodingFromByteOrderMarks, minByteBufferSize,
+                    return ReadLinesBackwards(path, encoding, detectEncodingFromByteOrderMarks, bufferSize,
                         startingByteOffset).ToMaybe();
                 }
                 catch (Exception e)
@@ -2158,7 +2175,7 @@ namespace IoFluently
         }
 
         private IEnumerable<Line> ReadLinesBackwards(AbsolutePath path, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, int minByteBufferSize = Constants.DefaultBufferSize, ulong startingByteOffset = ulong.MaxValue)
+            bool detectEncodingFromByteOrderMarks = true, Information? bufferSize = default, ulong startingByteOffset = ulong.MaxValue)
         {
             if (detectEncodingFromByteOrderMarks)
             {
@@ -2170,7 +2187,7 @@ namespace IoFluently
                 throw new ArgumentException(nameof(detectEncodingFromByteOrderMarks));
             }
             
-            var maybeStream = path.IoService.TryOpen(path, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.RandomAccess, minByteBufferSize);
+            var maybeStream = path.IoService.TryOpen(path, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.RandomAccess, bufferSize);
             if (maybeStream.HasValue)
             {
                 using (var stream = maybeStream.Value)
@@ -2189,7 +2206,7 @@ namespace IoFluently
 
                     var lastLine = new List<Line>();
                     
-                    foreach (var buffer in new ReverseStreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), minByteBufferSize, encoding))
+                    foreach (var buffer in new ReverseStreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), GetBufferSizeInBytes(bufferSize), encoding))
                     {
                         var innerEnumerator = new ReverseLineSplitEnumerator(buffer.Value,
                             buffer.ByteOffsetOfStart, buffer.CharOffsetOfStart,
@@ -2239,11 +2256,11 @@ namespace IoFluently
 
         /// <inheritdoc />
         public virtual string TryReadText(Stream stream, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
-            int bufferSize = Constants.DefaultBufferSize, bool leaveOpen = false)
+            Information? bufferSize = default)
         {
             if (encoding == null)
                 encoding = Encoding.UTF8;
-            using (var sr = new StreamReader(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen))
+            using (var sr = new StreamReader(stream, encoding, detectEncodingFromByteOrderMarks, GetBufferSizeInBytes(bufferSize)))
             {
                 return ReadText(sr);
             }
@@ -2253,7 +2270,7 @@ namespace IoFluently
         #region File writing
 
         /// <inheritdoc />
-        public IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, int bufferSize = Constants.DefaultBufferSize,
+        public IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, Information? bufferSize = default,
             bool createRecursively = false)
         {
             return TryOpen(absolutePath, FileMode.Create, FileAccess.Write, FileShare.None,
@@ -2272,7 +2289,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual AbsolutePath WriteAllLines(AbsolutePath path, IEnumerable<string> lines, Encoding encoding = null, int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false)
+        public virtual AbsolutePath WriteAllLines(AbsolutePath path, IEnumerable<string> lines, Encoding encoding = null, Information? bufferSize = default, bool createRecursively = false)
         {
             var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite, FileShare.Write, FileOptions.WriteThrough, bufferSize, createRecursively);
             using (var stream = maybeStream.Value)
@@ -2290,7 +2307,7 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual AbsolutePath WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = false)
         {
-            var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.WriteThrough, bytes.Length, createRecursively);
+            var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.WriteThrough, Information.FromBytes(bytes.Length), createRecursively);
             using (var stream = maybeStream.Value)
             {
                 stream.Write(bytes, 0, Math.Max(bytes.Length, 1));
@@ -2303,7 +2320,7 @@ namespace IoFluently
         public AbsolutePath WriteAllText(AbsolutePath absolutePath, string text, Encoding encoding = null, bool createRecursively = false)
         {
             encoding ??= Encoding.Default;
-            using var writer = TryOpenWriter(absolutePath, FileOptions.None, encoding, Math.Max(encoding.GetByteCount(text), 1), createRecursively).Value;
+            using var writer = TryOpenWriter(absolutePath, FileOptions.None, encoding, Information.FromBytes(Math.Max(encoding.GetByteCount(text), 1)), createRecursively).Value;
             writer.Write(text);
 
             return absolutePath;
@@ -2317,7 +2334,7 @@ namespace IoFluently
             FileAccess fileAccess = FileAccess.ReadWrite,
             FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.None | FileOptions.SequentialScan,
-            int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false);
+            Information? bufferSize = default, bool createRecursively = false);
 
         #endregion
         #region LINQ-style APIs

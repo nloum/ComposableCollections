@@ -297,7 +297,7 @@ namespace IoFluently
         public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,
             FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.None | FileOptions.SequentialScan,
-            int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false)
+            Information? bufferSize = default, bool createRecursively = false)
         {
             if (!createRecursively)
             {

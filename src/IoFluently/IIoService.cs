@@ -286,22 +286,22 @@ namespace IoFluently
         #region Stuff that needs to be implemented
         
         Task<IAbsolutePathTranslation> CopyFileAsync(IAbsolutePathTranslation translation, CancellationToken cancellationToken,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            Information? bufferSize = default, bool overwrite = false);
         Task<IAbsolutePathTranslation> CopyFolderAsync(IAbsolutePathTranslation translation, CancellationToken cancellationToken,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            Information? bufferSize = default, bool overwrite = false);
         Task<IAbsolutePathTranslation> MoveFileAsync(IAbsolutePathTranslation translation, CancellationToken cancellationToken,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            Information? bufferSize = default, bool overwrite = false);
         Task<IAbsolutePathTranslation> MoveFolderAsync(IAbsolutePathTranslation translation, CancellationToken cancellationToken,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            Information? bufferSize = default, bool overwrite = false);
         
         IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            Information? bufferSize = default, bool overwrite = false);
         IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            Information? bufferSize = default, bool overwrite = false);
         IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            Information? bufferSize = default, bool overwrite = false);
         IAbsolutePathTranslation MoveFolder(IAbsolutePathTranslation translation,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            Information? bufferSize = default, bool overwrite = false);
 
         #endregion
         
@@ -309,38 +309,38 @@ namespace IoFluently
         IAbsolutePathTranslation Translate(AbsolutePath source, AbsolutePath destination);
 
         IAbsolutePathTranslation Copy(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            Information? bufferSize = default, bool overwrite = false);
         IAbsolutePathTranslation Copy(AbsolutePath source, AbsolutePath destination,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            Information? bufferSize = default, bool overwrite = false);
         IAbsolutePathTranslation Move(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            Information? bufferSize = default, bool overwrite = false);
         IAbsolutePathTranslation Move(AbsolutePath source, AbsolutePath destination,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            Information? bufferSize = default, bool overwrite = false);
 
         IAbsolutePathTranslation RenameTo(AbsolutePath source, AbsolutePath target,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            Information? bufferSize = default, bool overwrite = false);
         
         IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            Information? bufferSize = default, bool overwrite = false);
         IAbsolutePathTranslation Move(IAbsolutePathTranslation translation,
-            int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            Information? bufferSize = default, bool overwrite = false);
         
         Task<IAbsolutePathTranslation> CopyAsync(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
-            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false);
         Task<IAbsolutePathTranslation> CopyAsync(AbsolutePath source, AbsolutePath destination,
-            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false);
         Task<IAbsolutePathTranslation> MoveAsync(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
-            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false);
         Task<IAbsolutePathTranslation> MoveAsync(AbsolutePath source, AbsolutePath destination,
-            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false);
 
         Task<IAbsolutePathTranslation> RenameToAsync(AbsolutePath source, AbsolutePath target,
-            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false);
         
         Task<IAbsolutePathTranslation> CopyAsync(IAbsolutePathTranslation translation,
-            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false);
         Task<IAbsolutePathTranslation> MoveAsync(IAbsolutePathTranslation translation,
-            CancellationToken cancellationToken, int bufferSize = Constants.DefaultBufferSize, bool overwrite = false);
+            CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false);
 
         #endregion
 
@@ -457,7 +457,7 @@ namespace IoFluently
         #region File reading
 
         BufferEnumerator ReadBuffers(AbsolutePath path, FileShare fileShare = FileShare.None,
-            int bufferSize = Constants.DefaultBufferSize, int paddingAtStart = 0, int paddingAtEnd = 0);
+            Information? bufferSize = default, int paddingAtStart = 0, int paddingAtEnd = 0);
         IMaybe<string> TryGetNewLine(AbsolutePath path);
         IMaybe<Encoding> TryGetEncoding(AbsolutePath path);
         
@@ -467,7 +467,7 @@ namespace IoFluently
         /// <param name="path"></param>
         /// <param name="encoding"></param>
         /// <param name="detectEncodingFromByteOrderMarks"></param>
-        /// <param name="minByteBufferSize"></param>
+        /// <param name="bufferSize"></param>
         /// <param name="startingByteOffset">The byte offset in the file to start reading at.</param>
         /// <returns></returns>
         /// <remarks>
@@ -479,7 +479,7 @@ namespace IoFluently
         /// from other alphabets.
         /// </remarks>
         IMaybe<IEnumerable<Line>> TryReadLines(AbsolutePath path, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, int minByteBufferSize = Constants.DefaultBufferSize, ulong startingByteOffset = 0);
+            bool detectEncodingFromByteOrderMarks = true, Information? bufferSize = default, ulong startingByteOffset = 0);
         
         /// <summary>
         /// 
@@ -487,23 +487,23 @@ namespace IoFluently
         /// <param name="path"></param>
         /// <param name="encoding"></param>
         /// <param name="detectEncodingFromByteOrderMarks"></param>
-        /// <param name="minByteBufferSize"></param>
+        /// <param name="bufferSize"></param>
         /// <param name="startingByteOffset">The byte offset in the file to start reading at. If this is greater than the
         /// file's length, then this function starts reading at the end of the file.</param>
         /// <returns></returns>
         IMaybe<IEnumerable<Line>> TryReadLinesBackwards(AbsolutePath path, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, FileShare fileShare = FileShare.Read, int minByteBufferSize = Constants.DefaultBufferSize, ulong startingByteOffset = ulong.MaxValue);
+            bool detectEncodingFromByteOrderMarks = true, FileShare fileShare = FileShare.Read, Information? bufferSize = default, ulong startingByteOffset = ulong.MaxValue);
         IMaybe<string> TryReadAllText(AbsolutePath path, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
-            int minByteBufferSize = Constants.DefaultBufferSize);
-        IMaybe<StreamReader> TryOpenReader(AbsolutePath path, FileOptions fileOptions = FileOptions.SequentialScan, Encoding encoding = null, int minByteBufferSize = Constants.DefaultBufferSize);
+            Information? bufferSize = default);
+        IMaybe<StreamReader> TryOpenReader(AbsolutePath path, FileOptions fileOptions = FileOptions.SequentialScan, Encoding encoding = null, Information? bufferSize = default);
         #endregion
         
         #region File writing
-        IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false);
+        IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, Information? bufferSize = default, bool createRecursively = false);
         AbsolutePath WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = false);
-        AbsolutePath WriteAllLines(AbsolutePath absolutePath, IEnumerable<string> lines, Encoding encoding = null, int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false);
+        AbsolutePath WriteAllLines(AbsolutePath absolutePath, IEnumerable<string> lines, Encoding encoding = null, Information? bufferSize = default, bool createRecursively = false);
         AbsolutePath WriteAllText(AbsolutePath absolutePath, string text, Encoding encoding = null, bool createRecursively = false);
         #endregion
         
@@ -511,7 +511,7 @@ namespace IoFluently
         IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
             FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.SequentialScan,
-            int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false);
+            Information? bufferSize = default, bool createRecursively = false);
         #endregion
         
         #region LINQ-style APIs

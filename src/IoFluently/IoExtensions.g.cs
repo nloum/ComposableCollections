@@ -123,35 +123,35 @@ namespace IoFluently
             return path.IoService.Encrypt(path);
         }
 
-        public static Task<IAbsolutePathTranslation> CopyFileAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, int bufferSize = 4096, Boolean overwrite = false) {
+        public static Task<IAbsolutePathTranslation> CopyFileAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.IoService.CopyFileAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> CopyFolderAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, int bufferSize = 4096, Boolean overwrite = false) {
+        public static Task<IAbsolutePathTranslation> CopyFolderAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.IoService.CopyFolderAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> MoveFileAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, int bufferSize = 4096, Boolean overwrite = false) {
+        public static Task<IAbsolutePathTranslation> MoveFileAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.IoService.MoveFileAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> MoveFolderAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, int bufferSize = 4096, Boolean overwrite = false) {
+        public static Task<IAbsolutePathTranslation> MoveFolderAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.IoService.MoveFolderAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation CopyFile(this IAbsolutePathTranslation translation, int bufferSize = 4096, Boolean overwrite = false) {
+        public static IAbsolutePathTranslation CopyFile(this IAbsolutePathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.IoService.CopyFile(translation, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation CopyFolder(this IAbsolutePathTranslation translation, int bufferSize = 4096, Boolean overwrite = false) {
+        public static IAbsolutePathTranslation CopyFolder(this IAbsolutePathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.IoService.CopyFolder(translation, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation MoveFile(this IAbsolutePathTranslation translation, int bufferSize = 4096, Boolean overwrite = false) {
+        public static IAbsolutePathTranslation MoveFile(this IAbsolutePathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.IoService.MoveFile(translation, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation MoveFolder(this IAbsolutePathTranslation translation, int bufferSize = 4096, Boolean overwrite = false) {
+        public static IAbsolutePathTranslation MoveFolder(this IAbsolutePathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.IoService.MoveFolder(translation, bufferSize, overwrite);
         }
 
@@ -163,59 +163,59 @@ namespace IoFluently
             return source.IoService.Translate(source, destination);
         }
 
-        public static IAbsolutePathTranslation Copy(this AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination, int bufferSize = 4096, Boolean overwrite = false) {
+        public static IAbsolutePathTranslation Copy(this AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return pathToBeCopied.IoService.Copy(pathToBeCopied, source, destination, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation Copy(this AbsolutePath source, AbsolutePath destination, int bufferSize = 4096, Boolean overwrite = false) {
+        public static IAbsolutePathTranslation Copy(this AbsolutePath source, AbsolutePath destination, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return source.IoService.Copy(source, destination, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation Move(this AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination, int bufferSize = 4096, Boolean overwrite = false) {
+        public static IAbsolutePathTranslation Move(this AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return pathToBeCopied.IoService.Move(pathToBeCopied, source, destination, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation Move(this AbsolutePath source, AbsolutePath destination, int bufferSize = 4096, Boolean overwrite = false) {
+        public static IAbsolutePathTranslation Move(this AbsolutePath source, AbsolutePath destination, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return source.IoService.Move(source, destination, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation RenameTo(this AbsolutePath source, AbsolutePath target, int bufferSize = 4096, Boolean overwrite = false) {
+        public static IAbsolutePathTranslation RenameTo(this AbsolutePath source, AbsolutePath target, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return source.IoService.RenameTo(source, target, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation Copy(this IAbsolutePathTranslation translation, int bufferSize = 4096, Boolean overwrite = false) {
+        public static IAbsolutePathTranslation Copy(this IAbsolutePathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.IoService.Copy(translation, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation Move(this IAbsolutePathTranslation translation, int bufferSize = 4096, Boolean overwrite = false) {
+        public static IAbsolutePathTranslation Move(this IAbsolutePathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.IoService.Move(translation, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> CopyAsync(this AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination, CancellationToken cancellationToken, int bufferSize = 4096, Boolean overwrite = false) {
+        public static Task<IAbsolutePathTranslation> CopyAsync(this AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return pathToBeCopied.IoService.CopyAsync(pathToBeCopied, source, destination, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> CopyAsync(this AbsolutePath source, AbsolutePath destination, CancellationToken cancellationToken, int bufferSize = 4096, Boolean overwrite = false) {
+        public static Task<IAbsolutePathTranslation> CopyAsync(this AbsolutePath source, AbsolutePath destination, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return source.IoService.CopyAsync(source, destination, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> MoveAsync(this AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination, CancellationToken cancellationToken, int bufferSize = 4096, Boolean overwrite = false) {
+        public static Task<IAbsolutePathTranslation> MoveAsync(this AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return pathToBeCopied.IoService.MoveAsync(pathToBeCopied, source, destination, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> MoveAsync(this AbsolutePath source, AbsolutePath destination, CancellationToken cancellationToken, int bufferSize = 4096, Boolean overwrite = false) {
+        public static Task<IAbsolutePathTranslation> MoveAsync(this AbsolutePath source, AbsolutePath destination, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return source.IoService.MoveAsync(source, destination, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> RenameToAsync(this AbsolutePath source, AbsolutePath target, CancellationToken cancellationToken, int bufferSize = 4096, Boolean overwrite = false) {
+        public static Task<IAbsolutePathTranslation> RenameToAsync(this AbsolutePath source, AbsolutePath target, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return source.IoService.RenameToAsync(source, target, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> CopyAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, int bufferSize = 4096, Boolean overwrite = false) {
+        public static Task<IAbsolutePathTranslation> CopyAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.IoService.CopyAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> MoveAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, int bufferSize = 4096, Boolean overwrite = false) {
+        public static Task<IAbsolutePathTranslation> MoveAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.IoService.MoveAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
@@ -339,47 +339,47 @@ namespace IoFluently
             return path.IoService.TryWithExtension(path, differentExtension).Value;
         }
 
-        public static BufferEnumerator ReadBuffers(this AbsolutePath path, FileShare fileShare = FileShare.None, int bufferSize = 4096, int paddingAtStart = 0, int paddingAtEnd = 0) {
+        public static BufferEnumerator ReadBuffers(this AbsolutePath path, FileShare fileShare = FileShare.None, Nullable<Information> bufferSize = null, int paddingAtStart = 0, int paddingAtEnd = 0) {
             return path.IoService.ReadBuffers(path, fileShare, bufferSize, paddingAtStart, paddingAtEnd);
         }
 
-        public static IMaybe<IEnumerable<Line>> TryReadLines(this AbsolutePath path, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, int minByteBufferSize = 4096, ulong startingByteOffset = 0) {
-            return path.IoService.TryReadLines(path, encoding, detectEncodingFromByteOrderMarks, minByteBufferSize, startingByteOffset);
+        public static IMaybe<IEnumerable<Line>> TryReadLines(this AbsolutePath path, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, Nullable<Information> bufferSize = null, ulong startingByteOffset = 0) {
+            return path.IoService.TryReadLines(path, encoding, detectEncodingFromByteOrderMarks, bufferSize, startingByteOffset);
         }
 
-        public static IEnumerable<Line> ReadLines(this AbsolutePath path, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, int minByteBufferSize = 4096, ulong startingByteOffset = 0) {
-            return path.IoService.TryReadLines(path, encoding, detectEncodingFromByteOrderMarks, minByteBufferSize, startingByteOffset).Value;
+        public static IEnumerable<Line> ReadLines(this AbsolutePath path, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, Nullable<Information> bufferSize = null, ulong startingByteOffset = 0) {
+            return path.IoService.TryReadLines(path, encoding, detectEncodingFromByteOrderMarks, bufferSize, startingByteOffset).Value;
         }
 
-        public static IMaybe<IEnumerable<Line>> TryReadLinesBackwards(this AbsolutePath path, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, FileShare fileShare = FileShare.Read, int minByteBufferSize = 4096, ulong startingByteOffset = 18446744073709551615) {
-            return path.IoService.TryReadLinesBackwards(path, encoding, detectEncodingFromByteOrderMarks, fileShare, minByteBufferSize, startingByteOffset);
+        public static IMaybe<IEnumerable<Line>> TryReadLinesBackwards(this AbsolutePath path, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, FileShare fileShare = FileShare.Read, Nullable<Information> bufferSize = null, ulong startingByteOffset = 18446744073709551615) {
+            return path.IoService.TryReadLinesBackwards(path, encoding, detectEncodingFromByteOrderMarks, fileShare, bufferSize, startingByteOffset);
         }
 
-        public static IEnumerable<Line> ReadLinesBackwards(this AbsolutePath path, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, FileShare fileShare = FileShare.Read, int minByteBufferSize = 4096, ulong startingByteOffset = 18446744073709551615) {
-            return path.IoService.TryReadLinesBackwards(path, encoding, detectEncodingFromByteOrderMarks, fileShare, minByteBufferSize, startingByteOffset).Value;
+        public static IEnumerable<Line> ReadLinesBackwards(this AbsolutePath path, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, FileShare fileShare = FileShare.Read, Nullable<Information> bufferSize = null, ulong startingByteOffset = 18446744073709551615) {
+            return path.IoService.TryReadLinesBackwards(path, encoding, detectEncodingFromByteOrderMarks, fileShare, bufferSize, startingByteOffset).Value;
         }
 
-        public static IMaybe<string> TryReadAllText(this AbsolutePath path, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, int minByteBufferSize = 4096) {
-            return path.IoService.TryReadAllText(path, fileMode, fileAccess, fileShare, encoding, detectEncodingFromByteOrderMarks, minByteBufferSize);
+        public static IMaybe<string> TryReadAllText(this AbsolutePath path, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, Nullable<Information> bufferSize = null) {
+            return path.IoService.TryReadAllText(path, fileMode, fileAccess, fileShare, encoding, detectEncodingFromByteOrderMarks, bufferSize);
         }
 
-        public static string ReadAllText(this AbsolutePath path, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, int minByteBufferSize = 4096) {
-            return path.IoService.TryReadAllText(path, fileMode, fileAccess, fileShare, encoding, detectEncodingFromByteOrderMarks, minByteBufferSize).Value;
+        public static string ReadAllText(this AbsolutePath path, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, Nullable<Information> bufferSize = null) {
+            return path.IoService.TryReadAllText(path, fileMode, fileAccess, fileShare, encoding, detectEncodingFromByteOrderMarks, bufferSize).Value;
         }
 
-        public static IMaybe<StreamReader> TryOpenReader(this AbsolutePath path, FileOptions fileOptions = FileOptions.SequentialScan, Encoding encoding = null, int minByteBufferSize = 4096) {
-            return path.IoService.TryOpenReader(path, fileOptions, encoding, minByteBufferSize);
+        public static IMaybe<StreamReader> TryOpenReader(this AbsolutePath path, FileOptions fileOptions = FileOptions.SequentialScan, Encoding encoding = null, Nullable<Information> bufferSize = null) {
+            return path.IoService.TryOpenReader(path, fileOptions, encoding, bufferSize);
         }
 
-        public static StreamReader OpenReader(this AbsolutePath path, FileOptions fileOptions = FileOptions.SequentialScan, Encoding encoding = null, int minByteBufferSize = 4096) {
-            return path.IoService.TryOpenReader(path, fileOptions, encoding, minByteBufferSize).Value;
+        public static StreamReader OpenReader(this AbsolutePath path, FileOptions fileOptions = FileOptions.SequentialScan, Encoding encoding = null, Nullable<Information> bufferSize = null) {
+            return path.IoService.TryOpenReader(path, fileOptions, encoding, bufferSize).Value;
         }
 
-        public static IMaybe<StreamWriter> TryOpenWriter(this AbsolutePath absolutePath, FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, int bufferSize = 4096, Boolean createRecursively = false) {
+        public static IMaybe<StreamWriter> TryOpenWriter(this AbsolutePath absolutePath, FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, Nullable<Information> bufferSize = null, Boolean createRecursively = false) {
             return absolutePath.IoService.TryOpenWriter(absolutePath, fileOptions, encoding, bufferSize, createRecursively);
         }
 
-        public static StreamWriter OpenWriter(this AbsolutePath absolutePath, FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, int bufferSize = 4096, Boolean createRecursively = false) {
+        public static StreamWriter OpenWriter(this AbsolutePath absolutePath, FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, Nullable<Information> bufferSize = null, Boolean createRecursively = false) {
             return absolutePath.IoService.TryOpenWriter(absolutePath, fileOptions, encoding, bufferSize, createRecursively).Value;
         }
 
@@ -387,7 +387,7 @@ namespace IoFluently
             return path.IoService.WriteAllBytes(path, bytes, createRecursively);
         }
 
-        public static AbsolutePath WriteAllLines(this AbsolutePath absolutePath, IEnumerable<string> lines, Encoding encoding = null, int bufferSize = 4096, Boolean createRecursively = false) {
+        public static AbsolutePath WriteAllLines(this AbsolutePath absolutePath, IEnumerable<string> lines, Encoding encoding = null, Nullable<Information> bufferSize = null, Boolean createRecursively = false) {
             return absolutePath.IoService.WriteAllLines(absolutePath, lines, encoding, bufferSize, createRecursively);
         }
 
@@ -395,11 +395,11 @@ namespace IoFluently
             return absolutePath.IoService.WriteAllText(absolutePath, text, encoding, createRecursively);
         }
 
-        public static IMaybe<Stream> TryOpen(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None, FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.Asynchronous, int bufferSize = 4096, Boolean createRecursively = false) {
+        public static IMaybe<Stream> TryOpen(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None, FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.Asynchronous, Nullable<Information> bufferSize = null, Boolean createRecursively = false) {
             return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively);
         }
 
-        public static Stream Open(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None, FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.Asynchronous, int bufferSize = 4096, Boolean createRecursively = false) {
+        public static Stream Open(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None, FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.Asynchronous, Nullable<Information> bufferSize = null, Boolean createRecursively = false) {
             return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively).Value;
         }
 

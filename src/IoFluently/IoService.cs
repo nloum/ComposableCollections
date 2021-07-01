@@ -329,14 +329,14 @@ namespace IoFluently
         public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
             FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.SequentialScan,
-            int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false)
+            Information? bufferSize = default, bool createRecursively = false)
         {
             try
             {
                 if (MayCreateFile(fileMode))
                     TryParent(path).IfHasValue(parent => CreateFolder(parent, createRecursively));
                 var fileStream = new FileStream(path, fileMode, fileAccess, fileShare,
-                    bufferSize, fileOptions);
+                    GetBufferSizeInBytes(bufferSize), fileOptions);
                 return Something<Stream>(fileStream);
             }
             catch (Exception ex)

@@ -53,6 +53,11 @@ namespace IoFluently
 
         public static Line Combine(this IReadOnlyList<Line> parts)
         {
+            if (parts == null)
+            {
+                throw new ArgumentNullException(nameof(parts));
+            }
+            
             return new Line(
                 String.Create(parts.Select(x => x.Value.Length).Sum(), parts,
                     (newString, lastLine) =>

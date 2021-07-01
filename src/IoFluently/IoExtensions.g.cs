@@ -339,24 +339,60 @@ namespace IoFluently
             return path.IoService.TryWithExtension(path, differentExtension).Value;
         }
 
-        public static IMaybe<StreamReader> TryOpenReader(this AbsolutePath path) {
-            return path.IoService.TryOpenReader(path);
+        public static BufferEnumerator ReadBuffers(this AbsolutePath path, FileShare fileShare = FileShare.None, int bufferSize = 4096, int paddingAtStart = 0, int paddingAtEnd = 0) {
+            return path.IoService.ReadBuffers(path, fileShare, bufferSize, paddingAtStart, paddingAtEnd);
         }
 
-        public static StreamReader OpenReader(this AbsolutePath path) {
-            return path.IoService.TryOpenReader(path).Value;
+        public static IMaybe<IEnumerable<Line>> TryReadLines(this AbsolutePath path, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, int minByteBufferSize = 4096, ulong startingByteOffset = 0) {
+            return path.IoService.TryReadLines(path, encoding, detectEncodingFromByteOrderMarks, minByteBufferSize, startingByteOffset);
         }
 
-        public static void WriteAllBytes(this AbsolutePath path, Byte[] bytes, Boolean createRecursively = false) {
-            path.IoService.WriteAllBytes(path, bytes, createRecursively);
+        public static IEnumerable<Line> ReadLines(this AbsolutePath path, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, int minByteBufferSize = 4096, ulong startingByteOffset = 0) {
+            return path.IoService.TryReadLines(path, encoding, detectEncodingFromByteOrderMarks, minByteBufferSize, startingByteOffset).Value;
         }
 
-        public static void WriteAllLines(this AbsolutePath absolutePath, IEnumerable<string> lines, Encoding encoding = null, int bufferSize = 4096, Boolean createRecursively = false) {
-            absolutePath.IoService.WriteAllLines(absolutePath, lines, encoding, bufferSize, createRecursively);
+        public static IMaybe<IEnumerable<Line>> TryReadLinesBackwards(this AbsolutePath path, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, FileShare fileShare = FileShare.Read, int minByteBufferSize = 4096, ulong startingByteOffset = 18446744073709551615) {
+            return path.IoService.TryReadLinesBackwards(path, encoding, detectEncodingFromByteOrderMarks, fileShare, minByteBufferSize, startingByteOffset);
         }
 
-        public static void WriteAllText(this AbsolutePath absolutePath, string text, Encoding encoding = null, Boolean createRecursively = false) {
-            absolutePath.IoService.WriteAllText(absolutePath, text, encoding, createRecursively);
+        public static IEnumerable<Line> ReadLinesBackwards(this AbsolutePath path, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, FileShare fileShare = FileShare.Read, int minByteBufferSize = 4096, ulong startingByteOffset = 18446744073709551615) {
+            return path.IoService.TryReadLinesBackwards(path, encoding, detectEncodingFromByteOrderMarks, fileShare, minByteBufferSize, startingByteOffset).Value;
+        }
+
+        public static IMaybe<string> TryReadAllText(this AbsolutePath path, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, int minByteBufferSize = 4096) {
+            return path.IoService.TryReadAllText(path, fileMode, fileAccess, fileShare, encoding, detectEncodingFromByteOrderMarks, minByteBufferSize);
+        }
+
+        public static string ReadAllText(this AbsolutePath path, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, int minByteBufferSize = 4096) {
+            return path.IoService.TryReadAllText(path, fileMode, fileAccess, fileShare, encoding, detectEncodingFromByteOrderMarks, minByteBufferSize).Value;
+        }
+
+        public static IMaybe<StreamReader> TryOpenReader(this AbsolutePath path, FileOptions fileOptions = FileOptions.SequentialScan, Encoding encoding = null, int minByteBufferSize = 4096) {
+            return path.IoService.TryOpenReader(path, fileOptions, encoding, minByteBufferSize);
+        }
+
+        public static StreamReader OpenReader(this AbsolutePath path, FileOptions fileOptions = FileOptions.SequentialScan, Encoding encoding = null, int minByteBufferSize = 4096) {
+            return path.IoService.TryOpenReader(path, fileOptions, encoding, minByteBufferSize).Value;
+        }
+
+        public static IMaybe<StreamWriter> TryOpenWriter(this AbsolutePath absolutePath, FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, int bufferSize = 4096, Boolean createRecursively = false) {
+            return absolutePath.IoService.TryOpenWriter(absolutePath, fileOptions, encoding, bufferSize, createRecursively);
+        }
+
+        public static StreamWriter OpenWriter(this AbsolutePath absolutePath, FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, int bufferSize = 4096, Boolean createRecursively = false) {
+            return absolutePath.IoService.TryOpenWriter(absolutePath, fileOptions, encoding, bufferSize, createRecursively).Value;
+        }
+
+        public static AbsolutePath WriteAllBytes(this AbsolutePath path, Byte[] bytes, Boolean createRecursively = false) {
+            return path.IoService.WriteAllBytes(path, bytes, createRecursively);
+        }
+
+        public static AbsolutePath WriteAllLines(this AbsolutePath absolutePath, IEnumerable<string> lines, Encoding encoding = null, int bufferSize = 4096, Boolean createRecursively = false) {
+            return absolutePath.IoService.WriteAllLines(absolutePath, lines, encoding, bufferSize, createRecursively);
+        }
+
+        public static AbsolutePath WriteAllText(this AbsolutePath absolutePath, string text, Encoding encoding = null, Boolean createRecursively = false) {
+            return absolutePath.IoService.WriteAllText(absolutePath, text, encoding, createRecursively);
         }
 
         public static IMaybe<Stream> TryOpen(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None, FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.Asynchronous, int bufferSize = 4096, Boolean createRecursively = false) {

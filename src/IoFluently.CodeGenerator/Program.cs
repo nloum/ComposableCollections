@@ -94,6 +94,10 @@ namespace IoFluently
                     if (method.ReturnType is IBoundGenericInterface boundIface && boundIface.Identifier.Name == "IMaybe" && method.Name.StartsWith("Try"))
                     {
                         var withoutTry = method.Name.Substring(3);
+                        if (withoutTry.StartsWith("Get"))
+                        {
+                            withoutTry = withoutTry.Substring(3);
+                        }
                         var returnValue = (IReflectionType) boundIface.Arguments[0];
                         if (returnValue is IValueType)
                         {

@@ -102,3 +102,7 @@ Any code that uses IoFluently requires minimal modification to run against an in
 ```
 var ioService = new InMemoryIoService(new ReactiveProcessFactory(), Environment.NewLine, PathFlags.CaseSensitive);
 ```
+
+### Acknowledgements
+
+Line-splitting code based on code by GÉRALD BARRÉ aka. meziantou, link: https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm

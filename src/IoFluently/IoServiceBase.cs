@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
@@ -2032,7 +2033,7 @@ namespace IoFluently
             {
                 try
                 {
-                    return ReadLines(path, encoding, detectEncodingFromByteOrderMarks, minByteBufferSize).ToMaybe();
+                    return ReadLines(path, encoding, detectEncodingFromByteOrderMarks, minByteBufferSize, startingByteOffset).ToMaybe();
                 }
                 catch (Exception e)
                 {
@@ -2044,33 +2045,55 @@ namespace IoFluently
         }
 
         private IEnumerable<Line> ReadLines(AbsolutePath path, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, int minByteBufferSize = Constants.DefaultBufferSize, ulong startingByteOffset = ulong.MaxValue)
+            bool detectEncodingFromByteOrderMarks = true, int minByteBufferSize = Constants.DefaultBufferSize, ulong startingByteOffset = 0)
         {
+            if (detectEncodingFromByteOrderMarks)
+            {
+                encoding ??= TryGetEncoding(path).Value;
+            }
+            
+            if (encoding == null && !detectEncodingFromByteOrderMarks)
+            {
+                throw new ArgumentException(nameof(detectEncodingFromByteOrderMarks));
+            }
+
             var maybeStream = path.IoService.TryOpen(path, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan, minByteBufferSize);
             if (maybeStream.HasValue)
             {
                 using (var stream = maybeStream.Value)
                 {
+                    if (startingByteOffset > (ulong) stream.Length)
+                    {
+                        startingByteOffset = (ulong) stream.Length;
+                    }
+                    
                     if (startingByteOffset != 0)
                     {
                         stream.Seek((long)startingByteOffset, SeekOrigin.Begin);
                     }
 
-                    var enumerator = new StreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), minByteBufferSize, encoding);
                     ulong lineNumber = 1;
 
-                    ulong byteOffset = startingByteOffset;
                     var lastLine = new List<Line>();
                     
-                    while (enumerator.MoveNext())
+                    foreach (var buffer in new StreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), minByteBufferSize, encoding))
                     {
-                        var innerEnumerator = new LineSplitEnumerator(enumerator.Current.Value,
-                            enumerator.Current.ByteOffsetOfStart, enumerator.Current.CharOffsetOfStart,
+                        var innerEnumerator = new LineSplitEnumerator(buffer.Value,
+                            buffer.ByteOffsetOfStart, buffer.CharOffsetOfStart,
                             lineNumber, encoding);
 
-                        innerEnumerator.MoveNext();
+                        if (!innerEnumerator.MoveNext())
+                        {
+                            continue;
+                        }
+                        
                         lastLine.Add(innerEnumerator.Current);
-                        innerEnumerator.MoveNext();
+                        
+                        if (!innerEnumerator.MoveNext())
+                        {
+                            continue;
+                        }
+                        
                         do
                         {
                             if (lastLine.Count == 1)
@@ -2137,31 +2160,53 @@ namespace IoFluently
         private IEnumerable<Line> ReadLinesBackwards(AbsolutePath path, Encoding encoding = null,
             bool detectEncodingFromByteOrderMarks = true, int minByteBufferSize = Constants.DefaultBufferSize, ulong startingByteOffset = ulong.MaxValue)
         {
+            if (detectEncodingFromByteOrderMarks)
+            {
+                encoding ??= TryGetEncoding(path).Value;
+            }
+
+            if (encoding == null && !detectEncodingFromByteOrderMarks)
+            {
+                throw new ArgumentException(nameof(detectEncodingFromByteOrderMarks));
+            }
+            
             var maybeStream = path.IoService.TryOpen(path, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.RandomAccess, minByteBufferSize);
             if (maybeStream.HasValue)
             {
                 using (var stream = maybeStream.Value)
                 {
+                    if (startingByteOffset > (ulong) stream.Length)
+                    {
+                        startingByteOffset = (ulong) stream.Length;
+                    }
+                    
                     if (startingByteOffset != 0)
                     {
                         stream.Seek((long)startingByteOffset, SeekOrigin.Begin);
                     }
 
-                    var enumerator = new ReverseStreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), minByteBufferSize, encoding);
                     ulong lineNumber = 1;
 
-                    ulong byteOffset = startingByteOffset;
                     var lastLine = new List<Line>();
                     
-                    while (enumerator.MoveNext())
+                    foreach (var buffer in new ReverseStreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), minByteBufferSize, encoding))
                     {
-                        var innerEnumerator = new LineSplitEnumerator(enumerator.Current.Value,
-                            enumerator.Current.ByteOffsetOfStart, enumerator.Current.CharOffsetOfStart,
+                        var innerEnumerator = new ReverseLineSplitEnumerator(buffer.Value,
+                            buffer.ByteOffsetOfStart, buffer.CharOffsetOfStart,
                             lineNumber, encoding);
 
-                        innerEnumerator.MoveNext();
+                        if (!innerEnumerator.MoveNext())
+                        {
+                            continue;
+                        }
+                        
                         lastLine.Add(innerEnumerator.Current);
-                        innerEnumerator.MoveNext();
+                        
+                        if (!innerEnumerator.MoveNext())
+                        {
+                            continue;
+                        }
+                        
                         do
                         {
                             if (lastLine.Count == 1)

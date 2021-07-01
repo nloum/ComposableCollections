@@ -5,9 +5,70 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Xml;
 using LiveLinq;
+using ComposableCollections;
 
 namespace IoFluently.Documentation
 {
+    public class CodeBlock
+    {
+        public string Settings { get; init; }
+        public int StartingLineNumber { get; init; }
+        public IReadOnlyList<string> LinesOfCode { get; init; }
+    }
+    
+    public class LiterateDocument
+    {
+        public AbsolutePath Path { get; init; }
+        
+        public IEnumerable<string> Weave()
+        {
+            foreach (var line in Path.ReadLines())
+            {
+                yield return line;
+            }
+        }
+
+        public IEnumerable<CodeBlock> GetCodeBlocks()
+        {
+            var isCurrentlyInTargetCodeBlock = false;
+            string currentSettings = null;
+            var lineNumber = 0;
+            var startingLineNumber = 0;
+            var linesOfCode = new List<string>();
+
+            foreach (var line in Path.ReadLines())
+            {
+                lineNumber++;
+                if (line.Value.StartsWith("```"))
+                {
+                    if (isCurrentlyInTargetCodeBlock)
+                    {
+                        isCurrentlyInTargetCodeBlock = false;
+                        yield return new CodeBlock()
+                        {
+                            Settings = currentSettings,
+                            StartingLineNumber = startingLineNumber,
+                            LinesOfCode = linesOfCode
+                        };
+                        continue;
+                    }
+                    else
+                    {
+                        isCurrentlyInTargetCodeBlock = true;
+                        currentSettings = line.Value.TrimStart('`');
+                        startingLineNumber = lineNumber;
+                        continue;
+                    }
+                }
+
+                if (isCurrentlyInTargetCodeBlock)
+                {
+                    linesOfCode.Add(line);
+                }
+            }
+        }
+    }
+    
     class Program
     {
         static void Main(string[] args)
@@ -15,13 +76,21 @@ namespace IoFluently.Documentation
             var ioService = new IoService();
 
             var repoRoot = ioService.DefaultRelativePathBase.Ancestors.First(ancestor => ioService.IsFolder(ancestor / ".git"));
-            repoRoot.Descendants().ToLiveLinq()
-                .Subscribe(x =>
+            var markdownFileRegex = ioService.FileNamePatternToRegex("*.md");
+            
+            var descendants = repoRoot.Descendants().ToLiveLinq()
+                .AsObservable()
+                .Publish()
+                .RefCount()
+                .ToLiveLinq();
+            
+            descendants.Where(path => markdownFileRegex.IsMatch(path))
+                .Subscribe(path =>
                 {
-                    Console.WriteLine(x);
-                }, (x, _) =>
+                    Console.WriteLine(path);
+                }, (path, _) =>
                 {
-                    Console.WriteLine(x);
+                    Console.WriteLine(path);
                 });
 
             Console.ReadKey();

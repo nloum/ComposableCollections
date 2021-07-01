@@ -24,5 +24,10 @@ namespace IoFluently
         public Encoding Encoding { get; }
         public string Value { get; }
         public string Separator { get; }
+        
+        public static implicit operator string(Line line)
+        {
+            return line.Value;
+        }
     }
 }

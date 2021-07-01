@@ -303,6 +303,32 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.InMemoryWindowsIoService)]
         [DataRow(IoServiceType.InMemoryUnixIoService)]
         [DataRow(IoServiceType.InMemoryZipIoService)]
+        public Task ShouldReadLinesInOrder(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, false);
+            var textFilePath = uut.GenerateUniqueTemporaryPath(".txt").WriteAllText("Line 1\nLine 2\nLine 3");
+            return Verify(textFilePath.ReadLines().ToList())
+                .UseParameters(type);
+        }
+
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryWindowsIoService)]
+        [DataRow(IoServiceType.InMemoryUnixIoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
+        public Task ShouldReadLinesBackwardsInCorrectOrder(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, false);
+            var textFilePath = uut.GenerateUniqueTemporaryPath(".txt").WriteAllText("Line 1\nLine 2\nLine 3");
+            return Verify(textFilePath.ReadLinesBackwards().ToList())
+                .UseParameters(type);
+        }
+
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryWindowsIoService)]
+        [DataRow(IoServiceType.InMemoryUnixIoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void ShouldParseWithComplexMixedDirectorySeparators(IoServiceType type)
         {
             var ioService = CreateUnitUnderTest(type, false);

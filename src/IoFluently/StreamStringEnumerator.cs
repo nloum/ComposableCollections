@@ -1,20 +1,32 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
 namespace IoFluently
 {
-    public ref struct StreamStringEnumerator
+    public class StreamStringEnumerator : IEnumerator<StringFromStream>
     {
         public ulong ByteOffset { get; private set; }
         public ulong CharOffset { get; private set; }
         private readonly Encoding _encoding;
-        private readonly BufferEnumerator _bufferEnumerator;
-        private Buffer _previousBuffer;
+        private BufferEnumeratorState _bufferEnumeratorState;
+        private byte[] _previousBuffer;
         private int _numBytesNeededFromPreviousBuffer;
-        
+        private readonly BufferEnumeratorState _initialState;
+
         public StreamStringEnumerator(Stream stream, ulong byteOffsetOfStart, ulong charOffsetOfStart, int bufferSize, Encoding encoding)
         {
-            _bufferEnumerator = new BufferEnumerator(stream, byteOffsetOfStart, bufferSize, encoding.GetMaxByteCount(1), 0);
+            _bufferEnumeratorState = new BufferEnumeratorState
+            {
+                Stream=stream,
+                ByteOffset = byteOffsetOfStart,
+                BufferSize = bufferSize,
+                PaddingAtStart = encoding.GetMaxByteCount(1),
+                PaddingAtEnd = 0,
+            };
+            _initialState = _bufferEnumeratorState;
             ByteOffset = byteOffsetOfStart;
             CharOffset = charOffsetOfStart;
             _encoding = encoding;
@@ -28,25 +40,26 @@ namespace IoFluently
 
         public bool MoveNext()
         {
-            if (!_bufferEnumerator.MoveNext())
+            var bufferEnumerator = new BufferEnumerator(_bufferEnumeratorState);
+            if (!bufferEnumerator.MoveNext())
             {
                 return false;
             }
 
-            var buffer = _bufferEnumerator.Current;
+            var buffer = bufferEnumerator.Current;
 
             if (_numBytesNeededFromPreviousBuffer > 0)
             {
-                _previousBuffer.Data.Slice(_previousBuffer.Data.Length - _previousBuffer.PaddingAtEnd - _numBytesNeededFromPreviousBuffer, _numBytesNeededFromPreviousBuffer)
+                _previousBuffer.AsSpan()
                     .CopyTo(buffer.Data.Slice(buffer.PaddingAtStart - _numBytesNeededFromPreviousBuffer, _numBytesNeededFromPreviousBuffer));
             }
             
             string str = _encoding.GetString(buffer.Data.Slice(buffer.PaddingAtStart - _numBytesNeededFromPreviousBuffer, buffer.Data.Length - buffer.PaddingAtStart - buffer.PaddingAtEnd + _numBytesNeededFromPreviousBuffer));
 
-            _previousBuffer = buffer;
+            _previousBuffer = buffer.Data.Slice(buffer.Data.Length - buffer.PaddingAtEnd - _numBytesNeededFromPreviousBuffer, _numBytesNeededFromPreviousBuffer).ToArray();
             _numBytesNeededFromPreviousBuffer = 0;
             int byteCount;
-            for (var i = 1; (byteCount = _encoding.GetByteCount(str)) != buffer.Data.Length && i < buffer.Data.Length; i++)
+            for (var i = 1; (byteCount = _encoding.GetByteCount(str)) != buffer.Data.Length - buffer.PaddingAtStart - buffer.PaddingAtEnd && i < buffer.Data.Length; i++)
             {
                 // If the for loop condition is true, that means that a character that takes up more than one byte
                 // (such as a non-English character in UTF-8) was split by the buffer. To fix this, 
@@ -59,9 +72,23 @@ namespace IoFluently
             ByteOffset += (ulong) byteCount;
             CharOffset += (ulong) str.Length;
 
+            _bufferEnumeratorState = bufferEnumerator.State;
+            
             return true;
         }
 
         public StringFromStream Current { get; private set; }
+
+        public void Reset()
+        {
+            _bufferEnumeratorState = _initialState;
+        }
+
+        object IEnumerator.Current => Current;
+        
+        public void Dispose()
+        {
+            _bufferEnumeratorState?.Stream?.Dispose();
+        }
     }
 }

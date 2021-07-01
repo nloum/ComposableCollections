@@ -971,13 +971,14 @@ namespace IoFluently
                 flags = IsCaseSensitiveByDefault ? CaseSensitivityMode.CaseSensitive : CaseSensitivityMode.CaseInsensitive;
             error = string.Empty;
             pathSpec = null;
-            if (path.Contains(":") && path.Contains("/"))
+            var containsWindowsDriveSpecification = path.LastIndexOf(':') == 1;
+            if (containsWindowsDriveSpecification && path.Contains("/"))
             {
                 path = path.Replace("/", "\\");
             }
 
             var backslashIndex = path.IndexOf('\\');
-            var containsColon = path.Contains(":");
+            var containsColon = containsWindowsDriveSpecification;
             var isWindowsStyle = backslashIndex != -1 || containsColon;
             var slashIndex = path.IndexOf('/');
             var isUnixStyle = slashIndex != -1;
@@ -1130,11 +1131,12 @@ namespace IoFluently
                     flags = CaseSensitivityMode.CaseSensitive;
                 if (path.Length > 1 && path.EndsWith("/"))
                     path = path.Substring(0, path.Length - 1);
-                if (path.Contains(":"))
-                {
-                    error = "A Unix path may not contain a : character.";
-                    return false;
-                }
+                // On Max OSX, paths may contain colons, so this is commented out
+                // if (path.Contains(":"))
+                // {
+                //     error = "A Unix path may not contain a : character.";
+                //     return false;
+                // }
 
                 var isAbsolute = IsAbsoluteUnixPath(path);
                 if (isAbsolute)

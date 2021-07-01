@@ -289,6 +289,20 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.InMemoryWindowsIoService)]
         [DataRow(IoServiceType.InMemoryUnixIoService)]
         [DataRow(IoServiceType.InMemoryZipIoService)]
+        public void ShouldParseMacOSXPathWithColon(IoServiceType type)
+        {
+            var uut = CreateUnitUnderTest(type, false);
+            var path = uut.ParseAbsolutePath("/src/TestResults/Deploy_family 2021-06-29 21:48:13/In");
+            path.DirectorySeparator.Should().Be("/");
+            path.Path.Components.Should()
+                .BeEquivalentTo("/", "src", "TestResults", "Deploy_family 2021-06-29 21:48:13", "In");
+        }
+        
+        [TestMethod]
+        [DataRow(IoServiceType.IoService)]
+        [DataRow(IoServiceType.InMemoryWindowsIoService)]
+        [DataRow(IoServiceType.InMemoryUnixIoService)]
+        [DataRow(IoServiceType.InMemoryZipIoService)]
         public void ShouldParseWithComplexMixedDirectorySeparators(IoServiceType type)
         {
             var ioService = CreateUnitUnderTest(type, false);

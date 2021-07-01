@@ -1,9 +1,11 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -1943,38 +1945,17 @@ namespace IoFluently
         #region File reading
         
         /// <inheritdoc />
-        public IMaybe<StreamReader> TryOpenReader(AbsolutePath path)
+        public IMaybe<StreamReader> TryOpenReader(AbsolutePath path, FileOptions fileOptions = FileOptions.SequentialScan, Encoding encoding = null, int bufferSize = Constants.DefaultBufferSize)
         {
-            return path.IoService.TryOpen(path, FileMode.Open, FileAccess.Read, FileShare.Read).Select(stream => new StreamReader(stream));
-        }
-
-        /// <inheritdoc />
-        public virtual IEnumerable<string> ReadLines(AbsolutePath path)
-        {
-            var maybeStream = TryOpen(path, FileMode.Open, FileAccess.Read);
-            using (var stream = maybeStream.Value)
+            return path.IoService.TryOpen(path, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan, bufferSize).Select(stream =>
             {
-                using (var reader = new StreamReader(stream))
+                if (encoding == null)
                 {
-                    while (!reader.EndOfStream)
-                    {
-                        yield return reader.ReadLine();
-                    }
+                    return new StreamReader(stream);
                 }
-            }
-        }
 
-        /// <inheritdoc />
-        public virtual string ReadAllText(AbsolutePath path)
-        {
-            var maybeStream = TryOpen(path, FileMode.Open, FileAccess.Read);
-            using (var stream = maybeStream.Value)
-            {
-                using (var reader = new StreamReader(stream))
-                {
-                    return reader.ReadToEnd();
-                }
-            }
+                return new StreamReader(stream, encoding);
+            });
         }
 
         private string ReadText(StreamReader streamReader)
@@ -1983,98 +1964,231 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IEnumerable<string> ReadLines(AbsolutePath path, FileMode fileMode = FileMode.Open,
-            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
-            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = Constants.DefaultBufferSize,
-            bool leaveOpen = false)
+        public IMaybe<Encoding> TryGetEncoding(AbsolutePath path)
         {
-            var maybeStream = path.IoService.TryOpen(path, fileMode, fileAccess, fileShare);
+            var maybeStream = TryOpen(path, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan);
             if (maybeStream.HasValue)
             {
-                using (maybeStream.Value)
+                using (var stream = maybeStream.Value)
                 {
-                    return ReadLines(maybeStream.Value, encoding, detectEncodingFromByteOrderMarks, bufferSize,
-                        leaveOpen);
+                    using (var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true))
+                    {
+                        var line = reader.ReadLine();
+                        return reader.CurrentEncoding.ToMaybe();
+                    }
                 }
             }
-
-            return Enumerable.Empty<string>();
+            
+            return Maybe<Encoding>.Nothing();
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<string> TryReadText(AbsolutePath path, FileMode fileMode = FileMode.Open,
-            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
-            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = Constants.DefaultBufferSize,
-            bool leaveOpen = false)
+        public BufferEnumerator ReadBuffers(AbsolutePath path, FileShare fileShare = FileShare.None,
+            int bufferSize = Constants.DefaultBufferSize, int paddingAtStart = 0, int paddingAtEnd = 0)
+        {
+            var stream = TryOpen(path, FileMode.Open, FileAccess.Read, fileShare, FileOptions.SequentialScan,
+                bufferSize).Value;
+            var result = new BufferEnumerator(stream, 0, bufferSize, paddingAtStart, paddingAtEnd);
+            return result;
+        }
+
+        /// <inheritdoc />
+        public IMaybe<string> TryGetNewLine(AbsolutePath path)
+        {
+            var maybeStream = TryOpen(path, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan);
+            if (maybeStream.HasValue)
+            {
+                using (var stream = maybeStream.Value)
+                {
+                    while (true)
+                    {
+                        var data = stream.ReadByte();
+                        if (data == -1)
+                        {
+                            return Maybe<string>.Nothing();
+                        }
+
+                        if (data == '\r')
+                        {
+                            return "\r\n".ToMaybe();
+                        }
+
+                        if (data == '\n')
+                        {
+                            return "\n".ToMaybe();
+                        }
+                    }
+                }
+            }
+            
+            return Maybe<string>.Nothing();
+        }
+
+        /// <inheritdoc />
+        public IMaybe<IEnumerable<Line>> TryReadLines(AbsolutePath path, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
+            int minByteBufferSize = Constants.DefaultBufferSize, ulong startingByteOffset = 0)
+        {
+            if (path.Exists)
+            {
+                try
+                {
+                    return ReadLines(path, encoding, detectEncodingFromByteOrderMarks, minByteBufferSize).ToMaybe();
+                }
+                catch (Exception e)
+                {
+                    return Maybe<IEnumerable<Line>>.Nothing();
+                }
+            }
+            
+            return Maybe<IEnumerable<Line>>.Nothing();
+        }
+
+        private IEnumerable<Line> ReadLines(AbsolutePath path, Encoding encoding = null,
+            bool detectEncodingFromByteOrderMarks = true, int minByteBufferSize = Constants.DefaultBufferSize, ulong startingByteOffset = ulong.MaxValue)
+        {
+            var maybeStream = path.IoService.TryOpen(path, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan, minByteBufferSize);
+            if (maybeStream.HasValue)
+            {
+                using (var stream = maybeStream.Value)
+                {
+                    if (startingByteOffset != 0)
+                    {
+                        stream.Seek((long)startingByteOffset, SeekOrigin.Begin);
+                    }
+
+                    var enumerator = new StreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), minByteBufferSize, encoding);
+                    ulong lineNumber = 1;
+
+                    ulong byteOffset = startingByteOffset;
+                    var lastLine = new List<Line>();
+                    
+                    while (enumerator.MoveNext())
+                    {
+                        var innerEnumerator = new LineSplitEnumerator(enumerator.Current.Value,
+                            enumerator.Current.ByteOffsetOfStart, enumerator.Current.CharOffsetOfStart,
+                            lineNumber, encoding);
+
+                        innerEnumerator.MoveNext();
+                        lastLine.Add(innerEnumerator.Current);
+                        innerEnumerator.MoveNext();
+                        do
+                        {
+                            if (lastLine.Count == 1)
+                            {
+                                yield return lastLine[0];
+                                lastLine.Clear();
+                            }
+                            else
+                            {
+                                yield return lastLine.Combine();
+                                lastLine.Clear();
+                            }
+                            lastLine.Add(innerEnumerator.Current);
+                        } while (innerEnumerator.MoveNext());
+                    }
+                    
+                    if (lastLine.Count == 1)
+                    {
+                        yield return lastLine[0];
+                        lastLine.Clear();
+                    }
+                    else if (lastLine.Count > 1)
+                    {
+                        yield return lastLine.Combine();
+                        lastLine.Clear();
+                    }
+                }
+            }
+        }
+
+        public IMaybe<string> TryReadAllText(AbsolutePath path, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read,
+            FileShare fileShare = FileShare.Read, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
+            int minByteBufferSize = Constants.DefaultBufferSize)
         {
             return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare).Select(
                 fs =>
                 {
                     using (fs)
                     {
-                        return TryReadText(fs, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
+                        return TryReadText(fs, encoding, detectEncodingFromByteOrderMarks, minByteBufferSize);
                     }
                 });
         }
-
+        
         /// <inheritdoc />
-        public virtual IEnumerable<string> ReadLines(Stream stream, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, int bufferSize = Constants.DefaultBufferSize, bool leaveOpen = false)
+        public IMaybe<IEnumerable<Line>> TryReadLinesBackwards(AbsolutePath path, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
+            FileShare fileShare = FileShare.Read, int minByteBufferSize = Constants.DefaultBufferSize, ulong startingByteOffset = UInt64.MaxValue)
         {
-            if (encoding == null)
-                encoding = Encoding.UTF8;
-            using (var sr = new StreamReader(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen))
+            if (path.Exists)
             {
-                string line;
-                while ((line = sr.ReadLine()) != null) yield return line;
+                try
+                {
+                    return ReadLinesBackwards(path, encoding, detectEncodingFromByteOrderMarks, minByteBufferSize,
+                        startingByteOffset).ToMaybe();
+                }
+                catch (Exception e)
+                {
+                    return Maybe<IEnumerable<Line>>.Nothing();
+                }
             }
+            return Maybe<IEnumerable<Line>>.Nothing();
         }
 
-        /// <inheritdoc />
-        public virtual IEnumerable<string> ReadLinesBackwards(Stream stream, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, int bufferSize = Constants.DefaultBufferSize, bool leaveOpen = false)
+        private IEnumerable<Line> ReadLinesBackwards(AbsolutePath path, Encoding encoding = null,
+            bool detectEncodingFromByteOrderMarks = true, int minByteBufferSize = Constants.DefaultBufferSize, ulong startingByteOffset = ulong.MaxValue)
         {
-            if (encoding == null)
-                encoding = Encoding.UTF8;
-
-            var content = string.Empty;
-            // Seek file pointer to end
-            stream.Seek(0, SeekOrigin.End);
-
-            var buffer = new byte[bufferSize];
-
-            //loop now and read backwards
-            while (stream.Position > 0)
+            var maybeStream = path.IoService.TryOpen(path, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.RandomAccess, minByteBufferSize);
+            if (maybeStream.HasValue)
             {
-                buffer.Initialize();
-
-                int bytesRead;
-
-                if (stream.Position - bufferSize >= 0)
+                using (var stream = maybeStream.Value)
                 {
-                    stream.Seek(-bufferSize, SeekOrigin.Current);
-                    bytesRead = stream.Read(buffer, 0, bufferSize);
-                    stream.Seek(-bufferSize, SeekOrigin.Current);
+                    if (startingByteOffset != 0)
+                    {
+                        stream.Seek((long)startingByteOffset, SeekOrigin.Begin);
+                    }
+
+                    var enumerator = new ReverseStreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), minByteBufferSize, encoding);
+                    ulong lineNumber = 1;
+
+                    ulong byteOffset = startingByteOffset;
+                    var lastLine = new List<Line>();
+                    
+                    while (enumerator.MoveNext())
+                    {
+                        var innerEnumerator = new LineSplitEnumerator(enumerator.Current.Value,
+                            enumerator.Current.ByteOffsetOfStart, enumerator.Current.CharOffsetOfStart,
+                            lineNumber, encoding);
+
+                        innerEnumerator.MoveNext();
+                        lastLine.Add(innerEnumerator.Current);
+                        innerEnumerator.MoveNext();
+                        do
+                        {
+                            if (lastLine.Count == 1)
+                            {
+                                yield return lastLine[0];
+                                lastLine.Clear();
+                            }
+                            else
+                            {
+                                yield return lastLine.Combine();
+                                lastLine.Clear();
+                            }
+                            lastLine.Add(innerEnumerator.Current);
+                        } while (innerEnumerator.MoveNext());
+                    }
+                    
+                    if (lastLine.Count == 1)
+                    {
+                        yield return lastLine[0];
+                        lastLine.Clear();
+                    }
+                    else if (lastLine.Count > 1)
+                    {
+                        yield return lastLine.Combine();
+                        lastLine.Clear();
+                    }
                 }
-                else
-                {
-                    var finalBufferSize = stream.Position;
-                    stream.Seek(0, SeekOrigin.Begin);
-                    bytesRead = stream.Read(buffer, 0, (int) finalBufferSize);
-                    stream.Seek(0, SeekOrigin.Begin);
-                }
-
-                var strBuffer = encoding.GetString(buffer, 0, bytesRead);
-
-                // lines is equal to what we just read, with the leftover content from last iteration appended to it.
-                var lines = (strBuffer + content).Split('\n');
-
-                // Loop through lines backwards, ignoring the first element, and yield each value
-                for (var i = lines.Length - 1; i > 0; i--) yield return lines[i].Trim('\r');
-
-                // Leftover content is part of a line defined on the line(s) that we'll read next iteration of while loop
-                // so we must save leftover content for later
-                content = lines[0];
             }
         }
 
@@ -2094,12 +2208,22 @@ namespace IoFluently
         #region File writing
 
         /// <inheritdoc />
-        public IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, int bufferSize = Constants.DefaultBufferSize,
+        public IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, int bufferSize = Constants.DefaultBufferSize,
             bool createRecursively = false)
         {
-            return TryOpen(absolutePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None,
-                FileOptions.WriteThrough, bufferSize, createRecursively)
-                .Select(stream => new StreamWriter(stream));
+            return TryOpen(absolutePath, FileMode.Create, FileAccess.Write, FileShare.None,
+                    fileOptions, bufferSize, createRecursively)
+                .Select(stream =>
+                {
+                    if (encoding == null)
+                    {
+                        return new StreamWriter(stream);
+                    }
+                    else
+                    {
+                        return new StreamWriter(stream, encoding);
+                    }
+                });
         }
 
         /// <inheritdoc />
@@ -2134,7 +2258,7 @@ namespace IoFluently
         public AbsolutePath WriteAllText(AbsolutePath absolutePath, string text, Encoding encoding = null, bool createRecursively = false)
         {
             encoding ??= Encoding.Default;
-            using var writer = TryOpenWriter(absolutePath, Math.Max(encoding.GetByteCount(text), 1), createRecursively).Value;
+            using var writer = TryOpenWriter(absolutePath, FileOptions.None, encoding, Math.Max(encoding.GetByteCount(text), 1), createRecursively).Value;
             writer.Write(text);
 
             return absolutePath;

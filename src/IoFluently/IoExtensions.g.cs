@@ -339,40 +339,12 @@ namespace IoFluently
             return path.IoService.TryWithExtension(path, differentExtension).Value;
         }
 
-        public static IEnumerable<string> ReadLines(this AbsolutePath path) {
-            return path.IoService.ReadLines(path);
-        }
-
-        public static string ReadAllText(this AbsolutePath path) {
-            return path.IoService.ReadAllText(path);
-        }
-
-        public static IEnumerable<string> ReadLines(this AbsolutePath path, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, Boolean leaveOpen = false) {
-            return path.IoService.ReadLines(path, fileMode, fileAccess, fileShare, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
-        }
-
-        public static IMaybe<string> TryReadText(this AbsolutePath path, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, Boolean leaveOpen = false) {
-            return path.IoService.TryReadText(path, fileMode, fileAccess, fileShare, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
-        }
-
-        public static string ReadText(this AbsolutePath path, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read, Encoding encoding = null, Boolean detectEncodingFromByteOrderMarks = true, int bufferSize = 4096, Boolean leaveOpen = false) {
-            return path.IoService.TryReadText(path, fileMode, fileAccess, fileShare, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen).Value;
-        }
-
         public static IMaybe<StreamReader> TryOpenReader(this AbsolutePath path) {
             return path.IoService.TryOpenReader(path);
         }
 
         public static StreamReader OpenReader(this AbsolutePath path) {
             return path.IoService.TryOpenReader(path).Value;
-        }
-
-        public static IMaybe<StreamWriter> TryOpenWriter(this AbsolutePath absolutePath, int bufferSize = 4096, Boolean createRecursively = false) {
-            return absolutePath.IoService.TryOpenWriter(absolutePath, bufferSize, createRecursively);
-        }
-
-        public static StreamWriter OpenWriter(this AbsolutePath absolutePath, int bufferSize = 4096, Boolean createRecursively = false) {
-            return absolutePath.IoService.TryOpenWriter(absolutePath, bufferSize, createRecursively).Value;
         }
 
         public static void WriteAllBytes(this AbsolutePath path, Byte[] bytes, Boolean createRecursively = false) {

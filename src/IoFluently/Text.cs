@@ -10,13 +10,13 @@ namespace IoFluently
         /// <summary>
         /// The lines of text from the text file
         /// </summary>
-        public IEnumerable<string> Lines { get; }
+        public IEnumerable<Line> Lines { get; }
 
         /// <summary>
         /// Constructs an object representing the contents of a text file
         /// </summary>
         /// <param name="lines">The lines to be read from the text file</param>
-        public Text(IEnumerable<string> lines)
+        public Text(IEnumerable<Line> lines)
         {
             Lines = lines;
         }

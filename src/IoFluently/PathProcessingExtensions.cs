@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
@@ -156,8 +157,8 @@ namespace IoFluently
         /// <returns>An object that allows the path to be read from.</returns>
         public static IPathWithKnownFormatSync<Text, Text> AsTextFile(this AbsolutePath path)
         {
-            return path.AsPathFormat(() => new Text(path.ReadLines()),
-                (text) => path.IoService.WriteAllLines(path, text.Lines));
+            return path.AsPathFormat(() => new Text(path.IoService.TryReadLines(path).Value),
+                (text) => path.IoService.WriteAllLines(path, text.Lines.Select(x => x.Value)));
         }
 
         /// <summary>
@@ -168,7 +169,7 @@ namespace IoFluently
         /// <returns>An object that allows the path to be read from.</returns>
         public static IPathWithKnownFormatSync<string, string> AsSmallTextFile(this AbsolutePath path)
         {
-            return path.AsPathFormat(() => path.ReadAllText(), (text) => path.IoService.WriteAllText(path, text));
+            return path.AsPathFormat(() => path.IoService.TryReadAllText(path).Value, (text) => path.IoService.WriteAllText(path, text));
         }
         
         /// <summary>
@@ -250,7 +251,7 @@ namespace IoFluently
         /// </summary>
         /// <param name="lines">The lines of text</param>
         /// <returns>An object that represents text.</returns>
-        public static Text AsText(this IEnumerable<string> lines)
+        public static Text AsText(this IEnumerable<Line> lines)
         {
             return new Text(lines);
         }

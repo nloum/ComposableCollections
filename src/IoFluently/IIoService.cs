@@ -455,30 +455,53 @@ namespace IoFluently
         #endregion
         
         #region File reading
-        IEnumerable<string> ReadLines(AbsolutePath path);
-        string ReadAllText(AbsolutePath path);
-        IEnumerable<string> ReadLines(AbsolutePath path, FileMode fileMode = FileMode.Open,
-            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
-            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = Constants.DefaultBufferSize,
-            bool leaveOpen = false);
-        IMaybe<string> TryReadText(AbsolutePath path, FileMode fileMode = FileMode.Open,
+
+        BufferEnumerator ReadBuffers(AbsolutePath path, FileShare fileShare = FileShare.None,
+            int bufferSize = Constants.DefaultBufferSize, int paddingAtStart = 0, int paddingAtEnd = 0);
+        IMaybe<string> TryGetNewLine(AbsolutePath path);
+        IMaybe<Encoding> TryGetEncoding(AbsolutePath path);
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="encoding"></param>
+        /// <param name="detectEncodingFromByteOrderMarks"></param>
+        /// <param name="minByteBufferSize"></param>
+        /// <param name="startingByteOffset">The byte offset in the file to start reading at.</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Note that if startingByteOffset is non-zero, the resulting Lines will have estimated starting character offsets,
+        /// not exact values. This is because some character encodings use different numbers of bytes for different characters,
+        /// and the starting character offsets assume the minimum number of bytes per character, rather than reading the
+        /// entire start of the file first. An example of such an encoding is UTF-8, one of the most common encodings,
+        /// which uses a single byte for English letters but up to three bytes for other characters, such as characters
+        /// from other alphabets.
+        /// </remarks>
+        IMaybe<IEnumerable<Line>> TryReadLines(AbsolutePath path, Encoding encoding = null,
+            bool detectEncodingFromByteOrderMarks = true, int minByteBufferSize = Constants.DefaultBufferSize, ulong startingByteOffset = 0);
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="encoding"></param>
+        /// <param name="detectEncodingFromByteOrderMarks"></param>
+        /// <param name="minByteBufferSize"></param>
+        /// <param name="startingByteOffset">The byte offset in the file to start reading at. If this is greater than the
+        /// file's length, then this function starts reading at the end of the file.</param>
+        /// <returns></returns>
+        IMaybe<IEnumerable<Line>> TryReadLinesBackwards(AbsolutePath path, Encoding encoding = null,
+            bool detectEncodingFromByteOrderMarks = true, FileShare fileShare = FileShare.Read, int minByteBufferSize = Constants.DefaultBufferSize, ulong startingByteOffset = ulong.MaxValue);
+        IMaybe<string> TryReadAllText(AbsolutePath path, FileMode fileMode = FileMode.Open,
             FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
             Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
-            int bufferSize = Constants.DefaultBufferSize, bool leaveOpen = false);
-        IEnumerable<string> ReadLines(Stream stream, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, int bufferSize = Constants.DefaultBufferSize,
-            bool leaveOpen = false);
-        IEnumerable<string> ReadLinesBackwards(Stream stream, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, int bufferSize = Constants.DefaultBufferSize,
-            bool leaveOpen = false);
-        string TryReadText(Stream stream, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, int bufferSize = Constants.DefaultBufferSize,
-            bool leaveOpen = false);
-        IMaybe<StreamReader> TryOpenReader(AbsolutePath path);
+            int minByteBufferSize = Constants.DefaultBufferSize);
+        IMaybe<StreamReader> TryOpenReader(AbsolutePath path, FileOptions fileOptions = FileOptions.SequentialScan, Encoding encoding = null, int minByteBufferSize = Constants.DefaultBufferSize);
         #endregion
         
         #region File writing
-        IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false);
+        IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false);
         AbsolutePath WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = false);
         AbsolutePath WriteAllLines(AbsolutePath absolutePath, IEnumerable<string> lines, Encoding encoding = null, int bufferSize = Constants.DefaultBufferSize, bool createRecursively = false);
         AbsolutePath WriteAllText(AbsolutePath absolutePath, string text, Encoding encoding = null, bool createRecursively = false);

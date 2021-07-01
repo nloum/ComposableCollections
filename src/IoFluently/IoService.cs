@@ -613,16 +613,6 @@ namespace IoFluently
             return path;
         }
 
-        public override IEnumerable<string> ReadLines(AbsolutePath path)
-        {
-            return File.ReadLines(path.ToString());
-        }
-
-        public override string ReadAllText(AbsolutePath path)
-        {
-            return File.ReadAllText(path.ToString());
-        }
-
         public override AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false)
         {
             Directory.Delete(path.ToString(), recursive);

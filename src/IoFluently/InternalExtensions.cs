@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace IoFluently
 {
@@ -39,6 +40,32 @@ namespace IoFluently
             if (i == str1.Length)
                 return str1;
             return str1.Substring(0, i);
+        }
+        
+        public static Line ToLine(this LineSplitEntry lineSplitEntry, Encoding encoding)
+        {
+            return new Line(
+                new string(lineSplitEntry.Line),
+                new string(lineSplitEntry.Separator),
+                lineSplitEntry.ByteOffsetOfStart, lineSplitEntry.CharOffsetOfStart, lineSplitEntry.LineNumber,
+                encoding);
+        }
+
+        public static Line Combine(this IReadOnlyList<Line> parts)
+        {
+            return new Line(
+                String.Create(parts.Select(x => x.Value.Length).Sum(), parts,
+                    (newString, lastLine) =>
+                    {
+                        var position = 0;
+                        foreach (var part in lastLine)
+                        {
+                            part.Value.AsSpan().CopyTo(newString.Slice(position, part.Value.Length));
+                        }
+                    }),
+                parts[parts.Count - 1].Separator,
+                parts[0].ByteOffsetOfStart, parts[0].CharOffsetOfStart, parts[0].LineNumber,
+                parts[0].Encoding);
         }
     }
 }

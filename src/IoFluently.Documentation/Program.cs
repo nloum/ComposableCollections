@@ -14,60 +14,67 @@ namespace IoFluently.Documentation
         public string Settings { get; init; }
         public int StartingLineNumber { get; init; }
         public IReadOnlyList<string> LinesOfCode { get; init; }
+        public bool ShowCode { get; init; }
+        public bool ShowOutput { get; init; }
+
+        public void Execute()
+        {
+            throw new NotImplementedException();
+        }
     }
     
-    public class LiterateDocument
-    {
-        public AbsolutePath Path { get; init; }
-        
-        public IEnumerable<string> Weave()
-        {
-            foreach (var line in Path.ReadLines())
-            {
-                yield return line;
-            }
-        }
-
-        public IEnumerable<CodeBlock> GetCodeBlocks()
-        {
-            var isCurrentlyInTargetCodeBlock = false;
-            string currentSettings = null;
-            var lineNumber = 0;
-            var startingLineNumber = 0;
-            var linesOfCode = new List<string>();
-
-            foreach (var line in Path.ReadLines())
-            {
-                lineNumber++;
-                if (line.Value.StartsWith("```"))
-                {
-                    if (isCurrentlyInTargetCodeBlock)
-                    {
-                        isCurrentlyInTargetCodeBlock = false;
-                        yield return new CodeBlock()
-                        {
-                            Settings = currentSettings,
-                            StartingLineNumber = startingLineNumber,
-                            LinesOfCode = linesOfCode
-                        };
-                        continue;
-                    }
-                    else
-                    {
-                        isCurrentlyInTargetCodeBlock = true;
-                        currentSettings = line.Value.TrimStart('`');
-                        startingLineNumber = lineNumber;
-                        continue;
-                    }
-                }
-
-                if (isCurrentlyInTargetCodeBlock)
-                {
-                    linesOfCode.Add(line);
-                }
-            }
-        }
-    }
+    // public class LiterateDocument
+    // {
+    //     public AbsolutePath Path { get; init; }
+    //     
+    //     public IEnumerable<string> Weave()
+    //     {
+    //         foreach (var line in Path.ReadLines())
+    //         {
+    //             yield return line;
+    //         }
+    //     }
+    //
+    //     public IEnumerable<CodeBlock> GetCodeBlocks()
+    //     {
+    //         var isCurrentlyInTargetCodeBlock = false;
+    //         string currentSettings = null;
+    //         var lineNumber = 0;
+    //         var startingLineNumber = 0;
+    //         var linesOfCode = new List<string>();
+    //
+    //         foreach (var line in Path.ReadLines())
+    //         {
+    //             lineNumber++;
+    //             if (line.Value.StartsWith("```"))
+    //             {
+    //                 if (isCurrentlyInTargetCodeBlock)
+    //                 {
+    //                     isCurrentlyInTargetCodeBlock = false;
+    //                     yield return new CodeBlock()
+    //                     {
+    //                         Settings = currentSettings,
+    //                         StartingLineNumber = startingLineNumber,
+    //                         LinesOfCode = linesOfCode
+    //                     };
+    //                     continue;
+    //                 }
+    //                 else
+    //                 {
+    //                     isCurrentlyInTargetCodeBlock = true;
+    //                     currentSettings = line.Value.TrimStart('`');
+    //                     startingLineNumber = lineNumber;
+    //                     continue;
+    //                 }
+    //             }
+    //
+    //             if (isCurrentlyInTargetCodeBlock)
+    //             {
+    //                 linesOfCode.Add(line);
+    //             }
+    //         }
+    //     }
+    // }
     
     class Program
     {
@@ -87,10 +94,10 @@ namespace IoFluently.Documentation
             descendants.Where(path => markdownFileRegex.IsMatch(path))
                 .Subscribe(path =>
                 {
-                    Console.WriteLine(path);
+                    Console.WriteLine("File was added: " + path);
                 }, (path, _) =>
                 {
-                    Console.WriteLine(path);
+                    Console.WriteLine("File was removed: " + path);
                 });
 
             Console.ReadKey();
@@ -107,7 +114,7 @@ namespace IoFluently.Documentation
             foreach (var typeElement in types)
             {
                 var typeName = typeElement.Attributes["name"].Value.Substring(2);
-                var typeDocumentationFile = repoRoot / "docs" / "src" / "docs" / "api" / $"{typeName}.mdx";    
+                var typeDocumentationFile = (repoRoot / "docs" / "src" / "docs" / "api" / $"{typeName}.mdx").ExpectTextFileOrMissingPath();    
                 
                 using (var writer = typeDocumentationFile.OpenWriter())
                 {

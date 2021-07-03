@@ -35,7 +35,7 @@ namespace IoFluently
         /// <param name="zipFilePath">The path to the zip file</param>
         /// <param name="newline">The newline character(s) (e.g. '\n' or '\r\n')</param>
         /// <param name="enableOpenFilesTracking">Whether to enable the tracking of open files</param>
-        public ZipIoService(AbsolutePath zipFilePath, string newline = null, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), true, "/", newline ?? Environment.NewLine)
+        public ZipIoService(AbsolutePath zipFilePath, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), true, "/")
         {
             ZipFilePath = zipFilePath;
             DefaultRelativePathBase = ParseAbsolutePath("/");
@@ -46,9 +46,9 @@ namespace IoFluently
             Copy(ParseAbsolutePath("/"), targetDirectory);
         }
 
-        public void Zip(AbsolutePath sourcePath, AbsolutePath relativeTo)
+        public void Zip(IHasAbsolutePath sourcePath, IHasAbsolutePath relativeTo)
         {
-            Copy(sourcePath, relativeTo, ParseAbsolutePath("/"));
+            Copy(sourcePath.Path, relativeTo.Path, ParseAbsolutePath("/"));
         }
 
         /// <inheritdoc />
@@ -245,7 +245,7 @@ namespace IoFluently
                         }
                     }
 
-                    return IoFluently.PathType.None;
+                    return IoFluently.PathType.Missing;
                 }
 
                 if (FolderMode == ZipFolderMode.EmptyFilesAreDirectories && zipEntry.Length == 0)
@@ -361,7 +361,7 @@ namespace IoFluently
         private ZipArchive OpenZipArchive(bool willBeWriting, bool willBeReading)
         {
             var pathType = ZipFilePath.Type;
-            if (pathType == IoFluently.PathType.None)
+            if (pathType == IoFluently.PathType.Missing)
             {
                 var stream = ZipFilePath.IoService.TryOpen(ZipFilePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, FileOptions.None).Value;
                 var zipArchive = new ZipArchive(stream, ZipArchiveMode.Create, false);

@@ -151,28 +151,6 @@ namespace IoFluently
         }
 
         /// <summary>
-        /// Tells IoFluently that the specified path is a text file.
-        /// </summary>
-        /// <param name="path">The path to be read from</param>
-        /// <returns>An object that allows the path to be read from.</returns>
-        public static IPathWithKnownFormatSync<Text, Text> AsTextFile(this AbsolutePath path)
-        {
-            return path.AsPathFormat(() => new Text(path.IoService.TryReadLines(path).Value),
-                (text) => path.IoService.WriteAllLines(path, text.Lines.Select(x => x.Value)));
-        }
-
-        /// <summary>
-        /// Tells IoFluently that the specified path is a text file that is small enough that it doesn't have to be read
-        /// lazily.
-        /// </summary>
-        /// <param name="path">The path to be read from</param>
-        /// <returns>An object that allows the path to be read from.</returns>
-        public static IPathWithKnownFormatSync<string, string> AsSmallTextFile(this AbsolutePath path)
-        {
-            return path.AsPathFormat(() => path.IoService.TryReadAllText(path).Value, (text) => path.IoService.WriteAllText(path, text));
-        }
-        
-        /// <summary>
         /// Tells IoFluently that the specified path is an XML file.
         /// </summary>
         /// <param name="path">The path to be read from</param>
@@ -194,66 +172,14 @@ namespace IoFluently
         }
         
         /// <summary>
-        /// Tells IoFluently that the specified path is an XML file, and should be read from and written to using the
-        /// XmlSerializer API.
-        /// </summary>
-        /// <param name="path">The path to be read from</param>
-        /// <typeparam name="TModel">The type that can be used to serialize or deserialize XML from this file</typeparam>
-        /// <returns>An object that allows the path to be read from.</returns>
-        public static IPathWithKnownFormatSync<TModel, TModel> AsSerializedXmlFile<TModel>(
-            this AbsolutePath path, Action<TModel> preSerialize = null, Action<TModel> postDeserialize = null)
-        {
-            return path.AsPathFormat<TModel, TModel>(() =>
-            {
-                var serializer = new XmlSerializer(typeof(TModel));
-                using (var reader = path.TryOpenReader().Value)
-                {
-                    var result = (TModel) serializer.Deserialize(reader);
-                    postDeserialize?.Invoke(result);
-                    return result;
-                }
-            }, (model) =>
-            {
-                var serializer = new XmlSerializer(typeof(TModel));
-                using (var writer = path.IoService.TryOpenWriter(path).Value)
-                {
-                    preSerialize?.Invoke(model);
-                    serializer.Serialize(writer, model);
-                }
-            });
-        }
-
-        /// <summary>
         /// Creates an IIoService object for reading from and writing to the specified zip file
         /// </summary>
         /// <param name="absolutePath">The zip file path</param>
         /// <param name="enableOpenFilesTracking">Whether to enable open-files tracking in the zip file</param>
         /// <returns>An object that can be used for reading from and writing to the zip file</returns>
-        public static ZipIoService AsZipFile(this AbsolutePath absolutePath, bool enableOpenFilesTracking = false)
+        public static ZipIoService ExpectZipFile(this IHasAbsolutePath absolutePath, bool enableOpenFilesTracking = false)
         {
-            return new ZipIoService(absolutePath, absolutePath.IoService.GetNewlineCharacter(), enableOpenFilesTracking);
-        }
-
-        /// <summary>
-        /// Creates an IIoService object for reading from and writing to the specified zip file
-        /// </summary>
-        /// <param name="absolutePath">The zip file path</param>
-        /// <param name="newline">The newline character to be used when writing text to a file inside the zip file</param>
-        /// <param name="enableOpenFilesTracking">Whether to enable open-files tracking in the zip file</param>
-        /// <returns>An object that can be used for reading from and writing to the zip file</returns>
-        public static ZipIoService AsZipFile(this AbsolutePath absolutePath, string newline, bool enableOpenFilesTracking = false)
-        {
-            return new ZipIoService(absolutePath, newline, enableOpenFilesTracking);
-        }
-
-        /// <summary>
-        /// Converts a lazy IEnumerable of lines of text into a Text object, just like the Text object returned by AsTextFile().Read().
-        /// </summary>
-        /// <param name="lines">The lines of text</param>
-        /// <returns>An object that represents text.</returns>
-        public static Text AsText(this IEnumerable<Line> lines)
-        {
-            return new Text(lines);
+            return new ZipIoService(absolutePath.Path,  enableOpenFilesTracking);
         }
     }
 }

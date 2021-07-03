@@ -124,8 +124,8 @@ namespace IoFluently
         /// E.g., '/' for Unix-like environments, '\\' for Windows-like environments.</param>
         /// <param name="enableOpenFilesTracking">Whether to track which files are open (useful for debugging, but comes
         /// with a performance hit)</param>
-        public InMemoryIoService(string newline = null, bool? isCaseSensitiveByDefault = null, string defaultDirectorySeparatorForThisEnvironment = null, bool enableOpenFilesTracking = false)
-            : base(new OpenFilesTrackingService(enableOpenFilesTracking), isCaseSensitiveByDefault ?? ShouldBeCaseSensitiveByDefault(), defaultDirectorySeparatorForThisEnvironment ?? GetDefaultDirectorySeparatorForThisEnvironment(), newline ?? Environment.NewLine)
+        public InMemoryIoService(bool? isCaseSensitiveByDefault = null, string defaultDirectorySeparatorForThisEnvironment = null, bool enableOpenFilesTracking = false)
+            : base(new OpenFilesTrackingService(enableOpenFilesTracking), isCaseSensitiveByDefault ?? ShouldBeCaseSensitiveByDefault(), defaultDirectorySeparatorForThisEnvironment ?? GetDefaultDirectorySeparatorForThisEnvironment())
         {
             _currentDirectory = defaultDirectorySeparatorForThisEnvironment == "/" ? ParseAbsolutePath("/") : null;
         }
@@ -340,7 +340,7 @@ namespace IoFluently
                 return IoFluently.PathType.Folder;
             }
             
-            return IoFluently.PathType.None;
+            return IoFluently.PathType.Missing;
         }
 
         /// <inheritdoc />

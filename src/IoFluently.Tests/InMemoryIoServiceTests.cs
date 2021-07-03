@@ -11,7 +11,7 @@ namespace IoFluently.Tests
         [TestMethod]
         public void ShouldAllowLinuxStylePaths()
         {
-            var uut = new InMemoryIoService("\n", true, "/");
+            var uut = new InMemoryIoService(true, "/");
             uut.RootFolders.Add("/", new InMemoryIoService.Folder());
             var root = uut.ParseAbsolutePath("/");
             root.IsFolder.Should().Be(true);
@@ -24,17 +24,19 @@ namespace IoFluently.Tests
         [TestMethod]
         public void ShouldBeAbleToWriteTextToAndReadTextFromFiles()
         {
-            var uut = new InMemoryIoService("\n", true, "/");
+            var uut = new InMemoryIoService(true, "/");
             uut.RootFolders.Add("/", new InMemoryIoService.Folder());
-            var testTxt = uut.ParseAbsolutePath("/test1.txt");
-            testTxt.WriteAllText("testcontents");
-            testTxt.ReadAllText().Should().Be("testcontents");
+            var testTxt = uut.ParseAbsolutePath("/test1.txt")
+                .ExpectTextFileOrMissingPath();
+            testTxt
+                .WriteAllText("testcontents")
+                .ReadAllText().Should().Be("testcontents");
         }
 
         [TestMethod]
         public void ShouldBeAbleToWriteToAndReadFromFiles()
         {
-            var uut = new InMemoryIoService("\n", true, "/");
+            var uut = new InMemoryIoService(true, "/");
             uut.RootFolders.Add("/", new InMemoryIoService.Folder());
             var testTxt = uut.ParseAbsolutePath("/test1.txt");
             var originalBuffer = new byte[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
@@ -72,10 +74,12 @@ namespace IoFluently.Tests
 	}}
 }}";
 
-            var ioService = new InMemoryIoService( "\n", false, "\\" );
+            var ioService = new InMemoryIoService( false, "\\" );
             ioService.RootFolders.Add( "C:", new InMemoryIoService.Folder() );
             var root = ioService.ParseAbsolutePath( "C:\\" );
-            ioService.WriteAllText( ioService.ParseAbsolutePath( "C:\\appsettings.json" ), configFileContents );
+            ioService.ParseAbsolutePath( "C:\\appsettings.json" )
+                .ExpectTextFileOrMissingPath()
+                .WriteAllText( configFileContents );
 
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile( root.Descendants(), "appsettings.json", false, false )

@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ComposableCollections.Dictionary;
@@ -59,7 +58,7 @@ namespace IoFluently
             UpdateRoots();
         }
         
-        public IoService(bool enableOpenFilesTracking) : base(new OpenFilesTrackingService(enableOpenFilesTracking), ShouldBeCaseSensitiveByDefault(), GetDefaultDirectorySeparatorForThisEnvironment(), Environment.NewLine)
+        public IoService(bool enableOpenFilesTracking) : base(new OpenFilesTrackingService(enableOpenFilesTracking), ShouldBeCaseSensitiveByDefault(), GetDefaultDirectorySeparatorForThisEnvironment())
         {
             PathObservationMethod = GetDefaultPathObservationMethod();
             UpdateRoots();
@@ -139,7 +138,7 @@ namespace IoFluently
                         var item = TryParseAbsolutePath(itemString).Value;
                         if (state.State.ContainsKey(item))
                         {
-                            if (File.Exists(itemString) || Directory.Exists(itemString))
+                            if (System.IO.File.Exists(itemString) || Directory.Exists(itemString))
                             {
                                 if (includeFileContentChanges)
                                 {
@@ -307,11 +306,11 @@ namespace IoFluently
 
         public override async Task<AbsolutePath> DeleteFileAsync(AbsolutePath path, CancellationToken cancellationToken)
         {
-            File.Delete(path);
+            System.IO.File.Delete(path);
 
             var timeoutTimeSpan = DeleteOrCreateTimeout;
             var start = DateTimeOffset.UtcNow;
-            while ( File.Exists(path) && !cancellationToken.IsCancellationRequested )
+            while ( System.IO.File.Exists(path) && !cancellationToken.IsCancellationRequested )
             {
                 var processingTime = DateTimeOffset.UtcNow - start;
                 if (processingTime > timeoutTimeSpan)
@@ -336,7 +335,7 @@ namespace IoFluently
                 if (MayCreateFile(fileMode))
                     TryParent(path).IfHasValue(parent => CreateFolder(parent, createRecursively));
                 var fileStream = new FileStream(path, fileMode, fileAccess, fileShare,
-                    GetBufferSizeInBytes(bufferSize), fileOptions);
+                    GetBufferSizeOrDefaultInBytes(bufferSize), fileOptions);
                 return Something<Stream>(fileStream);
             }
             catch (Exception ex)
@@ -430,7 +429,7 @@ namespace IoFluently
 
         public override AbsolutePath DeleteFile(AbsolutePath path)
         {
-            File.Delete(path);
+            System.IO.File.Delete(path);
 
             return path;
         }
@@ -577,7 +576,7 @@ namespace IoFluently
                         {
                             case IoFluently.PathType.File:
                                 throw new IOException($"The path {ancestor} is a file, not a folder");
-                            case IoFluently.PathType.None:
+                            case IoFluently.PathType.Missing:
                                 Directory.CreateDirectory(path);
                                 break;
                         }
@@ -609,7 +608,7 @@ namespace IoFluently
                     CreateFolder(parent.Value, true);
                 }
             }
-            File.WriteAllBytes(path.ToString(), bytes);
+            System.IO.File.WriteAllBytes(path.ToString(), bytes);
             return path;
         }
 
@@ -623,11 +622,11 @@ namespace IoFluently
         public override PathType Type(AbsolutePath path)
         {
             var str = path.ToString();
-            if (File.Exists(str))
+            if (System.IO.File.Exists(str))
                 return IoFluently.PathType.File;
             if (Directory.Exists(str))
                 return IoFluently.PathType.Folder;
-            return IoFluently.PathType.None;
+            return IoFluently.PathType.Missing;
         }
 
     }

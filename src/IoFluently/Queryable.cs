@@ -136,7 +136,7 @@ namespace IoFluently {
                                             }, (string node, string name, out string child) =>
                                             {
                                                 child = name;
-                                                return File.Exists(child) || Directory.Exists(child);
+                                                return System.IO.File.Exists(child) || Directory.Exists(child);
                                             })
                                             .Where(x => x.Type != TreeTraversalType.ExitBranch && !x.Path.IsRoot)
                                             .Select(x =>

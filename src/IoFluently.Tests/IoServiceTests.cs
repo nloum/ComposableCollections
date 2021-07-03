@@ -42,7 +42,7 @@ namespace IoFluently.Tests
             }
             else if (type == IoServiceType.InMemoryWindowsIoService)
             {
-                var result = new InMemoryIoService("\r\n", false, "/", enableOpenFilesTracking);
+                var result = new InMemoryIoService(false, "/", enableOpenFilesTracking);
                 result.RootFolders.Add("/", new InMemoryIoService.Folder());
                 result.SetCurrentDirectory(result.ParseAbsolutePath("/"));
                 result.SetTemporaryFolder(result.ParseAbsolutePath("/"));
@@ -50,7 +50,7 @@ namespace IoFluently.Tests
             }
             else if (type == IoServiceType.InMemoryUnixIoService)
             {
-                var result = new InMemoryIoService("\n", true, "/", enableOpenFilesTracking);
+                var result = new InMemoryIoService(true, "/", enableOpenFilesTracking);
                 result.RootFolders.Add("/", new InMemoryIoService.Folder());
                 result.SetCurrentDirectory(result.ParseAbsolutePath("/"));
                 result.SetTemporaryFolder(result.ParseAbsolutePath("/"));
@@ -58,10 +58,10 @@ namespace IoFluently.Tests
             }
             else if (type == IoServiceType.InMemoryZipIoService)
             {
-                var inMemoryIoService = new InMemoryIoService("\n", true, "/", enableOpenFilesTracking);
+                var inMemoryIoService = new InMemoryIoService(true, "/", enableOpenFilesTracking);
                 inMemoryIoService.RootFolders.Add("/", new InMemoryIoService.Folder());
                 var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip");
-                var result = testZipFilePath.AsZipFile(true);
+                var result = testZipFilePath.ExpectZipFile(true);
                 result.SetTemporaryFolder(result.ParseAbsolutePath("/tmp"));
                 return result;
             }
@@ -69,6 +69,14 @@ namespace IoFluently.Tests
             {
                 throw new ArgumentException($"Unknown IoServiceType {type}");
             }
+        }
+
+        public void TestSomething()
+        {
+            var uut = CreateUnitUnderTest(IoServiceType.IoService, false);
+            var path = uut.ParseAbsolutePath("/test.txt")
+                .ExpectTextFile();
+            
         }
 
         [TestMethod]
@@ -137,11 +145,11 @@ namespace IoFluently.Tests
         public void WriteAllTextCreateRecursivelyShouldWork(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, true);
-            var temporaryPath = uut.GenerateUniqueTemporaryPath() / "test1"  / "test2";
+            var temporaryPath = (uut.GenerateUniqueTemporaryPath() / "test1"  / "test2").ExpectTextFileOrMissingPath();
             temporaryPath.WriteAllText("", createRecursively: true);
-            temporaryPath.IsFile.Should().BeTrue();
-            temporaryPath.DeleteFileAsync(CancellationToken.None).Wait();
-            temporaryPath.Exists.Should().BeFalse();
+            temporaryPath.Path.IsFile.Should().BeTrue();
+            temporaryPath.Path.DeleteFileAsync(CancellationToken.None).Wait();
+            temporaryPath.Path.Exists.Should().BeFalse();
         }
 
         [TestMethod]
@@ -150,11 +158,11 @@ namespace IoFluently.Tests
         public void CreateTemporaryFileShouldWork(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, true);
-            var temporaryPath = uut.GenerateUniqueTemporaryPath();
+            var temporaryPath = uut.GenerateUniqueTemporaryPath().ExpectTextFileOrMissingPath();
             temporaryPath.WriteAllText("");
-            temporaryPath.IsFile.Should().BeTrue();
-            temporaryPath.DeleteFileAsync(CancellationToken.None).Wait();
-            temporaryPath.Exists.Should().BeFalse();
+            temporaryPath.Path.IsFile.Should().BeTrue();
+            temporaryPath.Path.DeleteFileAsync(CancellationToken.None).Wait();
+            temporaryPath.Path.Exists.Should().BeFalse();
         }
         
         [TestMethod]
@@ -306,7 +314,7 @@ namespace IoFluently.Tests
         public Task ShouldReadLinesInOrder(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, false);
-            var textFilePath = uut.GenerateUniqueTemporaryPath(".txt").WriteAllText("Line 1\nLine 2\nLine 3");
+            var textFilePath = uut.GenerateUniqueTemporaryPath(".txt").ExpectTextFileOrMissingPath().WriteAllText("Line 1\nLine 2\nLine 3");
             return Verify(textFilePath.ReadLines().ToList())
                 .UseParameters(type);
         }
@@ -319,7 +327,7 @@ namespace IoFluently.Tests
         public Task ShouldReadLinesBackwardsInCorrectOrder(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, false);
-            var textFilePath = uut.GenerateUniqueTemporaryPath(".txt").WriteAllText("Line 1\nLine 2\nLine 3");
+            var textFilePath = uut.GenerateUniqueTemporaryPath(".txt").ExpectTextFileOrMissingPath().WriteAllText("Line 1\nLine 2\nLine 3");
             return Verify(textFilePath.ReadLinesBackwards().ToList())
                 .UseParameters(type);
         }
@@ -542,21 +550,21 @@ namespace IoFluently.Tests
 
             sourceFolder.EnsureIsEmptyFolder();
 
-            var textFileInSourceFolder = sourceFolder / "test.txt";
+            var textFileInSourceFolder = (sourceFolder / "test.txt").ExpectTextFileOrMissingPath();
 
             textFileInSourceFolder.WriteAllText("testing 1 2 3");
 
             var targetFolder = (ioService.DefaultRelativePathBase / "test2")
                 .EnsureIsEmptyFolder();
 
-            var textFileMovePlan = textFileInSourceFolder.Translate(sourceFolder, targetFolder);
+            var textFileMovePlan = textFileInSourceFolder.Path.Translate(sourceFolder, targetFolder);
 
-            textFileInSourceFolder.Exists.Should().BeTrue();
+            textFileInSourceFolder.Path.Exists.Should().BeTrue();
             textFileMovePlan.Destination.Exists.Should().BeFalse();
             
             textFileMovePlan.Move();
 
-            textFileInSourceFolder.Exists.Should().BeFalse();
+            textFileInSourceFolder.Path.Exists.Should().BeFalse();
             textFileMovePlan.Destination.Exists.Should().BeTrue();
         }
     }

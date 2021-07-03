@@ -53,6 +53,10 @@ namespace IoFluently
         
         #region Environmental stuff
 
+        Information DefaultBufferSize { get; set; }
+
+        int GetBufferSizeOrDefaultInBytes(Information? bufferSize);
+
         /// <summary>
         /// Indicates that empty directories can exist. This is true for every built-in implementation except the ZipIoService,
         /// because in zip files directories don't exist.
@@ -417,12 +421,6 @@ namespace IoFluently
         IMaybe<Tuple<Uri, Uri>> TryGetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2);
 
         /// <summary>
-        /// Returns the newline character used by this IIoService when writing text to a file (e.g., '\n' or '\r\n')
-        /// </summary>
-        /// <returns>The newline character used by this IIoService when writing text to a file</returns>
-        string GetNewlineCharacter();
-        
-        /// <summary>
         /// </summary>
         /// <param name="path"></param>
         /// <param name="differentExtension">Must include the "." part of the extension (e.g., ".avi" not "avi")</param>
@@ -458,53 +456,10 @@ namespace IoFluently
 
         BufferEnumerator ReadBuffers(AbsolutePath path, FileShare fileShare = FileShare.None,
             Information? bufferSize = default, int paddingAtStart = 0, int paddingAtEnd = 0);
-        IMaybe<string> TryGetNewLine(AbsolutePath path);
-        IMaybe<Encoding> TryGetEncoding(AbsolutePath path);
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="path"></param>
-        /// <param name="encoding"></param>
-        /// <param name="detectEncodingFromByteOrderMarks"></param>
-        /// <param name="bufferSize"></param>
-        /// <param name="startingByteOffset">The byte offset in the file to start reading at.</param>
-        /// <returns></returns>
-        /// <remarks>
-        /// Note that if startingByteOffset is non-zero, the resulting Lines will have estimated starting character offsets,
-        /// not exact values. This is because some character encodings use different numbers of bytes for different characters,
-        /// and the starting character offsets assume the minimum number of bytes per character, rather than reading the
-        /// entire start of the file first. An example of such an encoding is UTF-8, one of the most common encodings,
-        /// which uses a single byte for English letters but up to three bytes for other characters, such as characters
-        /// from other alphabets.
-        /// </remarks>
-        IMaybe<IEnumerable<Line>> TryReadLines(AbsolutePath path, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, Information? bufferSize = default, ulong startingByteOffset = 0);
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="path"></param>
-        /// <param name="encoding"></param>
-        /// <param name="detectEncodingFromByteOrderMarks"></param>
-        /// <param name="bufferSize"></param>
-        /// <param name="startingByteOffset">The byte offset in the file to start reading at. If this is greater than the
-        /// file's length, then this function starts reading at the end of the file.</param>
-        /// <returns></returns>
-        IMaybe<IEnumerable<Line>> TryReadLinesBackwards(AbsolutePath path, Encoding encoding = null,
-            bool detectEncodingFromByteOrderMarks = true, FileShare fileShare = FileShare.Read, Information? bufferSize = default, ulong startingByteOffset = ulong.MaxValue);
-        IMaybe<string> TryReadAllText(AbsolutePath path, FileMode fileMode = FileMode.Open,
-            FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read,
-            Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true,
-            Information? bufferSize = default);
-        IMaybe<StreamReader> TryOpenReader(AbsolutePath path, FileOptions fileOptions = FileOptions.SequentialScan, Encoding encoding = null, Information? bufferSize = default);
         #endregion
         
         #region File writing
-        IMaybe<StreamWriter> TryOpenWriter(AbsolutePath absolutePath, FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, Information? bufferSize = default, bool createRecursively = false);
         AbsolutePath WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = false);
-        AbsolutePath WriteAllLines(AbsolutePath absolutePath, IEnumerable<string> lines, Encoding encoding = null, Information? bufferSize = default, bool createRecursively = false);
-        AbsolutePath WriteAllText(AbsolutePath absolutePath, string text, Encoding encoding = null, bool createRecursively = false);
         #endregion
         
         #region File open for reading or writing

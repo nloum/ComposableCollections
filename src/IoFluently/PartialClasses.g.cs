@@ -26,8 +26,6 @@ namespace IoFluently {
         public FileAttributes? Attributes => IoService.TryAttributes(this).Select(x => (FileAttributes?)x).ValueOrDefault;
         public DateTimeOffset? CreationTime => IoService.TryCreationTime(this).Select(x => (DateTimeOffset?)x).ValueOrDefault;
         public Information? FileSize => IoService.TryFileSize(this).Select(x => (Information?)x).ValueOrDefault;
-        public Encoding Encoding => IoService.TryGetEncoding(this).ValueOrDefault;
-        public string NewLine => IoService.TryGetNewLine(this).ValueOrDefault;
         public Boolean? IsReadOnly => IoService.TryIsReadOnly(this).Select(x => (Boolean?)x).ValueOrDefault;
         public DateTimeOffset? LastAccessTime => IoService.TryLastAccessTime(this).Select(x => (DateTimeOffset?)x).ValueOrDefault;
         public DateTimeOffset? LastWriteTime => IoService.TryLastWriteTime(this).Select(x => (DateTimeOffset?)x).ValueOrDefault;

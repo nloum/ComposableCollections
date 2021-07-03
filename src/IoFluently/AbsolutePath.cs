@@ -13,8 +13,10 @@ namespace IoFluently
     /// <summary>
     /// Represents an absolute path to a file or folder (the file or folder doesn't have to exist)
     /// </summary>
-    public partial class AbsolutePath : IComparable, IComparable<AbsolutePath>, IEquatable<AbsolutePath>
+    public partial class AbsolutePath : IComparable, IComparable<AbsolutePath>, IEquatable<AbsolutePath>, IHasAbsolutePath
     {
+        private AbsolutePath _path;
+
         /// <summary>
         /// Indicates whether or not the absolute path is case sensitive
         /// </summary>
@@ -34,6 +36,8 @@ namespace IoFluently
         /// The TreeLinq absolute path that this object represents
         /// </summary>
         public AbsoluteTreePath<string> Path { get; }
+
+        AbsolutePath IHasAbsolutePath.Path => this;
 
         internal AbsolutePath(bool isCaseSensitive, string directorySeparator, IIoService ioService, IEnumerable<string> path)
         {

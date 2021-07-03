@@ -13,13 +13,13 @@ namespace IoFluently.Tests
         [TestMethod]
         public void ShouldZipUpSingleFile()
         {
-            var inMemoryIoService = new InMemoryIoService("\n", true, "/", false);
+            var inMemoryIoService = new InMemoryIoService(true, "/", false);
             inMemoryIoService.RootFolders.Add("/", new InMemoryIoService.Folder());
-            var textFilePath = inMemoryIoService.DefaultRelativePathBase / "test.txt";
+            var textFilePath = (inMemoryIoService.DefaultRelativePathBase / "test.txt").ExpectTextFileOrMissingPath();
             textFilePath.WriteAllText("Test 1 2 3");
             var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip");
-            var result = testZipFilePath.AsZipFile(true);
-            result.Zip(textFilePath, textFilePath.Parent);
+            var result = testZipFilePath.ExpectZipFile(true);
+            result.Zip(textFilePath, textFilePath.Path.Parent);
             
             using (var stream = result.ZipFilePath.Open(FileMode.Open, FileAccess.Read))
             {
@@ -38,13 +38,13 @@ namespace IoFluently.Tests
         [TestMethod]
         public void ShouldZipUpAndUnzipFolder()
         {
-            var inMemoryIoService = new InMemoryIoService("\n", true, "/", false);
+            var inMemoryIoService = new InMemoryIoService(true, "/", false);
             inMemoryIoService.RootFolders.Add("/", new InMemoryIoService.Folder());
             var folder = inMemoryIoService.DefaultRelativePathBase / "test";
             var textFilePath = folder / "test.txt";
-            textFilePath.WriteAllText("Test 1 2 3");
+            textFilePath.ExpectTextFileOrMissingPath().WriteAllText("Test 1 2 3");
             var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip");
-            var result = testZipFilePath.AsZipFile(true);
+            var result = testZipFilePath.ExpectZipFile(true);
             result.Zip(folder, folder.Parent);
             
             using (var stream = result.ZipFilePath.Open(FileMode.Open, FileAccess.Read))

@@ -72,7 +72,7 @@ namespace SimpleMonads.CodeGeneration
                 genericArgNames.Add(argName);
                 genericArgDefinitions.Add($"out {argName}");
                 interfaceProperties.Add($"{argName}? Item{i} {{ get; }}");
-                classProperties.Add($"public {argName}? Item{i} {{ get; init; }} = default;");
+                classProperties.Add($"public virtual {argName}? Item{i} {{ get; init; }} = default;");
                 baseConstructors.Add($"public EitherBase({argName} item{i}) {{\n" +
                                            $"Item{i} = item{i};\n" +
                                            "}");

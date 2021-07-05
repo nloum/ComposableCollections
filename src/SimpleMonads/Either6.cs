@@ -30,12 +30,12 @@ Item4 = other.Item4;
 Item5 = other.Item5;
 Item6 = other.Item6;
 }
-public T1? Item1 { get; init; } = default;
-public T2? Item2 { get; init; } = default;
-public T3? Item3 { get; init; } = default;
-public T4? Item4 { get; init; } = default;
-public T5? Item5 { get; init; } = default;
-public T6? Item6 { get; init; } = default;
+public virtual T1? Item1 { get; init; } = default;
+public virtual T2? Item2 { get; init; } = default;
+public virtual T3? Item3 { get; init; } = default;
+public virtual T4? Item4 { get; init; } = default;
+public virtual T5? Item5 { get; init; } = default;
+public virtual T6? Item6 { get; init; } = default;
 public TOutput Collapse<TOutput>(Func<T1, TOutput> selector1, Func<T2, TOutput> selector2, Func<T3, TOutput> selector3, Func<T4, TOutput> selector4, Func<T5, TOutput> selector5, Func<T6, TOutput> selector6) {
 if (Item1 != null) return selector1(Item1);
 if (Item2 != null) return selector2(Item2);

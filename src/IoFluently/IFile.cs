@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using SimpleMonads;
+using TreeLinq;
 
 namespace IoFluently
 {
@@ -109,6 +112,61 @@ namespace IoFluently
         public Folder(AbsolutePath path)
         {
             Path = path;
+        }
+        
+        /// <summary>
+        /// Adds a subpath to all this relative path
+        /// </summary>
+        /// <param name="relPath">The relative path that will have a subpath added to it</param>
+        /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
+        /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
+        public static AbsolutePath operator / (Folder absPath, string whatToAdd)
+        {
+            return absPath.Path / whatToAdd;
+        }
+
+        /// <summary>
+        /// Adds a subpath to all this relative path
+        /// </summary>
+        /// <param name="relPath">The relative path that will have a subpath added to it</param>
+        /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
+        /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
+        public static AbsolutePaths operator / (Folder absPath, IEnumerable<RelativePath> whatToAdd)
+        {
+            return absPath.Path / whatToAdd;
+        }
+
+        /// <summary>
+        /// Adds a subpath to all this relative path
+        /// </summary>
+        /// <param name="relPath">The relative path that will have a subpath added to it</param>
+        /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
+        /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
+        public static AbsolutePaths operator / (Folder absPath, Func<AbsolutePath, IEnumerable<RelativePath>> whatToAdd)
+        {
+            return absPath.Path / whatToAdd;
+        }
+
+        /// <summary>
+        /// Adds a subpath to all this relative path
+        /// </summary>
+        /// <param name="relPath">The relative path that will have a subpath added to it</param>
+        /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
+        /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
+        public static AbsolutePath operator / (Folder absPath, RelativePath whatToAdd)
+        {
+            return absPath.Path / whatToAdd;
+        }
+
+        /// <summary>
+        /// Adds a subpath to all this relative path
+        /// </summary>
+        /// <param name="relPath">The relative path that will have a subpath added to it</param>
+        /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
+        /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
+        public static AbsolutePaths operator / (Folder absPath, IEnumerable<string> whatToAdd)
+        {
+            return absPath.Path / whatToAdd;
         }
     }
 

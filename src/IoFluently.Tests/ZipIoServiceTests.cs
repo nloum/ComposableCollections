@@ -14,14 +14,14 @@ namespace IoFluently.Tests
         public void ShouldZipUpSingleFile()
         {
             var inMemoryIoService = new InMemoryIoService(true, "/", false);
-            inMemoryIoService.RootFolders.Add("/", new InMemoryIoService.Folder());
+            inMemoryIoService.RootFolders.Add("/", new InMemoryIoService.InMemoryFolder());
             var textFilePath = (inMemoryIoService.DefaultRelativePathBase / "test.txt").ExpectTextFileOrMissingPath();
             textFilePath.WriteAllText("Test 1 2 3");
             var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip");
             var result = testZipFilePath.ExpectZipFile(true);
             result.Zip(textFilePath, textFilePath.Path.Parent);
             
-            using (var stream = result.ZipFilePath.Open(FileMode.Open, FileAccess.Read))
+            using (var stream = result.ZipFilePath.Path.Open(FileMode.Open, FileAccess.Read))
             {
                 using (var archive = new ZipArchive(stream, ZipArchiveMode.Read))
                 {
@@ -39,7 +39,7 @@ namespace IoFluently.Tests
         public void ShouldZipUpAndUnzipFolder()
         {
             var inMemoryIoService = new InMemoryIoService(true, "/", false);
-            inMemoryIoService.RootFolders.Add("/", new InMemoryIoService.Folder());
+            inMemoryIoService.RootFolders.Add("/", new InMemoryIoService.InMemoryFolder());
             var folder = inMemoryIoService.DefaultRelativePathBase / "test";
             var textFilePath = folder / "test.txt";
             textFilePath.ExpectTextFileOrMissingPath().WriteAllText("Test 1 2 3");
@@ -47,7 +47,7 @@ namespace IoFluently.Tests
             var result = testZipFilePath.ExpectZipFile(true);
             result.Zip(folder, folder.Parent);
             
-            using (var stream = result.ZipFilePath.Open(FileMode.Open, FileAccess.Read))
+            using (var stream = result.ZipFilePath.Path.Open(FileMode.Open, FileAccess.Read))
             {
                 using (var archive = new ZipArchive(stream, ZipArchiveMode.Read))
                 {

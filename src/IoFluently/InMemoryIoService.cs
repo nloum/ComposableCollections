@@ -72,7 +72,7 @@ namespace IoFluently
         /// <summary>
         /// Represents a folder in memory.
         /// </summary>
-        public class Folder
+        public class InMemoryFolder
         {
             /// <summary>
             /// The files that this folder contains
@@ -82,7 +82,7 @@ namespace IoFluently
             /// <summary>
             /// The sub-folders that this folder contains
             /// </summary>
-            public Dictionary<string, Folder> Folders { get; } = new Dictionary<string, Folder>();
+            public Dictionary<string, InMemoryFolder> Folders { get; } = new Dictionary<string, InMemoryFolder>();
         }
         
         /// <inheritdoc />
@@ -93,23 +93,23 @@ namespace IoFluently
 
         public override bool CanEmptyDirectoriesExist => true;
 
-        private AbsolutePath _currentDirectory;
-        private AbsolutePath _temporaryFolder = null;
+        private Folder _currentDirectory;
+        private Folder _temporaryFolder = null;
         
         /// <summary>
         /// The root folders in this in-memory file system. E.g., if this is a Unix-like file system then this would have
         /// just '/'. If this was a Windows-like file system then this might contain 'C:' and 'D:'.
         /// </summary>
-        public ObservableDictionary<string, Folder> RootFolders { get; } = new ObservableDictionary<string, Folder>();
+        public ObservableDictionary<string, InMemoryFolder> RootFolders { get; } = new ObservableDictionary<string, InMemoryFolder>();
 
         /// <inheritdoc />
-        public override AbsolutePath DefaultRelativePathBase => _currentDirectory;
+        public override Folder DefaultRelativePathBase => _currentDirectory;
 
         /// <summary>
         /// Changes the current working directory
         /// </summary>
         /// <param name="newCurrentDirectory">The new current directory</param>
-        public void SetCurrentDirectory(AbsolutePath newCurrentDirectory)
+        public void SetCurrentDirectory(Folder newCurrentDirectory)
         {
             _currentDirectory = newCurrentDirectory;
         }
@@ -131,7 +131,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override AbsolutePath GetTemporaryFolder()
+        public override Folder GetTemporaryFolder()
         {
             return _temporaryFolder;
         }
@@ -152,7 +152,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IObservableReadOnlySet<AbsolutePath> Roots => RootFolders.ToLiveLinq().KeysAsSet().Select(x => ParseAbsolutePath(x)).ToReadOnlyObservableSet();
+        public override IObservableReadOnlySet<Folder> Roots => RootFolders.ToLiveLinq().KeysAsSet().Select(x => ParseAbsolutePath(x).ExpectFolder()).ToReadOnlyObservableSet();
 
         private IMaybe<File> GetFile(AbsolutePath path)
         {
@@ -165,7 +165,7 @@ namespace IoFluently
             return Nothing<File>(() => throw new InvalidOperationException($"The root folder of {path} does not exist"));
         }
 
-        private IMaybe<File> GetFile(Folder folder, IReadOnlyList<string> components, AbsolutePath originalPath)
+        private IMaybe<File> GetFile(InMemoryFolder folder, IReadOnlyList<string> components, AbsolutePath originalPath)
         {
             if (components.Count == 0)
             {
@@ -190,7 +190,7 @@ namespace IoFluently
             return Nothing<File>(() => throw new InvalidOperationException($"The {components[0]} part of the path {originalPath} is missing"));
         }
         
-        private IMaybe<Folder> GetFolder(AbsolutePath path)
+        private IMaybe<InMemoryFolder> GetFolder(AbsolutePath path)
         {
             path = Simplify(path);
             var components = path.Path.Components;
@@ -198,10 +198,10 @@ namespace IoFluently
             {
                 return GetFolder(RootFolders[components[0]], components.Skip(1).ToList(), path);
             }
-            return Nothing<Folder>(() => throw new InvalidOperationException($"The root folder of {path} does not exist"));
+            return Nothing<InMemoryFolder>(() => throw new InvalidOperationException($"The root folder of {path} does not exist"));
         }
 
-        private IMaybe<Folder> GetFolder(Folder folder, IReadOnlyList<string> components, AbsolutePath originalPath)
+        private IMaybe<InMemoryFolder> GetFolder(InMemoryFolder folder, IReadOnlyList<string> components, AbsolutePath originalPath)
         {
             if (components.Count == 0)
             {
@@ -210,7 +210,7 @@ namespace IoFluently
             
             if (folder.Files.ContainsKey(components[0]))
             {
-                return Nothing<Folder>(() => throw new InvalidOperationException($"The {components[0]} folder in the path {originalPath} is actually a file, not a folder"));
+                return Nothing<InMemoryFolder>(() => throw new InvalidOperationException($"The {components[0]} folder in the path {originalPath} is actually a file, not a folder"));
             }
 
             if (folder.Folders.ContainsKey(components[0]))
@@ -218,7 +218,7 @@ namespace IoFluently
                 return GetFolder(folder.Folders[components[0]], components.Skip(1).ToList(), originalPath);
             }
 
-            return Nothing<Folder>(() => throw new InvalidOperationException($"The {components[0]} part of the path {originalPath} is missing"));
+            return Nothing<InMemoryFolder>(() => throw new InvalidOperationException($"The {components[0]} part of the path {originalPath} is missing"));
         }
 
         /// <inheritdoc />
@@ -376,7 +376,7 @@ namespace IoFluently
                     fileMode == FileMode.OpenOrCreate)
                 {
                     var pathParent = TryParent(path).Value;
-                    Folder parentFolder = null;
+                    InMemoryFolder parentFolder = null;
                     var maybeParentFolder = GetFolder(pathParent);
                     if (!maybeParentFolder.HasValue)
                     {
@@ -447,21 +447,21 @@ namespace IoFluently
             return path;
         }
 
-        private void EnsureFolderExists(Folder folder, IReadOnlyList<string> components)
+        private void EnsureFolderExists(InMemoryFolder folder, IReadOnlyList<string> components)
         {
             if (folder.Files.ContainsKey(components[0]))
             {
                 throw new IOException("Cannot create folder because a file already has that name");
             }
 
-            Folder childFolder = null;
+            InMemoryFolder childFolder = null;
             if (folder.Folders.ContainsKey(components[0]))
             {
                 childFolder = folder.Folders[components[0]];
             }
             else
             {
-                childFolder = new Folder();
+                childFolder = new InMemoryFolder();
                 folder.Folders[components[0]] = childFolder;
             }
 

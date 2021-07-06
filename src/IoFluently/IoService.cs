@@ -37,13 +37,13 @@ namespace IoFluently
             return new Queryable<AbsolutePath>(new QueryContext());
         }
 
-        private AbsolutePath _defaultRelativePathBase;
+        private Folder _defaultRelativePathBase;
         
-        public override AbsolutePath DefaultRelativePathBase => _defaultRelativePathBase ?? TryParseAbsolutePath(Environment.CurrentDirectory).Value;
+        public override Folder DefaultRelativePathBase => _defaultRelativePathBase ?? TryParseAbsolutePath(Environment.CurrentDirectory).Value;
         public TimeSpan DeleteOrCreateSpinPeriod { get; set; } = TimeSpan.FromMilliseconds(100);
         public TimeSpan DeleteOrCreateTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
-        public override void SetDefaultRelativePathBase(AbsolutePath defaultRelativePathBase)
+        public override void SetDefaultRelativePathBase(Folder defaultRelativePathBase)
         {
             _defaultRelativePathBase = defaultRelativePathBase;
         }
@@ -446,9 +446,9 @@ namespace IoFluently
             return path;
         }
 
-        public override IObservableReadOnlySet<AbsolutePath> Roots => _storage;
+        public override IObservableReadOnlySet<Folder> Roots => _storage;
 
-        private readonly ObservableSet<AbsolutePath> _storage = new ObservableSet<AbsolutePath>();
+        private readonly ObservableSet<Folder> _storage = new ObservableSet<Folder>();
 
         public override IEnumerable<AbsolutePath> EnumerateDescendants(AbsolutePath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
@@ -506,7 +506,7 @@ namespace IoFluently
                     _storage.Add(drivePath);
             }
 
-            var drivesThatWereRemoved = new List<AbsolutePath>();
+            var drivesThatWereRemoved = new List<Folder>();
 
             foreach (var drive in _storage)
                 if (!currentStorage.Contains(drive + "\\"))
@@ -554,9 +554,9 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override AbsolutePath GetTemporaryFolder()
+        public override Folder GetTemporaryFolder()
         {
-            return ParseAbsolutePath(Path.GetTempPath());
+            return ParseAbsolutePath(Path.GetTempPath()).ExpectFolder();
         }
 
         /// <inheritdoc />

@@ -16,13 +16,13 @@ namespace IoFluently
     /// </summary>
     public class ZipIoService : IoServiceBase
     {
-        private AbsolutePath _temporaryFolder;
+        private Folder _temporaryFolder;
         private bool _hasZipFileBeenCreatedYet = false;
         
         /// <summary>
         /// The path to the zip file
         /// </summary>
-        public AbsolutePath ZipFilePath { get; }
+        public File ZipFilePath { get; }
 
         public ZipFolderMode FolderMode { get; set; } = ZipFolderMode.AllNonExistentPathsAreFolders;
         public override bool CanEmptyDirectoriesExist => FolderMode == ZipFolderMode.EmptyFilesAreDirectories;
@@ -35,15 +35,15 @@ namespace IoFluently
         /// <param name="zipFilePath">The path to the zip file</param>
         /// <param name="newline">The newline character(s) (e.g. '\n' or '\r\n')</param>
         /// <param name="enableOpenFilesTracking">Whether to enable the tracking of open files</param>
-        public ZipIoService(AbsolutePath zipFilePath, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), true, "/")
+        public ZipIoService(File zipFilePath, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), true, "/")
         {
             ZipFilePath = zipFilePath;
             DefaultRelativePathBase = ParseAbsolutePath("/");
         }
 
-        public void Unzip(AbsolutePath targetDirectory)
+        public void Unzip(Folder targetDirectory)
         {
-            Copy(ParseAbsolutePath("/"), targetDirectory);
+            Copy(ParseAbsolutePath("/"), targetDirectory.Path);
         }
 
         public void Zip(IHasAbsolutePath sourcePath, IHasAbsolutePath relativeTo)
@@ -52,9 +52,9 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override AbsolutePath DefaultRelativePathBase { get; protected set; }
+        public override Folder DefaultRelativePathBase { get; protected set; }
 
-        public override void SetDefaultRelativePathBase(AbsolutePath defaultRelativePathBase)
+        public override void SetDefaultRelativePathBase(Folder defaultRelativePathBase)
         {
             throw new NotImplementedException();
         }
@@ -65,7 +65,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IObservableReadOnlySet<AbsolutePath> Roots { get; } = new ObservableSet<AbsolutePath>();
+        public override IObservableReadOnlySet<Folder> Roots { get; } = new ObservableSet<Folder>();
 
         /// <inheritdoc />
         public override IQueryable<AbsolutePath> Query()
@@ -93,7 +93,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override AbsolutePath GetTemporaryFolder()
+        public override Folder GetTemporaryFolder()
         {
             return _temporaryFolder;
         }
@@ -133,7 +133,7 @@ namespace IoFluently
 
         private ZipArchiveEntry GetZipArchiveEntry(ZipArchive archive, AbsolutePath path)
         {
-            var result = archive.GetEntry(path.RelativeTo(DefaultRelativePathBase).Simplify())
+            var result = archive.GetEntry(path.RelativeTo(DefaultRelativePathBase.Path).Simplify())
                 ?? archive.GetEntry(path.Simplify());
             return result;
         }
@@ -190,7 +190,7 @@ namespace IoFluently
                 {
                     return Maybe<FileAttributes>.Nothing();
                 }
-                return ZipFilePath.IoService.TryAttributes(ZipFilePath);
+                return ZipFilePath.Path.IoService.TryAttributes(ZipFilePath.Path);
             }
         }
 
@@ -305,6 +305,8 @@ namespace IoFluently
                 // throw new InvalidOperationException(
                 //     $"{nameof(createRecursively)} must always be true for {nameof(ZipIoService)}");
             }
+
+            path = path.Simplify();
             var archive = OpenZipArchive(fileAccess != FileAccess.Read, true);
             
             var entry = GetZipArchiveEntry(archive, path);
@@ -360,17 +362,17 @@ namespace IoFluently
 
         private ZipArchive OpenZipArchive(bool willBeWriting, bool willBeReading)
         {
-            var pathType = ZipFilePath.Type;
+            var pathType = ZipFilePath.Path.Type;
             if (pathType == IoFluently.PathType.MissingPath)
             {
-                var stream = ZipFilePath.IoService.TryOpen(ZipFilePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, FileOptions.None).Value;
+                var stream = ZipFilePath.Path.IoService.TryOpen(ZipFilePath.Path, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, FileOptions.None).Value;
                 var zipArchive = new ZipArchive(stream, ZipArchiveMode.Create, false);
                 zipArchive.Dispose();
                 
                 if (willBeReading)
                 {
                     zipArchive.Dispose();
-                    stream = ZipFilePath.IoService.TryOpen(ZipFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None, FileOptions.None).Value;
+                    stream = ZipFilePath.Path.IoService.TryOpen(ZipFilePath.Path, FileMode.Open, FileAccess.ReadWrite, FileShare.None, FileOptions.None).Value;
                     zipArchive = new ZipArchive(stream, ZipArchiveMode.Update, false);
                     return zipArchive;
                 }
@@ -385,7 +387,7 @@ namespace IoFluently
             }
             else
             {
-                var stream = ZipFilePath.IoService.TryOpen(ZipFilePath, FileMode.Open, willBeWriting ? FileAccess.ReadWrite : FileAccess.Read,
+                var stream = ZipFilePath.Path.IoService.TryOpen(ZipFilePath.Path, FileMode.Open, willBeWriting ? FileAccess.ReadWrite : FileAccess.Read,
                     willBeWriting ? FileShare.None : FileShare.Read, FileOptions.None).Value;
                 return new ZipArchive(stream, willBeWriting ? ZipArchiveMode.Update : ZipArchiveMode.Read, false);
             }

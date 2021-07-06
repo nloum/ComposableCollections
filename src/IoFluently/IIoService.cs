@@ -62,13 +62,13 @@ namespace IoFluently
         /// because in zip files directories don't exist.
         /// </summary>
         bool CanEmptyDirectoriesExist { get; }
-        void SetDefaultRelativePathBase(AbsolutePath defaultRelativePathBase);
+        void SetDefaultRelativePathBase(Folder defaultRelativePathBase);
         void UnsetDefaultRelativePathBase();
-        AbsolutePath DefaultRelativePathBase { get; }
+        Folder DefaultRelativePathBase { get; }
         /// <summary>
         /// Lists the file system roots. On Unix-like operating systems, there's only one file system root, and it is '/'.
         /// </summary>
-        IObservableReadOnlySet<AbsolutePath> Roots { get; }
+        IObservableReadOnlySet<Folder> Roots { get; }
 
         string DefaultDirectorySeparator { get; }
         bool IsCaseSensitiveByDefault { get; }
@@ -77,7 +77,7 @@ namespace IoFluently
         /// Returns the path to the user's temporary folder
         /// </summary>
         /// <returns>The path to the user's temporary folder</returns>
-        AbsolutePath GetTemporaryFolder();
+        Folder GetTemporaryFolder();
 
         #endregion
         
@@ -277,7 +277,7 @@ namespace IoFluently
         bool IsAbsolutePath(string path);
         bool ComponentsAreAbsolute(IReadOnlyList<string> path);
         IMaybe<RelativePath> TryParseRelativePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
-        IMaybe<AbsolutePath> TryParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
+        IMaybe<AbsolutePath> TryParseAbsolutePath(string path, Folder optionallyRelativeTo, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         IMaybe<AbsolutePath> TryParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         RelativePath ParseRelativePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         AbsolutePath ParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);

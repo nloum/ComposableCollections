@@ -55,7 +55,7 @@ namespace IoFluently
         /// <inheritdoc />
         public bool IsCaseSensitiveByDefault { get; }
         /// <inheritdoc />
-        public virtual AbsolutePath DefaultRelativePathBase { get; protected set; }
+        public virtual Folder DefaultRelativePathBase { get; protected set; }
         
         /// <summary>
         /// The default buffer size for this <see cref="IIoService"/>, used in calls where the buffer size is an optional
@@ -74,7 +74,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual void SetDefaultRelativePathBase(AbsolutePath defaultRelativePathBase)
+        public virtual void SetDefaultRelativePathBase(Folder defaultRelativePathBase)
         {
             DefaultRelativePathBase = defaultRelativePathBase;
         }
@@ -85,7 +85,7 @@ namespace IoFluently
             throw new NotImplementedException();
         }
 
-        public abstract IObservableReadOnlySet<AbsolutePath> Roots { get; }
+        public abstract IObservableReadOnlySet<Folder> Roots { get; }
 
         /// <inheritdoc />
         public abstract void UpdateRoots();
@@ -106,7 +106,7 @@ namespace IoFluently
         }
         
         /// <inheritdoc />
-        public abstract AbsolutePath GetTemporaryFolder();
+        public abstract Folder GetTemporaryFolder();
 
         #endregion
         #region Creating
@@ -659,7 +659,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public IMaybe<AbsolutePath> TryParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo,
+        public IMaybe<AbsolutePath> TryParseAbsolutePath(string path, Folder optionallyRelativeTo,
             CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             var relativePath = TryParseRelativePath(path, flags);

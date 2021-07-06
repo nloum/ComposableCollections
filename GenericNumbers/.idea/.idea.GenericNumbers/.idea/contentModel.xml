@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="$USER_HOME$/Library/Caches/Rider2019.3/extResources" t="IncludeRecursive" />
+    <e p="$USER_HOME$/Library/Caches/Rider2019.3/resharper-host/local/Transient/ReSharperHost/v193/SolutionCaches/_GenericNumbers.235838525.00" t="ExcludeRecursive" />
+    <e p="$PROJECT_DIR$" t="IncludeFlat">
+      <e p="GenericNumbers" t="IncludeRecursive">
+        <e p="Arithmetic" t="Include">
+          <e p="Abs" t="Include">
+            <e p="AbsUtil.cs" t="Include" />
+            <e p="AbsUtilWithTypeConstraint.cs" t="Include" />
+            <e p="IAbs.cs" t="Include" />
+          </e>
+          <e p="Ceiling" t="Include">
+            <e p="CeilingUtil.cs" t="Include" />
+            <e p="CeilingUtilWithTypeConstraint.cs" t="Include" />
+            <e p="ICeiling.cs" t="Include" />
+          </e>
+          <e p="DividedBy" t="Include">
+            <e p="DividedByUtil.cs" t="Include" />
+            <e p="DividedByUtilWithTypeConstraint.cs" t="Include" />
+            <e p="IDividedBy.cs" t="Include" />
+          </e>
+          <e p="Floor" t="Include">
+            <e p="FloorUtil.cs" t="Include" />
+            <e p="FloorUtilWithTypeConstraint.cs" t="Include" />
+            <e p="IFloor.cs" t="Include" />
+          </e>
+          <e p="Minus" t="Include">
+            <e p="IMinus.cs" t="Include" />
+            <e p="MinusUtil.cs" t="Include" />
+            <e p="MinusUtilWithTypeConstraint.cs" t="Include" />
+          </e>
+          <e p="Plus" t="Include">
+            <e p="IPlus.cs" t="Include" />
+            <e p="PlusUtil.cs" t="Include" />
+            <e p="PlusUtilWithTypeConstraint.cs" t="Include" />
+          </e>
+          <e p="RaisedTo" t="Include">
+            <e p="IRaisedTo.cs" t="Include" />
+            <e p="RaisedToUtil.cs" t="Include" />
+            <e p="RaisedToUtilWithTypeConstraint.cs" t="Include" />
+          </e>
+          <e p="Remainder" t="Include">
+            <e p="IRemainder.cs" t="Include" />
+            <e p="RemainderUtil.cs" t="Include" />
+            <e p="RemainderUtilWithTypeConstraint.cs" t="Include" />
+          </e>
+          <e p="Round" t="Include">
+            <e p="IRound.cs" t="Include" />
+            <e p="RoundUtil.cs" t="Include" />
+            <e p="RoundUtilWithTypeConstraint.cs" t="Include" />
+          </e>
+          <e p="SpecialNumbers" t="Include">
+            <e p="ISpecialNumbers.cs" t="Include" />
+            <e p="SpecialNumbersUtil.cs" t="Include" />
+            <e p="SpecialNumbersUtilWithTypeConstraint.cs" t="Include" />
+          </e>
+          <e p="Sqrt" t="Include">
+            <e p="ISqrt.cs" t="Include" />
+            <e p="SqrtUtil.cs" t="Include" />
+            <e p="SqrtUtilWithTypeConstraint.cs" t="Include" />
+          </e>
+          <e p="Times" t="Include">
+            <e p="ITimes.cs" t="Include" />
+            <e p="TimesUtil.cs" t="Include" />
+            <e p="TimesUtilWithTypeConstraint.cs" t="Include" />
+          </e>
+        </e>
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="ConvertTo" t="Include">
+          <e p="ConverterTo.cs" t="Include" />
+          <e p="ConvertToUtil.cs" t="Include" />
+          <e p="ConvertToUtilWithTypeConstraint.cs" t="Include" />
+          <e p="IConvertTo.cs" t="Include" />
+        </e>
+        <e p="Extensions.cs" t="Include" />
+        <e p="GenericNumbers.csproj" t="IncludeRecursive" />
+        <e p="INumberBound.cs" t="Include" />
+        <e p="INumberRange.cs" t="Include" />
+        <e p="INumberRangeIntersectionCount.cs" t="Include" />
+        <e p="NumberBound.cs" t="Include" />
+        <e p="NumberRange.cs" t="Include" />
+        <e p="NumberRangeIntersectionCount.cs" t="Include" />
+        <e p="NumberRangeSplitBehavior.cs" t="Include" />
+        <e p="NumberRangeSubset.cs" t="Include" />
+        <e p="NumbersInANumberRange.cs" t="Include" />
+        <e p="NumbersUtility.cs" t="Include" />
+        <e p="NumbersWrapper.cs" t="Include" />
+        <e p="NumbersWrapper1.cs" t="Include" />
+        <e p="NumberWrapper.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netstandard1.4" t="Include">
+              <e p="GenericNumbers.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="Relational" t="Include">
+          <e p="Equal" t="Include">
+            <e p="EqualsUtilWithTypeConstraint.cs" t="Include" />
+            <e p="EqualUtil.cs" t="Include" />
+          </e>
+          <e p="GreaterThan" t="Include">
+            <e p="GreaterThanUtil.cs" t="Include" />
+            <e p="GreaterThanUtilWithTypeConstraint.cs" t="Include" />
+          </e>
+          <e p="GreaterThanOrEqual" t="Include">
+            <e p="GreaterThanOrEqualUtil.cs" t="Include" />
+            <e p="GreaterThanOrEqualUtilWithTypeConstraint.cs" t="Include" />
+          </e>
+          <e p="LessThan" t="Include">
+            <e p="LessThanUtil.cs" t="Include" />
+            <e p="LessThanUtilWithTypeConstraint.cs" t="Include" />
+          </e>
+          <e p="LessThanOrEqual" t="Include">
+            <e p="LessThanOrEqualUtil.cs" t="Include" />
+            <e p="LessThanOrEqualUtilWithTypeConstraint.cs" t="Include" />
+          </e>
+          <e p="NotEqual" t="Include">
+            <e p="NotEqualUtil.cs" t="Include" />
+            <e p="NotEqualUtilWithTypeConstraint.cs" t="Include" />
+          </e>
+          <e p="RelationExt.cs" t="Include" />
+        </e>
+        <e p="SimpleNumberWrapper.cs" t="Include" />
+      </e>
+      <e p="GenericNumbers.sln" t="IncludeFlat" />
+      <e p="packages" t="ExcludeRecursive" />
+    </e>
+  </component>
+</project>

@@ -8,8 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GenericNumbers" Version="1.1.0-alpha0035" />
     <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GenericNumbers\GenericNumbers.csproj" />
   </ItemGroup>
 
 </Project>

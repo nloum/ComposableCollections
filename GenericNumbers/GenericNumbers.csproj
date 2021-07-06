@@ -13,6 +13,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0052" />
+    <ProjectReference Include="..\SimpleMonads\SimpleMonads.csproj" />
   </ItemGroup>
 </Project>

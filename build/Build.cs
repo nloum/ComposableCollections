@@ -67,7 +67,12 @@ class Build : NukeBuild
     Project[] PackageProjects => new[]
     {
 	    Solution.GetProject("ComposableCollections"),
-	    Solution.GetProject("ComposableCollections.GraphQL")
+	    Solution.GetProject("ComposableCollections.GraphQL"),
+	    Solution.GetProject("GenericNumbers"),
+	    Solution.GetProject("MoreCollections"),
+	    Solution.GetProject("SimpleMonads"),
+	    Solution.GetProject("SimpleMonads.HotChocolate"),
+	    Solution.GetProject("UtilityDisposables"),
     };
     
     IEnumerable<Project> TestProjects => Solution.GetProjects("*.Test");

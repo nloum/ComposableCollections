@@ -576,7 +576,7 @@ namespace IoFluently
                         {
                             case IoFluently.PathType.File:
                                 throw new IOException($"The path {ancestor} is a file, not a folder");
-                            case IoFluently.PathType.Missing:
+                            case IoFluently.PathType.MissingPath:
                                 Directory.CreateDirectory(path);
                                 break;
                         }
@@ -626,7 +626,7 @@ namespace IoFluently
                 return IoFluently.PathType.File;
             if (Directory.Exists(str))
                 return IoFluently.PathType.Folder;
-            return IoFluently.PathType.Missing;
+            return IoFluently.PathType.MissingPath;
         }
 
     }

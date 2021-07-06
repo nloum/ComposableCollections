@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Humanizer;
 using MoreCollections;
 using SimpleMonads;
 using TreeLinq;
@@ -13,7 +14,7 @@ namespace IoFluently
     /// <summary>
     /// Represents an absolute path to a file or folder (the file or folder doesn't have to exist)
     /// </summary>
-    public partial class AbsolutePath : IComparable, IComparable<AbsolutePath>, IEquatable<AbsolutePath>, IHasAbsolutePath
+    public partial class AbsolutePath : SubTypesOf<IHasAbsolutePath>.Either<File, Folder, MissingPath>, IComparable, IComparable<AbsolutePath>, IEquatable<AbsolutePath>, IHasAbsolutePath
     {
         private AbsolutePath _path;
 
@@ -122,6 +123,91 @@ namespace IoFluently
             }
         }
 
+        private Exception ThrowWrongType(params PathType[] oneOf)
+        {
+            var actualType = Type;
+            
+            var oneOfString = oneOf.Select(x => x.ToString()).Humanize();
+            
+            throw new InvalidOperationException(
+                $"Expected {this} to be a one of {oneOfString} but it was a {actualType} instead");
+        }
+
+        public override File? Item1 => GetFile(Type);
+        public override Folder? Item2 => GetFolder(Type);
+        public override MissingPath? Item3 => GetMissingPath(Type);
+
+        private File? GetFile(PathType type)
+        {
+            return type == PathType.File ? new File(this) : null;
+        }
+        
+        private Folder? GetFolder(PathType type)
+        {
+            return type == PathType.Folder ? new Folder(this) : null;
+        }
+        
+        private MissingPath? GetMissingPath(PathType type)
+        {
+            return type == PathType.MissingPath ? new MissingPath(this) : null;
+        }
+        
+        public override TOutput Collapse<TOutput>(Func<File, TOutput> selector1, Func<Folder, TOutput> selector2, Func<MissingPath, TOutput> selector3)
+        {
+            var type = Type;
+            switch (type)
+            {
+                case PathType.File:
+                    return selector1(new File(this));
+                case PathType.Folder:
+                    return selector2(new Folder(this));
+                case PathType.MissingPath:
+                    return selector3(new MissingPath(this));
+                default:
+                    throw new InvalidOperationException($"Unknown path type {type}");
+            }
+        }
+
+        public File ExpectFile()
+        {
+            return Collapse(
+                file => file,
+                folder => throw ThrowWrongType(PathType.File),
+                missingPath => throw ThrowWrongType(PathType.File));
+        }
+
+        public FileOrMissingPath ExpectFileOrMissingPath()
+        {
+            return Collapse(
+                file => new FileOrMissingPath(file),
+                folder => throw ThrowWrongType(PathType.File, PathType.MissingPath),
+                missingPath => new FileOrMissingPath(missingPath));
+        }
+
+        public Folder ExpectFolder()
+        {
+            return Collapse(
+                file => throw ThrowWrongType(PathType.Folder),
+                folder => folder,
+                missingPath => throw ThrowWrongType(PathType.Folder));
+        }
+
+        public FolderOrMissingPath ExpectFolderOrMissingPath()
+        {
+            return Collapse(
+                file => throw ThrowWrongType(PathType.Folder, PathType.MissingPath),
+                folder => new FolderOrMissingPath(folder),
+                missingPath => new FolderOrMissingPath(missingPath));
+        }
+
+        public MissingPath ExpectMissingPath()
+        {
+            return Collapse(
+                file => throw ThrowWrongType(PathType.MissingPath),
+                folder => throw ThrowWrongType(PathType.MissingPath),
+                missingPath => missingPath);
+        }
+        
         /// <inheritdoc />
         public override int GetHashCode()
         {

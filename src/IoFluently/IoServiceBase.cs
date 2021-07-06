@@ -168,7 +168,7 @@ namespace IoFluently
                     }
                     CreateFolder(path);
                     break;
-                case PathType.Missing:
+                case PathType.MissingPath:
                     CreateFolder(path);
                     break;
             }
@@ -1937,7 +1937,7 @@ namespace IoFluently
                 return false;
             }
 
-            return pathType != IoFluently.PathType.Missing;
+            return pathType != IoFluently.PathType.MissingPath;
         }
 
         /// <inheritdoc />

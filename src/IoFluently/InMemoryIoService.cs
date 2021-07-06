@@ -340,7 +340,7 @@ namespace IoFluently
                 return IoFluently.PathType.Folder;
             }
             
-            return IoFluently.PathType.Missing;
+            return IoFluently.PathType.MissingPath;
         }
 
         /// <inheritdoc />

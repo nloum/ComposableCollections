@@ -18,6 +18,6 @@ namespace IoFluently
         /// <summary>
         /// There is neither a file or folder that exists at this path
         /// </summary>
-        Missing
+        MissingPath
     }
 }

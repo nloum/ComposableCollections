@@ -245,7 +245,7 @@ namespace IoFluently
                         }
                     }
 
-                    return IoFluently.PathType.Missing;
+                    return IoFluently.PathType.MissingPath;
                 }
 
                 if (FolderMode == ZipFolderMode.EmptyFilesAreDirectories && zipEntry.Length == 0)
@@ -361,7 +361,7 @@ namespace IoFluently
         private ZipArchive OpenZipArchive(bool willBeWriting, bool willBeReading)
         {
             var pathType = ZipFilePath.Type;
-            if (pathType == IoFluently.PathType.Missing)
+            if (pathType == IoFluently.PathType.MissingPath)
             {
                 var stream = ZipFilePath.IoService.TryOpen(ZipFilePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, FileOptions.None).Value;
                 var zipArchive = new ZipArchive(stream, ZipArchiveMode.Create, false);

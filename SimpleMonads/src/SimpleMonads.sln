@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleMonads", "SimpleMonads\SimpleMonads.csproj", "{2618A355-5633-43C1-B520-17EB1E0214A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleMonads.CodeGeneration", "SimpleMonads.CodeGeneration\SimpleMonads.CodeGeneration.csproj", "{395CB779-99A6-492F-A8D0-A717FBC7825C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "..\build\_build.csproj", "{C8A27E6F-84F4-4BC5-96C7-641983EBA6F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleMonads.Tests", "SimpleMonads.Tests\SimpleMonads.Tests.csproj", "{C62FED5B-DC7B-4F4C-B122-AC0C71ADDEA2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleMonads.HotChocolate", "SimpleMonads.HotChocolate\SimpleMonads.HotChocolate.csproj", "{E8AB518D-077A-48EC-9951-F8421F88DBB3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleMonads.HotChocolate.Tests", "SimpleMonads.HotChocolate.Tests\SimpleMonads.HotChocolate.Tests.csproj", "{6E568CDE-D99E-43F1-96D2-8E008187E774}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C8A27E6F-84F4-4BC5-96C7-641983EBA6F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8A27E6F-84F4-4BC5-96C7-641983EBA6F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2618A355-5633-43C1-B520-17EB1E0214A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2618A355-5633-43C1-B520-17EB1E0214A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2618A355-5633-43C1-B520-17EB1E0214A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2618A355-5633-43C1-B520-17EB1E0214A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{395CB779-99A6-492F-A8D0-A717FBC7825C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{395CB779-99A6-492F-A8D0-A717FBC7825C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{395CB779-99A6-492F-A8D0-A717FBC7825C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{395CB779-99A6-492F-A8D0-A717FBC7825C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C62FED5B-DC7B-4F4C-B122-AC0C71ADDEA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C62FED5B-DC7B-4F4C-B122-AC0C71ADDEA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C62FED5B-DC7B-4F4C-B122-AC0C71ADDEA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C62FED5B-DC7B-4F4C-B122-AC0C71ADDEA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8AB518D-077A-48EC-9951-F8421F88DBB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8AB518D-077A-48EC-9951-F8421F88DBB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8AB518D-077A-48EC-9951-F8421F88DBB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8AB518D-077A-48EC-9951-F8421F88DBB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E568CDE-D99E-43F1-96D2-8E008187E774}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E568CDE-D99E-43F1-96D2-8E008187E774}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E568CDE-D99E-43F1-96D2-8E008187E774}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E568CDE-D99E-43F1-96D2-8E008187E774}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

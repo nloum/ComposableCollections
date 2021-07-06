@@ -17,7 +17,7 @@ namespace SimpleMonads.CodeGeneration
         {
             var ioService = new IoService(new ReactiveProcessFactory());
 
-            var simpleMonadsSourcePath = ioService.CurrentDirectory.Ancestors().First(x => (x / ".git").IsFolder()) / "src" / "SimpleMonads";
+            var simpleMonadsSourcePath = ioService.CurrentDirectory.Ancestors().First(x => (x / ".git").IsFolder()) / "SimpleMonads";
             
             var maxArity = 16;
 
@@ -126,7 +126,7 @@ namespace SimpleMonads.CodeGeneration
                     $"public class EitherBase<{string.Join(", ", genericArgNames)}> : IEitherBase<{genericArgNamesString}>, IEquatable<IEither<{genericArgNamesString}>>\n{{");
                 writer.WriteLine(string.Join("\n", baseConstructors));
                 writer.WriteLine(string.Join("\n", classProperties));
-                writer.WriteLine($"public TOutput Collapse<TOutput>({collapseArgsString}) {{");
+                writer.WriteLine($"public virtual TOutput Collapse<TOutput>({collapseArgsString}) {{");
                 for (var i = 1; i <= arity; i++)
                 {
                     writer.WriteLine($"if (Item{i} != null) return selector{i}(Item{i});");

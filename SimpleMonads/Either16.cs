@@ -86,7 +86,7 @@ public virtual T13? Item13 { get; init; } = default;
 public virtual T14? Item14 { get; init; } = default;
 public virtual T15? Item15 { get; init; } = default;
 public virtual T16? Item16 { get; init; } = default;
-public TOutput Collapse<TOutput>(Func<T1, TOutput> selector1, Func<T2, TOutput> selector2, Func<T3, TOutput> selector3, Func<T4, TOutput> selector4, Func<T5, TOutput> selector5, Func<T6, TOutput> selector6, Func<T7, TOutput> selector7, Func<T8, TOutput> selector8, Func<T9, TOutput> selector9, Func<T10, TOutput> selector10, Func<T11, TOutput> selector11, Func<T12, TOutput> selector12, Func<T13, TOutput> selector13, Func<T14, TOutput> selector14, Func<T15, TOutput> selector15, Func<T16, TOutput> selector16) {
+public virtual TOutput Collapse<TOutput>(Func<T1, TOutput> selector1, Func<T2, TOutput> selector2, Func<T3, TOutput> selector3, Func<T4, TOutput> selector4, Func<T5, TOutput> selector5, Func<T6, TOutput> selector6, Func<T7, TOutput> selector7, Func<T8, TOutput> selector8, Func<T9, TOutput> selector9, Func<T10, TOutput> selector10, Func<T11, TOutput> selector11, Func<T12, TOutput> selector12, Func<T13, TOutput> selector13, Func<T14, TOutput> selector14, Func<T15, TOutput> selector15, Func<T16, TOutput> selector16) {
 if (Item1 != null) return selector1(Item1);
 if (Item2 != null) return selector2(Item2);
 if (Item3 != null) return selector3(Item3);

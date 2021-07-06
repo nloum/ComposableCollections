@@ -36,7 +36,7 @@ public virtual T3? Item3 { get; init; } = default;
 public virtual T4? Item4 { get; init; } = default;
 public virtual T5? Item5 { get; init; } = default;
 public virtual T6? Item6 { get; init; } = default;
-public TOutput Collapse<TOutput>(Func<T1, TOutput> selector1, Func<T2, TOutput> selector2, Func<T3, TOutput> selector3, Func<T4, TOutput> selector4, Func<T5, TOutput> selector5, Func<T6, TOutput> selector6) {
+public virtual TOutput Collapse<TOutput>(Func<T1, TOutput> selector1, Func<T2, TOutput> selector2, Func<T3, TOutput> selector3, Func<T4, TOutput> selector4, Func<T5, TOutput> selector5, Func<T6, TOutput> selector6) {
 if (Item1 != null) return selector1(Item1);
 if (Item2 != null) return selector2(Item2);
 if (Item3 != null) return selector3(Item3);

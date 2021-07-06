@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackOnBuild>true</PackOnBuild>
+    <RepositoryUrl>https://github.com/nloum/UtilityDisposables</RepositoryUrl>
+    <PackageId>UtilityDisposables</PackageId>
+    <Authors>nloum</Authors>
+  </PropertyGroup>
+</Project>

@@ -560,48 +560,33 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override AbsolutePath CreateFolder(AbsolutePath path, bool createRecursively = true)
+        public override Folder CreateFolder(MissingPath path, bool createRecursively = true)
         {
-            try
+            if (createRecursively)
             {
-                if (Type(path) == IoFluently.PathType.Folder)
-                    return path;
-                if (createRecursively)
+                var ancestors = Ancestors(path, true).ToList();
+                ancestors.Reverse();
+                foreach (var ancestor in ancestors)
                 {
-                    var ancestors = Ancestors(path, true).ToList();
-                    ancestors.Reverse();
-                    foreach (var ancestor in ancestors)
-                    {
-                        switch (Type(ancestor))
-                        {
-                            case IoFluently.PathType.File:
-                                throw new IOException($"The path {ancestor} is a file, not a folder");
-                            case IoFluently.PathType.MissingPath:
-                                Directory.CreateDirectory(path);
-                                break;
-                        }
-                    }
-                }
-                else
-                {
-                    Directory.CreateDirectory(path);
+                    ancestor.ForEach(folder => { }, missingPath => Directory.CreateDirectory(missingPath.Path));
                 }
             }
-            catch (IOException)
+            else
             {
-                if (Type(path) != IoFluently.PathType.Folder)
-                    throw;
+                Directory.CreateDirectory(path.Path);
             }
 
-            if (Type(path) != IoFluently.PathType.Folder)
-                throw new IOException("Failed to create folder " + path);
-            return path;
+            return new Folder(path.Path);
         }
 
         public override AbsolutePath WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = true)
         {
             if (createRecursively)
             {
+                foreach (var ancestor in Ancestors(path))
+                {
+                    
+                }
                 var parent = TryParent(path);
                 if (parent.HasValue)
                 {

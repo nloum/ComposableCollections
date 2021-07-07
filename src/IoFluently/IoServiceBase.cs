@@ -112,7 +112,7 @@ namespace IoFluently
         #region Creating
         
         /// <inheritdoc />
-        public abstract AbsolutePath CreateFolder(AbsolutePath path, bool createRecursively = false);
+        public abstract Folder CreateFolder(MissingPath path, bool createRecursively = false);
 
         #endregion
         #region Deleting
@@ -1566,16 +1566,16 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public AbsolutePaths GlobFiles(AbsolutePath path, string pattern)
+        public AbsolutePaths GlobFiles(Folder path, string pattern)
         {
             Func<AbsolutePath, IEnumerable<RelativePath>> patternFunc = absPath => absPath.Children(pattern).Select(x => new RelativePath(x.IsCaseSensitive, x.DirectorySeparator, x.IoService, new[]{x.Name}));
             return path / patternFunc;
         }
 
         /// <inheritdoc />
-        public AbsolutePath Combine(AbsolutePath path, params string[] subsequentPathParts)
+        public AbsolutePath Combine(Folder path, params string[] subsequentPathParts)
         {
-            return TryDescendant(path, subsequentPathParts).Value;
+            return TryDescendant(path.Path, subsequentPathParts).Value;
         }
 
         /// <inheritdoc />
@@ -1750,11 +1750,12 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual AbsolutePath Root(AbsolutePath path)
+        public virtual Folder Root(AbsolutePath path)
         {
             var ancestor = path;
             IMaybe<AbsolutePath> cachedParent;
-            while ((cachedParent = ancestor.IoService.TryParent(ancestor)).HasValue) ancestor = cachedParent.Value;
+            while ((cachedParent = ancestor.IoService.TryParent(ancestor)).HasValue)
+                ancestor = cachedParent.Value;
 
             return ancestor;
         }
@@ -1804,11 +1805,85 @@ namespace IoFluently
             return TryParseAbsolutePath(Path.ChangeExtension(path.ToString(), differentExtension));
         }
 
-        /// <inheritdoc />
-        public virtual IEnumerable<AbsolutePath> Ancestors(AbsolutePath path, bool includeItself)
+        public IEnumerable<Folder> Ancestors(Folder path, bool includeItself)
         {
             if (includeItself)
+            {
                 yield return path;
+            }
+
+            foreach (var ancestor in Ancestors(path))
+            {
+                yield return ancestor;
+            }
+        }
+
+        public IEnumerable<FileOrFolder> Ancestors(File path, bool includeItself)
+        {
+            if (includeItself)
+            {
+                yield return path.ExpectFileOrFolder();
+            }
+
+            foreach (var ancestor in Ancestors(path))
+            {
+                yield return ancestor.ExpectFileOrFolder();
+            }
+        }
+
+        public IEnumerable<Folder> Ancestors(Folder path)
+        {
+            foreach (var ancestor in Ancestors(path.Path))
+            {
+                yield return ancestor.ExpectFolder();
+            }
+        }
+
+        public IEnumerable<Folder> Ancestors(File path)
+        {
+            foreach (var ancestor in Ancestors(path.Path))
+            {
+                yield return ancestor.ExpectFolder();
+            }
+        }
+
+        public IEnumerable<FolderOrMissingPath> Ancestors(MissingPath path)
+        {
+            foreach (var ancestor in Ancestors(path.Path))
+            {
+                yield return ancestor.ExpectFolderOrMissingPath();
+            }
+        }
+
+        public IEnumerable<FolderOrMissingPath> Ancestors(MissingPath path, bool includeItself)
+        {
+            if (includeItself)
+            {
+                yield return path.ExpectFolderOrMissingPath();
+            }
+
+            foreach (var ancestor in Ancestors(path))
+            {
+                yield return ancestor;
+            }
+        }
+
+        public IEnumerable<AbsolutePath> Ancestors(AbsolutePath path, bool includeItself)
+        {
+            if (includeItself)
+            {
+                yield return path;
+            }
+
+            foreach (var ancestor in Ancestors(path))
+            {
+                yield return ancestor;
+            }
+        }
+
+        /// <inheritdoc />
+        public virtual IEnumerable<AbsolutePath> Ancestors(AbsolutePath path)
+        {
             while (true)
             {
                 var maybePath = path.IoService.TryParent(path);
@@ -1843,25 +1918,19 @@ namespace IoFluently
             var pathResult = TryParseAbsolutePath(combinedResult);
             return pathResult;
         }
-
-        /// <inheritdoc />
-        public IEnumerable<AbsolutePath> Ancestors(AbsolutePath path)
-        {
-            return Ancestors(path, false);
-        }
         
         /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryAncestor(AbsolutePath path, int level)
+        public virtual IMaybe<Folder> TryAncestor(AbsolutePath path, int level)
         {
             var maybePath = path.ToMaybe();
             for (var i = 0; i < level; i++)
             {
                 maybePath = maybePath.Select(p => p.IoService.TryParent(p)).SelectMany(x => x);
                 if (!maybePath.HasValue)
-                    return Nothing<AbsolutePath>(() => throw new InvalidOperationException($"The path {path} has no ancestor"));
+                    return Nothing<Folder>(() => throw new InvalidOperationException($"The path {path} has no ancestor"));
             }
 
-            return maybePath;
+            return maybePath.Select(x => x.ExpectFolder());
         }
 
         /// <inheritdoc />
@@ -1887,9 +1956,9 @@ namespace IoFluently
             foreach (var parentPath in path.IoService.Ancestors(path))
             {
                 if (filename == null)
-                    filename = parentPath.Name;
+                    filename = parentPath.Path.Name;
                 else
-                    filename = $"{parentPath.Name}.{filename}";
+                    filename = $"{parentPath.Path.Name}.{filename}";
 
                 yield return filename;
             }

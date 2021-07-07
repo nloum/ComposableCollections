@@ -43,10 +43,6 @@ namespace IoFluently
             defaultRelativePathBase.IoService.SetDefaultRelativePathBase(defaultRelativePathBase);
         }
 
-        public static AbsolutePath CreateFolder(this AbsolutePath path, Boolean createRecursively = false) {
-            return path.IoService.CreateFolder(path, createRecursively);
-        }
-
         public static AbsolutePath DeleteFolder(this AbsolutePath path, Boolean recursive = false) {
             return path.IoService.DeleteFolder(path, recursive);
         }
@@ -273,14 +269,6 @@ namespace IoFluently
 
         public static AbsolutePath Descendant(this AbsolutePath path, String[] paths) {
             return path.IoService.TryDescendant(path, paths).Value;
-        }
-
-        public static IMaybe<AbsolutePath> TryAncestor(this AbsolutePath path, int level) {
-            return path.IoService.TryAncestor(path, level);
-        }
-
-        public static AbsolutePath Ancestor(this AbsolutePath path, int level) {
-            return path.IoService.TryAncestor(path, level).Value;
         }
 
         public static Boolean IsAncestorOf(this AbsolutePath path, AbsolutePath possibleDescendant) {

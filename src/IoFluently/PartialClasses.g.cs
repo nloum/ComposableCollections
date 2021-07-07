@@ -22,7 +22,6 @@ namespace IoFluently {
         public Boolean HasExtension => IoService.HasExtension(this);
         public Boolean IsFile => IoService.IsFile(this);
         public Boolean IsFolder => IoService.IsFolder(this);
-        public AbsolutePath Root => IoService.Root(this);
         public FileAttributes? Attributes => IoService.TryAttributes(this).Select(x => (FileAttributes?)x).ValueOrDefault;
         public DateTimeOffset? CreationTime => IoService.TryCreationTime(this).Select(x => (DateTimeOffset?)x).ValueOrDefault;
         public Information? FileSize => IoService.TryFileSize(this).Select(x => (Information?)x).ValueOrDefault;

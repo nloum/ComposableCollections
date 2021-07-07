@@ -341,7 +341,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override AbsolutePath CreateFolder(AbsolutePath path, bool createRecursively = true)
+        public override Folder CreateFolder(MissingPath path, bool createRecursively = true)
         {
             if (!createRecursively)
             {
@@ -351,7 +351,7 @@ namespace IoFluently
             }
             // Zip files don't have folders, they just include a path in their name.
             // https://archive.fo/qIIIZ#24.12%
-            return path;
+            return new Folder(path.Path);
         }
 
         /// <inheritdoc />

@@ -83,7 +83,7 @@ namespace IoFluently
         
         #region Creating
         
-        AbsolutePath CreateFolder(AbsolutePath path, bool createRecursively = false);
+        Folder CreateFolder(MissingPath path, bool createRecursively = false);
 
         #endregion
 
@@ -371,7 +371,7 @@ namespace IoFluently
             bool includeFolders = true, bool includeFiles = true);
         
         bool CanBeSimplified(AbsolutePath path);
-        AbsolutePath Root(AbsolutePath path);
+        Folder Root(AbsolutePath path);
         RelativePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo);
         IMaybe<AbsolutePath> TryCommonWith(AbsolutePath path, AbsolutePath that);
         AbsolutePath Simplify(AbsolutePath path);
@@ -382,10 +382,10 @@ namespace IoFluently
         /// Equivalent to Path.Combine. You can also use the / operator to build paths, like this:
         /// _ioService.CurrentDirectory / "folder1" / "folder2" / "file.txt"
         /// </summary>
-        AbsolutePath Combine(AbsolutePath path, params string[] subsequentPathParts);
+        AbsolutePath Combine(Folder path, params string[] subsequentPathParts);
         AbsolutePath WithoutExtension(AbsolutePath path);
         Uri Child(Uri parent, Uri child);
-        AbsolutePaths GlobFiles(AbsolutePath path, string pattern);
+        AbsolutePaths GlobFiles(Folder path, string pattern);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -397,6 +397,68 @@ namespace IoFluently
         /// <param name="path"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
+        IEnumerable<Folder> Ancestors(Folder path, bool includeItself);
+
+        /// <summary>
+        ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
+        ///     For example, the ancestors of the path C:\Users\myusername\Documents would be these, in order:
+        ///     C:\Users\myusername
+        ///     C:\Users
+        ///     C:
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="includeItself"></param>
+        /// <returns></returns>
+        IEnumerable<FileOrFolder> Ancestors(File path, bool includeItself);
+
+        /// <summary>
+        ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
+        ///     For example, the ancestors of the path C:\Users\myusername\Documents would be these, in order:
+        ///     C:\Users\myusername
+        ///     C:\Users
+        ///     C:
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="includeItself"></param>
+        /// <returns></returns>
+        IEnumerable<FolderOrMissingPath> Ancestors(MissingPath path, bool includeItself);
+
+        /// <summary>
+        ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
+        ///     For example, the ancestors of the path C:\Users\myusername\Documents would be these, in order:
+        ///     C:\Users\myusername
+        ///     C:\Users
+        ///     C:
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="includeItself"></param>
+        /// <returns></returns>
+        IEnumerable<Folder> Ancestors(Folder path);
+
+        /// <summary>
+        ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
+        ///     For example, the ancestors of the path C:\Users\myusername\Documents would be these, in order:
+        ///     C:\Users\myusername
+        ///     C:\Users
+        ///     C:
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="includeItself"></param>
+        /// <returns></returns>
+        IEnumerable<Folder> Ancestors(File path);
+
+        /// <summary>
+        ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
+        ///     For example, the ancestors of the path C:\Users\myusername\Documents would be these, in order:
+        ///     C:\Users\myusername
+        ///     C:\Users
+        ///     C:
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="includeItself"></param>
+        /// <returns></returns>
+        IEnumerable<FolderOrMissingPath> Ancestors(MissingPath path);
+
         IEnumerable<AbsolutePath> Ancestors(AbsolutePath path, bool includeItself);
 
         /// <summary>
@@ -412,7 +474,7 @@ namespace IoFluently
 
         IMaybe<AbsolutePath> TryDescendant(AbsolutePath path, params AbsolutePath[] paths);
         IMaybe<AbsolutePath> TryDescendant(AbsolutePath path, params string[] paths);
-        IMaybe<AbsolutePath> TryAncestor(AbsolutePath path, int level);
+        IMaybe<Folder> TryAncestor(AbsolutePath path, int level);
         bool IsAncestorOf(AbsolutePath path, AbsolutePath possibleDescendant);
         bool IsDescendantOf(AbsolutePath path, AbsolutePath possibleAncestor);
         IMaybe<AbsolutePath> TryGetCommonAncestry(AbsolutePath path1, AbsolutePath path2);

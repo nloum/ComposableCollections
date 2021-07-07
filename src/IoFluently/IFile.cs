@@ -52,6 +52,45 @@ namespace IoFluently
         public AbsolutePath Path => Value.Path;
     }
     
+    public class FileOrFolder : SubTypesOf<IHasAbsolutePath>.Either<File, Folder>, IHasAbsolutePath
+    {
+        public FileOrFolder(File item1) : base(item1)
+        {
+        }
+
+        public FileOrFolder(Folder item3) : base(item3)
+        {
+        }
+
+        public FileOrFolder(SubTypesOf<IHasAbsolutePath>.Either<File, Folder> other) : base(other)
+        {
+        }
+
+        public FileOrFolder(IHasAbsolutePath item) : base(item)
+        {
+        }
+
+        public File ExpectFile()
+        {
+            if (Item1 == default)
+            {
+                throw new InvalidOperationException($"Expected {Path} to be a file but it was a {Path.Type}");
+            }
+            return Item1;
+        }
+
+        public Folder ExpectFolder()
+        {
+            if (Item2 == default)
+            {
+                throw new InvalidOperationException($"Expected {Path} to be a folder but it was a {Path.Type}");
+            }
+            return Item2;
+        }
+
+        public AbsolutePath Path => Value.Path;
+    }
+
     public class FolderOrMissingPath : SubTypesOf<IHasAbsolutePath>.Either<Folder, MissingPath>, IHasAbsolutePath
     {
         public FolderOrMissingPath(Folder item1) : base(item1)
@@ -70,7 +109,7 @@ namespace IoFluently
         {
         }
 
-        public Folder ExpectFoldre()
+        public Folder ExpectFolder()
         {
             if (Item1 == default)
             {
@@ -102,6 +141,21 @@ namespace IoFluently
             }
         }
 
+        public FileOrFolder ExpectFileOrFolder()
+        {
+            return new(this);
+        }
+        
+        public FileOrMissingPath ExpectFileOrMissingPath()
+        {
+            return new(this);
+        }
+        
+        public AbsolutePath ExpectFileOrFolderOrMissingPath()
+        {
+            return Path;
+        }
+        
         public AbsolutePath Path { get; }
     }
 
@@ -114,6 +168,21 @@ namespace IoFluently
             Path = path;
         }
         
+        public FileOrFolder ExpectFileOrFolder()
+        {
+            return new(this);
+        }
+        
+        public FolderOrMissingPath ExpectFolderOrMissingPath()
+        {
+            return new(this);
+        }
+        
+        public AbsolutePath ExpectFileOrFolderOrMissingPath()
+        {
+            return Path;
+        }
+
         /// <summary>
         /// Adds a subpath to all this relative path
         /// </summary>
@@ -181,6 +250,21 @@ namespace IoFluently
             {
                 throw new IOException($"{Path} should not exist");
             }
+        }
+        
+        public FileOrMissingPath ExpectFileOrMissingPath()
+        {
+            return new(this);
+        }
+        
+        public FolderOrMissingPath ExpectFolderOrMissingPath()
+        {
+            return new(this);
+        }
+        
+        public AbsolutePath ExpectFileOrFolderOrMissingPath()
+        {
+            return Path;
         }
     }
 }

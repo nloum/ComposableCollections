@@ -440,11 +440,11 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override AbsolutePath CreateFolder(AbsolutePath path, bool createRecursively = false)
+        public override Folder CreateFolder(MissingPath path, bool createRecursively = false)
         {
-            var folder = GetFolder(TryParent(path).Value).Value;
-            EnsureFolderExists(folder, new[]{path.Name});
-            return path;
+            var folder = GetFolder(TryParent(path.Path).Value).Value;
+            EnsureFolderExists(folder, new[]{path.Path.Name});
+            return new Folder(path.Path);
         }
 
         private void EnsureFolderExists(InMemoryFolder folder, IReadOnlyList<string> components)

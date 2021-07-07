@@ -2,12 +2,31 @@ using System;
 using System.IO;
 using System.Reactive.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using UtilityDisposables;
 
 namespace IoFluently
 {
     public static partial class IoExtensions
     {
+        public static File CopyFrom(this FileOrMissingPath fileOrMissingPath, Stream sourceStream)
+        {
+            using var targetStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None,
+                FileOptions.None, createRecursively: true);
+            sourceStream.CopyTo(targetStream);
+            return new File(fileOrMissingPath.Path);
+        }
+        
+        public static async Task<File> CopyFromAsync(this FileOrMissingPath fileOrMissingPath, Stream sourceStream,
+            CancellationToken cancellationToken)
+        {
+            using var targetStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None,
+                FileOptions.None, createRecursively: true);
+            await sourceStream.CopyToAsync(targetStream, cancellationToken);
+            return new File(fileOrMissingPath.Path);
+        }
+    
         /// <summary>
         /// Backs up the specified path and then when the IDisposable is disposed of, the backup file is restored, overwriting
         /// any changes that were made to the path. This is useful for making temporary changes to the path.

@@ -356,7 +356,7 @@ namespace IoFluently
         /// </summary>
         /// <param name="extension">The file extension for the path. If null, the resulting path has no extension.</param>
         /// <returns>A path that does not exist but whose parent folder exists</returns>
-        AbsolutePath GenerateUniqueTemporaryPath(string extension = null);
+        MissingPath GenerateUniqueTemporaryPath(string extension = null);
 
         /// <summary>
         /// Returns a lazily-enumerated list of child files and/or folders

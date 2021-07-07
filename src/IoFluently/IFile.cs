@@ -7,13 +7,12 @@ using TreeLinq;
 
 namespace IoFluently
 {
-    public interface IHasAbsolutePath
+    public partial interface IHasAbsolutePath
     {
         AbsolutePath Path { get; }
-        IIoService IoService => Path.IoService;
     }
 
-    public class FileOrMissingPath : SubTypesOf<IHasAbsolutePath>.Either<File, MissingPath>, IHasAbsolutePath
+    public partial class FileOrMissingPath : SubTypesOf<IHasAbsolutePath>.Either<File, MissingPath>, IHasAbsolutePath
     {
         public FileOrMissingPath(File item1) : base(item1)
         {
@@ -29,6 +28,11 @@ namespace IoFluently
 
         public FileOrMissingPath(IHasAbsolutePath item) : base(item)
         {
+        }
+
+        public override string ToString()
+        {
+            return Path.ToString();
         }
 
         public File ExpectFile()
@@ -50,9 +54,10 @@ namespace IoFluently
         }
 
         public AbsolutePath Path => Value.Path;
+        public IIoService IoService => Path.IoService;
     }
     
-    public class FileOrFolder : SubTypesOf<IHasAbsolutePath>.Either<File, Folder>, IHasAbsolutePath
+    public partial class FileOrFolder : SubTypesOf<IHasAbsolutePath>.Either<File, Folder>, IHasAbsolutePath
     {
         public FileOrFolder(File item1) : base(item1)
         {
@@ -60,6 +65,11 @@ namespace IoFluently
 
         public FileOrFolder(Folder item3) : base(item3)
         {
+        }
+
+        public override string ToString()
+        {
+            return Path.ToString();
         }
 
         public FileOrFolder(SubTypesOf<IHasAbsolutePath>.Either<File, Folder> other) : base(other)
@@ -89,9 +99,10 @@ namespace IoFluently
         }
 
         public AbsolutePath Path => Value.Path;
+        public IIoService IoService => Path.IoService;
     }
 
-    public class FolderOrMissingPath : SubTypesOf<IHasAbsolutePath>.Either<Folder, MissingPath>, IHasAbsolutePath
+    public partial class FolderOrMissingPath : SubTypesOf<IHasAbsolutePath>.Either<Folder, MissingPath>, IHasAbsolutePath
     {
         public FolderOrMissingPath(Folder item1) : base(item1)
         {
@@ -99,6 +110,11 @@ namespace IoFluently
 
         public FolderOrMissingPath(MissingPath item3) : base(item3)
         {
+        }
+
+        public override string ToString()
+        {
+            return Path.ToString();
         }
 
         public FolderOrMissingPath(SubTypesOf<IHasAbsolutePath>.Either<Folder, MissingPath> other) : base(other)
@@ -128,9 +144,10 @@ namespace IoFluently
         }
 
         public AbsolutePath Path => Value.Path;
+        public IIoService IoService => Path.IoService;
     }
     
-    public class File : IHasAbsolutePath
+    public partial class File : IHasAbsolutePath
     {
         public File(AbsolutePath path)
         {
@@ -139,6 +156,11 @@ namespace IoFluently
             {
                 throw new IOException($"{Path} is not a file");
             }
+        }
+
+        public override string ToString()
+        {
+            return Path.ToString();
         }
 
         public FileOrFolder ExpectFileOrFolder()
@@ -157,17 +179,24 @@ namespace IoFluently
         }
         
         public AbsolutePath Path { get; }
+        public IIoService IoService => Path.IoService;
     }
 
-    public class Folder : IHasAbsolutePath
+    public partial class Folder : IHasAbsolutePath
     {
         public AbsolutePath Path { get; }
+        public IIoService IoService => Path.IoService;
 
         public Folder(AbsolutePath path)
         {
             Path = path;
         }
         
+        public override string ToString()
+        {
+            return Path.ToString();
+        }
+
         public FileOrFolder ExpectFileOrFolder()
         {
             return new(this);
@@ -239,9 +268,10 @@ namespace IoFluently
         }
     }
 
-    public class MissingPath : IHasAbsolutePath
+    public partial class MissingPath : IHasAbsolutePath
     {
         public AbsolutePath Path { get; }
+        public IIoService IoService => Path.IoService;
 
         public MissingPath(AbsolutePath path)
         {
@@ -251,7 +281,12 @@ namespace IoFluently
                 throw new IOException($"{Path} should not exist");
             }
         }
-        
+
+        public override string ToString()
+        {
+            return Path.ToString();
+        }
+
         public FileOrMissingPath ExpectFileOrMissingPath()
         {
             return new(this);
@@ -265,6 +300,61 @@ namespace IoFluently
         public AbsolutePath ExpectFileOrFolderOrMissingPath()
         {
             return Path;
+        }
+        
+        /// <summary>
+        /// Adds a subpath to all this relative path
+        /// </summary>
+        /// <param name="relPath">The relative path that will have a subpath added to it</param>
+        /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
+        /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
+        public static AbsolutePath operator / (MissingPath absPath, string whatToAdd)
+        {
+            return absPath.Path / whatToAdd;
+        }
+
+        /// <summary>
+        /// Adds a subpath to all this relative path
+        /// </summary>
+        /// <param name="relPath">The relative path that will have a subpath added to it</param>
+        /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
+        /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
+        public static AbsolutePaths operator / (MissingPath absPath, IEnumerable<RelativePath> whatToAdd)
+        {
+            return absPath.Path / whatToAdd;
+        }
+
+        /// <summary>
+        /// Adds a subpath to all this relative path
+        /// </summary>
+        /// <param name="relPath">The relative path that will have a subpath added to it</param>
+        /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
+        /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
+        public static AbsolutePaths operator / (MissingPath absPath, Func<AbsolutePath, IEnumerable<RelativePath>> whatToAdd)
+        {
+            return absPath.Path / whatToAdd;
+        }
+
+        /// <summary>
+        /// Adds a subpath to all this relative path
+        /// </summary>
+        /// <param name="relPath">The relative path that will have a subpath added to it</param>
+        /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
+        /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
+        public static AbsolutePath operator / (MissingPath absPath, RelativePath whatToAdd)
+        {
+            return absPath.Path / whatToAdd;
+        }
+
+        /// <summary>
+        /// Adds a subpath to all this relative path
+        /// </summary>
+        /// <param name="relPath">The relative path that will have a subpath added to it</param>
+        /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
+        /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
+        public static AbsolutePaths operator / (MissingPath absPath, IEnumerable<string> whatToAdd)
+        {
+            return absPath.Path / whatToAdd;
         }
     }
 }

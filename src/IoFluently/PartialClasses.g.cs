@@ -15,6 +15,21 @@ using UnitsNet;
 
 
 namespace IoFluently {
+    public partial class MissingPath {
+        public IEnumerable<FolderOrMissingPath> Ancestors => IoService.Ancestors(this);
+    }
+}
+namespace IoFluently {
+    public partial class Folder {
+        public IEnumerable<Folder> Ancestors => IoService.Ancestors(this);
+    }
+}
+namespace IoFluently {
+    public partial class File {
+        public IEnumerable<Folder> Ancestors => IoService.Ancestors(this);
+    }
+}
+namespace IoFluently {
     public partial class AbsolutePath {
         public IEnumerable<AbsolutePath> Ancestors => IoService.Ancestors(this);
         public Boolean CanBeSimplified => IoService.CanBeSimplified(this);
@@ -22,6 +37,7 @@ namespace IoFluently {
         public Boolean HasExtension => IoService.HasExtension(this);
         public Boolean IsFile => IoService.IsFile(this);
         public Boolean IsFolder => IoService.IsFolder(this);
+        public Folder Root => IoService.Root(this);
         public FileAttributes? Attributes => IoService.TryAttributes(this).Select(x => (FileAttributes?)x).ValueOrDefault;
         public DateTimeOffset? CreationTime => IoService.TryCreationTime(this).Select(x => (DateTimeOffset?)x).ValueOrDefault;
         public Information? FileSize => IoService.TryFileSize(this).Select(x => (Information?)x).ValueOrDefault;

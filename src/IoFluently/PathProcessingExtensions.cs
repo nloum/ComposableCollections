@@ -177,9 +177,20 @@ namespace IoFluently
         /// <param name="absolutePath">The zip file path</param>
         /// <param name="enableOpenFilesTracking">Whether to enable open-files tracking in the zip file</param>
         /// <returns>An object that can be used for reading from and writing to the zip file</returns>
-        public static ZipIoService ExpectZipFile(this IHasAbsolutePath absolutePath, bool enableOpenFilesTracking = false)
+        public static ZipIoService ExpectZipFile(this FileOrMissingPath absolutePath, bool enableOpenFilesTracking = false)
         {
-            return new ZipIoService(absolutePath.Path,  enableOpenFilesTracking);
+            return new ZipIoService(absolutePath,  enableOpenFilesTracking);
+        }
+        
+        /// <summary>
+        /// Creates an IIoService object for reading from and writing to the specified zip file
+        /// </summary>
+        /// <param name="absolutePath">The zip file path</param>
+        /// <param name="enableOpenFilesTracking">Whether to enable open-files tracking in the zip file</param>
+        /// <returns>An object that can be used for reading from and writing to the zip file</returns>
+        public static ZipIoService ExpectZipFile(this File absolutePath, bool enableOpenFilesTracking = false)
+        {
+            return new ZipIoService(absolutePath.ExpectFileOrMissingPath(),  enableOpenFilesTracking);
         }
     }
 }

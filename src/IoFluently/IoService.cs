@@ -333,7 +333,7 @@ namespace IoFluently
             try
             {
                 if (MayCreateFile(fileMode))
-                    TryParent(path).IfHasValue(parent => CreateFolder(parent, createRecursively));
+                    TryParent(path).IfHasValue(parent => EnsureIsFolder(parent));
                 var fileStream = new FileStream(path, fileMode, fileAccess, fileShare,
                     GetBufferSizeOrDefaultInBytes(bufferSize), fileOptions);
                 return Something<Stream>(fileStream);
@@ -501,7 +501,7 @@ namespace IoFluently
             var currentStorage = Directory.GetLogicalDrives();
             foreach (var drive in currentStorage)
             {
-                var drivePath = TryParseAbsolutePath(drive).Value;
+                var drivePath = TryParseAbsolutePath(drive).Value.ExpectFolder();
                 if (!_storage.Contains(drivePath))
                     _storage.Add(drivePath);
             }
@@ -509,7 +509,7 @@ namespace IoFluently
             var drivesThatWereRemoved = new List<Folder>();
 
             foreach (var drive in _storage)
-                if (!currentStorage.Contains(drive + "\\"))
+                if (!currentStorage.Contains(drive.Path + "\\"))
                     drivesThatWereRemoved.Add(drive);
 
             foreach (var driveThatWasRemoved in drivesThatWereRemoved) _storage.Remove(driveThatWasRemoved);

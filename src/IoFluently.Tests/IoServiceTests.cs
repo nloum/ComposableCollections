@@ -60,7 +60,7 @@ namespace IoFluently.Tests
             {
                 var inMemoryIoService = new InMemoryIoService(true, "/", enableOpenFilesTracking);
                 inMemoryIoService.RootFolders.Add("/", new InMemoryIoService.InMemoryFolder());
-                var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip");
+                var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip").ExpectFileOrMissingPath();
                 var result = testZipFilePath.ExpectZipFile(true);
                 result.SetTemporaryFolder(result.ParseAbsolutePath("/tmp"));
                 return result;
@@ -171,9 +171,9 @@ namespace IoFluently.Tests
         {
             var uut = CreateUnitUnderTest(type, true);
             var temporaryPath = uut.GenerateUniqueTemporaryPath().CreateFolder();
-            temporaryPath.IsFolder.Should().BeTrue();
-            temporaryPath.DeleteFolder();
-            temporaryPath.IsFolder.Should().BeFalse();
+            temporaryPath.Path.IsFolder.Should().BeTrue();
+            temporaryPath.Path.DeleteFolder();
+            temporaryPath.Path.IsFolder.Should().BeFalse();
         }
         
         [TestMethod]
@@ -182,8 +182,8 @@ namespace IoFluently.Tests
         {
             var uut = CreateUnitUnderTest(type, true);
             var temporaryPath = uut.GenerateUniqueTemporaryPath();
-            temporaryPath.IsFolder.Should().BeFalse();
-            temporaryPath.IsFile.Should().BeFalse();
+            temporaryPath.Path.IsFolder.Should().BeFalse();
+            temporaryPath.Path.IsFile.Should().BeFalse();
         }
         
         [TestMethod]
@@ -195,7 +195,7 @@ namespace IoFluently.Tests
         {
             var uut = CreateUnitUnderTest(type, true);
             var simplified = uut.DefaultRelativePathBase.Path.Simplify();
-            uut.DefaultRelativePathBase.ToString().Should().Be(simplified.ToString());
+            uut.DefaultRelativePathBase.Path.ToString().Should().Be(simplified.ToString());
         }
 
         [TestMethod]

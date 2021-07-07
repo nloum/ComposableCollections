@@ -22,7 +22,7 @@ namespace IoFluently
         /// <summary>
         /// The path to the zip file
         /// </summary>
-        public File ZipFilePath { get; }
+        public FileOrMissingPath ZipFilePath { get; }
 
         public ZipFolderMode FolderMode { get; set; } = ZipFolderMode.AllNonExistentPathsAreFolders;
         public override bool CanEmptyDirectoriesExist => FolderMode == ZipFolderMode.EmptyFilesAreDirectories;
@@ -35,13 +35,24 @@ namespace IoFluently
         /// <param name="zipFilePath">The path to the zip file</param>
         /// <param name="newline">The newline character(s) (e.g. '\n' or '\r\n')</param>
         /// <param name="enableOpenFilesTracking">Whether to enable the tracking of open files</param>
-        public ZipIoService(File zipFilePath, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), true, "/")
+        public ZipIoService(FileOrMissingPath zipFilePath, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), true, "/")
         {
+            if (zipFilePath == null)
+            {
+                throw new ArgumentNullException(nameof(zipFilePath));
+            }
+            
             ZipFilePath = zipFilePath;
-            DefaultRelativePathBase = ParseAbsolutePath("/");
+            var path = new AbsolutePath(true, DefaultDirectorySeparator, this, new[] {"/"});
+            DefaultRelativePathBase = new Folder(path);
+
+            if (DefaultRelativePathBase == null)
+            {
+                throw new ArgumentNullException(nameof(DefaultRelativePathBase));
+            }
         }
 
-        public void Unzip(Folder targetDirectory)
+        public void Unzip(FolderOrMissingPath targetDirectory)
         {
             Copy(ParseAbsolutePath("/"), targetDirectory.Path);
         }

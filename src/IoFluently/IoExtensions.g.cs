@@ -23,6 +23,138 @@ namespace IoFluently
     /// </summary>
     public static partial class IoExtensions
     {
+        public static AbsolutePath Simplify(this AbsolutePath path) {
+            return path.IoService.Simplify(path);
+        }
+
+        public static RelativePath Simplify(this RelativePath path) {
+            return path.IoService.Simplify(path);
+        }
+
+        public static AbsolutePath Combine(this Folder path, String[] subsequentPathParts) {
+            return path.IoService.Combine(path, subsequentPathParts);
+        }
+
+        public static AbsolutePaths GlobFiles(this Folder path, string pattern) {
+            return path.IoService.GlobFiles(path, pattern);
+        }
+
+        public static IEnumerable<Folder> Ancestors(this Folder path, Boolean includeItself) {
+            return path.IoService.Ancestors(path, includeItself);
+        }
+
+        public static IEnumerable<FileOrFolder> Ancestors(this File path, Boolean includeItself) {
+            return path.IoService.Ancestors(path, includeItself);
+        }
+
+        public static IEnumerable<FolderOrMissingPath> Ancestors(this MissingPath path, Boolean includeItself) {
+            return path.IoService.Ancestors(path, includeItself);
+        }
+
+        public static IEnumerable<AbsolutePath> Ancestors(this AbsolutePath path, Boolean includeItself) {
+            return path.IoService.Ancestors(path, includeItself);
+        }
+
+        public static IMaybe<AbsolutePath> TryDescendant(this AbsolutePath path, AbsolutePath[] paths) {
+            return path.IoService.TryDescendant(path, paths);
+        }
+
+        public static AbsolutePath Descendant(this AbsolutePath path, AbsolutePath[] paths) {
+            return path.IoService.TryDescendant(path, paths).Value;
+        }
+
+        public static IMaybe<AbsolutePath> TryDescendant(this AbsolutePath path, String[] paths) {
+            return path.IoService.TryDescendant(path, paths);
+        }
+
+        public static AbsolutePath Descendant(this AbsolutePath path, String[] paths) {
+            return path.IoService.TryDescendant(path, paths).Value;
+        }
+
+        public static IMaybe<Folder> TryAncestor(this AbsolutePath path, int level) {
+            return path.IoService.TryAncestor(path, level);
+        }
+
+        public static Folder Ancestor(this AbsolutePath path, int level) {
+            return path.IoService.TryAncestor(path, level).Value;
+        }
+
+        public static Boolean IsAncestorOf(this AbsolutePath path, AbsolutePath possibleDescendant) {
+            return path.IoService.IsAncestorOf(path, possibleDescendant);
+        }
+
+        public static Boolean IsDescendantOf(this AbsolutePath path, AbsolutePath possibleAncestor) {
+            return path.IoService.IsDescendantOf(path, possibleAncestor);
+        }
+
+        public static IMaybe<AbsolutePath> TryGetCommonAncestry(this AbsolutePath path1, AbsolutePath path2) {
+            return path1.IoService.TryGetCommonAncestry(path1, path2);
+        }
+
+        public static AbsolutePath GetCommonAncestry(this AbsolutePath path1, AbsolutePath path2) {
+            return path1.IoService.TryGetCommonAncestry(path1, path2).Value;
+        }
+
+        public static IMaybe<Uri> TryGetCommonDescendants(this AbsolutePath path1, AbsolutePath path2) {
+            return path1.IoService.TryGetCommonDescendants(path1, path2);
+        }
+
+        public static Uri GetCommonDescendants(this AbsolutePath path1, AbsolutePath path2) {
+            return path1.IoService.TryGetCommonDescendants(path1, path2).Value;
+        }
+
+        public static IMaybe<Tuple<Uri, Uri>> TryGetNonCommonDescendants(this AbsolutePath path1, AbsolutePath path2) {
+            return path1.IoService.TryGetNonCommonDescendants(path1, path2);
+        }
+
+        public static Tuple<Uri, Uri> GetNonCommonDescendants(this AbsolutePath path1, AbsolutePath path2) {
+            return path1.IoService.TryGetNonCommonDescendants(path1, path2).Value;
+        }
+
+        public static IMaybe<Tuple<Uri, Uri>> TryGetNonCommonAncestry(this AbsolutePath path1, AbsolutePath path2) {
+            return path1.IoService.TryGetNonCommonAncestry(path1, path2);
+        }
+
+        public static Tuple<Uri, Uri> GetNonCommonAncestry(this AbsolutePath path1, AbsolutePath path2) {
+            return path1.IoService.TryGetNonCommonAncestry(path1, path2).Value;
+        }
+
+        public static IMaybe<AbsolutePath> TryWithExtension(this AbsolutePath path, string differentExtension) {
+            return path.IoService.TryWithExtension(path, differentExtension);
+        }
+
+        public static AbsolutePath WithExtension(this AbsolutePath path, string differentExtension) {
+            return path.IoService.TryWithExtension(path, differentExtension).Value;
+        }
+
+        public static IMaybe<AbsolutePath> TryWithExtension(this AbsolutePath path, Func<string, string> differentExtension) {
+            return path.IoService.TryWithExtension(path, differentExtension);
+        }
+
+        public static AbsolutePath WithExtension(this AbsolutePath path, Func<string, string> differentExtension) {
+            return path.IoService.TryWithExtension(path, differentExtension).Value;
+        }
+
+        public static BufferEnumerator ReadBuffers(this AbsolutePath path, FileShare fileShare = FileShare.None, Nullable<Information> bufferSize = null, int paddingAtStart = 0, int paddingAtEnd = 0) {
+            return path.IoService.ReadBuffers(path, fileShare, bufferSize, paddingAtStart, paddingAtEnd);
+        }
+
+        public static AbsolutePath WriteAllBytes(this AbsolutePath path, Byte[] bytes, Boolean createRecursively = false) {
+            return path.IoService.WriteAllBytes(path, bytes, createRecursively);
+        }
+
+        public static IMaybe<Stream> TryOpen(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None, FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.Asynchronous, Nullable<Information> bufferSize = null, Boolean createRecursively = false) {
+            return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively);
+        }
+
+        public static Stream Open(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None, FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.Asynchronous, Nullable<Information> bufferSize = null, Boolean createRecursively = false) {
+            return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively).Value;
+        }
+
+        public static ISetChanges<AbsolutePath> ToLiveLinq(this AbsolutePath path, Boolean includeFileContentChanges, Boolean includeSubFolders, string pattern) {
+            return path.IoService.ToLiveLinq(path, includeFileContentChanges, includeSubFolders, pattern);
+        }
+
         public static IObservable<Unit> ObserveChanges(this AbsolutePath path) {
             return path.IoService.ObserveChanges(path);
         }
@@ -39,8 +171,12 @@ namespace IoFluently
             return path.IoService.Renamings(path);
         }
 
-        public static void SetDefaultRelativePathBase(this AbsolutePath defaultRelativePathBase) {
+        public static void SetDefaultRelativePathBase(this Folder defaultRelativePathBase) {
             defaultRelativePathBase.IoService.SetDefaultRelativePathBase(defaultRelativePathBase);
+        }
+
+        public static Folder CreateFolder(this MissingPath path, Boolean createRecursively = false) {
+            return path.IoService.CreateFolder(path, createRecursively);
         }
 
         public static AbsolutePath DeleteFolder(this AbsolutePath path, Boolean recursive = false) {
@@ -233,118 +369,6 @@ namespace IoFluently
 
         public static AbsolutePath CommonWith(this AbsolutePath path, AbsolutePath that) {
             return path.IoService.TryCommonWith(path, that).Value;
-        }
-
-        public static AbsolutePath Simplify(this AbsolutePath path) {
-            return path.IoService.Simplify(path);
-        }
-
-        public static RelativePath Simplify(this RelativePath path) {
-            return path.IoService.Simplify(path);
-        }
-
-        public static AbsolutePath Combine(this AbsolutePath path, String[] subsequentPathParts) {
-            return path.IoService.Combine(path, subsequentPathParts);
-        }
-
-        public static AbsolutePaths GlobFiles(this AbsolutePath path, string pattern) {
-            return path.IoService.GlobFiles(path, pattern);
-        }
-
-        public static IEnumerable<AbsolutePath> Ancestors(this AbsolutePath path, Boolean includeItself) {
-            return path.IoService.Ancestors(path, includeItself);
-        }
-
-        public static IMaybe<AbsolutePath> TryDescendant(this AbsolutePath path, AbsolutePath[] paths) {
-            return path.IoService.TryDescendant(path, paths);
-        }
-
-        public static AbsolutePath Descendant(this AbsolutePath path, AbsolutePath[] paths) {
-            return path.IoService.TryDescendant(path, paths).Value;
-        }
-
-        public static IMaybe<AbsolutePath> TryDescendant(this AbsolutePath path, String[] paths) {
-            return path.IoService.TryDescendant(path, paths);
-        }
-
-        public static AbsolutePath Descendant(this AbsolutePath path, String[] paths) {
-            return path.IoService.TryDescendant(path, paths).Value;
-        }
-
-        public static Boolean IsAncestorOf(this AbsolutePath path, AbsolutePath possibleDescendant) {
-            return path.IoService.IsAncestorOf(path, possibleDescendant);
-        }
-
-        public static Boolean IsDescendantOf(this AbsolutePath path, AbsolutePath possibleAncestor) {
-            return path.IoService.IsDescendantOf(path, possibleAncestor);
-        }
-
-        public static IMaybe<AbsolutePath> TryGetCommonAncestry(this AbsolutePath path1, AbsolutePath path2) {
-            return path1.IoService.TryGetCommonAncestry(path1, path2);
-        }
-
-        public static AbsolutePath GetCommonAncestry(this AbsolutePath path1, AbsolutePath path2) {
-            return path1.IoService.TryGetCommonAncestry(path1, path2).Value;
-        }
-
-        public static IMaybe<Uri> TryGetCommonDescendants(this AbsolutePath path1, AbsolutePath path2) {
-            return path1.IoService.TryGetCommonDescendants(path1, path2);
-        }
-
-        public static Uri GetCommonDescendants(this AbsolutePath path1, AbsolutePath path2) {
-            return path1.IoService.TryGetCommonDescendants(path1, path2).Value;
-        }
-
-        public static IMaybe<Tuple<Uri, Uri>> TryGetNonCommonDescendants(this AbsolutePath path1, AbsolutePath path2) {
-            return path1.IoService.TryGetNonCommonDescendants(path1, path2);
-        }
-
-        public static Tuple<Uri, Uri> GetNonCommonDescendants(this AbsolutePath path1, AbsolutePath path2) {
-            return path1.IoService.TryGetNonCommonDescendants(path1, path2).Value;
-        }
-
-        public static IMaybe<Tuple<Uri, Uri>> TryGetNonCommonAncestry(this AbsolutePath path1, AbsolutePath path2) {
-            return path1.IoService.TryGetNonCommonAncestry(path1, path2);
-        }
-
-        public static Tuple<Uri, Uri> GetNonCommonAncestry(this AbsolutePath path1, AbsolutePath path2) {
-            return path1.IoService.TryGetNonCommonAncestry(path1, path2).Value;
-        }
-
-        public static IMaybe<AbsolutePath> TryWithExtension(this AbsolutePath path, string differentExtension) {
-            return path.IoService.TryWithExtension(path, differentExtension);
-        }
-
-        public static AbsolutePath WithExtension(this AbsolutePath path, string differentExtension) {
-            return path.IoService.TryWithExtension(path, differentExtension).Value;
-        }
-
-        public static IMaybe<AbsolutePath> TryWithExtension(this AbsolutePath path, Func<string, string> differentExtension) {
-            return path.IoService.TryWithExtension(path, differentExtension);
-        }
-
-        public static AbsolutePath WithExtension(this AbsolutePath path, Func<string, string> differentExtension) {
-            return path.IoService.TryWithExtension(path, differentExtension).Value;
-        }
-
-        public static BufferEnumerator ReadBuffers(this AbsolutePath path, FileShare fileShare = FileShare.None, Nullable<Information> bufferSize = null, int paddingAtStart = 0, int paddingAtEnd = 0) {
-            return path.IoService.ReadBuffers(path, fileShare, bufferSize, paddingAtStart, paddingAtEnd);
-        }
-
-        public static AbsolutePath WriteAllBytes(this AbsolutePath path, Byte[] bytes, Boolean createRecursively = false) {
-            return path.IoService.WriteAllBytes(path, bytes, createRecursively);
-        }
-
-        public static IMaybe<Stream> TryOpen(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None, FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.Asynchronous, Nullable<Information> bufferSize = null, Boolean createRecursively = false) {
-            return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively);
-        }
-
-        public static Stream Open(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None, FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.Asynchronous, Nullable<Information> bufferSize = null, Boolean createRecursively = false) {
-            return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively).Value;
-        }
-
-        public static ISetChanges<AbsolutePath> ToLiveLinq(this AbsolutePath path, Boolean includeFileContentChanges, Boolean includeSubFolders, string pattern) {
-            return path.IoService.ToLiveLinq(path, includeFileContentChanges, includeSubFolders, pattern);
         }
 
     }

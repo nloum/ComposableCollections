@@ -128,8 +128,15 @@ namespace IoFluently
 
             var onlyParam = method.Parameters[0];
             var onlyParamTypeName = onlyParam.Type.Identifier.Name;
-            if (onlyParamTypeName != "AbsolutePath" && onlyParamTypeName != "RelativePath" &&
-                onlyParamTypeName != "IAbsolutePathTranslation")
+            if (onlyParamTypeName != "AbsolutePath" && onlyParamTypeName != "RelativePath"
+                && onlyParamTypeName != "IAbsolutePathTranslation"
+                && onlyParamTypeName != "IHasAbsolutePath"
+                && onlyParamTypeName != "File"
+                && onlyParamTypeName != "Folder"
+                && onlyParamTypeName != "MissingPath"
+                && onlyParamTypeName != "FileOrMissingPath"
+                && onlyParamTypeName != "FolderOrMissingPath"
+                && onlyParamTypeName != "FileOrFolder")
             {
                 return false;
             }
@@ -157,9 +164,18 @@ namespace IoFluently
             var typeReader = new TypeReader();
             typeReader.AddSupportForReflection();
             var ioServiceType = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IIoService)].Value;
-            var absolutePath = typeReader.GetTypeFormat<Type>()[typeof(AbsolutePath)].Value;
-            var relativePath = typeReader.GetTypeFormat<Type>()[typeof(RelativePath)].Value;
-            var absolutePathTranslation = typeReader.GetTypeFormat<Type>()[typeof(IAbsolutePathTranslation)].Value;
+            var extensionMethodTypes = new[]
+            {
+                typeof(AbsolutePath),
+                typeof(RelativePath),
+                typeof(IAbsolutePathTranslation),
+                typeof(File),
+                typeof(Folder),
+                typeof(MissingPath),
+                typeof(FileOrFolder),
+                typeof(FileOrMissingPath),
+                typeof(FolderOrMissingPath)
+            }.Select(x => typeReader.GetTypeFormat<Type>()[x].Value).ToImmutableHashSet();
 
             foreach (var method in ioServiceType.Methods)
             {
@@ -175,13 +191,10 @@ namespace IoFluently
 
                 var firstParameter = method.Parameters[0];
                 
-                if (!Equals(firstParameter.Type, absolutePath) &&
-                    !Equals(firstParameter.Type, relativePath) &&
-                    !Equals(firstParameter.Type, absolutePathTranslation))
+                if (!extensionMethodTypes.Contains(firstParameter.Type))
                 {
                     continue;
                 }
-                
                 
                 var parameters = new List<string>();
                 var arguments = new List<string>();

@@ -1360,7 +1360,7 @@ namespace IoFluently
                 translation.Destination.IoService.Delete(translation.Destination, true);
             }
 
-            translation.Destination.IoService.CreateFolder(translation.Destination);
+            translation.Destination.IoService.EnsureIsFolder(translation.Destination);
 
             foreach (var child in translation)
             {
@@ -1554,7 +1554,7 @@ namespace IoFluently
         #region Path building
 
         /// <inheritdoc />
-        public AbsolutePath GenerateUniqueTemporaryPath(string extension = null)
+        public MissingPath GenerateUniqueTemporaryPath(string extension = null)
         {
             var result = GetTemporaryFolder() / Guid.NewGuid().ToString();
             if (!string.IsNullOrEmpty(extension))

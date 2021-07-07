@@ -127,7 +127,16 @@ namespace IoFluently
         public InMemoryIoService(bool? isCaseSensitiveByDefault = null, string defaultDirectorySeparatorForThisEnvironment = null, bool enableOpenFilesTracking = false)
             : base(new OpenFilesTrackingService(enableOpenFilesTracking), isCaseSensitiveByDefault ?? ShouldBeCaseSensitiveByDefault(), defaultDirectorySeparatorForThisEnvironment ?? GetDefaultDirectorySeparatorForThisEnvironment())
         {
-            _currentDirectory = defaultDirectorySeparatorForThisEnvironment == "/" ? ParseAbsolutePath("/") : null;
+            if (defaultDirectorySeparatorForThisEnvironment == "/")
+            {
+                RootFolders.Add("/", new InMemoryFolder());
+                _currentDirectory = ParseAbsolutePath("/");
+            }
+            else
+            {
+                RootFolders.Add("C:", new InMemoryFolder());
+                _currentDirectory = ParseAbsolutePath("C:\\");
+            }
         }
 
         /// <inheritdoc />

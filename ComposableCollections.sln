@@ -51,6 +51,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TreeLinq", "TreeLinq\TreeLi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TreeLinq.Tests", "TreeLinq.Tests\TreeLinq.Tests.csproj", "{0B38EF82-E9D8-435B-8B8F-C835DD4D66A4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeIO", "CodeIO\CodeIO.csproj", "{2B27E427-2DF1-4061-BD4E-7D9F66172750}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeIO.Tests", "CodeIO.Tests\CodeIO.Tests.csproj", "{49391FF3-68FB-4830-BF6F-64E5C0D554FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -151,6 +155,14 @@ Global
 		{0B38EF82-E9D8-435B-8B8F-C835DD4D66A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B38EF82-E9D8-435B-8B8F-C835DD4D66A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B38EF82-E9D8-435B-8B8F-C835DD4D66A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B27E427-2DF1-4061-BD4E-7D9F66172750}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B27E427-2DF1-4061-BD4E-7D9F66172750}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B27E427-2DF1-4061-BD4E-7D9F66172750}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B27E427-2DF1-4061-BD4E-7D9F66172750}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49391FF3-68FB-4830-BF6F-64E5C0D554FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49391FF3-68FB-4830-BF6F-64E5C0D554FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49391FF3-68FB-4830-BF6F-64E5C0D554FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49391FF3-68FB-4830-BF6F-64E5C0D554FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

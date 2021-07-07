@@ -75,6 +75,7 @@ class Build : NukeBuild
 	    Solution.GetProject("UtilityDisposables"),
 	    Solution.GetProject("IoFluently"),
 	    Solution.GetProject("IoFluently.SystemTextJson"),
+	    Solution.GetProject("CodeIO"),
     };
     
     IEnumerable<Project> TestProjects => Solution.GetProjects("*.Test");

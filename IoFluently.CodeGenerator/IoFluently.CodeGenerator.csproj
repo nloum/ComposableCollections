@@ -6,12 +6,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\CodeIO\CodeIO.csproj" />
       <ProjectReference Include="..\ComposableCollections\ComposableCollections.csproj" />
       <ProjectReference Include="..\IoFluently\IoFluently.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="CodeIO" Version="1.0.0-alpha0077" />
       <PackageReference Include="ComposableCollections" Version="1.0.0-alpha0182" />
     </ItemGroup>
 

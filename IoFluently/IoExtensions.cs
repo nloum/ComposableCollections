@@ -4,12 +4,22 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using UnitsNet;
 using UtilityDisposables;
 
 namespace IoFluently
 {
     public static partial class IoExtensions
     {
+        public static Stream Open(this MissingPath path, FileMode fileMode,
+            FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None,
+            FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.Asynchronous,
+            Nullable<Information> bufferSize = null, Boolean createRecursively = false)
+        {
+            return path.ExpectFileOrMissingPath()
+                .Open(fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively);
+        }
+
         public static File CopyFrom(this FileOrMissingPath fileOrMissingPath, Stream sourceStream)
         {
             using var targetStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None,
@@ -19,6 +29,23 @@ namespace IoFluently
         }
         
         public static async Task<File> CopyFromAsync(this FileOrMissingPath fileOrMissingPath, Stream sourceStream,
+            CancellationToken cancellationToken)
+        {
+            using var targetStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None,
+                FileOptions.None, createRecursively: true);
+            await sourceStream.CopyToAsync(targetStream, cancellationToken);
+            return new File(fileOrMissingPath.Path);
+        }
+        
+        public static File CopyFrom(this MissingPath fileOrMissingPath, Stream sourceStream)
+        {
+            using var targetStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None,
+                FileOptions.None, createRecursively: true);
+            sourceStream.CopyTo(targetStream);
+            return new File(fileOrMissingPath.Path);
+        }
+        
+        public static async Task<File> CopyFromAsync(this MissingPath fileOrMissingPath, Stream sourceStream,
             CancellationToken cancellationToken)
         {
             using var targetStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None,

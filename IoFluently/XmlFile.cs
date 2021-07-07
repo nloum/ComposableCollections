@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Xml;
 using System.Xml.Serialization;
 using SimpleMonads;
 
@@ -37,6 +39,13 @@ namespace IoFluently
                 return result;
             }
         }
+
+        public XmlDocument ReadXmlDocument()
+        {
+            var doc = new XmlDocument();
+            doc.Load(Path.ToString());
+            return doc;
+        }
     }
 
     public class XmlFileOrMissingPath : TextFileOrMissingPath
@@ -63,6 +72,16 @@ namespace IoFluently
             using (var writer = OpenWriter())
             {
                 serializer.Serialize(writer, model);
+            }
+
+            return new XmlFile(Path);
+        }
+
+        public XmlFile WriteXmlDocument(XmlDocument xmlDocument)
+        {
+            using (var stream = Path.IoService.Open(this, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                xmlDocument.Save(stream);
             }
 
             return new XmlFile(Path);

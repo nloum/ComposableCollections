@@ -39,7 +39,7 @@ namespace IoFluently
 
         private Folder _defaultRelativePathBase;
         
-        public override Folder DefaultRelativePathBase => _defaultRelativePathBase ?? TryParseAbsolutePath(Environment.CurrentDirectory).Value;
+        public override Folder DefaultRelativePathBase => _defaultRelativePathBase ?? TryParseAbsolutePath(Environment.CurrentDirectory).Value.ExpectFolder();
         public TimeSpan DeleteOrCreateSpinPeriod { get; set; } = TimeSpan.FromMilliseconds(100);
         public TimeSpan DeleteOrCreateTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
@@ -442,7 +442,7 @@ namespace IoFluently
             {
                 if (_storage.Count == 0)
                 {
-                    _storage.Add(ParseAbsolutePath("/"));
+                    _storage.Add(ParseAbsolutePath("/").ExpectFolder());
                 }
                 return;
             }
@@ -532,18 +532,17 @@ namespace IoFluently
         {
             if (createRecursively)
             {
-                foreach (var ancestor in Ancestors(path.Path))
-                {
-                    
-                }
                 var parent = TryParent(path.Path);
                 if (parent.HasValue)
                 {
-                    CreateFolder(parent.Value, true);
+                    if (!parent.Value.Exists)
+                    {
+                        CreateFolder(parent.Value.ExpectMissingPath(), true);
+                    }
                 }
             }
             System.IO.File.WriteAllBytes(path.ToString(), bytes);
-            return path;
+            return path.ExpectFile();
         }
 
         public override MissingPath DeleteFolder(Folder path, bool recursive = false)

@@ -167,7 +167,15 @@ namespace IoFluently
         {
             return Collapse(
                 file => new FileOrMissingPath(file),
-                folder => throw ThrowWrongType(PathType.File, PathType.MissingPath),
+                folder =>
+                {
+                    if (IoService.CanEmptyDirectoriesExist)
+                    {
+                        throw ThrowWrongType(PathType.File, PathType.MissingPath);
+                    }
+
+                    return new FileOrMissingPath(new MissingPath(folder.Path));
+                },
                 missingPath => new FileOrMissingPath(missingPath));
         }
 

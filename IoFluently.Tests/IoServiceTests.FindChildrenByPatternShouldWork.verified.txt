@@ -1,6 +1,6 @@
 ﻿[
   {
-    Value: /Users/family/src/GitHub/IoFluently/test_folder/readme.md,
+    Value: {SolutionDirectory}test_folder/readme.md,
     FileSize: 47 B,
     ReadOnly: false,
     CreationTime: DateTimeOffset_1,

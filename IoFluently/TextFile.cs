@@ -53,7 +53,7 @@ namespace IoFluently
         /// <inheritdoc />
         public StreamReader OpenReader(FileOptions fileOptions = FileOptions.SequentialScan, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, Information? bufferSize = default)
         {
-            var stream = Path.IoService.Open(Path, FileMode.Open, FileAccess.Read, FileShare.Read,
+            var stream = Path.IoService.Open(this, FileMode.Open, FileAccess.Read, FileShare.Read,
                 FileOptions.SequentialScan, bufferSize);
             if (encoding == null)
             {
@@ -66,7 +66,7 @@ namespace IoFluently
         /// <inheritdoc />
         public Encoding GetEncoding()
         {
-            using(var stream = Path.IoService.Open(Path, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan)) {
+            using(var stream = Path.IoService.Open(this, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan)) {
                 using (var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true))
                 {
                     var line = reader.ReadLine();
@@ -78,7 +78,7 @@ namespace IoFluently
         /// <inheritdoc />
         public IMaybe<string> TryGetNewLine()
         {
-            using var stream = Path.IoService.Open(Path, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan);
+            using var stream = Path.IoService.Open(this, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan);
             while (true)
             {
                 var data = stream.ReadByte();
@@ -113,7 +113,7 @@ namespace IoFluently
                 throw new ArgumentException(nameof(detectEncodingFromByteOrderMarks));
             }
 
-            using var stream = Path.IoService.Open(Path, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan, bufferSize);
+            using var stream = Path.IoService.Open(this, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan, bufferSize);
             if (startingByteOffset > (ulong) stream.Length)
             {
                 startingByteOffset = (ulong) stream.Length;
@@ -189,7 +189,7 @@ namespace IoFluently
                 throw new ArgumentException(nameof(detectEncodingFromByteOrderMarks));
             }
             
-            using var stream = Path.IoService.Open(Path, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.RandomAccess, bufferSize);
+            using var stream = Path.IoService.Open(this, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.RandomAccess, bufferSize);
             if (startingByteOffset > (ulong) stream.Length)
             {
                 startingByteOffset = (ulong) stream.Length;

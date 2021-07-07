@@ -219,9 +219,9 @@ namespace IoFluently
         /// <param name="pattern">The string pattern that files or folders must match to be included in the return value.
         /// If this is null, then all files and folders in this folder are returned.</param>
         /// <returns>An object representing the descendant files and folders of this folder.</returns>
-        public AbsolutePathDescendants GetDescendants(string pattern) => new AbsolutePathDescendants(Path, pattern, IoService);
+        public AbsolutePathDescendants GetDescendants(string pattern) => new AbsolutePathDescendants(this, pattern, IoService);
 
-        public AbsolutePathDescendants Descendants => new AbsolutePathDescendants(Path, null, IoService);
+        public AbsolutePathDescendants Descendants => new AbsolutePathDescendants(this, null, IoService);
 
         public FileOrFolder ExpectFileOrFolder()
         {

@@ -145,7 +145,7 @@ namespace IoFluently
                 },
                 async folder =>
                 {
-                    foreach (var child in Children(folder.Path))
+                    foreach (var child in Children(folder))
                     {
                         await EnsureDoesNotExistAsync(child.Path, cancellationToken, true);
                     }
@@ -171,7 +171,7 @@ namespace IoFluently
                 file => CreateFolder(DeleteFile(file)),
                 folder =>
                 {
-                    foreach (var child in Children(folder.Path))
+                    foreach (var child in Children(folder))
                     {
                         EnsureDoesNotExist(child.Path, true);
                     }
@@ -1229,7 +1229,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public AbsolutePath ParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo,
+        public AbsolutePath ParseAbsolutePath(string path, Folder optionallyRelativeTo,
             CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             return TryParseAbsolutePath(path, optionallyRelativeTo, flags).Value;
@@ -1260,9 +1260,9 @@ namespace IoFluently
             
             var fileOptions = FileOptions.Asynchronous | FileOptions.SequentialScan;
 
-            using var sourceStream = translation.Source.IoService.Open(translation.Source, FileMode.Open, FileAccess.Read,
+            using var sourceStream = translation.Source.IoService.Open(translation.Source.ExpectFile(), FileMode.Open, FileAccess.Read,
                 FileShare.Read, fileOptions, bufferSize);
-            using var destinationStream = translation.Destination.IoService.Open(translation.Destination, FileMode.Open,
+            using var destinationStream = translation.Destination.IoService.Open(translation.Destination.ExpectFileOrMissingPath(), FileMode.Open,
                 FileAccess.Write, FileShare.None, fileOptions, bufferSize);
 
             await sourceStream.CopyToAsync(destinationStream, GetBufferSizeOrDefaultInBytes(bufferSize), cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
@@ -1283,7 +1283,7 @@ namespace IoFluently
                     missingPath => Task.FromResult(missingPath));
             }
 
-            translation.Destination.IoService.CreateFolder(translation.Destination);
+            translation.Destination.IoService.CreateFolder(translation.Destination.ExpectMissingPath());
 
             foreach (var child in translation)
             {
@@ -1328,9 +1328,9 @@ namespace IoFluently
 
             var fileOptions = FileOptions.SequentialScan;
 
-            using var sourceStream = translation.Source.IoService.Open(translation.Source, FileMode.Open, FileAccess.Read,
+            using var sourceStream = translation.Source.IoService.Open(translation.Source.ExpectFile(), FileMode.Open, FileAccess.Read,
                 FileShare.Read, fileOptions, bufferSize);
-            using var destinationStream = translation.Destination.IoService.Open(translation.Destination, overwrite ? FileMode.Create : FileMode.CreateNew,
+            using var destinationStream = translation.Destination.IoService.Open(translation.Destination.ExpectFileOrMissingPath(), overwrite ? FileMode.Create : FileMode.CreateNew,
                 FileAccess.Write, FileShare.None, fileOptions, bufferSize);
 
             sourceStream.CopyTo(destinationStream, GetBufferSizeOrDefaultInBytes(bufferSize));
@@ -1552,7 +1552,7 @@ namespace IoFluently
                 result = result.WithExtension(extension);
             }
 
-            return result;
+            return result.ExpectMissingPath();
         }
 
         /// <inheritdoc />
@@ -1997,11 +1997,10 @@ namespace IoFluently
             bool includeFiles = true)
         {
             return path.ExpectFileOrFolder().TraverseTree(x =>
-            {
-                var children = Children(x);
-                var childrenNames = children.Select(child => child.Path.Name);
-                return childrenNames;
-            }, (FileOrFolder node, string name, out FileOrFolder child) =>
+                {
+                    return x.Collapse(file => Enumerable.Empty<FileOrFolder>(), folder => Children(folder))
+                        .Select(x => x.Path.Name);
+                }, (FileOrFolder node, string name, out FileOrFolder child) =>
             {
                 child = (node.ExpectFolder() / name).ExpectFileOrFolder();
                 if (CanEmptyDirectoriesExist)
@@ -2057,7 +2056,7 @@ namespace IoFluently
         public abstract DateTimeOffset LastWriteTime(File attributes);
 
         /// <inheritdoc />
-        public IFileInfo GetFileInfo( string subpath ) => new AbsolutePathFileInfoAdapter(ParseAbsolutePath( subpath ));
+        public IFileInfo GetFileInfo( string subpath ) => new AbsolutePathFileInfoAdapter(ParseAbsolutePath( subpath ).ExpectFile());
 
         #endregion
         #region File reading
@@ -2154,7 +2153,7 @@ namespace IoFluently
         #endregion
         #region IFileProvider implementation
         public IDirectoryContents GetDirectoryContents( string subpath ) =>
-            new AbsolutePathDirectoryContents( ParseAbsolutePath( subpath ) );
+            new AbsolutePathDirectoryContents( ParseAbsolutePath( subpath ).ExpectFolder() );
 
         public IChangeToken Watch( string filter )
         {

@@ -131,12 +131,12 @@ namespace IoFluently
             if (defaultDirectorySeparatorForThisEnvironment == "/")
             {
                 RootFolders.Add("/", new InMemoryFolder());
-                _currentDirectory = ParseAbsolutePath("/");
+                _currentDirectory = ParseAbsolutePath("/").ExpectFolder();
             }
             else
             {
                 RootFolders.Add("C:", new InMemoryFolder());
-                _currentDirectory = ParseAbsolutePath("C:\\");
+                _currentDirectory = ParseAbsolutePath("C:\\").ExpectFolder();
             }
         }
 
@@ -150,7 +150,7 @@ namespace IoFluently
         /// Sets the temporary folder path
         /// </summary>
         /// <param name="absolutePath">The new temporary folder path</param>
-        public void SetTemporaryFolder(AbsolutePath absolutePath)
+        public void SetTemporaryFolder(Folder absolutePath)
         {
             _temporaryFolder = absolutePath;
         }
@@ -273,7 +273,7 @@ namespace IoFluently
 
         public override MissingPath DeleteFile(IoFluently.File path)
         {
-            path = Simplify(path.Path);
+            path = Simplify(path.Path).ExpectFile();
             var parentFolder = GetFolder(TryParent(path.Path).Value).Value;
             parentFolder.Files.Remove(path.Path.Name);
             return new MissingPath(path.Path);
@@ -388,7 +388,7 @@ namespace IoFluently
                     var maybeParentFolder = GetFolder(pathParent);
                     if (!maybeParentFolder.HasValue)
                     {
-                        CreateFolder(pathParent);
+                        CreateFolder(pathParent.ExpectMissingPath());
                         parentFolder = GetFolder(pathParent).Value;
                     }
                     else

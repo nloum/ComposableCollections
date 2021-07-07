@@ -44,16 +44,16 @@ namespace IoFluently.Tests
             {
                 var result = new InMemoryIoService(false, "/", enableOpenFilesTracking);
                 result.RootFolders.Add("/", new InMemoryIoService.InMemoryFolder());
-                result.SetCurrentDirectory(result.ParseAbsolutePath("/"));
-                result.SetTemporaryFolder(result.ParseAbsolutePath("/"));
+                result.SetCurrentDirectory(result.ParseAbsolutePath("/").ExpectFolder());
+                result.SetTemporaryFolder(result.ParseAbsolutePath("/").ExpectFolder());
                 return result;
             }
             else if (type == IoServiceType.InMemoryUnixIoService)
             {
                 var result = new InMemoryIoService(true, "/", enableOpenFilesTracking);
                 result.RootFolders.Add("/", new InMemoryIoService.InMemoryFolder());
-                result.SetCurrentDirectory(result.ParseAbsolutePath("/"));
-                result.SetTemporaryFolder(result.ParseAbsolutePath("/"));
+                result.SetCurrentDirectory(result.ParseAbsolutePath("/").ExpectFolder());
+                result.SetTemporaryFolder(result.ParseAbsolutePath("/").ExpectFolder());
                 return result;
             }
             else if (type == IoServiceType.InMemoryZipIoService)
@@ -62,7 +62,7 @@ namespace IoFluently.Tests
                 inMemoryIoService.RootFolders.Add("/", new InMemoryIoService.InMemoryFolder());
                 var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip").ExpectFileOrMissingPath();
                 var result = testZipFilePath.ExpectZipFile(true);
-                result.SetTemporaryFolder(result.ParseAbsolutePath("/tmp"));
+                result.SetTemporaryFolder(result.ParseAbsolutePath("/tmp").ExpectFolder());
                 return result;
             }
             else

@@ -14,12 +14,12 @@ namespace IoFluently
 
         public IFileInfo GetFileInfo(string subpath)
         {
-            return new AbsolutePathFileInfoAdapter(_path / subpath);
+            return new AbsolutePathFileInfoAdapter((_path / subpath).ExpectFile());
         }
 
         public IDirectoryContents GetDirectoryContents(string subpath)
         {
-            return new AbsolutePathDirectoryContents(_path / subpath);
+            return new AbsolutePathDirectoryContents((_path / subpath).ExpectFolder());
         }
 
         public IChangeToken Watch(string filter)

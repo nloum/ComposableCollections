@@ -151,27 +151,6 @@ namespace IoFluently
         }
 
         /// <summary>
-        /// Tells IoFluently that the specified path is an XML file.
-        /// </summary>
-        /// <param name="path">The path to be read from</param>
-        /// <returns>An object that allows the path to be read from.</returns>
-        public static IPathWithKnownFormatSync<XmlDocument, XmlDocument> AsXmlFile(this AbsolutePath path)
-        {
-            return path.AsPathFormat(() =>
-            {
-                var doc = new XmlDocument();
-                doc.Load(path.ToString());
-                return doc;
-            }, (doc) =>
-            {
-                using (var stream = path.IoService.Open(path, FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    doc.Save(stream);
-                }
-            });
-        }
-        
-        /// <summary>
         /// Creates an IIoService object for reading from and writing to the specified zip file
         /// </summary>
         /// <param name="absolutePath">The zip file path</param>

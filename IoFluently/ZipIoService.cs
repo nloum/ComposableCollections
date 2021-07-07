@@ -103,7 +103,7 @@ namespace IoFluently
         /// Sets the temporary folder path
         /// </summary>
         /// <param name="absolutePath">The new temporary folder path</param>
-        public void SetTemporaryFolder(AbsolutePath absolutePath)
+        public void SetTemporaryFolder(Folder absolutePath)
         {
             _temporaryFolder = absolutePath;
         }
@@ -204,20 +204,20 @@ namespace IoFluently
                 {
                     throw new InvalidOperationException($"No such file {attributes}");
                 }
-                return ZipFilePath.Path.IoService.Attributes(ZipFilePath.Path);
+                return ZipFilePath.Path.IoService.Attributes(ZipFilePath.ExpectFile());
             }
         }
 
         /// <inheritdoc />
         public override DateTimeOffset CreationTime(File path)
         {
-            return ZipFilePath.IoService.CreationTime(ZipFilePath);
+            return ZipFilePath.IoService.CreationTime(ZipFilePath.ExpectFile());
         }
 
         /// <inheritdoc />
         public override DateTimeOffset LastAccessTime(File path)
         {
-            return ZipFilePath.IoService.LastAccessTime(ZipFilePath);
+            return ZipFilePath.IoService.LastAccessTime(ZipFilePath.ExpectFile());
         }
 
         /// <inheritdoc />
@@ -375,14 +375,14 @@ namespace IoFluently
             var pathType = ZipFilePath.Path.Type;
             if (pathType == IoFluently.PathType.MissingPath)
             {
-                var stream = ZipFilePath.Path.IoService.Open(ZipFilePath.Path, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, FileOptions.None);
+                var stream = ZipFilePath.Path.IoService.Open(ZipFilePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, FileOptions.None);
                 var zipArchive = new ZipArchive(stream, ZipArchiveMode.Create, false);
                 zipArchive.Dispose();
                 
                 if (willBeReading)
                 {
                     zipArchive.Dispose();
-                    stream = ZipFilePath.Path.IoService.Open(ZipFilePath.Path, FileMode.Open, FileAccess.ReadWrite, FileShare.None, FileOptions.None);
+                    stream = ZipFilePath.Path.IoService.Open(ZipFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None, FileOptions.None);
                     zipArchive = new ZipArchive(stream, ZipArchiveMode.Update, false);
                     return zipArchive;
                 }
@@ -397,7 +397,7 @@ namespace IoFluently
             }
             else
             {
-                var stream = ZipFilePath.Path.IoService.Open(ZipFilePath.Path, FileMode.Open, willBeWriting ? FileAccess.ReadWrite : FileAccess.Read,
+                var stream = ZipFilePath.Path.IoService.Open(ZipFilePath, FileMode.Open, willBeWriting ? FileAccess.ReadWrite : FileAccess.Read,
                     willBeWriting ? FileShare.None : FileShare.Read, FileOptions.None);
                 return new ZipArchive(stream, willBeWriting ? ZipArchiveMode.Update : ZipArchiveMode.Read, false);
             }

@@ -102,8 +102,8 @@ namespace IoFluently.Documentation
 
             Console.ReadKey();
             
-            var xmlDoc = (repoRoot / "src/IoFluently/bin/Debug/IoFluently.xml").AsXmlFile();
-            var csharpDocumentation = xmlDoc.Read();
+            var xmlDoc = (repoRoot / "src/IoFluently/bin/Debug/IoFluently.xml").ExpectXmlFile();
+            var csharpDocumentation = xmlDoc.ReadXmlDocument();
 
             var memberNodes = csharpDocumentation.SelectNodes("/doc/members/member").Cast<XmlElement>();
             

@@ -1,6 +1,6 @@
 ﻿[
   {
-    Value: /Users/family/src/GitHub/IoFluently/test_folder/readme.md,
+    Value: {SolutionDirectory}test_folder/readme.md,
     FileSize: 47 B,
     ReadOnly: false,
     CreationTime: DateTimeOffset_1,
@@ -8,7 +8,7 @@
     LastWriteTime: DateTimeOffset_3
   },
   {
-    Value: /Users/family/src/GitHub/IoFluently/test_folder/subfolder/subfolder_readme.md,
+    Value: {SolutionDirectory}test_folder/subfolder/subfolder_readme.md,
     FileSize: 47 B,
     ReadOnly: false,
     CreationTime: DateTimeOffset_4,

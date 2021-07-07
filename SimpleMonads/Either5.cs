@@ -302,21 +302,6 @@ return new(t4);
 public static implicit operator EitherBase<T1, T2, T3, T4, T5>(T5 t5) {
 return new(t5);
 }
-public static implicit operator T1(EitherBase<T1, T2, T3, T4, T5> either) {
-return either.Item1;
-}
-public static implicit operator T2(EitherBase<T1, T2, T3, T4, T5> either) {
-return either.Item2;
-}
-public static implicit operator T3(EitherBase<T1, T2, T3, T4, T5> either) {
-return either.Item3;
-}
-public static implicit operator T4(EitherBase<T1, T2, T3, T4, T5> either) {
-return either.Item4;
-}
-public static implicit operator T5(EitherBase<T1, T2, T3, T4, T5> either) {
-return either.Item5;
-}
 public ConvertibleTo<TBase>.IEither<T1, T2, T3, T4, T5> ConvertTo<TBase>() {
 if (Item1 != null) {
 return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5>(Item1);

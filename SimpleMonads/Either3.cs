@@ -236,15 +236,6 @@ return new(t2);
 public static implicit operator EitherBase<T1, T2, T3>(T3 t3) {
 return new(t3);
 }
-public static implicit operator T1(EitherBase<T1, T2, T3> either) {
-return either.Item1;
-}
-public static implicit operator T2(EitherBase<T1, T2, T3> either) {
-return either.Item2;
-}
-public static implicit operator T3(EitherBase<T1, T2, T3> either) {
-return either.Item3;
-}
 public ConvertibleTo<TBase>.IEither<T1, T2, T3> ConvertTo<TBase>() {
 if (Item1 != null) {
 return new ConvertibleTo<TBase>.Either<T1, T2, T3>(Item1);

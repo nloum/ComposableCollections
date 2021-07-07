@@ -302,48 +302,6 @@ return new(t13);
 public static implicit operator EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(T14 t14) {
 return new(t14);
 }
-public static implicit operator T1(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> either) {
-return either.Item1;
-}
-public static implicit operator T2(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> either) {
-return either.Item2;
-}
-public static implicit operator T3(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> either) {
-return either.Item3;
-}
-public static implicit operator T4(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> either) {
-return either.Item4;
-}
-public static implicit operator T5(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> either) {
-return either.Item5;
-}
-public static implicit operator T6(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> either) {
-return either.Item6;
-}
-public static implicit operator T7(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> either) {
-return either.Item7;
-}
-public static implicit operator T8(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> either) {
-return either.Item8;
-}
-public static implicit operator T9(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> either) {
-return either.Item9;
-}
-public static implicit operator T10(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> either) {
-return either.Item10;
-}
-public static implicit operator T11(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> either) {
-return either.Item11;
-}
-public static implicit operator T12(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> either) {
-return either.Item12;
-}
-public static implicit operator T13(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> either) {
-return either.Item13;
-}
-public static implicit operator T14(EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> either) {
-return either.Item14;
-}
 public ConvertibleTo<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> ConvertTo<TBase>() {
 if (Item1 != null) {
 return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item1);

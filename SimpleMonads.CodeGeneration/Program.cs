@@ -242,9 +242,9 @@ namespace SimpleMonads.CodeGeneration
             
             for (var i = 1; i <= arity; i++)
             {
-                writer.WriteLine($"public static implicit operator T{i}({className}<{string.Join(", ", genericArgNames)}> either) {{");
-                writer.WriteLine($"return either.Item{i};");
-                writer.WriteLine("}");
+                // writer.WriteLine($"public static implicit operator T{i}({className}<{string.Join(", ", genericArgNames)}> either) {{");
+                // writer.WriteLine($"return either.Item{i};");
+                // writer.WriteLine("}");
             }
         }
 

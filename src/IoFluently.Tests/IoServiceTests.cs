@@ -145,10 +145,11 @@ namespace IoFluently.Tests
         public void WriteAllTextCreateRecursivelyShouldWork(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, true);
-            var temporaryPath = (uut.GenerateUniqueTemporaryPath() / "test1"  / "test2").ExpectTextFileOrMissingPath();
-            temporaryPath.WriteAllText("", createRecursively: true);
+            var temporaryPath = (uut.GenerateUniqueTemporaryPath() / "test1"  / "test2")
+                .ExpectTextFileOrMissingPath()
+                .WriteAllText("", createRecursively: true);
             temporaryPath.Path.IsFile.Should().BeTrue();
-            temporaryPath.Path.DeleteFileAsync(CancellationToken.None).Wait();
+            temporaryPath.DeleteFileAsync(CancellationToken.None).Wait();
             temporaryPath.Path.Exists.Should().BeFalse();
         }
 
@@ -158,10 +159,11 @@ namespace IoFluently.Tests
         public void CreateTemporaryFileShouldWork(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, true);
-            var temporaryPath = uut.GenerateUniqueTemporaryPath().ExpectTextFileOrMissingPath();
-            temporaryPath.WriteAllText("");
+            var temporaryPath = uut.GenerateUniqueTemporaryPath()
+                .ExpectTextFileOrMissingPath()
+                .WriteAllText("");
             temporaryPath.Path.IsFile.Should().BeTrue();
-            temporaryPath.Path.DeleteFileAsync(CancellationToken.None).Wait();
+            temporaryPath.DeleteFileAsync(CancellationToken.None).Wait();
             temporaryPath.Path.Exists.Should().BeFalse();
         }
         
@@ -170,9 +172,10 @@ namespace IoFluently.Tests
         public void CreateTemporaryFolderShouldWork(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, true);
-            var temporaryPath = uut.GenerateUniqueTemporaryPath().CreateFolder();
+            var temporaryPath = uut.GenerateUniqueTemporaryPath()
+                .CreateFolder();
             temporaryPath.Path.IsFolder.Should().BeTrue();
-            temporaryPath.Path.DeleteFolder();
+            temporaryPath.DeleteFolder();
             temporaryPath.Path.IsFolder.Should().BeFalse();
         }
         
@@ -557,7 +560,7 @@ namespace IoFluently.Tests
             var targetFolder = (ioService.DefaultRelativePathBase / "test2")
                 .EnsureIsEmptyFolder();
 
-            var textFileMovePlan = textFileInSourceFolder.Path.Translate(sourceFolder, targetFolder);
+            var textFileMovePlan = textFileInSourceFolder.Path.Translate(sourceFolder, targetFolder.Path);
 
             textFileInSourceFolder.Path.Exists.Should().BeTrue();
             textFileMovePlan.Destination.Exists.Should().BeFalse();

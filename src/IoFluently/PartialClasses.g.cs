@@ -15,18 +15,13 @@ using UnitsNet;
 
 
 namespace IoFluently {
-    public partial class MissingPath {
-        public IEnumerable<FolderOrMissingPath> Ancestors => IoService.Ancestors(this);
-    }
-}
-namespace IoFluently {
-    public partial class Folder {
-        public IEnumerable<Folder> Ancestors => IoService.Ancestors(this);
-    }
-}
-namespace IoFluently {
     public partial class File {
         public IEnumerable<Folder> Ancestors => IoService.Ancestors(this);
+    }
+}
+namespace IoFluently {
+    public partial class MissingPath {
+        public IEnumerable<FolderOrMissingPath> Ancestors => IoService.Ancestors(this);
     }
 }
 namespace IoFluently {
@@ -47,5 +42,10 @@ namespace IoFluently {
         public AbsolutePath Parent => IoService.TryParent(this).ValueOrDefault;
         public PathType Type => IoService.Type(this);
         public AbsolutePath WithoutExtension => IoService.WithoutExtension(this);
+    }
+}
+namespace IoFluently {
+    public partial class Folder {
+        public IEnumerable<Folder> Ancestors => IoService.Ancestors(this);
     }
 }

@@ -179,67 +179,67 @@ namespace IoFluently
             return path.IoService.CreateFolder(path, createRecursively);
         }
 
-        public static AbsolutePath DeleteFolder(this AbsolutePath path, Boolean recursive = false) {
+        public static MissingPath DeleteFolder(this Folder path, Boolean recursive = false) {
             return path.IoService.DeleteFolder(path, recursive);
         }
 
-        public static AbsolutePath DeleteFile(this AbsolutePath path) {
+        public static MissingPath DeleteFile(this File path) {
             return path.IoService.DeleteFile(path);
         }
 
-        public static AbsolutePath Delete(this AbsolutePath path, Boolean recursiveDeleteIfFolder = true) {
+        public static MissingPath Delete(this FileOrFolder path, Boolean recursiveDeleteIfFolder = true) {
             return path.IoService.Delete(path, recursiveDeleteIfFolder);
         }
 
-        public static Task<AbsolutePath> DeleteFolderAsync(this AbsolutePath path, CancellationToken cancellationToken, Boolean recursive = false) {
+        public static Task<MissingPath> DeleteFolderAsync(this Folder path, CancellationToken cancellationToken, Boolean recursive = false) {
             return path.IoService.DeleteFolderAsync(path, cancellationToken, recursive);
         }
 
-        public static Task<AbsolutePath> DeleteFileAsync(this AbsolutePath path, CancellationToken cancellationToken) {
+        public static Task<MissingPath> DeleteFileAsync(this File path, CancellationToken cancellationToken) {
             return path.IoService.DeleteFileAsync(path, cancellationToken);
         }
 
-        public static Task<AbsolutePath> DeleteAsync(this AbsolutePath path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = true) {
+        public static Task<MissingPath> DeleteAsync(this FileOrFolder path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = true) {
             return path.IoService.DeleteAsync(path, cancellationToken, recursiveDeleteIfFolder);
         }
 
-        public static AbsolutePath EnsureIsFolder(this AbsolutePath path, Boolean createRecursively = false) {
+        public static Folder EnsureIsFolder(this AbsolutePath path, Boolean createRecursively = false) {
             return path.IoService.EnsureIsFolder(path, createRecursively);
         }
 
-        public static AbsolutePath EnsureIsEmptyFolder(this AbsolutePath path, Boolean recursiveDeleteIfFolder = true, Boolean createRecursively = false) {
+        public static Folder EnsureIsEmptyFolder(this AbsolutePath path, Boolean recursiveDeleteIfFolder = true, Boolean createRecursively = false) {
             return path.IoService.EnsureIsEmptyFolder(path, recursiveDeleteIfFolder, createRecursively);
         }
 
-        public static Task<AbsolutePath> EnsureIsFolderAsync(this AbsolutePath path, CancellationToken cancellationToken, Boolean createRecursively = false) {
+        public static Task<Folder> EnsureIsFolderAsync(this AbsolutePath path, CancellationToken cancellationToken, Boolean createRecursively = false) {
             return path.IoService.EnsureIsFolderAsync(path, cancellationToken, createRecursively);
         }
 
-        public static Task<AbsolutePath> EnsureIsEmptyFolderAsync(this AbsolutePath path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = true, Boolean createRecursively = false) {
+        public static Task<Folder> EnsureIsEmptyFolderAsync(this AbsolutePath path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = true, Boolean createRecursively = false) {
             return path.IoService.EnsureIsEmptyFolderAsync(path, cancellationToken, recursiveDeleteIfFolder, createRecursively);
         }
 
-        public static AbsolutePath EnsureIsNotFolder(this AbsolutePath path, Boolean recursive = false) {
+        public static FileOrMissingPath EnsureIsNotFolder(this AbsolutePath path, Boolean recursive = false) {
             return path.IoService.EnsureIsNotFolder(path, recursive);
         }
 
-        public static AbsolutePath EnsureIsNotFile(this AbsolutePath path) {
+        public static FolderOrMissingPath EnsureIsNotFile(this AbsolutePath path) {
             return path.IoService.EnsureIsNotFile(path);
         }
 
-        public static AbsolutePath EnsureDoesNotExist(this AbsolutePath path, Boolean recursiveDeleteIfFolder = true) {
+        public static MissingPath EnsureDoesNotExist(this AbsolutePath path, Boolean recursiveDeleteIfFolder = true) {
             return path.IoService.EnsureDoesNotExist(path, recursiveDeleteIfFolder);
         }
 
-        public static Task<AbsolutePath> EnsureIsNotFolderAsync(this AbsolutePath path, CancellationToken cancellationToken, Boolean recursive = false) {
+        public static Task<FileOrMissingPath> EnsureIsNotFolderAsync(this AbsolutePath path, CancellationToken cancellationToken, Boolean recursive = false) {
             return path.IoService.EnsureIsNotFolderAsync(path, cancellationToken, recursive);
         }
 
-        public static Task<AbsolutePath> EnsureIsNotFileAsync(this AbsolutePath path, CancellationToken cancellationToken) {
+        public static Task<FolderOrMissingPath> EnsureIsNotFileAsync(this AbsolutePath path, CancellationToken cancellationToken) {
             return path.IoService.EnsureIsNotFileAsync(path, cancellationToken);
         }
 
-        public static Task<AbsolutePath> EnsureDoesNotExistAsync(this AbsolutePath path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = true) {
+        public static Task<MissingPath> EnsureDoesNotExistAsync(this AbsolutePath path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = true) {
             return path.IoService.EnsureDoesNotExistAsync(path, cancellationToken, recursiveDeleteIfFolder);
         }
 

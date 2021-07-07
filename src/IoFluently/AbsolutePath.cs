@@ -176,6 +176,14 @@ namespace IoFluently
                 missingPath => throw ThrowWrongType(PathType.File));
         }
 
+        public FileOrFolder ExpectFileOrFolder()
+        {
+            return Collapse(
+                file => new FileOrFolder(file),
+                folder => new FileOrFolder(folder),
+                missingPath => throw ThrowWrongType(PathType.File, PathType.MissingPath));
+        }
+
         public FileOrMissingPath ExpectFileOrMissingPath()
         {
             return Collapse(

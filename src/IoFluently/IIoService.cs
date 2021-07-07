@@ -97,14 +97,14 @@ namespace IoFluently
         /// <param name="path">The folder to delete</param>
         /// <param name="recursive">Whether to delete the folder recursively.</param>
         /// <returns>The path that was deleted</returns>
-        AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false);
+        MissingPath DeleteFolder(Folder path, bool recursive = false);
         
         /// <summary>
         /// Deletes the specified file
         /// </summary>
         /// <param name="path">The file that should be deleted</param>
         /// <returns>The same path that was specified</returns>
-        AbsolutePath DeleteFile(AbsolutePath path);
+        MissingPath DeleteFile(File path);
         
         /// <summary>
         /// Deletes the specified file or folder
@@ -115,7 +115,7 @@ namespace IoFluently
         /// folder contains other files or folders, then an IOException is thrown. If the path is a file, this parameter
         /// is ignored.</param>
         /// <returns>The path that was just deleted</returns>
-        AbsolutePath Delete(AbsolutePath path, bool recursiveDeleteIfFolder = true);
+        MissingPath Delete(FileOrFolder path, bool recursiveDeleteIfFolder = true);
 
         /// <summary>
         /// Delete the specified folder. This throws an exception if the path is a file, doesn't exist, or the current
@@ -125,14 +125,14 @@ namespace IoFluently
         /// <param name="path">The folder to delete</param>
         /// <param name="recursive">Whether to delete the folder recursively.</param>
         /// <returns>The path that was deleted</returns>
-        Task<AbsolutePath> DeleteFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursive = false);
+        Task<MissingPath> DeleteFolderAsync(Folder path, CancellationToken cancellationToken, bool recursive = false);
         
         /// <summary>
         /// Deletes the specified file
         /// </summary>
         /// <param name="path">The file that should be deleted</param>
         /// <returns>The same path that was specified</returns>
-        Task<AbsolutePath> DeleteFileAsync(AbsolutePath path, CancellationToken cancellationToken);
+        Task<MissingPath> DeleteFileAsync(File path, CancellationToken cancellationToken);
         
         /// <summary>
         /// Deletes the specified file or folder
@@ -143,7 +143,7 @@ namespace IoFluently
         /// folder contains other files or folders, then an IOException is thrown. If the path is a file, this parameter
         /// is ignored.</param>
         /// <returns>The path that was just deleted</returns>
-        Task<AbsolutePath> DeleteAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true);
+        Task<MissingPath> DeleteAsync(FileOrFolder path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true);
         
         #endregion
         
@@ -154,18 +154,18 @@ namespace IoFluently
         /// </summary>
         /// <param name="path">The path that should be a folder</param>
         /// <returns>The same path that was specified</returns>
-        AbsolutePath EnsureIsFolder(AbsolutePath path, bool createRecursively = false);
+        Folder EnsureIsFolder(AbsolutePath path, bool createRecursively = false);
 
-        AbsolutePath EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = true, bool createRecursively = false);
+        Folder EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = true, bool createRecursively = false);
 
         /// <summary>
         /// Creates the path as a folder if it isn't already. If the path is a file, throws an IOException.
         /// </summary>
         /// <param name="path">The path that should be a folder</param>
         /// <returns>The same path that was specified</returns>
-        Task<AbsolutePath> EnsureIsFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool createRecursively = false);
+        Task<Folder> EnsureIsFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool createRecursively = false);
 
-        Task<AbsolutePath> EnsureIsEmptyFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true, bool createRecursively = false);
+        Task<Folder> EnsureIsEmptyFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true, bool createRecursively = false);
 
         #endregion
         
@@ -178,11 +178,11 @@ namespace IoFluently
         /// <param name="path">The path that may be a folder</param>
         /// <param name="recursive">Whether to recursively delete the contents of the path if the path is a non-empty folder</param>
         /// <returns>The same path that was specified</returns>
-        AbsolutePath EnsureIsNotFolder(AbsolutePath path, bool recursive = false);
+        FileOrMissingPath EnsureIsNotFolder(AbsolutePath path, bool recursive = false);
 
-        AbsolutePath EnsureIsNotFile(AbsolutePath path);
+        FolderOrMissingPath EnsureIsNotFile(AbsolutePath path);
 
-        AbsolutePath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = true);
+        MissingPath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = true);
 
         /// <summary>
         /// Deletes the specified path if it is a folder. If the path is a file or doesn't exist, this returns without
@@ -191,11 +191,11 @@ namespace IoFluently
         /// <param name="path">The path that may be a folder</param>
         /// <param name="recursive">Whether to recursively delete the contents of the path if the path is a non-empty folder</param>
         /// <returns>The same path that was specified</returns>
-        Task<AbsolutePath> EnsureIsNotFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursive = false);
+        Task<FileOrMissingPath> EnsureIsNotFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursive = false);
 
-        Task<AbsolutePath> EnsureIsNotFileAsync(AbsolutePath path, CancellationToken cancellationToken);
+        Task<FolderOrMissingPath> EnsureIsNotFileAsync(AbsolutePath path, CancellationToken cancellationToken);
 
-        Task<AbsolutePath> EnsureDoesNotExistAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true);
+        Task<MissingPath> EnsureDoesNotExistAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true);
 
         #endregion
 

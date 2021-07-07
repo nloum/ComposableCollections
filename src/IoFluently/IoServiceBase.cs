@@ -118,163 +118,162 @@ namespace IoFluently
         #region Deleting
         
         /// <inheritdoc />
-        public abstract AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false);
+        public abstract MissingPath DeleteFolder(Folder path, bool recursive = false);
 
         /// <inheritdoc />
-        public abstract AbsolutePath DeleteFile(AbsolutePath path);
+        public abstract MissingPath DeleteFile(File path);
 
         /// <inheritdoc />
-        public virtual AbsolutePath Delete(AbsolutePath path, bool recursiveDeleteIfFolder = true)
+        public virtual MissingPath Delete(FileOrFolder path, bool recursiveDeleteIfFolder = true)
         {
-            if (path.IoService.Type(path) == IoFluently.PathType.File) return path.IoService.DeleteFile(path);
-
-            if (path.IoService.Type(path) == IoFluently.PathType.Folder) return path.IoService.DeleteFolder(path, recursiveDeleteIfFolder);
-
-            return path;
+            return path.Collapse(file => DeleteFile(file), folder => DeleteFolder(folder, recursiveDeleteIfFolder));
         }
 
         /// <inheritdoc />
-        public abstract Task<AbsolutePath> DeleteFolderAsync(AbsolutePath path, CancellationToken cancellationToken,
+        public abstract Task<MissingPath> DeleteFolderAsync(Folder path, CancellationToken cancellationToken,
             bool recursive = false);
 
         /// <inheritdoc />
-        public abstract Task<AbsolutePath> DeleteFileAsync(AbsolutePath path, CancellationToken cancellationToken);
+        public abstract Task<MissingPath> DeleteFileAsync(File path, CancellationToken cancellationToken);
 
         /// <inheritdoc />
-        public Task<AbsolutePath> DeleteAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true)
+        public Task<MissingPath> DeleteAsync(FileOrFolder path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true)
         {
-            if (path.IoService.Type(path) == IoFluently.PathType.File) return path.IoService.DeleteFileAsync(path, cancellationToken);
-
-            if (path.IoService.Type(path) == IoFluently.PathType.Folder) return path.IoService.DeleteFolderAsync(path, cancellationToken, recursiveDeleteIfFolder);
-
-            return Task.FromResult(path);
+            return path.Collapse(file => DeleteFileAsync(file, cancellationToken), folder => DeleteFolderAsync(folder, cancellationToken, recursiveDeleteIfFolder));
         }
 
         #endregion
         #region Ensuring is
 
         /// <inheritdoc />
-        public async Task<AbsolutePath> EnsureIsFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool createRecursively = false)
+        public async Task<Folder> EnsureIsFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool createRecursively = false)
         {
-            switch (path.IoService.Type(path))
-            {
-                case PathType.Folder:
-                    break;
-                case PathType.File:
-                    await DeleteAsync(path, cancellationToken, true);
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        break;
-                    }
-                    CreateFolder(path);
-                    break;
-                case PathType.MissingPath:
-                    CreateFolder(path);
-                    break;
-            }
-
-            return path;
+            return path.Collapse(
+                file => CreateFolder(DeleteFile(file)),
+                folder => folder,
+                missingPath => CreateFolder(missingPath));
         }
 
         /// <inheritdoc />
-        public Task<AbsolutePath> EnsureIsEmptyFolderAsync(AbsolutePath path, CancellationToken cancellationToken,
+        public Task<Folder> EnsureIsEmptyFolderAsync(AbsolutePath path, CancellationToken cancellationToken,
             bool recursiveDeleteIfFolder = true, bool createRecursively = false)
         {
-            throw new NotImplementedException();
+            return path.Collapse(
+                async file =>
+                {
+                    var missingPath = await DeleteFileAsync(file, cancellationToken);
+                    return CreateFolder(missingPath);
+                },
+                async folder =>
+                {
+                    foreach (var child in EnumerateChildren(folder.Path))
+                    {
+                        await EnsureDoesNotExistAsync(child, cancellationToken, true);
+                    }
+
+                    return folder;
+                },
+                missingPath => Task.FromResult(CreateFolder(missingPath)));
         }
 
         /// <inheritdoc />
-        public AbsolutePath EnsureIsFolder(AbsolutePath path, bool createRecursively = false)
+        public Folder EnsureIsFolder(AbsolutePath path, bool createRecursively = false)
         {
-            if (!IsFolder(path))
-            {
-                path.IoService.CreateFolder(path);
-            }
-
-            return path;
+            return path.Collapse(
+                file => CreateFolder(DeleteFile(file)),
+                folder => folder,
+                missingPath => CreateFolder(missingPath));
         }
         
         /// <inheritdoc />
-        public AbsolutePath EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = true, bool createRecursively = false)
+        public Folder EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = true, bool createRecursively = false)
         {
-            if (path.IoService.Exists(path))
-            {
-                path.IoService.Delete(path, recursiveDeleteIfFolder);
-            }
+            return path.Collapse(
+                file => CreateFolder(DeleteFile(file)),
+                folder =>
+                {
+                    foreach (var child in EnumerateChildren(folder.Path))
+                    {
+                        EnsureDoesNotExist(child, true);
+                    }
 
-            path.IoService.CreateFolder(path);
-
-            return path;
+                    return folder;
+                },
+                missingPath => CreateFolder(missingPath));
         }
 
         #endregion
         #region Ensuring is not
 
         /// <inheritdoc />
-        public async Task<AbsolutePath> EnsureIsNotFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursive = false)
+        public Task<FileOrMissingPath> EnsureIsNotFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursive = false)
         {
-            if (path.IoService.IsFolder(path))
-            {
-                await path.IoService.DeleteFolderAsync(path, cancellationToken, recursive);
-            }
-
-            return path;
+            return path.Collapse(
+                file => Task.FromResult(file.ExpectFileOrMissingPath()),
+                async folder =>
+                {
+                    var missingPath = await DeleteFolderAsync(folder, cancellationToken, recursive);
+                    return missingPath.ExpectFileOrMissingPath();
+                },
+                missingPath => Task.FromResult(missingPath.ExpectFileOrMissingPath()));
         }
 
         /// <inheritdoc />
-        public async Task<AbsolutePath> EnsureIsNotFileAsync(AbsolutePath path, CancellationToken cancellationToken)
+        public Task<FolderOrMissingPath> EnsureIsNotFileAsync(AbsolutePath path, CancellationToken cancellationToken)
         {
-            if (path.IoService.IsFile(path))
-            {
-                await path.IoService.DeleteFileAsync(path, cancellationToken);
-            }
-
-            return path;
+            return path.Collapse(
+                async file =>
+                {
+                    var missingPath = await DeleteFileAsync(file, cancellationToken);
+                    return missingPath.ExpectFolderOrMissingPath();
+                },
+                folder => Task.FromResult(folder.ExpectFolderOrMissingPath()),
+                missingPath => Task.FromResult(missingPath.ExpectFolderOrMissingPath()));
         }
 
         /// <inheritdoc />
-        public async Task<AbsolutePath> EnsureDoesNotExistAsync(AbsolutePath path, CancellationToken cancellationToken,
+        public Task<MissingPath> EnsureDoesNotExistAsync(AbsolutePath path, CancellationToken cancellationToken,
             bool recursiveDeleteIfFolder = true)
         {
-            if (path.IoService.Exists(path))
-            {
-                await path.IoService.DeleteAsync(path, cancellationToken, recursiveDeleteIfFolder);
-            }
-
-            return path;
+            return path.Collapse(
+                file => DeleteFileAsync(file, cancellationToken),
+                folder => DeleteFolderAsync(folder, cancellationToken, recursiveDeleteIfFolder),
+                missingPath => Task.FromResult(missingPath));
         }
 
         /// <inheritdoc />
-        public AbsolutePath EnsureIsNotFile(AbsolutePath path)
+        public FolderOrMissingPath EnsureIsNotFile(AbsolutePath path)
         {
-            if (IsFile(path))
-            {
-                path.IoService.DeleteFile(path);
-            }
-
-            return path;
+            return path.Collapse(
+                file =>
+                {
+                    var missingPath = DeleteFile(file);
+                    return missingPath.ExpectFolderOrMissingPath();
+                },
+                folder => folder.ExpectFolderOrMissingPath(),
+                missingPath => missingPath.ExpectFolderOrMissingPath());
         }
 
         /// <inheritdoc />
-        public AbsolutePath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = true)
+        public MissingPath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = true)
         {
-            if (path.IoService.Exists(path))
-            {
-                path.IoService.Delete(path, recursiveDeleteIfFolder);
-            }
-
-            return path;
+            return path.Collapse(
+                file => DeleteFile(file),
+                folder => DeleteFolder(folder, recursiveDeleteIfFolder),
+                missingPath => missingPath);
         }
 
         /// <inheritdoc />
-        public AbsolutePath EnsureIsNotFolder(AbsolutePath path, bool recursive = false)
+        public FileOrMissingPath EnsureIsNotFolder(AbsolutePath path, bool recursive = false)
         {
-            if (IsFolder(path))
-            {
-                path.IoService.DeleteFolder(path, recursive);
-            }
-
-            return path;
+            return path.Collapse(
+                file => file.ExpectFileOrMissingPath(),
+                folder =>
+                {
+                    var missingPath = DeleteFolder(folder, recursive);
+                    return missingPath.ExpectFileOrMissingPath();
+                },
+                missingPath => missingPath.ExpectFileOrMissingPath());
         }
 
 
@@ -1267,9 +1266,12 @@ namespace IoFluently
             CancellationToken cancellationToken,
             Information? bufferSize = default, bool overwrite = false)
         {
-            if (overwrite && translation.Destination.Exists)
+            if (overwrite)
             {
-                await translation.Destination.IoService.DeleteAsync(translation.Destination, cancellationToken, true);
+                await translation.Destination.Collapse(
+                    file => DeleteFileAsync(file, cancellationToken),
+                    folder => DeleteFolderAsync(folder, cancellationToken, true),
+                    missingPath => Task.FromResult(missingPath));
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -1294,9 +1296,12 @@ namespace IoFluently
             CancellationToken cancellationToken,
             Information? bufferSize = default, bool overwrite = false)
         {
-            if (overwrite && translation.Destination.Exists)
+            if (overwrite)
             {
-                await translation.Destination.IoService.DeleteAsync(translation.Destination, cancellationToken, true);
+                await translation.Destination.Collapse(
+                    file => DeleteFileAsync(file, cancellationToken),
+                    folder => DeleteFolderAsync(folder, cancellationToken, true),
+                    missingPath => Task.FromResult(missingPath));
             }
 
             translation.Destination.IoService.CreateFolder(translation.Destination);
@@ -1316,7 +1321,7 @@ namespace IoFluently
             Information? bufferSize = default, bool overwrite = false)
         {
             await CopyFileAsync(translation, cancellationToken, bufferSize, overwrite);
-            await translation.Source.IoService.DeleteAsync(translation.Source, cancellationToken, true);
+            await translation.Source.IoService.DeleteAsync(translation.Source.ExpectFileOrFolder(), cancellationToken, true);
             return translation;
         }
 
@@ -1326,7 +1331,7 @@ namespace IoFluently
             Information? bufferSize = default, bool overwrite = false)
         {
             await CopyFolderAsync(translation, cancellationToken, bufferSize, overwrite);
-            await translation.Source.IoService.DeleteAsync(translation.Source, cancellationToken, true);
+            await translation.Source.IoService.DeleteAsync(translation.Source.ExpectFileOrFolder(), cancellationToken, true);
             return translation;
         }
 
@@ -1334,9 +1339,12 @@ namespace IoFluently
         public virtual IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation,
             Information? bufferSize = default, bool overwrite = false)
         {
-            if (overwrite && translation.Destination.Exists)
+            if (overwrite)
             {
-                translation.Destination.IoService.Delete(translation.Destination, true);
+                translation.Destination.Collapse(
+                    file => DeleteFile(file),
+                    folder => DeleteFolder(folder, true),
+                    missingPath => missingPath);
             }
 
             var fileOptions = FileOptions.SequentialScan;
@@ -1355,9 +1363,12 @@ namespace IoFluently
         public virtual IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation,
             Information? bufferSize = default, bool overwrite = false)
         {
-            if (overwrite && translation.Destination.Exists)
+            if (overwrite)
             {
-                translation.Destination.IoService.Delete(translation.Destination, true);
+                translation.Destination.Collapse(
+                    file => DeleteFile(file),
+                    folder => DeleteFolder(folder, true),
+                    missingPath => missingPath);
             }
 
             translation.Destination.IoService.EnsureIsFolder(translation.Destination);
@@ -1375,7 +1386,7 @@ namespace IoFluently
             Information? bufferSize = default, bool overwrite = false)
         {
             CopyFile(translation, bufferSize, overwrite);
-            translation.Source.IoService.Delete(translation.Source, true);
+            translation.Source.IoService.Delete(translation.Source.ExpectFileOrFolder(), true);
             return translation;
         }
 
@@ -1384,7 +1395,7 @@ namespace IoFluently
             Information? bufferSize = default, bool overwrite = false)
         {
             CopyFolder(translation, bufferSize, overwrite);
-            translation.Source.IoService.Delete(translation.Source, true);
+            translation.Source.IoService.Delete(translation.Source.ExpectFileOrFolder(), true);
             return translation;
         }
 

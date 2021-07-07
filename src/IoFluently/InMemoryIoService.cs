@@ -26,7 +26,7 @@ namespace IoFluently
         /// <summary>
         /// Represents a file in memory.
         /// </summary>
-        public class File
+        public class InMemoryFile
         {
             /// <summary>
             /// Whether the file is read-only
@@ -77,7 +77,7 @@ namespace IoFluently
             /// <summary>
             /// The files that this folder contains
             /// </summary>
-            public Dictionary<string, File> Files { get; } = new Dictionary<string, File>();
+            public Dictionary<string, InMemoryFile> Files { get; } = new Dictionary<string, InMemoryFile>();
             
             /// <summary>
             /// The sub-folders that this folder contains
@@ -163,7 +163,7 @@ namespace IoFluently
         /// <inheritdoc />
         public override IObservableReadOnlySet<Folder> Roots => RootFolders.ToLiveLinq().KeysAsSet().Select(x => ParseAbsolutePath(x).ExpectFolder()).ToReadOnlyObservableSet();
 
-        private IMaybe<File> GetFile(AbsolutePath path)
+        private IMaybe<InMemoryFile> GetFile(AbsolutePath path)
         {
             path = Simplify(path);
             var components = path.Path.Components;
@@ -171,21 +171,21 @@ namespace IoFluently
             {
                 return GetFile(RootFolders[components[0]], components.Skip(1).ToList(), path);
             }
-            return Nothing<File>(() => throw new InvalidOperationException($"The root folder of {path} does not exist"));
+            return Nothing<InMemoryFile>(() => throw new InvalidOperationException($"The root folder of {path} does not exist"));
         }
 
-        private IMaybe<File> GetFile(InMemoryFolder folder, IReadOnlyList<string> components, AbsolutePath originalPath)
+        private IMaybe<InMemoryFile> GetFile(InMemoryFolder folder, IReadOnlyList<string> components, AbsolutePath originalPath)
         {
             if (components.Count == 0)
             {
-                return Nothing<File>(() => throw new InvalidOperationException("There are no components in the specified path"));
+                return Nothing<InMemoryFile>(() => throw new InvalidOperationException("There are no components in the specified path"));
             }
             
             if (folder.Files.ContainsKey(components[0]))
             {
                 if (components.Count > 1)
                 {
-                    return Nothing<File>(() => throw new InvalidOperationException($"The {components[0]} folder in the path {originalPath} is actually a file, not a folder"));
+                    return Nothing<InMemoryFile>(() => throw new InvalidOperationException($"The {components[0]} folder in the path {originalPath} is actually a file, not a folder"));
                 }
 
                 return folder.Files[components[0]].ToMaybe();
@@ -196,7 +196,7 @@ namespace IoFluently
                 return GetFile(folder.Folders[components[0]], components.Skip(1).ToList(), originalPath);
             }
 
-            return Nothing<File>(() => throw new InvalidOperationException($"The {components[0]} part of the path {originalPath} is missing"));
+            return Nothing<InMemoryFile>(() => throw new InvalidOperationException($"The {components[0]} part of the path {originalPath} is missing"));
         }
         
         private IMaybe<InMemoryFolder> GetFolder(AbsolutePath path)
@@ -268,13 +268,12 @@ namespace IoFluently
                 .Where(x => regex.IsMatch(x));
         }
 
-        /// <inheritdoc />
-        public override AbsolutePath DeleteFile(AbsolutePath path)
+        public override MissingPath DeleteFile(IoFluently.File path)
         {
-            path = Simplify(path);
-            var parentFolder = GetFolder(TryParent(path).Value).Value;
-            parentFolder.Files.Remove(path.Name);
-            return path;
+            path = Simplify(path.Path);
+            var parentFolder = GetFolder(TryParent(path.Path).Value).Value;
+            parentFolder.Files.Remove(path.Path.Name);
+            return new MissingPath(path.Path);
         }
 
         /// <inheritdoc />
@@ -353,23 +352,23 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override Task<AbsolutePath> DeleteFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursive = false)
+        public override Task<MissingPath> DeleteFolderAsync(Folder path, CancellationToken cancellationToken, bool recursive = false)
         {
             return Task.Run(() => DeleteFolder(path, recursive), cancellationToken);
         }
 
         /// <inheritdoc />
-        public override Task<AbsolutePath> DeleteFileAsync(AbsolutePath path, CancellationToken cancellationToken)
+        public override Task<MissingPath> DeleteFileAsync(File path, CancellationToken cancellationToken)
         {
             return Task.Run(() => DeleteFile(path), cancellationToken);
         }
 
         /// <inheritdoc />
-        public override AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false)
+        public override MissingPath DeleteFolder(Folder path, bool recursive = false)
         {
-            var parentFolder = GetFolder(TryParent(path).Value);
-            parentFolder.Value.Folders.Remove(Simplify(path).Name);
-            return path;
+            var parentFolder = GetFolder(TryParent(path.Path).Value);
+            parentFolder.Value.Folders.Remove(Simplify(path.Path).Name);
+            return new MissingPath(path.Path);
         }
 
         public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,
@@ -377,7 +376,7 @@ namespace IoFluently
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.None | FileOptions.SequentialScan,
             Information? bufferSize = default, bool createRecursively = false)
         {
-            File file = null;
+            InMemoryFile file = null;
             var maybeFile = GetFile(path);
             if (!maybeFile.HasValue)
             {
@@ -398,7 +397,7 @@ namespace IoFluently
                     }
                 
                     var now = DateTimeOffset.UtcNow;
-                    file = new File()
+                    file = new InMemoryFile()
                     {
                         Attributes = FileAttributes.Normal,
                         Contents = new byte[0],

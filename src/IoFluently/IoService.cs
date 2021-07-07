@@ -284,13 +284,13 @@ namespace IoFluently
             return observable.ToLiveLinq();
         }
 
-        public override async Task<AbsolutePath> DeleteFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursive = false)
+        public override async Task<MissingPath> DeleteFolderAsync(Folder path, CancellationToken cancellationToken, bool recursive = false)
         {
-            Directory.Delete(path, recursive);
+            Directory.Delete(path.Path, recursive);
 
             var timeoutTimeSpan = DeleteOrCreateTimeout;
             var start = DateTimeOffset.UtcNow;
-            while ( Directory.Exists(path) && !cancellationToken.IsCancellationRequested )
+            while ( Directory.Exists(path.Path) && !cancellationToken.IsCancellationRequested )
             {
                 var processingTime = DateTimeOffset.UtcNow - start;
                 if ( processingTime > timeoutTimeSpan )
@@ -301,16 +301,16 @@ namespace IoFluently
                 await Task.Delay(DeleteOrCreateSpinPeriod, cancellationToken);
             }
 
-            return path;
+            return new MissingPath(path.Path);
         }
 
-        public override async Task<AbsolutePath> DeleteFileAsync(AbsolutePath path, CancellationToken cancellationToken)
+        public override async Task<MissingPath> DeleteFileAsync(File path, CancellationToken cancellationToken)
         {
-            System.IO.File.Delete(path);
+            System.IO.File.Delete(path.Path);
 
             var timeoutTimeSpan = DeleteOrCreateTimeout;
             var start = DateTimeOffset.UtcNow;
-            while ( System.IO.File.Exists(path) && !cancellationToken.IsCancellationRequested )
+            while ( System.IO.File.Exists(path.Path) && !cancellationToken.IsCancellationRequested )
             {
                 var processingTime = DateTimeOffset.UtcNow - start;
                 if (processingTime > timeoutTimeSpan)
@@ -321,7 +321,7 @@ namespace IoFluently
                 await Task.Delay(DeleteOrCreateSpinPeriod, cancellationToken);
             }
             
-            return path;
+            return new MissingPath(path.Path);
         }
 
         /// <inheritdoc />
@@ -427,11 +427,11 @@ namespace IoFluently
             return new DirectoryInfo(path.ToString());
         }
 
-        public override AbsolutePath DeleteFile(AbsolutePath path)
+        public override MissingPath DeleteFile(File path)
         {
-            System.IO.File.Delete(path);
+            System.IO.File.Delete(path.Path);
 
-            return path;
+            return new MissingPath(path.Path);
         }
 
         public override AbsolutePath Decrypt(AbsolutePath path)
@@ -597,11 +597,11 @@ namespace IoFluently
             return path;
         }
 
-        public override AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false)
+        public override MissingPath DeleteFolder(Folder path, bool recursive = false)
         {
-            Directory.Delete(path.ToString(), recursive);
+            Directory.Delete(path.Path, recursive);
 
-            return path;
+            return new MissingPath(path.Path);
         }
 
         public override PathType Type(AbsolutePath path)

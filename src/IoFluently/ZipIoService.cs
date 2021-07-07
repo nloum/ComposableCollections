@@ -150,11 +150,11 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override AbsolutePath DeleteFile(AbsolutePath path)
+        public override MissingPath DeleteFile(File path)
         {
             using (var archive = OpenZipArchive(true, true))
             {
-                var zipEntry = GetZipArchiveEntry(archive, path);
+                var zipEntry = GetZipArchiveEntry(archive, path.Path);
                 if (zipEntry == null)
                 {
                     throw new IOException($"Cannot delete {path} because it doesn't exist");
@@ -162,7 +162,7 @@ namespace IoFluently
                 zipEntry.Delete();
             }
             
-            return path;
+            return new MissingPath(path.Path);
         }
 
         /// <inheritdoc />
@@ -268,20 +268,20 @@ namespace IoFluently
             }
         }
 
-        public override async Task<AbsolutePath> DeleteFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursive = false)
+        public override async Task<MissingPath> DeleteFolderAsync(Folder path, CancellationToken cancellationToken, bool recursive = false)
         {
             return DeleteFolder(path, recursive);
         }
 
-        public override async Task<AbsolutePath> DeleteFileAsync(AbsolutePath path, CancellationToken cancellationToken)
+        public override async Task<MissingPath> DeleteFileAsync(File path, CancellationToken cancellationToken)
         {
             return DeleteFile(path);
         }
 
         /// <inheritdoc />
-        public override AbsolutePath DeleteFolder(AbsolutePath path, bool recursive = false)
+        public override MissingPath DeleteFolder(Folder path, bool recursive = false)
         {
-            if (Type(path) != IoFluently.PathType.Folder)
+            if (Type(path.Path) != IoFluently.PathType.Folder)
             {
                 throw new IOException($"The path {path} is not a folder");
             }
@@ -289,7 +289,7 @@ namespace IoFluently
             using (var zipArchive = OpenZipArchive(true, true))
             {
                 foreach (var subZipEntry in zipArchive.Entries.Where(entry =>
-                    TryParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Value.Ancestors.Any(ancestor => ancestor == path)))
+                    TryParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Value.Ancestors.Any(ancestor => ancestor == path.Path)))
                 {
                     if (!recursive)
                     {
@@ -302,7 +302,7 @@ namespace IoFluently
                 }
             }
 
-            return path;
+            return new MissingPath(path.Path);
         }
 
         public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,

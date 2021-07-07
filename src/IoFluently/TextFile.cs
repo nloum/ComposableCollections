@@ -310,7 +310,7 @@ namespace IoFluently
         public StreamWriter OpenWriter(FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, Information? bufferSize = default,
             bool createRecursively = false)
         {
-            var stream = Value.Path.IoService.Open(Value.Path, FileMode.Create, FileAccess.Write, FileShare.None,
+            var stream = Value.Path.IoService.Open(Value.ExpectTextFileOrMissingPath(), FileMode.Create, FileAccess.Write, FileShare.None,
                 fileOptions, bufferSize, createRecursively);
             if (encoding == null)
             {
@@ -326,7 +326,7 @@ namespace IoFluently
         {
             newline ??= Environment.NewLine;
             
-            var stream = Value.Path.IoService.Open(Value.Path, FileMode.Create, FileAccess.ReadWrite, FileShare.Write, FileOptions.WriteThrough, bufferSize, createRecursively);
+            var stream = Value.Path.IoService.Open(Value.ExpectTextFile(), FileMode.Create, FileAccess.ReadWrite, FileShare.Write, FileOptions.WriteThrough, bufferSize, createRecursively);
             foreach (var line in lines)
             {
                 var bytes = Encoding.Default.GetBytes(line + newline);

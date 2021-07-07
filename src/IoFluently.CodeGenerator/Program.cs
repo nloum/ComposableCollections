@@ -88,7 +88,14 @@ namespace IoFluently
                 .GroupBy(x => x.Parameters[0].Type.Identifier))
             {
                 textWriter.WriteLine($"namespace {groupedByPartialClass.Key.Namespace} {{");
-                textWriter.WriteLine($"    public partial class {groupedByPartialClass.Key.Name} {{");
+                if (groupedByPartialClass.Key.Name == "IHasAbsolutePath")
+                {
+                    textWriter.WriteLine($"    public partial interface {groupedByPartialClass.Key.Name} {{");
+                }
+                else
+                {
+                    textWriter.WriteLine($"    public partial class {groupedByPartialClass.Key.Name} {{");
+                }
                 foreach (var method in groupedByPartialClass)
                 {
                     if (method.ReturnType is IBoundGenericInterface boundIface && boundIface.Identifier.Name == "IMaybe" && method.Name.StartsWith("Try"))
@@ -169,6 +176,7 @@ namespace IoFluently
             {
                 typeof(AbsolutePath),
                 typeof(RelativePath),
+                typeof(IHasAbsolutePath),
                 typeof(IAbsolutePathTranslation),
                 typeof(File),
                 typeof(Folder),

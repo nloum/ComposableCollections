@@ -10,6 +10,7 @@ namespace IoFluently
     public partial interface IHasAbsolutePath
     {
         AbsolutePath Path { get; }
+        IIoService IoService => Path.IoService;
     }
 
     public partial class FileOrMissingPath : SubTypesOf<IHasAbsolutePath>.Either<File, MissingPath>, IHasAbsolutePath

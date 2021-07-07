@@ -147,8 +147,24 @@ namespace IoFluently
             return path.IoService.TryWithExtension(path, differentExtension).Value;
         }
 
-        public static BufferEnumerator ReadBuffers(this AbsolutePath path, FileShare fileShare = FileShare.None, Nullable<Information> bufferSize = null, int paddingAtStart = 0, int paddingAtEnd = 0) {
+        public static BufferEnumerator ReadBuffers(this File path, FileShare fileShare = FileShare.None, Nullable<Information> bufferSize = null, int paddingAtStart = 0, int paddingAtEnd = 0) {
             return path.IoService.ReadBuffers(path, fileShare, bufferSize, paddingAtStart, paddingAtEnd);
+        }
+
+        public static File WriteAllBytes(this FileOrMissingPath path, Byte[] bytes, Boolean createRecursively = false) {
+            return path.IoService.WriteAllBytes(path, bytes, createRecursively);
+        }
+
+        public static File WriteAllBytes(this File path, Byte[] bytes, Boolean createRecursively = false) {
+            return path.IoService.WriteAllBytes(path, bytes, createRecursively);
+        }
+
+        public static Stream Open(this FileOrMissingPath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None, FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.Asynchronous, Nullable<Information> bufferSize = null, Boolean createRecursively = false) {
+            return path.IoService.Open(path, fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively);
+        }
+
+        public static Stream Open(this File path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None, FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.Asynchronous, Nullable<Information> bufferSize = null, Boolean createRecursively = false) {
+            return path.IoService.Open(path, fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively);
         }
 
         public static ISetChanges<AbsolutePath> ToLiveLinq(this Folder path, Boolean includeFileContentChanges, Boolean includeSubFolders, string pattern) {
@@ -243,7 +259,7 @@ namespace IoFluently
             return path.IoService.EnsureDoesNotExistAsync(path, cancellationToken, recursiveDeleteIfFolder);
         }
 
-        public static Boolean HasExtension(this AbsolutePath path, string extension) {
+        public static Boolean HasExtension(this IHasAbsolutePath path, string extension) {
             return path.IoService.HasExtension(path, extension);
         }
 

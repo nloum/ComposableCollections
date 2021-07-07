@@ -208,7 +208,7 @@ namespace IoFluently.Tests
         [DataRow(IoServiceType.InMemoryZipIoService)]
         public void HasExtensionShouldWorkWithAndWithoutTheDot(IoServiceType type) {
             var uut = CreateUnitUnderTest(type, false);
-            var testTxt = uut.TryParseAbsolutePath("/test.txt").Value;
+            var testTxt = uut.TryParseAbsolutePath("/test.txt").Value.ExpectTextFileOrMissingPath();
             testTxt.HasExtension(".txt").Should().BeTrue();
             testTxt.HasExtension("txt").Should().BeTrue();
         }

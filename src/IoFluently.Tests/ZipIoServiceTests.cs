@@ -20,7 +20,7 @@ namespace IoFluently.Tests
             var result = testZipFilePath.ExpectZipFile(true);
             result.Zip(textFilePath, textFilePath.Path.Parent.Value);
             
-            using (var stream = result.ZipFilePath.Path.Open(FileMode.Open, FileAccess.Read))
+            using (var stream = result.ZipFilePath.Open(FileMode.Open, FileAccess.Read))
             {
                 using (var archive = new ZipArchive(stream, ZipArchiveMode.Read))
                 {
@@ -45,7 +45,7 @@ namespace IoFluently.Tests
             var result = testZipFilePath.ExpectZipFile(true);
             result.Zip(folder, folder.Parent.Value);
             
-            using (var stream = result.ZipFilePath.Path.Open(FileMode.Open, FileAccess.Read))
+            using (var stream = result.ZipFilePath.Open(FileMode.Open, FileAccess.Read))
             {
                 using (var archive = new ZipArchive(stream, ZipArchiveMode.Read))
                 {

@@ -72,13 +72,13 @@ namespace IoFluently.Tests
 }}";
 
             var ioService = new InMemoryIoService( false, "\\" );
-            var root = ioService.ParseAbsolutePath( "C:\\" );
+            var root = ioService.ParseAbsolutePath( "C:\\" ).ExpectFolder();
             ioService.ParseAbsolutePath( "C:\\appsettings.json" )
                 .ExpectTextFileOrMissingPath()
                 .WriteAllText( configFileContents );
 
             var configuration = new ConfigurationBuilder()
-                .AddJsonFile( root.Descendants(), "appsettings.json", false, false )
+                .AddJsonFile( root.Descendants, "appsettings.json", false, false )
                 .Build();
 
             configuration["ConfigSection1:Value1"].Should().Be("astringvalue");

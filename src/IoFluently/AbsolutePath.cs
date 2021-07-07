@@ -53,27 +53,6 @@ namespace IoFluently
         }
 
         /// <summary>
-        /// Returns the files and folders that this folder contains, but not anything else. This will not return files or folders
-        /// that are nested deeper. For example, if this folder contains a folder called Level1, and Level1 contains another
-        /// folder called Level2, then this method will return only Level1, not Level2 or anything else in Level1.
-        /// </summary>
-        /// <param name="pattern">The string pattern that files or folders must match to be included in the return value.
-        /// If this is null, then all files and folders in this folder are returned.</param>
-        /// <returns>An object representing the children files and folders of this folder.</returns>
-        public AbsolutePathChildren Children(string pattern = null) => new AbsolutePathChildren(this, pattern, IoService);
-        
-        /// <summary>
-        /// Returns the files and folders that this folder contains, and the files and folders that they contain, etc.
-        /// This will return ALL files and folders that are nested deeper as well. For example, if this folder contains
-        /// a folder called Level1, and Level1 contains another folder called Level2, then this method will return both
-        /// Level1, Level2, and anything else in Level1.
-        /// </summary>
-        /// <param name="pattern">The string pattern that files or folders must match to be included in the return value.
-        /// If this is null, then all files and folders in this folder are returned.</param>
-        /// <returns>An object representing the descendant files and folders of this folder.</returns>
-        public AbsolutePathDescendants Descendants(string pattern = null) => new AbsolutePathDescendants(this, pattern, IoService);
-        
-        /// <summary>
         /// The file or directory name, a.k.a the last component in the path
         /// </summary>
         public string Name => Path[Path.Count - 1];

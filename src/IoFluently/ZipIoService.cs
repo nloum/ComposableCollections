@@ -57,6 +57,11 @@ namespace IoFluently
             Copy(ParseAbsolutePath("/"), targetDirectory.Path);
         }
 
+        public void Unzip(Folder targetDirectory)
+        {
+            Copy(ParseAbsolutePath("/"), targetDirectory.Path);
+        }
+
         public void Zip(IHasAbsolutePath sourcePath, IHasAbsolutePath relativeTo)
         {
             Copy(sourcePath.Path, relativeTo.Path, ParseAbsolutePath("/"));
@@ -89,7 +94,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override ISetChanges<AbsolutePath> ToLiveLinq(AbsolutePath path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        public override ISetChanges<AbsolutePath> ToLiveLinq(Folder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             throw new NotImplementedException();
         }
@@ -116,20 +121,21 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<FileOrFolder> Children(Folder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             using (var archive = OpenZipArchive(false, true))
             {
                 var regex = FileNamePatternToRegex(searchPattern);
                 
                 return archive.Entries.Select(entry =>
-                    TryParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Value).Where(child => child.IoService.TryParent(child).Value == path)
-                    .Where(x => regex.IsMatch(x));
+                    TryParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Value).Where(child => child.IoService.TryParent(child).Value == path.Path)
+                    .Where(x => regex.IsMatch(x))
+                    .Select(path => path.ExpectFileOrFolder());
             }
         }
 
         /// <inheritdoc />
-        public override IEnumerable<AbsolutePath> EnumerateDescendants(AbsolutePath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<FileOrFolder> Descendants(Folder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             using (var archive = OpenZipArchive(false, true))
             {
@@ -137,8 +143,9 @@ namespace IoFluently
                 
                 return archive.Entries.Select(entry =>
                         TryParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Value).Where(child => child.Ancestors
-                        .Any(ancestor => ancestor == path))
-                    .Where(x => regex.IsMatch(x));
+                        .Any(ancestor => ancestor == path.Path))
+                    .Where(x => regex.IsMatch(x))
+                    .Select(path => path.ExpectFileOrFolder());
             }
         }
 

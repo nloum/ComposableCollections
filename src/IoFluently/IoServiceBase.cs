@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -166,9 +167,9 @@ namespace IoFluently
                 },
                 async folder =>
                 {
-                    foreach (var child in EnumerateChildren(folder.Path))
+                    foreach (var child in Children(folder.Path))
                     {
-                        await EnsureDoesNotExistAsync(child, cancellationToken, true);
+                        await EnsureDoesNotExistAsync(child.Path, cancellationToken, true);
                     }
 
                     return folder;
@@ -192,9 +193,9 @@ namespace IoFluently
                 file => CreateFolder(DeleteFile(file)),
                 folder =>
                 {
-                    foreach (var child in EnumerateChildren(folder.Path))
+                    foreach (var child in Children(folder.Path))
                     {
-                        EnsureDoesNotExist(child, true);
+                        EnsureDoesNotExist(child.Path, true);
                     }
 
                     return folder;
@@ -1579,7 +1580,10 @@ namespace IoFluently
         /// <inheritdoc />
         public AbsolutePaths GlobFiles(Folder path, string pattern)
         {
-            Func<AbsolutePath, IEnumerable<RelativePath>> patternFunc = absPath => absPath.Children(pattern).Select(x => new RelativePath(x.IsCaseSensitive, x.DirectorySeparator, x.IoService, new[]{x.Name}));
+            Func<AbsolutePath, IEnumerable<RelativePath>> patternFunc = absPath => absPath.Collapse(
+                file => Enumerable.Empty<RelativePath>(),
+                folder => folder.GetChildren(pattern).Select(x => new RelativePath(x.IsCaseSensitive, x.DirectorySeparator, x.IoService, new[]{x.Path.Name})),
+                missingPath => Enumerable.Empty<RelativePath>());
             return path / patternFunc;
         }
 
@@ -1692,7 +1696,17 @@ namespace IoFluently
                 return Nothing<AbsolutePath>(() => throw new InvalidOperationException($"The path {path} has only one component, so there is no parent"));
             }
         }
-        
+
+        public Folder Parent(File path)
+        {
+            return TryParent(path.Path).Value.ExpectFolder();
+        }
+
+        public IMaybe<Folder> TryParent(Folder path)
+        {
+            return TryParent(path.Path).Select(x => x.ExpectFolder());
+        }
+
         /// <inheritdoc />
         public virtual RelativePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo)
         {
@@ -1763,12 +1777,12 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual Folder Root(AbsolutePath path)
         {
-            var ancestor = path;
-            IMaybe<AbsolutePath> cachedParent;
-            while ((cachedParent = ancestor.IoService.TryParent(ancestor)).HasValue)
+            IHasAbsolutePath ancestor = path;
+            IMaybe<IHasAbsolutePath> cachedParent;
+            while ((cachedParent = ancestor.Path.IoService.TryParent(ancestor.Path)).HasValue)
                 ancestor = cachedParent.Value;
 
-            return ancestor;
+            return ancestor.Path.ExpectFolder();
         }
 
         /// <inheritdoc />
@@ -1975,26 +1989,46 @@ namespace IoFluently
             }
         }
 
+        public virtual IEnumerable<File> ChildFiles(Folder path, string searchPattern = null)
+        {
+            return Children(path, searchPattern, false, true).Select(x => x.ExpectFile());
+        }
+
+        public virtual IEnumerable<Folder> ChildFolders(Folder path, string searchPattern = null)
+        {
+            return Children(path, searchPattern, true, false).Select(x => x.ExpectFolder());
+        }
+
+        public virtual IEnumerable<Folder> DescendantFolders(Folder path, string searchPattern = null)
+        {
+            return Descendants(path, searchPattern, true, false).Select(x => x.ExpectFolder());
+        }
+
+        public virtual IEnumerable<File> DescendantFiles(Folder path, string searchPattern = null)
+        {
+            return Descendants(path, searchPattern, false, true).Select(x => x.ExpectFile());
+        }
+
         /// <inheritdoc />
-        public abstract IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, string searchPattern = null, bool includeFolders = true,
+        public abstract IEnumerable<FileOrFolder> Children(Folder path, string searchPattern = null, bool includeFolders = true,
             bool includeFiles = true);
 
         /// <inheritdoc />
-        public virtual IEnumerable<AbsolutePath> EnumerateDescendants(AbsolutePath path, string searchPattern = null,
+        public virtual IEnumerable<FileOrFolder> Descendants(Folder path, string searchPattern = null,
             bool includeFolders = true,
             bool includeFiles = true)
         {
-            return path.TraverseTree(x =>
+            return path.ExpectFileOrFolder().TraverseTree(x =>
             {
-                var children = EnumerateChildren(x);
-                var childrenNames = children.Select(child => child.Name);
+                var children = Children(x);
+                var childrenNames = children.Select(child => child.Path.Name);
                 return childrenNames;
-            }, (AbsolutePath node, string name, out AbsolutePath child) =>
+            }, (FileOrFolder node, string name, out FileOrFolder child) =>
             {
-                child = node / name;
+                child = (node.ExpectFolder() / name).ExpectFileOrFolder();
                 if (CanEmptyDirectoriesExist)
                 {
-                    var result = child.IoService.Exists(child);
+                    var result = child.Path.Exists;
                     return result;
                 }
 
@@ -2099,16 +2133,16 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual IObservable<Unit> ObserveChanges(AbsolutePath path, NotifyFilters filters)
         {
-            var parent = path.IoService.TryParent(path).Value;
-            return parent.Children().ToLiveLinq().Where(x => x == path).AsObservable().SelectUnit();
+            var parent = path.IoService.TryParent(path).Value.ExpectFolder();
+            return parent.Children.ToLiveLinq().Where(x => x == path).AsObservable().SelectUnit();
         }
 
         /// <inheritdoc />
         public virtual IObservable<PathType> ObservePathType(AbsolutePath path)
         {
-            var parent = path.IoService.TryParent(path);
+            var parent = path.IoService.TryParent(path).Select(x => x.ExpectFolder());
             if (!parent.HasValue) return Observable.Return(path.IoService.Type(path));
-            return parent.Value.Children(path.Name).ToLiveLinq().AsObservable().Select(_ => path.IoService.Type(path))
+            return parent.Value.GetChildren(path.Name).ToLiveLinq().AsObservable().Select(_ => path.IoService.Type(path))
                 .DistinctUntilChanged();
         }
 
@@ -2117,7 +2151,7 @@ namespace IoFluently
 
         public abstract IQueryable<AbsolutePath> Query();
 
-        public abstract ISetChanges<AbsolutePath> ToLiveLinq(AbsolutePath path, bool includeFileContentChanges,
+        public abstract ISetChanges<AbsolutePath> ToLiveLinq(Folder path, bool includeFileContentChanges,
             bool includeSubFolders, string pattern);
         #endregion
         #region IFileProvider implementation

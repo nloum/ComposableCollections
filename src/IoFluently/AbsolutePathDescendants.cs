@@ -8,7 +8,7 @@ namespace IoFluently
 {
     public class AbsolutePathDescendants : AbsolutePathDescendantsOrChildren, IFileProvider
     {
-        internal AbsolutePathDescendants(AbsolutePath path, string pattern, IIoService ioService) : base(path, pattern, true, ioService)
+        internal AbsolutePathDescendants(Folder path, string pattern, IIoService ioService) : base(path, pattern, true, ioService)
         {
         }
 
@@ -30,7 +30,7 @@ namespace IoFluently
         
         public override IEnumerator<AbsolutePath> GetEnumerator()
         {
-            return _path.IoService.EnumerateDescendants(_path, _pattern).GetEnumerator();
+            return _path.IoService.Descendants(_path, _pattern).Select(x => x.Path).GetEnumerator();
         }
     }
 }

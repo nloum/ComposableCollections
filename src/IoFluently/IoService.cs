@@ -72,7 +72,7 @@ namespace IoFluently
         public PathObservationMethod PathObservationMethod { get; set; }
 
         /// <inheritdoc />
-        public override ISetChanges<AbsolutePath> ToLiveLinq(AbsolutePath path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        public override ISetChanges<AbsolutePath> ToLiveLinq(Folder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             if (PathObservationMethod == PathObservationMethod.FileSystemWatcher)
             {
@@ -83,7 +83,7 @@ namespace IoFluently
             return ToLiveLinqWithFsWatch(path, includeFileContentChanges, includeSubFolders, pattern);
         }
 
-        private ISetChanges<AbsolutePath> ToLiveLinqWithFsWatch(AbsolutePath root, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        private ISetChanges<AbsolutePath> ToLiveLinqWithFsWatch(Folder root, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             // TODO - add support for FSWatch events on Windows and Linux as well. Although I think I already support all the ones on Linux
             // and the FileSystemWatcher class on Windows should be sufficient, it would be nice to have this support for
@@ -126,9 +126,9 @@ namespace IoFluently
 
             process.Start();
 
-            var initialState = includeSubFolders ? root.Descendants()
+            var initialState = includeSubFolders ? root.Descendants
                 .ToImmutableDictionary(x => x, x => Type(x))
-                : root.Children().ToImmutableDictionary(x => x, x => Type(x));
+                : root.Children.ToImmutableDictionary(x => x, x => Type(x));
 
             var resultObservable = process.StandardOutput
                 .Observe(new []{ (char)0 })
@@ -203,7 +203,7 @@ namespace IoFluently
             return result;
         }
 
-        private ISetChanges<AbsolutePath> ToLiveLinqWithFileSystemWatcher(AbsolutePath root, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        private ISetChanges<AbsolutePath> ToLiveLinqWithFileSystemWatcher(Folder root, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             var observable = Observable.Create<ISetChange<AbsolutePath>>(observer =>
             {
@@ -270,8 +270,8 @@ namespace IoFluently
                         observer.OnNext(LiveLinq.Utility.SetChange(CollectionChangeType.Add, path));
                     });
 
-                var initialSetChange = LiveLinq.Utility.SetChange(CollectionChangeType.Add, includeSubFolders ? root.Descendants()
-                    : root.Children().AsEnumerable());
+                var initialSetChange = LiveLinq.Utility.SetChange(CollectionChangeType.Add, includeSubFolders ? root.Descendants
+                    : root.Children.AsEnumerable());
 
                 observer.OnNext(initialSetChange);
 
@@ -450,40 +450,38 @@ namespace IoFluently
 
         private readonly ObservableSet<Folder> _storage = new ObservableSet<Folder>();
 
-        public override IEnumerable<AbsolutePath> EnumerateDescendants(AbsolutePath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<FileOrFolder> Descendants(Folder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             return EnumerateDescendantsOrChildren(path, searchPattern ?? "*", SearchOption.AllDirectories,
                 includeFolders, includeFiles);
         }
 
-        public override IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<FileOrFolder> Children(Folder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             return EnumerateDescendantsOrChildren(path, searchPattern ?? "*", SearchOption.TopDirectoryOnly,
                 includeFolders, includeFiles);
         }
 
-        private IEnumerable<AbsolutePath> EnumerateDescendantsOrChildren(AbsolutePath path, string searchPattern, SearchOption searchOption, bool includeFolders, bool includeFiles)
+        private IEnumerable<FileOrFolder> EnumerateDescendantsOrChildren(Folder path, string searchPattern, SearchOption searchOption, bool includeFolders, bool includeFiles)
         {
-            if (!IsFolder(path)) return ImmutableArray<AbsolutePath>.Empty;
-
-            var fullName = AsDirectoryInfo(path).FullName;
+            var fullName = AsDirectoryInfo(path.Path).FullName;
 
             if (includeFiles && includeFolders)
             {
-                return Directory.GetFileSystemEntries(fullName, searchPattern, searchOption).Select(x => ParseAbsolutePath(x));
+                return Directory.GetFileSystemEntries(fullName, searchPattern, searchOption).Select(x => ParseAbsolutePath(x).ExpectFileOrFolder());
             }
 
             if (includeFiles)
             {
-                return Directory.GetFiles(fullName, searchPattern, searchOption).Select(x => ParseAbsolutePath(x));
+                return Directory.GetFiles(fullName, searchPattern, searchOption).Select(x => ParseAbsolutePath(x).ExpectFileOrFolder());
             }
             
             if (includeFolders)
             {
-                return Directory.GetDirectories(fullName, searchPattern, searchOption).Select(x => ParseAbsolutePath(x));
+                return Directory.GetDirectories(fullName, searchPattern, searchOption).Select(x => ParseAbsolutePath(x).ExpectFileOrFolder());
             }
 
-            return ImmutableArray<AbsolutePath>.Empty;
+            return ImmutableArray<FileOrFolder>.Empty;
         }
 
         /// <inheritdoc />

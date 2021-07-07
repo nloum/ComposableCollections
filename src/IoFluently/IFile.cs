@@ -197,6 +197,31 @@ namespace IoFluently
             return Path.ToString();
         }
 
+        /// <summary>
+        /// Returns the files and folders that this folder contains, but not anything else. This will not return files or folders
+        /// that are nested deeper. For example, if this folder contains a folder called Level1, and Level1 contains another
+        /// folder called Level2, then this method will return only Level1, not Level2 or anything else in Level1.
+        /// </summary>
+        /// <param name="pattern">The string pattern that files or folders must match to be included in the return value.
+        /// If this is null, then all files and folders in this folder are returned.</param>
+        /// <returns>An object representing the children files and folders of this folder.</returns>
+        public AbsolutePathChildren GetChildren(string pattern) => new AbsolutePathChildren(this, pattern, IoService);
+
+        public AbsolutePathChildren Children => new AbsolutePathChildren(this, null, IoService);
+
+        /// <summary>
+        /// Returns the files and folders that this folder contains, and the files and folders that they contain, etc.
+        /// This will return ALL files and folders that are nested deeper as well. For example, if this folder contains
+        /// a folder called Level1, and Level1 contains another folder called Level2, then this method will return both
+        /// Level1, Level2, and anything else in Level1.
+        /// </summary>
+        /// <param name="pattern">The string pattern that files or folders must match to be included in the return value.
+        /// If this is null, then all files and folders in this folder are returned.</param>
+        /// <returns>An object representing the descendant files and folders of this folder.</returns>
+        public AbsolutePathDescendants GetDescendants(string pattern) => new AbsolutePathDescendants(Path, pattern, IoService);
+
+        public AbsolutePathDescendants Descendants => new AbsolutePathDescendants(Path, null, IoService);
+
         public FileOrFolder ExpectFileOrFolder()
         {
             return new(this);

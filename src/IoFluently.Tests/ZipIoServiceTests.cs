@@ -58,10 +58,10 @@ namespace IoFluently.Tests
                 }
             }
             
-            var unzippedTo = inMemoryIoService.DefaultRelativePathBase / "test2";
-            result.Unzip(unzippedTo.ExpectFolderOrMissingPath());
+            var unzippedTo = (inMemoryIoService.DefaultRelativePathBase / "test2").EnsureIsEmptyFolder();
+            result.Unzip(unzippedTo);
 
-            Verify(unzippedTo.Descendants());
+            Verify(unzippedTo.Descendants);
         }
     }
 }

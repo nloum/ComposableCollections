@@ -23,6 +23,18 @@ namespace IoFluently
     /// </summary>
     public static partial class IoExtensions
     {
+        public static RelativePath RelativeTo(this AbsolutePath path, AbsolutePath relativeTo) {
+            return path.IoService.RelativeTo(path, relativeTo);
+        }
+
+        public static IMaybe<AbsolutePath> TryCommonWith(this AbsolutePath path, AbsolutePath that) {
+            return path.IoService.TryCommonWith(path, that);
+        }
+
+        public static AbsolutePath CommonWith(this AbsolutePath path, AbsolutePath that) {
+            return path.IoService.TryCommonWith(path, that).Value;
+        }
+
         public static AbsolutePath Simplify(this AbsolutePath path) {
             return path.IoService.Simplify(path);
         }
@@ -351,25 +363,28 @@ namespace IoFluently
             return translation.IoService.MoveAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public static IEnumerable<AbsolutePath> EnumerateChildren(this AbsolutePath path, string searchPattern = null, Boolean includeFolders = true, Boolean includeFiles = true) {
-            return path.IoService.EnumerateChildren(path, searchPattern, includeFolders, includeFiles);
+        public static IEnumerable<FileOrFolder> EnumerateChildren(this Folder path, string searchPattern = null, Boolean includeFolders = true, Boolean includeFiles = true) {
+            return path.IoService.Children(path, searchPattern, includeFolders, includeFiles);
         }
 
-        public static IEnumerable<AbsolutePath> EnumerateDescendants(this AbsolutePath path, string searchPattern = null, Boolean includeFolders = true, Boolean includeFiles = true) {
-            return path.IoService.EnumerateDescendants(path, searchPattern, includeFolders, includeFiles);
+        public static IEnumerable<File> EnumerateChildFiles(this Folder path, string searchPattern = null) {
+            return path.IoService.ChildFiles(path, searchPattern);
         }
 
-        public static RelativePath RelativeTo(this AbsolutePath path, AbsolutePath relativeTo) {
-            return path.IoService.RelativeTo(path, relativeTo);
+        public static IEnumerable<Folder> EnumerateChildFolders(this Folder path, string searchPattern = null) {
+            return path.IoService.ChildFolders(path, searchPattern);
         }
 
-        public static IMaybe<AbsolutePath> TryCommonWith(this AbsolutePath path, AbsolutePath that) {
-            return path.IoService.TryCommonWith(path, that);
+        public static IEnumerable<FileOrFolder> EnumerateDescendants(this Folder path, string searchPattern = null, Boolean includeFolders = true, Boolean includeFiles = true) {
+            return path.IoService.Descendants(path, searchPattern, includeFolders, includeFiles);
         }
 
-        public static AbsolutePath CommonWith(this AbsolutePath path, AbsolutePath that) {
-            return path.IoService.TryCommonWith(path, that).Value;
+        public static IEnumerable<Folder> EnumerateDescendantFolders(this Folder path, string searchPattern = null) {
+            return path.IoService.DescendantFolders(path, searchPattern);
         }
 
+        public static IEnumerable<File> EnumerateDescendantFiles(this Folder path, string searchPattern = null) {
+            return path.IoService.DescendantFiles(path, searchPattern);
+        }
     }
 }

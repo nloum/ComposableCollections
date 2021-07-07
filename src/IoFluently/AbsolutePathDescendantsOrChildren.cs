@@ -9,10 +9,10 @@ namespace IoFluently
 {
     public abstract class AbsolutePathDescendantsOrChildren : IObservableReadOnlySet<AbsolutePath>
     {
-        protected readonly AbsolutePath _path;
+        protected readonly Folder _path;
         protected readonly string _pattern;
 
-        protected AbsolutePathDescendantsOrChildren(AbsolutePath path, string pattern, bool includeSubFolders, IIoService ioService)
+        protected AbsolutePathDescendantsOrChildren(Folder path, string pattern, bool includeSubFolders, IIoService ioService)
         {
             _path = path;
             _pattern = pattern;
@@ -26,7 +26,7 @@ namespace IoFluently
 
         public ISetChanges<AbsolutePath> ToLiveLinq()
         {
-            return IoService.ToLiveLinq(_path, true, IncludeSubFolders, _pattern);
+            return IoService.ToLiveLinq(_path.Path, true, IncludeSubFolders, _pattern);
         }
 
         public int Count => this.AsEnumerable().Count();

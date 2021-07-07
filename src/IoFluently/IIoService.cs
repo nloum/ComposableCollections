@@ -365,10 +365,31 @@ namespace IoFluently
         /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
         /// <param name="includeFiles">Whether to include sub-files in the return value</param>
         /// <returns>The children of this path</returns>
-        IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, string searchPattern = null,
+        IEnumerable<FileOrFolder> Children(Folder path, string searchPattern = null,
             bool includeFolders = true, bool includeFiles = true);
-        IEnumerable<AbsolutePath> EnumerateDescendants(AbsolutePath path, string searchPattern = null,
+
+        /// <summary>
+        /// Returns a lazily-enumerated list of child files and/or folders
+        /// </summary>
+        /// <param name="path">The parent folder</param>
+        /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
+        /// <param name="includeFiles">Whether to include sub-files in the return value</param>
+        /// <returns>The children of this path</returns>
+        IEnumerable<File> ChildFiles(Folder path, string searchPattern = null);
+
+        /// <summary>
+        /// Returns a lazily-enumerated list of child files and/or folders
+        /// </summary>
+        /// <param name="path">The parent folder</param>
+        /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
+        /// <param name="includeFiles">Whether to include sub-files in the return value</param>
+        /// <returns>The children of this path</returns>
+        IEnumerable<Folder> ChildFolders(Folder path, string searchPattern = null);
+        
+        IEnumerable<FileOrFolder> Descendants(Folder path, string searchPattern = null,
             bool includeFolders = true, bool includeFiles = true);
+        IEnumerable<Folder> DescendantFolders(Folder path, string searchPattern = null);
+        IEnumerable<File> DescendantFiles(Folder path, string searchPattern = null);
         
         bool CanBeSimplified(AbsolutePath path);
         Folder Root(AbsolutePath path);
@@ -377,6 +398,8 @@ namespace IoFluently
         AbsolutePath Simplify(AbsolutePath path);
         RelativePath Simplify(RelativePath path);
         IMaybe<AbsolutePath> TryParent(AbsolutePath path);
+        Folder Parent(File path);
+        IMaybe<Folder> TryParent(Folder path);
 
         /// <summary>
         /// Equivalent to Path.Combine. You can also use the / operator to build paths, like this:
@@ -539,7 +562,7 @@ namespace IoFluently
         /// </summary>
         IQueryable<AbsolutePath> Query();
 
-        ISetChanges<AbsolutePath> ToLiveLinq(AbsolutePath path, bool includeFileContentChanges,
+        ISetChanges<AbsolutePath> ToLiveLinq(Folder path, bool includeFileContentChanges,
             bool includeSubFolders, string pattern);
         IObservable<Unit> ObserveChanges(AbsolutePath path);
         IObservable<Unit> ObserveChanges(AbsolutePath path, NotifyFilters filters);

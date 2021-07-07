@@ -26,9 +26,11 @@ namespace IoFluently
 
         public IEnumerator<CalculatedAbsolutePathTranslation> GetEnumerator()
         {
-            return Source.Descendants()
-                .Select(child => new CalculatedAbsolutePathTranslation(child, Source, Destination, IoService))
-                .GetEnumerator();
+            return Source.Collapse(
+                file => Enumerable.Empty<CalculatedAbsolutePathTranslation>(),
+                folder => folder.Descendants
+                    .Select(child => new CalculatedAbsolutePathTranslation(child, Source, Destination, IoService)),
+                missingPath => Enumerable.Empty<CalculatedAbsolutePathTranslation>()).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

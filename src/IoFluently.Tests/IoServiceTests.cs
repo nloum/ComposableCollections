@@ -84,8 +84,8 @@ namespace IoFluently.Tests
         {
             var uut = CreateUnitUnderTest(IoServiceType.IoService, true);
             var repoRoot = uut.DefaultRelativePathBase.Path.Ancestors.First(ancestor => (ancestor / ".git").Exists);
-            var testFolder = repoRoot / "test_folder";
-            var children = testFolder.Children().Select(x => x.ToJsonDto()).ToList();
+            var testFolder = (repoRoot / "test_folder").ExpectFolder();
+            var children = testFolder.Children.Select(x => x.ToJsonDto()).ToList();
             await Verify(children);
         }
         
@@ -94,8 +94,8 @@ namespace IoFluently.Tests
         {
             var uut = CreateUnitUnderTest(IoServiceType.IoService, true);
             var repoRoot = uut.DefaultRelativePathBase.Path.Ancestors.First(ancestor => (ancestor / ".git").Exists);
-            var testFolder = repoRoot / "test_folder";
-            var children = testFolder.Descendants().Select(x => x.ToJsonDto()).ToList();
+            var testFolder = (repoRoot / "test_folder").ExpectFolder();
+            var children = testFolder.Descendants.Select(x => x.ToJsonDto()).ToList();
             await Verify(children);
         }
 
@@ -104,8 +104,8 @@ namespace IoFluently.Tests
         {
             var uut = CreateUnitUnderTest(IoServiceType.IoService, true);
             var repoRoot = uut.DefaultRelativePathBase.Path.Ancestors.First(ancestor => (ancestor / ".git").Exists);
-            var testFolder = repoRoot / "test_folder";
-            var children = testFolder.Children("*.md").Select(x => x.ToJsonDto()).ToList();
+            var testFolder = (repoRoot / "test_folder").ExpectFolder();
+            var children = testFolder.GetChildren("*.md").Select(x => x.ToJsonDto()).ToList();
             await Verify(children);
         }
         
@@ -114,8 +114,8 @@ namespace IoFluently.Tests
         {
             var uut = CreateUnitUnderTest(IoServiceType.IoService, true);
             var repoRoot = uut.DefaultRelativePathBase.Path.Ancestors.First(ancestor => (ancestor / ".git").Exists);
-            var testFolder = repoRoot / "test_folder";
-            var children = testFolder.Descendants("*.md").Select(x => x.ToJsonDto()).ToList();
+            var testFolder = (repoRoot / "test_folder").ExpectFolder();
+            var children = testFolder.GetDescendants("*.md").Select(x => x.ToJsonDto()).ToList();
             await Verify(children);
         }
 

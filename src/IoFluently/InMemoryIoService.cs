@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Algorithms.Sorting;
 using GenericNumbers;
 using LiveLinq;
 using LiveLinq.Dictionary;
@@ -155,7 +156,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override ISetChanges<AbsolutePath> ToLiveLinq(AbsolutePath path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        public override ISetChanges<AbsolutePath> ToLiveLinq(Folder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             throw new NotImplementedException();
         }
@@ -199,13 +200,13 @@ namespace IoFluently
             return Nothing<InMemoryFile>(() => throw new InvalidOperationException($"The {components[0]} part of the path {originalPath} is missing"));
         }
         
-        private IMaybe<InMemoryFolder> GetFolder(AbsolutePath path)
+        private IMaybe<InMemoryFolder> GetFolder(IHasAbsolutePath path)
         {
-            path = Simplify(path);
-            var components = path.Path.Components;
+            path = Simplify(path.Path);
+            var components = path.Path.Path.Components;
             if (RootFolders.ContainsKey(components[0]))
             {
-                return GetFolder(RootFolders[components[0]], components.Skip(1).ToList(), path);
+                return GetFolder(RootFolders[components[0]], components.Skip(1).ToList(), path.Path);
             }
             return Nothing<InMemoryFolder>(() => throw new InvalidOperationException($"The root folder of {path} does not exist"));
         }
@@ -237,35 +238,37 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IEnumerable<AbsolutePath> EnumerateChildren(AbsolutePath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<FileOrFolder> Children(Folder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
-            var folder = GetFolder(path);
+            var folder = GetFolder(path.Path);
             if (!folder.HasValue)
             {
-                return Enumerable.Empty<AbsolutePath>();
+                return Enumerable.Empty<FileOrFolder>();
             }
 
             var regex = FileNamePatternToRegex(searchPattern);
             
             return folder.Value.Files.Select(file => path / file.Key)
                 .Concat(folder.Value.Folders.Select(subfolder => path / subfolder.Key))
-                .Where(x => regex.IsMatch(x));
+                .Where(x => regex.IsMatch(x))
+                .Select(path => path.ExpectFileOrFolder());
         }
 
-        public override IEnumerable<AbsolutePath> EnumerateDescendants(AbsolutePath path, string searchPattern = null, bool includeFolders = true,
+        public override IEnumerable<FileOrFolder> Descendants(Folder path, string searchPattern = null, bool includeFolders = true,
             bool includeFiles = true)
         {
-            var folder = GetFolder(path);
+            var folder = GetFolder(path.Path);
             if (!folder.HasValue)
             {
-                return Enumerable.Empty<AbsolutePath>();
+                return Enumerable.Empty<FileOrFolder>();
             }
 
             var regex = FileNamePatternToRegex(searchPattern);
-            
+
             return folder.Value.Files.Select(file => path / file.Key)
                 .Concat(folder.Value.Folders.Select(subfolder => path / subfolder.Key))
-                .Where(x => regex.IsMatch(x));
+                .Where(x => regex.IsMatch(x))
+                .Select(path => path.ExpectFileOrFolder());
         }
 
         public override MissingPath DeleteFile(IoFluently.File path)

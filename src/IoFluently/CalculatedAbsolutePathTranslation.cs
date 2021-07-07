@@ -99,10 +99,11 @@ namespace IoFluently
 
         public IEnumerator<CalculatedAbsolutePathTranslation> GetEnumerator()
         {
-            return
-                Source.Descendants()
-                    .Select(fileUri => new CalculatedAbsolutePathTranslation(fileUri, Source, Destination, IoService))
-                    .GetEnumerator();
+            return Source.Collapse(
+                file => Enumerable.Empty<CalculatedAbsolutePathTranslation>(),
+                folder => folder.Descendants
+                    .Select(fileUri => new CalculatedAbsolutePathTranslation(fileUri, Source, Destination, IoService)),
+                missingPath => Enumerable.Empty<CalculatedAbsolutePathTranslation>()).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

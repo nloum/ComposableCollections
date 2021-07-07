@@ -2058,25 +2058,25 @@ namespace IoFluently
         public abstract PathType Type(AbsolutePath path);
 
         /// <inheritdoc />
-        public virtual IMaybe<bool> TryIsReadOnly(AbsolutePath path)
+        public virtual bool IsReadOnly(File path)
         {
-            return TryAttributes(path).Select(attr => attr.HasFlag(FileAttributes.ReadOnly));
+            return Attributes(path).HasFlag(FileAttributes.ReadOnly);
         }
 
         /// <inheritdoc />
-        public abstract IMaybe<Information> TryFileSize(AbsolutePath path);
+        public abstract Information FileSize(File path);
 
         /// <inheritdoc />
-        public abstract IMaybe<FileAttributes> TryAttributes(AbsolutePath attributes);
+        public abstract FileAttributes Attributes(File attributes);
 
         /// <inheritdoc />
-        public abstract IMaybe<DateTimeOffset> TryCreationTime(AbsolutePath attributes);
+        public abstract DateTimeOffset CreationTime(File attributes);
 
         /// <inheritdoc />
-        public abstract IMaybe<DateTimeOffset> TryLastAccessTime(AbsolutePath attributes);
+        public abstract DateTimeOffset LastAccessTime(File attributes);
 
         /// <inheritdoc />
-        public abstract IMaybe<DateTimeOffset> TryLastWriteTime(AbsolutePath attributes);
+        public abstract DateTimeOffset LastWriteTime(File attributes);
 
         /// <inheritdoc />
         public IFileInfo GetFileInfo( string subpath ) => new AbsolutePathFileInfoAdapter(ParseAbsolutePath( subpath ));

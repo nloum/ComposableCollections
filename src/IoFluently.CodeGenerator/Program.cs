@@ -98,15 +98,16 @@ namespace IoFluently
                         {
                             withoutTry = withoutTry.Substring(3);
                         }
-                        var returnValue = (IReflectionType) boundIface.Arguments[0];
-                        if (returnValue is IValueType)
-                        {
-                            textWriter.WriteLine($"        public {ConvertToCSharpTypeName((returnValue).Type)}? {withoutTry} => IoService.{method.Name}(this).Select(x => ({ConvertToCSharpTypeName((returnValue).Type)}?)x).ValueOrDefault;");
-                        }
-                        else
-                        {
-                            textWriter.WriteLine($"        public {ConvertToCSharpTypeName((returnValue).Type)} {withoutTry} => IoService.{method.Name}(this).ValueOrDefault;");
-                        }
+                        // var returnValue = (IReflectionType) boundIface.Arguments[0];
+                        // if (returnValue is IValueType)
+                        // {
+                        //     textWriter.WriteLine($"        public {ConvertToCSharpTypeName((returnValue).Type)}? {withoutTry} => IoService.{method.Name}(this).Select(x => ({ConvertToCSharpTypeName((returnValue).Type)}?)x).ValueOrDefault;");
+                        // }
+                        // else
+                        // {
+                        //     textWriter.WriteLine($"        public {ConvertToCSharpTypeName((returnValue).Type)} {withoutTry} => IoService.{method.Name}(this).ValueOrDefault;");
+                        // }
+                        textWriter.WriteLine($"        public {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {withoutTry} => IoService.{method.Name}(this);");
                     }
                     else
                     {

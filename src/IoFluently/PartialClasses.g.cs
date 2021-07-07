@@ -17,6 +17,13 @@ using UnitsNet;
 namespace IoFluently {
     public partial class File {
         public IEnumerable<Folder> Ancestors => IoService.Ancestors(this);
+        public FileAttributes Attributes => IoService.Attributes(this);
+        public DateTimeOffset CreationTime => IoService.CreationTime(this);
+        public Information FileSize => IoService.FileSize(this);
+        public Boolean IsReadOnly => IoService.IsReadOnly(this);
+        public DateTimeOffset LastAccessTime => IoService.LastAccessTime(this);
+        public DateTimeOffset LastWriteTime => IoService.LastWriteTime(this);
+        public Folder Parent => IoService.Parent(this);
     }
 }
 namespace IoFluently {
@@ -33,13 +40,7 @@ namespace IoFluently {
         public Boolean IsFile => IoService.IsFile(this);
         public Boolean IsFolder => IoService.IsFolder(this);
         public Folder Root => IoService.Root(this);
-        public FileAttributes? Attributes => IoService.TryAttributes(this).Select(x => (FileAttributes?)x).ValueOrDefault;
-        public DateTimeOffset? CreationTime => IoService.TryCreationTime(this).Select(x => (DateTimeOffset?)x).ValueOrDefault;
-        public Information? FileSize => IoService.TryFileSize(this).Select(x => (Information?)x).ValueOrDefault;
-        public Boolean? IsReadOnly => IoService.TryIsReadOnly(this).Select(x => (Boolean?)x).ValueOrDefault;
-        public DateTimeOffset? LastAccessTime => IoService.TryLastAccessTime(this).Select(x => (DateTimeOffset?)x).ValueOrDefault;
-        public DateTimeOffset? LastWriteTime => IoService.TryLastWriteTime(this).Select(x => (DateTimeOffset?)x).ValueOrDefault;
-        public AbsolutePath Parent => IoService.TryParent(this).ValueOrDefault;
+        public IMaybe<AbsolutePath> Parent => IoService.TryParent(this);
         public PathType Type => IoService.Type(this);
         public AbsolutePath WithoutExtension => IoService.WithoutExtension(this);
     }
@@ -47,5 +48,6 @@ namespace IoFluently {
 namespace IoFluently {
     public partial class Folder {
         public IEnumerable<Folder> Ancestors => IoService.Ancestors(this);
+        public IMaybe<Folder> Parent => IoService.TryParent(this);
     }
 }

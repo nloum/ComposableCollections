@@ -345,86 +345,44 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IMaybe<FileAttributes> TryAttributes(AbsolutePath attributes)
+        public override FileAttributes Attributes(File attributes) 
         {
-            try
-            {
-                return Something(AsFileInfo(attributes).Attributes);
-            }
-            catch (Exception ex)
-            {
-                return Nothing<FileAttributes>(() => throw ex);
-            }
+            return AsFileInfo(attributes).Attributes;
         }
 
-        public override IMaybe<DateTimeOffset> TryCreationTime(AbsolutePath attributes)
+        public override DateTimeOffset CreationTime(File attributes)
         {
-            try
-            {
-                return Something<DateTimeOffset>(AsFileInfo(attributes).CreationTime);
-            }
-            catch (Exception ex)
-            {
-                return Nothing<DateTimeOffset>(() => throw ex);
-            }
+            return AsFileInfo(attributes).CreationTime;
         }
 
-        public override IMaybe<DateTimeOffset> TryLastAccessTime(AbsolutePath attributes)
+        public override DateTimeOffset LastAccessTime(File attributes)
         {
-            try
-            {
-                return Something<DateTimeOffset>(AsFileInfo(attributes).LastAccessTime);
-            }
-            catch (Exception ex)
-            {
-                return Nothing<DateTimeOffset>(() => throw ex);
-            }
+            return AsFileInfo(attributes).LastAccessTime;
         }
 
-        public override IMaybe<DateTimeOffset> TryLastWriteTime(AbsolutePath attributes)
+        public override DateTimeOffset LastWriteTime(File attributes)
         {
-            try
-            {
-                return Something<DateTimeOffset>(AsFileInfo(attributes).LastWriteTime);
-            }
-            catch (Exception ex)
-            {
-                return Nothing<DateTimeOffset>(() => throw ex);
-            }
+            return AsFileInfo(attributes).LastWriteTime;
         }
 
-        public override IMaybe<Information> TryFileSize(AbsolutePath path)
+        public override Information FileSize(File path)
         {
-            try
-            {
-                return Something(Information.FromBytes(AsFileInfo(path).Length));
-            }
-            catch (Exception ex)
-            {
-                return Nothing<Information>(() => throw ex);
-            }
+            return Information.FromBytes(AsFileInfo(path).Length);
         }
 
-        public override IMaybe<bool> TryIsReadOnly(AbsolutePath path)
+        public override bool IsReadOnly(File path)
         {
-            try
-            {
-                return Something<bool>(AsFileInfo(path).IsReadOnly);
-            }
-            catch (Exception ex)
-            {
-                return Nothing<bool>(() => throw ex);
-            }
+            return AsFileInfo(path).IsReadOnly;
         }
 
-        private FileInfo AsFileInfo(AbsolutePath path)
+        private FileInfo AsFileInfo(IHasAbsolutePath path)
         {
-            return new FileInfo(path.ToString());
+            return new FileInfo(path.Path.ToString());
         }
 
-        private DirectoryInfo AsDirectoryInfo(AbsolutePath path)
+        private DirectoryInfo AsDirectoryInfo(IHasAbsolutePath path)
         {
-            return new DirectoryInfo(path.ToString());
+            return new DirectoryInfo(path.Path.ToString());
         }
 
         public override MissingPath DeleteFile(File path)

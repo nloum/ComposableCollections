@@ -381,7 +381,7 @@ namespace IoFluently.Tests
 
             var repoRoot = ioService.DefaultRelativePathBase.Path.Ancestors.First(ancestor => (ancestor / ".git").IsFolder);
             var testFolder = repoRoot / "test_folder";
-            var results = ioService.Query().Where(path => path.Parent == testFolder).AsEnumerable().ToImmutableList();
+            var results = ioService.Query().Where(path => path.Parent.Value == testFolder).AsEnumerable().ToImmutableList();
             results.Count.Should().BeGreaterThan(0);
             results.Count.Should().BeLessThan(10);
             results.Any(result => result.Name == "readme.md").Should().BeTrue();

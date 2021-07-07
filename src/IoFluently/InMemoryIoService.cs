@@ -164,13 +164,13 @@ namespace IoFluently
         /// <inheritdoc />
         public override IObservableReadOnlySet<Folder> Roots => RootFolders.ToLiveLinq().KeysAsSet().Select(x => ParseAbsolutePath(x).ExpectFolder()).ToReadOnlyObservableSet();
 
-        private IMaybe<InMemoryFile> GetFile(AbsolutePath path)
+        private IMaybe<InMemoryFile> GetFile(IHasAbsolutePath path)
         {
-            path = Simplify(path);
-            var components = path.Path.Components;
+            path = Simplify(path.Path);
+            var components = path.Path.Path.Components;
             if (RootFolders.ContainsKey(components[0]))
             {
-                return GetFile(RootFolders[components[0]], components.Skip(1).ToList(), path);
+                return GetFile(RootFolders[components[0]], components.Skip(1).ToList(), path.Path);
             }
             return Nothing<InMemoryFile>(() => throw new InvalidOperationException($"The root folder of {path} does not exist"));
         }
@@ -296,42 +296,39 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IMaybe<bool> TryIsReadOnly(AbsolutePath path)
+        public override bool IsReadOnly(File path)
         {
-            return GetFile(path).Select(x => x.IsReadOnly);
+            return GetFile(path).Value.IsReadOnly;
         }
 
         /// <inheritdoc />
-        public override IMaybe<Information> TryFileSize(AbsolutePath path)
+        public override Information FileSize(File path)
         {
-            return GetFile(path).Select(x => Information.FromBytes(x.Contents.LongLength));
+            return Information.FromBytes(GetFile(path).Value.Contents.LongLength);
          }
 
         /// <inheritdoc />
-        public override IMaybe<FileAttributes> TryAttributes(AbsolutePath path)
+        public override FileAttributes Attributes(File path)
         {
-            return GetFile(path).Select(x => x.Attributes);
+            return GetFile(path).Value.Attributes;
         }
 
         /// <inheritdoc />
-        public override IMaybe<DateTimeOffset> TryCreationTime(AbsolutePath path)
+        public override DateTimeOffset CreationTime(File path)
         {
-            return GetFile(path).Select(x => x.CreationTime);
-
+            return GetFile(path).Value.CreationTime;
         }
 
         /// <inheritdoc />
-        public override IMaybe<DateTimeOffset> TryLastAccessTime(AbsolutePath path)
+        public override DateTimeOffset LastAccessTime(File path)
         {
-            return GetFile(path).Select(x => x.LastAccessTime);
-
+            return GetFile(path).Value.LastAccessTime;
         }
 
         /// <inheritdoc />
-        public override IMaybe<DateTimeOffset> TryLastWriteTime(AbsolutePath path)
+        public override DateTimeOffset LastWriteTime(File path)
         {
-            return GetFile(path).Select(x => x.LastWriteTime);
-
+            return GetFile(path).Value.LastWriteTime;
         }
 
         /// <inheritdoc />

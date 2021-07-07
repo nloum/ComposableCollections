@@ -149,10 +149,10 @@ namespace IoFluently
             }
         }
 
-        private ZipArchiveEntry GetZipArchiveEntry(ZipArchive archive, AbsolutePath path)
+        private ZipArchiveEntry GetZipArchiveEntry(ZipArchive archive, IHasAbsolutePath path)
         {
-            var result = archive.GetEntry(path.RelativeTo(DefaultRelativePathBase.Path).Simplify())
-                ?? archive.GetEntry(path.Simplify());
+            var result = archive.GetEntry(path.Path.RelativeTo(DefaultRelativePathBase.Path).Simplify())
+                ?? archive.GetEntry(path.Path.Simplify());
             return result;
         }
 
@@ -185,56 +185,48 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IMaybe<Information> TryFileSize(AbsolutePath path)
+        public override Information FileSize(File path)
         {
             using (var archive = OpenZipArchive(false, true))
             {
                 var zipEntry = GetZipArchiveEntry(archive, path);
-                if (zipEntry == null)
-                {
-                    return Maybe<Information>.Nothing();
-                }
-                return Information.FromBytes(zipEntry.Length).ToMaybe();
+                return Information.FromBytes(zipEntry.Length);
             }
         }
 
         /// <inheritdoc />
-        public override IMaybe<FileAttributes> TryAttributes(AbsolutePath attributes)
+        public override FileAttributes Attributes(File attributes)
         {
             using (var archive = OpenZipArchive(false, true))
             {
                 var zipEntry = GetZipArchiveEntry(archive, attributes);
                 if (zipEntry == null)
                 {
-                    return Maybe<FileAttributes>.Nothing();
+                    throw new InvalidOperationException($"No such file {attributes}");
                 }
-                return ZipFilePath.Path.IoService.TryAttributes(ZipFilePath.Path);
+                return ZipFilePath.Path.IoService.Attributes(ZipFilePath.Path);
             }
         }
 
         /// <inheritdoc />
-        public override IMaybe<DateTimeOffset> TryCreationTime(AbsolutePath path)
+        public override DateTimeOffset CreationTime(File path)
         {
-            return Maybe<DateTimeOffset>.Nothing();
+            return ZipFilePath.IoService.CreationTime(ZipFilePath);
         }
 
         /// <inheritdoc />
-        public override IMaybe<DateTimeOffset> TryLastAccessTime(AbsolutePath path)
+        public override DateTimeOffset LastAccessTime(File path)
         {
-            return Maybe<DateTimeOffset>.Nothing();
+            return ZipFilePath.IoService.LastAccessTime(ZipFilePath);
         }
 
         /// <inheritdoc />
-        public override IMaybe<DateTimeOffset> TryLastWriteTime(AbsolutePath path)
+        public override DateTimeOffset LastWriteTime(File path)
         {
             using (var archive = OpenZipArchive(false, true))
             {
                 var zipEntry = GetZipArchiveEntry(archive, path);
-                if (zipEntry == null)
-                {
-                    return Maybe<DateTimeOffset>.Nothing();
-                }
-                return zipEntry.LastWriteTime.ToMaybe();
+                return zipEntry.LastWriteTime;
             }
         }
 

@@ -528,12 +528,12 @@ namespace IoFluently
         bool HasExtension(AbsolutePath path);
         bool IsFile(AbsolutePath path);
         bool IsFolder(AbsolutePath path);
-        IMaybe<bool> TryIsReadOnly(AbsolutePath path);
-        IMaybe<Information> TryFileSize(AbsolutePath path);
-        IMaybe<FileAttributes> TryAttributes(AbsolutePath attributes);
-        IMaybe<DateTimeOffset> TryCreationTime(AbsolutePath attributes);
-        IMaybe<DateTimeOffset> TryLastAccessTime(AbsolutePath attributes);
-        IMaybe<DateTimeOffset> TryLastWriteTime(AbsolutePath attributes);
+        bool IsReadOnly(File path);
+        Information FileSize(File path);
+        FileAttributes Attributes(File attributes);
+        DateTimeOffset CreationTime(File attributes);
+        DateTimeOffset LastAccessTime(File attributes);
+        DateTimeOffset LastWriteTime(File attributes);
 
         #endregion
         

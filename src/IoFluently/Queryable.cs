@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Castle.DynamicProxy.Contributors;
+using SimpleMonads;
 using TreeLinq;
 
 namespace IoFluently { 
@@ -158,9 +159,9 @@ namespace IoFluently {
         {
             if (parentExpr is MemberExpression mce)
             {
-                if (mce.Expression == parentOf)
+                if (mce.Expression is MemberExpression mce2 && mce2.Expression == parentOf)
                 {
-                    if (mce.Member == typeof(AbsolutePath).GetProperty("Parent"))
+                    if (mce.Member == typeof(IMaybe<AbsolutePath>).GetProperty("Value"))
                     {
                         return true;
                     }

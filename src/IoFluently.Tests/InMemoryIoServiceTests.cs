@@ -17,7 +17,7 @@ namespace IoFluently.Tests
             root.ToString().Should().Be("/");
             var testTxt = uut.ParseAbsolutePath("/test1.txt");
             testTxt.ToString().Should().Be("/test1.txt");
-            testTxt.Parent.ToString().Should().Be("/");
+            testTxt.Parent.Value.ToString().Should().Be("/");
         }
 
         [TestMethod]

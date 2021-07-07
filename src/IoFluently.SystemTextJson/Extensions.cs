@@ -1,5 +1,6 @@
 using System;
 using SimpleMonads;
+using UnitsNet;
 
 namespace IoFluently.SystemTextJson
 {
@@ -11,11 +12,11 @@ namespace IoFluently.SystemTextJson
             {
                 Value = absolutePath,
                 Type = absolutePath.Type,
-                FileSize = absolutePath.FileSize?.ToString(),
-                ReadOnly = absolutePath.IsReadOnly,
-                CreationTime = absolutePath.CreationTime,
-                LastAccessTime = absolutePath.LastAccessTime,
-                LastWriteTime = absolutePath.LastWriteTime
+                FileSize = absolutePath.Collapse(x => x.FileSize.ToString(), _ => null, _ => null),
+                ReadOnly = absolutePath.Collapse(x => (bool?)x.IsReadOnly, _ => null, _ => null),
+                CreationTime = absolutePath.Collapse(x => (DateTimeOffset?)x.CreationTime, _ => null, _ => null),
+                LastAccessTime = absolutePath.Collapse(x => (DateTimeOffset?)x.LastAccessTime, _ => null, _ => null),
+                LastWriteTime = absolutePath.Collapse(x => (DateTimeOffset?)x.LastWriteTime, _ => null, _ => null),
             };
         }
     }

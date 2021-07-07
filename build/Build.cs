@@ -66,16 +66,17 @@ class Build : NukeBuild
 
     Project[] PackageProjects => new[]
     {
+	    Solution.GetProject("CodeIO"),
 	    Solution.GetProject("ComposableCollections"),
 	    Solution.GetProject("ComposableCollections.GraphQL"),
 	    Solution.GetProject("GenericNumbers"),
+	    Solution.GetProject("IoFluently"),
+	    Solution.GetProject("IoFluently.SystemTextJson"),
 	    Solution.GetProject("MoreCollections"),
 	    Solution.GetProject("SimpleMonads"),
 	    Solution.GetProject("SimpleMonads.HotChocolate"),
+	    Solution.GetProject("TreeLinq"),
 	    Solution.GetProject("UtilityDisposables"),
-	    Solution.GetProject("IoFluently"),
-	    Solution.GetProject("IoFluently.SystemTextJson"),
-	    Solution.GetProject("CodeIO"),
     };
     
     IEnumerable<Project> TestProjects => Solution.GetProjects("*.Test");

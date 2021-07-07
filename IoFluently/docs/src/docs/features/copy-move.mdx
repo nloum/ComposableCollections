@@ -1,0 +1,23 @@
+---
+title: Copy/move APIs
+---
+
+IoFluently makes it easy to copy or move files in a very natural way. Here's an example of a program that copies everything from the `packages` folder to the `new-packages` folder (but not if there's a more recent version of a file in the destination):
+
+```csharp
+var repositoryRoot = service.CurrentDirectory.Ancestors().First(ancestor => (ancestor / ".git").Exists());
+
+var source = repositoryRoot / "packages";
+var destination = repositoryRoot / "new-packages";
+
+foreach (var sourceAndDestination in source.Translate(destination))
+{
+    // Each sourceAndDestination represents a single source / destination pair.
+    if (sourceAndDestination.Source.LastWriteTime() > sourceAndDestination.Destination.LastWriteTime())
+    {
+        sourceAndDestination.Copy(overwrite: true);
+    }
+}
+```
+
+Because the copy operation consists of a loop, you can easily change the behavior depending on arbitrary behaviors that the developer can define.

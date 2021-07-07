@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <LangVersion>9</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\IoFluently\IoFluently.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="ComposableCollections" Version="1.0.0-alpha0182" />
+      <PackageReference Include="Markdig" Version="0.25.0" />
+      <PackageReference Include="TreeLinq" Version="1.0.0-alpha0023" />
+    </ItemGroup>
+
+</Project>

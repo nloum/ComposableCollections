@@ -1,0 +1,95 @@
+﻿[
+  {
+    CharOffsetOfStart: 1,
+    ByteOffsetOfEnd: 7,
+    CharOffsetOfEnd: 8,
+    LineNumber: 1,
+    Encoding: {
+      BodyName: utf-8,
+      EncodingName: Unicode (UTF-8),
+      HeaderName: utf-8,
+      WebName: utf-8,
+      WindowsCodePage: 1200,
+      IsBrowserDisplay: true,
+      IsBrowserSave: true,
+      IsMailNewsDisplay: true,
+      IsMailNewsSave: true,
+      EncoderFallback: {
+        DefaultString: �,
+        MaxCharCount: 1
+      },
+      DecoderFallback: {
+        DefaultString: �,
+        MaxCharCount: 1
+      },
+      IsReadOnly: true,
+      CodePage: 65001
+    },
+    Value: Line 1,
+    Separator:
+
+
+  },
+  {
+    ByteOffsetOfStart: 8,
+    CharOffsetOfStart: 9,
+    ByteOffsetOfEnd: 15,
+    CharOffsetOfEnd: 16,
+    LineNumber: 2,
+    Encoding: {
+      BodyName: utf-8,
+      EncodingName: Unicode (UTF-8),
+      HeaderName: utf-8,
+      WebName: utf-8,
+      WindowsCodePage: 1200,
+      IsBrowserDisplay: true,
+      IsBrowserSave: true,
+      IsMailNewsDisplay: true,
+      IsMailNewsSave: true,
+      EncoderFallback: {
+        DefaultString: �,
+        MaxCharCount: 1
+      },
+      DecoderFallback: {
+        DefaultString: �,
+        MaxCharCount: 1
+      },
+      IsReadOnly: true,
+      CodePage: 65001
+    },
+    Value: Line 2,
+    Separator:
+
+
+  },
+  {
+    ByteOffsetOfStart: 16,
+    CharOffsetOfStart: 17,
+    ByteOffsetOfEnd: 22,
+    CharOffsetOfEnd: 23,
+    LineNumber: 3,
+    Encoding: {
+      BodyName: utf-8,
+      EncodingName: Unicode (UTF-8),
+      HeaderName: utf-8,
+      WebName: utf-8,
+      WindowsCodePage: 1200,
+      IsBrowserDisplay: true,
+      IsBrowserSave: true,
+      IsMailNewsDisplay: true,
+      IsMailNewsSave: true,
+      EncoderFallback: {
+        DefaultString: �,
+        MaxCharCount: 1
+      },
+      DecoderFallback: {
+        DefaultString: �,
+        MaxCharCount: 1
+      },
+      IsReadOnly: true,
+      CodePage: 65001
+    },
+    Value: Line 3,
+    Separator: 
+  }
+]

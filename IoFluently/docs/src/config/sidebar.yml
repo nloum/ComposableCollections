@@ -1,0 +1,26 @@
+# Sidebar navigation
+
+- label: 'Introduction'
+  link: '/'
+- label: 'Getting started'
+  link: '/getting-started'
+- label: Features
+  items:
+    - label: 'Copy/move API'
+      link: '/features/copy-move'
+    - label: 'In-memory implementation'
+      link: '/features/in-memory'
+    - label: 'Mockable and fluent API'
+      link: '/features/mockable-fluent'
+    - label: 'Monitoring for file changes'
+      link: '/features/monitoring-for-changes'
+    - label: 'Object-oriented files'
+      link: '/features/object-oriented-files'
+- label: API Documentation
+  items:
+    - label: 'IoFluently.ConcatenatedStream'
+      link: '/api/IoFluently.ConcatenatedStream'
+    - label: 'IoFluently.StreamCloseDisposeDecorator'
+      link: '/api/IoFluently.StreamCloseDisposeDecorator'
+    - label: 'IoFluently.IoExtensions'
+      link: '/api/IoFluently.IoExtensions'

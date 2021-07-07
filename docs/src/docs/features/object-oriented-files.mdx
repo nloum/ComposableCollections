@@ -1,0 +1,36 @@
+---
+title: Object-oriented files
+---
+
+IoFluently provides an API for converting paths into strongly-typed objects that know how to read from and write to those paths.
+
+Here is code that enumerates a directory (but not its subdirectories), finds all Markdown files, and converts those `AbsolutePath` objects into strongly-typed objects that know the path is a text file.
+
+```csharp
+var markdownChildFiles = documentationFolder.Children()
+    .Where(child => child.IsFile() && child.HasExtension(".md"))
+    .Select(child => child.AsMarkdownFile());
+```
+
+This creates a lazy `IEnumerable` of `IPathWithKnownFormatSync<string>` objects, which can be used like this:
+
+```csharp
+IPathWithKnownFormatSync<string> markdownFile = ...;
+string markdown = markdownFile.Read();
+markdown = markdown + "\n---\n";
+markdownFile.Write(markdown);
+```
+
+Creating new file formats is easy:
+
+```csharp
+public static class Extensions
+{
+    public static IPathWithKnownFormatSync<string> AsMarkdownFile(this AbsolutePath path)
+    {
+        return path.AsPathFormat(absPath => absPath.ReadAllText(), (absPath, text) => absPath.WriteAllText(text));
+    }
+}
+```
+
+There are `Task`-oriented variations of this API that work asynchronously.

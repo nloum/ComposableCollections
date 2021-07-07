@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="ComposableCollections" Version="1.0.0-alpha0182" />
+        <PackageReference Include="SimpleMonads" Version="1.1.0-alpha0067" />
+        <PackageReference Include="Mono.Cecil" Version="0.11.3" />
+        <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
+        <PackageReference Include="Microsoft.Build.Locator" Version="1.4.1" />
+        <PackageReference Include="Microsoft.Build" ExcludeAssets="runtime" Version="16.10.0" />
+        <PackageReference Include="Microsoft.Build.Tasks.Core" ExcludeAssets="runtime" Version="16.10.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis" Version="3.9.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.9.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.2" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="3.9.0" />
+        <PackageReference Include="NuGet.Protocol" Version="5.10.0" />
+        <PackageReference Include="SemanticVersion" Version="2.1.0" />
+    </ItemGroup>
+
+</Project>

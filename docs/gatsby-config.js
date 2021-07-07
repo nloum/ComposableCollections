@@ -1,11 +1,11 @@
 module.exports = {
   siteMetadata: {
-    siteTitle: `ComposableCollections`,
-    defaultTitle: `ComposableCollections`,
-    siteTitleShort: `ComposableCollections`,
-    siteDescription: `.NET collection decorators and adapters`,
+    siteTitle: `IoFluently - fluent file and folder I/O package for .NET`,
+    defaultTitle: `IoFluently - fluent file and folder I/O package for .NET`,
+    siteTitleShort: `IoFluently`,
+    siteDescription: `Fluent, unit testable file and folder I/O package for .NET`,
     siteUrl: `https://rocketdocs.netlify.com`,
-    siteAuthor: `Nate`,
+    siteAuthor: `@rocketseat`,
     siteImage: `/banner.png`,
     siteLanguage: `en`,
     themeColor: `#7159c1`,

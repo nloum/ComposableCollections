@@ -6,6 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\ComposableCollections\ComposableCollections.csproj" />
       <ProjectReference Include="..\IoFluently\IoFluently.csproj" />
     </ItemGroup>
 

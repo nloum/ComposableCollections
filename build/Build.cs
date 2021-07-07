@@ -73,6 +73,8 @@ class Build : NukeBuild
 	    Solution.GetProject("SimpleMonads"),
 	    Solution.GetProject("SimpleMonads.HotChocolate"),
 	    Solution.GetProject("UtilityDisposables"),
+	    Solution.GetProject("IoFluently"),
+	    Solution.GetProject("IoFluently.SystemTextJson"),
     };
     
     IEnumerable<Project> TestProjects => Solution.GetProjects("*.Test");

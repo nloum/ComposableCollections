@@ -1,9 +1,0 @@
----
-title: In-memory implementation
----
-
-Any code that uses IoFluently requires minimal modification to run against an in-memory, virtual implementation of `IoService`. To do this, just use the `InMemoryIoService` class. For example:
-
-```csharp
-var ioService = new InMemoryIoService(Environment.NewLine, PathFlags.CaseSensitive);
-```

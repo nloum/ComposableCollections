@@ -206,13 +206,11 @@ namespace IoFluently
         /// On Windows, there can be multiple, e.g. 'C:', 'D:', 'E:'. This method is only useful on Windows.
         /// </summary>
         void UpdateRoots();
-        bool HasExtension(AbsolutePath path, string extension);
+        bool HasExtension(IHasAbsolutePath path, string extension);
         bool MayCreateFile(FileMode fileMode);
         bool IsImageUri(Uri uri);
         bool IsVideoUri(Uri uri);
         string StripQuotes(string str);
-        AbsolutePath Decrypt(AbsolutePath path);
-        AbsolutePath Encrypt(AbsolutePath path);
         string SurroundWithDoubleQuotesIfNecessary(string str);
 
         /// <summary>
@@ -525,7 +523,7 @@ namespace IoFluently
         
         bool Exists(AbsolutePath path);
         PathType Type(AbsolutePath path);
-        bool HasExtension(AbsolutePath path);
+        bool HasExtension(IHasAbsolutePath path);
         bool IsFile(AbsolutePath path);
         bool IsFolder(AbsolutePath path);
         bool IsReadOnly(File path);
@@ -539,16 +537,21 @@ namespace IoFluently
         
         #region File reading
 
-        BufferEnumerator ReadBuffers(AbsolutePath path, FileShare fileShare = FileShare.None,
+        BufferEnumerator ReadBuffers(File path, FileShare fileShare = FileShare.None,
             Information? bufferSize = default, int paddingAtStart = 0, int paddingAtEnd = 0);
         #endregion
         
         #region File writing
-        AbsolutePath WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = false);
+        File WriteAllBytes(FileOrMissingPath path, byte[] bytes, bool createRecursively = false);
+        File WriteAllBytes(File path, byte[] bytes, bool createRecursively = false);
         #endregion
         
         #region File open for reading or writing
-        IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
+        Stream Open(FileOrMissingPath path, FileMode fileMode,
+            FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None,
+            FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.SequentialScan,
+            Information? bufferSize = default, bool createRecursively = false);
+        Stream Open(File path, FileMode fileMode,
             FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.SequentialScan,
             Information? bufferSize = default, bool createRecursively = false);

@@ -14,7 +14,7 @@ namespace IoFluently
             _isPhysicalPath = isPhysicalPath;
         }
 
-        public Stream CreateReadStream() => _absolutePath.IoService.TryOpen( _absolutePath, FileMode.Open, FileAccess.Read, FileShare.Read ).Value;
+        public Stream CreateReadStream() => _absolutePath.IoService.Open( _absolutePath, FileMode.Open, FileAccess.Read, FileShare.Read );
 
         public bool Exists => _absolutePath.IoService.Exists(_absolutePath);
         public long Length => (long) Math.Round(_absolutePath.IoService.FileSize(_absolutePath).Bytes);

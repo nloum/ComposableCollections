@@ -22,30 +22,8 @@ using static SimpleMonads.Utility;
 
 namespace IoFluently
 {
-    public interface IFormatService
-    {
-        
-    }
-    
     public abstract class IoServiceBase : IIoService
     {
-        private readonly IMultiTypeDictionary<IFormatService> _formatServices = new MultiTypeDictionary<IFormatService>();
-
-        public T GetIoService<T>() where T : IFormatService
-        {
-            if (!_formatServices.TryGetValue(out T result))
-            {
-                throw new InvalidOperationException($"No {typeof(T)} registered with this IoService");
-            }
-
-            return result;
-        }
-
-        public bool AddFormatService<T>(Func<T> value, out T result) where T : IFormatService
-        {
-            return _formatServices.TryAdd<T>(value, out result, out var _);
-        }
-
         #region Environmental stuff
 
         /// <inheritdoc />
@@ -301,9 +279,9 @@ namespace IoFluently
         }
         
         /// <inheritdoc />
-        public bool HasExtension(AbsolutePath path)
+        public bool HasExtension(IHasAbsolutePath path)
         {
-            return path.Extension.HasValue;
+            return path.Path.Extension.HasValue;
         }
 
         /// <inheritdoc />
@@ -484,7 +462,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual bool HasExtension(AbsolutePath path, string extension)
+        public virtual bool HasExtension(IHasAbsolutePath path, string extension)
         {
             if (!extension.StartsWith(".")) {
                 extension = "." + extension;
@@ -1282,10 +1260,10 @@ namespace IoFluently
             
             var fileOptions = FileOptions.Asynchronous | FileOptions.SequentialScan;
 
-            using var sourceStream = translation.Source.IoService.TryOpen(translation.Source, FileMode.Open, FileAccess.Read,
-                FileShare.Read, fileOptions, bufferSize).Value;
-            using var destinationStream = translation.Destination.IoService.TryOpen(translation.Destination, FileMode.Open,
-                FileAccess.Write, FileShare.None, fileOptions, bufferSize).Value;
+            using var sourceStream = translation.Source.IoService.Open(translation.Source, FileMode.Open, FileAccess.Read,
+                FileShare.Read, fileOptions, bufferSize);
+            using var destinationStream = translation.Destination.IoService.Open(translation.Destination, FileMode.Open,
+                FileAccess.Write, FileShare.None, fileOptions, bufferSize);
 
             await sourceStream.CopyToAsync(destinationStream, GetBufferSizeOrDefaultInBytes(bufferSize), cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
             
@@ -1350,10 +1328,10 @@ namespace IoFluently
 
             var fileOptions = FileOptions.SequentialScan;
 
-            using var sourceStream = translation.Source.IoService.TryOpen(translation.Source, FileMode.Open, FileAccess.Read,
-                FileShare.Read, fileOptions, bufferSize).Value;
-            using var destinationStream = translation.Destination.IoService.TryOpen(translation.Destination, overwrite ? FileMode.Create : FileMode.CreateNew,
-                FileAccess.Write, FileShare.None, fileOptions, bufferSize).Value;
+            using var sourceStream = translation.Source.IoService.Open(translation.Source, FileMode.Open, FileAccess.Read,
+                FileShare.Read, fileOptions, bufferSize);
+            using var destinationStream = translation.Destination.IoService.Open(translation.Destination, overwrite ? FileMode.Create : FileMode.CreateNew,
+                FileAccess.Write, FileShare.None, fileOptions, bufferSize);
 
             sourceStream.CopyTo(destinationStream, GetBufferSizeOrDefaultInBytes(bufferSize));
             
@@ -2085,12 +2063,13 @@ namespace IoFluently
         #region File reading
         
         /// <inheritdoc />
-        public BufferEnumerator ReadBuffers(AbsolutePath path, FileShare fileShare = FileShare.None,
+        public BufferEnumerator ReadBuffers(File path, FileShare fileShare = FileShare.None,
             Information? bufferSize = default, int paddingAtStart = 0, int paddingAtEnd = 0)
         {
-            var stream = TryOpen(path, FileMode.Open, FileAccess.Read, fileShare, FileOptions.SequentialScan,
-                bufferSize).Value;
-            var result = new BufferEnumerator(stream, 0, GetBufferSizeOrDefaultInBytes(bufferSize), paddingAtStart, paddingAtEnd);
+            var stream = Open(path, FileMode.Open, FileAccess.Read, fileShare, FileOptions.SequentialScan,
+                bufferSize);
+            var result = new BufferEnumerator(stream, 0, GetBufferSizeOrDefaultInBytes(bufferSize),
+                paddingAtStart, paddingAtEnd);
             return result;
         }
 
@@ -2098,26 +2077,45 @@ namespace IoFluently
         #region File writing
 
         /// <inheritdoc />
-        public virtual AbsolutePath WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = false)
+        public virtual File WriteAllBytes(File path, byte[] bytes, bool createRecursively = false)
         {
-            var maybeStream = TryOpen(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.WriteThrough, Information.FromBytes(bytes.Length), createRecursively);
-            using (var stream = maybeStream.Value)
-            {
-                stream.Write(bytes, 0, Math.Max(bytes.Length, 1));
-            }
+            using var stream = Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None,
+                FileOptions.WriteThrough, Information.FromBytes(bytes.Length), createRecursively);
+            stream.Write(bytes, 0, Math.Max(bytes.Length, 1));
 
             return path;
         }
 
+        /// <inheritdoc />
+        public virtual File WriteAllBytes(FileOrMissingPath path, byte[] bytes, bool createRecursively = false)
+        {
+            using var stream = Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.WriteThrough,
+                Information.FromBytes(bytes.Length), createRecursively);
+            stream.Write(bytes, 0, Math.Max(bytes.Length, 1));
+
+            return new File(path.Path);
+        }
+        
         #endregion
         #region File open for reading or writing
 
         /// <inheritdoc />
-        public abstract IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
+        public abstract Stream Open(FileOrMissingPath path, FileMode fileMode,
             FileAccess fileAccess = FileAccess.ReadWrite,
             FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.None | FileOptions.SequentialScan,
             Information? bufferSize = default, bool createRecursively = false);
+
+        /// <inheritdoc />
+        public virtual Stream Open(File path, FileMode fileMode,
+            FileAccess fileAccess = FileAccess.ReadWrite,
+            FileShare fileShare = FileShare.None,
+            FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.None | FileOptions.SequentialScan,
+            Information? bufferSize = default, bool createRecursively = false)
+        {
+            return Open(path.ExpectFileOrMissingPath(), fileMode, fileAccess, fileShare, fileOptions,
+                bufferSize, createRecursively);
+        }
 
         #endregion
         #region LINQ-style APIs
@@ -2155,7 +2153,8 @@ namespace IoFluently
             bool includeSubFolders, string pattern);
         #endregion
         #region IFileProvider implementation
-        public IDirectoryContents GetDirectoryContents( string subpath ) => new AbsolutePathDirectoryContents( ParseAbsolutePath( subpath ) );
+        public IDirectoryContents GetDirectoryContents( string subpath ) =>
+            new AbsolutePathDirectoryContents( ParseAbsolutePath( subpath ) );
 
         public IChangeToken Watch( string filter )
         {

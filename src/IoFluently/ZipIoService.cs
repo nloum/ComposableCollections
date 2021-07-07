@@ -304,7 +304,7 @@ namespace IoFluently
             return new MissingPath(path.Path);
         }
 
-        public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,
+        public override Stream Open(FileOrMissingPath fileOrMissingPath, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,
             FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.None | FileOptions.SequentialScan,
             Information? bufferSize = default, bool createRecursively = false)
@@ -316,7 +316,7 @@ namespace IoFluently
                 //     $"{nameof(createRecursively)} must always be true for {nameof(ZipIoService)}");
             }
 
-            path = path.Simplify();
+            var path = fileOrMissingPath.Path.Simplify();
             var archive = OpenZipArchive(fileAccess != FileAccess.Read, true);
             
             var entry = GetZipArchiveEntry(archive, path);
@@ -327,26 +327,26 @@ namespace IoFluently
                 {
                     var entryName = path.Simplify();
                     entry = archive.CreateEntry(entryName.ToString(), CompressionLevel);
-                    
+
                     return new StreamCloseDecorator(entry.Open(), () =>
                     {
                         archive.Dispose();
-                    }).ToMaybe();
+                    });
                 }
                 
-                return Maybe<Stream>.Nothing(() => throw new IOException($"Cannot open the file {path} since doesn't exist"));
+                throw new IOException($"Cannot open the file {path} since doesn't exist");
             }
             else
             {
                 if (fileMode == FileMode.CreateNew)
                 {
-                    return Maybe<Stream>.Nothing(() => throw new IOException($"Cannot create the file {path} since it already exists"));
+                    throw new IOException($"Cannot create the file {path} since it already exists");
                 }
                 
                 return new StreamCloseDecorator(entry.Open(), () =>
                 {
                     archive.Dispose();
-                }).ToMaybe();
+                });
             }
         }
 
@@ -375,14 +375,14 @@ namespace IoFluently
             var pathType = ZipFilePath.Path.Type;
             if (pathType == IoFluently.PathType.MissingPath)
             {
-                var stream = ZipFilePath.Path.IoService.TryOpen(ZipFilePath.Path, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, FileOptions.None).Value;
+                var stream = ZipFilePath.Path.IoService.Open(ZipFilePath.Path, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, FileOptions.None);
                 var zipArchive = new ZipArchive(stream, ZipArchiveMode.Create, false);
                 zipArchive.Dispose();
                 
                 if (willBeReading)
                 {
                     zipArchive.Dispose();
-                    stream = ZipFilePath.Path.IoService.TryOpen(ZipFilePath.Path, FileMode.Open, FileAccess.ReadWrite, FileShare.None, FileOptions.None).Value;
+                    stream = ZipFilePath.Path.IoService.Open(ZipFilePath.Path, FileMode.Open, FileAccess.ReadWrite, FileShare.None, FileOptions.None);
                     zipArchive = new ZipArchive(stream, ZipArchiveMode.Update, false);
                     return zipArchive;
                 }
@@ -397,8 +397,8 @@ namespace IoFluently
             }
             else
             {
-                var stream = ZipFilePath.Path.IoService.TryOpen(ZipFilePath.Path, FileMode.Open, willBeWriting ? FileAccess.ReadWrite : FileAccess.Read,
-                    willBeWriting ? FileShare.None : FileShare.Read, FileOptions.None).Value;
+                var stream = ZipFilePath.Path.IoService.Open(ZipFilePath.Path, FileMode.Open, willBeWriting ? FileAccess.ReadWrite : FileAccess.Read,
+                    willBeWriting ? FileShare.None : FileShare.Read, FileOptions.None);
                 return new ZipArchive(stream, willBeWriting ? ZipArchiveMode.Update : ZipArchiveMode.Read, false);
             }
         }

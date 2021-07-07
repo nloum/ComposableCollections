@@ -371,7 +371,7 @@ namespace IoFluently
             return new MissingPath(path.Path);
         }
 
-        public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,
+        public override Stream Open(FileOrMissingPath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,
             FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.None | FileOptions.SequentialScan,
             Information? bufferSize = default, bool createRecursively = false)
@@ -383,7 +383,7 @@ namespace IoFluently
                 if (fileMode == FileMode.Create || fileMode == FileMode.CreateNew ||
                     fileMode == FileMode.OpenOrCreate)
                 {
-                    var pathParent = TryParent(path).Value;
+                    var pathParent = TryParent(path.Path).Value;
                     InMemoryFolder parentFolder = null;
                     var maybeParentFolder = GetFolder(pathParent);
                     if (!maybeParentFolder.HasValue)
@@ -407,7 +407,7 @@ namespace IoFluently
                         LastWriteTime = now,
                     };
                 
-                    parentFolder.Files.Add(path.Name, file);
+                    parentFolder.Files.Add(path.Path.Name, file);
                     
                     file.Lock.AcquireReaderLock(0);
                     var memoryStream = new MemoryStream();
@@ -417,7 +417,7 @@ namespace IoFluently
                         memoryStream.Seek(0, SeekOrigin.Begin);
                         file.Contents = memoryStream.ToArray();
                         file.Lock.ReleaseReaderLock();
-                    })).ToMaybe();
+                    }));
                 }
                 else
                 {
@@ -429,7 +429,7 @@ namespace IoFluently
             {
                 if (fileMode == FileMode.CreateNew)
                 {
-                    return Nothing<FileStream>(() => throw new InvalidOperationException($"The FileMode.CreateNew flag was specified, but the file {path} did indeed exist"));
+                    throw new InvalidOperationException($"The FileMode.CreateNew flag was specified, but the file {path} did indeed exist");
                 }
                 
                 file = GetFile(path).Value;
@@ -443,7 +443,7 @@ namespace IoFluently
                 {
                     file.Contents = memoryStream.GetBuffer();
                     file.Lock.ReleaseReaderLock();
-                })).ToMaybe();
+                }));
             }
         }
 

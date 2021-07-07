@@ -325,23 +325,16 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IMaybe<Stream> TryOpen(AbsolutePath path, FileMode fileMode,
+        public override Stream Open(FileOrMissingPath path, FileMode fileMode,
             FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.SequentialScan,
             Information? bufferSize = default, bool createRecursively = false)
         {
-            try
-            {
-                if (MayCreateFile(fileMode))
-                    TryParent(path).IfHasValue(parent => EnsureIsFolder(parent));
-                var fileStream = new FileStream(path, fileMode, fileAccess, fileShare,
-                    GetBufferSizeOrDefaultInBytes(bufferSize), fileOptions);
-                return Something<Stream>(fileStream);
-            }
-            catch (Exception ex)
-            {
-                return Nothing<Stream>(() => throw ex);
-            }
+            if (MayCreateFile(fileMode))
+                TryParent(path.Path).IfHasValue(parent => EnsureIsFolder(parent));
+            var fileStream = new FileStream(path.Path, fileMode, fileAccess, fileShare,
+                GetBufferSizeOrDefaultInBytes(bufferSize), fileOptions);
+            return fileStream;
         }
 
         /// <inheritdoc />
@@ -535,15 +528,15 @@ namespace IoFluently
             return new Folder(path.Path);
         }
 
-        public override AbsolutePath WriteAllBytes(AbsolutePath path, byte[] bytes, bool createRecursively = true)
+        public override File WriteAllBytes(FileOrMissingPath path, byte[] bytes, bool createRecursively = true)
         {
             if (createRecursively)
             {
-                foreach (var ancestor in Ancestors(path))
+                foreach (var ancestor in Ancestors(path.Path))
                 {
                     
                 }
-                var parent = TryParent(path);
+                var parent = TryParent(path.Path);
                 if (parent.HasValue)
                 {
                     CreateFolder(parent.Value, true);

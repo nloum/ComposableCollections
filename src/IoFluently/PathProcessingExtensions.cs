@@ -164,7 +164,7 @@ namespace IoFluently
                 return doc;
             }, (doc) =>
             {
-                using (var stream = path.IoService.TryOpen(path, FileMode.Create, FileAccess.Write, FileShare.None).Value)
+                using (var stream = path.IoService.Open(path, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     doc.Save(stream);
                 }

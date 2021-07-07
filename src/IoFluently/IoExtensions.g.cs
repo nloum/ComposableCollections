@@ -151,18 +151,6 @@ namespace IoFluently
             return path.IoService.ReadBuffers(path, fileShare, bufferSize, paddingAtStart, paddingAtEnd);
         }
 
-        public static AbsolutePath WriteAllBytes(this AbsolutePath path, Byte[] bytes, Boolean createRecursively = false) {
-            return path.IoService.WriteAllBytes(path, bytes, createRecursively);
-        }
-
-        public static IMaybe<Stream> TryOpen(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None, FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.Asynchronous, Nullable<Information> bufferSize = null, Boolean createRecursively = false) {
-            return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively);
-        }
-
-        public static Stream Open(this AbsolutePath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None, FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.Asynchronous, Nullable<Information> bufferSize = null, Boolean createRecursively = false) {
-            return path.IoService.TryOpen(path, fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively).Value;
-        }
-
         public static ISetChanges<AbsolutePath> ToLiveLinq(this Folder path, Boolean includeFileContentChanges, Boolean includeSubFolders, string pattern) {
             return path.IoService.ToLiveLinq(path, includeFileContentChanges, includeSubFolders, pattern);
         }
@@ -257,14 +245,6 @@ namespace IoFluently
 
         public static Boolean HasExtension(this AbsolutePath path, string extension) {
             return path.IoService.HasExtension(path, extension);
-        }
-
-        public static AbsolutePath Decrypt(this AbsolutePath path) {
-            return path.IoService.Decrypt(path);
-        }
-
-        public static AbsolutePath Encrypt(this AbsolutePath path) {
-            return path.IoService.Encrypt(path);
         }
 
         public static Task<IAbsolutePathTranslation> CopyFileAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {

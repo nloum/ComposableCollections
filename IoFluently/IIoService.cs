@@ -154,18 +154,18 @@ namespace IoFluently
         /// </summary>
         /// <param name="path">The path that should be a folder</param>
         /// <returns>The same path that was specified</returns>
-        Folder EnsureIsFolder(AbsolutePath path, bool createRecursively = false);
+        Folder EnsureIsFolder(IHasAbsolutePath path, bool createRecursively = false);
 
-        Folder EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = true, bool createRecursively = false);
+        Folder EnsureIsEmptyFolder(IHasAbsolutePath path, bool recursiveDeleteIfFolder = true, bool createRecursively = false);
 
         /// <summary>
         /// Creates the path as a folder if it isn't already. If the path is a file, throws an IOException.
         /// </summary>
         /// <param name="path">The path that should be a folder</param>
         /// <returns>The same path that was specified</returns>
-        Task<Folder> EnsureIsFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool createRecursively = false);
+        Task<Folder> EnsureIsFolderAsync(IHasAbsolutePath path, CancellationToken cancellationToken, bool createRecursively = false);
 
-        Task<Folder> EnsureIsEmptyFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true, bool createRecursively = false);
+        Task<Folder> EnsureIsEmptyFolderAsync(IHasAbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true, bool createRecursively = false);
 
         #endregion
         
@@ -178,11 +178,11 @@ namespace IoFluently
         /// <param name="path">The path that may be a folder</param>
         /// <param name="recursive">Whether to recursively delete the contents of the path if the path is a non-empty folder</param>
         /// <returns>The same path that was specified</returns>
-        FileOrMissingPath EnsureIsNotFolder(AbsolutePath path, bool recursive = false);
+        FileOrMissingPath EnsureIsNotFolder(IHasAbsolutePath path, bool recursive = false);
 
-        FolderOrMissingPath EnsureIsNotFile(AbsolutePath path);
+        FolderOrMissingPath EnsureIsNotFile(IHasAbsolutePath path);
 
-        MissingPath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = true);
+        MissingPath EnsureDoesNotExist(IHasAbsolutePath path, bool recursiveDeleteIfFolder = true);
 
         /// <summary>
         /// Deletes the specified path if it is a folder. If the path is a file or doesn't exist, this returns without
@@ -191,11 +191,11 @@ namespace IoFluently
         /// <param name="path">The path that may be a folder</param>
         /// <param name="recursive">Whether to recursively delete the contents of the path if the path is a non-empty folder</param>
         /// <returns>The same path that was specified</returns>
-        Task<FileOrMissingPath> EnsureIsNotFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursive = false);
+        Task<FileOrMissingPath> EnsureIsNotFolderAsync(IHasAbsolutePath path, CancellationToken cancellationToken, bool recursive = false);
 
-        Task<FolderOrMissingPath> EnsureIsNotFileAsync(AbsolutePath path, CancellationToken cancellationToken);
+        Task<FolderOrMissingPath> EnsureIsNotFileAsync(IHasAbsolutePath path, CancellationToken cancellationToken);
 
-        Task<MissingPath> EnsureDoesNotExistAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true);
+        Task<MissingPath> EnsureDoesNotExistAsync(IHasAbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true);
 
         #endregion
 

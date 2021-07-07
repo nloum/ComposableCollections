@@ -125,19 +125,19 @@ namespace IoFluently
         #region Ensuring is
 
         /// <inheritdoc />
-        public async Task<Folder> EnsureIsFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool createRecursively = false)
+        public async Task<Folder> EnsureIsFolderAsync(IHasAbsolutePath path, CancellationToken cancellationToken, bool createRecursively = false)
         {
-            return path.Collapse(
+            return path.Path.Collapse(
                 file => CreateFolder(DeleteFile(file)),
                 folder => folder,
                 missingPath => CreateFolder(missingPath));
         }
 
         /// <inheritdoc />
-        public Task<Folder> EnsureIsEmptyFolderAsync(AbsolutePath path, CancellationToken cancellationToken,
+        public Task<Folder> EnsureIsEmptyFolderAsync(IHasAbsolutePath path, CancellationToken cancellationToken,
             bool recursiveDeleteIfFolder = true, bool createRecursively = false)
         {
-            return path.Collapse(
+            return path.Path.Collapse(
                 async file =>
                 {
                     var missingPath = await DeleteFileAsync(file, cancellationToken);
@@ -156,18 +156,18 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public Folder EnsureIsFolder(AbsolutePath path, bool createRecursively = false)
+        public Folder EnsureIsFolder(IHasAbsolutePath path, bool createRecursively = false)
         {
-            return path.Collapse(
+            return path.Path.Collapse(
                 file => CreateFolder(DeleteFile(file)),
                 folder => folder,
                 missingPath => CreateFolder(missingPath));
         }
         
         /// <inheritdoc />
-        public Folder EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = true, bool createRecursively = false)
+        public Folder EnsureIsEmptyFolder(IHasAbsolutePath path, bool recursiveDeleteIfFolder = true, bool createRecursively = false)
         {
-            return path.Collapse(
+            return path.Path.Collapse(
                 file => CreateFolder(DeleteFile(file)),
                 folder =>
                 {
@@ -185,9 +185,9 @@ namespace IoFluently
         #region Ensuring is not
 
         /// <inheritdoc />
-        public Task<FileOrMissingPath> EnsureIsNotFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursive = false)
+        public Task<FileOrMissingPath> EnsureIsNotFolderAsync(IHasAbsolutePath path, CancellationToken cancellationToken, bool recursive = false)
         {
-            return path.Collapse(
+            return path.Path.Collapse(
                 file => Task.FromResult(file.ExpectFileOrMissingPath()),
                 async folder =>
                 {
@@ -198,9 +198,9 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public Task<FolderOrMissingPath> EnsureIsNotFileAsync(AbsolutePath path, CancellationToken cancellationToken)
+        public Task<FolderOrMissingPath> EnsureIsNotFileAsync(IHasAbsolutePath path, CancellationToken cancellationToken)
         {
-            return path.Collapse(
+            return path.Path.Collapse(
                 async file =>
                 {
                     var missingPath = await DeleteFileAsync(file, cancellationToken);
@@ -211,19 +211,19 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public Task<MissingPath> EnsureDoesNotExistAsync(AbsolutePath path, CancellationToken cancellationToken,
+        public Task<MissingPath> EnsureDoesNotExistAsync(IHasAbsolutePath path, CancellationToken cancellationToken,
             bool recursiveDeleteIfFolder = true)
         {
-            return path.Collapse(
+            return path.Path.Collapse(
                 file => DeleteFileAsync(file, cancellationToken),
                 folder => DeleteFolderAsync(folder, cancellationToken, recursiveDeleteIfFolder),
                 missingPath => Task.FromResult(missingPath));
         }
 
         /// <inheritdoc />
-        public FolderOrMissingPath EnsureIsNotFile(AbsolutePath path)
+        public FolderOrMissingPath EnsureIsNotFile(IHasAbsolutePath path)
         {
-            return path.Collapse(
+            return path.Path.Collapse(
                 file =>
                 {
                     var missingPath = DeleteFile(file);
@@ -234,18 +234,18 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public MissingPath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = true)
+        public MissingPath EnsureDoesNotExist(IHasAbsolutePath path, bool recursiveDeleteIfFolder = true)
         {
-            return path.Collapse(
+            return path.Path.Collapse(
                 file => DeleteFile(file),
                 folder => DeleteFolder(folder, recursiveDeleteIfFolder),
                 missingPath => missingPath);
         }
 
         /// <inheritdoc />
-        public FileOrMissingPath EnsureIsNotFolder(AbsolutePath path, bool recursive = false)
+        public FileOrMissingPath EnsureIsNotFolder(IHasAbsolutePath path, bool recursive = false)
         {
-            return path.Collapse(
+            return path.Path.Collapse(
                 file => file.ExpectFileOrMissingPath(),
                 folder =>
                 {

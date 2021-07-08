@@ -13,7 +13,15 @@ namespace IoFluently
         IIoService IoService => Path.IoService;
     }
 
-    public partial class FileOrMissingPath : SubTypesOf<IHasAbsolutePath>.Either<File, MissingPath>, IHasAbsolutePath
+    public partial interface IFileOrMissingPath : SubTypesOf<IHasAbsolutePath>.IEither<File, MissingPath>,
+        IAbsolutePath,
+        IHasAbsolutePath
+    {
+        File ExpectFile();
+        MissingPath ExpectMissingPath();
+    }
+    
+    public partial class FileOrMissingPath : AbsolutePath, IFileOrMissingPath
     {
         public FileOrMissingPath(File item1) : base(item1)
         {
@@ -30,7 +38,7 @@ namespace IoFluently
         public FileOrMissingPath(IHasAbsolutePath item) : base(item)
         {
         }
-
+        
         public override string ToString()
         {
             return Path.ToString();
@@ -57,8 +65,14 @@ namespace IoFluently
         public AbsolutePath Path => Value.Path;
         public IIoService IoService => Path.IoService;
     }
+
+    public interface IFileOrFolder : SubTypesOf<IHasAbsolutePath>.IEither<File, Folder>, IHasAbsolutePath
+    {
+        File ExpectFile();
+        Folder ExpectFolder();
+    }
     
-    public partial class FileOrFolder : SubTypesOf<IHasAbsolutePath>.Either<File, Folder>, IHasAbsolutePath
+    public partial class FileOrFolder : SubTypesOf<IHasAbsolutePath>.Either<File, Folder>, IFileOrFolder
     {
         public FileOrFolder(File item1) : base(item1)
         {
@@ -103,7 +117,14 @@ namespace IoFluently
         public IIoService IoService => Path.IoService;
     }
 
-    public partial class FolderOrMissingPath : SubTypesOf<IHasAbsolutePath>.Either<Folder, MissingPath>, IHasAbsolutePath
+    public partial interface IFolderOrMissingPath : SubTypesOf<IHasAbsolutePath>.IEither<Folder, MissingPath>,
+        IHasAbsolutePath
+    {
+        Folder ExpectFolder();
+        MissingPath ExpectMissingPath();
+    }
+    
+    public partial class FolderOrMissingPath : SubTypesOf<IHasAbsolutePath>.Either<Folder, MissingPath>, IFolderOrMissingPath
     {
         public FolderOrMissingPath(Folder item1) : base(item1)
         {
@@ -147,8 +168,15 @@ namespace IoFluently
         public AbsolutePath Path => Value.Path;
         public IIoService IoService => Path.IoService;
     }
+
+    public interface IFile : IHasAbsolutePath
+    {
+        FileOrFolder ExpectFileOrFolder();
+        FileOrMissingPath ExpectFileOrMissingPath();
+        AbsolutePath ExpectFileOrFolderOrMissingPath();
+    }
     
-    public partial class File : IHasAbsolutePath
+    public partial class File : IFile
     {
         public File(AbsolutePath path)
         {
@@ -183,7 +211,36 @@ namespace IoFluently
         public IIoService IoService => Path.IoService;
     }
 
-    public partial class Folder : IHasAbsolutePath
+    public partial interface IFolder : IHasAbsolutePath
+    {
+        /// <summary>
+        /// Returns the files and folders that this folder contains, but not anything else. This will not return files or folders
+        /// that are nested deeper. For example, if this folder contains a folder called Level1, and Level1 contains another
+        /// folder called Level2, then this method will return only Level1, not Level2 or anything else in Level1.
+        /// </summary>
+        /// <param name="pattern">The string pattern that files or folders must match to be included in the return value.
+        /// If this is null, then all files and folders in this folder are returned.</param>
+        /// <returns>An object representing the children files and folders of this folder.</returns>
+        AbsolutePathChildren GetChildren(string pattern);
+        AbsolutePathChildren Children { get; }
+
+        /// <summary>
+        /// Returns the files and folders that this folder contains, and the files and folders that they contain, etc.
+        /// This will return ALL files and folders that are nested deeper as well. For example, if this folder contains
+        /// a folder called Level1, and Level1 contains another folder called Level2, then this method will return both
+        /// Level1, Level2, and anything else in Level1.
+        /// </summary>
+        /// <param name="pattern">The string pattern that files or folders must match to be included in the return value.
+        /// If this is null, then all files and folders in this folder are returned.</param>
+        /// <returns>An object representing the descendant files and folders of this folder.</returns>
+        AbsolutePathDescendants GetDescendants(string pattern);
+        AbsolutePathDescendants Descendants { get; }
+        FileOrFolder ExpectFileOrFolder();
+        FolderOrMissingPath ExpectFolderOrMissingPath();
+        AbsolutePath ExpectFileOrFolderOrMissingPath();
+    }
+
+    public partial class Folder : IFolder
     {
         public AbsolutePath Path { get; }
         public IIoService IoService => Path.IoService;
@@ -294,7 +351,14 @@ namespace IoFluently
         }
     }
 
-    public partial class MissingPath : IHasAbsolutePath
+    public partial interface IMissingPath : IHasAbsolutePath
+    {
+        FileOrMissingPath ExpectFileOrMissingPath();
+        FolderOrMissingPath ExpectFolderOrMissingPath();
+        AbsolutePath ExpectFileOrFolderOrMissingPath();
+    }
+    
+    public partial class MissingPath : IMissingPath
     {
         public AbsolutePath Path { get; }
         public IIoService IoService => Path.IoService;

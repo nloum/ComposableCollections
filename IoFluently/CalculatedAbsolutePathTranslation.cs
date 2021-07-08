@@ -9,12 +9,12 @@ namespace IoFluently
     {
         private readonly AbsolutePathTranslation _actualValues;
 
-        internal CalculatedAbsolutePathTranslation(AbsolutePath absolutePath, AbsolutePath ancestorSource, AbsolutePath ancestorDestination,
+        internal CalculatedAbsolutePathTranslation(IAbsolutePath absolutePath, IAbsolutePath ancestorSource, IAbsolutePath ancestorDestination,
             IIoService ioService)
         {
-            AbsoluteAbsolutePath = absolutePath.Simplify();
-            AncestorSource = ancestorSource.Simplify();
-            AncestorDestination = ancestorDestination.Simplify();
+            AbsoluteAbsolutePath = absolutePath.IoService.Simplify(absolutePath);
+            AncestorSource = ancestorSource.IoService.Simplify(ancestorSource);
+            AncestorDestination = ancestorDestination.IoService.Simplify(ancestorDestination);
             IoService = ioService;
             _actualValues = Calculate();
         }
@@ -93,9 +93,9 @@ namespace IoFluently
 
         #region IFileUriTranslation Members
 
-        public AbsolutePath Source => _actualValues.Source;
+        public IAbsolutePath Source => _actualValues.Source;
 
-        public AbsolutePath Destination => _actualValues.Destination;
+        public IAbsolutePath Destination => _actualValues.Destination;
 
         public IEnumerator<CalculatedAbsolutePathTranslation> GetEnumerator()
         {

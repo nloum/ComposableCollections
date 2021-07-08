@@ -385,18 +385,6 @@ namespace IoFluently
             return new MissingPath(path.Path);
         }
 
-        public override AbsolutePath Decrypt(AbsolutePath path)
-        {
-            AsFileInfo(path).Decrypt();
-            return path;
-        }
-
-        public override AbsolutePath Encrypt(AbsolutePath path)
-        {
-            AsFileInfo(path).Encrypt();
-            return path;
-        }
-
         public override IObservableReadOnlySet<Folder> Roots => _storage;
 
         private readonly ObservableSet<Folder> _storage = new ObservableSet<Folder>();
@@ -464,15 +452,15 @@ namespace IoFluently
             foreach (var driveThatWasRemoved in drivesThatWereRemoved) _storage.Remove(driveThatWasRemoved);
         }
 
-        public override IObservable<AbsolutePath> Renamings(AbsolutePath path)
+        public override IObservable<AbsolutePath> Renamings(IAbsolutePath path)
         {
             var parent = TryParent(path);
-            if (!parent.HasValue) return Observable.Return(path);
+            if (!parent.HasValue) return Observable.Return(new AbsolutePath(path));
 
             return Observable.Create<AbsolutePath>(
                 async (observer, token) =>
                 {
-                    var currentPath = path;
+                    var currentPath = new AbsolutePath(path);
                     while (!token.IsCancellationRequested)
                     {
                         var watcher = new FileSystemWatcher(TryParent(currentPath).Value.ToString())
@@ -552,7 +540,7 @@ namespace IoFluently
             return new MissingPath(path.Path);
         }
 
-        public override PathType Type(AbsolutePath path)
+        public override PathType Type(IAbsolutePath path)
         {
             var str = path.ToString();
             if (System.IO.File.Exists(str))

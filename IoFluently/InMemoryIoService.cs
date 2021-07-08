@@ -280,22 +280,6 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override AbsolutePath Decrypt(AbsolutePath path)
-        {
-            GetFile(path).Value.IsEncrypted = false;
-
-            return path;
-        }
-
-        /// <inheritdoc />
-        public override AbsolutePath Encrypt(AbsolutePath path)
-        {
-            GetFile(path).Value.IsEncrypted = true;
-
-            return path;
-        }
-
-        /// <inheritdoc />
         public override bool IsReadOnly(File path)
         {
             return GetFile(path).Value.IsReadOnly;
@@ -332,7 +316,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override PathType Type(AbsolutePath path)
+        public override PathType Type(IAbsolutePath path)
         {
             path = Simplify(path);
 
@@ -482,7 +466,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IObservable<AbsolutePath> Renamings(AbsolutePath path)
+        public override IObservable<AbsolutePath> Renamings(IAbsolutePath path)
         {
             throw new NotImplementedException();
         }

@@ -6,7 +6,7 @@ namespace IoFluently
     {
         IAbsolutePathTranslation Invert();
         IIoService IoService { get; }
-        AbsolutePath Source { get; }
-        AbsolutePath Destination { get; }
+        IAbsolutePath Source { get; }
+        IAbsolutePath Destination { get; }
     }
 }

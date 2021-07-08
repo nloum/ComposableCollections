@@ -88,7 +88,7 @@ namespace IoFluently
                 .GroupBy(x => x.Parameters[0].Type.Identifier))
             {
                 textWriter.WriteLine($"namespace {groupedByPartialClass.Key.Namespace} {{");
-                if (groupedByPartialClass.Key.Name == "IHasAbsolutePath")
+                if (typeReader.Types[groupedByPartialClass.Key] is IInterface)
                 {
                     textWriter.WriteLine($"    public partial interface {groupedByPartialClass.Key.Name} {{");
                 }

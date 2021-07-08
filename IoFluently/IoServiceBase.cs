@@ -267,13 +267,13 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public bool IsFile(AbsolutePath absolutePath)
+        public bool IsFile(IAbsolutePath absolutePath)
         {
             return absolutePath.IoService.Type(absolutePath) == IoFluently.PathType.File;
         }
 
         /// <inheritdoc />
-        public bool IsFolder(AbsolutePath absolutePath)
+        public bool IsFolder(IAbsolutePath absolutePath)
         {
             return absolutePath.IoService.Type(absolutePath) == IoFluently.PathType.Folder;
         }
@@ -285,7 +285,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual bool CanBeSimplified(AbsolutePath path)
+        public virtual bool CanBeSimplified(IAbsolutePath path)
         {
             return path.Path.SkipWhile(str => str == "..").Any(str => str == "..");
         }
@@ -448,13 +448,13 @@ namespace IoFluently
         };
 
         /// <inheritdoc />
-        public virtual bool IsAncestorOf(AbsolutePath path, AbsolutePath possibleDescendant)
+        public virtual bool IsAncestorOf(IAbsolutePath path, IAbsolutePath possibleDescendant)
         {
             return IsDescendantOf(possibleDescendant, path);
         }
 
         /// <inheritdoc />
-        public virtual bool IsDescendantOf(AbsolutePath path, AbsolutePath possibleAncestor)
+        public virtual bool IsDescendantOf(IAbsolutePath path, IAbsolutePath possibleAncestor)
         {
             var possibleDescendantStr = Path.GetFullPath(path.ToString()).ToLower();
             var possibleAncestorStr = Path.GetFullPath(possibleAncestor.ToString()).ToLower();
@@ -489,12 +489,6 @@ namespace IoFluently
 
             return str;
         }
-
-        /// <inheritdoc />
-        public abstract AbsolutePath Decrypt(AbsolutePath path);
-
-        /// <inheritdoc />
-        public abstract AbsolutePath Encrypt(AbsolutePath path);
 
         /// <inheritdoc />
         public IOpenFilesTrackingService OpenFilesTrackingService { get; }
@@ -1381,47 +1375,47 @@ namespace IoFluently
         #endregion
 
         /// <inheritdoc />
-        public IAbsolutePathTranslation Translate(AbsolutePath pathToBeCopied, AbsolutePath source,
-            AbsolutePath destination)
+        public IAbsolutePathTranslation Translate(IAbsolutePath pathToBeCopied, IAbsolutePath source,
+            IAbsolutePath destination)
         {
             return new CalculatedAbsolutePathTranslation(pathToBeCopied, source, destination, this);
         }
 
         /// <inheritdoc />
-        public IAbsolutePathTranslation Translate(AbsolutePath source, AbsolutePath destination)
+        public IAbsolutePathTranslation Translate(IAbsolutePath source, IAbsolutePath destination)
         {
             return new AbsolutePathTranslation(source, destination, this);
         }
 
         /// <inheritdoc />
-        public IAbsolutePathTranslation Copy(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
+        public IAbsolutePathTranslation Copy(IAbsolutePath pathToBeCopied, IAbsolutePath source, IAbsolutePath destination,
             Information? bufferSize = default, bool overwrite = false)
         {
             return Copy(Translate(pathToBeCopied, source, destination), bufferSize, overwrite);
         }
         
         /// <inheritdoc />
-        public IAbsolutePathTranslation Copy(AbsolutePath source, AbsolutePath destination,
+        public IAbsolutePathTranslation Copy(IAbsolutePath source, IAbsolutePath destination,
             Information? bufferSize = default, bool overwrite = false) {
             return Copy(Translate(source, destination), bufferSize, overwrite);
         }
 
         /// <inheritdoc />
-        public IAbsolutePathTranslation Move(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
+        public IAbsolutePathTranslation Move(IAbsolutePath pathToBeCopied, IAbsolutePath source, IAbsolutePath destination,
             Information? bufferSize = default, bool overwrite = false)
         {
             return Move(Translate(pathToBeCopied, source, destination), bufferSize, overwrite);
         }
 
         /// <inheritdoc />
-        public IAbsolutePathTranslation Move(AbsolutePath source, AbsolutePath destination,
+        public IAbsolutePathTranslation Move(IAbsolutePath source, IAbsolutePath destination,
             Information? bufferSize = default, bool overwrite = false)
         {
             return Move(Translate(source, destination), bufferSize, overwrite);
         }
 
         /// <inheritdoc />
-        public IAbsolutePathTranslation RenameTo(AbsolutePath source, AbsolutePath target,
+        public IAbsolutePathTranslation RenameTo(IAbsolutePath source, IAbsolutePath target,
             Information? bufferSize = default, bool overwrite = false)
         {
             return Move(Translate(source, target), bufferSize, overwrite);
@@ -1431,7 +1425,7 @@ namespace IoFluently
         public IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation,
             Information? bufferSize = default, bool overwrite = false)
         {
-            switch (translation.Source.Type)
+            switch (translation.Source.IoService.Type(translation.Source))
             {
                 case PathType.File:
                     CopyFile(translation, bufferSize, overwrite);
@@ -1450,7 +1444,7 @@ namespace IoFluently
         public IAbsolutePathTranslation Move(IAbsolutePathTranslation translation,
             Information? bufferSize = default, bool overwrite = false)
         {
-            switch (translation.Source.Type)
+            switch (translation.Source.IoService.Type(translation.Source))
             {
                 case PathType.File:
                     MoveFile(translation, bufferSize, overwrite);
@@ -1466,37 +1460,37 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public Task<IAbsolutePathTranslation> CopyAsync(AbsolutePath pathToBeCopied, AbsolutePath source,
-            AbsolutePath destination,
+        public Task<IAbsolutePathTranslation> CopyAsync(IAbsolutePath pathToBeCopied, IAbsolutePath source,
+            IAbsolutePath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             return CopyAsync(Translate(pathToBeCopied, source, destination), cancellationToken, bufferSize, overwrite);
         }
 
         /// <inheritdoc />
-        public Task<IAbsolutePathTranslation> CopyAsync(AbsolutePath source, AbsolutePath destination,
+        public Task<IAbsolutePathTranslation> CopyAsync(IAbsolutePath source, IAbsolutePath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             return CopyAsync(Translate(source, destination), cancellationToken, bufferSize, overwrite);
         }
 
         /// <inheritdoc />
-        public Task<IAbsolutePathTranslation> MoveAsync(AbsolutePath pathToBeCopied, AbsolutePath source,
-            AbsolutePath destination,
+        public Task<IAbsolutePathTranslation> MoveAsync(IAbsolutePath pathToBeCopied, IAbsolutePath source,
+            IAbsolutePath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             return MoveAsync(Translate(pathToBeCopied, source, destination), cancellationToken, bufferSize, overwrite);
         }
 
         /// <inheritdoc />
-        public Task<IAbsolutePathTranslation> MoveAsync(AbsolutePath source, AbsolutePath destination,
+        public Task<IAbsolutePathTranslation> MoveAsync(IAbsolutePath source, IAbsolutePath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             return MoveAsync(Translate(source, destination), cancellationToken, bufferSize, overwrite);
         }
 
         /// <inheritdoc />
-        public Task<IAbsolutePathTranslation> RenameToAsync(AbsolutePath source, AbsolutePath target,
+        public Task<IAbsolutePathTranslation> RenameToAsync(IAbsolutePath source, IAbsolutePath target,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             return MoveAsync(Translate(source, target), cancellationToken, bufferSize, overwrite);
@@ -1506,7 +1500,7 @@ namespace IoFluently
         public async Task<IAbsolutePathTranslation> CopyAsync(IAbsolutePathTranslation translation,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
-            switch (translation.Source.Type)
+            switch (translation.Source.IoService.Type(translation.Source))
             {
                 case PathType.File:
                     await CopyFileAsync(translation, cancellationToken, bufferSize, overwrite);
@@ -1525,7 +1519,7 @@ namespace IoFluently
         public async Task<IAbsolutePathTranslation> MoveAsync(IAbsolutePathTranslation translation,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
-            switch (translation.Source.Type)
+            switch (translation.Source.IoService.Type(translation.Source))
             {
                 case PathType.File:
                     await MoveFileAsync(translation, cancellationToken, bufferSize, overwrite);
@@ -1572,11 +1566,11 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public AbsolutePath WithoutExtension(AbsolutePath path)
+        public AbsolutePath WithoutExtension(IAbsolutePath path)
         {
             if (!HasExtension(path))
             {
-                return path;
+                return new AbsolutePath(path.IsCaseSensitive, path.DirectorySeparator, path.IoService, path.Path.Components);
             }
 
             var newComponents = new List<string>();
@@ -1593,7 +1587,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public IMaybe<AbsolutePath> TryWithExtension(AbsolutePath path, Func<string, string> differentExtension)
+        public IMaybe<AbsolutePath> TryWithExtension(IAbsolutePath path, Func<string, string> differentExtension)
         {
             return path.IoService.TryWithExtension(path, differentExtension(path.Extension.ValueOrDefault ?? string.Empty));
         }
@@ -1626,7 +1620,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual AbsolutePath Simplify(AbsolutePath path)
+        public virtual AbsolutePath Simplify(IAbsolutePath path)
         {
             var result = new List<string>();
             var numberOfComponentsToSkip = 0;
@@ -1662,7 +1656,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryParent(AbsolutePath path)
+        public virtual IMaybe<AbsolutePath> TryParent(IAbsolutePath path)
         {
             if (path.Path.Components.Count > 1)
             {
@@ -1686,7 +1680,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual RelativePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo)
+        public virtual RelativePath RelativeTo(IAbsolutePath path, IAbsolutePath relativeTo)
         {
             var simplified = Simplify(path);
             var pathStr = simplified.ToString();
@@ -1722,7 +1716,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryCommonWith(AbsolutePath path, AbsolutePath that)
+        public virtual IMaybe<AbsolutePath> TryCommonWith(IAbsolutePath path, IAbsolutePath that)
         {
             var path1Str = path.ToString();
             var path2Str = that.ToString();
@@ -1753,7 +1747,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual Folder Root(AbsolutePath path)
+        public virtual Folder Root(IAbsolutePath path)
         {
             IHasAbsolutePath ancestor = path;
             IMaybe<IHasAbsolutePath> cachedParent;
@@ -1764,20 +1758,20 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryGetCommonAncestry(AbsolutePath path1, AbsolutePath path2)
+        public virtual IMaybe<AbsolutePath> TryGetCommonAncestry(IAbsolutePath path1, IAbsolutePath path2)
         {
             return TryParseAbsolutePath(path1.ToString().GetCommonBeginning(path2.ToString()).Trim('\\'));
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<Uri> TryGetCommonDescendants(AbsolutePath path1, AbsolutePath path2)
+        public virtual IMaybe<Uri> TryGetCommonDescendants(IAbsolutePath path1, IAbsolutePath path2)
         {
             return MaybeCatch(() => new Uri(path1.ToString().GetCommonEnding(path2.ToString()).Trim('\\'),
                 UriKind.Relative));
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<Tuple<Uri, Uri>> TryGetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2)
+        public virtual IMaybe<Tuple<Uri, Uri>> TryGetNonCommonDescendants(IAbsolutePath path1, IAbsolutePath path2)
         {
             return MaybeCatch(() =>
             {
@@ -1789,7 +1783,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<Tuple<Uri, Uri>> TryGetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2)
+        public virtual IMaybe<Tuple<Uri, Uri>> TryGetNonCommonAncestry(IAbsolutePath path1, IAbsolutePath path2)
         {
             return MaybeCatch(() =>
             {
@@ -1803,7 +1797,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryWithExtension(AbsolutePath path, string differentExtension)
+        public virtual IMaybe<AbsolutePath> TryWithExtension(IAbsolutePath path, string differentExtension)
         {
             return TryParseAbsolutePath(Path.ChangeExtension(path.ToString(), differentExtension));
         }
@@ -1871,11 +1865,11 @@ namespace IoFluently
             }
         }
 
-        public IEnumerable<AbsolutePath> Ancestors(AbsolutePath path, bool includeItself)
+        public IEnumerable<AbsolutePath> Ancestors(IAbsolutePath path, bool includeItself)
         {
             if (includeItself)
             {
-                yield return path;
+                yield return new AbsolutePath(path.IsCaseSensitive, path.DirectorySeparator, path.IoService, path.Path.Components);
             }
 
             foreach (var ancestor in Ancestors(path))
@@ -1885,7 +1879,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IEnumerable<AbsolutePath> Ancestors(AbsolutePath path)
+        public virtual IEnumerable<AbsolutePath> Ancestors(IAbsolutePath path)
         {
             while (true)
             {
@@ -1903,13 +1897,13 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryDescendant(AbsolutePath path, params AbsolutePath[] paths)
+        public virtual IMaybe<AbsolutePath> TryDescendant(IAbsolutePath path, params AbsolutePath[] paths)
         {
             return path.IoService.TryDescendant(path, paths.Select(p => p.ToString()).ToArray());
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryDescendant(AbsolutePath path, params string[] paths)
+        public virtual IMaybe<AbsolutePath> TryDescendant(IAbsolutePath path, params string[] paths)
         {
             var pathStr = path.ToString();
             // Make sure that pathStr is treated as a directory.
@@ -1923,7 +1917,7 @@ namespace IoFluently
         }
         
         /// <inheritdoc />
-        public virtual IMaybe<Folder> TryAncestor(AbsolutePath path, int level)
+        public virtual IMaybe<Folder> TryAncestor(IAbsolutePath path, int level)
         {
             var maybePath = path.ToMaybe();
             for (var i = 0; i < level; i++)
@@ -1953,7 +1947,7 @@ namespace IoFluently
             }
         }
 
-        private IEnumerable<string> ProposeSuccessivelyMoreSpecificNames(AbsolutePath path)
+        private IEnumerable<string> ProposeSuccessivelyMoreSpecificNames(IAbsolutePath path)
         {
             string filename = null;
             foreach (var parentPath in path.IoService.Ancestors(path))
@@ -2020,7 +2014,7 @@ namespace IoFluently
         #region File metadata
         
         /// <inheritdoc />
-        public virtual bool Exists(AbsolutePath path)
+        public virtual bool Exists(IAbsolutePath path)
         {
             var pathType = path.IoService.Type(path);
             if (pathType == IoFluently.PathType.Folder && !CanEmptyDirectoriesExist)
@@ -2032,7 +2026,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public abstract PathType Type(AbsolutePath path);
+        public abstract PathType Type(IAbsolutePath path);
 
         /// <inheritdoc />
         public virtual bool IsReadOnly(File path)
@@ -2120,7 +2114,7 @@ namespace IoFluently
         #region LINQ-style APIs
         
         /// <inheritdoc />
-        public virtual IObservable<Unit> ObserveChanges(AbsolutePath path)
+        public virtual IObservable<Unit> ObserveChanges(IAbsolutePath path)
         {
             return path.IoService.ObserveChanges(path, NotifyFilters.Attributes | NotifyFilters.CreationTime |
                                        NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastAccess |
@@ -2128,14 +2122,14 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IObservable<Unit> ObserveChanges(AbsolutePath path, NotifyFilters filters)
+        public virtual IObservable<Unit> ObserveChanges(IAbsolutePath path, NotifyFilters filters)
         {
             var parent = path.IoService.TryParent(path).Value.ExpectFolder();
             return parent.Children.ToLiveLinq().Where(x => x == path).AsObservable().SelectUnit();
         }
 
         /// <inheritdoc />
-        public virtual IObservable<PathType> ObservePathType(AbsolutePath path)
+        public virtual IObservable<PathType> ObservePathType(IAbsolutePath path)
         {
             var parent = path.IoService.TryParent(path).Select(x => x.ExpectFolder());
             if (!parent.HasValue) return Observable.Return(path.IoService.Type(path));
@@ -2144,7 +2138,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public abstract IObservable<AbsolutePath> Renamings(AbsolutePath path);
+        public abstract IObservable<AbsolutePath> Renamings(IAbsolutePath path);
 
         public abstract IQueryable<AbsolutePath> Query();
 

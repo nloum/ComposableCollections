@@ -50,9 +50,3 @@ namespace IoFluently {
         public Folder Parent => IoService.Parent(this);
     }
 }
-namespace IoFluently {
-    public partial interface IHasAbsolutePath {
-        public string Path { get; }
-        public Boolean HasExtension => IoService.HasExtension(this);
-    }
-}

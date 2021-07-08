@@ -259,7 +259,7 @@ namespace IoFluently
             return path.IoService.EnsureDoesNotExistAsync(path, cancellationToken, recursiveDeleteIfFolder);
         }
 
-        public static Boolean HasExtension(this IHasAbsolutePath path, string extension) {
+        public static Boolean HasExtension(this IFileOrFolderOrMissingPath path, string extension) {
             return path.IoService.HasExtension(path, extension);
         }
 

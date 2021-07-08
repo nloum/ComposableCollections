@@ -28,7 +28,7 @@ namespace IoFluently
         {
             return Source.Collapse(
                 file => Enumerable.Empty<CalculatedAbsolutePathTranslation>(),
-                folder => folder.Descendants
+                folder => folder.IoService.Descendants(folder)
                     .Select(child => new CalculatedAbsolutePathTranslation(child, Source, Destination, IoService)),
                 missingPath => Enumerable.Empty<CalculatedAbsolutePathTranslation>()).GetEnumerator();
         }

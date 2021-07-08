@@ -25,7 +25,7 @@ namespace IoFluently
             using var targetStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None,
                 FileOptions.None, createRecursively: true);
             sourceStream.CopyTo(targetStream);
-            return new File(fileOrMissingPath.Path);
+            return new File(fileOrMissingPath);
         }
         
         public static async Task<File> CopyFromAsync(this FileOrMissingPath fileOrMissingPath, Stream sourceStream,
@@ -34,7 +34,7 @@ namespace IoFluently
             using var targetStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None,
                 FileOptions.None, createRecursively: true);
             await sourceStream.CopyToAsync(targetStream, cancellationToken);
-            return new File(fileOrMissingPath.Path);
+            return new File(fileOrMissingPath);
         }
         
         public static File CopyFrom(this MissingPath fileOrMissingPath, Stream sourceStream)
@@ -42,7 +42,7 @@ namespace IoFluently
             using var targetStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None,
                 FileOptions.None, createRecursively: true);
             sourceStream.CopyTo(targetStream);
-            return new File(fileOrMissingPath.Path);
+            return new File(fileOrMissingPath);
         }
         
         public static async Task<File> CopyFromAsync(this MissingPath fileOrMissingPath, Stream sourceStream,
@@ -51,7 +51,7 @@ namespace IoFluently
             using var targetStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None,
                 FileOptions.None, createRecursively: true);
             await sourceStream.CopyToAsync(targetStream, cancellationToken);
-            return new File(fileOrMissingPath.Path);
+            return new File(fileOrMissingPath);
         }
     
         /// <summary>
@@ -60,10 +60,10 @@ namespace IoFluently
         /// </summary>
         /// <param name="path">The path that temporary changes will be made to.</param>
         /// <returns>An object that, when disposed of, undoes any changes made to the specified path.</returns>
-        public static IDisposable TemporaryChanges(this IHasAbsolutePath path)
+        public static IDisposable TemporaryChanges(this IFileOrFolderOrMissingPath path)
         {
-            var backupPath = path.IoService.TryWithExtension(path.Path, x => x + ".backup").Value;
-            var translation = path.Path.Translate(backupPath);
+            var backupPath = path.IoService.TryWithExtension(path, x => x + ".backup").Value;
+            var translation = path.IoService.Translate(path, backupPath);
             translation.IoService.Copy(translation, overwrite: true);
 
             return new AnonymousDisposable(() => translation.IoService.Move(translation.Invert(), overwrite: true));
@@ -73,13 +73,13 @@ namespace IoFluently
         /// If <see cref="mainPath"/> exists, then return <see cref="mainPath"/>. Otherwise, return <see cref="fallbackPath"/>.
         /// </summary>
         public static THasAbsolutePath FallbackTo<THasAbsolutePath>(this THasAbsolutePath mainPath, THasAbsolutePath fallbackPath, bool copy = false)
-            where THasAbsolutePath : IHasAbsolutePath
+            where THasAbsolutePath : IFileOrFolderOrMissingPath
         {
-            if (!mainPath.Path.Exists)
+            if (!mainPath.IoService.Exists(mainPath))
             {
                 if (copy)
                 {
-                    fallbackPath.Path.Copy(mainPath.Path).Copy();
+                    fallbackPath.IoService.Copy(fallbackPath, mainPath).Copy();
                 }
                 else
                 {

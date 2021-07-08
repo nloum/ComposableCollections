@@ -19,7 +19,7 @@ namespace IoFluently
         public bool Exists => _absolutePath.IoService.Exists(_absolutePath);
         public long Length => (long) Math.Round(_absolutePath.IoService.FileSize(_absolutePath).Bytes);
         public string PhysicalPath => _isPhysicalPath ? _absolutePath.ToString() : null;
-        public string Name => _absolutePath.Path.Name;
+        public string Name => _absolutePath.Name;
         public DateTimeOffset LastModified => _absolutePath.IoService.LastWriteTime(_absolutePath);
         public bool IsDirectory => _absolutePath.IoService.IsFolder(_absolutePath);
     }

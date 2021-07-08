@@ -103,7 +103,7 @@ namespace IoFluently
         public abstract MissingPath DeleteFile(File path);
 
         /// <inheritdoc />
-        public virtual MissingPath Delete(FileOrFolder path, bool recursiveDeleteIfFolder = true)
+        public virtual MissingPath Delete(IFileOrFolder path, bool recursiveDeleteIfFolder = true)
         {
             return path.Collapse(file => DeleteFile(file), folder => DeleteFolder(folder, recursiveDeleteIfFolder));
         }
@@ -116,7 +116,7 @@ namespace IoFluently
         public abstract Task<MissingPath> DeleteFileAsync(File path, CancellationToken cancellationToken);
 
         /// <inheritdoc />
-        public Task<MissingPath> DeleteAsync(FileOrFolder path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true)
+        public Task<MissingPath> DeleteAsync(IFileOrFolder path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true)
         {
             return path.Collapse(file => DeleteFileAsync(file, cancellationToken), folder => DeleteFolderAsync(folder, cancellationToken, recursiveDeleteIfFolder));
         }
@@ -125,19 +125,19 @@ namespace IoFluently
         #region Ensuring is
 
         /// <inheritdoc />
-        public async Task<Folder> EnsureIsFolderAsync(IHasAbsolutePath path, CancellationToken cancellationToken, bool createRecursively = false)
+        public async Task<Folder> EnsureIsFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, bool createRecursively = false)
         {
-            return path.Path.Collapse(
+            return path.Collapse(
                 file => CreateFolder(DeleteFile(file)),
                 folder => folder,
                 missingPath => CreateFolder(missingPath));
         }
 
         /// <inheritdoc />
-        public Task<Folder> EnsureIsEmptyFolderAsync(IHasAbsolutePath path, CancellationToken cancellationToken,
+        public Task<Folder> EnsureIsEmptyFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken,
             bool recursiveDeleteIfFolder = true, bool createRecursively = false)
         {
-            return path.Path.Collapse(
+            return path.Collapse(
                 async file =>
                 {
                     var missingPath = await DeleteFileAsync(file, cancellationToken);
@@ -147,7 +147,7 @@ namespace IoFluently
                 {
                     foreach (var child in Children(folder))
                     {
-                        await EnsureDoesNotExistAsync(child.Path, cancellationToken, true);
+                        await EnsureDoesNotExistAsync(child, cancellationToken, true);
                     }
 
                     return folder;
@@ -156,24 +156,24 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public Folder EnsureIsFolder(IHasAbsolutePath path, bool createRecursively = false)
+        public Folder EnsureIsFolder(IFileOrFolderOrMissingPath path, bool createRecursively = false)
         {
-            return path.Path.Collapse(
+            return path.Collapse(
                 file => CreateFolder(DeleteFile(file)),
                 folder => folder,
                 missingPath => CreateFolder(missingPath));
         }
         
         /// <inheritdoc />
-        public Folder EnsureIsEmptyFolder(IHasAbsolutePath path, bool recursiveDeleteIfFolder = true, bool createRecursively = false)
+        public Folder EnsureIsEmptyFolder(IFileOrFolderOrMissingPath path, bool recursiveDeleteIfFolder = true, bool createRecursively = false)
         {
-            return path.Path.Collapse(
+            return path.Collapse(
                 file => CreateFolder(DeleteFile(file)),
                 folder =>
                 {
                     foreach (var child in Children(folder))
                     {
-                        EnsureDoesNotExist(child.Path, true);
+                        EnsureDoesNotExist(child, true);
                     }
 
                     return folder;
@@ -185,9 +185,9 @@ namespace IoFluently
         #region Ensuring is not
 
         /// <inheritdoc />
-        public Task<FileOrMissingPath> EnsureIsNotFolderAsync(IHasAbsolutePath path, CancellationToken cancellationToken, bool recursive = false)
+        public Task<FileOrMissingPath> EnsureIsNotFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, bool recursive = false)
         {
-            return path.Path.Collapse(
+            return path.Collapse(
                 file => Task.FromResult(file.ExpectFileOrMissingPath()),
                 async folder =>
                 {
@@ -198,9 +198,9 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public Task<FolderOrMissingPath> EnsureIsNotFileAsync(IHasAbsolutePath path, CancellationToken cancellationToken)
+        public Task<FolderOrMissingPath> EnsureIsNotFileAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken)
         {
-            return path.Path.Collapse(
+            return path.Collapse(
                 async file =>
                 {
                     var missingPath = await DeleteFileAsync(file, cancellationToken);
@@ -211,19 +211,19 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public Task<MissingPath> EnsureDoesNotExistAsync(IHasAbsolutePath path, CancellationToken cancellationToken,
+        public Task<MissingPath> EnsureDoesNotExistAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken,
             bool recursiveDeleteIfFolder = true)
         {
-            return path.Path.Collapse(
+            return path.Collapse(
                 file => DeleteFileAsync(file, cancellationToken),
                 folder => DeleteFolderAsync(folder, cancellationToken, recursiveDeleteIfFolder),
                 missingPath => Task.FromResult(missingPath));
         }
 
         /// <inheritdoc />
-        public FolderOrMissingPath EnsureIsNotFile(IHasAbsolutePath path)
+        public FolderOrMissingPath EnsureIsNotFile(IFileOrFolderOrMissingPath path)
         {
-            return path.Path.Collapse(
+            return path.Collapse(
                 file =>
                 {
                     var missingPath = DeleteFile(file);
@@ -234,18 +234,18 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public MissingPath EnsureDoesNotExist(IHasAbsolutePath path, bool recursiveDeleteIfFolder = true)
+        public MissingPath EnsureDoesNotExist(IFileOrFolderOrMissingPath path, bool recursiveDeleteIfFolder = true)
         {
-            return path.Path.Collapse(
+            return path.Collapse(
                 file => DeleteFile(file),
                 folder => DeleteFolder(folder, recursiveDeleteIfFolder),
                 missingPath => missingPath);
         }
 
         /// <inheritdoc />
-        public FileOrMissingPath EnsureIsNotFolder(IHasAbsolutePath path, bool recursive = false)
+        public FileOrMissingPath EnsureIsNotFolder(IFileOrFolderOrMissingPath path, bool recursive = false)
         {
-            return path.Path.Collapse(
+            return path.Collapse(
                 file => file.ExpectFileOrMissingPath(),
                 folder =>
                 {
@@ -279,15 +279,15 @@ namespace IoFluently
         }
         
         /// <inheritdoc />
-        public bool HasExtension(IHasAbsolutePath path)
+        public bool HasExtension(IFileOrFolderOrMissingPath path)
         {
-            return path.Path.Extension.HasValue;
+            return path.Extension.HasValue;
         }
 
         /// <inheritdoc />
         public virtual bool CanBeSimplified(IFileOrFolderOrMissingPath path)
         {
-            return path.Path.SkipWhile(str => str == "..").Any(str => str == "..");
+            return path.Components.SkipWhile(str => str == "..").Any(str => str == "..");
         }
 
         /// <inheritdoc />
@@ -462,7 +462,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual bool HasExtension(IHasAbsolutePath path, string extension)
+        public virtual bool HasExtension(IFileOrFolderOrMissingPath path, string extension)
         {
             if (!extension.StartsWith(".")) {
                 extension = "." + extension;
@@ -1554,7 +1554,7 @@ namespace IoFluently
         {
             Func<FileOrFolderOrMissingPath, IEnumerable<RelativePath>> patternFunc = absPath => absPath.Collapse(
                 file => Enumerable.Empty<RelativePath>(),
-                folder => folder.GetChildren(pattern).Select(x => new RelativePath(x.IsCaseSensitive, x.DirectorySeparator, x.IoService, new[]{x.Path.Name})),
+                folder => folder.IoService.Children(folder, pattern).Select(x => new RelativePath(x.IsCaseSensitive, x.DirectorySeparator, x.IoService, new[]{x.Name})),
                 missingPath => Enumerable.Empty<RelativePath>());
             return path / patternFunc;
         }
@@ -1562,7 +1562,7 @@ namespace IoFluently
         /// <inheritdoc />
         public FileOrFolderOrMissingPath Combine(Folder path, params string[] subsequentPathParts)
         {
-            return TryDescendant(path.Path, subsequentPathParts).Value;
+            return TryDescendant(path, subsequentPathParts).Value;
         }
 
         /// <inheritdoc />
@@ -1570,14 +1570,14 @@ namespace IoFluently
         {
             if (!HasExtension(path))
             {
-                return new FileOrFolderOrMissingPath(path.IsCaseSensitive, path.DirectorySeparator, path.IoService, path.Path.Components);
+                return new FileOrFolderOrMissingPath(path.IsCaseSensitive, path.DirectorySeparator, path.IoService, path.Components);
             }
 
             var newComponents = new List<string>();
 
-            for (var i = 0; i < path.Path.Components.Count - 1; i++)
+            for (var i = 0; i < path.Components.Count - 1; i++)
             {
-                newComponents.Add(path.Path.Components[i]);
+                newComponents.Add(path.Components[i]);
             }
 
             var name = path.Name;
@@ -1624,16 +1624,16 @@ namespace IoFluently
         {
             var result = new List<string>();
             var numberOfComponentsToSkip = 0;
-            for (var i = path.Path.Count - 1; i >= 0; i--)
+            for (var i = path.Components.Count - 1; i >= 0; i--)
             {
-                if (path.Path[i] == ".")
+                if (path.Components[i] == ".")
                     continue;
-                if (path.Path[i] == "..")
+                if (path.Components[i] == "..")
                     numberOfComponentsToSkip++;
                 else if (numberOfComponentsToSkip > 0)
                     numberOfComponentsToSkip--;
                 else
-                    result.Insert(0, path.Path[i]);
+                    result.Insert(0, path.Components[i]);
             }
 
             if (numberOfComponentsToSkip > 0)
@@ -1658,10 +1658,10 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual IMaybe<FileOrFolderOrMissingPath> TryParent(IFileOrFolderOrMissingPath path)
         {
-            if (path.Path.Components.Count > 1)
+            if (path.Components.Count > 1)
             {
                 return new FileOrFolderOrMissingPath(path.IsCaseSensitive, path.DirectorySeparator, path.IoService,
-                    path.Path.Components.Take(path.Path.Components.Count - 1)).ToMaybe();
+                    path.Components.Take(path.Components.Count - 1)).ToMaybe();
             }
             else
             {
@@ -1671,12 +1671,12 @@ namespace IoFluently
 
         public Folder Parent(File path)
         {
-            return TryParent(path.Path).Value.ExpectFolder();
+            return TryParent(path).Value.ExpectFolder();
         }
 
         public IMaybe<Folder> TryParent(Folder path)
         {
-            return TryParent(path.Path).Select(x => x.ExpectFolder());
+            return TryParent(path).Select(x => x.ExpectFolder());
         }
 
         /// <inheritdoc />
@@ -1692,7 +1692,7 @@ namespace IoFluently
 
             var sb = new StringBuilder();
 
-            for (var i = 0; i < relativeTo.Path.Count - common.Value.Path.Count; i++)
+            for (var i = 0; i < relativeTo.Components.Count - common.Value.Components.Count; i++)
             {
                 sb.Append("..");
                 sb.Append(path.DirectorySeparator);
@@ -1729,7 +1729,7 @@ namespace IoFluently
 
             var caseSensitive = path.IsCaseSensitive ||
                                 that.IsCaseSensitive;
-            var zippedComponents = path.Path.Components.SkipWhile(x => x == path.DirectorySeparator).Zip(that.Path.Components.SkipWhile(x => x == path.DirectorySeparator), (comp1, comp2) => 
+            var zippedComponents = path.Components.SkipWhile(x => x == path.DirectorySeparator).Zip(that.Components.SkipWhile(x => x == path.DirectorySeparator), (comp1, comp2) => 
                 new
                 {
                     equals = comp1.Equals(comp2, !caseSensitive ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal),
@@ -1749,12 +1749,12 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual Folder Root(IFileOrFolderOrMissingPath path)
         {
-            IHasAbsolutePath ancestor = path;
-            IMaybe<IHasAbsolutePath> cachedParent;
-            while ((cachedParent = ancestor.Path.IoService.TryParent(ancestor.Path)).HasValue)
+            IFileOrFolderOrMissingPath ancestor = path;
+            IMaybe<IFileOrFolderOrMissingPath> cachedParent;
+            while ((cachedParent = ancestor.IoService.TryParent(ancestor)).HasValue)
                 ancestor = cachedParent.Value;
 
-            return ancestor.Path.ExpectFolder();
+            return ancestor.ExpectFolder();
         }
 
         /// <inheritdoc />
@@ -1830,7 +1830,7 @@ namespace IoFluently
 
         public IEnumerable<Folder> Ancestors(Folder path)
         {
-            foreach (var ancestor in Ancestors(path.Path))
+            foreach (var ancestor in Ancestors(path))
             {
                 yield return ancestor.ExpectFolder();
             }
@@ -1838,7 +1838,7 @@ namespace IoFluently
 
         public IEnumerable<Folder> Ancestors(File path)
         {
-            foreach (var ancestor in Ancestors(path.Path))
+            foreach (var ancestor in Ancestors(path))
             {
                 yield return ancestor.ExpectFolder();
             }
@@ -1846,7 +1846,7 @@ namespace IoFluently
 
         public IEnumerable<FolderOrMissingPath> Ancestors(MissingPath path)
         {
-            foreach (var ancestor in Ancestors(path.Path))
+            foreach (var ancestor in Ancestors(path))
             {
                 yield return ancestor.ExpectFolderOrMissingPath();
             }
@@ -1869,7 +1869,7 @@ namespace IoFluently
         {
             if (includeItself)
             {
-                yield return new FileOrFolderOrMissingPath(path.IsCaseSensitive, path.DirectorySeparator, path.IoService, path.Path.Components);
+                yield return new FileOrFolderOrMissingPath(path.IsCaseSensitive, path.DirectorySeparator, path.IoService, path.Components);
             }
 
             foreach (var ancestor in Ancestors(path))
@@ -1910,7 +1910,7 @@ namespace IoFluently
             if (!pathStr.EndsWith(path.DirectorySeparator))
                 pathStr += path.DirectorySeparator;
 
-            var result = path.Path.Concat(paths).ToArray();
+            var result = path.Components.Concat(paths).ToArray();
             var combinedResult = Path.Combine(result);
             var pathResult = TryParseAbsolutePath(combinedResult);
             return pathResult;
@@ -1953,9 +1953,9 @@ namespace IoFluently
             foreach (var parentPath in path.IoService.Ancestors(path))
             {
                 if (filename == null)
-                    filename = parentPath.Path.Name;
+                    filename = parentPath.Name;
                 else
-                    filename = $"{parentPath.Path.Name}.{filename}";
+                    filename = $"{parentPath.Name}.{filename}";
 
                 yield return filename;
             }
@@ -1993,13 +1993,13 @@ namespace IoFluently
             return path.ExpectFileOrFolder().TraverseTree(x =>
                 {
                     return x.Collapse(file => Enumerable.Empty<FileOrFolder>(), folder => Children(folder))
-                        .Select(x => x.Path.Name);
+                        .Select(x => x.Name);
                 }, (FileOrFolder node, string name, out FileOrFolder child) =>
             {
                 child = (node.ExpectFolder() / name).ExpectFileOrFolder();
                 if (CanEmptyDirectoriesExist)
                 {
-                    var result = child.Path.Exists;
+                    var result = child.Exists;
                     return result;
                 }
 
@@ -2070,45 +2070,24 @@ namespace IoFluently
         #region File writing
 
         /// <inheritdoc />
-        public virtual File WriteAllBytes(File path, byte[] bytes, bool createRecursively = false)
-        {
-            using var stream = Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None,
-                FileOptions.WriteThrough, Information.FromBytes(bytes.Length), createRecursively);
-            stream.Write(bytes, 0, Math.Max(bytes.Length, 1));
-
-            return path;
-        }
-
-        /// <inheritdoc />
-        public virtual File WriteAllBytes(FileOrMissingPath path, byte[] bytes, bool createRecursively = false)
+        public virtual File WriteAllBytes(IFileOrMissingPath path, byte[] bytes, bool createRecursively = false)
         {
             using var stream = Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.WriteThrough,
                 Information.FromBytes(bytes.Length), createRecursively);
             stream.Write(bytes, 0, Math.Max(bytes.Length, 1));
 
-            return new File(path.Path);
+            return new File(path);
         }
         
         #endregion
         #region File open for reading or writing
 
         /// <inheritdoc />
-        public abstract Stream Open(FileOrMissingPath path, FileMode fileMode,
+        public abstract Stream Open(IFileOrMissingPath path, FileMode fileMode,
             FileAccess fileAccess = FileAccess.ReadWrite,
             FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.None | FileOptions.SequentialScan,
             Information? bufferSize = default, bool createRecursively = false);
-
-        /// <inheritdoc />
-        public virtual Stream Open(File path, FileMode fileMode,
-            FileAccess fileAccess = FileAccess.ReadWrite,
-            FileShare fileShare = FileShare.None,
-            FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.None | FileOptions.SequentialScan,
-            Information? bufferSize = default, bool createRecursively = false)
-        {
-            return Open(path.ExpectFileOrMissingPath(), fileMode, fileAccess, fileShare, fileOptions,
-                bufferSize, createRecursively);
-        }
 
         #endregion
         #region LINQ-style APIs

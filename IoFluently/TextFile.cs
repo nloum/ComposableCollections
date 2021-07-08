@@ -9,25 +9,63 @@ namespace IoFluently
 {
     public static class TextFileExtensions
     {
-        public static TextFile ExpectTextFile(this IHasAbsolutePath path)
+        public static TextFile ExpectTextFile(this IFileOrFolderOrMissingPath path)
         {
-            return new TextFile(path.Path);
+            return new TextFile(path);
         }
 
-        public static TextFileOrMissingPath ExpectTextFileOrMissingPath(this IHasAbsolutePath path)
+        public static TextFileOrMissingPath ExpectTextFileOrMissingPath(this IFileOrFolderOrMissingPath path)
         {
-            if (path.Path.IsFile)
+            if (path.IsFile)
             {
-                return new TextFileOrMissingPath(new TextFile(path.Path));
+                return new TextFileOrMissingPath(new TextFile(path));
             }
             
-            return new TextFileOrMissingPath(new MissingPath(path.Path));
+            return new TextFileOrMissingPath(new MissingPath(path));
+        }
+        
+        public static StreamWriter OpenWriter(this IFileOrMissingPath fileOrMissingPath, FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, Information? bufferSize = default,
+            bool createRecursively = false)
+        {
+            var stream = fileOrMissingPath.IoService.Open(fileOrMissingPath, FileMode.Create, FileAccess.Write, FileShare.None,
+                fileOptions, bufferSize, createRecursively);
+            if (encoding == null)
+            {
+                return new StreamWriter(stream);
+            }
+            else
+            {
+                return new StreamWriter(stream, encoding);
+            }
+        }
+
+        public static TextFile WriteAllLines(this IFileOrMissingPath fileOrMissingPath, IEnumerable<string> lines, string newline = null, Encoding encoding = null, Information? bufferSize = default, bool createRecursively = false)
+        {
+            newline ??= Environment.NewLine;
+            
+            var stream = fileOrMissingPath.IoService.Open(fileOrMissingPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Write, FileOptions.WriteThrough, bufferSize, createRecursively);
+            foreach (var line in lines)
+            {
+                var bytes = Encoding.Default.GetBytes(line + newline);
+                stream.Write(bytes, 0, bytes.Length);
+            }
+
+            return new TextFile(fileOrMissingPath);
+        }
+
+        public static TextFile WriteAllText(this IFileOrMissingPath fileOrMissingPath, string text, Encoding encoding = null, bool createRecursively = false)
+        {
+            encoding ??= Encoding.Default;
+            using var writer = OpenWriter(fileOrMissingPath, FileOptions.None, encoding, Information.FromBytes(Math.Max(encoding.GetByteCount(text), 1)), createRecursively);
+            writer.Write(text);
+
+            return new TextFile(fileOrMissingPath);
         }
     }
     
     public class TextFile : File
     {
-        public TextFile(FileOrFolderOrMissingPath path) : base(path)
+        public TextFile(IFileOrFolderOrMissingPath path) : base(path)
         {
         }
 
@@ -53,7 +91,7 @@ namespace IoFluently
         /// <inheritdoc />
         public StreamReader OpenReader(FileOptions fileOptions = FileOptions.SequentialScan, Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, Information? bufferSize = default)
         {
-            var stream = Path.IoService.Open(this, FileMode.Open, FileAccess.Read, FileShare.Read,
+            var stream = IoService.Open(this, FileMode.Open, FileAccess.Read, FileShare.Read,
                 FileOptions.SequentialScan, bufferSize);
             if (encoding == null)
             {
@@ -66,7 +104,7 @@ namespace IoFluently
         /// <inheritdoc />
         public Encoding GetEncoding()
         {
-            using(var stream = Path.IoService.Open(this, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan)) {
+            using(var stream = IoService.Open(this, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan)) {
                 using (var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true))
                 {
                     var line = reader.ReadLine();
@@ -78,7 +116,7 @@ namespace IoFluently
         /// <inheritdoc />
         public IMaybe<string> TryGetNewLine()
         {
-            using var stream = Path.IoService.Open(this, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan);
+            using var stream = IoService.Open(this, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan);
             while (true)
             {
                 var data = stream.ReadByte();
@@ -113,7 +151,7 @@ namespace IoFluently
                 throw new ArgumentException(nameof(detectEncodingFromByteOrderMarks));
             }
 
-            using var stream = Path.IoService.Open(this, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan, bufferSize);
+            using var stream = IoService.Open(this, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan, bufferSize);
             if (startingByteOffset > (ulong) stream.Length)
             {
                 startingByteOffset = (ulong) stream.Length;
@@ -128,7 +166,7 @@ namespace IoFluently
 
             var lastLine = new List<Line>();
             
-            foreach (var buffer in new StreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), Path.IoService.GetBufferSizeOrDefaultInBytes(bufferSize), encoding))
+            foreach (var buffer in new StreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), IoService.GetBufferSizeOrDefaultInBytes(bufferSize), encoding))
             {
                 var innerEnumerator = new LineSplitEnumerator(buffer.Value,
                     buffer.ByteOffsetOfStart, buffer.CharOffsetOfStart,
@@ -189,7 +227,7 @@ namespace IoFluently
                 throw new ArgumentException(nameof(detectEncodingFromByteOrderMarks));
             }
             
-            using var stream = Path.IoService.Open(this, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.RandomAccess, bufferSize);
+            using var stream = IoService.Open(this, FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.RandomAccess, bufferSize);
             if (startingByteOffset > (ulong) stream.Length)
             {
                 startingByteOffset = (ulong) stream.Length;
@@ -204,7 +242,7 @@ namespace IoFluently
 
             var lastLine = new List<Line>();
             
-            foreach (var buffer in new ReverseStreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), Path.IoService.GetBufferSizeOrDefaultInBytes(bufferSize), encoding))
+            foreach (var buffer in new ReverseStreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), IoService.GetBufferSizeOrDefaultInBytes(bufferSize), encoding))
             {
                 var innerEnumerator = new ReverseLineSplitEnumerator(buffer.Value,
                     buffer.ByteOffsetOfStart, buffer.CharOffsetOfStart,
@@ -288,61 +326,4 @@ namespace IoFluently
     //             .WriteAllText(text, encoding, createRecursively);
     //     }
     // }
-
-    public class TextFileOrMissingPath : FileOrMissingPath
-    {
-        public TextFileOrMissingPath(TextFile item1) : base((File)item1)
-        {
-        }
-
-        public TextFileOrMissingPath(MissingPath item3) : base(item3)
-        {
-        }
-
-        public TextFileOrMissingPath(SubTypesOf<IHasAbsolutePath>.Either<File, MissingPath> other) : base(other)
-        {
-        }
-
-        public TextFileOrMissingPath(IHasAbsolutePath item) : base(item)
-        {
-        }
-        
-        public StreamWriter OpenWriter(FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, Information? bufferSize = default,
-            bool createRecursively = false)
-        {
-            var stream = Value.Path.IoService.Open(Value.ExpectTextFileOrMissingPath(), FileMode.Create, FileAccess.Write, FileShare.None,
-                fileOptions, bufferSize, createRecursively);
-            if (encoding == null)
-            {
-                return new StreamWriter(stream);
-            }
-            else
-            {
-                return new StreamWriter(stream, encoding);
-            }
-        }
-
-        public virtual TextFile WriteAllLines(IEnumerable<string> lines, string newline = null, Encoding encoding = null, Information? bufferSize = default, bool createRecursively = false)
-        {
-            newline ??= Environment.NewLine;
-            
-            var stream = Value.Path.IoService.Open(Value.ExpectTextFile(), FileMode.Create, FileAccess.ReadWrite, FileShare.Write, FileOptions.WriteThrough, bufferSize, createRecursively);
-            foreach (var line in lines)
-            {
-                var bytes = Encoding.Default.GetBytes(line + newline);
-                stream.Write(bytes, 0, bytes.Length);
-            }
-
-            return new TextFile(Value.Path);
-        }
-
-        public TextFile WriteAllText(string text, Encoding encoding = null, bool createRecursively = false)
-        {
-            encoding ??= Encoding.Default;
-            using var writer = OpenWriter(FileOptions.None, encoding, Information.FromBytes(Math.Max(encoding.GetByteCount(text), 1)), createRecursively);
-            writer.Write(text);
-
-            return new TextFile(Value.Path);
-        }
-    }
 }

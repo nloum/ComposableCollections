@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using SimpleMonads;
 using TreeLinq;
 
 namespace IoFluently
 {
-    public interface IFileOrFolderOrMissingPath : SubTypesOf<IHasAbsolutePath>.IEither<File, Folder, MissingPath>, IComparable,
-        IComparable<FileOrFolderOrMissingPath>, IEquatable<FileOrFolderOrMissingPath>, IHasAbsolutePath
+    public interface IFileOrFolderOrMissingPath : SubTypesOf<IFileOrFolderOrMissingPath>.IEither<File, Folder, MissingPath>, IComparable,
+        IComparable<FileOrFolderOrMissingPath>, IEquatable<FileOrFolderOrMissingPath>
     {
         /// <summary>
         /// Indicates whether or not the absolute path is case sensitive
@@ -25,7 +26,7 @@ namespace IoFluently
         /// <summary>
         /// The TreeLinq absolute path that this object represents
         /// </summary>
-        public AbsoluteTreePath<string> Path { get; }
+        public IReadOnlyList<string> Components { get; }
 
         /// <summary>
         /// The file or directory name, a.k.a the last component in the path

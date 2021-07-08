@@ -286,11 +286,11 @@ namespace IoFluently
 
         public override async Task<MissingPath> DeleteFolderAsync(Folder path, CancellationToken cancellationToken, bool recursive = false)
         {
-            Directory.Delete(path.Path, recursive);
+            Directory.Delete(path, recursive);
 
             var timeoutTimeSpan = DeleteOrCreateTimeout;
             var start = DateTimeOffset.UtcNow;
-            while ( Directory.Exists(path.Path) && !cancellationToken.IsCancellationRequested )
+            while ( Directory.Exists(path) && !cancellationToken.IsCancellationRequested )
             {
                 var processingTime = DateTimeOffset.UtcNow - start;
                 if ( processingTime > timeoutTimeSpan )
@@ -301,16 +301,16 @@ namespace IoFluently
                 await Task.Delay(DeleteOrCreateSpinPeriod, cancellationToken);
             }
 
-            return new MissingPath(path.Path);
+            return new MissingPath(path);
         }
 
         public override async Task<MissingPath> DeleteFileAsync(File path, CancellationToken cancellationToken)
         {
-            System.IO.File.Delete(path.Path);
+            System.IO.File.Delete(path);
 
             var timeoutTimeSpan = DeleteOrCreateTimeout;
             var start = DateTimeOffset.UtcNow;
-            while ( System.IO.File.Exists(path.Path) && !cancellationToken.IsCancellationRequested )
+            while ( System.IO.File.Exists(path) && !cancellationToken.IsCancellationRequested )
             {
                 var processingTime = DateTimeOffset.UtcNow - start;
                 if (processingTime > timeoutTimeSpan)
@@ -321,18 +321,18 @@ namespace IoFluently
                 await Task.Delay(DeleteOrCreateSpinPeriod, cancellationToken);
             }
             
-            return new MissingPath(path.Path);
+            return new MissingPath(path);
         }
 
         /// <inheritdoc />
-        public override Stream Open(FileOrMissingPath path, FileMode fileMode,
+        public override Stream Open(IFileOrMissingPath path, FileMode fileMode,
             FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.SequentialScan,
             Information? bufferSize = default, bool createRecursively = false)
         {
             if (MayCreateFile(fileMode))
-                TryParent(path.Path).IfHasValue(parent => EnsureIsFolder(parent));
-            var fileStream = new FileStream(path.Path, fileMode, fileAccess, fileShare,
+                TryParent(path).IfHasValue(parent => EnsureIsFolder(parent));
+            var fileStream = new FileStream(path.ToString(), fileMode, fileAccess, fileShare,
                 GetBufferSizeOrDefaultInBytes(bufferSize), fileOptions);
             return fileStream;
         }
@@ -368,21 +368,21 @@ namespace IoFluently
             return AsFileInfo(path).IsReadOnly;
         }
 
-        private FileInfo AsFileInfo(IHasAbsolutePath path)
+        private FileInfo AsFileInfo(IFileOrFolderOrMissingPath path)
         {
-            return new FileInfo(path.Path.ToString());
+            return new FileInfo(path.ToString());
         }
 
-        private DirectoryInfo AsDirectoryInfo(IHasAbsolutePath path)
+        private DirectoryInfo AsDirectoryInfo(IFileOrFolderOrMissingPath path)
         {
-            return new DirectoryInfo(path.Path.ToString());
+            return new DirectoryInfo(path.ToString());
         }
 
         public override MissingPath DeleteFile(File path)
         {
-            System.IO.File.Delete(path.Path);
+            System.IO.File.Delete(path);
 
-            return new MissingPath(path.Path);
+            return new MissingPath(path);
         }
 
         public override IObservableReadOnlySet<Folder> Roots => _storage;
@@ -403,7 +403,7 @@ namespace IoFluently
 
         private IEnumerable<FileOrFolder> EnumerateDescendantsOrChildren(Folder path, string searchPattern, SearchOption searchOption, bool includeFolders, bool includeFiles)
         {
-            var fullName = AsDirectoryInfo(path.Path).FullName;
+            var fullName = AsDirectoryInfo(path).FullName;
 
             if (includeFiles && includeFolders)
             {
@@ -446,7 +446,7 @@ namespace IoFluently
             var drivesThatWereRemoved = new List<Folder>();
 
             foreach (var drive in _storage)
-                if (!currentStorage.Contains(drive.Path + "\\"))
+                if (!currentStorage.Contains(drive + "\\"))
                     drivesThatWereRemoved.Add(drive);
 
             foreach (var driveThatWasRemoved in drivesThatWereRemoved) _storage.Remove(driveThatWasRemoved);
@@ -505,22 +505,22 @@ namespace IoFluently
                 ancestors.Reverse();
                 foreach (var ancestor in ancestors)
                 {
-                    ancestor.ForEach(folder => { }, missingPath => Directory.CreateDirectory(missingPath.Path));
+                    ancestor.ForEach(folder => { }, missingPath => Directory.CreateDirectory(missingPath));
                 }
             }
             else
             {
-                Directory.CreateDirectory(path.Path);
+                Directory.CreateDirectory(path);
             }
 
-            return new Folder(path.Path);
+            return new Folder(path);
         }
 
-        public override File WriteAllBytes(FileOrMissingPath path, byte[] bytes, bool createRecursively = true)
+        public override File WriteAllBytes(IFileOrMissingPath path, byte[] bytes, bool createRecursively = true)
         {
             if (createRecursively)
             {
-                var parent = TryParent(path.Path);
+                var parent = TryParent(path);
                 if (parent.HasValue)
                 {
                     if (!parent.Value.Exists)
@@ -535,9 +535,9 @@ namespace IoFluently
 
         public override MissingPath DeleteFolder(Folder path, bool recursive = false)
         {
-            Directory.Delete(path.Path, recursive);
+            Directory.Delete(path, recursive);
 
-            return new MissingPath(path.Path);
+            return new MissingPath(path);
         }
 
         public override PathType Type(IFileOrFolderOrMissingPath path)

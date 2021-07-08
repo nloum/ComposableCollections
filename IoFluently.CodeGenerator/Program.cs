@@ -17,7 +17,7 @@ namespace IoFluently.CodeGenerator
         static void Main(string[] args)
         {
             var ioService = new IoService();
-            var repoRoot = ioService.DefaultRelativePathBase.Path.Ancestors.First(ancestor => ioService.IsFolder(ancestor / ".git"));
+            var repoRoot = ioService.DefaultRelativePathBase.Ancestors.First(ancestor => ioService.IsFolder(ancestor / ".git"));
 
             using (var partialClassesWriter = (repoRoot / "src" / "IoFluently" / "PartialClasses.g.cs").ExpectTextFileOrMissingPath().OpenWriter())
             {
@@ -138,7 +138,7 @@ namespace IoFluently
             var onlyParamTypeName = onlyParam.Type.Identifier.Name;
             if (onlyParamTypeName != "AbsolutePath" && onlyParamTypeName != "RelativePath"
                 && onlyParamTypeName != "IAbsolutePathTranslation"
-                && onlyParamTypeName != "IHasAbsolutePath"
+                && onlyParamTypeName != "IFileOrFolderOrMissingPath"
                 && onlyParamTypeName != "File"
                 && onlyParamTypeName != "Folder"
                 && onlyParamTypeName != "MissingPath"
@@ -176,7 +176,7 @@ namespace IoFluently
             {
                 typeof(FileOrFolderOrMissingPath),
                 typeof(RelativePath),
-                typeof(IHasAbsolutePath),
+                typeof(IFileOrFolderOrMissingPath),
                 typeof(IAbsolutePathTranslation),
                 typeof(File),
                 typeof(Folder),

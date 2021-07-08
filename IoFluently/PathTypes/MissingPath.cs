@@ -5,14 +5,14 @@ namespace IoFluently
 {
     public partial class MissingPath : FileOrMissingPath, IFileOrMissingPath, IFolderOrMissingPath
     {
-        private SubTypesOf<IHasAbsolutePath>.Either<Folder, MissingPath> _value;
+        private SubTypesOf<IFileOrFolderOrMissingPath>.Either<Folder, MissingPath> _value;
     
         public MissingPath(IFileOrFolderOrMissingPath path) : base(path)
         {
             _value = path.Collapse(
                 file => throw new InvalidOperationException(),
-                folder => new SubTypesOf<IHasAbsolutePath>.Either<Folder, MissingPath>(folder),
-                missingPath => new SubTypesOf<IHasAbsolutePath>.Either<Folder, MissingPath>(missingPath));
+                folder => new SubTypesOf<IFileOrFolderOrMissingPath>.Either<Folder, MissingPath>(folder),
+                missingPath => new SubTypesOf<IFileOrFolderOrMissingPath>.Either<Folder, MissingPath>(missingPath));
         }
         
         public Folder? Item1 => _value.Item1;

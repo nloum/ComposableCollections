@@ -307,19 +307,19 @@ namespace IoFluently
 
         #endregion
         
-        IAbsolutePathTranslation Translate(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination);
-        IAbsolutePathTranslation Translate(AbsolutePath source, AbsolutePath destination);
+        IAbsolutePathTranslation Translate(IAbsolutePath pathToBeCopied, IAbsolutePath source, IAbsolutePath destination);
+        IAbsolutePathTranslation Translate(IAbsolutePath source, IAbsolutePath destination);
 
-        IAbsolutePathTranslation Copy(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
+        IAbsolutePathTranslation Copy(IAbsolutePath pathToBeCopied, IAbsolutePath source, IAbsolutePath destination,
             Information? bufferSize = default, bool overwrite = false);
-        IAbsolutePathTranslation Copy(AbsolutePath source, AbsolutePath destination,
+        IAbsolutePathTranslation Copy(IAbsolutePath source, IAbsolutePath destination,
             Information? bufferSize = default, bool overwrite = false);
-        IAbsolutePathTranslation Move(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
+        IAbsolutePathTranslation Move(IAbsolutePath pathToBeCopied, IAbsolutePath source, IAbsolutePath destination,
             Information? bufferSize = default, bool overwrite = false);
-        IAbsolutePathTranslation Move(AbsolutePath source, AbsolutePath destination,
+        IAbsolutePathTranslation Move(IAbsolutePath source, IAbsolutePath destination,
             Information? bufferSize = default, bool overwrite = false);
 
-        IAbsolutePathTranslation RenameTo(AbsolutePath source, AbsolutePath target,
+        IAbsolutePathTranslation RenameTo(IAbsolutePath source, IAbsolutePath target,
             Information? bufferSize = default, bool overwrite = false);
         
         IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation,
@@ -327,16 +327,16 @@ namespace IoFluently
         IAbsolutePathTranslation Move(IAbsolutePathTranslation translation,
             Information? bufferSize = default, bool overwrite = false);
         
-        Task<IAbsolutePathTranslation> CopyAsync(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
+        Task<IAbsolutePathTranslation> CopyAsync(IAbsolutePath pathToBeCopied, IAbsolutePath source, IAbsolutePath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false);
-        Task<IAbsolutePathTranslation> CopyAsync(AbsolutePath source, AbsolutePath destination,
+        Task<IAbsolutePathTranslation> CopyAsync(IAbsolutePath source, IAbsolutePath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false);
-        Task<IAbsolutePathTranslation> MoveAsync(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
+        Task<IAbsolutePathTranslation> MoveAsync(IAbsolutePath pathToBeCopied, IAbsolutePath source, IAbsolutePath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false);
-        Task<IAbsolutePathTranslation> MoveAsync(AbsolutePath source, AbsolutePath destination,
+        Task<IAbsolutePathTranslation> MoveAsync(IAbsolutePath source, IAbsolutePath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false);
 
-        Task<IAbsolutePathTranslation> RenameToAsync(AbsolutePath source, AbsolutePath target,
+        Task<IAbsolutePathTranslation> RenameToAsync(IAbsolutePath source, IAbsolutePath target,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false);
         
         Task<IAbsolutePathTranslation> CopyAsync(IAbsolutePathTranslation translation,
@@ -389,13 +389,13 @@ namespace IoFluently
         IEnumerable<Folder> DescendantFolders(Folder path, string searchPattern = null);
         IEnumerable<File> DescendantFiles(Folder path, string searchPattern = null);
         
-        bool CanBeSimplified(AbsolutePath path);
-        Folder Root(AbsolutePath path);
-        RelativePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo);
-        IMaybe<AbsolutePath> TryCommonWith(AbsolutePath path, AbsolutePath that);
-        AbsolutePath Simplify(AbsolutePath path);
+        bool CanBeSimplified(IAbsolutePath path);
+        Folder Root(IAbsolutePath path);
+        RelativePath RelativeTo(IAbsolutePath path, IAbsolutePath relativeTo);
+        IMaybe<AbsolutePath> TryCommonWith(IAbsolutePath path, IAbsolutePath that);
+        AbsolutePath Simplify(IAbsolutePath path);
         RelativePath Simplify(RelativePath path);
-        IMaybe<AbsolutePath> TryParent(AbsolutePath path);
+        IMaybe<AbsolutePath> TryParent(IAbsolutePath path);
         Folder Parent(File path);
         IMaybe<Folder> TryParent(Folder path);
 
@@ -404,7 +404,7 @@ namespace IoFluently
         /// _ioService.CurrentDirectory / "folder1" / "folder2" / "file.txt"
         /// </summary>
         AbsolutePath Combine(Folder path, params string[] subsequentPathParts);
-        AbsolutePath WithoutExtension(AbsolutePath path);
+        AbsolutePath WithoutExtension(IAbsolutePath path);
         Uri Child(Uri parent, Uri child);
         AbsolutePaths GlobFiles(Folder path, string pattern);
 
@@ -480,7 +480,7 @@ namespace IoFluently
         /// <returns></returns>
         IEnumerable<FolderOrMissingPath> Ancestors(MissingPath path);
 
-        IEnumerable<AbsolutePath> Ancestors(AbsolutePath path, bool includeItself);
+        IEnumerable<AbsolutePath> Ancestors(IAbsolutePath path, bool includeItself);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -491,41 +491,41 @@ namespace IoFluently
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        IEnumerable<AbsolutePath> Ancestors(AbsolutePath path);
+        IEnumerable<AbsolutePath> Ancestors(IAbsolutePath path);
 
-        IMaybe<AbsolutePath> TryDescendant(AbsolutePath path, params AbsolutePath[] paths);
-        IMaybe<AbsolutePath> TryDescendant(AbsolutePath path, params string[] paths);
-        IMaybe<Folder> TryAncestor(AbsolutePath path, int level);
-        bool IsAncestorOf(AbsolutePath path, AbsolutePath possibleDescendant);
-        bool IsDescendantOf(AbsolutePath path, AbsolutePath possibleAncestor);
-        IMaybe<AbsolutePath> TryGetCommonAncestry(AbsolutePath path1, AbsolutePath path2);
-        IMaybe<Uri> TryGetCommonDescendants(AbsolutePath path1, AbsolutePath path2);
-        IMaybe<Tuple<Uri, Uri>> TryGetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2);
-        IMaybe<Tuple<Uri, Uri>> TryGetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2);
-
-        /// <summary>
-        /// </summary>
-        /// <param name="path"></param>
-        /// <param name="differentExtension">Must include the "." part of the extension (e.g., ".avi" not "avi")</param>
-        /// <returns></returns>
-        IMaybe<AbsolutePath> TryWithExtension(AbsolutePath path, string differentExtension);
+        IMaybe<AbsolutePath> TryDescendant(IAbsolutePath path, params AbsolutePath[] paths);
+        IMaybe<AbsolutePath> TryDescendant(IAbsolutePath path, params string[] paths);
+        IMaybe<Folder> TryAncestor(IAbsolutePath path, int level);
+        bool IsAncestorOf(IAbsolutePath path, IAbsolutePath possibleDescendant);
+        bool IsDescendantOf(IAbsolutePath path, IAbsolutePath possibleAncestor);
+        IMaybe<AbsolutePath> TryGetCommonAncestry(IAbsolutePath path1, IAbsolutePath path2);
+        IMaybe<Uri> TryGetCommonDescendants(IAbsolutePath path1, IAbsolutePath path2);
+        IMaybe<Tuple<Uri, Uri>> TryGetNonCommonDescendants(IAbsolutePath path1, IAbsolutePath path2);
+        IMaybe<Tuple<Uri, Uri>> TryGetNonCommonAncestry(IAbsolutePath path1, IAbsolutePath path2);
 
         /// <summary>
         /// </summary>
         /// <param name="path"></param>
         /// <param name="differentExtension">Must include the "." part of the extension (e.g., ".avi" not "avi")</param>
         /// <returns></returns>
-        IMaybe<AbsolutePath> TryWithExtension(AbsolutePath path, Func<string, string> differentExtension);
+        IMaybe<AbsolutePath> TryWithExtension(IAbsolutePath path, string differentExtension);
+
+        /// <summary>
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="differentExtension">Must include the "." part of the extension (e.g., ".avi" not "avi")</param>
+        /// <returns></returns>
+        IMaybe<AbsolutePath> TryWithExtension(IAbsolutePath path, Func<string, string> differentExtension);
 
         #endregion
 
         #region File metadata
         
-        bool Exists(AbsolutePath path);
-        PathType Type(AbsolutePath path);
+        bool Exists(IAbsolutePath path);
+        PathType Type(IAbsolutePath path);
         bool HasExtension(IHasAbsolutePath path);
-        bool IsFile(AbsolutePath path);
-        bool IsFolder(AbsolutePath path);
+        bool IsFile(IAbsolutePath path);
+        bool IsFolder(IAbsolutePath path);
         bool IsReadOnly(File path);
         Information FileSize(File path);
         FileAttributes Attributes(File attributes);
@@ -567,10 +567,10 @@ namespace IoFluently
 
         ISetChanges<AbsolutePath> ToLiveLinq(Folder path, bool includeFileContentChanges,
             bool includeSubFolders, string pattern);
-        IObservable<Unit> ObserveChanges(AbsolutePath path);
-        IObservable<Unit> ObserveChanges(AbsolutePath path, NotifyFilters filters);
-        IObservable<PathType> ObservePathType(AbsolutePath path);
-        IObservable<AbsolutePath> Renamings(AbsolutePath path);
+        IObservable<Unit> ObserveChanges(IAbsolutePath path);
+        IObservable<Unit> ObserveChanges(IAbsolutePath path, NotifyFilters filters);
+        IObservable<PathType> ObservePathType(IAbsolutePath path);
+        IObservable<AbsolutePath> Renamings(IAbsolutePath path);
         
         #endregion
     }

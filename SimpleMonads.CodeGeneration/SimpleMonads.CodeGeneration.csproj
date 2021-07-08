@@ -10,4 +10,8 @@
       <PackageReference Include="IoFluently" Version="1.2.0-alpha0111" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\MoreCollections\MoreCollections.csproj" />
+    </ItemGroup>
+
 </Project>

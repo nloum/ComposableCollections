@@ -11,10 +11,56 @@ using static SimpleMonads.Utility;
 
 namespace IoFluently
 {
+    public interface IAbsolutePath : SubTypesOf<IHasAbsolutePath>.IEither<File, Folder, MissingPath>, IComparable,
+        IComparable<AbsolutePath>, IEquatable<AbsolutePath>, IHasAbsolutePath
+    {
+        /// <summary>
+        /// Indicates whether or not the absolute path is case sensitive
+        /// </summary>
+        public bool IsCaseSensitive { get; }
+        
+        /// <summary>
+        /// Indicates what the directory separator is for this absolute path (e.g., '/' or '\') 
+        /// </summary>
+        public string DirectorySeparator { get; }
+        
+        /// <summary>
+        /// The IIoService that is used for this absolute path
+        /// </summary>
+        public IIoService IoService { get; }
+        
+        /// <summary>
+        /// The TreeLinq absolute path that this object represents
+        /// </summary>
+        public AbsoluteTreePath<string> Path { get; }
+
+        /// <summary>
+        /// The file or directory name, a.k.a the last component in the path
+        /// </summary>
+        public string Name { get; }
+
+        /// <summary>
+        /// The file extension, if there is one, including the dot.
+        /// </summary>
+        IMaybe<string> Extension { get; }
+
+        File ExpectFile();
+
+        FileOrFolder ExpectFileOrFolder();
+
+        FileOrMissingPath ExpectFileOrMissingPath();
+
+        Folder ExpectFolder();
+
+        FolderOrMissingPath ExpectFolderOrMissingPath();
+
+        MissingPath ExpectMissingPath();
+    }
+
     /// <summary>
     /// Represents an absolute path to a file or folder (the file or folder doesn't have to exist)
     /// </summary>
-    public partial class AbsolutePath : SubTypesOf<IHasAbsolutePath>.Either<File, Folder, MissingPath>, IComparable, IComparable<AbsolutePath>, IEquatable<AbsolutePath>, IHasAbsolutePath
+    public partial class AbsolutePath : SubTypesOf<IHasAbsolutePath>.Either<File, Folder, MissingPath>, IAbsolutePath
     {
         private AbsolutePath _path;
 
@@ -40,6 +86,9 @@ namespace IoFluently
 
         AbsolutePath IHasAbsolutePath.Path => this;
 
+        internal AbsolutePath(IAbsolutePath path) : this(path.IsCaseSensitive, path.DirectorySeparator, path.IoService, path.Path.Components) {
+        }
+ 
         internal AbsolutePath(bool isCaseSensitive, string directorySeparator, IIoService ioService, IEnumerable<string> path)
         {
             IsCaseSensitive = isCaseSensitive;

@@ -7,7 +7,7 @@ namespace IoFluently
 {
     public sealed class AbsolutePathTranslation : IAbsolutePathTranslation
     {
-        internal AbsolutePathTranslation(AbsolutePath source, AbsolutePath destination, IIoService ioService)
+        internal AbsolutePathTranslation(IAbsolutePath source, IAbsolutePath destination, IIoService ioService)
         {
             Source = source;
             Destination = destination;
@@ -16,8 +16,8 @@ namespace IoFluently
 
         public IIoService IoService { get; }
 
-        public AbsolutePath Source { get; }
-        public AbsolutePath Destination { get; }
+        public IAbsolutePath Source { get; }
+        public IAbsolutePath Destination { get; }
 
         public IAbsolutePathTranslation Invert()
         {
@@ -43,9 +43,9 @@ namespace IoFluently
             return string.Format("Translate {0} to {1}", Source, Destination);
         }
 
-        public Tuple<AbsolutePath, AbsolutePath> ToTuple()
+        public Tuple<IAbsolutePath, IAbsolutePath> ToTuple()
         {
-            return new Tuple<AbsolutePath, AbsolutePath>(Source, Destination);
+            return new Tuple<IAbsolutePath, IAbsolutePath>(Source, Destination);
         }
 
         private bool Equals(AbsolutePathTranslation other)

@@ -173,18 +173,6 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override AbsolutePath Decrypt(AbsolutePath path)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public override AbsolutePath Encrypt(AbsolutePath path)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
         public override Information FileSize(File path)
         {
             using (var archive = OpenZipArchive(false, true))
@@ -231,7 +219,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override PathType Type(AbsolutePath path)
+        public override PathType Type(IAbsolutePath path)
         {
             using (var archive = OpenZipArchive(false, true))
             {
@@ -365,7 +353,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IObservable<AbsolutePath> Renamings(AbsolutePath path)
+        public override IObservable<AbsolutePath> Renamings(IAbsolutePath path)
         {
             throw new NotImplementedException();
         }

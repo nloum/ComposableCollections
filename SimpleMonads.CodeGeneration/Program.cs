@@ -7,6 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Humanizer;
 using IoFluently;
+using MoreCollections;
 using ReactiveProcesses;
 
 namespace SimpleMonads.CodeGeneration
@@ -240,11 +241,17 @@ namespace SimpleMonads.CodeGeneration
         {
             GenerateSubClassImplicitOperators(writer, className, arity, genericArgNames);
             
-            for (var i = 1; i <= arity; i++)
+            foreach (var combo in Enumerable.Range(1, arity).ToImmutableList().CalcCombination(arity))
             {
-                // writer.WriteLine($"public static implicit operator T{i}({className}<{string.Join(", ", genericArgNames)}> either) {{");
-                // writer.WriteLine($"return either.Item{i};");
-                // writer.WriteLine("}");
+                var genericArgsString = string.Join(", ", combo.Select(i => $"T{i}"));
+                writer.WriteLine($"        public static implicit operator IEither<{genericArgsString}>({className}<{string.Join(", ", genericArgNames)}> either) {{");
+                for (var i = 1; i <= arity; i++)
+                {
+                    writer.WriteLine($"            if (Item{i} != default) {{");
+                    writer.WriteLine($"                return new Either<{genericArgsString}>(Item{i});");
+                    writer.WriteLine("            }");
+                }
+                writer.WriteLine("        }");
             }
         }
 

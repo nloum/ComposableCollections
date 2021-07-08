@@ -95,7 +95,7 @@ namespace IoFluently
         /// idiomatic code with IoFluently.
         /// </summary>
         [Obsolete("Use the / operator on AbsolutePath objects (and related objects) to write idiomatic code with IoFluently", true)]
-        public static AbsolutePath Combine(this AbsolutePath path, string subpath)
+        public static FileOrFolderOrMissingPath Combine(this FileOrFolderOrMissingPath path, string subpath)
         {
             throw new NotImplementedException();
         }
@@ -105,7 +105,7 @@ namespace IoFluently
         /// idiomatic code with IoFluently.
         /// </summary>
         [Obsolete("Use the / operator on RelativePath objects (and related objects) to write idiomatic code with IoFluently", true)]
-        public static AbsolutePath Combine(this RelativePath path, string subpath)
+        public static FileOrFolderOrMissingPath Combine(this RelativePath path, string subpath)
         {
             throw new NotImplementedException();
         }
@@ -115,7 +115,7 @@ namespace IoFluently
         /// idiomatic code with IoFluently.
         /// </summary>
         [Obsolete("Use the / operator on AbsolutePath objects (and related objects) to write idiomatic code with IoFluently", true)]
-        public static AbsolutePath Combine(this IIoService path, string subpath)
+        public static FileOrFolderOrMissingPath Combine(this IIoService path, string subpath)
         {
             throw new NotImplementedException();
         }

@@ -7,10 +7,10 @@
 
     <ItemGroup>
       <PackageReference Include="Humanizer" Version="2.10.1" />
-      <PackageReference Include="IoFluently" Version="1.2.0-alpha0111" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\IoFluently\IoFluently.csproj" />
       <ProjectReference Include="..\MoreCollections\MoreCollections.csproj" />
     </ItemGroup>
 

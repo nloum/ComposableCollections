@@ -5,17 +5,17 @@ using UtilityDisposables;
 namespace IoFluently
 {
     public class AbsolutePathChangeToken : IChangeToken {
-        private readonly AbsolutePath _absolutePath;
+        private readonly FileOrFolderOrMissingPath _fileOrFolderOrMissingPath;
         private int _numActiveChangeCallbacks = -1;
 
-        public AbsolutePathChangeToken( AbsolutePath absolutePath ) {
-            _absolutePath = absolutePath;
+        public AbsolutePathChangeToken( FileOrFolderOrMissingPath fileOrFolderOrMissingPath ) {
+            _fileOrFolderOrMissingPath = fileOrFolderOrMissingPath;
             RegisterChangeCallback( _ => HasChanged = true, null );
         }
 
         public IDisposable RegisterChangeCallback( Action<object> callback, object state ) {
             _numActiveChangeCallbacks++;
-            var disposable = _absolutePath.IoService.ObserveChanges(_absolutePath).Subscribe( _ => callback( state ) );
+            var disposable = _fileOrFolderOrMissingPath.IoService.ObserveChanges(_fileOrFolderOrMissingPath).Subscribe( _ => callback( state ) );
             return new AnonymousDisposable( () => {
                 disposable.Dispose();
                 _numActiveChangeCallbacks--;

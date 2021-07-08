@@ -26,7 +26,7 @@ namespace IoFluently
     
     public class XmlFile : TextFile
     {
-        public XmlFile(AbsolutePath path) : base(path)
+        public XmlFile(FileOrFolderOrMissingPath path) : base(path)
         {
         }
 
@@ -90,7 +90,7 @@ namespace IoFluently
     
     public class XmlFile<TModel> : TextFile
     {
-        public XmlFile(AbsolutePath path) : base(path)
+        public XmlFile(FileOrFolderOrMissingPath path) : base(path)
         {
         }
 

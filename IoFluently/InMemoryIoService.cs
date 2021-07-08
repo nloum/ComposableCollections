@@ -87,7 +87,7 @@ namespace IoFluently
         }
         
         /// <inheritdoc />
-        public override IQueryable<AbsolutePath> Query()
+        public override IQueryable<FileOrFolderOrMissingPath> Query()
         {
             throw new NotImplementedException();
         }
@@ -156,7 +156,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override ISetChanges<AbsolutePath> ToLiveLinq(Folder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        public override ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq(Folder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             throw new NotImplementedException();
         }
@@ -175,7 +175,7 @@ namespace IoFluently
             return Nothing<InMemoryFile>(() => throw new InvalidOperationException($"The root folder of {path} does not exist"));
         }
 
-        private IMaybe<InMemoryFile> GetFile(InMemoryFolder folder, IReadOnlyList<string> components, AbsolutePath originalPath)
+        private IMaybe<InMemoryFile> GetFile(InMemoryFolder folder, IReadOnlyList<string> components, FileOrFolderOrMissingPath originalPath)
         {
             if (components.Count == 0)
             {
@@ -211,7 +211,7 @@ namespace IoFluently
             return Nothing<InMemoryFolder>(() => throw new InvalidOperationException($"The root folder of {path} does not exist"));
         }
 
-        private IMaybe<InMemoryFolder> GetFolder(InMemoryFolder folder, IReadOnlyList<string> components, AbsolutePath originalPath)
+        private IMaybe<InMemoryFolder> GetFolder(InMemoryFolder folder, IReadOnlyList<string> components, FileOrFolderOrMissingPath originalPath)
         {
             if (components.Count == 0)
             {
@@ -316,7 +316,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override PathType Type(IAbsolutePath path)
+        public override PathType Type(IFileOrFolderOrMissingPath path)
         {
             path = Simplify(path);
 
@@ -466,7 +466,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IObservable<AbsolutePath> Renamings(IAbsolutePath path)
+        public override IObservable<FileOrFolderOrMissingPath> Renamings(IFileOrFolderOrMissingPath path)
         {
             throw new NotImplementedException();
         }

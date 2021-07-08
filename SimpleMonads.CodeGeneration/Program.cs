@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Humanizer;
 using IoFluently;
 using MoreCollections;
-using ReactiveProcesses;
 
 namespace SimpleMonads.CodeGeneration
 {
@@ -16,9 +14,9 @@ namespace SimpleMonads.CodeGeneration
     {
         private static void Main(string[] args)
         {
-            var ioService = new IoService(new ReactiveProcessFactory());
+            var ioService = new IoService();
 
-            var simpleMonadsSourcePath = ioService.CurrentDirectory.Ancestors().First(x => (x / ".git").IsFolder()) / "SimpleMonads";
+            var simpleMonadsSourcePath = ioService.DefaultRelativePathBase.Ancestors.First(x => (x / ".git").IsFolder) / "SimpleMonads";
             
             var maxArity = 16;
 
@@ -27,25 +25,25 @@ namespace SimpleMonads.CodeGeneration
                 var interfacePath = simpleMonadsSourcePath / $"IEither{i}.cs";
                 var classPath = simpleMonadsSourcePath / $"Either{i}.cs";
                 var extensionsPath = simpleMonadsSourcePath / $"Either{i}Extensions.cs";
-                interfacePath.DeleteFile();
-                classPath.DeleteFile();
-                extensionsPath.DeleteFile();
+                interfacePath.EnsureDoesNotExist();
+                classPath.EnsureDoesNotExist();
+                extensionsPath.EnsureDoesNotExist();
 
-                using (var writer = interfacePath.OpenWriter())
+                using (var writer = interfacePath.ExpectTextFileOrMissingPath().OpenWriter())
                 {
                     writer.WriteLine("using System;\n\nnamespace SimpleMonads {");
                     GenerateEither(writer, i, maxArity, CodePart.Interface);
                     writer.WriteLine("}");
                 }
 
-                using (var writer = classPath.OpenWriter())
+                using (var writer = classPath.ExpectTextFileOrMissingPath().OpenWriter())
                 {
                     writer.WriteLine("using System;\n\nnamespace SimpleMonads {");
                     GenerateEither(writer, i, maxArity, CodePart.Class);
                     writer.WriteLine("}");
                 }
 
-                using (var writer = extensionsPath.OpenWriter())
+                using (var writer = extensionsPath.ExpectTextFileOrMissingPath().OpenWriter())
                 {
                     writer.WriteLine("using System;\n\nnamespace SimpleMonads {");
                     GenerateEither(writer, i, maxArity, CodePart.ExtensionMethods);
@@ -240,18 +238,27 @@ namespace SimpleMonads.CodeGeneration
         private static void GenerateBaseImplicitOperators(TextWriter writer, string className, int arity, List<string> genericArgNames)
         {
             GenerateSubClassImplicitOperators(writer, className, arity, genericArgNames);
-            
-            foreach (var combo in Enumerable.Range(1, arity).ToImmutableList().CalcCombination(arity))
+
+            if (arity <= 7)
             {
-                var genericArgsString = string.Join(", ", combo.Select(i => $"T{i}"));
-                writer.WriteLine($"        public static implicit operator IEither<{genericArgsString}>({className}<{string.Join(", ", genericArgNames)}> either) {{");
-                for (var i = 1; i <= arity; i++)
+                var permutation = Enumerable.Range(1, arity).ToArray();
+
+                // Skip the first permutation since it's identical to the default
+                permutation.NextPermutation();
+
+                while (permutation.NextPermutation())
                 {
-                    writer.WriteLine($"            if (Item{i} != default) {{");
-                    writer.WriteLine($"                return new Either<{genericArgsString}>(Item{i});");
-                    writer.WriteLine("            }");
+                    var genericArgsString = string.Join(", ", permutation.Select(i => $"T{i}"));
+                    writer.WriteLine($"        public static implicit operator Either<{genericArgsString}>({className}<{string.Join(", ", genericArgNames)}> either) {{");
+                    for (var i = 1; i <= arity; i++)
+                    {
+                        writer.WriteLine($"            if (either.Item{i} != null) {{");
+                        writer.WriteLine($"                return new Either<{genericArgsString}>(either.Item{i});");
+                        writer.WriteLine("            }");
+                    }
+                    writer.WriteLine("            throw new InvalidOperationException(\"The Either has no values\");");
+                    writer.WriteLine("        }");
                 }
-                writer.WriteLine("        }");
             }
         }
 

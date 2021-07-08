@@ -32,9 +32,9 @@ namespace IoFluently
 
         public override bool CanEmptyDirectoriesExist => true;
         
-        public override IQueryable<AbsolutePath> Query()
+        public override IQueryable<FileOrFolderOrMissingPath> Query()
         {
-            return new Queryable<AbsolutePath>(new QueryContext());
+            return new Queryable<FileOrFolderOrMissingPath>(new QueryContext());
         }
 
         private Folder _defaultRelativePathBase;
@@ -72,7 +72,7 @@ namespace IoFluently
         public PathObservationMethod PathObservationMethod { get; set; }
 
         /// <inheritdoc />
-        public override ISetChanges<AbsolutePath> ToLiveLinq(Folder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        public override ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq(Folder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             if (PathObservationMethod == PathObservationMethod.FileSystemWatcher)
             {
@@ -83,7 +83,7 @@ namespace IoFluently
             return ToLiveLinqWithFsWatch(path, includeFileContentChanges, includeSubFolders, pattern);
         }
 
-        private ISetChanges<AbsolutePath> ToLiveLinqWithFsWatch(Folder root, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        private ISetChanges<FileOrFolderOrMissingPath> ToLiveLinqWithFsWatch(Folder root, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             // TODO - add support for FSWatch events on Windows and Linux as well. Although I think I already support all the ones on Linux
             // and the FileSystemWatcher class on Windows should be sufficient, it would be nice to have this support for
@@ -132,7 +132,7 @@ namespace IoFluently
 
             var resultObservable = process.StandardOutput
                 .Observe(new []{ (char)0 })
-                .Scan(new {State = initialState, LastEvents = (IDictionaryChangeStrict<AbsolutePath, PathType>[]) null},
+                .Scan(new {State = initialState, LastEvents = (IDictionaryChangeStrict<FileOrFolderOrMissingPath, PathType>[]) null},
                     (state, itemString) =>
                     {
                         var item = TryParseAbsolutePath(itemString).Value;
@@ -147,8 +147,8 @@ namespace IoFluently
                                         state.State,
                                         LastEvents = new []
                                         {
-                                            LiveLinq.Utility.DictionaryRemove(new KeyValue<AbsolutePath, PathType>(item, state.State[item])),
-                                            LiveLinq.Utility.DictionaryAdd(new KeyValue<AbsolutePath, PathType>(item, Type(item)))
+                                            LiveLinq.Utility.DictionaryRemove(new KeyValue<FileOrFolderOrMissingPath, PathType>(item, state.State[item])),
+                                            LiveLinq.Utility.DictionaryAdd(new KeyValue<FileOrFolderOrMissingPath, PathType>(item, Type(item)))
                                         }
                                     };
                                 }
@@ -157,7 +157,7 @@ namespace IoFluently
                                     return new
                                     {
                                         state.State,
-                                        LastEvents = new IDictionaryChangeStrict<AbsolutePath, PathType>[0]
+                                        LastEvents = new IDictionaryChangeStrict<FileOrFolderOrMissingPath, PathType>[0]
                                     };
                                 }
                             }
@@ -168,9 +168,9 @@ namespace IoFluently
                                 return new
                                 {
                                     State = state.State.Remove(item),
-                                    LastEvents = new IDictionaryChangeStrict<AbsolutePath, PathType>[]
+                                    LastEvents = new IDictionaryChangeStrict<FileOrFolderOrMissingPath, PathType>[]
                                     {
-                                        LiveLinq.Utility.DictionaryRemove(new KeyValue<AbsolutePath, PathType>(item, state.State[item])),
+                                        LiveLinq.Utility.DictionaryRemove(new KeyValue<FileOrFolderOrMissingPath, PathType>(item, state.State[item])),
                                     }
                                 };
                             }
@@ -180,9 +180,9 @@ namespace IoFluently
                             return new
                             {
                                 State = state.State.Add(item, Type(item)),
-                                LastEvents = new IDictionaryChangeStrict<AbsolutePath, PathType>[]
+                                LastEvents = new IDictionaryChangeStrict<FileOrFolderOrMissingPath, PathType>[]
                                 {
-                                    LiveLinq.Utility.DictionaryAdd(new KeyValue<AbsolutePath, PathType>(item, Type(item))),
+                                    LiveLinq.Utility.DictionaryAdd(new KeyValue<FileOrFolderOrMissingPath, PathType>(item, Type(item))),
                                 }
                             };
                         }
@@ -203,9 +203,9 @@ namespace IoFluently
             return result;
         }
 
-        private ISetChanges<AbsolutePath> ToLiveLinqWithFileSystemWatcher(Folder root, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        private ISetChanges<FileOrFolderOrMissingPath> ToLiveLinqWithFileSystemWatcher(Folder root, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
-            var observable = Observable.Create<ISetChange<AbsolutePath>>(observer =>
+            var observable = Observable.Create<ISetChange<FileOrFolderOrMissingPath>>(observer =>
             {
                 var watcher = new FileSystemWatcher
                 {
@@ -452,15 +452,15 @@ namespace IoFluently
             foreach (var driveThatWasRemoved in drivesThatWereRemoved) _storage.Remove(driveThatWasRemoved);
         }
 
-        public override IObservable<AbsolutePath> Renamings(IAbsolutePath path)
+        public override IObservable<FileOrFolderOrMissingPath> Renamings(IFileOrFolderOrMissingPath path)
         {
             var parent = TryParent(path);
-            if (!parent.HasValue) return Observable.Return(new AbsolutePath(path));
+            if (!parent.HasValue) return Observable.Return(new FileOrFolderOrMissingPath(path));
 
-            return Observable.Create<AbsolutePath>(
+            return Observable.Create<FileOrFolderOrMissingPath>(
                 async (observer, token) =>
                 {
-                    var currentPath = new AbsolutePath(path);
+                    var currentPath = new FileOrFolderOrMissingPath(path);
                     while (!token.IsCancellationRequested)
                     {
                         var watcher = new FileSystemWatcher(TryParent(currentPath).Value.ToString())
@@ -469,11 +469,11 @@ namespace IoFluently
                             Filter = currentPath.Name
                         };
 
-                        var tcs = new TaskCompletionSource<AbsolutePath>();
+                        var tcs = new TaskCompletionSource<FileOrFolderOrMissingPath>();
 
                         RenamedEventHandler handler = (_, args) =>
                         {
-                            tcs.SetResult(new AbsolutePath(path.IsCaseSensitive, path.DirectorySeparator, this, new[]{args.FullPath}));
+                            tcs.SetResult(new FileOrFolderOrMissingPath(path.IsCaseSensitive, path.DirectorySeparator, this, new[]{args.FullPath}));
                         };
 
                         watcher.EnableRaisingEvents = true;
@@ -540,7 +540,7 @@ namespace IoFluently
             return new MissingPath(path.Path);
         }
 
-        public override PathType Type(IAbsolutePath path)
+        public override PathType Type(IFileOrFolderOrMissingPath path)
         {
             var str = path.ToString();
             if (System.IO.File.Exists(str))

@@ -28,9 +28,9 @@ namespace IoFluently
             return new EmptyChangeToken();
         }
         
-        public override IEnumerator<AbsolutePath> GetEnumerator()
+        public override IEnumerator<FileOrFolderOrMissingPath> GetEnumerator()
         {
-            return _path.IoService.Descendants(_path, _pattern).Select(x => x.Path).GetEnumerator();
+            return _path.IoService.Descendants(_path, _pattern).GetEnumerator();
         }
     }
 }

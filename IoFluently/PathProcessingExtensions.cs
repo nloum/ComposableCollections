@@ -21,7 +21,7 @@ namespace IoFluently
         /// <param name="read">A function defining how to read from this path.</param>
         /// <typeparam name="T">The type of object that represents data read from the file</typeparam>
         /// <returns>An object that allows the path to be read from.</returns>
-        public static IPathWithKnownFormatSync<T> AsPathFormat<T>(this AbsolutePath path, Func<T> read)
+        public static IPathWithKnownFormatSync<T> AsPathFormat<T>(this FileOrFolderOrMissingPath path, Func<T> read)
         {
             return new PathWithKnownFormatSync<T>(path, read);
         }
@@ -33,7 +33,7 @@ namespace IoFluently
         /// <param name="read">A function defining how to read from this path.</param>
         /// <typeparam name="T">The type of object that represents data read from the file</typeparam>
         /// <returns>An object that allows the path to be read from.</returns>
-        public static IPathWithKnownFormatAsync<T> AsPathFormat<T>(this AbsolutePath path, Func<Task<T>> read)
+        public static IPathWithKnownFormatAsync<T> AsPathFormat<T>(this FileOrFolderOrMissingPath path, Func<Task<T>> read)
         {
             return new PathWithKnownFormatAsync<T>(path, read);
         }
@@ -46,7 +46,7 @@ namespace IoFluently
         /// <param name="write">A function defining how to write to this path.</param>
         /// <typeparam name="T">The type of object that represents data read from the file</typeparam>
         /// <returns>An object that allows the path to be read from.</returns>
-        public static IPathWithKnownFormatSync<T, T> AsPathFormat<T>(this AbsolutePath path, Func<T> read,
+        public static IPathWithKnownFormatSync<T, T> AsPathFormat<T>(this FileOrFolderOrMissingPath path, Func<T> read,
             Action<T> write)
         {
             return new PathWithKnownFormatSync<T, T>(path, read, write);
@@ -60,7 +60,7 @@ namespace IoFluently
         /// <param name="write">A function defining how to write to this path.</param>
         /// <typeparam name="T">The type of object that represents data read from the file</typeparam>
         /// <returns>An object that allows the path to be read from.</returns>
-        public static IPathWithKnownFormatSyncAsync<T, T> AsPathFormat<T>(this AbsolutePath path, Func<T> read,
+        public static IPathWithKnownFormatSyncAsync<T, T> AsPathFormat<T>(this FileOrFolderOrMissingPath path, Func<T> read,
             Func<T, Task> write)
         {
             return new PathWithKnownFormatSyncAsync<T, T>(path, read, write);
@@ -74,7 +74,7 @@ namespace IoFluently
         /// <param name="write">A function defining how to write to this path.</param>
         /// <typeparam name="T">The type of object that represents data read from the file</typeparam>
         /// <returns>An object that allows the path to be read from.</returns>
-        public static IPathWithKnownFormatAsyncSync<T, T> AsPathFormat<T>(this AbsolutePath path, Func<Task<T>> read,
+        public static IPathWithKnownFormatAsyncSync<T, T> AsPathFormat<T>(this FileOrFolderOrMissingPath path, Func<Task<T>> read,
             Action<T> write)
         {
             return new PathWithKnownFormatAsyncSync<T, T>(path, read, write);
@@ -88,7 +88,7 @@ namespace IoFluently
         /// <param name="write">A function defining how to write to this path.</param>
         /// <typeparam name="T">The type of object that represents data read from the file</typeparam>
         /// <returns>An object that allows the path to be read from.</returns>
-        public static IPathWithKnownFormatAsync<T, T> AsPathFormat<T>(this AbsolutePath path, Func<Task<T>> read,
+        public static IPathWithKnownFormatAsync<T, T> AsPathFormat<T>(this FileOrFolderOrMissingPath path, Func<Task<T>> read,
             Func<T, Task> write)
         {
             return new PathWithKnownFormatAsync<T, T>(path, read, write);
@@ -102,7 +102,7 @@ namespace IoFluently
         /// <param name="write">A function defining how to write to this path.</param>
         /// <typeparam name="T">The type of object that represents data read from the file</typeparam>
         /// <returns>An object that allows the path to be read from.</returns>
-        public static IPathWithKnownFormatSync<TReader, TWriter> AsPathFormat<TReader, TWriter>(this AbsolutePath path, Func<TReader> read,
+        public static IPathWithKnownFormatSync<TReader, TWriter> AsPathFormat<TReader, TWriter>(this FileOrFolderOrMissingPath path, Func<TReader> read,
             Action<TWriter> write)
         {
             return new PathWithKnownFormatSync<TReader, TWriter>(path, read, write);
@@ -116,7 +116,7 @@ namespace IoFluently
         /// <param name="write">A function defining how to write to this path.</param>
         /// <typeparam name="T">The type of object that represents data read from the file</typeparam>
         /// <returns>An object that allows the path to be read from.</returns>
-        public static IPathWithKnownFormatSyncAsync<TReader, TWriter> AsPathFormat<TReader, TWriter>(this AbsolutePath path, Func<TReader> read,
+        public static IPathWithKnownFormatSyncAsync<TReader, TWriter> AsPathFormat<TReader, TWriter>(this FileOrFolderOrMissingPath path, Func<TReader> read,
             Func<TWriter, Task> write)
         {
             return new PathWithKnownFormatSyncAsync<TReader, TWriter>(path, read, write);
@@ -130,7 +130,7 @@ namespace IoFluently
         /// <param name="write">A function defining how to write to this path.</param>
         /// <typeparam name="T">The type of object that represents data read from the file</typeparam>
         /// <returns>An object that allows the path to be read from.</returns>
-        public static IPathWithKnownFormatAsyncSync<TReader, TWriter> AsPathFormat<TReader, TWriter>(this AbsolutePath path, Func<Task<TReader>> read,
+        public static IPathWithKnownFormatAsyncSync<TReader, TWriter> AsPathFormat<TReader, TWriter>(this FileOrFolderOrMissingPath path, Func<Task<TReader>> read,
             Action<TWriter> write)
         {
             return new PathWithKnownFormatAsyncSync<TReader, TWriter>(path, read, write);
@@ -144,7 +144,7 @@ namespace IoFluently
         /// <param name="write">A function defining how to write to this path.</param>
         /// <typeparam name="T">The type of object that represents data read from the file</typeparam>
         /// <returns>An object that allows the path to be read from.</returns>
-        public static IPathWithKnownFormatAsync<TReader, TWriter> AsPathFormat<TReader, TWriter>(this AbsolutePath path, Func<Task<TReader>> read,
+        public static IPathWithKnownFormatAsync<TReader, TWriter> AsPathFormat<TReader, TWriter>(this FileOrFolderOrMissingPath path, Func<Task<TReader>> read,
             Func<TWriter, Task> write)
         {
             return new PathWithKnownFormatAsync<TReader, TWriter>(path, read, write);

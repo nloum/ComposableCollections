@@ -9,9 +9,9 @@ namespace IoFluently
         {
         }
 
-        public override IEnumerator<AbsolutePath> GetEnumerator()
+        public override IEnumerator<FileOrFolderOrMissingPath> GetEnumerator()
         {
-            return _path.IoService.Children(_path, _pattern).Select(x => x.Path).GetEnumerator();
+            return _path.IoService.Children(_path, _pattern).GetEnumerator();
         }
     }
 }

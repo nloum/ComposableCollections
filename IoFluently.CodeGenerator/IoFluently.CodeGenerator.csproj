@@ -10,9 +10,4 @@
       <ProjectReference Include="..\ComposableCollections\ComposableCollections.csproj" />
       <ProjectReference Include="..\IoFluently\IoFluently.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="ComposableCollections" Version="1.0.0-alpha0182" />
-    </ItemGroup>
-
 </Project>

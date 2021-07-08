@@ -556,7 +556,7 @@ if (item is T8 item8) {
 Item8 = item8;
 return;
 }
-throw new ArgumentException($"Expected argument to be either a {typeof(T1).Name}, {typeof(T2).Name}, {typeof(T3).Name}, {typeof(T4).Name}, {typeof(T5).Name}, {typeof(T6).Name}, {typeof(T7).Name} or {typeof(T8).Name} but instead got a type of {typeof(TBase).Name}: {item.GetType().Name}", "name");
+throw new ArgumentException($"Expected argument to be either a {typeof(T1).Name}, {typeof(T2).Name}, {typeof(T3).Name}, {typeof(T4).Name}, {typeof(T5).Name}, {typeof(T6).Name}, {typeof(T7).Name}, or {typeof(T8).Name} but instead got a type of {typeof(TBase).Name}: {item.GetType().Name}", "name");
 }
 public virtual TBase Value => Item1 ?? Item2 ?? Item3 ?? Item4 ?? Item5 ?? Item6 ?? Item7 ?? (TBase)Item8;
 public static implicit operator Either<T1, T2, T3, T4, T5, T6, T7, T8>(T1 t1) {

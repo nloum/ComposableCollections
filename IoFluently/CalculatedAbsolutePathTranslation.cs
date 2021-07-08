@@ -9,10 +9,10 @@ namespace IoFluently
     {
         private readonly AbsolutePathTranslation _actualValues;
 
-        internal CalculatedAbsolutePathTranslation(IAbsolutePath absolutePath, IAbsolutePath ancestorSource, IAbsolutePath ancestorDestination,
+        internal CalculatedAbsolutePathTranslation(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath, IFileOrFolderOrMissingPath ancestorSource, IFileOrFolderOrMissingPath ancestorDestination,
             IIoService ioService)
         {
-            AbsoluteAbsolutePath = absolutePath.IoService.Simplify(absolutePath);
+            FileOrFolderOrMissingPath = fileOrFolderOrMissingPath.IoService.Simplify(fileOrFolderOrMissingPath);
             AncestorSource = ancestorSource.IoService.Simplify(ancestorSource);
             AncestorDestination = ancestorDestination.IoService.Simplify(ancestorDestination);
             IoService = ioService;
@@ -21,12 +21,12 @@ namespace IoFluently
 
         public IAbsolutePathTranslation Invert()
         {
-            return new CalculatedAbsolutePathTranslation(AbsoluteAbsolutePath, AncestorDestination, AncestorSource, IoService);
+            return new CalculatedAbsolutePathTranslation(FileOrFolderOrMissingPath, AncestorDestination, AncestorSource, IoService);
         }
 
-        public AbsolutePath AbsoluteAbsolutePath { get; }
-        public AbsolutePath AncestorSource { get; }
-        public AbsolutePath AncestorDestination { get; }
+        public FileOrFolderOrMissingPath FileOrFolderOrMissingPath { get; }
+        public FileOrFolderOrMissingPath AncestorSource { get; }
+        public FileOrFolderOrMissingPath AncestorDestination { get; }
 
         public IIoService IoService { get; }
 
@@ -43,23 +43,23 @@ namespace IoFluently
                 throw new InvalidOperationException(
                     string.Format(
                         "An attempt was made to calculate the path if a file (\"{0}\") was copied from \"{1}\" to \"{2}\". It is illegal to have the destination and source directories be the same, which is true in this case.",
-                        AbsoluteAbsolutePath, AncestorSource, AncestorDestination));
-            if (!AbsoluteAbsolutePath.IoService.IsDescendantOf(AbsoluteAbsolutePath, AncestorSource))
+                        FileOrFolderOrMissingPath, AncestorSource, AncestorDestination));
+            if (!FileOrFolderOrMissingPath.IoService.IsDescendantOf(FileOrFolderOrMissingPath, AncestorSource))
                 throw new InvalidOperationException(
                     string.Format(
                         "The path \"{2}\" cannot be copied to \"{1}\" because the path isn't under the source path: \"{0}\"",
-                        AncestorSource, AncestorDestination, AbsoluteAbsolutePath));
-            if (AncestorSource.Equals(AbsoluteAbsolutePath))
+                        AncestorSource, AncestorDestination, FileOrFolderOrMissingPath));
+            if (AncestorSource.Equals(FileOrFolderOrMissingPath))
                 return new AbsolutePathTranslation(AncestorSource, AncestorDestination, IoService);
-            var relativePath = AbsoluteAbsolutePath.IoService.RelativeTo(AbsoluteAbsolutePath, AncestorSource);
+            var relativePath = FileOrFolderOrMissingPath.IoService.RelativeTo(FileOrFolderOrMissingPath, AncestorSource);
             var pathToBeCopiedDestination = AncestorDestination / relativePath;
-            return new AbsolutePathTranslation(AbsoluteAbsolutePath, pathToBeCopiedDestination, IoService);
+            return new AbsolutePathTranslation(FileOrFolderOrMissingPath, pathToBeCopiedDestination, IoService);
         }
 
         protected bool Equals(CalculatedAbsolutePathTranslation other)
         {
             return Equals(AncestorDestination, other.AncestorDestination) &&
-                   Equals(AncestorSource, other.AncestorSource) && Equals(AbsoluteAbsolutePath, other.AbsoluteAbsolutePath);
+                   Equals(AncestorSource, other.AncestorSource) && Equals(FileOrFolderOrMissingPath, other.FileOrFolderOrMissingPath);
         }
 
         public override bool Equals(object obj)
@@ -76,7 +76,7 @@ namespace IoFluently
             {
                 var hashCode = AncestorDestination != null ? AncestorDestination.GetHashCode() : 0;
                 hashCode = (hashCode * 397) ^ (AncestorSource != null ? AncestorSource.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (AbsoluteAbsolutePath != null ? AbsoluteAbsolutePath.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (FileOrFolderOrMissingPath != null ? FileOrFolderOrMissingPath.GetHashCode() : 0);
                 return hashCode;
             }
         }
@@ -93,9 +93,9 @@ namespace IoFluently
 
         #region IFileUriTranslation Members
 
-        public IAbsolutePath Source => _actualValues.Source;
+        public IFileOrFolderOrMissingPath Source => _actualValues.Source;
 
-        public IAbsolutePath Destination => _actualValues.Destination;
+        public IFileOrFolderOrMissingPath Destination => _actualValues.Destination;
 
         public IEnumerator<CalculatedAbsolutePathTranslation> GetEnumerator()
         {

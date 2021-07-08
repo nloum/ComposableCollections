@@ -43,7 +43,7 @@ namespace IoFluently
             }
             
             ZipFilePath = zipFilePath;
-            var path = new AbsolutePath(true, DefaultDirectorySeparator, this, new[] {"/"});
+            var path = new FileOrFolderOrMissingPath(true, DefaultDirectorySeparator, this, new[] {"/"});
             DefaultRelativePathBase = new Folder(path);
 
             if (DefaultRelativePathBase == null)
@@ -54,17 +54,17 @@ namespace IoFluently
 
         public void Unzip(FolderOrMissingPath targetDirectory)
         {
-            Copy(ParseAbsolutePath("/"), targetDirectory.Path);
+            Copy(ParseAbsolutePath("/"), targetDirectory);
         }
 
         public void Unzip(Folder targetDirectory)
         {
-            Copy(ParseAbsolutePath("/"), targetDirectory.Path);
+            Copy(ParseAbsolutePath("/"), targetDirectory);
         }
 
         public void Zip(IHasAbsolutePath sourcePath, IHasAbsolutePath relativeTo)
         {
-            Copy(sourcePath.Path, relativeTo.Path, ParseAbsolutePath("/"));
+            Copy(sourcePath, relativeTo, ParseAbsolutePath("/"));
         }
 
         /// <inheritdoc />
@@ -84,17 +84,17 @@ namespace IoFluently
         public override IObservableReadOnlySet<Folder> Roots { get; } = new ObservableSet<Folder>();
 
         /// <inheritdoc />
-        public override IQueryable<AbsolutePath> Query()
+        public override IQueryable<FileOrFolderOrMissingPath> Query()
         {
             var archive = OpenZipArchive(false, true);
             var queryable = archive.Entries
                 .Select(zipEntry => TryParseAbsolutePath(zipEntry.FullName, DefaultRelativePathBase).Value)
                 .AsQueryable();
-            return new QueryableWithDisposable<AbsolutePath>(queryable, archive);
+            return new QueryableWithDisposable<FileOrFolderOrMissingPath>(queryable, archive);
         }
 
         /// <inheritdoc />
-        public override ISetChanges<AbsolutePath> ToLiveLinq(Folder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        public override ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq(Folder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             throw new NotImplementedException();
         }
@@ -219,7 +219,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override PathType Type(IAbsolutePath path)
+        public override PathType Type(IFileOrFolderOrMissingPath path)
         {
             using (var archive = OpenZipArchive(false, true))
             {
@@ -353,7 +353,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IObservable<AbsolutePath> Renamings(IAbsolutePath path)
+        public override IObservable<FileOrFolderOrMissingPath> Renamings(IFileOrFolderOrMissingPath path)
         {
             throw new NotImplementedException();
         }

@@ -17,6 +17,6 @@ namespace IoFluently
             .Select( x => new AbsolutePathFileInfoAdapter( x ) )
             .GetEnumerator();
 
-        public bool Exists => _absolutePath.IoService.Exists(_absolutePath.Path);
+        public bool Exists => _absolutePath.IoService.Exists(_absolutePath);
     }
 }

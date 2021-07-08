@@ -27,7 +27,7 @@ namespace IoFluently
     
     public class TextFile : File
     {
-        public TextFile(AbsolutePath path) : base(path)
+        public TextFile(FileOrFolderOrMissingPath path) : base(path)
         {
         }
 

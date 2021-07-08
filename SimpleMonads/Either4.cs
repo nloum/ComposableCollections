@@ -272,6 +272,336 @@ return new(t3);
 public static implicit operator EitherBase<T1, T2, T3, T4>(T4 t4) {
 return new(t4);
 }
+        public static implicit operator Either<T1, T3, T2, T4>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T1, T3, T2, T4>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T1, T3, T2, T4>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T1, T3, T2, T4>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T1, T3, T2, T4>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T1, T3, T4, T2>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T1, T3, T4, T2>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T1, T3, T4, T2>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T1, T3, T4, T2>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T1, T3, T4, T2>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T1, T4, T2, T3>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T1, T4, T2, T3>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T1, T4, T2, T3>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T1, T4, T2, T3>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T1, T4, T2, T3>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T1, T4, T3, T2>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T1, T4, T3, T2>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T1, T4, T3, T2>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T1, T4, T3, T2>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T1, T4, T3, T2>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T2, T1, T3, T4>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T2, T1, T3, T4>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T2, T1, T3, T4>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T2, T1, T3, T4>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T2, T1, T3, T4>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T2, T1, T4, T3>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T2, T1, T4, T3>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T2, T1, T4, T3>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T2, T1, T4, T3>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T2, T1, T4, T3>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T2, T3, T1, T4>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T2, T3, T1, T4>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T2, T3, T1, T4>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T2, T3, T1, T4>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T2, T3, T1, T4>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T2, T3, T4, T1>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T2, T3, T4, T1>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T2, T3, T4, T1>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T2, T3, T4, T1>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T2, T3, T4, T1>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T2, T4, T1, T3>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T2, T4, T1, T3>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T2, T4, T1, T3>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T2, T4, T1, T3>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T2, T4, T1, T3>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T2, T4, T3, T1>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T2, T4, T3, T1>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T2, T4, T3, T1>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T2, T4, T3, T1>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T2, T4, T3, T1>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T3, T1, T2, T4>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T3, T1, T2, T4>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T3, T1, T2, T4>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T3, T1, T2, T4>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T3, T1, T2, T4>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T3, T1, T4, T2>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T3, T1, T4, T2>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T3, T1, T4, T2>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T3, T1, T4, T2>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T3, T1, T4, T2>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T3, T2, T1, T4>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T3, T2, T1, T4>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T3, T2, T1, T4>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T3, T2, T1, T4>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T3, T2, T1, T4>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T3, T2, T4, T1>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T3, T2, T4, T1>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T3, T2, T4, T1>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T3, T2, T4, T1>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T3, T2, T4, T1>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T3, T4, T1, T2>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T3, T4, T1, T2>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T3, T4, T1, T2>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T3, T4, T1, T2>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T3, T4, T1, T2>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T3, T4, T2, T1>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T3, T4, T2, T1>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T3, T4, T2, T1>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T3, T4, T2, T1>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T3, T4, T2, T1>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T4, T1, T2, T3>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T4, T1, T2, T3>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T4, T1, T2, T3>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T4, T1, T2, T3>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T4, T1, T2, T3>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T4, T1, T3, T2>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T4, T1, T3, T2>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T4, T1, T3, T2>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T4, T1, T3, T2>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T4, T1, T3, T2>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T4, T2, T1, T3>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T4, T2, T1, T3>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T4, T2, T1, T3>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T4, T2, T1, T3>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T4, T2, T1, T3>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T4, T2, T3, T1>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T4, T2, T3, T1>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T4, T2, T3, T1>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T4, T2, T3, T1>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T4, T2, T3, T1>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T4, T3, T1, T2>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T4, T3, T1, T2>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T4, T3, T1, T2>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T4, T3, T1, T2>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T4, T3, T1, T2>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
+        public static implicit operator Either<T4, T3, T2, T1>(EitherBase<T1, T2, T3, T4> either) {
+            if (either.Item1 != null) {
+                return new Either<T4, T3, T2, T1>(either.Item1);
+            }
+            if (either.Item2 != null) {
+                return new Either<T4, T3, T2, T1>(either.Item2);
+            }
+            if (either.Item3 != null) {
+                return new Either<T4, T3, T2, T1>(either.Item3);
+            }
+            if (either.Item4 != null) {
+                return new Either<T4, T3, T2, T1>(either.Item4);
+            }
+            throw new InvalidOperationException("The Either has no values");
+        }
 public ConvertibleTo<TBase>.IEither<T1, T2, T3, T4> ConvertTo<TBase>() {
 if (Item1 != null) {
 return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4>(Item1);
@@ -384,7 +714,7 @@ if (item is T4 item4) {
 Item4 = item4;
 return;
 }
-throw new ArgumentException($"Expected argument to be either a {typeof(T1).Name}, {typeof(T2).Name}, {typeof(T3).Name} or {typeof(T4).Name} but instead got a type of {typeof(TBase).Name}: {item.GetType().Name}", "name");
+throw new ArgumentException($"Expected argument to be either a {typeof(T1).Name}, {typeof(T2).Name}, {typeof(T3).Name}, or {typeof(T4).Name} but instead got a type of {typeof(TBase).Name}: {item.GetType().Name}", "name");
 }
 public virtual TBase Value => Item1 ?? Item2 ?? Item3 ?? (TBase)Item4;
 public static implicit operator Either<T1, T2, T3, T4>(T1 t1) {

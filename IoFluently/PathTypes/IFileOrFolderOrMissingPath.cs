@@ -5,8 +5,7 @@ using TreeLinq;
 
 namespace IoFluently
 {
-    public interface IFileOrFolderOrMissingPath : SubTypesOf<IFileOrFolderOrMissingPath>.IEither<File, Folder, MissingPath>, IComparable,
-        IComparable<FileOrFolderOrMissingPath>, IEquatable<FileOrFolderOrMissingPath>
+    public partial interface IAbsolutePath
     {
         /// <summary>
         /// Indicates whether or not the absolute path is case sensitive
@@ -37,17 +36,15 @@ namespace IoFluently
         /// The file extension, if there is one, including the dot.
         /// </summary>
         IMaybe<string> Extension { get; }
+    }
 
-        File ExpectFile();
+    public interface IFileOrFolderOrMissingPath : IFileOrFolderOrMissingPath<File, Folder, MissingPath>
+    {
+    }
 
-        FileOrFolder ExpectFileOrFolder();
-
-        FileOrMissingPath ExpectFileOrMissingPath();
-
-        Folder ExpectFolder();
-
-        FolderOrMissingPath ExpectFolderOrMissingPath();
-
-        MissingPath ExpectMissingPath();
+    public interface IFileOrFolderOrMissingPath<out TFile, out TFolder, out TMissingPath> : IEither<TFile, TFolder, TMissingPath>, IComparable, IAbsolutePath
+        where TFile : File where TFolder : Folder where TMissingPath : MissingPath
+    {
+        
     }
 }

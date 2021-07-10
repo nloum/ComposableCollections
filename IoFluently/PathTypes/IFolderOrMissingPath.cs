@@ -2,10 +2,13 @@
 
 namespace IoFluently
 {
-    public partial interface IFolderOrMissingPath : SubTypesOf<IFileOrFolderOrMissingPath>.IEither<Folder, MissingPath>,
-        IFileOrFolderOrMissingPath
+    public interface IFolderOrMissingPath : IFolderOrMissingPath<Folder, MissingPath>, IFileOrFolderOrMissingPath
     {
-        Folder ExpectFolder();
-        MissingPath ExpectMissingPath();
+    }
+
+    public partial interface IFolderOrMissingPath<out TFolder, out TMissingPath> : IEither<TFolder, TMissingPath>,
+        IFileOrFolderOrMissingPath<File, TFolder, TMissingPath>
+        where TFolder : Folder where TMissingPath : MissingPath
+    {
     }
 }

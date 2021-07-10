@@ -20,7 +20,12 @@ namespace IoFluently {
     }
 }
 namespace IoFluently {
-    public partial class FileOrFolderOrMissingPath {
+    public partial interface IAbsolutePath
+    {
+        PathType Type => IoService.Type(this);
+    }
+    
+    public partial class FileOrFolderOrMissingPath<TFile, TFolder, TMissingPath> {
         public IEnumerable<FileOrFolderOrMissingPath> Ancestors => IoService.Ancestors(this);
         public Boolean CanBeSimplified => IoService.CanBeSimplified(this);
         public Boolean Exists => IoService.Exists(this);

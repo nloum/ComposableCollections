@@ -24,6 +24,62 @@ namespace IoFluently
 {
     public abstract class IoServiceBase : IIoService
     {
+        #region Formats
+
+        private readonly IMultiTypeDictionary<object> _fileFormats = new MultiTypeDictionary<object>();
+        private readonly IMultiTypeDictionary<object> _folderFormats = new MultiTypeDictionary<object>();
+        private readonly IMultiTypeDictionary<object> _missingPathFormats = new MultiTypeDictionary<object>();
+        
+        public void RegisterFileFormat<TFile>(IFileFormat<TFile> fileFormat) where TFile : File<TFile>
+        {
+            _fileFormats.TryAdd(() => fileFormat, out var _, out var __);
+        }
+
+        public void RegisterFolderFormat<TFolder>(IFolderFormat<TFolder> folderFormat) where TFolder : Folder<TFolder>
+        {
+            _folderFormats.TryAdd(() => folderFormat, out var _, out var __);
+        }
+
+        public void RegisterMissingFormat<TMissingPath>(IMissingPathFormat<TMissingPath> missingPathFormat) where TMissingPath : MissingPath<TMissingPath>
+        {
+            _missingPathFormats.TryAdd(() => missingPathFormat, out var _, out var __);
+        }
+
+        public TFile CreateFileObject<TFile>(IAbsolutePath file) where TFile : File<TFile>
+        {
+            if (!_fileFormats.TryGetValue(out IFileFormat<TFile> fileFormat))
+            {
+                throw new InvalidOperationException(
+                    $"Expected there to be a registered file format for {typeof(TFile)}, but there wasn't.");
+            }
+
+            return fileFormat.CreateFileObject(file);
+        }
+
+        public TFolder CreateFolderObject<TFolder>(IAbsolutePath folder) where TFolder : Folder<TFolder>
+        {
+            if (!_folderFormats.TryGetValue(out IFolderFormat<TFolder> folderFormat))
+            {
+                throw new InvalidOperationException(
+                    $"Expected there to be a registered folder format for {typeof(TFolder)}, but there wasn't.");
+            }
+
+            return folderFormat.CreateFolderObject(folder);
+        }
+
+        public TMissingPath CreateMissingPathObject<TMissingPath>(IAbsolutePath missingPath) where TMissingPath : MissingPath<TMissingPath>
+        {
+            if (!_missingPathFormats.TryGetValue(out IMissingPathFormat<TMissingPath> missingPathFormat))
+            {
+                throw new InvalidOperationException(
+                    $"Expected there to be a registered missing path format for {typeof(TMissingPath)}, but there wasn't.");
+            }
+
+            return missingPathFormat.CreateMissingPathObject(missingPath);
+        }
+
+        #endregion
+        
         #region Environmental stuff
 
         /// <inheritdoc />

@@ -16,10 +16,26 @@ using UnitsNet;
 
 namespace IoFluently
 {
+    public interface IFileFormat<TFile> where TFile : File<TFile>
+    {
+        TFile CreateFileObject(IAbsolutePath file);
+    }
+
+    public interface IFolderFormat<TFolder> where TFolder : Folder<TFolder>
+    {
+        TFolder CreateFolderObject(IAbsolutePath folder);
+    }
+
+    public interface IMissingPathFormat<TMissingPath> where TMissingPath : MissingPath<TMissingPath>
+    {
+        TMissingPath CreateMissingPathObject(IAbsolutePath missingPath);
+    }
+    
     public interface IIoService : IFileProvider
     {
         #region Regions - for implementations
-        
+        #region File formats
+        #endregion
         #region Environmental stuff
         #endregion
         #region Creating
@@ -49,6 +65,17 @@ namespace IoFluently
         #region LINQ-style APIs
         #endregion
         
+        #endregion
+        
+        #region File formats
+
+        void RegisterFileFormat<TFile>(IFileFormat<TFile> fileFormat) where TFile : File<TFile>;
+        void RegisterFolderFormat<TFolder>(IFolderFormat<TFolder> folderFormat) where TFolder : Folder<TFolder>;
+        void RegisterMissingFormat<TMissingPath>(IMissingPathFormat<TMissingPath> missingPathFormat) where TMissingPath : MissingPath<TMissingPath>;
+        
+        TFile CreateFileObject<TFile>(IAbsolutePath file) where TFile : File<TFile>;
+        TFolder CreateFolderObject<TFolder>(IAbsolutePath folder) where TFolder : Folder<TFolder>;
+        TMissingPath CreateMissingPathObject<TMissingPath>(IAbsolutePath missingPath) where TMissingPath : MissingPath<TMissingPath>;
         #endregion
         
         #region Environmental stuff
@@ -363,7 +390,7 @@ namespace IoFluently
         /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
         /// <param name="includeFiles">Whether to include sub-files in the return value</param>
         /// <returns>The children of this path</returns>
-        IEnumerable<FileOrFolder> Children(Folder path, string searchPattern = null,
+        IEnumerable<IFileOrFolder> Children(Folder path, string searchPattern = null,
             bool includeFolders = true, bool includeFiles = true);
 
         /// <summary>
@@ -384,7 +411,7 @@ namespace IoFluently
         /// <returns>The children of this path</returns>
         IEnumerable<Folder> ChildFolders(Folder path, string searchPattern = null);
         
-        IEnumerable<FileOrFolder> Descendants(Folder path, string searchPattern = null,
+        IEnumerable<IFileOrFolder> Descendants(Folder path, string searchPattern = null,
             bool includeFolders = true, bool includeFiles = true);
         IEnumerable<Folder> DescendantFolders(Folder path, string searchPattern = null);
         IEnumerable<File> DescendantFiles(Folder path, string searchPattern = null);
@@ -522,7 +549,7 @@ namespace IoFluently
         #region File metadata
         
         bool Exists(IFileOrFolderOrMissingPath path);
-        PathType Type(IFileOrFolderOrMissingPath path);
+        PathType Type(IAbsolutePath path);
         bool HasExtension(IFileOrFolderOrMissingPath path);
         bool IsFile(IFileOrFolderOrMissingPath path);
         bool IsFolder(IFileOrFolderOrMissingPath path);
@@ -560,7 +587,7 @@ namespace IoFluently
         /// </summary>
         IQueryable<FileOrFolderOrMissingPath> Query();
 
-        ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq(Folder path, bool includeFileContentChanges,
+        ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq<TFolder>(Folder<TFolder> path, bool includeFileContentChanges,
             bool includeSubFolders, string pattern);
         IObservable<Unit> ObserveChanges(IFileOrFolderOrMissingPath path);
         IObservable<Unit> ObserveChanges(IFileOrFolderOrMissingPath path, NotifyFilters filters);

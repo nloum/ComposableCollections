@@ -55,6 +55,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeIO", "CodeIO\CodeIO.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeIO.Tests", "CodeIO.Tests\CodeIO.Tests.csproj", "{49391FF3-68FB-4830-BF6F-64E5C0D554FB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoFluently.PathTypes", "IoFluently.PathTypes\IoFluently.PathTypes.csproj", "{09945CB2-C5A2-43F0-9241-E81971250740}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoFluently.PathTypes.Tests", "IoFluently.PathTypes.Tests\IoFluently.PathTypes.Tests.csproj", "{375C0979-D079-45CE-B04E-D31CDF503E25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -163,6 +167,14 @@ Global
 		{49391FF3-68FB-4830-BF6F-64E5C0D554FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{49391FF3-68FB-4830-BF6F-64E5C0D554FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{49391FF3-68FB-4830-BF6F-64E5C0D554FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09945CB2-C5A2-43F0-9241-E81971250740}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09945CB2-C5A2-43F0-9241-E81971250740}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09945CB2-C5A2-43F0-9241-E81971250740}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09945CB2-C5A2-43F0-9241-E81971250740}.Release|Any CPU.Build.0 = Release|Any CPU
+		{375C0979-D079-45CE-B04E-D31CDF503E25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{375C0979-D079-45CE-B04E-D31CDF503E25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{375C0979-D079-45CE-B04E-D31CDF503E25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{375C0979-D079-45CE-B04E-D31CDF503E25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

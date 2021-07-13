@@ -23,6 +23,21 @@ namespace IoFluently
             IsCaseSensitive = isCaseSensitive;
             DirectorySeparator = directorySeparator;
             IoService = ioService;
+
+            this.AssertExpectedType(PathType.Folder);
+        }
+
+        public Folder(IReadOnlyList<string> components, bool isCaseSensitive, string directorySeparator, IIoService ioService, bool skipCheck)
+        {
+            Components = components;
+            IsCaseSensitive = isCaseSensitive;
+            DirectorySeparator = directorySeparator;
+            IoService = ioService;
+
+            if (!skipCheck)
+            {
+                this.AssertExpectedType(PathType.Folder);
+            }
         }
 
         /// <inheritdoc />

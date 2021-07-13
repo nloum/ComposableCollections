@@ -59,8 +59,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoFluently.PathTypes", "IoF
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoFluently.PathTypes.Tests", "IoFluently.PathTypes.Tests\IoFluently.PathTypes.Tests.csproj", "{375C0979-D079-45CE-B04E-D31CDF503E25}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoFluently.Xml", "IoFluently.Xml\IoFluently.Xml.csproj", "{7FF99CDC-12E2-485A-AF45-E3588470A38C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -177,10 +175,6 @@ Global
 		{375C0979-D079-45CE-B04E-D31CDF503E25}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{375C0979-D079-45CE-B04E-D31CDF503E25}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{375C0979-D079-45CE-B04E-D31CDF503E25}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7FF99CDC-12E2-485A-AF45-E3588470A38C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7FF99CDC-12E2-485A-AF45-E3588470A38C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7FF99CDC-12E2-485A-AF45-E3588470A38C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7FF99CDC-12E2-485A-AF45-E3588470A38C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

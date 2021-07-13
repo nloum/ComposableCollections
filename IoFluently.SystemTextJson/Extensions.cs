@@ -6,11 +6,11 @@ namespace IoFluently.SystemTextJson
 {
     public static class Extensions
     {
-        public static AbsolutePathJsonDto ToJsonDto(this AbsolutePath fileOrFolderOrMissingPath)
+        public static AbsolutePathJsonDto ToJsonDto(this IFileOrFolderOrMissingPath fileOrFolderOrMissingPath)
         {
             return new AbsolutePathJsonDto()
             {
-                Value = fileOrFolderOrMissingPath,
+                Value = fileOrFolderOrMissingPath.ToString(),
                 Type = fileOrFolderOrMissingPath.Type,
                 FileSize = fileOrFolderOrMissingPath.Collapse(x => x.FileSize.ToString(), _ => null, _ => null),
                 ReadOnly = fileOrFolderOrMissingPath.Collapse(x => (bool?)x.IsReadOnly, _ => null, _ => null),

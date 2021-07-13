@@ -8,7 +8,7 @@ namespace IoFluently
 {
     public class AbsolutePathDescendants : AbsolutePathDescendantsOrChildren, IFileProvider
     {
-        internal AbsolutePathDescendants(Folder path, string pattern, IIoService ioService) : base(path, pattern, true, ioService)
+        public AbsolutePathDescendants(Folder path, string pattern) : base(path, pattern, true)
         {
         }
 

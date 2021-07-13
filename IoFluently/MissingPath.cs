@@ -23,6 +23,8 @@ namespace IoFluently
             IsCaseSensitive = isCaseSensitive;
             DirectorySeparator = directorySeparator;
             IoService = ioService;
+
+            this.AssertExpectedType(PathType.MissingPath);
         }
 
         /// <inheritdoc />

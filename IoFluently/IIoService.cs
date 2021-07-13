@@ -57,6 +57,8 @@ namespace IoFluently
 
         int GetBufferSizeOrDefaultInBytes(Information? bufferSize);
 
+        EmptyFolderMode EmptyFolderMode { get; }
+        
         /// <summary>
         /// Indicates that empty directories can exist. This is true for every built-in implementation except the ZipIoService,
         /// because in zip files directories don't exist.

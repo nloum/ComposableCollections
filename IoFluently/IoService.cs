@@ -31,7 +31,9 @@ namespace IoFluently
         private bool? _isCaseSensitiveByDefault = null;
 
         public override bool CanEmptyDirectoriesExist => true;
-        
+
+        public override EmptyFolderMode EmptyFolderMode { get; }
+
         public override IQueryable<AbsolutePath> Query()
         {
             return new Queryable<AbsolutePath>(new QueryContext());

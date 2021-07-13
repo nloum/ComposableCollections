@@ -5,7 +5,7 @@ namespace IoFluently
 {
     public class AbsolutePathChildren : AbsolutePathDescendantsOrChildren
     {
-        internal AbsolutePathChildren(Folder path, string pattern, IIoService ioService) : base(path, pattern, false, ioService)
+        public AbsolutePathChildren(Folder path, string pattern) : base(path, pattern, false)
         {
         }
 

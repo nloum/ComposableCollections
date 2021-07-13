@@ -12,12 +12,12 @@ namespace IoFluently
         protected readonly Folder _path;
         protected readonly string _pattern;
 
-        protected AbsolutePathDescendantsOrChildren(Folder path, string pattern, bool includeSubFolders, IIoService ioService)
+        protected AbsolutePathDescendantsOrChildren(Folder path, string pattern, bool includeSubFolders)
         {
             _path = path;
             _pattern = pattern;
             IncludeSubFolders = includeSubFolders;
-            IoService = ioService;
+            IoService = path.IoService;
         }
 
         public IIoService IoService { get; }

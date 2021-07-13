@@ -78,7 +78,7 @@ namespace IoFluently.Tests
                 .WriteAllText( configFileContents );
 
             var configuration = new ConfigurationBuilder()
-                .AddJsonFile( root.Descendants, "appsettings.json", false, false )
+                .AddJsonFile( new AbsolutePathDescendants(root, "*"), "appsettings.json", false, false )
                 .Build();
 
             configuration["ConfigSection1:Value1"].Should().Be("astringvalue");

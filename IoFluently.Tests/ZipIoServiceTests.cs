@@ -14,11 +14,12 @@ namespace IoFluently.Tests
         public void ShouldZipUpSingleFile()
         {
             var inMemoryIoService = new InMemoryIoService(true, "/", false);
-            var textFilePath = (inMemoryIoService.DefaultRelativePathBase / "test.txt").ExpectTextFileOrMissingPath();
-            textFilePath.WriteAllText("Test 1 2 3");
+            var textFilePath = (inMemoryIoService.DefaultRelativePathBase / "test.txt")
+                .ExpectTextFileOrMissingPath()
+                .WriteAllText("Test 1 2 3");
             var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip").ExpectFileOrMissingPath();
-            var result = testZipFilePath.ExpectZipFile(true);
-            result.Zip(textFilePath, textFilePath.Path.Parent.Value);
+            var result = testZipFilePath.ExpectZipFileOrMissingPath(true);
+            result.Zip(textFilePath, textFilePath.Parent);
             
             using (var stream = result.ZipFilePath.Open(FileMode.Open, FileAccess.Read))
             {
@@ -42,7 +43,7 @@ namespace IoFluently.Tests
             var textFilePath = folder / "test.txt";
             textFilePath.ExpectTextFileOrMissingPath().WriteAllText("Test 1 2 3");
             var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip").ExpectFileOrMissingPath();
-            var result = testZipFilePath.ExpectZipFile(true);
+            var result = testZipFilePath.ExpectZipFileOrMissingPath(true);
             result.Zip(folder, folder.Parent.Value);
             
             using (var stream = result.ZipFilePath.Open(FileMode.Open, FileAccess.Read))

@@ -1,0 +1,22 @@
+﻿[
+  {
+    Value: {SolutionDirectory}test_folder\readme.md,
+    FileSize: 50 B,
+    ReadOnly: false,
+    CreationTime: DateTimeOffset_1,
+    LastAccessTime: DateTimeOffset_2,
+    LastWriteTime: DateTimeOffset_3
+  },
+  {
+    Value: {SolutionDirectory}test_folder\readme.txt,
+    FileSize: 50 B,
+    ReadOnly: false,
+    CreationTime: DateTimeOffset_3,
+    LastAccessTime: DateTimeOffset_2,
+    LastWriteTime: DateTimeOffset_3
+  },
+  {
+    Value: {SolutionDirectory}test_folder\subfolder,
+    Type: Folder
+  }
+]

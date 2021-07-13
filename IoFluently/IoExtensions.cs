@@ -30,8 +30,8 @@ namespace IoFluently
             }
             
             return path.Collapse(
-                file => throw new InvalidOperationException(),
-                folder => throw new InvalidOperationException(),
+                file => throw file.AssertExpectedType(PathType.MissingPath),
+                folder => throw folder.AssertExpectedType(PathType.MissingPath),
                 missingPath =>
                 {
                     if (missingPath is MissingPath missingPathObj)
@@ -41,6 +41,16 @@ namespace IoFluently
                     
                     return new MissingPath(missingPath);
                 });
+        }
+
+        public static AbsolutePath ExpectFileOrFolderOrMissingPath(this IFileOrFolderOrMissingPath path)
+        {
+            if (path is AbsolutePath absolutePath)
+            {
+                return absolutePath;
+            }
+            
+            return new AbsolutePath(path);
         }
 
         public static File ExpectFile(this IFileOrFolderOrMissingPath path)
@@ -60,8 +70,8 @@ namespace IoFluently
 
                     return new File(file);
                 },
-                folder => throw new InvalidOperationException(),
-                missingPath => throw new InvalidOperationException());
+                folder => throw folder.AssertExpectedType(PathType.File),
+                missingPath => throw missingPath.AssertExpectedType(PathType.File));
         }
 
         public static Folder ExpectFolder(this IFileOrFolderOrMissingPath path)
@@ -72,7 +82,7 @@ namespace IoFluently
             }
             
             return path.Collapse(
-                file => throw new InvalidOperationException(),
+                file => throw file.AssertExpectedType(PathType.Folder),
                 folder =>
                 {
                     if (folder is Folder folderObj)
@@ -82,22 +92,38 @@ namespace IoFluently
 
                     return new Folder(folder);
                 },
-                missingPath => throw new InvalidOperationException());
+                missingPath => throw missingPath.AssertExpectedType(PathType.Folder));
         }
 
         public static IFileOrFolder ExpectFileOrFolder(this IFileOrFolderOrMissingPath path)
         {
-            return path.Collapse(file => (IFileOrFolder)file, folder => folder, missingPath => throw new InvalidOperationException());
+            return path.Collapse(file => (IFileOrFolder)file, folder => folder, missingPath => throw missingPath.AssertExpectedType(PathType.File, PathType.Folder));
         }
 
         public static IFileOrMissingPath ExpectFileOrMissingPath(this IFileOrFolderOrMissingPath path)
         {
-            return path.Collapse(file => (IFileOrMissingPath)file, folder => throw new InvalidOperationException(), missingPath => missingPath);
+            return path.Collapse(
+            file => (IFileOrMissingPath)file,
+            folder => {
+                if (!folder.IoService.CanEmptyDirectoriesExist)
+                {
+                    switch (folder.IoService.EmptyFolderMode)
+                    {
+                        case EmptyFolderMode.EmptyFilesAreFolders:
+                            return new File(folder);
+                        case EmptyFolderMode.AllNonExistentPathsAreFolders:
+                            return new MissingPath(folder);
+                    }
+                }
+
+                throw folder.AssertExpectedType(PathType.File, PathType.MissingPath);
+            },
+            missingPath => missingPath);
         }
 
         public static IFolderOrMissingPath ExpectFolderOrMissingPath(this IFileOrFolderOrMissingPath path)
         {
-            return path.Collapse(file => throw new InvalidOperationException(), folder => (IFolderOrMissingPath)folder, missingPath => missingPath);
+            return path.Collapse(file => throw file.AssertExpectedType(PathType.Folder, PathType.MissingPath), folder => (IFolderOrMissingPath)folder, missingPath => missingPath);
         }
     
         /// <summary>

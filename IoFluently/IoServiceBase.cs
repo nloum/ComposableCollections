@@ -27,6 +27,7 @@ namespace IoFluently
     {
         #region Environmental stuff
 
+        public abstract EmptyFolderMode EmptyFolderMode { get; }
         /// <inheritdoc />
         public abstract bool CanEmptyDirectoriesExist { get; }
 
@@ -2018,7 +2019,7 @@ namespace IoFluently
             }, (IFileOrFolder node, string name, out IFileOrFolder child) =>
             {
                 child = (new Folder(node) / name)
-                    .Collapse(file => (IFileOrFolder)file, folder => (IFileOrFolder)folder, missingPath => throw new InvalidOperationException());
+                    .Collapse(file => (IFileOrFolder)file, folder => (IFileOrFolder)folder, missingPath => throw missingPath.AssertExpectedType(PathType.File, PathType.Folder));
                 if (CanEmptyDirectoriesExist)
                 {
                     var result = child.Path.Exists;

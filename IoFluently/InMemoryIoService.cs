@@ -94,6 +94,8 @@ namespace IoFluently
 
         public override bool CanEmptyDirectoriesExist => true;
 
+        public override EmptyFolderMode EmptyFolderMode { get; }
+
         private Folder _currentDirectory;
         private Folder _temporaryFolder = null;
         

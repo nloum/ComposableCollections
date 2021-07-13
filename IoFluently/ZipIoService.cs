@@ -6,11 +6,18 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using LiveLinq.Set;
-using SimpleMonads;
 using UnitsNet;
 
 namespace IoFluently
 {
+    public static class ZipIoExtensions
+    {
+        public static ZipIoService ExpectZipFileOrMissingPath(this IFileOrMissingPath path, bool enableOpenFilesTracking = false)
+        {
+            return new ZipIoService(path, enableOpenFilesTracking);
+        }
+    }
+    
     /// <summary>
     /// An IIoService implementation that is backed by a zip file
     /// </summary>
@@ -18,14 +25,21 @@ namespace IoFluently
     {
         private Folder _temporaryFolder;
         private bool _hasZipFileBeenCreatedYet = false;
+        private EmptyFolderMode _emptyFolderMode = EmptyFolderMode.AllNonExistentPathsAreFolders;
         
         /// <summary>
         /// The path to the zip file
         /// </summary>
         public IFileOrMissingPath ZipFilePath { get; }
 
-        public ZipFolderMode FolderMode { get; set; } = ZipFolderMode.AllNonExistentPathsAreFolders;
-        public override bool CanEmptyDirectoriesExist => FolderMode == ZipFolderMode.EmptyFilesAreDirectories;
+        public override EmptyFolderMode EmptyFolderMode => _emptyFolderMode;
+
+        public void UpdateEmptyFolderMode(EmptyFolderMode newMode)
+        {
+            _emptyFolderMode = newMode;
+        }
+        
+        public override bool CanEmptyDirectoriesExist => EmptyFolderMode == EmptyFolderMode.EmptyFilesAreFolders;
 
         public CompressionLevel CompressionLevel { get; set; } = CompressionLevel.Fastest;
 
@@ -44,7 +58,7 @@ namespace IoFluently
             
             ZipFilePath = zipFilePath;
             var path = new AbsolutePath(new[] {"/"}, true, DefaultDirectorySeparator, this);
-            DefaultRelativePathBase = new Folder(path);
+            DefaultRelativePathBase = new Folder(path.Components, path.IsCaseSensitive, path.DirectorySeparator, this, true);
 
             if (DefaultRelativePathBase == null)
             {
@@ -226,12 +240,12 @@ namespace IoFluently
                 var zipEntry = GetZipArchiveEntry(archive, path);
                 if (zipEntry == null)
                 {
-                    if (FolderMode == ZipFolderMode.AllNonExistentPathsAreFolders)
+                    if (EmptyFolderMode == EmptyFolderMode.AllNonExistentPathsAreFolders)
                     {
                         return IoFluently.PathType.Folder;
                     }
 
-                    if (FolderMode == ZipFolderMode.DirectoriesExistIfTheyContainFiles)
+                    if (EmptyFolderMode == EmptyFolderMode.FoldersOnlyExistIfTheyContainFiles)
                     {
                         var hasDescendants = archive.Entries.Any(entry =>
                             TryParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Value.Ancestors(true)
@@ -246,7 +260,7 @@ namespace IoFluently
                     return IoFluently.PathType.MissingPath;
                 }
 
-                if (FolderMode == ZipFolderMode.EmptyFilesAreDirectories && zipEntry.Length == 0)
+                if (EmptyFolderMode == EmptyFolderMode.EmptyFilesAreFolders && zipEntry.Length == 0)
                 {
                     return IoFluently.PathType.Folder;
                 }

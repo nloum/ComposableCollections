@@ -88,7 +88,7 @@ namespace IoFluently
             if (obj.GetType() != this.GetType()) return false;
             return Equals((AbsolutePath) obj);
         }
-
+        
         /// <summary>
         /// Adds a subpath to all this relative path
         /// </summary>

@@ -90,9 +90,9 @@ namespace IoFluently {
                         var lambdaExpression = unaryExpression.Operand as LambdaExpression;
                         if (lambdaExpression.Body is BinaryExpression methodBinaryExpression)
                         {
-                            if (methodBinaryExpression.Method == typeof(FileOrFolderOrMissingPath).GetMethod("op_Equality"))
+                            if (methodBinaryExpression.Method == typeof(AbsolutePath).GetMethod("op_Equality"))
                             {
-                                var absolutePath = (FileOrFolderOrMissingPath)GetConstant(methodBinaryExpression.Right);
+                                var absolutePath = (AbsolutePath)GetConstant(methodBinaryExpression.Right);
 
                                 var isParent = false;
                                 var parentExpr = methodBinaryExpression.Left;
@@ -115,11 +115,11 @@ namespace IoFluently {
                             {
                                 if (methodCallExpression2.Arguments[0] is MemberExpression memberExpression)
                                 {
-                                    var ancestorsMethod = typeof(FileOrFolderOrMissingPath)
+                                    var ancestorsMethod = typeof(AbsolutePath)
                                         .GetProperties()
                                         .Single(property => property.Name == "Ancestors");
 
-                                    var ancestor = (FileOrFolderOrMissingPath)GetConstant(methodCallExpression2.Arguments[1]);
+                                    var ancestor = (AbsolutePath)GetConstant(methodCallExpression2.Arguments[1]);
                                     
                                     if (memberExpression.Member == ancestorsMethod)
                                     {
@@ -161,7 +161,7 @@ namespace IoFluently {
             {
                 if (mce.Expression is MemberExpression mce2 && mce2.Expression == parentOf)
                 {
-                    if (mce.Member == typeof(IMaybe<FileOrFolderOrMissingPath>).GetProperty("Value"))
+                    if (mce.Member == typeof(IMaybe<AbsolutePath>).GetProperty("Value"))
                     {
                         return true;
                     }

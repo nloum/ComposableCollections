@@ -5,11 +5,11 @@ namespace IoFluently
 {
     internal class PathWithKnownFormatAsync<TReader> : IPathWithKnownFormatAsync<TReader>
     {
-        public FileOrFolderOrMissingPath Path { get; }
+        public AbsolutePath Path { get; }
         
         private Func<Task<TReader>> _read;
 
-        public PathWithKnownFormatAsync(FileOrFolderOrMissingPath path, Func<Task<TReader>> read)
+        public PathWithKnownFormatAsync(AbsolutePath path, Func<Task<TReader>> read)
         {
             Path = path;
             _read = read;
@@ -46,11 +46,11 @@ namespace IoFluently
     
     internal class PathWithKnownFormatSync<TReader> : IPathWithKnownFormatSync<TReader>
     {
-        public FileOrFolderOrMissingPath Path { get; }
+        public AbsolutePath Path { get; }
         
         private Func<TReader> _read;
 
-        public PathWithKnownFormatSync(FileOrFolderOrMissingPath path, Func<TReader> read)
+        public PathWithKnownFormatSync(AbsolutePath path, Func<TReader> read)
         {
             Path = path;
             _read = read;
@@ -87,10 +87,10 @@ namespace IoFluently
 
     internal class PathWithKnownFormatAsync<TReader, TWriter> : PathWithKnownFormatAsync<TReader>, IPathWithKnownFormatAsync<TReader, TWriter>
     {
-        private readonly FileOrFolderOrMissingPath _path;
+        private readonly AbsolutePath _path;
         private Func<TWriter, Task> _write;
 
-        public PathWithKnownFormatAsync(FileOrFolderOrMissingPath path, Func<Task<TReader>> read,
+        public PathWithKnownFormatAsync(AbsolutePath path, Func<Task<TReader>> read,
             Func<TWriter, Task> write) : base(path, read)
         {
             _path = path;
@@ -102,7 +102,7 @@ namespace IoFluently
             return _write(writer);
         }
 
-        public FileOrFolderOrMissingPath Path { get; }
+        public AbsolutePath Path { get; }
 
         public override string ToString()
         {
@@ -112,10 +112,10 @@ namespace IoFluently
     
     internal class PathWithKnownFormatAsyncSync<TReader, TWriter> : PathWithKnownFormatAsync<TReader>, IPathWithKnownFormatAsyncSync<TReader, TWriter>
     {
-        private readonly FileOrFolderOrMissingPath _path;
+        private readonly AbsolutePath _path;
         private Action<TWriter> _write;
 
-        public PathWithKnownFormatAsyncSync(FileOrFolderOrMissingPath path, Func<Task<TReader>> read,
+        public PathWithKnownFormatAsyncSync(AbsolutePath path, Func<Task<TReader>> read,
             Action<TWriter> write) : base(path, read)
         {
             _path = path;
@@ -156,10 +156,10 @@ namespace IoFluently
     
     internal class PathWithKnownFormatSync<TReader, TWriter> : PathWithKnownFormatSync<TReader>, IPathWithKnownFormatSync<TReader, TWriter>
     {
-        private readonly FileOrFolderOrMissingPath _path;
+        private readonly AbsolutePath _path;
         private Action<TWriter> _write;
 
-        public PathWithKnownFormatSync(FileOrFolderOrMissingPath path, Func<TReader> read,
+        public PathWithKnownFormatSync(AbsolutePath path, Func<TReader> read,
             Action<TWriter> write) : base(path, read)
         {
             _path = path;
@@ -200,10 +200,10 @@ namespace IoFluently
     
     internal class PathWithKnownFormatSyncAsync<TReader, TWriter> : PathWithKnownFormatSync<TReader>, IPathWithKnownFormatSyncAsync<TReader, TWriter>
     {
-        private readonly FileOrFolderOrMissingPath _path;
+        private readonly AbsolutePath _path;
         private Func<TWriter, Task> _write;
 
-        public PathWithKnownFormatSyncAsync(FileOrFolderOrMissingPath path, Func<TReader> read,
+        public PathWithKnownFormatSyncAsync(AbsolutePath path, Func<TReader> read,
             Func<TWriter, Task> write) : base(path, read)
         {
             _path = path;
@@ -257,7 +257,7 @@ namespace IoFluently
         /// <summary>
         /// The path of the file.
         /// </summary>
-        FileOrFolderOrMissingPath Path { get; }
+        AbsolutePath Path { get; }
         
         /// <summary>
         /// Reads from the file.
@@ -281,7 +281,7 @@ namespace IoFluently
         /// <summary>
         /// The path of the file.
         /// </summary>
-        FileOrFolderOrMissingPath Path { get; }
+        AbsolutePath Path { get; }
         
         /// <summary>
         /// Reads from the file.

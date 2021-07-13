@@ -7,11 +7,11 @@ namespace IoFluently
     {
         internal AbsolutePathChildren(Folder path, string pattern, IIoService ioService) : base(path, pattern, false, ioService)
         {
-        }  
+        }
 
-        public override IEnumerator<FileOrFolderOrMissingPath> GetEnumerator()
+        public override IEnumerator<AbsolutePath> GetEnumerator()
         {
-            return _path.IoService.Children(_path, _pattern).GetEnumerator();
+            return _path.IoService.Children(_path, _pattern).Select(x => x.Path).GetEnumerator();
         }
     }
 }

@@ -5,10 +5,10 @@ using Microsoft.Extensions.FileProviders;
 namespace IoFluently
 {
     public class AbsolutePathFileInfoAdapter : IFileInfo {
-        private readonly File _absolutePath;
+        private readonly AbsolutePath _absolutePath;
         private readonly bool _isPhysicalPath;
 
-        public AbsolutePathFileInfoAdapter( File absolutePath, bool isPhysicalPath = false )
+        public AbsolutePathFileInfoAdapter( AbsolutePath absolutePath, bool isPhysicalPath = false )
         {
             _absolutePath = absolutePath;
             _isPhysicalPath = isPhysicalPath;

@@ -7,7 +7,7 @@ using TreeLinq;
 
 namespace IoFluently
 {
-    public class AbsolutePaths : IComparable, IComparable<AbsolutePaths>, IEquatable<AbsolutePaths>, IEnumerable<FileOrFolderOrMissingPath>
+    public class AbsolutePaths : IComparable, IComparable<AbsolutePaths>, IEquatable<AbsolutePaths>, IEnumerable<AbsolutePath>
     {
         /// <summary>
         /// Indicates whether or not the absolute paths are case sensitive
@@ -65,11 +65,11 @@ namespace IoFluently
             return GetEnumerator();
         }
 
-        public IEnumerator<FileOrFolderOrMissingPath> GetEnumerator()
+        public IEnumerator<AbsolutePath> GetEnumerator()
         {
             foreach (var path in Paths)
             {
-                yield return new FileOrFolderOrMissingPath(IsCaseSensitive, DirectorySeparator, IoService, path);
+                yield return new AbsolutePath(IsCaseSensitive, DirectorySeparator, IoService, path);
             }
         }
 
@@ -124,9 +124,9 @@ namespace IoFluently
         /// <param name="whatToAdd">The subpath that will be added to all the absolute paths</param>
         /// <returns>A new AbsolutePaths object where all absolute paths in it has an additional subpath appended to it</returns>
         public static AbsolutePaths operator / (AbsolutePaths absPath,
-            Func<FileOrFolderOrMissingPath, IEnumerable<RelativePath>> whatToAdd)
+            Func<AbsolutePath, IEnumerable<RelativePath>> whatToAdd)
         {
-            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / (abs => whatToAdd(new FileOrFolderOrMissingPath(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, abs)).Select(x => x.Path)));
+            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / (abs => whatToAdd(new AbsolutePath(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, abs)).Select(x => x.Path)));
         }
         
         /// <summary>

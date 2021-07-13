@@ -14,12 +14,12 @@ namespace IoFluently
 
         public IFileInfo GetFileInfo(string subpath)
         {
-            return new AbsolutePathFileInfoAdapter((_path / subpath).ExpectFile());
+            return new AbsolutePathFileInfoAdapter(_path / subpath);
         }
 
         public IDirectoryContents GetDirectoryContents(string subpath)
         {
-            return new AbsolutePathDirectoryContents((_path / subpath).ExpectFolder());
+            return new AbsolutePathDirectoryContents(_path / subpath);
         }
 
         public IChangeToken Watch(string filter)
@@ -28,9 +28,9 @@ namespace IoFluently
             return new EmptyChangeToken();
         }
         
-        public override IEnumerator<FileOrFolderOrMissingPath> GetEnumerator()
+        public override IEnumerator<AbsolutePath> GetEnumerator()
         {
-            return _path.IoService.Descendants(_path, _pattern).GetEnumerator();
+            return _path.IoService.Descendants(_path, _pattern).Select(x => x.Path).GetEnumerator();
         }
     }
 }

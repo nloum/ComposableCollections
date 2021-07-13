@@ -87,7 +87,7 @@ namespace IoFluently
         }
         
         /// <inheritdoc />
-        public override IQueryable<FileOrFolderOrMissingPath> Query()
+        public override IQueryable<AbsolutePath> Query()
         {
             throw new NotImplementedException();
         }
@@ -131,12 +131,12 @@ namespace IoFluently
             if (defaultDirectorySeparatorForThisEnvironment == "/")
             {
                 RootFolders.Add("/", new InMemoryFolder());
-                _currentDirectory = ParseAbsolutePath("/").ExpectFolder();
+                _currentDirectory = ParseAbsolutePath("/");
             }
             else
             {
                 RootFolders.Add("C:", new InMemoryFolder());
-                _currentDirectory = ParseAbsolutePath("C:\\").ExpectFolder();
+                _currentDirectory = ParseAbsolutePath("C:\\");
             }
         }
 
@@ -150,13 +150,13 @@ namespace IoFluently
         /// Sets the temporary folder path
         /// </summary>
         /// <param name="absolutePath">The new temporary folder path</param>
-        public void SetTemporaryFolder(Folder absolutePath)
+        public void SetTemporaryFolder(AbsolutePath absolutePath)
         {
             _temporaryFolder = absolutePath;
         }
 
         /// <inheritdoc />
-        public override ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq(Folder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        public override ISetChanges<AbsolutePath> ToLiveLinq(Folder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             throw new NotImplementedException();
         }
@@ -164,18 +164,18 @@ namespace IoFluently
         /// <inheritdoc />
         public override IObservableReadOnlySet<Folder> Roots => RootFolders.ToLiveLinq().KeysAsSet().Select(x => ParseAbsolutePath(x).ExpectFolder()).ToReadOnlyObservableSet();
 
-        private IMaybe<InMemoryFile> GetFile(IFileOrFolderOrMissingPath path)
+        private IMaybe<InMemoryFile> GetFile(IHasAbsolutePath path)
         {
-            path = Simplify(path);
-            var components = path.Components;
+            path = Simplify(path.Path);
+            var components = path.Path.Path.Components;
             if (RootFolders.ContainsKey(components[0]))
             {
-                return GetFile(RootFolders[components[0]], components.Skip(1).ToList(), path);
+                return GetFile(RootFolders[components[0]], components.Skip(1).ToList(), path.Path);
             }
             return Nothing<InMemoryFile>(() => throw new InvalidOperationException($"The root folder of {path} does not exist"));
         }
 
-        private IMaybe<InMemoryFile> GetFile(InMemoryFolder folder, IReadOnlyList<string> components, IFileOrFolderOrMissingPath originalPath)
+        private IMaybe<InMemoryFile> GetFile(InMemoryFolder folder, IReadOnlyList<string> components, AbsolutePath originalPath)
         {
             if (components.Count == 0)
             {
@@ -200,18 +200,18 @@ namespace IoFluently
             return Nothing<InMemoryFile>(() => throw new InvalidOperationException($"The {components[0]} part of the path {originalPath} is missing"));
         }
         
-        private IMaybe<InMemoryFolder> GetFolder(IFileOrFolderOrMissingPath path)
+        private IMaybe<InMemoryFolder> GetFolder(IHasAbsolutePath path)
         {
-            path = Simplify(path);
-            var components = path.Components;
+            path = Simplify(path.Path);
+            var components = path.Path.Path.Components;
             if (RootFolders.ContainsKey(components[0]))
             {
-                return GetFolder(RootFolders[components[0]], components.Skip(1).ToList(), path);
+                return GetFolder(RootFolders[components[0]], components.Skip(1).ToList(), path.Path);
             }
             return Nothing<InMemoryFolder>(() => throw new InvalidOperationException($"The root folder of {path} does not exist"));
         }
 
-        private IMaybe<InMemoryFolder> GetFolder(InMemoryFolder folder, IReadOnlyList<string> components, IFileOrFolderOrMissingPath originalPath)
+        private IMaybe<InMemoryFolder> GetFolder(InMemoryFolder folder, IReadOnlyList<string> components, AbsolutePath originalPath)
         {
             if (components.Count == 0)
             {
@@ -240,7 +240,7 @@ namespace IoFluently
         /// <inheritdoc />
         public override IEnumerable<FileOrFolder> Children(Folder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
-            var folder = GetFolder(path);
+            var folder = GetFolder(path.Path);
             if (!folder.HasValue)
             {
                 return Enumerable.Empty<FileOrFolder>();
@@ -257,7 +257,7 @@ namespace IoFluently
         public override IEnumerable<FileOrFolder> Descendants(Folder path, string searchPattern = null, bool includeFolders = true,
             bool includeFiles = true)
         {
-            var folder = GetFolder(path);
+            var folder = GetFolder(path.Path);
             if (!folder.HasValue)
             {
                 return Enumerable.Empty<FileOrFolder>();
@@ -273,10 +273,26 @@ namespace IoFluently
 
         public override MissingPath DeleteFile(IoFluently.File path)
         {
-            path = Simplify(path).ExpectFile();
-            var parentFolder = GetFolder(TryParent(path).Value).Value;
-            parentFolder.Files.Remove(path.Name);
-            return new MissingPath(path);
+            path = Simplify(path.Path);
+            var parentFolder = GetFolder(TryParent(path.Path).Value).Value;
+            parentFolder.Files.Remove(path.Path.Name);
+            return new MissingPath(path.Path);
+        }
+
+        /// <inheritdoc />
+        public override AbsolutePath Decrypt(AbsolutePath path)
+        {
+            GetFile(path).Value.IsEncrypted = false;
+
+            return path;
+        }
+
+        /// <inheritdoc />
+        public override AbsolutePath Encrypt(AbsolutePath path)
+        {
+            GetFile(path).Value.IsEncrypted = true;
+
+            return path;
         }
 
         /// <inheritdoc />
@@ -316,7 +332,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override PathType Type(IFileOrFolderOrMissingPath path)
+        public override PathType Type(AbsolutePath path)
         {
             path = Simplify(path);
 
@@ -350,12 +366,12 @@ namespace IoFluently
         /// <inheritdoc />
         public override MissingPath DeleteFolder(Folder path, bool recursive = false)
         {
-            var parentFolder = GetFolder(TryParent(path).Value);
-            parentFolder.Value.Folders.Remove(Simplify(path).Name);
-            return new MissingPath(path);
+            var parentFolder = GetFolder(TryParent(path.Path).Value);
+            parentFolder.Value.Folders.Remove(Simplify(path.Path).Name);
+            return new MissingPath(path.Path);
         }
 
-        public override Stream Open(IFileOrMissingPath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,
+        public override Stream Open(FileOrMissingPath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,
             FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.None | FileOptions.SequentialScan,
             Information? bufferSize = default, bool createRecursively = false)
@@ -367,12 +383,12 @@ namespace IoFluently
                 if (fileMode == FileMode.Create || fileMode == FileMode.CreateNew ||
                     fileMode == FileMode.OpenOrCreate)
                 {
-                    var pathParent = TryParent(path).Value;
+                    var pathParent = TryParent(path.Path).Value;
                     InMemoryFolder parentFolder = null;
                     var maybeParentFolder = GetFolder(pathParent);
                     if (!maybeParentFolder.HasValue)
                     {
-                        CreateFolder(pathParent.ExpectMissingPath());
+                        CreateFolder(pathParent);
                         parentFolder = GetFolder(pathParent).Value;
                     }
                     else
@@ -391,7 +407,7 @@ namespace IoFluently
                         LastWriteTime = now,
                     };
                 
-                    parentFolder.Files.Add(path.Name, file);
+                    parentFolder.Files.Add(path.Path.Name, file);
                     
                     file.Lock.AcquireReaderLock(0);
                     var memoryStream = new MemoryStream();
@@ -434,9 +450,9 @@ namespace IoFluently
         /// <inheritdoc />
         public override Folder CreateFolder(MissingPath path, bool createRecursively = false)
         {
-            var folder = GetFolder(TryParent(path).Value).Value;
-            EnsureFolderExists(folder, new[]{path.Name});
-            return new Folder(path);
+            var folder = GetFolder(TryParent(path.Path).Value).Value;
+            EnsureFolderExists(folder, new[]{path.Path.Name});
+            return new Folder(path.Path);
         }
 
         private void EnsureFolderExists(InMemoryFolder folder, IReadOnlyList<string> components)
@@ -466,7 +482,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IObservable<FileOrFolderOrMissingPath> Renamings(IFileOrFolderOrMissingPath path)
+        public override IObservable<AbsolutePath> Renamings(AbsolutePath path)
         {
             throw new NotImplementedException();
         }

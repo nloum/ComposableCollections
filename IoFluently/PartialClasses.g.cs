@@ -20,11 +20,6 @@ namespace IoFluently {
     }
 }
 namespace IoFluently {
-    public partial interface IAbsolutePath
-    {
-        PathType Type => IoService.Type(this);
-    }
-    
     public partial class AbsolutePath {
         public IEnumerable<AbsolutePath> Ancestors => IoService.Ancestors(this);
         public Boolean CanBeSimplified => IoService.CanBeSimplified(this);
@@ -32,7 +27,7 @@ namespace IoFluently {
         public Boolean IsFile => IoService.IsFile(this);
         public Boolean IsFolder => IoService.IsFolder(this);
         public Folder Root => IoService.Root(this);
-        public IMaybe<Folder> Parent => IoService.TryParent(this);
+        public IMaybe<AbsolutePath> Parent => IoService.TryParent(this);
         public PathType Type => IoService.Type(this);
         public AbsolutePath WithoutExtension => IoService.WithoutExtension(this);
     }
@@ -53,5 +48,10 @@ namespace IoFluently {
         public DateTimeOffset LastAccessTime => IoService.LastAccessTime(this);
         public DateTimeOffset LastWriteTime => IoService.LastWriteTime(this);
         public Folder Parent => IoService.Parent(this);
+    }
+}
+namespace IoFluently {
+    public partial interface IHasAbsolutePath {
+        public Boolean HasExtension => IoService.HasExtension(this);
     }
 }

@@ -106,7 +106,7 @@ namespace IoFluently
         /// </summary>
         /// <param name="other">The object that this object will be compared to</param>
         /// <returns>True if the objects are equal; false otherwise</returns>
-        public bool Equals(FileOrFolderOrMissingPath other)
+        public bool Equals(AbsolutePath other)
         {
             return GetHashCode().Equals(other.GetHashCode());
         }
@@ -117,7 +117,7 @@ namespace IoFluently
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((FileOrFolderOrMissingPath) obj);
+            return Equals((AbsolutePath) obj);
         }
 
         /// <summary>

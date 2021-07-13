@@ -18,7 +18,7 @@ namespace IoFluently.Tests
             textFilePath.WriteAllText("Test 1 2 3");
             var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip").ExpectFileOrMissingPath();
             var result = testZipFilePath.ExpectZipFile(true);
-            result.Zip(textFilePath, textFilePath.Parent.Value);
+            result.Zip(textFilePath, textFilePath.Path.Parent.Value);
             
             using (var stream = result.ZipFilePath.Open(FileMode.Open, FileAccess.Read))
             {

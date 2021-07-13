@@ -6,7 +6,7 @@ namespace IoFluently.SystemTextJson
 {
     public static class Extensions
     {
-        public static AbsolutePathJsonDto ToJsonDto(this FileOrFolderOrMissingPath fileOrFolderOrMissingPath)
+        public static AbsolutePathJsonDto ToJsonDto(this AbsolutePath fileOrFolderOrMissingPath)
         {
             return new AbsolutePathJsonDto()
             {

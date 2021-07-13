@@ -45,7 +45,7 @@ namespace IoFluently.Tests
                 var result = new InMemoryIoService(false, "/", enableOpenFilesTracking);
                 result.RootFolders.Add("/", new InMemoryIoService.InMemoryFolder());
                 result.SetCurrentDirectory(result.ParseAbsolutePath("/").ExpectFolder());
-                result.SetTemporaryFolder(result.ParseAbsolutePath("/").ExpectFolder());
+                result.SetTemporaryFolder(result.ParseAbsolutePath("/"));
                 return result;
             }
             else if (type == IoServiceType.InMemoryUnixIoService)
@@ -53,7 +53,7 @@ namespace IoFluently.Tests
                 var result = new InMemoryIoService(true, "/", enableOpenFilesTracking);
                 result.RootFolders.Add("/", new InMemoryIoService.InMemoryFolder());
                 result.SetCurrentDirectory(result.ParseAbsolutePath("/").ExpectFolder());
-                result.SetTemporaryFolder(result.ParseAbsolutePath("/").ExpectFolder());
+                result.SetTemporaryFolder(result.ParseAbsolutePath("/"));
                 return result;
             }
             else if (type == IoServiceType.InMemoryZipIoService)
@@ -62,7 +62,7 @@ namespace IoFluently.Tests
                 inMemoryIoService.RootFolders.Add("/", new InMemoryIoService.InMemoryFolder());
                 var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip").ExpectFileOrMissingPath();
                 var result = testZipFilePath.ExpectZipFile(true);
-                result.SetTemporaryFolder(result.ParseAbsolutePath("/tmp").ExpectFolder());
+                result.SetTemporaryFolder(result.ParseAbsolutePath("/tmp"));
                 return result;
             }
             else
@@ -148,9 +148,9 @@ namespace IoFluently.Tests
             var temporaryPath = (uut.GenerateUniqueTemporaryPath() / "test1"  / "test2")
                 .ExpectTextFileOrMissingPath()
                 .WriteAllText("", createRecursively: true);
-            temporaryPath.IsFile.Should().BeTrue();
+            temporaryPath.Path.IsFile.Should().BeTrue();
             temporaryPath.DeleteFileAsync(CancellationToken.None).Wait();
-            temporaryPath.Exists.Should().BeFalse();
+            temporaryPath.Path.Exists.Should().BeFalse();
         }
 
         [TestMethod]
@@ -162,9 +162,9 @@ namespace IoFluently.Tests
             var temporaryPath = uut.GenerateUniqueTemporaryPath()
                 .ExpectTextFileOrMissingPath()
                 .WriteAllText("");
-            temporaryPath.IsFile.Should().BeTrue();
+            temporaryPath.Path.IsFile.Should().BeTrue();
             temporaryPath.DeleteFileAsync(CancellationToken.None).Wait();
-            temporaryPath.Exists.Should().BeFalse();
+            temporaryPath.Path.Exists.Should().BeFalse();
         }
         
         [TestMethod]
@@ -174,9 +174,9 @@ namespace IoFluently.Tests
             var uut = CreateUnitUnderTest(type, true);
             var temporaryPath = uut.GenerateUniqueTemporaryPath()
                 .CreateFolder();
-            temporaryPath.IsFolder.Should().BeTrue();
+            temporaryPath.Path.IsFolder.Should().BeTrue();
             temporaryPath.DeleteFolder();
-            temporaryPath.IsFolder.Should().BeFalse();
+            temporaryPath.Path.IsFolder.Should().BeFalse();
         }
         
         [TestMethod]
@@ -185,8 +185,8 @@ namespace IoFluently.Tests
         {
             var uut = CreateUnitUnderTest(type, true);
             var temporaryPath = uut.GenerateUniqueTemporaryPath();
-            temporaryPath.IsFolder.Should().BeFalse();
-            temporaryPath.IsFile.Should().BeFalse();
+            temporaryPath.Path.IsFolder.Should().BeFalse();
+            temporaryPath.Path.IsFile.Should().BeFalse();
         }
         
         [TestMethod]
@@ -197,7 +197,7 @@ namespace IoFluently.Tests
         public void SimplifyShouldNotChangeSimplePath(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, true);
-            var simplified = uut.DefaultRelativePathBase.Simplify();
+            var simplified = uut.DefaultRelativePathBase.Path.Simplify();
             uut.DefaultRelativePathBase.ToString().Should().Be(simplified.ToString());
         }
 
@@ -305,7 +305,7 @@ namespace IoFluently.Tests
             var uut = CreateUnitUnderTest(type, false);
             var path = uut.ParseAbsolutePath("/src/TestResults/Deploy_family 2021-06-29 21:48:13/In");
             path.DirectorySeparator.Should().Be("/");
-            path.Components.Should()
+            path.Path.Components.Should()
                 .BeEquivalentTo("/", "src", "TestResults", "Deploy_family 2021-06-29 21:48:13", "In");
         }
         
@@ -345,7 +345,7 @@ namespace IoFluently.Tests
             var ioService = CreateUnitUnderTest(type, false);
             var result = ioService.ParseAbsolutePath("C:\\test1\\./test2\\");
             result.ToString().Should().Be("C:\\test1\\test2");
-            result.Components.Should().BeEquivalentTo("C:", "test1", "test2");
+            result.Path.Components.Should().BeEquivalentTo("C:", "test1", "test2");
         }
         
         [TestMethod]
@@ -358,7 +358,7 @@ namespace IoFluently.Tests
             var ioService = CreateUnitUnderTest(type, false);
             var result = ioService.ParseAbsolutePath("C:\\test1") / "test2/test3";
             result.ToString().Should().Be("C:\\test1\\test2\\test3");
-            result.Components.Should().BeEquivalentTo(new[] {"C:", "test1", "test2", "test3"});
+            result.Path.Components.Should().BeEquivalentTo(new[] {"C:", "test1", "test2", "test3"});
         }
         
         [TestMethod]
@@ -560,14 +560,14 @@ namespace IoFluently.Tests
             var targetFolder = (ioService.DefaultRelativePathBase / "test2")
                 .EnsureIsEmptyFolder();
 
-            var textFileMovePlan = textFileInSourceFolder.Translate(sourceFolder, targetFolder);
+            var textFileMovePlan = textFileInSourceFolder.Path.Translate(sourceFolder, targetFolder.Path);
 
-            textFileInSourceFolder.Exists.Should().BeTrue();
+            textFileInSourceFolder.Path.Exists.Should().BeTrue();
             textFileMovePlan.Destination.Exists.Should().BeFalse();
             
             textFileMovePlan.Move();
 
-            textFileInSourceFolder.Exists.Should().BeFalse();
+            textFileInSourceFolder.Path.Exists.Should().BeFalse();
             textFileMovePlan.Destination.Exists.Should().BeTrue();
         }
     }

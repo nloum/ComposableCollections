@@ -7,7 +7,7 @@ namespace IoFluently
 {
     public sealed class AbsolutePathTranslation : IAbsolutePathTranslation
     {
-        internal AbsolutePathTranslation(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, IIoService ioService)
+        internal AbsolutePathTranslation(AbsolutePath source, AbsolutePath destination, IIoService ioService)
         {
             Source = source;
             Destination = destination;
@@ -16,8 +16,8 @@ namespace IoFluently
 
         public IIoService IoService { get; }
 
-        public IFileOrFolderOrMissingPath Source { get; }
-        public IFileOrFolderOrMissingPath Destination { get; }
+        public AbsolutePath Source { get; }
+        public AbsolutePath Destination { get; }
 
         public IAbsolutePathTranslation Invert()
         {
@@ -28,7 +28,7 @@ namespace IoFluently
         {
             return Source.Collapse(
                 file => Enumerable.Empty<CalculatedAbsolutePathTranslation>(),
-                folder => folder.IoService.Descendants(folder)
+                folder => folder.Descendants
                     .Select(child => new CalculatedAbsolutePathTranslation(child, Source, Destination, IoService)),
                 missingPath => Enumerable.Empty<CalculatedAbsolutePathTranslation>()).GetEnumerator();
         }
@@ -43,9 +43,9 @@ namespace IoFluently
             return string.Format("Translate {0} to {1}", Source, Destination);
         }
 
-        public Tuple<IFileOrFolderOrMissingPath, IFileOrFolderOrMissingPath> ToTuple()
+        public Tuple<AbsolutePath, AbsolutePath> ToTuple()
         {
-            return new Tuple<IFileOrFolderOrMissingPath, IFileOrFolderOrMissingPath>(Source, Destination);
+            return new Tuple<AbsolutePath, AbsolutePath>(Source, Destination);
         }
 
         private bool Equals(AbsolutePathTranslation other)

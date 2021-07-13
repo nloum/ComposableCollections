@@ -77,7 +77,7 @@ namespace IoFluently
 
         private static Regex _memberRegex = new Regex(@"M\:(?<type_name>[0-9][a-z][A-Z]\.)\.(?<member_name>[0-9][a-z][A-Z])(\((?<parameters>.+)\))?");
 
-        private static void GeneratePartialClassesWithProperties(FileOrFolderOrMissingPath repoRoot, TextWriter textWriter)
+        private static void GeneratePartialClassesWithProperties(Folder repoRoot, TextWriter textWriter)
         {
             var typeReader = new TypeReader();
             typeReader.AddSupportForReflection();
@@ -167,16 +167,16 @@ namespace IoFluently
             return true;
         }
         
-        private static void GenerateIoExtensions(FileOrFolderOrMissingPath repoRoot, TextWriter textWriter)
+        private static void GenerateIoExtensions(Folder repoRoot, TextWriter textWriter)
         {
             var typeReader = new TypeReader();
             typeReader.AddSupportForReflection();
             var ioServiceType = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IIoService)].Value;
             var extensionMethodTypes = new[]
             {
-                typeof(FileOrFolderOrMissingPath),
+                typeof(Folder),
                 typeof(RelativePath),
-                typeof(IFileOrFolderOrMissingPath),
+                typeof(AbsolutePath),
                 typeof(IAbsolutePathTranslation),
                 typeof(File),
                 typeof(Folder),

@@ -12,7 +12,7 @@ namespace IoFluently
     public class OpenFilesTrackingService : IOpenFilesTrackingService
     {
         private object _lock = new object();
-        private readonly Dictionary<FileOrFolderOrMissingPath, Dictionary<Guid, object>> _openFiles = new Dictionary<FileOrFolderOrMissingPath, Dictionary<Guid, object>>();
+        private readonly Dictionary<AbsolutePath, Dictionary<Guid, object>> _openFiles = new Dictionary<AbsolutePath, Dictionary<Guid, object>>();
 
         /// <inheritdoc />
         public bool IsEnabled { get; }
@@ -28,7 +28,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public IDisposable TrackOpenFile(FileOrFolderOrMissingPath fileOrFolderOrMissingPath, Func<object> tag)
+        public IDisposable TrackOpenFile(AbsolutePath absolutePath, Func<object> tag)
         {
             if (IsEnabled)
             {
@@ -36,10 +36,10 @@ namespace IoFluently
                 {
                     var id = Guid.NewGuid();
                     
-                    if (!_openFiles.TryGetValue(fileOrFolderOrMissingPath, out var tags))
+                    if (!_openFiles.TryGetValue(absolutePath, out var tags))
                     {
                         tags = new Dictionary<Guid, object>();
-                        _openFiles[fileOrFolderOrMissingPath] = tags;
+                        _openFiles[absolutePath] = tags;
                     }
 
                     tags.Add(id, tag());
@@ -58,13 +58,13 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public IEnumerable<object> GetTagsForOpenFile(FileOrFolderOrMissingPath fileOrFolderOrMissingPath)
+        public IEnumerable<object> GetTagsForOpenFile(AbsolutePath absolutePath)
         {
             if (IsEnabled)
             {
                 lock (_lock)
                 {
-                    if (_openFiles.TryGetValue(fileOrFolderOrMissingPath, out var tags))
+                    if (_openFiles.TryGetValue(absolutePath, out var tags))
                     {
                         return tags.Values;
                     }

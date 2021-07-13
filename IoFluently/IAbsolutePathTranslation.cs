@@ -6,7 +6,7 @@ namespace IoFluently
     {
         IAbsolutePathTranslation Invert();
         IIoService IoService { get; }
-        IFileOrFolderOrMissingPath Source { get; }
-        IFileOrFolderOrMissingPath Destination { get; }
+        AbsolutePath Source { get; }
+        AbsolutePath Destination { get; }
     }
 }

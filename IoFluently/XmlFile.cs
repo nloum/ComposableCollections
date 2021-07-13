@@ -8,25 +8,25 @@ namespace IoFluently
 {
     public static class XmlFileExtensions
     {
-        public static XmlFile ExpectXmlFile(this IFileOrFolderOrMissingPath path)
+        public static XmlFile ExpectXmlFile(this IHasAbsolutePath path)
         {
-            return new XmlFile(path);
+            return new XmlFile(path.Path);
         }
 
-        public static XmlFileOrMissingPath ExpectXmlFileOrMissingPath(this IFileOrFolderOrMissingPath path)
+        public static XmlFileOrMissingPath ExpectXmlFileOrMissingPath(this IHasAbsolutePath path)
         {
-            if (path.IsFile)
+            if (path.Path.IsFile)
             {
-                return new XmlFileOrMissingPath(new XmlFile(path));
+                return new XmlFileOrMissingPath(new XmlFile(path.Path));
             }
             
-            return new XmlFileOrMissingPath(new MissingPath(path));
+            return new XmlFileOrMissingPath(new MissingPath(path.Path));
         }
     }
     
     public class XmlFile : TextFile
     {
-        public XmlFile(FileOrFolderOrMissingPath path) : base(path)
+        public XmlFile(AbsolutePath path) : base(path)
         {
         }
 
@@ -39,11 +39,11 @@ namespace IoFluently
                 return result;
             }
         }
-
+        
         public XmlDocument ReadXmlDocument()
         {
             var doc = new XmlDocument();
-            doc.Load(PleaseChangeMe.ToString());
+            doc.Load(Path.ToString());
             return doc;
         }
     }
@@ -58,11 +58,11 @@ namespace IoFluently
         {
         }
 
-        public XmlFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<File, MissingPath> other) : base(other)
+        public XmlFileOrMissingPath(SubTypesOf<IHasAbsolutePath>.Either<File, MissingPath> other) : base(other)
         {
         }
 
-        public XmlFileOrMissingPath(IFileOrFolderOrMissingPath item) : base(item)
+        public XmlFileOrMissingPath(IHasAbsolutePath item) : base(item)
         {
         }
 
@@ -74,23 +74,23 @@ namespace IoFluently
                 serializer.Serialize(writer, model);
             }
 
-            return new XmlFile(PleaseChangeMe);
+            return new XmlFile(Path);
         }
 
         public XmlFile WriteXmlDocument(XmlDocument xmlDocument)
         {
-            using (var stream = IoService.Open(this, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (var stream = Path.IoService.Open(Path, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 xmlDocument.Save(stream);
             }
 
-            return new XmlFile(PleaseChangeMe);
+            return new XmlFile(Path);
         }
     }
     
     public class XmlFile<TModel> : TextFile
     {
-        public XmlFile(FileOrFolderOrMissingPath path) : base(path)
+        public XmlFile(AbsolutePath path) : base(path)
         {
         }
 
@@ -115,11 +115,11 @@ namespace IoFluently
         {
         }
 
-        public XmlFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<File, MissingPath> other) : base(other)
+        public XmlFileOrMissingPath(SubTypesOf<IHasAbsolutePath>.Either<File, MissingPath> other) : base(other)
         {
         }
 
-        public XmlFileOrMissingPath(IFileOrFolderOrMissingPath item) : base(item)
+        public XmlFileOrMissingPath(IHasAbsolutePath item) : base(item)
         {
         }
 
@@ -131,7 +131,7 @@ namespace IoFluently
                 serializer.Serialize(writer, model);
             }
 
-            return new XmlFile(PleaseChangeMe);
+            return new XmlFile(Path);
         }
     }
 }

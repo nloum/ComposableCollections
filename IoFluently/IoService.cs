@@ -39,13 +39,13 @@ namespace IoFluently
 
         private Folder _defaultRelativePathBase;
         
-        public override Folder DefaultRelativePathBase => _defaultRelativePathBase ?? TryParseAbsolutePath(Environment.CurrentDirectory).Value;
+        public override Folder DefaultRelativePathBase => _defaultRelativePathBase ?? TryParseAbsolutePath(Environment.CurrentDirectory).Value.ExpectFolder();
         public TimeSpan DeleteOrCreateSpinPeriod { get; set; } = TimeSpan.FromMilliseconds(100);
         public TimeSpan DeleteOrCreateTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
-        public override void SetDefaultRelativePathBase(Folder defaultRelativePathBase)
+        public override void SetDefaultRelativePathBase(IFolder defaultRelativePathBase)
         {
-            _defaultRelativePathBase = defaultRelativePathBase;
+            _defaultRelativePathBase = defaultRelativePathBase.ExpectFolder();
         }
 
         public override void UnsetDefaultRelativePathBase()
@@ -72,7 +72,7 @@ namespace IoFluently
         public PathObservationMethod PathObservationMethod { get; set; }
 
         /// <inheritdoc />
-        public override ISetChanges<AbsolutePath> ToLiveLinq(Folder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        public override ISetChanges<AbsolutePath> ToLiveLinq(IFolder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             if (PathObservationMethod == PathObservationMethod.FileSystemWatcher)
             {
@@ -83,7 +83,7 @@ namespace IoFluently
             return ToLiveLinqWithFsWatch(path, includeFileContentChanges, includeSubFolders, pattern);
         }
 
-        private ISetChanges<AbsolutePath> ToLiveLinqWithFsWatch(Folder root, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        private ISetChanges<AbsolutePath> ToLiveLinqWithFsWatch(IFolder root, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             // TODO - add support for FSWatch events on Windows and Linux as well. Although I think I already support all the ones on Linux
             // and the FileSystemWatcher class on Windows should be sufficient, it would be nice to have this support for
@@ -126,9 +126,9 @@ namespace IoFluently
 
             process.Start();
 
-            var initialState = includeSubFolders ? root.Descendants
-                .ToImmutableDictionary(x => x, x => Type(x))
-                : root.Children.ToImmutableDictionary(x => x, x => Type(x));
+            var initialState = includeSubFolders
+                ? root.IoService.Descendants(root).Select(x => new AbsolutePath(x)).ToImmutableDictionary(x => x, x => Type(x))
+                : root.IoService.Children(root).Select(x => new AbsolutePath(x)).ToImmutableDictionary(x => x, x => Type(x));
 
             var resultObservable = process.StandardOutput
                 .Observe(new []{ (char)0 })
@@ -197,13 +197,13 @@ namespace IoFluently
             if (!string.IsNullOrWhiteSpace(pattern))
             {
                 var regex = FileNamePatternToRegex(pattern);
-                result = result.Where(path => regex.IsMatch(path.Name));
+                result = result.Where(path => regex.IsMatch(path.IoService.Name(path)));
             }
             
             return result;
         }
 
-        private ISetChanges<AbsolutePath> ToLiveLinqWithFileSystemWatcher(Folder root, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        private ISetChanges<AbsolutePath> ToLiveLinqWithFileSystemWatcher(IFolder root, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             var observable = Observable.Create<ISetChange<AbsolutePath>>(observer =>
             {
@@ -270,8 +270,9 @@ namespace IoFluently
                         observer.OnNext(LiveLinq.Utility.SetChange(CollectionChangeType.Add, path));
                     });
 
-                var initialSetChange = LiveLinq.Utility.SetChange(CollectionChangeType.Add, includeSubFolders ? root.Descendants
-                    : root.Children.AsEnumerable());
+                var initialSetChange = LiveLinq.Utility.SetChange(CollectionChangeType.Add, includeSubFolders
+                    ? root.IoService.Descendants(root).Select(x => new AbsolutePath(x))
+                    : root.IoService.Children(root).Select(x => new AbsolutePath(x)).AsEnumerable());
 
                 observer.OnNext(initialSetChange);
 
@@ -284,13 +285,14 @@ namespace IoFluently
             return observable.ToLiveLinq();
         }
 
-        public override async Task<MissingPath> DeleteFolderAsync(Folder path, CancellationToken cancellationToken, bool recursive = false)
+        public override async Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken, bool recursive = false)
         {
-            Directory.Delete(path.Path, recursive);
+            var pathString = path.ToString();
+            Directory.Delete(pathString, recursive);
 
             var timeoutTimeSpan = DeleteOrCreateTimeout;
             var start = DateTimeOffset.UtcNow;
-            while ( Directory.Exists(path.Path) && !cancellationToken.IsCancellationRequested )
+            while ( Directory.Exists(pathString) && !cancellationToken.IsCancellationRequested )
             {
                 var processingTime = DateTimeOffset.UtcNow - start;
                 if ( processingTime > timeoutTimeSpan )
@@ -304,13 +306,14 @@ namespace IoFluently
             return new MissingPath(path.Path);
         }
 
-        public override async Task<MissingPath> DeleteFileAsync(File path, CancellationToken cancellationToken)
+        public override async Task<MissingPath> DeleteFileAsync(IFile path, CancellationToken cancellationToken)
         {
-            System.IO.File.Delete(path.Path);
+            var pathString = path.ToString();
+            System.IO.File.Delete(pathString);
 
             var timeoutTimeSpan = DeleteOrCreateTimeout;
             var start = DateTimeOffset.UtcNow;
-            while ( System.IO.File.Exists(path.Path) && !cancellationToken.IsCancellationRequested )
+            while ( System.IO.File.Exists(pathString) && !cancellationToken.IsCancellationRequested )
             {
                 var processingTime = DateTimeOffset.UtcNow - start;
                 if (processingTime > timeoutTimeSpan)
@@ -325,97 +328,85 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override Stream Open(FileOrMissingPath path, FileMode fileMode,
+        public override Stream Open(IFileOrMissingPath path, FileMode fileMode,
             FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.SequentialScan,
             Information? bufferSize = default, bool createRecursively = false)
         {
             if (MayCreateFile(fileMode))
                 TryParent(path.Path).IfHasValue(parent => EnsureIsFolder(parent));
-            var fileStream = new FileStream(path.Path, fileMode, fileAccess, fileShare,
+            var fileStream = new FileStream(path.ToString(), fileMode, fileAccess, fileShare,
                 GetBufferSizeOrDefaultInBytes(bufferSize), fileOptions);
             return fileStream;
         }
 
         /// <inheritdoc />
-        public override FileAttributes Attributes(File attributes) 
+        public override FileAttributes Attributes(IFile attributes) 
         {
             return AsFileInfo(attributes).Attributes;
         }
 
-        public override DateTimeOffset CreationTime(File attributes)
+        public override DateTimeOffset CreationTime(IFile attributes)
         {
             return AsFileInfo(attributes).CreationTime;
         }
 
-        public override DateTimeOffset LastAccessTime(File attributes)
+        public override DateTimeOffset LastAccessTime(IFile attributes)
         {
             return AsFileInfo(attributes).LastAccessTime;
         }
 
-        public override DateTimeOffset LastWriteTime(File attributes)
+        public override DateTimeOffset LastWriteTime(IFile attributes)
         {
             return AsFileInfo(attributes).LastWriteTime;
         }
 
-        public override Information FileSize(File path)
+        public override Information FileSize(IFile path)
         {
             return Information.FromBytes(AsFileInfo(path).Length);
         }
 
-        public override bool IsReadOnly(File path)
+        public override bool IsReadOnly(IFile path)
         {
             return AsFileInfo(path).IsReadOnly;
         }
 
-        private FileInfo AsFileInfo(IHasAbsolutePath path)
+        private FileInfo AsFileInfo(IFileOrFolderOrMissingPath path)
         {
             return new FileInfo(path.Path.ToString());
         }
 
-        private DirectoryInfo AsDirectoryInfo(IHasAbsolutePath path)
+        private DirectoryInfo AsDirectoryInfo(IFileOrFolderOrMissingPath path)
         {
             return new DirectoryInfo(path.Path.ToString());
         }
 
-        public override MissingPath DeleteFile(File path)
+        public override MissingPath DeleteFile(IFile path)
         {
-            System.IO.File.Delete(path.Path);
+            System.IO.File.Delete(path.ToString());
 
-            return new MissingPath(path.Path);
+            return new MissingPath(path);
         }
-
-        public override AbsolutePath Decrypt(AbsolutePath path)
-        {
-            AsFileInfo(path).Decrypt();
-            return path;
-        }
-
-        public override AbsolutePath Encrypt(AbsolutePath path)
-        {
-            AsFileInfo(path).Encrypt();
-            return path;
-        }
-
+        
         public override IObservableReadOnlySet<Folder> Roots => _storage;
 
         private readonly ObservableSet<Folder> _storage = new ObservableSet<Folder>();
 
-        public override IEnumerable<FileOrFolder> Descendants(Folder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolder> Descendants(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             return EnumerateDescendantsOrChildren(path, searchPattern ?? "*", SearchOption.AllDirectories,
                 includeFolders, includeFiles);
         }
 
-        public override IEnumerable<FileOrFolder> Children(Folder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolder> Children(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             return EnumerateDescendantsOrChildren(path, searchPattern ?? "*", SearchOption.TopDirectoryOnly,
                 includeFolders, includeFiles);
         }
 
-        private IEnumerable<FileOrFolder> EnumerateDescendantsOrChildren(Folder path, string searchPattern, SearchOption searchOption, bool includeFolders, bool includeFiles)
+        private IEnumerable<IFileOrFolder> EnumerateDescendantsOrChildren(IFolder path, string searchPattern, SearchOption searchOption, bool includeFolders, bool includeFiles)
         {
-            var fullName = AsDirectoryInfo(path.Path).FullName;
+            var fullName = AsDirectoryInfo(path).FullName;
 
             if (includeFiles && includeFolders)
             {
@@ -432,7 +423,7 @@ namespace IoFluently
                 return Directory.GetDirectories(fullName, searchPattern, searchOption).Select(x => ParseAbsolutePath(x).ExpectFileOrFolder());
             }
 
-            return ImmutableArray<FileOrFolder>.Empty;
+            return ImmutableArray<IFileOrFolder>.Empty;
         }
 
         /// <inheritdoc />
@@ -442,7 +433,7 @@ namespace IoFluently
             {
                 if (_storage.Count == 0)
                 {
-                    _storage.Add(ParseAbsolutePath("/"));
+                    _storage.Add(ParseAbsolutePath("/").ExpectFolder());
                 }
                 return;
             }
@@ -458,48 +449,10 @@ namespace IoFluently
             var drivesThatWereRemoved = new List<Folder>();
 
             foreach (var drive in _storage)
-                if (!currentStorage.Contains(drive.Path + "\\"))
+                if (!currentStorage.Contains(drive + "\\"))
                     drivesThatWereRemoved.Add(drive);
 
             foreach (var driveThatWasRemoved in drivesThatWereRemoved) _storage.Remove(driveThatWasRemoved);
-        }
-
-        public override IObservable<AbsolutePath> Renamings(AbsolutePath path)
-        {
-            var parent = TryParent(path);
-            if (!parent.HasValue) return Observable.Return(path);
-
-            return Observable.Create<AbsolutePath>(
-                async (observer, token) =>
-                {
-                    var currentPath = path;
-                    while (!token.IsCancellationRequested)
-                    {
-                        var watcher = new FileSystemWatcher(TryParent(currentPath).Value.ToString())
-                        {
-                            IncludeSubdirectories = false,
-                            Filter = currentPath.Name
-                        };
-
-                        var tcs = new TaskCompletionSource<AbsolutePath>();
-
-                        RenamedEventHandler handler = (_, args) =>
-                        {
-                            tcs.SetResult(new AbsolutePath(path.IsCaseSensitive, path.DirectorySeparator, this, new[]{args.FullPath}));
-                        };
-
-                        watcher.EnableRaisingEvents = true;
-
-                        watcher.Renamed += handler;
-
-                        currentPath = await tcs.Task;
-
-                        observer.OnNext(currentPath);
-
-                        watcher.Renamed -= handler;
-                        watcher.Dispose();
-                    }
-                });
         }
 
         /// <inheritdoc />
@@ -509,51 +462,55 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override Folder CreateFolder(MissingPath path, bool createRecursively = true)
+        public override Folder CreateFolder(IMissingPath path, bool createRecursively = true)
         {
+            var pathString = path.ToString();
+        
             if (createRecursively)
             {
                 var ancestors = Ancestors(path, true).ToList();
                 ancestors.Reverse();
                 foreach (var ancestor in ancestors)
                 {
-                    ancestor.ForEach(folder => { }, missingPath => Directory.CreateDirectory(missingPath.Path));
+                    ancestor.ForEach(folder => { }, missingPath => Directory.CreateDirectory(pathString));
                 }
             }
             else
             {
-                Directory.CreateDirectory(path.Path);
+                Directory.CreateDirectory(pathString);
             }
 
-            return new Folder(path.Path);
+            return new Folder(path);
         }
 
-        public override File WriteAllBytes(FileOrMissingPath path, byte[] bytes, bool createRecursively = true)
+        public override File WriteAllBytes(IFileOrMissingPath path, byte[] bytes, bool createRecursively = true)
         {
+            var pathString = path.ToString();
+                    
             if (createRecursively)
             {
                 foreach (var ancestor in Ancestors(path.Path))
                 {
                     
                 }
-                var parent = TryParent(path.Path);
+                var parent = TryParent(path);
                 if (parent.HasValue)
                 {
-                    CreateFolder(parent.Value, true);
+                    parent.Value.EnsureIsFolder(true);
                 }
             }
-            System.IO.File.WriteAllBytes(path.ToString(), bytes);
-            return path;
+            System.IO.File.WriteAllBytes(pathString, bytes);
+            return path.ExpectFile();
         }
 
-        public override MissingPath DeleteFolder(Folder path, bool recursive = false)
+        public override MissingPath DeleteFolder(IFolder path, bool recursive = false)
         {
-            Directory.Delete(path.Path, recursive);
+            Directory.Delete(path.ToString(), recursive);
 
-            return new MissingPath(path.Path);
+            return new MissingPath(path);
         }
 
-        public override PathType Type(AbsolutePath path)
+        public override PathType Type(IFileOrFolderOrMissingPath path)
         {
             var str = path.ToString();
             if (System.IO.File.Exists(str))

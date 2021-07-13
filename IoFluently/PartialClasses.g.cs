@@ -16,11 +16,11 @@ using UnitsNet;
 
 namespace IoFluently {
     public partial class MissingPath {
-        public IEnumerable<FolderOrMissingPath> Ancestors => IoService.Ancestors(this);
+        public IEnumerable<IFolderOrMissingPath> Ancestors => IoService.Ancestors(this);
     }
 }
 namespace IoFluently {
-    public partial class AbsolutePath {
+    public partial interface IFileOrFolderOrMissingPath {
         public IEnumerable<AbsolutePath> Ancestors => IoService.Ancestors(this);
         public Boolean CanBeSimplified => IoService.CanBeSimplified(this);
         public Boolean Exists => IoService.Exists(this);
@@ -30,16 +30,19 @@ namespace IoFluently {
         public IMaybe<AbsolutePath> Parent => IoService.TryParent(this);
         public PathType Type => IoService.Type(this);
         public AbsolutePath WithoutExtension => IoService.WithoutExtension(this);
+        public string? Extension => IoService.Extension(this);
+        public string Name => IoService.Name(this);
     }
 }
 namespace IoFluently {
-    public partial class Folder {
+    public partial interface IFolder {
         public IEnumerable<Folder> Ancestors => IoService.Ancestors(this);
         public IMaybe<Folder> Parent => IoService.TryParent(this);
+        public IEnumerable<IFileOrFolder> Descendants => IoService.Descendants(this);
     }
 }
 namespace IoFluently {
-    public partial class File {
+    public partial interface IFile {
         public IEnumerable<Folder> Ancestors => IoService.Ancestors(this);
         public FileAttributes Attributes => IoService.Attributes(this);
         public DateTimeOffset CreationTime => IoService.CreationTime(this);
@@ -51,7 +54,7 @@ namespace IoFluently {
     }
 }
 namespace IoFluently {
-    public partial interface IHasAbsolutePath {
+    public partial interface IFileOrFolderOrMissingPath {
         public Boolean HasExtension => IoService.HasExtension(this);
     }
 }

@@ -8,6 +8,84 @@ namespace IoFluently
 {
     public static partial class IoExtensions
     {
+        public static MissingPath ExpectMissingPath(this IFileOrFolderOrMissingPath path)
+        {
+            if (path is MissingPath missingPath)
+            {
+                return missingPath;
+            }
+            
+            return path.Collapse(
+                file => throw new InvalidOperationException(),
+                folder => throw new InvalidOperationException(),
+                missingPath =>
+                {
+                    if (missingPath is MissingPath missingPathObj)
+                    {
+                        return missingPathObj;
+                    }
+                    
+                    return new MissingPath(missingPath);
+                });
+        }
+
+        public static File ExpectFile(this IFileOrFolderOrMissingPath path)
+        {
+            if (path is File file)
+            {
+                return file;
+            }
+            
+            return path.Collapse(
+                file =>
+                {
+                    if (file is File fileObj)
+                    {
+                        return fileObj;
+                    }
+
+                    return new File(file);
+                },
+                folder => throw new InvalidOperationException(),
+                missingPath => throw new InvalidOperationException());
+        }
+
+        public static Folder ExpectFolder(this IFileOrFolderOrMissingPath path)
+        {
+            if (path is Folder folder)
+            {
+                return folder;
+            }
+            
+            return path.Collapse(
+                file => throw new InvalidOperationException(),
+                folder =>
+                {
+                    if (folder is Folder folderObj)
+                    {
+                        return folderObj;
+                    }
+
+                    return new Folder(folder);
+                },
+                missingPath => throw new InvalidOperationException());
+        }
+
+        public static IFileOrFolder ExpectFileOrFolder(this IFileOrFolderOrMissingPath path)
+        {
+            return path.Collapse(file => (IFileOrFolder)file, folder => folder, missingPath => throw new InvalidOperationException());
+        }
+
+        public static IFileOrMissingPath ExpectFileOrMissingPath(this IFileOrFolderOrMissingPath path)
+        {
+            return path.Collapse(file => (IFileOrMissingPath)file, folder => throw new InvalidOperationException(), missingPath => missingPath);
+        }
+
+        public static IFolderOrMissingPath ExpectFolderOrMissingPath(this IFileOrFolderOrMissingPath path)
+        {
+            return path.Collapse(file => throw new InvalidOperationException(), folder => (IFolderOrMissingPath)folder, missingPath => missingPath);
+        }
+    
         /// <summary>
         /// Backs up the specified path and then when the IDisposable is disposed of, the backup file is restored, overwriting
         /// any changes that were made to the path. This is useful for making temporary changes to the path.
@@ -36,7 +114,7 @@ namespace IoFluently
         /// </summary>
         public static AbsolutePath FallbackTo(this AbsolutePath mainPath, AbsolutePath fallbackPath)
         {
-            if (!mainPath.Exists)
+            if (!mainPath.IoService.Exists(mainPath))
             {
                 return fallbackPath;
             }
@@ -57,7 +135,7 @@ namespace IoFluently
         /// </summary>
         public static AbsolutePath FallbackCopyFrom(this AbsolutePath mainPath, AbsolutePath fallbackPath)
         {
-            if (!mainPath.Exists)
+            if (!mainPath.IoService.Exists(mainPath))
             {
                 fallbackPath.Copy(mainPath);
             }

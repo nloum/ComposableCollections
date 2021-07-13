@@ -9,7 +9,7 @@ namespace IoFluently
     {
         private readonly AbsolutePathTranslation _actualValues;
 
-        internal CalculatedAbsolutePathTranslation(AbsolutePath absolutePath, AbsolutePath ancestorSource, AbsolutePath ancestorDestination,
+        internal CalculatedAbsolutePathTranslation(IFileOrFolderOrMissingPath absolutePath, IFileOrFolderOrMissingPath ancestorSource, IFileOrFolderOrMissingPath ancestorDestination,
             IIoService ioService)
         {
             AbsoluteAbsolutePath = absolutePath.Simplify();

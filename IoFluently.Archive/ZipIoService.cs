@@ -22,7 +22,7 @@ namespace IoFluently
         /// <summary>
         /// The path to the zip file
         /// </summary>
-        public FileOrMissingPath ZipFilePath { get; }
+        public IFileOrMissingPath ZipFilePath { get; }
 
         public ZipFolderMode FolderMode { get; set; } = ZipFolderMode.AllNonExistentPathsAreFolders;
         public override bool CanEmptyDirectoriesExist => FolderMode == ZipFolderMode.EmptyFilesAreDirectories;
@@ -35,7 +35,7 @@ namespace IoFluently
         /// <param name="zipFilePath">The path to the zip file</param>
         /// <param name="newline">The newline character(s) (e.g. '\n' or '\r\n')</param>
         /// <param name="enableOpenFilesTracking">Whether to enable the tracking of open files</param>
-        public ZipIoService(FileOrMissingPath zipFilePath, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), true, "/")
+        public ZipIoService(IFileOrMissingPath zipFilePath, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), true, "/")
         {
             if (zipFilePath == null)
             {
@@ -43,7 +43,7 @@ namespace IoFluently
             }
             
             ZipFilePath = zipFilePath;
-            var path = new AbsolutePath(true, DefaultDirectorySeparator, this, new[] {"/"});
+            var path = new AbsolutePath(new[] {"/"}, true, DefaultDirectorySeparator, this);
             DefaultRelativePathBase = new Folder(path);
 
             if (DefaultRelativePathBase == null)
@@ -52,17 +52,17 @@ namespace IoFluently
             }
         }
 
-        public void Unzip(FolderOrMissingPath targetDirectory)
+        public void Unzip(IFolderOrMissingPath targetDirectory)
         {
             Copy(ParseAbsolutePath("/"), targetDirectory.Path);
         }
 
-        public void Unzip(Folder targetDirectory)
+        public void Unzip(IFolder targetDirectory)
         {
-            Copy(ParseAbsolutePath("/"), targetDirectory.Path);
+            Copy(ParseAbsolutePath("/"), targetDirectory);
         }
 
-        public void Zip(IHasAbsolutePath sourcePath, IHasAbsolutePath relativeTo)
+        public void Zip(IFileOrFolderOrMissingPath sourcePath, IFileOrFolderOrMissingPath relativeTo)
         {
             Copy(sourcePath.Path, relativeTo.Path, ParseAbsolutePath("/"));
         }
@@ -70,7 +70,7 @@ namespace IoFluently
         /// <inheritdoc />
         public override Folder DefaultRelativePathBase { get; protected set; }
 
-        public override void SetDefaultRelativePathBase(Folder defaultRelativePathBase)
+        public override void SetDefaultRelativePathBase(IFolder defaultRelativePathBase)
         {
             throw new NotImplementedException();
         }
@@ -94,7 +94,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override ISetChanges<AbsolutePath> ToLiveLinq(Folder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        public override ISetChanges<AbsolutePath> ToLiveLinq(IFolder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             throw new NotImplementedException();
         }
@@ -103,9 +103,9 @@ namespace IoFluently
         /// Sets the temporary folder path
         /// </summary>
         /// <param name="absolutePath">The new temporary folder path</param>
-        public void SetTemporaryFolder(AbsolutePath absolutePath)
+        public void SetTemporaryFolder(IFolder absolutePath)
         {
-            _temporaryFolder = absolutePath;
+            _temporaryFolder = absolutePath.ExpectFolder();
         }
 
         /// <inheritdoc />
@@ -121,7 +121,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IEnumerable<FileOrFolder> Children(Folder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolder> Children(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             using (var archive = OpenZipArchive(false, true))
             {
@@ -135,7 +135,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IEnumerable<FileOrFolder> Descendants(Folder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolder> Descendants(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             using (var archive = OpenZipArchive(false, true))
             {
@@ -149,7 +149,7 @@ namespace IoFluently
             }
         }
 
-        private ZipArchiveEntry GetZipArchiveEntry(ZipArchive archive, IHasAbsolutePath path)
+        private ZipArchiveEntry GetZipArchiveEntry(ZipArchive archive, IFileOrFolderOrMissingPath path)
         {
             var result = archive.GetEntry(path.Path.RelativeTo(DefaultRelativePathBase.Path).Simplify())
                 ?? archive.GetEntry(path.Path.Simplify());
@@ -304,7 +304,7 @@ namespace IoFluently
             return new MissingPath(path.Path);
         }
 
-        public override Stream Open(FileOrMissingPath fileOrMissingPath, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,
+        public override Stream Open(IFileOrMissingPath fileOrMissingPath, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,
             FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.None | FileOptions.SequentialScan,
             Information? bufferSize = default, bool createRecursively = false)

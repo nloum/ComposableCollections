@@ -17,7 +17,7 @@ namespace IoFluently.CodeGenerator
         static void Main(string[] args)
         {
             var ioService = new IoService();
-            var repoRoot = ioService.DefaultRelativePathBase.Ancestors.First(ancestor => ioService.IsFolder(ancestor / ".git"));
+            var repoRoot = ioService.DefaultRelativePathBase.Ancestors(false).First(ancestor => ioService.IsFolder(ancestor / ".git"));
 
             using (var partialClassesWriter = (repoRoot / "src" / "IoFluently" / "PartialClasses.g.cs").ExpectTextFileOrMissingPath().OpenWriter())
             {
@@ -176,14 +176,14 @@ namespace IoFluently
             {
                 typeof(Folder),
                 typeof(RelativePath),
-                typeof(AbsolutePath),
+                typeof(IFileOrFolderOrMissingPath),
                 typeof(IAbsolutePathTranslation),
                 typeof(File),
                 typeof(Folder),
                 typeof(MissingPath),
-                typeof(FileOrFolder),
-                typeof(FileOrMissingPath),
-                typeof(FolderOrMissingPath)
+                typeof(IFileOrFolder),
+                typeof(IFileOrMissingPath),
+                typeof(IFolderOrMissingPath)
             }.Select(x => typeReader.GetTypeFormat<Type>()[x].Value).ToImmutableHashSet();
 
             foreach (var method in ioServiceType.Methods)

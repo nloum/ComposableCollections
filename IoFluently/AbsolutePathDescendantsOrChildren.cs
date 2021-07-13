@@ -26,7 +26,7 @@ namespace IoFluently
 
         public ISetChanges<AbsolutePath> ToLiveLinq()
         {
-            return IoService.ToLiveLinq(_path.Path, true, IncludeSubFolders, _pattern);
+            return IoService.ToLiveLinq(_path, true, IncludeSubFolders, _pattern);
         }
 
         public int Count => this.AsEnumerable().Count();

@@ -1,215 +1,56 @@
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
-using Humanizer;
-using MoreCollections;
 using SimpleMonads;
 using TreeLinq;
-using static SimpleMonads.Utility;
 
 namespace IoFluently
 {
-    /// <summary>
-    /// Represents an absolute path to a file or folder (the file or folder doesn't have to exist)
-    /// </summary>
-    public partial class AbsolutePath : SubTypesOf<IHasAbsolutePath>.Either<File, Folder, MissingPath>, IComparable, IComparable<AbsolutePath>, IEquatable<AbsolutePath>, IHasAbsolutePath
+    public partial class AbsolutePath : SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFile, IFolder, IMissingPath>, IFileOrFolderOrMissingPath
     {
-        private AbsolutePath _path;
-
-        /// <summary>
-        /// Indicates whether or not the absolute path is case sensitive
-        /// </summary>
+        private readonly AbsoluteTreePath<string> _treePath;
+        public IReadOnlyList<string> Components => _treePath.Components;
         public bool IsCaseSensitive { get; }
-        
-        /// <summary>
-        /// Indicates what the directory separator is for this absolute path (e.g., '/' or '\') 
-        /// </summary>
         public string DirectorySeparator { get; }
-        
-        /// <summary>
-        /// The IIoService that is used for this absolute path
-        /// </summary>
         public IIoService IoService { get; }
-        
-        /// <summary>
-        /// The TreeLinq absolute path that this object represents
-        /// </summary>
-        public AbsoluteTreePath<string> Path { get; }
 
-        AbsolutePath IHasAbsolutePath.Path => this;
-
-        internal AbsolutePath(bool isCaseSensitive, string directorySeparator, IIoService ioService, IEnumerable<string> path)
+        public AbsolutePath(IReadOnlyList<string> components, bool isCaseSensitive, string directorySeparator, IIoService ioService)
         {
+            _treePath = new AbsoluteTreePath<string>(components);
             IsCaseSensitive = isCaseSensitive;
             DirectorySeparator = directorySeparator;
             IoService = ioService;
-            Path = new AbsoluteTreePath<string>(path);
-            if (!ioService.ComponentsAreAbsolute(Path.Components))
-            {
-                throw new ArgumentException($"The path {Path} is not absolute");
-            }
-        }
-
-        /// <summary>
-        /// The file or directory name, a.k.a the last component in the path
-        /// </summary>
-        public string Name => Path[Path.Count - 1];
-
-        /// <inheritdoc />
-        public int CompareTo(object obj)
-        {
-            var tp = obj as AbsolutePath;
-            if (tp != null)
-                return CompareTo(tp);
-            return GetHashCode().CompareTo(obj.GetHashCode());
-        }
-
-        private IEnumerable<string> SplitComponent(string component)
-        {
-            // For UNC paths
-            if (component.StartsWith(DirectorySeparator + DirectorySeparator))
-            {
-                component = component.Substring(DirectorySeparator.Length * 2);
-                yield return DirectorySeparator + DirectorySeparator;
-            }
-            else if (component.StartsWith(DirectorySeparator))
-            {
-                component = component.Substring(DirectorySeparator.Length);
-                yield return DirectorySeparator;
-            }
-
-            foreach (var subcomponent in component.Split(new[] {DirectorySeparator},
-                StringSplitOptions.RemoveEmptyEntries)) yield return subcomponent;
-        }
-
-        /// <summary>
-        /// The file extension, if there is one, including the dot.
-        /// </summary>
-        public IMaybe<string> Extension
-        {
-            get
-            {
-                var lastPathComponent = Name;
-                var dotIndex = lastPathComponent.IndexOf('.');
-                if (dotIndex < 0)
-                {
-                    return Nothing<string>(() => throw new InvalidOperationException($"The path {this} has no extension"));
-                }
-
-                return lastPathComponent.Substring(dotIndex).ToMaybe();
-            }
-        }
-
-        private Exception ThrowWrongType(params PathType[] oneOf)
-        {
-            var actualType = Type;
-            
-            var oneOfString = oneOf.Select(x => x.ToString()).Humanize();
-            
-            throw new InvalidOperationException(
-                $"Expected {this} to be a one of {oneOfString} but it was a {actualType} instead");
-        }
-
-        public override File? Item1 => GetFile(Type);
-        public override Folder? Item2 => GetFolder(Type);
-        public override MissingPath? Item3 => GetMissingPath(Type);
-
-        private File? GetFile(PathType type)
-        {
-            return type == PathType.File ? new File(this) : null;
         }
         
-        private Folder? GetFolder(PathType type)
+        public AbsolutePath(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath) : this(fileOrFolderOrMissingPath.Components,
+            fileOrFolderOrMissingPath.IsCaseSensitive, fileOrFolderOrMissingPath.DirectorySeparator, fileOrFolderOrMissingPath.IoService)
         {
-            return type == PathType.Folder ? new Folder(this) : null;
-        }
-        
-        private MissingPath? GetMissingPath(PathType type)
-        {
-            return type == PathType.MissingPath ? new MissingPath(this) : null;
-        }
-        
-        public override TOutput Collapse<TOutput>(Func<File, TOutput> selector1, Func<Folder, TOutput> selector2, Func<MissingPath, TOutput> selector3)
-        {
-            var type = Type;
-            switch (type)
-            {
-                case PathType.File:
-                    return selector1(new File(this));
-                case PathType.Folder:
-                    return selector2(new Folder(this));
-                case PathType.MissingPath:
-                    return selector3(new MissingPath(this));
-                default:
-                    throw new InvalidOperationException($"Unknown path type {type}");
-            }
         }
 
-        public File ExpectFile()
-        {
-            return Collapse(
-                file => file,
-                folder => throw ThrowWrongType(PathType.File),
-                missingPath => throw ThrowWrongType(PathType.File));
-        }
-
-        public FileOrFolder ExpectFileOrFolder()
-        {
-            return Collapse(
-                file => new FileOrFolder(file),
-                folder => new FileOrFolder(folder),
-                missingPath => throw ThrowWrongType(PathType.File, PathType.MissingPath));
-        }
-
-        public FileOrMissingPath ExpectFileOrMissingPath()
-        {
-            return Collapse(
-                file => new FileOrMissingPath(file),
-                folder => throw ThrowWrongType(PathType.File, PathType.MissingPath),
-                missingPath => new FileOrMissingPath(missingPath));
-        }
-
-        public Folder ExpectFolder()
-        {
-            return Collapse(
-                file => throw ThrowWrongType(PathType.Folder),
-                folder => folder,
-                missingPath => throw ThrowWrongType(PathType.Folder));
-        }
-
-        public FolderOrMissingPath ExpectFolderOrMissingPath()
-        {
-            return Collapse(
-                file => throw ThrowWrongType(PathType.Folder, PathType.MissingPath),
-                folder => new FolderOrMissingPath(folder),
-                missingPath => new FolderOrMissingPath(missingPath));
-        }
-
-        public MissingPath ExpectMissingPath()
-        {
-            return Collapse(
-                file => throw ThrowWrongType(PathType.MissingPath),
-                folder => throw ThrowWrongType(PathType.MissingPath),
-                missingPath => missingPath);
-        }
+        public override IFile? Item1 => IoService.Type(this) == PathType.File
+            ? new File(Components, IsCaseSensitive, DirectorySeparator, IoService) : null;
+        public override IFolder? Item2 => IoService.Type(this) == PathType.Folder
+            ? new Folder(Components, IsCaseSensitive, DirectorySeparator, IoService) : null;
+        public override IMissingPath? Item3 => IoService.Type(this) == PathType.MissingPath
+            ? new MissingPath(Components, IsCaseSensitive, DirectorySeparator, IoService) : null;
         
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return (Path != null ? Path.GetHashCode() : 0);
+            return (_treePath != null ? _treePath.GetHashCode() : 0);
         }
 
         /// <inheritdoc />
         public int CompareTo(AbsolutePath other)
         {
-            var compareCounts = Path.Count - other.Path.Count;
+            var compareCounts = Components.Count - other.Components.Count;
             if (compareCounts != 0)
                 return compareCounts;
-            for (var i = 0; i < Path.Count; i++)
+            for (var i = 0; i < Components.Count; i++)
             {
-                var compareElement = Path[i].CompareTo(other.Path[i]);
+                var compareElement = Components[i].CompareTo(other.Components[i]);
                 if (compareElement != 0)
                     return compareElement;
             }
@@ -220,30 +61,31 @@ namespace IoFluently
         /// <inheritdoc />
         public bool Equals(AbsolutePath other)
         {
-            return Equals(Path, other.Path);
+            return CompareTo(other) == 0;
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
             var sb = new StringBuilder();
-            for (var i = 0; i < Path.Count; i++)
+            for (var i = 0; i < Components.Count; i++)
             {
-                sb.Append(Path[i]);
-                if (Path[i] != DirectorySeparator && i + 1 != Path.Count && sb.ToString() != DirectorySeparator)
+                sb.Append(Components[i]);
+                if (Components[i] != DirectorySeparator && i + 1 != Components.Count &&
+                    sb.ToString() != DirectorySeparator)
                     sb.Append(DirectorySeparator);
             }
 
             return sb.ToString();
         }
-        
+
         /// <summary>
         /// Converts this AbsolutePath to a string form of the path
         /// </summary>
         /// <param name="path">The path to be converted to a string</param>
         /// <returns>The string form of this path</returns>
-        public static implicit operator string(AbsolutePath path)  
-        {  
+        public static implicit operator string(AbsolutePath path)
+        {
             return path.ToString();
         }
 
@@ -262,14 +104,14 @@ namespace IoFluently
         /// <param name="relPath">The relative path that will have a subpath added to it</param>
         /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
-        public static AbsolutePath operator / (AbsolutePath absPath, string whatToAdd)
+        public static AbsolutePath operator /(AbsolutePath absPath, string whatToAdd)
         {
             if (string.IsNullOrEmpty(whatToAdd))
             {
                 return absPath;
             }
-            
-            return new AbsolutePath(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Path / new RelativeTreePath<string>(whatToAdd.Split('/', '\\')));
+
+            return new AbsolutePath(absPath.Components.Concat(whatToAdd.Split('/', '\\')).ToImmutableList(), absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService);
         }
 
         /// <summary>
@@ -278,9 +120,13 @@ namespace IoFluently
         /// <param name="relPath">The relative path that will have a subpath added to it</param>
         /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
-        public static AbsolutePaths operator / (AbsolutePath absPath, IEnumerable<RelativePath> whatToAdd)
+        public static AbsolutePaths operator /(AbsolutePath absPath, IEnumerable<RelativePath> whatToAdd)
         {
-            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd.Select(x => x.Path));
+            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService,
+                new AbsoluteTreePaths<string>(absPath.Components.Select(component => 
+                    new Either<string, IEnumerable<RelativeTreePath<string>>, Func<AbsoluteTreePath<string>, IEnumerable<RelativeTreePath<string>>>>(component))
+                .Concat<IEither<string, IEnumerable<RelativeTreePath<string>>, Func<AbsoluteTreePath<string>, IEnumerable<RelativeTreePath<string>>>>>(whatToAdd.Select(component => 
+                    new Either<string, IEnumerable<RelativeTreePath<string>>, Func<AbsoluteTreePath<string>, IEnumerable<RelativeTreePath<string>>>>(component)))));
         }
 
         /// <summary>
@@ -289,9 +135,13 @@ namespace IoFluently
         /// <param name="relPath">The relative path that will have a subpath added to it</param>
         /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
-        public static AbsolutePaths operator / (AbsolutePath absPath, Func<AbsolutePath, IEnumerable<RelativePath>> whatToAdd)
+        public static AbsolutePaths operator /(AbsolutePath absPath,
+            Func<AbsolutePath, IEnumerable<RelativePath>> whatToAdd)
         {
-            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Path / (x => whatToAdd(new AbsolutePath(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, x)).Select(y => y.Path)));
+            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService,
+                absPath._treePath / (x =>
+                    whatToAdd(new AbsolutePath(x.Components, absPath.IsCaseSensitive, absPath.DirectorySeparator,
+                        absPath.IoService)).Select(x => x.Path)));
         }
 
         /// <summary>
@@ -300,14 +150,14 @@ namespace IoFluently
         /// <param name="relPath">The relative path that will have a subpath added to it</param>
         /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
-        public static AbsolutePath operator / (AbsolutePath absPath, RelativePath whatToAdd)
+        public static AbsolutePath operator /(AbsolutePath absPath, RelativePath whatToAdd)
         {
             if (whatToAdd == null)
             {
                 return absPath;
             }
 
-            return new AbsolutePath(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd.Path);
+            return new AbsolutePath(absPath.Components.Concat(whatToAdd.Path).ToImmutableList(), absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService);
         }
 
         /// <summary>
@@ -316,9 +166,10 @@ namespace IoFluently
         /// <param name="relPath">The relative path that will have a subpath added to it</param>
         /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
-        public static AbsolutePaths operator / (AbsolutePath absPath, IEnumerable<string> whatToAdd)
+        public static AbsolutePaths operator /(AbsolutePath absPath, IEnumerable<string> whatToAdd)
         {
-            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Path / whatToAdd.Select(x => new RelativeTreePath<string>(x.Split('/', '\\'))));
+            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService,
+                absPath._treePath / whatToAdd.Select(x => new RelativeTreePath<string>(x.Split('/', '\\'))));
         }
 
         /// <summary>

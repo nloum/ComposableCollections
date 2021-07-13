@@ -62,7 +62,7 @@ namespace IoFluently
         /// because in zip files directories don't exist.
         /// </summary>
         bool CanEmptyDirectoriesExist { get; }
-        void SetDefaultRelativePathBase(Folder defaultRelativePathBase);
+        void SetDefaultRelativePathBase(IFolder defaultRelativePathBase);
         void UnsetDefaultRelativePathBase();
         Folder DefaultRelativePathBase { get; }
         /// <summary>
@@ -83,7 +83,7 @@ namespace IoFluently
         
         #region Creating
         
-        Folder CreateFolder(MissingPath path, bool createRecursively = false);
+        Folder CreateFolder(IMissingPath path, bool createRecursively = false);
 
         #endregion
 
@@ -97,14 +97,14 @@ namespace IoFluently
         /// <param name="path">The folder to delete</param>
         /// <param name="recursive">Whether to delete the folder recursively.</param>
         /// <returns>The path that was deleted</returns>
-        MissingPath DeleteFolder(Folder path, bool recursive = false);
+        MissingPath DeleteFolder(IFolder  path, bool recursive = false);
         
         /// <summary>
         /// Deletes the specified file
         /// </summary>
         /// <param name="path">The file that should be deleted</param>
         /// <returns>The same path that was specified</returns>
-        MissingPath DeleteFile(File path);
+        MissingPath DeleteFile(IFile path);
         
         /// <summary>
         /// Deletes the specified file or folder
@@ -115,7 +115,7 @@ namespace IoFluently
         /// folder contains other files or folders, then an IOException is thrown. If the path is a file, this parameter
         /// is ignored.</param>
         /// <returns>The path that was just deleted</returns>
-        MissingPath Delete(FileOrFolder path, bool recursiveDeleteIfFolder = true);
+        MissingPath Delete(IFileOrFolder path, bool recursiveDeleteIfFolder = true);
 
         /// <summary>
         /// Delete the specified folder. This throws an exception if the path is a file, doesn't exist, or the current
@@ -125,14 +125,14 @@ namespace IoFluently
         /// <param name="path">The folder to delete</param>
         /// <param name="recursive">Whether to delete the folder recursively.</param>
         /// <returns>The path that was deleted</returns>
-        Task<MissingPath> DeleteFolderAsync(Folder path, CancellationToken cancellationToken, bool recursive = false);
+        Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken, bool recursive = false);
         
         /// <summary>
         /// Deletes the specified file
         /// </summary>
         /// <param name="path">The file that should be deleted</param>
         /// <returns>The same path that was specified</returns>
-        Task<MissingPath> DeleteFileAsync(File path, CancellationToken cancellationToken);
+        Task<MissingPath> DeleteFileAsync(IFile path, CancellationToken cancellationToken);
         
         /// <summary>
         /// Deletes the specified file or folder
@@ -143,7 +143,7 @@ namespace IoFluently
         /// folder contains other files or folders, then an IOException is thrown. If the path is a file, this parameter
         /// is ignored.</param>
         /// <returns>The path that was just deleted</returns>
-        Task<MissingPath> DeleteAsync(FileOrFolder path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true);
+        Task<MissingPath> DeleteAsync(IFileOrFolder path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true);
         
         #endregion
         
@@ -154,18 +154,18 @@ namespace IoFluently
         /// </summary>
         /// <param name="path">The path that should be a folder</param>
         /// <returns>The same path that was specified</returns>
-        Folder EnsureIsFolder(AbsolutePath path, bool createRecursively = false);
+        Folder EnsureIsFolder(IFileOrFolderOrMissingPath path, bool createRecursively = false);
 
-        Folder EnsureIsEmptyFolder(AbsolutePath path, bool recursiveDeleteIfFolder = true, bool createRecursively = false);
+        Folder EnsureIsEmptyFolder(IFileOrFolderOrMissingPath path, bool recursiveDeleteIfFolder = true, bool createRecursively = false);
 
         /// <summary>
         /// Creates the path as a folder if it isn't already. If the path is a file, throws an IOException.
         /// </summary>
         /// <param name="path">The path that should be a folder</param>
         /// <returns>The same path that was specified</returns>
-        Task<Folder> EnsureIsFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool createRecursively = false);
+        Task<Folder> EnsureIsFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, bool createRecursively = false);
 
-        Task<Folder> EnsureIsEmptyFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true, bool createRecursively = false);
+        Task<Folder> EnsureIsEmptyFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true, bool createRecursively = false);
 
         #endregion
         
@@ -178,11 +178,11 @@ namespace IoFluently
         /// <param name="path">The path that may be a folder</param>
         /// <param name="recursive">Whether to recursively delete the contents of the path if the path is a non-empty folder</param>
         /// <returns>The same path that was specified</returns>
-        FileOrMissingPath EnsureIsNotFolder(AbsolutePath path, bool recursive = false);
+        IFileOrMissingPath EnsureIsNotFolder(IFileOrFolderOrMissingPath path, bool recursive = false);
 
-        FolderOrMissingPath EnsureIsNotFile(AbsolutePath path);
+        IFolderOrMissingPath EnsureIsNotFile(IFileOrFolderOrMissingPath path);
 
-        MissingPath EnsureDoesNotExist(AbsolutePath path, bool recursiveDeleteIfFolder = true);
+        MissingPath EnsureDoesNotExist(IFileOrFolderOrMissingPath path, bool recursiveDeleteIfFolder = true);
 
         /// <summary>
         /// Deletes the specified path if it is a folder. If the path is a file or doesn't exist, this returns without
@@ -191,11 +191,11 @@ namespace IoFluently
         /// <param name="path">The path that may be a folder</param>
         /// <param name="recursive">Whether to recursively delete the contents of the path if the path is a non-empty folder</param>
         /// <returns>The same path that was specified</returns>
-        Task<FileOrMissingPath> EnsureIsNotFolderAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursive = false);
+        Task<IFileOrMissingPath> EnsureIsNotFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, bool recursive = false);
 
-        Task<FolderOrMissingPath> EnsureIsNotFileAsync(AbsolutePath path, CancellationToken cancellationToken);
+        Task<IFolderOrMissingPath> EnsureIsNotFileAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken);
 
-        Task<MissingPath> EnsureDoesNotExistAsync(AbsolutePath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true);
+        Task<MissingPath> EnsureDoesNotExistAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true);
 
         #endregion
 
@@ -206,7 +206,9 @@ namespace IoFluently
         /// On Windows, there can be multiple, e.g. 'C:', 'D:', 'E:'. This method is only useful on Windows.
         /// </summary>
         void UpdateRoots();
-        bool HasExtension(IHasAbsolutePath path, string extension);
+        bool HasExtension(IFileOrFolderOrMissingPath path, string extension);
+        string Name(IFileOrFolderOrMissingPath path);
+        string? Extension(IFileOrFolderOrMissingPath path);
         bool MayCreateFile(FileMode fileMode);
         bool IsImageUri(Uri uri);
         bool IsVideoUri(Uri uri);
@@ -275,10 +277,10 @@ namespace IoFluently
         bool IsAbsolutePath(string path);
         bool ComponentsAreAbsolute(IReadOnlyList<string> path);
         IMaybe<RelativePath> TryParseRelativePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
-        IMaybe<AbsolutePath> TryParseAbsolutePath(string path, Folder optionallyRelativeTo, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
+        IMaybe<AbsolutePath> TryParseAbsolutePath(string path, IFolder optionallyRelativeTo, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         IMaybe<AbsolutePath> TryParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         RelativePath ParseRelativePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
-        AbsolutePath ParseAbsolutePath(string path, AbsolutePath optionallyRelativeTo, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
+        AbsolutePath ParseAbsolutePath(string path, IFolder optionallyRelativeTo, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         AbsolutePath ParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         
         #endregion
@@ -307,19 +309,19 @@ namespace IoFluently
 
         #endregion
         
-        IAbsolutePathTranslation Translate(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination);
-        IAbsolutePathTranslation Translate(AbsolutePath source, AbsolutePath destination);
+        IAbsolutePathTranslation Translate(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination);
+        IAbsolutePathTranslation Translate(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination);
 
-        IAbsolutePathTranslation Copy(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
+        IAbsolutePathTranslation Copy(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             Information? bufferSize = default, bool overwrite = false);
-        IAbsolutePathTranslation Copy(AbsolutePath source, AbsolutePath destination,
+        IAbsolutePathTranslation Copy(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             Information? bufferSize = default, bool overwrite = false);
-        IAbsolutePathTranslation Move(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
+        IAbsolutePathTranslation Move(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             Information? bufferSize = default, bool overwrite = false);
-        IAbsolutePathTranslation Move(AbsolutePath source, AbsolutePath destination,
+        IAbsolutePathTranslation Move(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             Information? bufferSize = default, bool overwrite = false);
 
-        IAbsolutePathTranslation RenameTo(AbsolutePath source, AbsolutePath target,
+        IAbsolutePathTranslation RenameTo(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath target,
             Information? bufferSize = default, bool overwrite = false);
         
         IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation,
@@ -327,16 +329,16 @@ namespace IoFluently
         IAbsolutePathTranslation Move(IAbsolutePathTranslation translation,
             Information? bufferSize = default, bool overwrite = false);
         
-        Task<IAbsolutePathTranslation> CopyAsync(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
+        Task<IAbsolutePathTranslation> CopyAsync(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false);
-        Task<IAbsolutePathTranslation> CopyAsync(AbsolutePath source, AbsolutePath destination,
+        Task<IAbsolutePathTranslation> CopyAsync(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false);
-        Task<IAbsolutePathTranslation> MoveAsync(AbsolutePath pathToBeCopied, AbsolutePath source, AbsolutePath destination,
+        Task<IAbsolutePathTranslation> MoveAsync(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false);
-        Task<IAbsolutePathTranslation> MoveAsync(AbsolutePath source, AbsolutePath destination,
+        Task<IAbsolutePathTranslation> MoveAsync(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false);
 
-        Task<IAbsolutePathTranslation> RenameToAsync(AbsolutePath source, AbsolutePath target,
+        Task<IAbsolutePathTranslation> RenameToAsync(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath target,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false);
         
         Task<IAbsolutePathTranslation> CopyAsync(IAbsolutePathTranslation translation,
@@ -363,7 +365,7 @@ namespace IoFluently
         /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
         /// <param name="includeFiles">Whether to include sub-files in the return value</param>
         /// <returns>The children of this path</returns>
-        IEnumerable<FileOrFolder> Children(Folder path, string searchPattern = null,
+        IEnumerable<IFileOrFolder> Children(IFolder path, string searchPattern = null,
             bool includeFolders = true, bool includeFiles = true);
 
         /// <summary>
@@ -373,7 +375,7 @@ namespace IoFluently
         /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
         /// <param name="includeFiles">Whether to include sub-files in the return value</param>
         /// <returns>The children of this path</returns>
-        IEnumerable<File> ChildFiles(Folder path, string searchPattern = null);
+        IEnumerable<File> ChildFiles(IFolder path, string searchPattern = null);
 
         /// <summary>
         /// Returns a lazily-enumerated list of child files and/or folders
@@ -382,31 +384,31 @@ namespace IoFluently
         /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
         /// <param name="includeFiles">Whether to include sub-files in the return value</param>
         /// <returns>The children of this path</returns>
-        IEnumerable<Folder> ChildFolders(Folder path, string searchPattern = null);
+        IEnumerable<Folder> ChildFolders(IFolder path, string searchPattern = null);
         
-        IEnumerable<FileOrFolder> Descendants(Folder path, string searchPattern = null,
+        IEnumerable<IFileOrFolder> Descendants(IFolder path, string searchPattern = null,
             bool includeFolders = true, bool includeFiles = true);
-        IEnumerable<Folder> DescendantFolders(Folder path, string searchPattern = null);
-        IEnumerable<File> DescendantFiles(Folder path, string searchPattern = null);
+        IEnumerable<Folder> DescendantFolders(IFolder path, string searchPattern = null);
+        IEnumerable<File> DescendantFiles(IFolder path, string searchPattern = null);
         
-        bool CanBeSimplified(AbsolutePath path);
-        Folder Root(AbsolutePath path);
-        RelativePath RelativeTo(AbsolutePath path, AbsolutePath relativeTo);
-        IMaybe<AbsolutePath> TryCommonWith(AbsolutePath path, AbsolutePath that);
-        AbsolutePath Simplify(AbsolutePath path);
+        bool CanBeSimplified(IFileOrFolderOrMissingPath path);
+        Folder Root(IFileOrFolderOrMissingPath path);
+        RelativePath RelativeTo(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath relativeTo);
+        IMaybe<AbsolutePath> TryCommonWith(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath that);
+        AbsolutePath Simplify(IFileOrFolderOrMissingPath path);
         RelativePath Simplify(RelativePath path);
-        IMaybe<AbsolutePath> TryParent(AbsolutePath path);
-        Folder Parent(File path);
-        IMaybe<Folder> TryParent(Folder path);
+        IMaybe<AbsolutePath> TryParent(IFileOrFolderOrMissingPath path);
+        Folder Parent(IFile path);
+        IMaybe<Folder> TryParent(IFolder path);
 
         /// <summary>
         /// Equivalent to Path.Combine. You can also use the / operator to build paths, like this:
         /// _ioService.CurrentDirectory / "folder1" / "folder2" / "file.txt"
         /// </summary>
-        AbsolutePath Combine(Folder path, params string[] subsequentPathParts);
-        AbsolutePath WithoutExtension(AbsolutePath path);
+        AbsolutePath Combine(IFolder path, params string[] subsequentPathParts);
+        AbsolutePath WithoutExtension(IFileOrFolderOrMissingPath path);
         Uri Child(Uri parent, Uri child);
-        AbsolutePaths GlobFiles(Folder path, string pattern);
+        AbsolutePaths GlobFiles(IFolder path, string pattern);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -418,7 +420,7 @@ namespace IoFluently
         /// <param name="path"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        IEnumerable<Folder> Ancestors(Folder path, bool includeItself);
+        IEnumerable<Folder> Ancestors(IFolder path, bool includeItself);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -430,7 +432,7 @@ namespace IoFluently
         /// <param name="path"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        IEnumerable<FileOrFolder> Ancestors(File path, bool includeItself);
+        IEnumerable<IFileOrFolder> Ancestors(IFile path, bool includeItself);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -442,7 +444,7 @@ namespace IoFluently
         /// <param name="path"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        IEnumerable<FolderOrMissingPath> Ancestors(MissingPath path, bool includeItself);
+        IEnumerable<IFolderOrMissingPath> Ancestors(IMissingPath path, bool includeItself);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -454,7 +456,7 @@ namespace IoFluently
         /// <param name="path"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        IEnumerable<Folder> Ancestors(Folder path);
+        IEnumerable<Folder> Ancestors(IFolder path);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -466,7 +468,7 @@ namespace IoFluently
         /// <param name="path"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        IEnumerable<Folder> Ancestors(File path);
+        IEnumerable<Folder> Ancestors(IFile path);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -478,9 +480,9 @@ namespace IoFluently
         /// <param name="path"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        IEnumerable<FolderOrMissingPath> Ancestors(MissingPath path);
+        IEnumerable<IFolderOrMissingPath> Ancestors(IMissingPath path);
 
-        IEnumerable<AbsolutePath> Ancestors(AbsolutePath path, bool includeItself);
+        IEnumerable<AbsolutePath> Ancestors(IFileOrFolderOrMissingPath path, bool includeItself);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -491,67 +493,62 @@ namespace IoFluently
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        IEnumerable<AbsolutePath> Ancestors(AbsolutePath path);
+        IEnumerable<AbsolutePath> Ancestors(IFileOrFolderOrMissingPath path);
 
-        IMaybe<AbsolutePath> TryDescendant(AbsolutePath path, params AbsolutePath[] paths);
-        IMaybe<AbsolutePath> TryDescendant(AbsolutePath path, params string[] paths);
-        IMaybe<Folder> TryAncestor(AbsolutePath path, int level);
-        bool IsAncestorOf(AbsolutePath path, AbsolutePath possibleDescendant);
-        bool IsDescendantOf(AbsolutePath path, AbsolutePath possibleAncestor);
-        IMaybe<AbsolutePath> TryGetCommonAncestry(AbsolutePath path1, AbsolutePath path2);
-        IMaybe<Uri> TryGetCommonDescendants(AbsolutePath path1, AbsolutePath path2);
-        IMaybe<Tuple<Uri, Uri>> TryGetNonCommonDescendants(AbsolutePath path1, AbsolutePath path2);
-        IMaybe<Tuple<Uri, Uri>> TryGetNonCommonAncestry(AbsolutePath path1, AbsolutePath path2);
+        IMaybe<AbsolutePath> TryDescendant(IFileOrFolderOrMissingPath path, params IFileOrFolderOrMissingPath[] paths);
+        IMaybe<AbsolutePath> TryDescendant(IFileOrFolderOrMissingPath path, params string[] paths);
+        IMaybe<Folder> TryAncestor(IFileOrFolderOrMissingPath path, int level);
+        bool IsAncestorOf(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath possibleDescendant);
+        bool IsDescendantOf(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath possibleAncestor);
+        IMaybe<AbsolutePath> TryGetCommonAncestry(IFileOrFolderOrMissingPath path1, IFileOrFolderOrMissingPath path2);
+        IMaybe<Uri> TryGetCommonDescendants(IFileOrFolderOrMissingPath path1, IFileOrFolderOrMissingPath path2);
+        IMaybe<Tuple<Uri, Uri>> TryGetNonCommonDescendants(IFileOrFolderOrMissingPath path1, IFileOrFolderOrMissingPath path2);
+        IMaybe<Tuple<Uri, Uri>> TryGetNonCommonAncestry(IFileOrFolderOrMissingPath path1, IFileOrFolderOrMissingPath path2);
 
         /// <summary>
         /// </summary>
         /// <param name="path"></param>
         /// <param name="differentExtension">Must include the "." part of the extension (e.g., ".avi" not "avi")</param>
         /// <returns></returns>
-        IMaybe<AbsolutePath> TryWithExtension(AbsolutePath path, string differentExtension);
+        IMaybe<AbsolutePath> TryWithExtension(IFileOrFolderOrMissingPath path, string differentExtension);
 
         /// <summary>
         /// </summary>
         /// <param name="path"></param>
         /// <param name="differentExtension">Must include the "." part of the extension (e.g., ".avi" not "avi")</param>
         /// <returns></returns>
-        IMaybe<AbsolutePath> TryWithExtension(AbsolutePath path, Func<string, string> differentExtension);
+        IMaybe<AbsolutePath> TryWithExtension(IFileOrFolderOrMissingPath path, Func<string, string> differentExtension);
 
         #endregion
 
         #region File metadata
         
-        bool Exists(AbsolutePath path);
-        PathType Type(AbsolutePath path);
-        bool HasExtension(IHasAbsolutePath path);
-        bool IsFile(AbsolutePath path);
-        bool IsFolder(AbsolutePath path);
-        bool IsReadOnly(File path);
-        Information FileSize(File path);
-        FileAttributes Attributes(File attributes);
-        DateTimeOffset CreationTime(File attributes);
-        DateTimeOffset LastAccessTime(File attributes);
-        DateTimeOffset LastWriteTime(File attributes);
+        bool Exists(IFileOrFolderOrMissingPath path);
+        PathType Type(IFileOrFolderOrMissingPath path);
+        bool HasExtension(IFileOrFolderOrMissingPath path);
+        bool IsFile(IFileOrFolderOrMissingPath path);
+        bool IsFolder(IFileOrFolderOrMissingPath path);
+        bool IsReadOnly(IFile path);
+        Information FileSize(IFile path);
+        FileAttributes Attributes(IFile attributes);
+        DateTimeOffset CreationTime(IFile attributes);
+        DateTimeOffset LastAccessTime(IFile attributes);
+        DateTimeOffset LastWriteTime(IFile attributes);
 
         #endregion
         
         #region File reading
 
-        BufferEnumerator ReadBuffers(File path, FileShare fileShare = FileShare.None,
+        BufferEnumerator ReadBuffers(IFile path, FileShare fileShare = FileShare.None,
             Information? bufferSize = default, int paddingAtStart = 0, int paddingAtEnd = 0);
         #endregion
         
         #region File writing
-        File WriteAllBytes(FileOrMissingPath path, byte[] bytes, bool createRecursively = false);
-        File WriteAllBytes(File path, byte[] bytes, bool createRecursively = false);
+        File WriteAllBytes(IFileOrMissingPath path, byte[] bytes, bool createRecursively = false);
         #endregion
         
         #region File open for reading or writing
-        Stream Open(FileOrMissingPath path, FileMode fileMode,
-            FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None,
-            FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.SequentialScan,
-            Information? bufferSize = default, bool createRecursively = false);
-        Stream Open(File path, FileMode fileMode,
+        Stream Open(IFileOrMissingPath path, FileMode fileMode,
             FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.SequentialScan,
             Information? bufferSize = default, bool createRecursively = false);
@@ -565,12 +562,8 @@ namespace IoFluently
         /// </summary>
         IQueryable<AbsolutePath> Query();
 
-        ISetChanges<AbsolutePath> ToLiveLinq(Folder path, bool includeFileContentChanges,
+        ISetChanges<AbsolutePath> ToLiveLinq(IFolder path, bool includeFileContentChanges,
             bool includeSubFolders, string pattern);
-        IObservable<Unit> ObserveChanges(AbsolutePath path);
-        IObservable<Unit> ObserveChanges(AbsolutePath path, NotifyFilters filters);
-        IObservable<PathType> ObservePathType(AbsolutePath path);
-        IObservable<AbsolutePath> Renamings(AbsolutePath path);
         
         #endregion
     }

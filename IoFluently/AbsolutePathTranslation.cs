@@ -7,10 +7,10 @@ namespace IoFluently
 {
     public sealed class AbsolutePathTranslation : IAbsolutePathTranslation
     {
-        internal AbsolutePathTranslation(AbsolutePath source, AbsolutePath destination, IIoService ioService)
+        internal AbsolutePathTranslation(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, IIoService ioService)
         {
-            Source = source;
-            Destination = destination;
+            Source = new AbsolutePath(source);
+            Destination = new AbsolutePath(destination);
             IoService = ioService;
         }
 

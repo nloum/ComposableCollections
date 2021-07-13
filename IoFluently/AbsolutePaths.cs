@@ -69,7 +69,7 @@ namespace IoFluently
         {
             foreach (var path in Paths)
             {
-                yield return new AbsolutePath(IsCaseSensitive, DirectorySeparator, IoService, path);
+                yield return new AbsolutePath(path, IsCaseSensitive, DirectorySeparator, IoService);
             }
         }
 
@@ -126,7 +126,7 @@ namespace IoFluently
         public static AbsolutePaths operator / (AbsolutePaths absPath,
             Func<AbsolutePath, IEnumerable<RelativePath>> whatToAdd)
         {
-            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / (abs => whatToAdd(new AbsolutePath(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, abs)).Select(x => x.Path)));
+            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / (abs => whatToAdd(new AbsolutePath(abs, absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService)).Select(x => x.Path)));
         }
         
         /// <summary>

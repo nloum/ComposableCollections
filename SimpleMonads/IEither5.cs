@@ -7,17 +7,17 @@ T2? Item2 { get; }
 T3? Item3 { get; }
 T4? Item4 { get; }
 T5? Item5 { get; }
-IEither<T1, T2, T3, T4, T5, T6> Or<T6>();
-IEither<T1, T2, T3, T4, T5, T6, T7> Or<T6, T7>();
-IEither<T1, T2, T3, T4, T5, T6, T7, T8> Or<T6, T7, T8>();
-IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9> Or<T6, T7, T8, T9>();
-IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Or<T6, T7, T8, T9, T10>();
-IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Or<T6, T7, T8, T9, T10, T11>();
-IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Or<T6, T7, T8, T9, T10, T11, T12>();
-IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Or<T6, T7, T8, T9, T10, T11, T12, T13>();
-IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Or<T6, T7, T8, T9, T10, T11, T12, T13, T14>();
-IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Or<T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>();
-IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Or<T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>();
+IEitherBase<T1, T2, T3, T4, T5, T6> Or<T6>();
+IEitherBase<T1, T2, T3, T4, T5, T6, T7> Or<T6, T7>();
+IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8> Or<T6, T7, T8>();
+IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9> Or<T6, T7, T8, T9>();
+IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Or<T6, T7, T8, T9, T10>();
+IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Or<T6, T7, T8, T9, T10, T11>();
+IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Or<T6, T7, T8, T9, T10, T11, T12>();
+IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Or<T6, T7, T8, T9, T10, T11, T12, T13>();
+IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Or<T6, T7, T8, T9, T10, T11, T12, T13, T14>();
+IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Or<T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>();
+IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Or<T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>();
 TOutput Collapse<TOutput>(Func<T1, TOutput> selector1, Func<T2, TOutput> selector2, Func<T3, TOutput> selector3, Func<T4, TOutput> selector4, Func<T5, TOutput> selector5);
 ConvertibleTo<TBase>.IEither<T1, T2, T3, T4, T5> ConvertTo<TBase>();
 }

@@ -25,16 +25,16 @@ namespace IoFluently {
         PathType Type => IoService.Type(this);
     }
     
-    public partial class FileOrFolderOrMissingPath<TFile, TFolder, TMissingPath> {
-        public IEnumerable<FileOrFolderOrMissingPath> Ancestors => IoService.Ancestors(this);
+    public partial class AbsolutePath {
+        public IEnumerable<AbsolutePath> Ancestors => IoService.Ancestors(this);
         public Boolean CanBeSimplified => IoService.CanBeSimplified(this);
         public Boolean Exists => IoService.Exists(this);
         public Boolean IsFile => IoService.IsFile(this);
         public Boolean IsFolder => IoService.IsFolder(this);
         public Folder Root => IoService.Root(this);
-        public IMaybe<FileOrFolderOrMissingPath> Parent => IoService.TryParent(this);
+        public IMaybe<Folder> Parent => IoService.TryParent(this);
         public PathType Type => IoService.Type(this);
-        public FileOrFolderOrMissingPath WithoutExtension => IoService.WithoutExtension(this);
+        public AbsolutePath WithoutExtension => IoService.WithoutExtension(this);
     }
 }
 namespace IoFluently {

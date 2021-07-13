@@ -16,17 +16,17 @@ using UnitsNet;
 
 namespace IoFluently
 {
-    public interface IFileFormat<TFile> where TFile : File<TFile>
+    public interface IFileFormat<TFile> where TFile : File
     {
         TFile CreateFileObject(IAbsolutePath file);
     }
 
-    public interface IFolderFormat<TFolder> where TFolder : Folder<TFolder>
+    public interface IFolderFormat<TFolder> where TFolder : Folder
     {
         TFolder CreateFolderObject(IAbsolutePath folder);
     }
 
-    public interface IMissingPathFormat<TMissingPath> where TMissingPath : MissingPath<TMissingPath>
+    public interface IMissingPathFormat<TMissingPath> where TMissingPath : MissingPath
     {
         TMissingPath CreateMissingPathObject(IAbsolutePath missingPath);
     }
@@ -69,13 +69,13 @@ namespace IoFluently
         
         #region File formats
 
-        void RegisterFileFormat<TFile>(IFileFormat<TFile> fileFormat) where TFile : File<TFile>;
-        void RegisterFolderFormat<TFolder>(IFolderFormat<TFolder> folderFormat) where TFolder : Folder<TFolder>;
-        void RegisterMissingFormat<TMissingPath>(IMissingPathFormat<TMissingPath> missingPathFormat) where TMissingPath : MissingPath<TMissingPath>;
+        void RegisterFileFormat<TFile>(IFileFormat<TFile> fileFormat) where TFile : File;
+        void RegisterFolderFormat<TFolder>(IFolderFormat<TFolder> folderFormat) where TFolder : Folder;
+        void RegisterMissingFormat<TMissingPath>(IMissingPathFormat<TMissingPath> missingPathFormat) where TMissingPath : MissingPath;
         
-        TFile CreateFileObject<TFile>(IAbsolutePath file) where TFile : File<TFile>;
-        TFolder CreateFolderObject<TFolder>(IAbsolutePath folder) where TFolder : Folder<TFolder>;
-        TMissingPath CreateMissingPathObject<TMissingPath>(IAbsolutePath missingPath) where TMissingPath : MissingPath<TMissingPath>;
+        TFile CreateFileObject<TFile>(IAbsolutePath file) where TFile : File;
+        TFolder CreateFolderObject<TFolder>(IAbsolutePath folder) where TFolder : Folder;
+        TMissingPath CreateMissingPathObject<TMissingPath>(IAbsolutePath missingPath) where TMissingPath : MissingPath;
         #endregion
         
         #region Environmental stuff
@@ -549,7 +549,7 @@ namespace IoFluently
         #region File metadata
         
         bool Exists(IFileOrFolderOrMissingPath path);
-        PathType Type(IAbsolutePath path);
+        PathType Type(IFileOrFolderOrMissingPath path);
         bool HasExtension(IFileOrFolderOrMissingPath path);
         bool IsFile(IFileOrFolderOrMissingPath path);
         bool IsFolder(IFileOrFolderOrMissingPath path);
@@ -587,7 +587,7 @@ namespace IoFluently
         /// </summary>
         IQueryable<FileOrFolderOrMissingPath> Query();
 
-        ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq<TFolder>(Folder<TFolder> path, bool includeFileContentChanges,
+        ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq(Folder path, bool includeFileContentChanges,
             bool includeSubFolders, string pattern);
         IObservable<Unit> ObserveChanges(IFileOrFolderOrMissingPath path);
         IObservable<Unit> ObserveChanges(IFileOrFolderOrMissingPath path, NotifyFilters filters);

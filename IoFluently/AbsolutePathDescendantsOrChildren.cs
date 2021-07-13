@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using IoFluently;
 using LiveLinq.Set;
 
 namespace IoFluently
 {
-    public abstract class AbsolutePathDescendantsOrChildren : IObservableReadOnlySet<IFileOrFolderOrMissingPath>
+    public abstract class AbsolutePathDescendantsOrChildren : IObservableReadOnlySet<FileOrFolderOrMissingPath>
     {
-        protected readonly Folder<Folder> _path;
+        protected readonly IFolder _path;
         protected readonly string _pattern;
 
-        protected AbsolutePathDescendantsOrChildren(Folder<Folder> path, string pattern, bool includeSubFolders, IIoService ioService)
+        protected AbsolutePathDescendantsOrChildren(IFolder path, string pattern, bool includeSubFolders, IIoService ioService)
         {
             _path = path;
             _pattern = pattern;
@@ -24,7 +25,7 @@ namespace IoFluently
 
         protected bool IncludeSubFolders { get; }
 
-        public ISetChanges<IFileOrFolderOrMissingPath> ToLiveLinq()
+        public ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq()
         {
             return IoService.ToLiveLinq(_path, true, IncludeSubFolders, _pattern);
         }
@@ -40,6 +41,6 @@ namespace IoFluently
             return GetEnumerator();
         }
 
-        public abstract IEnumerator<IFileOrFolderOrMissingPath> GetEnumerator();
+        public abstract IEnumerator<FileOrFolderOrMissingPath> GetEnumerator();
     }
 }

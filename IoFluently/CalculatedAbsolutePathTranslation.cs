@@ -24,9 +24,9 @@ namespace IoFluently
             return new CalculatedAbsolutePathTranslation(FileOrFolderOrMissingPath, AncestorDestination, AncestorSource, IoService);
         }
 
-        public FileOrFolderOrMissingPath FileOrFolderOrMissingPath { get; }
-        public FileOrFolderOrMissingPath AncestorSource { get; }
-        public FileOrFolderOrMissingPath AncestorDestination { get; }
+        public AbsolutePath FileOrFolderOrMissingPath { get; }
+        public AbsolutePath AncestorSource { get; }
+        public AbsolutePath AncestorDestination { get; }
 
         public IIoService IoService { get; }
 

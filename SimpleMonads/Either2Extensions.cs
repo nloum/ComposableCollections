@@ -3,7 +3,7 @@ using System;
 namespace SimpleMonads {
 public static class Either2Extensions
 {
-public static SubTypesOf<object>.IEither<T1B, T2> Select1<TBase, T1A, T1B, T2>(SubTypesOf<TBase>.IEither<T1A, T2> either, Func<T1A, T1B> selector) where T1A : TBase where T2 : TBase
+public static SubTypesOf<object>.Either<T1B, T2> Select1<TBase, T1A, T1B, T2>(this SubTypesOf<TBase>.IEither<T1A, T2> either, Func<T1A, T1B> selector) where T1A : TBase where T2 : TBase
 {
 if (either.Item1 != null) {
 return new Either<T1B, T2>(selector(either.Item1));
@@ -15,7 +15,7 @@ else {
 throw new InvalidOperationException();
 }
 }
-public static SubTypesOf<object>.IEither<T1, T2B> Select2<TBase, T1, T2A, T2B>(SubTypesOf<TBase>.IEither<T1, T2A> either, Func<T2A, T2B> selector) where T1 : TBase where T2A : TBase
+public static SubTypesOf<object>.Either<T1, T2B> Select2<TBase, T1, T2A, T2B>(this SubTypesOf<TBase>.IEither<T1, T2A> either, Func<T2A, T2B> selector) where T1 : TBase where T2A : TBase
 {
 if (either.Item1 != null) {
 return new Either<T1, T2B>(either.Item1);

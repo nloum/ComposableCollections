@@ -21,7 +21,7 @@ if (Item1 != null) return selector1(Item1);
 if (Item2 != null) return selector2(Item2);
 throw new InvalidOperationException();
 }
-public IEither<T1, T2, T3> Or<T3>()
+public IEitherBase<T1, T2, T3> Or<T3>()
 {
 if (Item1 != null) {
 return new Either<T1, T2, T3>(Item1);
@@ -31,7 +31,7 @@ return new Either<T1, T2, T3>(Item2);
 }
 throw new System.InvalidOperationException("The either has no values");
 }
-public IEither<T1, T2, T3, T4> Or<T3, T4>()
+public IEitherBase<T1, T2, T3, T4> Or<T3, T4>()
 {
 if (Item1 != null) {
 return new Either<T1, T2, T3, T4>(Item1);
@@ -41,7 +41,7 @@ return new Either<T1, T2, T3, T4>(Item2);
 }
 throw new System.InvalidOperationException("The either has no values");
 }
-public IEither<T1, T2, T3, T4, T5> Or<T3, T4, T5>()
+public IEitherBase<T1, T2, T3, T4, T5> Or<T3, T4, T5>()
 {
 if (Item1 != null) {
 return new Either<T1, T2, T3, T4, T5>(Item1);
@@ -51,7 +51,7 @@ return new Either<T1, T2, T3, T4, T5>(Item2);
 }
 throw new System.InvalidOperationException("The either has no values");
 }
-public IEither<T1, T2, T3, T4, T5, T6> Or<T3, T4, T5, T6>()
+public IEitherBase<T1, T2, T3, T4, T5, T6> Or<T3, T4, T5, T6>()
 {
 if (Item1 != null) {
 return new Either<T1, T2, T3, T4, T5, T6>(Item1);
@@ -61,7 +61,7 @@ return new Either<T1, T2, T3, T4, T5, T6>(Item2);
 }
 throw new System.InvalidOperationException("The either has no values");
 }
-public IEither<T1, T2, T3, T4, T5, T6, T7> Or<T3, T4, T5, T6, T7>()
+public IEitherBase<T1, T2, T3, T4, T5, T6, T7> Or<T3, T4, T5, T6, T7>()
 {
 if (Item1 != null) {
 return new Either<T1, T2, T3, T4, T5, T6, T7>(Item1);
@@ -71,7 +71,7 @@ return new Either<T1, T2, T3, T4, T5, T6, T7>(Item2);
 }
 throw new System.InvalidOperationException("The either has no values");
 }
-public IEither<T1, T2, T3, T4, T5, T6, T7, T8> Or<T3, T4, T5, T6, T7, T8>()
+public IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8> Or<T3, T4, T5, T6, T7, T8>()
 {
 if (Item1 != null) {
 return new Either<T1, T2, T3, T4, T5, T6, T7, T8>(Item1);
@@ -81,7 +81,7 @@ return new Either<T1, T2, T3, T4, T5, T6, T7, T8>(Item2);
 }
 throw new System.InvalidOperationException("The either has no values");
 }
-public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9> Or<T3, T4, T5, T6, T7, T8, T9>()
+public IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9> Or<T3, T4, T5, T6, T7, T8, T9>()
 {
 if (Item1 != null) {
 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item1);
@@ -91,7 +91,7 @@ return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Item2);
 }
 throw new System.InvalidOperationException("The either has no values");
 }
-public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Or<T3, T4, T5, T6, T7, T8, T9, T10>()
+public IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Or<T3, T4, T5, T6, T7, T8, T9, T10>()
 {
 if (Item1 != null) {
 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(Item1);
@@ -101,7 +101,7 @@ return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(Item2);
 }
 throw new System.InvalidOperationException("The either has no values");
 }
-public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Or<T3, T4, T5, T6, T7, T8, T9, T10, T11>()
+public IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Or<T3, T4, T5, T6, T7, T8, T9, T10, T11>()
 {
 if (Item1 != null) {
 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Item1);
@@ -111,7 +111,7 @@ return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Item2);
 }
 throw new System.InvalidOperationException("The either has no values");
 }
-public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>()
+public IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>()
 {
 if (Item1 != null) {
 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(Item1);
@@ -121,7 +121,7 @@ return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(Item2);
 }
 throw new System.InvalidOperationException("The either has no values");
 }
-public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>()
+public IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>()
 {
 if (Item1 != null) {
 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(Item1);
@@ -131,7 +131,7 @@ return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(Item2)
 }
 throw new System.InvalidOperationException("The either has no values");
 }
-public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>()
+public IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>()
 {
 if (Item1 != null) {
 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item1);
@@ -141,7 +141,7 @@ return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(I
 }
 throw new System.InvalidOperationException("The either has no values");
 }
-public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>()
+public IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>()
 {
 if (Item1 != null) {
 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item1);
@@ -151,7 +151,7 @@ return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T
 }
 throw new System.InvalidOperationException("The either has no values");
 }
-public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>()
+public IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>()
 {
 if (Item1 != null) {
 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item1);

@@ -3,7 +3,7 @@ using System;
 namespace SimpleMonads {
 public static class Either4Extensions
 {
-public static SubTypesOf<object>.IEither<T1B, T2, T3, T4> Select1<TBase, T1A, T1B, T2, T3, T4>(SubTypesOf<TBase>.IEither<T1A, T2, T3, T4> either, Func<T1A, T1B> selector) where T1A : TBase where T2 : TBase where T3 : TBase where T4 : TBase
+public static SubTypesOf<object>.Either<T1B, T2, T3, T4> Select1<TBase, T1A, T1B, T2, T3, T4>(this SubTypesOf<TBase>.IEither<T1A, T2, T3, T4> either, Func<T1A, T1B> selector) where T1A : TBase where T2 : TBase where T3 : TBase where T4 : TBase
 {
 if (either.Item1 != null) {
 return new Either<T1B, T2, T3, T4>(selector(either.Item1));
@@ -21,7 +21,7 @@ else {
 throw new InvalidOperationException();
 }
 }
-public static SubTypesOf<object>.IEither<T1, T2B, T3, T4> Select2<TBase, T1, T2A, T2B, T3, T4>(SubTypesOf<TBase>.IEither<T1, T2A, T3, T4> either, Func<T2A, T2B> selector) where T1 : TBase where T2A : TBase where T3 : TBase where T4 : TBase
+public static SubTypesOf<object>.Either<T1, T2B, T3, T4> Select2<TBase, T1, T2A, T2B, T3, T4>(this SubTypesOf<TBase>.IEither<T1, T2A, T3, T4> either, Func<T2A, T2B> selector) where T1 : TBase where T2A : TBase where T3 : TBase where T4 : TBase
 {
 if (either.Item1 != null) {
 return new Either<T1, T2B, T3, T4>(either.Item1);
@@ -39,7 +39,7 @@ else {
 throw new InvalidOperationException();
 }
 }
-public static SubTypesOf<object>.IEither<T1, T2, T3B, T4> Select3<TBase, T1, T2, T3A, T3B, T4>(SubTypesOf<TBase>.IEither<T1, T2, T3A, T4> either, Func<T3A, T3B> selector) where T1 : TBase where T2 : TBase where T3A : TBase where T4 : TBase
+public static SubTypesOf<object>.Either<T1, T2, T3B, T4> Select3<TBase, T1, T2, T3A, T3B, T4>(this SubTypesOf<TBase>.IEither<T1, T2, T3A, T4> either, Func<T3A, T3B> selector) where T1 : TBase where T2 : TBase where T3A : TBase where T4 : TBase
 {
 if (either.Item1 != null) {
 return new Either<T1, T2, T3B, T4>(either.Item1);
@@ -57,7 +57,7 @@ else {
 throw new InvalidOperationException();
 }
 }
-public static SubTypesOf<object>.IEither<T1, T2, T3, T4B> Select4<TBase, T1, T2, T3, T4A, T4B>(SubTypesOf<TBase>.IEither<T1, T2, T3, T4A> either, Func<T4A, T4B> selector) where T1 : TBase where T2 : TBase where T3 : TBase where T4A : TBase
+public static SubTypesOf<object>.Either<T1, T2, T3, T4B> Select4<TBase, T1, T2, T3, T4A, T4B>(this SubTypesOf<TBase>.IEither<T1, T2, T3, T4A> either, Func<T4A, T4B> selector) where T1 : TBase where T2 : TBase where T3 : TBase where T4A : TBase
 {
 if (either.Item1 != null) {
 return new Either<T1, T2, T3, T4B>(either.Item1);

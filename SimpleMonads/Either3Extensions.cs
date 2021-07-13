@@ -3,7 +3,7 @@ using System;
 namespace SimpleMonads {
 public static class Either3Extensions
 {
-public static SubTypesOf<object>.IEither<T1B, T2, T3> Select1<TBase, T1A, T1B, T2, T3>(SubTypesOf<TBase>.IEither<T1A, T2, T3> either, Func<T1A, T1B> selector) where T1A : TBase where T2 : TBase where T3 : TBase
+public static SubTypesOf<object>.Either<T1B, T2, T3> Select1<TBase, T1A, T1B, T2, T3>(this SubTypesOf<TBase>.IEither<T1A, T2, T3> either, Func<T1A, T1B> selector) where T1A : TBase where T2 : TBase where T3 : TBase
 {
 if (either.Item1 != null) {
 return new Either<T1B, T2, T3>(selector(either.Item1));
@@ -18,7 +18,7 @@ else {
 throw new InvalidOperationException();
 }
 }
-public static SubTypesOf<object>.IEither<T1, T2B, T3> Select2<TBase, T1, T2A, T2B, T3>(SubTypesOf<TBase>.IEither<T1, T2A, T3> either, Func<T2A, T2B> selector) where T1 : TBase where T2A : TBase where T3 : TBase
+public static SubTypesOf<object>.Either<T1, T2B, T3> Select2<TBase, T1, T2A, T2B, T3>(this SubTypesOf<TBase>.IEither<T1, T2A, T3> either, Func<T2A, T2B> selector) where T1 : TBase where T2A : TBase where T3 : TBase
 {
 if (either.Item1 != null) {
 return new Either<T1, T2B, T3>(either.Item1);
@@ -33,7 +33,7 @@ else {
 throw new InvalidOperationException();
 }
 }
-public static SubTypesOf<object>.IEither<T1, T2, T3B> Select3<TBase, T1, T2, T3A, T3B>(SubTypesOf<TBase>.IEither<T1, T2, T3A> either, Func<T3A, T3B> selector) where T1 : TBase where T2 : TBase where T3A : TBase
+public static SubTypesOf<object>.Either<T1, T2, T3B> Select3<TBase, T1, T2, T3A, T3B>(this SubTypesOf<TBase>.IEither<T1, T2, T3A> either, Func<T3A, T3B> selector) where T1 : TBase where T2 : TBase where T3A : TBase
 {
 if (either.Item1 != null) {
 return new Either<T1, T2, T3B>(either.Item1);

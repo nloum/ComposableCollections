@@ -346,7 +346,7 @@ namespace SimpleMonads.CodeGeneration
             var additionalArityArgsConstraints = string.Join(" ", Enumerable.Range(arity + 1, biggerArityArgs - arity).Select(i => $"where T{i} : TBase"));
             var maxArityArgs = Enumerable.Range(1, biggerArityArgs).Select(i => $"T{i}");
             writer.WriteLine(
-                $"IEither<{string.Join(", ", maxArityArgs)}> Or<{string.Join(", ", additionalArityArgs)}>();");
+                $"IEitherBase<{string.Join(", ", maxArityArgs)}> Or<{string.Join(", ", additionalArityArgs)}>();");
         }
 
         private static void GenerateOrImplementation(TextWriter writer, int arity, int biggerArityArgs)
@@ -356,7 +356,7 @@ namespace SimpleMonads.CodeGeneration
             var additionalArityArgsConstraints = string.Join(" ", Enumerable.Range(arity + 1, biggerArityArgs - arity).Select(i => $"where T{i} : TBase"));
             var maxArityArgs = Enumerable.Range(1, biggerArityArgs).Select(i => $"T{i}");
             writer.WriteLine(
-                $"public IEither<{string.Join(", ", maxArityArgs)}> Or<{string.Join(", ", additionalArityArgs)}>()\n{{");
+                $"public IEitherBase<{string.Join(", ", maxArityArgs)}> Or<{string.Join(", ", additionalArityArgs)}>()\n{{");
 
             for (var i = 1; i <= arity; i++)
             {
@@ -370,7 +370,7 @@ namespace SimpleMonads.CodeGeneration
 
         private static void GeneratePartialSelect(TextWriter writer, int arity, int i)
         {
-            writer.Write("public static SubTypesOf<object>.IEither<");
+            writer.Write("public static SubTypesOf<object>.Either<");
             for (var j = 1; j <= arity; j++)
             {
                 if (j == i)
@@ -393,7 +393,7 @@ namespace SimpleMonads.CodeGeneration
                 if (j < arity) writer.Write(", ");
             }
 
-            writer.Write(">(SubTypesOf<TBase>.IEither<");
+            writer.Write(">(this SubTypesOf<TBase>.IEither<");
 
             for (var j = 1; j <= arity; j++)
             {

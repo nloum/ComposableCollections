@@ -93,7 +93,7 @@ if (Item13 != null) return selector13(Item13);
 if (Item14 != null) return selector14(Item14);
 throw new InvalidOperationException();
 }
-public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Or<T15>()
+public IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Or<T15>()
 {
 if (Item1 != null) {
 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Item1);
@@ -139,7 +139,7 @@ return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T
 }
 throw new System.InvalidOperationException("The either has no values");
 }
-public IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Or<T15, T16>()
+public IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Or<T15, T16>()
 {
 if (Item1 != null) {
 return new Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Item1);

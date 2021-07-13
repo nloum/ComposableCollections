@@ -14,12 +14,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ComposableCollections" Version="1.0.0-alpha0182" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="5.0.0" />
-    <PackageReference Include="SimpleMonads" Version="2.0.0-alpha0451" />
-    <PackageReference Include="TreeLinq" Version="1.0.0-alpha0023" />
     <PackageReference Include="UnitsNet" Version="4.96.0" />
-    <PackageReference Include="UtilityDisposables" Version="1.1.0-alpha0006" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ComposableCollections\ComposableCollections.csproj" />
+    <ProjectReference Include="..\SimpleMonads\SimpleMonads.csproj" />
+    <ProjectReference Include="..\TreeLinq\TreeLinq.csproj" />
+    <ProjectReference Include="..\UtilityDisposables\UtilityDisposables.csproj" />
   </ItemGroup>
 
 </Project>

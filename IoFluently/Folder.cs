@@ -42,72 +42,72 @@ namespace IoFluently
 
         IMissingPath? IEitherBase<IFolder, IMissingPath>.Item2 => IFolderOrMissingPath.Item2;
 
-        IEither<IFile, IFolder, T3> IEitherBase<IFile, IFolder>.Or<T3>()
+        IEitherBase<IFile, IFolder, T3> IEitherBase<IFile, IFolder>.Or<T3>()
         {
             return FileOrFolder.Or<T3>();
         }
 
-        IEither<IFile, IFolder, T3, T4> IEitherBase<IFile, IFolder>.Or<T3, T4>()
+        IEitherBase<IFile, IFolder, T3, T4> IEitherBase<IFile, IFolder>.Or<T3, T4>()
         {
             return FileOrFolder.Or<T3, T4>();
         }
 
-        IEither<IFile, IFolder, T3, T4, T5> IEitherBase<IFile, IFolder>.Or<T3, T4, T5>()
+        IEitherBase<IFile, IFolder, T3, T4, T5> IEitherBase<IFile, IFolder>.Or<T3, T4, T5>()
         {
             return FileOrFolder.Or<T3, T4, T5>();
         }
 
-        IEither<IFile, IFolder, T3, T4, T5, T6> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6>()
+        IEitherBase<IFile, IFolder, T3, T4, T5, T6> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6>()
         {
             return FileOrFolder.Or<T3, T4, T5, T6>();
         }
 
-        IEither<IFile, IFolder, T3, T4, T5, T6, T7> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7>()
+        IEitherBase<IFile, IFolder, T3, T4, T5, T6, T7> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7>()
         {
             return FileOrFolder.Or<T3, T4, T5, T6, T7>();
         }
 
-        IEither<IFile, IFolder, T3, T4, T5, T6, T7, T8> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8>()
+        IEitherBase<IFile, IFolder, T3, T4, T5, T6, T7, T8> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8>()
         {
             return FileOrFolder.Or<T3, T4, T5, T6, T7, T8>();
         }
 
-        IEither<IFile, IFolder, T3, T4, T5, T6, T7, T8, T9> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8, T9>()
+        IEitherBase<IFile, IFolder, T3, T4, T5, T6, T7, T8, T9> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8, T9>()
         {
             return FileOrFolder.Or<T3, T4, T5, T6, T7, T8, T9>();
         }
 
-        IEither<IFile, IFolder, T3, T4, T5, T6, T7, T8, T9, T10> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8, T9, T10>()
+        IEitherBase<IFile, IFolder, T3, T4, T5, T6, T7, T8, T9, T10> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8, T9, T10>()
         {
             return FileOrFolder.Or<T3, T4, T5, T6, T7, T8, T9, T10>();
         }
 
-        IEither<IFile, IFolder, T3, T4, T5, T6, T7, T8, T9, T10, T11> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11>()
+        IEitherBase<IFile, IFolder, T3, T4, T5, T6, T7, T8, T9, T10, T11> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11>()
         {
             return FileOrFolder.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11>();
         }
 
-        IEither<IFile, IFolder, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>()
+        IEitherBase<IFile, IFolder, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>()
         {
             return FileOrFolder.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>();
         }
 
-        IEither<IFile, IFolder, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>()
+        IEitherBase<IFile, IFolder, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>()
         {
             return FileOrFolder.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>();
         }
 
-        IEither<IFile, IFolder, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>()
+        IEitherBase<IFile, IFolder, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>()
         {
             return FileOrFolder.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>();
         }
 
-        IEither<IFile, IFolder, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>()
+        IEitherBase<IFile, IFolder, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>()
         {
             return FileOrFolder.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>();
         }
 
-        IEither<IFile, IFolder, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>()
+        IEitherBase<IFile, IFolder, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> IEitherBase<IFile, IFolder>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>()
         {
             return FileOrFolder.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>();
         }
@@ -126,72 +126,72 @@ namespace IoFluently
 
         
 
-        IEither<IFolder, IMissingPath, T3> IEitherBase<IFolder, IMissingPath>.Or<T3>()
+        IEitherBase<IFolder, IMissingPath, T3> IEitherBase<IFolder, IMissingPath>.Or<T3>()
         {
             return IFolderOrMissingPath.Or<T3>();
         }
 
-        IEither<IFolder, IMissingPath, T3, T4> IEitherBase<IFolder, IMissingPath>.Or<T3, T4>()
+        IEitherBase<IFolder, IMissingPath, T3, T4> IEitherBase<IFolder, IMissingPath>.Or<T3, T4>()
         {
             return IFolderOrMissingPath.Or<T3, T4>();
         }
 
-        IEither<IFolder, IMissingPath, T3, T4, T5> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5>()
+        IEitherBase<IFolder, IMissingPath, T3, T4, T5> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5>()
         {
             return IFolderOrMissingPath.Or<T3, T4, T5>();
         }
 
-        IEither<IFolder, IMissingPath, T3, T4, T5, T6> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6>()
+        IEitherBase<IFolder, IMissingPath, T3, T4, T5, T6> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6>()
         {
             return IFolderOrMissingPath.Or<T3, T4, T5, T6>();
         }
 
-        IEither<IFolder, IMissingPath, T3, T4, T5, T6, T7> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7>()
+        IEitherBase<IFolder, IMissingPath, T3, T4, T5, T6, T7> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7>()
         {
             return IFolderOrMissingPath.Or<T3, T4, T5, T6, T7>();
         }
 
-        IEither<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8>()
+        IEitherBase<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8>()
         {
             return IFolderOrMissingPath.Or<T3, T4, T5, T6, T7, T8>();
         }
 
-        IEither<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8, T9> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9>()
+        IEitherBase<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8, T9> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9>()
         {
             return IFolderOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9>();
         }
 
-        IEither<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10>()
+        IEitherBase<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10>()
         {
             return IFolderOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10>();
         }
 
-        IEither<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11>()
+        IEitherBase<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11>()
         {
             return IFolderOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11>();
         }
 
-        IEither<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>()
+        IEitherBase<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>()
         {
             return IFolderOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>();
         }
 
-        IEither<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>()
+        IEitherBase<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>()
         {
             return IFolderOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>();
         }
 
-        IEither<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>()
+        IEitherBase<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>()
         {
             return IFolderOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>();
         }
 
-        IEither<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>()
+        IEitherBase<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>()
         {
             return IFolderOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>();
         }
 
-        IEither<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>()
+        IEitherBase<IFolder, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> IEitherBase<IFolder, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>()
         {
             return IFolderOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>();
         }
@@ -216,67 +216,67 @@ namespace IoFluently
 
         public IMissingPath? Item3 => FileOrFolderOrMissingPath.Item3;
 
-        public IEither<IFile, IFolder, IMissingPath, T4> Or<T4>()
+        public IEitherBase<IFile, IFolder, IMissingPath, T4> Or<T4>()
         {
             return FileOrFolderOrMissingPath.Or<T4>();
         }
 
-        public IEither<IFile, IFolder, IMissingPath, T4, T5> Or<T4, T5>()
+        public IEitherBase<IFile, IFolder, IMissingPath, T4, T5> Or<T4, T5>()
         {
             return FileOrFolderOrMissingPath.Or<T4, T5>();
         }
 
-        public IEither<IFile, IFolder, IMissingPath, T4, T5, T6> Or<T4, T5, T6>()
+        public IEitherBase<IFile, IFolder, IMissingPath, T4, T5, T6> Or<T4, T5, T6>()
         {
             return FileOrFolderOrMissingPath.Or<T4, T5, T6>();
         }
 
-        public IEither<IFile, IFolder, IMissingPath, T4, T5, T6, T7> Or<T4, T5, T6, T7>()
+        public IEitherBase<IFile, IFolder, IMissingPath, T4, T5, T6, T7> Or<T4, T5, T6, T7>()
         {
             return FileOrFolderOrMissingPath.Or<T4, T5, T6, T7>();
         }
 
-        public IEither<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8> Or<T4, T5, T6, T7, T8>()
+        public IEitherBase<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8> Or<T4, T5, T6, T7, T8>()
         {
             return FileOrFolderOrMissingPath.Or<T4, T5, T6, T7, T8>();
         }
 
-        public IEither<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8, T9> Or<T4, T5, T6, T7, T8, T9>()
+        public IEitherBase<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8, T9> Or<T4, T5, T6, T7, T8, T9>()
         {
             return FileOrFolderOrMissingPath.Or<T4, T5, T6, T7, T8, T9>();
         }
 
-        public IEither<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8, T9, T10> Or<T4, T5, T6, T7, T8, T9, T10>()
+        public IEitherBase<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8, T9, T10> Or<T4, T5, T6, T7, T8, T9, T10>()
         {
             return FileOrFolderOrMissingPath.Or<T4, T5, T6, T7, T8, T9, T10>();
         }
 
-        public IEither<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8, T9, T10, T11> Or<T4, T5, T6, T7, T8, T9, T10, T11>()
+        public IEitherBase<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8, T9, T10, T11> Or<T4, T5, T6, T7, T8, T9, T10, T11>()
         {
             return FileOrFolderOrMissingPath.Or<T4, T5, T6, T7, T8, T9, T10, T11>();
         }
 
-        public IEither<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8, T9, T10, T11, T12> Or<T4, T5, T6, T7, T8, T9, T10, T11, T12>()
+        public IEitherBase<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8, T9, T10, T11, T12> Or<T4, T5, T6, T7, T8, T9, T10, T11, T12>()
         {
             return FileOrFolderOrMissingPath.Or<T4, T5, T6, T7, T8, T9, T10, T11, T12>();
         }
 
-        public IEither<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Or<T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>()
+        public IEitherBase<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Or<T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>()
         {
             return FileOrFolderOrMissingPath.Or<T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>();
         }
 
-        public IEither<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Or<T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>()
+        public IEitherBase<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Or<T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>()
         {
             return FileOrFolderOrMissingPath.Or<T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>();
         }
 
-        public IEither<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Or<T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>()
+        public IEitherBase<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Or<T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>()
         {
             return FileOrFolderOrMissingPath.Or<T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>();
         }
 
-        public IEither<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Or<T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>()
+        public IEitherBase<IFile, IFolder, IMissingPath, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Or<T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>()
         {
             return FileOrFolderOrMissingPath.Or<T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>();
         }

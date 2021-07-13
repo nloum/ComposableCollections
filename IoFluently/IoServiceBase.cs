@@ -1850,7 +1850,7 @@ namespace IoFluently
 
         public IEnumerable<Folder> Ancestors(IFolder path)
         {
-            foreach (var ancestor in Ancestors(path))
+            foreach (var ancestor in Ancestors((IFileOrFolderOrMissingPath)path))
             {
                 yield return ancestor.ExpectFolder();
             }
@@ -1858,7 +1858,7 @@ namespace IoFluently
 
         public IEnumerable<Folder> Ancestors(IFile path)
         {
-            foreach (var ancestor in Ancestors(path))
+            foreach (var ancestor in Ancestors((IFileOrFolderOrMissingPath)path))
             {
                 yield return ancestor.ExpectFolder();
             }
@@ -1866,7 +1866,7 @@ namespace IoFluently
 
         public IEnumerable<IFolderOrMissingPath> Ancestors(IMissingPath path)
         {
-            foreach (var ancestor in Ancestors(path))
+            foreach (var ancestor in Ancestors((IFileOrFolderOrMissingPath)path))
             {
                 yield return ancestor.ExpectFolderOrMissingPath();
             }

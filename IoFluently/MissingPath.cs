@@ -25,6 +25,12 @@ namespace IoFluently
             IoService = ioService;
         }
 
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return this.ConvertToString();
+        }
+
         protected SubTypesOf<IFileOrFolderOrMissingPath>.IEither<IFolder, IMissingPath> IFolderOrMissingPath =>
             new SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFolder, IMissingPath>((IMissingPath)this);
         protected SubTypesOf<IFileOrFolderOrMissingPath>.IEither<IFile, IMissingPath> IFileOrMissingPath =>

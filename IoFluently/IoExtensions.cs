@@ -8,6 +8,20 @@ namespace IoFluently
 {
     public static partial class IoExtensions
     {
+        public static string ConvertToString(this IFileOrFolderOrMissingPath path)
+        {
+            var sb = new StringBuilder();
+            for (var i = 0; i < path.Components.Count; i++)
+            {
+                sb.Append(path.Components[i]);
+                if (path.Components[i] != path.DirectorySeparator && i + 1 != path.Components.Count &&
+                    sb.ToString() != path.DirectorySeparator)
+                    sb.Append(path.DirectorySeparator);
+            }
+
+            return sb.ToString();
+        }
+        
         public static MissingPath ExpectMissingPath(this IFileOrFolderOrMissingPath path)
         {
             if (path is MissingPath missingPath)

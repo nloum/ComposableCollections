@@ -24,6 +24,12 @@ namespace IoFluently
             DirectorySeparator = directorySeparator;
             IoService = ioService;
         }
+        
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return this.ConvertToString();
+        }
 
         protected SubTypesOf<IFileOrFolderOrMissingPath>.IEither<IFile, IFolder> FileOrFolder =>
             new SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFile, IFolder>((IFile)this);

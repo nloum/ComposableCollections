@@ -26,6 +26,12 @@ namespace IoFluently
         public FileOrMissingPathBase(IFileOrFolderOrMissingPath item) : base(item)
         {
         }
+        
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return this.ConvertToString();
+        }
 
         protected SubTypesOf<IFileOrFolderOrMissingPath>.IEither<IFile, IFolder, IMissingPath>
             FileOrFolderOrMissingPath => this.Collapse(

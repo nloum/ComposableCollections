@@ -67,16 +67,7 @@ namespace IoFluently
         /// <inheritdoc />
         public override string ToString()
         {
-            var sb = new StringBuilder();
-            for (var i = 0; i < Components.Count; i++)
-            {
-                sb.Append(Components[i]);
-                if (Components[i] != DirectorySeparator && i + 1 != Components.Count &&
-                    sb.ToString() != DirectorySeparator)
-                    sb.Append(DirectorySeparator);
-            }
-
-            return sb.ToString();
+            return this.ConvertToString();
         }
 
         /// <summary>

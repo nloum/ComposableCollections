@@ -31,6 +31,7 @@ namespace IoFluently {
         public PathType Type => IoService.Type(this);
         public AbsolutePath WithoutExtension => IoService.WithoutExtension(this);
         public string? Extension => IoService.Extension(this);
+        
         public string Name => IoService.Name(this);
     }
 }

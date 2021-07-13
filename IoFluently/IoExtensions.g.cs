@@ -138,6 +138,7 @@ namespace IoFluently
         public static AbsolutePath WithExtension(this IFileOrFolderOrMissingPath path, string differentExtension) {
             return path.IoService.TryWithExtension(path, differentExtension).Value;
         }
+        
 
         public static IMaybe<AbsolutePath> TryWithExtension(this IFileOrFolderOrMissingPath path, Func<string, string> differentExtension) {
             return path.IoService.TryWithExtension(path, differentExtension);

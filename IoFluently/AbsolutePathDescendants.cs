@@ -8,7 +8,7 @@ namespace IoFluently
 {
     public class AbsolutePathDescendants : AbsolutePathDescendantsOrChildren, IFileProvider
     {
-        public AbsolutePathDescendants(Folder path, string pattern) : base(path, pattern, true)
+        public AbsolutePathDescendants(Folder path, string pattern = "*") : base(path, pattern, true)
         {
         }
 

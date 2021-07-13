@@ -5,7 +5,7 @@ namespace IoFluently
 {
     public class AbsolutePathChildren : AbsolutePathDescendantsOrChildren
     {
-        public AbsolutePathChildren(Folder path, string pattern) : base(path, pattern, false)
+        public AbsolutePathChildren(Folder path, string pattern = "*") : base(path, pattern, false)
         {
         }
 

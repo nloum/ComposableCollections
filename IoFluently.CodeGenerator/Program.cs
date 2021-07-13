@@ -139,12 +139,12 @@ namespace IoFluently
             if (onlyParamTypeName != "AbsolutePath" && onlyParamTypeName != "RelativePath"
                 && onlyParamTypeName != "IAbsolutePathTranslation"
                 && onlyParamTypeName != "IFileOrFolderOrMissingPath"
-                && onlyParamTypeName != "File"
-                && onlyParamTypeName != "Folder"
-                && onlyParamTypeName != "MissingPath"
-                && onlyParamTypeName != "FileOrMissingPath"
-                && onlyParamTypeName != "FolderOrMissingPath"
-                && onlyParamTypeName != "FileOrFolder")
+                && onlyParamTypeName != "IFile"
+                && onlyParamTypeName != "IFolder"
+                && onlyParamTypeName != "IMissingPath"
+                && onlyParamTypeName != "IFileOrMissingPath"
+                && onlyParamTypeName != "IFolderOrMissingPath"
+                && onlyParamTypeName != "IFileOrFolder")
             {
                 return false;
             }
@@ -178,9 +178,9 @@ namespace IoFluently
                 typeof(RelativePath),
                 typeof(IFileOrFolderOrMissingPath),
                 typeof(IAbsolutePathTranslation),
-                typeof(File),
-                typeof(Folder),
-                typeof(MissingPath),
+                typeof(IFile),
+                typeof(IFolder),
+                typeof(IMissingPath),
                 typeof(IFileOrFolder),
                 typeof(IFileOrMissingPath),
                 typeof(IFolderOrMissingPath)

@@ -365,7 +365,7 @@ namespace IoFluently
         /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
         /// <param name="includeFiles">Whether to include sub-files in the return value</param>
         /// <returns>The children of this path</returns>
-        IEnumerable<IFileOrFolder> Children(IFolder path, string searchPattern = null,
+        IEnumerable<IFileOrFolder> Children(IFolder path, string searchPattern,
             bool includeFolders = true, bool includeFiles = true);
 
         /// <summary>
@@ -375,7 +375,7 @@ namespace IoFluently
         /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
         /// <param name="includeFiles">Whether to include sub-files in the return value</param>
         /// <returns>The children of this path</returns>
-        IEnumerable<File> ChildFiles(IFolder path, string searchPattern = null);
+        IEnumerable<File> ChildFiles(IFolder path, string searchPattern);
 
         /// <summary>
         /// Returns a lazily-enumerated list of child files and/or folders
@@ -384,13 +384,44 @@ namespace IoFluently
         /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
         /// <param name="includeFiles">Whether to include sub-files in the return value</param>
         /// <returns>The children of this path</returns>
-        IEnumerable<Folder> ChildFolders(IFolder path, string searchPattern = null);
+        IEnumerable<Folder> ChildFolders(IFolder path, string searchPattern);
         
-        IEnumerable<IFileOrFolder> Descendants(IFolder path, string searchPattern = null,
+        IEnumerable<IFileOrFolder> Descendants(IFolder path, string searchPattern,
             bool includeFolders = true, bool includeFiles = true);
-        IEnumerable<Folder> DescendantFolders(IFolder path, string searchPattern = null);
-        IEnumerable<File> DescendantFiles(IFolder path, string searchPattern = null);
+        IEnumerable<Folder> DescendantFolders(IFolder path, string searchPattern);
+        IEnumerable<File> DescendantFiles(IFolder path, string searchPattern);
+
+        /// <summary>
+        /// Returns a lazily-enumerated list of child files and/or folders
+        /// </summary>
+        /// <param name="path">The parent folder</param>
+        /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
+        /// <param name="includeFiles">Whether to include sub-files in the return value</param>
+        /// <returns>The children of this path</returns>
+        IEnumerable<IFileOrFolder> Children(IFolder path);
+
+        /// <summary>
+        /// Returns a lazily-enumerated list of child files and/or folders
+        /// </summary>
+        /// <param name="path">The parent folder</param>
+        /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
+        /// <param name="includeFiles">Whether to include sub-files in the return value</param>
+        /// <returns>The children of this path</returns>
+        IEnumerable<File> ChildFiles(IFolder path);
+
+        /// <summary>
+        /// Returns a lazily-enumerated list of child files and/or folders
+        /// </summary>
+        /// <param name="path">The parent folder</param>
+        /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
+        /// <param name="includeFiles">Whether to include sub-files in the return value</param>
+        /// <returns>The children of this path</returns>
+        IEnumerable<Folder> ChildFolders(IFolder path);
         
+        IEnumerable<IFileOrFolder> Descendants(IFolder path);
+        IEnumerable<Folder> DescendantFolders(IFolder path);
+        IEnumerable<File> DescendantFiles(IFolder path);
+
         bool CanBeSimplified(IFileOrFolderOrMissingPath path);
         Folder Root(IFileOrFolderOrMissingPath path);
         RelativePath RelativeTo(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath relativeTo);

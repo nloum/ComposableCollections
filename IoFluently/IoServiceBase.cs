@@ -2032,6 +2032,36 @@ namespace IoFluently
                 .Select(tt => tt.Value);
         }
 
+        public IEnumerable<IFileOrFolder> Children(IFolder path)
+        {
+            return Children(path, "*");
+        }
+
+        public IEnumerable<File> ChildFiles(IFolder path)
+        {
+            return ChildFiles(path, "*");
+        }
+
+        public IEnumerable<Folder> ChildFolders(IFolder path)
+        {
+            return ChildFolders(path, "*");
+        }
+
+        public IEnumerable<IFileOrFolder> Descendants(IFolder path)
+        {
+            return Descendants(path, "*");
+        }
+
+        public IEnumerable<Folder> DescendantFolders(IFolder path)
+        {
+            return DescendantFolders(path, "*");
+        }
+
+        public IEnumerable<File> DescendantFiles(IFolder path)
+        {
+            return DescendantFiles(path, "*");
+        }
+
         #endregion
         #region File metadata
         

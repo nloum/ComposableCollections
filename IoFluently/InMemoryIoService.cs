@@ -19,73 +19,73 @@ using static SimpleMonads.Utility;
 namespace IoFluently
 {
     /// <summary>
+    /// Represents a file in memory.
+    /// </summary>
+    public class InMemoryFile
+    {
+        /// <summary>
+        /// Whether the file is read-only
+        /// </summary>
+        public bool IsReadOnly => Attributes.HasFlag(FileAttributes.ReadOnly);
+        
+        /// <summary>
+        /// Whether the file is encrypted
+        /// </summary>
+        public bool IsEncrypted { get; set; }
+        
+        /// <summary>
+        /// The file attributes (hidden, read-only, compressed, etc.)
+        /// </summary>
+        public FileAttributes Attributes { get; set; }
+        
+        /// <summary>
+        /// The timestamp when the file was created
+        /// </summary>
+        public DateTimeOffset CreationTime { get; set; }
+        
+        /// <summary>
+        /// The timestamp when the file was last accessed
+        /// </summary>
+        public DateTimeOffset LastAccessTime { get; set; }
+        
+        /// <summary>
+        /// The timestamp when the file was last modified
+        /// </summary>
+        public DateTimeOffset LastWriteTime { get; set; }
+        
+        /// <summary>
+        /// The contents of the file
+        /// </summary>
+        public byte[] Contents { get; set; }
+        
+        /// <summary>
+        /// An object used to lock the file for reading and/or writing
+        /// </summary>
+        public ReaderWriterLock Lock { get; } = new ReaderWriterLock();
+    }
+
+    /// <summary>
+    /// Represents a folder in memory.
+    /// </summary>
+    public class InMemoryFolder
+    {
+        /// <summary>
+        /// The files that this folder contains
+        /// </summary>
+        public Dictionary<string, InMemoryFile> Files { get; } = new Dictionary<string, InMemoryFile>();
+        
+        /// <summary>
+        /// The sub-folders that this folder contains
+        /// </summary>
+        public Dictionary<string, InMemoryFolder> Folders { get; } = new Dictionary<string, InMemoryFolder>();
+    }
+        
+    /// <summary>
     /// An implementation of <see cref="IIoService"/> that keeps the folder, the files, and the file contents in memory.
     /// Useful for unit testing code that uses IoFluently.
     /// </summary>
     public class InMemoryIoService : IoServiceBase
     {
-        /// <summary>
-        /// Represents a file in memory.
-        /// </summary>
-        public class InMemoryFile
-        {
-            /// <summary>
-            /// Whether the file is read-only
-            /// </summary>
-            public bool IsReadOnly => Attributes.HasFlag(FileAttributes.ReadOnly);
-            
-            /// <summary>
-            /// Whether the file is encrypted
-            /// </summary>
-            public bool IsEncrypted { get; set; }
-            
-            /// <summary>
-            /// The file attributes (hidden, read-only, compressed, etc.)
-            /// </summary>
-            public FileAttributes Attributes { get; set; }
-            
-            /// <summary>
-            /// The timestamp when the file was created
-            /// </summary>
-            public DateTimeOffset CreationTime { get; set; }
-            
-            /// <summary>
-            /// The timestamp when the file was last accessed
-            /// </summary>
-            public DateTimeOffset LastAccessTime { get; set; }
-            
-            /// <summary>
-            /// The timestamp when the file was last modified
-            /// </summary>
-            public DateTimeOffset LastWriteTime { get; set; }
-            
-            /// <summary>
-            /// The contents of the file
-            /// </summary>
-            public byte[] Contents { get; set; }
-            
-            /// <summary>
-            /// An object used to lock the file for reading and/or writing
-            /// </summary>
-            public ReaderWriterLock Lock { get; } = new ReaderWriterLock();
-        }
-
-        /// <summary>
-        /// Represents a folder in memory.
-        /// </summary>
-        public class InMemoryFolder
-        {
-            /// <summary>
-            /// The files that this folder contains
-            /// </summary>
-            public Dictionary<string, InMemoryFile> Files { get; } = new Dictionary<string, InMemoryFile>();
-            
-            /// <summary>
-            /// The sub-folders that this folder contains
-            /// </summary>
-            public Dictionary<string, InMemoryFolder> Folders { get; } = new Dictionary<string, InMemoryFolder>();
-        }
-        
         /// <inheritdoc />
         public override IQueryable<AbsolutePath> Query()
         {

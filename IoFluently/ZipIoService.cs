@@ -12,9 +12,9 @@ namespace IoFluently
 {
     public static class ZipIoExtensions
     {
-        public static ZipIoService ExpectZipFileOrMissingPath(this IFileOrMissingPath path, bool enableOpenFilesTracking = false)
+        public static ZipIoService ExpectZipFileOrMissingPath(this IFileOrFolderOrMissingPath path, bool enableOpenFilesTracking = false)
         {
-            return new ZipIoService(path, enableOpenFilesTracking);
+            return new ZipIoService(path.ExpectFileOrMissingPath(), enableOpenFilesTracking);
         }
     }
     

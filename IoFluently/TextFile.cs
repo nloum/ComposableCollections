@@ -239,6 +239,24 @@ namespace IoFluently
             using var reader = this.OpenReader(FileOptions.SequentialScan, encoding, detectEncodingFromByteOrderMarks, bufferSize);
             return reader.ReadToEnd();
         }
+        
+        public StreamWriter OpenWriter(FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, Information? bufferSize = default)
+        {
+            return this.ExpectTextFileOrMissingPath()
+                .OpenWriter(fileOptions, encoding, bufferSize);
+        }
+
+        public virtual TextFile WriteAllLines(IEnumerable<string> lines, string newline = null, Encoding encoding = null, Information? bufferSize = default)
+        {
+            return this.ExpectTextFileOrMissingPath()
+                .WriteAllLines(lines, newline, encoding, bufferSize);
+        }
+
+        public TextFile WriteAllText(string text, Encoding encoding = null)
+        {
+            return this.ExpectTextFileOrMissingPath()
+                .WriteAllText(text, encoding);
+        }
     }
 
     public class TextFileOrMissingPath : FileOrMissingPathBase

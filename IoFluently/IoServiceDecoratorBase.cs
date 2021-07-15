@@ -22,6 +22,66 @@ namespace IoFluently
             _decorated = decorated;
         }
 
+        public AbsolutePathChildren Children(IFolder path, string searchPattern)
+        {
+            return _decorated.Children(path, searchPattern);
+        }
+
+        public AbsolutePathChildFiles ChildFiles(IFolder path, string searchPattern)
+        {
+            return _decorated.ChildFiles(path, searchPattern);
+        }
+
+        public AbsolutePathChildFolders ChildFolders(IFolder path, string searchPattern)
+        {
+            return _decorated.ChildFolders(path, searchPattern);
+        }
+
+        public AbsolutePathDescendants Descendants(IFolder path, string searchPattern)
+        {
+            return _decorated.Descendants(path, searchPattern);
+        }
+
+        public AbsolutePathDescendantFolders DescendantFolders(IFolder path, string searchPattern)
+        {
+            return _decorated.DescendantFolders(path, searchPattern);
+        }
+
+        public AbsolutePathDescendantFiles DescendantFiles(IFolder path, string searchPattern)
+        {
+            return _decorated.DescendantFiles(path, searchPattern);
+        }
+
+        public AbsolutePathChildren Children(IFolder path)
+        {
+            return _decorated.Children(path);
+        }
+
+        public AbsolutePathChildFiles ChildFiles(IFolder path)
+        {
+            return _decorated.ChildFiles(path);
+        }
+
+        public AbsolutePathChildFolders ChildFolders(IFolder path)
+        {
+            return _decorated.ChildFolders(path);
+        }
+
+        public AbsolutePathDescendants Descendants(IFolder path)
+        {
+            return _decorated.Descendants(path);
+        }
+
+        public AbsolutePathDescendantFolders DescendantFolders(IFolder path)
+        {
+            return _decorated.DescendantFolders(path);
+        }
+
+        public AbsolutePathDescendantFiles DescendantFiles(IFolder path)
+        {
+            return _decorated.DescendantFiles(path);
+        }
+
         public IObservableReadOnlySet<Folder> Roots => _decorated.Roots;
 
         public Folder DefaultRoot => _decorated.DefaultRoot;

@@ -347,6 +347,56 @@ namespace IoFluently
         /// Returns a lazily-enumerated list of child files and/or folders
         /// </summary>
         /// <param name="path">The parent folder</param>
+        /// <returns>The children of this path</returns>
+        AbsolutePathChildren Children(IFolder path, string searchPattern);
+
+        /// <summary>
+        /// Returns a lazily-enumerated list of child files and/or folders
+        /// </summary>
+        /// <param name="path">The parent folder</param>
+        /// <returns>The children of this path</returns>
+        AbsolutePathChildFiles ChildFiles(IFolder path, string searchPattern);
+
+        /// <summary>
+        /// Returns a lazily-enumerated list of child files and/or folders
+        /// </summary>
+        /// <param name="path">The parent folder</param>
+        /// <returns>The children of this path</returns>
+        AbsolutePathChildFolders ChildFolders(IFolder path, string searchPattern);
+        
+        AbsolutePathDescendants Descendants(IFolder path, string searchPattern);
+        AbsolutePathDescendantFolders DescendantFolders(IFolder path, string searchPattern);
+        AbsolutePathDescendantFiles DescendantFiles(IFolder path, string searchPattern);
+
+        /// <summary>
+        /// Returns a lazily-enumerated list of child files and/or folders
+        /// </summary>
+        /// <param name="path">The parent folder</param>
+        /// <returns>The children of this path</returns>
+        AbsolutePathChildren Children(IFolder path);
+
+        /// <summary>
+        /// Returns a lazily-enumerated list of child files and/or folders
+        /// </summary>
+        /// <param name="path">The parent folder</param>
+        /// <returns>The children of this path</returns>
+        AbsolutePathChildFiles ChildFiles(IFolder path);
+
+        /// <summary>
+        /// Returns a lazily-enumerated list of child files and/or folders
+        /// </summary>
+        /// <param name="path">The parent folder</param>
+        /// <returns>The children of this path</returns>
+        AbsolutePathChildFolders ChildFolders(IFolder path);
+        
+        AbsolutePathDescendants Descendants(IFolder path);
+        AbsolutePathDescendantFolders DescendantFolders(IFolder path);
+        AbsolutePathDescendantFiles DescendantFiles(IFolder path);
+
+        /// <summary>
+        /// Returns a lazily-enumerated list of child files and/or folders
+        /// </summary>
+        /// <param name="path">The parent folder</param>
         /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
         /// <param name="includeFiles">Whether to include sub-files in the return value</param>
         /// <returns>The children of this path</returns>

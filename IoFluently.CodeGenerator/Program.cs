@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using CodeIO;
 using CodeIO.LoadedTypes.Read;
+using CodeIO.SourceCode.Write;
 using Void = CodeIO.Void;
 
 namespace IoFluently.CodeGenerator
@@ -83,20 +84,15 @@ namespace IoFluently
             typeReader.AddSupportForReflection();
             var ioServiceType = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IIoService)].Value;
 
+            var partialTypes = new List<IPartialType>();
+
             foreach (var groupedByPartialClass in ioServiceType.Methods.OrderBy(method => method.Name).ThenBy(method => method.Parameters.Count).ThenBy(method => method.GetHashCode())
                 .Where(x => ShouldBeProperty(x))
                 .GroupBy(x => x.Parameters[0].Type.Identifier))
             {
-                textWriter.WriteLine($"namespace {groupedByPartialClass.Key.Namespace} {{");
+                var properties = new List<PropertySourceCodeWriter>();
+            
                 var isInterface = typeReader.Types[groupedByPartialClass.Key] is IInterface;
-                if (isInterface)
-                {
-                    textWriter.WriteLine($"    public partial interface {groupedByPartialClass.Key.Name} {{");
-                }
-                else
-                {
-                    textWriter.WriteLine($"    public partial class {groupedByPartialClass.Key.Name} {{");
-                }
                 foreach (var method in groupedByPartialClass)
                 {
                     string methodName;
@@ -112,18 +108,78 @@ namespace IoFluently
                     {
                         methodName = method.Name;
                     }
+                    properties.Add(new PropertySourceCodeWriter()
+                    {
+                        Name = methodName,
+                        Implementation = new MethodToPropertyDelegateImplementation()
+                        {
+                            DelegatesTo = method,
+                            Body = $"IoService.{method.Name}(this);"
+                        }
+                    });
+                }
 
-                    if (isInterface)
+                if (isInterface)
+                {
+                    partialTypes.Add(new PartialInterface()
                     {
-                        textWriter.WriteLine($"        public {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {methodName} {{ get; }}");
-                    }
-                    else
+                        Identifier = groupedByPartialClass.Key,
+                        Properties = properties.ToImmutableList()
+                    });
+                }
+                else
+                {
+                    partialTypes.Add(new PartialClass()
                     {
-                        textWriter.WriteLine($"        public {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {methodName} => IoService.{method.Name}(this);");
+                        Identifier = groupedByPartialClass.Key,
+                        Properties = properties.ToImmutableList()
+                    });
+                }
+                
+                foreach (var type in typeReader.LazyTypes.ToImmutableList())
+                {
+                    if (type.Value.Value is IClass clazz && clazz.Interfaces.Any(x => x.Identifier.Equals(groupedByPartialClass.Key)))
+                    {
+                        var classProperties = new List<PropertySourceCodeWriter>();
+                        foreach (var method in groupedByPartialClass)
+                        {
+                            string methodName;
+                            if (method.ReturnType is IBoundGenericInterface boundIface && boundIface.Identifier.Name == "IMaybe" && method.Name.StartsWith("Try"))
+                            {
+                                methodName = method.Name.Substring(3);
+                                if (methodName.StartsWith("Get"))
+                                {
+                                    methodName = methodName.Substring(3);
+                                }
+                            }
+                            else
+                            {
+                                methodName = method.Name;
+                            }
+        
+                            classProperties.Add(new PropertySourceCodeWriter()
+                            {
+                                Name = methodName,
+                                Implementation = new MethodToPropertyDelegateImplementation()
+                                {
+                                    DelegatesTo = method,
+                                    Body = $"IoService.{method.Name}(this);"
+                                }
+                            });
+                        }
+                        partialTypes.Add(new PartialClass()
+                        {
+                            Identifier = clazz.Identifier,
+                            Properties = classProperties.ToImmutableList()
+                        });
                     }
                 }
-                textWriter.WriteLine("    }");
-                textWriter.WriteLine("}");
+            }
+            
+            var sourceCodeWriter = new SourceCodeWriter(textWriter);
+            foreach (var partialType in partialTypes.Merge().ToImmutableList())
+            {
+                partialType.RemoveDuplicates().Generate(sourceCodeWriter);
             }
         }
 

@@ -1949,6 +1949,66 @@ namespace IoFluently
             }
         }
 
+        public AbsolutePathChildren Children(IFolder path, string searchPattern)
+        {
+            return new(path, searchPattern);
+        }
+
+        public AbsolutePathChildFiles ChildFiles(IFolder path, string searchPattern)
+        {
+            return new(path, searchPattern);
+        }
+
+        public AbsolutePathChildFolders ChildFolders(IFolder path, string searchPattern)
+        {
+            return new(path, searchPattern);
+        }
+
+        public AbsolutePathDescendants Descendants(IFolder path, string searchPattern)
+        {
+            return new(path, searchPattern);
+        }
+
+        public AbsolutePathDescendantFolders DescendantFolders(IFolder path, string searchPattern)
+        {
+            return new(path, searchPattern);
+        }
+
+        public AbsolutePathDescendantFiles DescendantFiles(IFolder path, string searchPattern)
+        {
+            return new(path, searchPattern);
+        }
+
+        public AbsolutePathChildren Children(IFolder path)
+        {
+            return new(path);
+        }
+
+        public AbsolutePathChildFiles ChildFiles(IFolder path)
+        {
+            return new(path);
+        }
+
+        public AbsolutePathChildFolders ChildFolders(IFolder path)
+        {
+            return new(path);
+        }
+
+        public AbsolutePathDescendants Descendants(IFolder path)
+        {
+            return new(path);
+        }
+
+        public AbsolutePathDescendantFolders DescendantFolders(IFolder path)
+        {
+            return new(path);
+        }
+
+        public AbsolutePathDescendantFiles DescendantFiles(IFolder path)
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual IEnumerable<File> EnumerateChildFiles(IFolder path, string searchPattern = null)
         {
             return EnumerateChildren(path, searchPattern, false, true).Select(x => new File(x));

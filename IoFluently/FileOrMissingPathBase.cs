@@ -26,7 +26,19 @@ namespace IoFluently
         public FileOrMissingPathBase(IFileOrFolderOrMissingPath item) : base(item)
         {
         }
-        
+
+        public bool CanBeSimplified => Value.CanBeSimplified;
+        public bool Exists => Value.Exists;
+        public string Extension => Value.Extension;
+        public bool HasExtension => Value.HasExtension;
+        public bool IsFile => Value.IsFile;
+        public bool IsFolder => Value.IsFolder;
+        public string Name => Value.Name;
+        public Folder Root => Value.Root;
+        public IMaybe<AbsolutePath> Parent => Value.Parent;
+        public PathType Type => Value.Type;
+        public AbsolutePath WithoutExtension => Value.WithoutExtension;
+
         /// <inheritdoc />
         public override string ToString()
         {

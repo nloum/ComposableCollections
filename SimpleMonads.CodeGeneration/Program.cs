@@ -16,7 +16,7 @@ namespace SimpleMonads.CodeGeneration
         {
             var ioService = new IoService();
 
-            var simpleMonadsSourcePath = ioService.DefaultRelativePathBase.Ancestors.First(x => (x / ".git").IsFolder) / "SimpleMonads";
+            var simpleMonadsSourcePath = ioService.WorkingDirectory.Ancestors.First(x => (x / ".git").IsFolder) / "SimpleMonads";
             
             var maxArity = 16;
 

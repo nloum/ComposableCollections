@@ -14,7 +14,7 @@ namespace IoFluently.Tests
         public void ShouldZipUpSingleFile()
         {
             var inMemoryIoService = new InMemoryIoService(true, "/", false);
-            var textFilePath = (inMemoryIoService.DefaultRelativePathBase / "test.txt")
+            var textFilePath = (inMemoryIoService.DefaultRoot / "test.txt")
                 .ExpectTextFileOrMissingPath()
                 .WriteAllText("Test 1 2 3");
             var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip").ExpectFileOrMissingPath();
@@ -39,7 +39,7 @@ namespace IoFluently.Tests
         public void ShouldZipUpAndUnzipFolder()
         {
             var inMemoryIoService = new InMemoryIoService(true, "/", false);
-            var folder = inMemoryIoService.DefaultRelativePathBase / "test";
+            var folder = inMemoryIoService.DefaultRoot / "test";
             var textFilePath = folder / "test.txt";
             textFilePath.ExpectTextFileOrMissingPath().WriteAllText("Test 1 2 3");
             var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip").ExpectFileOrMissingPath();
@@ -59,7 +59,7 @@ namespace IoFluently.Tests
                 }
             }
             
-            var unzippedTo = (inMemoryIoService.DefaultRelativePathBase / "test2").EnsureIsEmptyFolder();
+            var unzippedTo = (inMemoryIoService.DefaultRoot / "test2").EnsureIsEmptyFolder();
             result.Unzip(unzippedTo);
 
             Verify(unzippedTo.Descendants);

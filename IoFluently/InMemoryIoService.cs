@@ -96,26 +96,26 @@ namespace IoFluently
 
         public override EmptyFolderMode EmptyFolderMode { get; }
 
-        private Folder _currentDirectory;
-        private Folder _temporaryFolder = null;
-        
+        public override Folder DefaultRoot
+        {
+            get
+            {
+                if (DefaultDirectorySeparator == "/")
+                {
+                    return ParseAbsolutePath("/").ExpectFolder();
+                }
+                else
+                {
+                    return ParseAbsolutePath("C:").ExpectFolder();
+                }
+            }
+        }
+
         /// <summary>
         /// The root folders in this in-memory file system. E.g., if this is a Unix-like file system then this would have
         /// just '/'. If this was a Windows-like file system then this might contain 'C:' and 'D:'.
         /// </summary>
         public ObservableDictionary<string, InMemoryFolder> RootFolders { get; } = new ObservableDictionary<string, InMemoryFolder>();
-
-        /// <inheritdoc />
-        public override Folder DefaultRelativePathBase => _currentDirectory;
-
-        /// <summary>
-        /// Changes the current working directory
-        /// </summary>
-        /// <param name="newCurrentDirectory">The new current directory</param>
-        public void SetCurrentDirectory(IFolder newCurrentDirectory)
-        {
-            _currentDirectory = newCurrentDirectory.ExpectFolder();
-        }
 
         /// <summary>
         /// Constructs a new in-memory IIoService.
@@ -133,28 +133,11 @@ namespace IoFluently
             if (defaultDirectorySeparatorForThisEnvironment == "/")
             {
                 RootFolders.Add("/", new InMemoryFolder());
-                _currentDirectory = ParseAbsolutePath("/").ExpectFolder();
             }
             else
             {
                 RootFolders.Add("C:", new InMemoryFolder());
-                _currentDirectory = ParseAbsolutePath("C:\\").ExpectFolder();
             }
-        }
-
-        /// <inheritdoc />
-        public override Folder GetTemporaryFolder()
-        {
-            return _temporaryFolder;
-        }
-        
-        /// <summary>
-        /// Sets the temporary folder path
-        /// </summary>
-        /// <param name="absolutePath">The new temporary folder path</param>
-        public void SetTemporaryFolder(IFolder absolutePath)
-        {
-            _temporaryFolder = absolutePath.ExpectFolder();
         }
 
         /// <inheritdoc />
@@ -165,6 +148,12 @@ namespace IoFluently
 
         /// <inheritdoc />
         public override IObservableReadOnlySet<Folder> Roots => RootFolders.ToLiveLinq().KeysAsSet().Select(x => ParseAbsolutePath(x).ExpectFolder()).ToReadOnlyObservableSet();
+
+        /// <inheritdoc />
+        public override void UpdateRoots()
+        {
+            // Only one root in a zip file, so ignore this
+        }
 
         private IMaybe<InMemoryFile> GetFile(IFileOrFolderOrMissingPath path)
         {
@@ -231,12 +220,6 @@ namespace IoFluently
             }
 
             return Nothing<InMemoryFolder>(() => throw new InvalidOperationException($"The {components[0]} part of the path {originalPath} is missing"));
-        }
-
-        /// <inheritdoc />
-        public override void UpdateRoots()
-        {
-            throw new NotImplementedException();
         }
 
         /// <inheritdoc />

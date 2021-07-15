@@ -145,14 +145,6 @@ namespace IoFluently
         /// <summary>
         /// If <see cref="mainPath"/> exists, then return <see cref="mainPath"/>. Otherwise, return <see cref="fallbackPath"/>.
         /// </summary>
-        public static AbsolutePath FallbackTo(this AbsolutePath mainPath, string fallbackPath)
-        {
-            return FallbackTo(mainPath, mainPath.IoService.ParsePathRelativeToDefault(fallbackPath));
-        }
-
-        /// <summary>
-        /// If <see cref="mainPath"/> exists, then return <see cref="mainPath"/>. Otherwise, return <see cref="fallbackPath"/>.
-        /// </summary>
         public static AbsolutePath FallbackTo(this AbsolutePath mainPath, AbsolutePath fallbackPath)
         {
             if (!mainPath.IoService.Exists(mainPath))
@@ -161,14 +153,6 @@ namespace IoFluently
             }
 
             return mainPath;
-        }
-
-        /// <summary>
-        /// If <see cref="mainPath"/> doesn't exist, then creates it by copying from <see cref="fallbackPath"/>.
-        /// </summary>
-        public static AbsolutePath FallbackCopyFrom(this AbsolutePath mainPath, string fallbackPath)
-        {
-            return FallbackCopyFrom(mainPath, mainPath.IoService.ParsePathRelativeToDefault(fallbackPath));
         }
 
         /// <summary>

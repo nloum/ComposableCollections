@@ -27,6 +27,14 @@ namespace IoFluently
     {
         #region Environmental stuff
 
+        /// <inheritdoc />
+        public abstract IObservableReadOnlySet<Folder> Roots { get; }
+
+        /// <inheritdoc />
+        public abstract void UpdateRoots();
+
+        public abstract Folder DefaultRoot { get; }
+
         public abstract EmptyFolderMode EmptyFolderMode { get; }
         /// <inheritdoc />
         public abstract bool CanEmptyDirectoriesExist { get; }
@@ -35,15 +43,12 @@ namespace IoFluently
         public string DefaultDirectorySeparator { get; }
         /// <inheritdoc />
         public bool IsCaseSensitiveByDefault { get; }
-        /// <inheritdoc />
-        public virtual Folder DefaultRelativePathBase { get; protected set; }
-        
         /// <summary>
         /// The default buffer size for this <see cref="IIoService"/>, used in calls where the buffer size is an optional
         /// parameter.
         /// </summary>
         public Information DefaultBufferSize { get; set; } = Information.FromBytes(4096);
-        
+
         public int GetBufferSizeOrDefaultInBytes(Information? bufferSize)
         {
             if (bufferSize != null)
@@ -53,23 +58,6 @@ namespace IoFluently
 
             return (int)Math.Round(DefaultBufferSize.Bytes);
         }
-
-        /// <inheritdoc />
-        public virtual void SetDefaultRelativePathBase(IFolder defaultRelativePathBase)
-        {
-            DefaultRelativePathBase = defaultRelativePathBase.ExpectFolder();
-        }
-
-        /// <inheritdoc />
-        public virtual void UnsetDefaultRelativePathBase()
-        {
-            throw new NotImplementedException();
-        }
-
-        public abstract IObservableReadOnlySet<Folder> Roots { get; }
-
-        /// <inheritdoc />
-        public abstract void UpdateRoots();
 
         protected static string GetDefaultDirectorySeparatorForThisEnvironment()
         {
@@ -86,9 +74,6 @@ namespace IoFluently
             return caseSensitive;
         }
         
-        /// <inheritdoc />
-        public abstract Folder GetTemporaryFolder();
-
         #endregion
         #region Creating
         
@@ -957,12 +942,6 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual AbsolutePath ParsePathRelativeToDefault(string path)
-        {
-            return TryParseAbsolutePath(path, DefaultRelativePathBase).Value;
-        }
-        
-        /// <inheritdoc />
         public virtual AbsolutePath ParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             var error = string.Empty;
@@ -1557,18 +1536,6 @@ namespace IoFluently
 
         #endregion
         #region Path building
-
-        /// <inheritdoc />
-        public MissingPath GenerateUniqueTemporaryPath(string extension = null)
-        {
-            var result = GetTemporaryFolder() / Guid.NewGuid().ToString();
-            if (!string.IsNullOrEmpty(extension))
-            {
-                result = result.WithExtension(extension);
-            }
-
-            return new MissingPath(result);
-        }
 
         /// <inheritdoc />
         public AbsolutePaths GlobFiles(IFolder path, string pattern)

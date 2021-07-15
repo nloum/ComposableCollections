@@ -23,9 +23,10 @@ namespace IoFluently
     /// </summary>
     public class ZipIoService : IoServiceBase
     {
-        private Folder _temporaryFolder;
         private bool _hasZipFileBeenCreatedYet = false;
         private EmptyFolderMode _emptyFolderMode = EmptyFolderMode.AllNonExistentPathsAreFolders;
+        private readonly Folder _root;
+        private readonly ObservableSet<Folder> _roots = new();
         
         /// <summary>
         /// The path to the zip file
@@ -38,10 +39,16 @@ namespace IoFluently
         {
             _emptyFolderMode = newMode;
         }
-        
+
+        /// <inheritdoc />
         public override bool CanEmptyDirectoriesExist => EmptyFolderMode == EmptyFolderMode.EmptyFilesAreFolders;
 
         public CompressionLevel CompressionLevel { get; set; } = CompressionLevel.Fastest;
+
+        /// <inheritdoc />
+        public override IObservableReadOnlySet<Folder> Roots => _roots;
+
+        public override Folder DefaultRoot => ParseAbsolutePath("/").ExpectFolder();
 
         /// <summary>
         /// Creates a zip file IIoService
@@ -58,12 +65,8 @@ namespace IoFluently
             
             ZipFilePath = zipFilePath;
             var path = new AbsolutePath(new[] {"/"}, true, DefaultDirectorySeparator, this);
-            DefaultRelativePathBase = new Folder(path.Components, path.IsCaseSensitive, path.DirectorySeparator, this, true);
-
-            if (DefaultRelativePathBase == null)
-            {
-                throw new ArgumentNullException(nameof(DefaultRelativePathBase));
-            }
+            _root = new Folder(path.Components, path.IsCaseSensitive, path.DirectorySeparator, this, true);
+            _roots.Add(_root);
         }
 
         public void Unzip(IFolderOrMissingPath targetDirectory)
@@ -82,27 +85,11 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override Folder DefaultRelativePathBase { get; protected set; }
-
-        public override void SetDefaultRelativePathBase(IFolder defaultRelativePathBase)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void UnsetDefaultRelativePathBase()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public override IObservableReadOnlySet<Folder> Roots { get; } = new ObservableSet<Folder>();
-
-        /// <inheritdoc />
         public override IQueryable<AbsolutePath> Query()
         {
             var archive = OpenZipArchive(false, true);
             var queryable = archive.Entries
-                .Select(zipEntry => TryParseAbsolutePath(zipEntry.FullName, DefaultRelativePathBase).Value)
+                .Select(zipEntry => TryParseAbsolutePath(zipEntry.FullName, _root).Value)
                 .AsQueryable();
             return new QueryableWithDisposable<AbsolutePath>(queryable, archive);
         }
@@ -111,21 +98,6 @@ namespace IoFluently
         public override ISetChanges<AbsolutePath> ToLiveLinq(IFolder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets the temporary folder path
-        /// </summary>
-        /// <param name="absolutePath">The new temporary folder path</param>
-        public void SetTemporaryFolder(IFolder absolutePath)
-        {
-            _temporaryFolder = absolutePath.ExpectFolder();
-        }
-
-        /// <inheritdoc />
-        public override Folder GetTemporaryFolder()
-        {
-            return _temporaryFolder;
         }
 
         /// <inheritdoc />
@@ -142,7 +114,7 @@ namespace IoFluently
                 var regex = FileNamePatternToRegex(searchPattern);
                 
                 return archive.Entries.Select(entry =>
-                    TryParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Value).Where(child => child.IoService.TryParent(child).Value == path.Path)
+                    TryParseAbsolutePath(entry.FullName, _root).Value).Where(child => child.IoService.TryParent(child).Value == path.Path)
                     .Where(x => regex.IsMatch(x))
                     .Select(path => path.ExpectFileOrFolder());
             }
@@ -156,7 +128,7 @@ namespace IoFluently
                 var regex = FileNamePatternToRegex(searchPattern);
                 
                 return archive.Entries.Select(entry =>
-                        TryParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Value).Where(child => child.Ancestors(true)
+                        TryParseAbsolutePath(entry.FullName, _root).Value).Where(child => child.Ancestors(true)
                         .Any(ancestor => ancestor.ToString().Equals(path.ToString())))
                     .Where(x => regex.IsMatch(x))
                     .Select(path => path.ExpectFileOrFolder());
@@ -165,7 +137,7 @@ namespace IoFluently
 
         private ZipArchiveEntry GetZipArchiveEntry(ZipArchive archive, IFileOrFolderOrMissingPath path)
         {
-            var result = archive.GetEntry(path.Path.RelativeTo(DefaultRelativePathBase).Simplify())
+            var result = archive.GetEntry(path.Path.RelativeTo(_root).Simplify())
                 ?? archive.GetEntry(path.Path.Simplify());
             return result;
         }
@@ -248,7 +220,7 @@ namespace IoFluently
                     if (EmptyFolderMode == EmptyFolderMode.FoldersOnlyExistIfTheyContainFiles)
                     {
                         var hasDescendants = archive.Entries.Any(entry =>
-                            TryParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Value.Ancestors(true)
+                            TryParseAbsolutePath(entry.FullName, _root).Value.Ancestors(true)
                                 .Any(ancestor => ancestor.ToString().Equals(path.ToString())));
 
                         if (hasDescendants)
@@ -290,7 +262,7 @@ namespace IoFluently
             using (var zipArchive = OpenZipArchive(true, true))
             {
                 foreach (var subZipEntry in zipArchive.Entries.Where(entry =>
-                    TryParseAbsolutePath(entry.FullName, DefaultRelativePathBase).Value.Ancestors(true).Any(ancestor => ancestor == path.Path)))
+                    TryParseAbsolutePath(entry.FullName, _root).Value.Ancestors(true).Any(ancestor => ancestor == path.Path)))
                 {
                     if (!recursive)
                     {

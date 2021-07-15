@@ -163,10 +163,6 @@ namespace IoFluently
             return path.IoService.ToLiveLinq(path, includeFileContentChanges, includeSubFolders, pattern);
         }
 
-        public static void SetDefaultRelativePathBase(this IFolder defaultRelativePathBase) {
-            defaultRelativePathBase.IoService.SetDefaultRelativePathBase(defaultRelativePathBase);
-        }
-
         public static Folder CreateFolder(this IMissingPath path, Boolean createRecursively = false) {
             return path.IoService.CreateFolder(path, createRecursively);
         }

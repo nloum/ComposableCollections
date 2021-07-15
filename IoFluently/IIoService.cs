@@ -16,11 +16,44 @@ using UnitsNet;
 
 namespace IoFluently
 {
+    /// <summary>
+    /// Environmental IO methods and properties. These are disconnected from the main <see cref="IIoService"/> because
+    /// it is quite possible to have <see cref="IIoService"/> implementations where these environmental methods and properties
+    /// don't make sense. E.g., zip files typically don't contain a temporary folder where temporary files can be written to.
+    /// </summary>
+    public interface IIoEnvironmentService : IIoService
+    {
+        /// <summary>
+        /// When relative paths are auto-converted to absolute paths, they are assumed to be relative to the default relative
+        /// path base.
+        /// </summary>
+        Folder WorkingDirectory { get; set; }
+        
+        /// <summary>
+        /// Returns the path to the user's temporary folder
+        /// </summary>
+        /// <returns>The path to the user's temporary folder</returns>
+        Folder TemporaryFolder { get; set; }
+
+        /// <summary>
+        /// Creates a non-existent path that is unique. The parent folder of this path is guaranteed to exist.
+        /// This does not create a file or folder for this path.
+        /// </summary>
+        /// <param name="extension">The file extension for the path. If null, the resulting path has no extension.</param>
+        /// <returns>A path that does not exist but whose parent folder exists</returns>
+        MissingPath GenerateUniqueTemporaryPath(string extension = null);
+        
+        /// <summary>
+        /// Parses the path. If the path is a relative path, assumes that it is relative to <see cref="IoService.WorkingDirectory"/>.
+        /// </summary>
+        AbsolutePath ParsePathRelativeToWorkingDirectory(string path);
+    }
+
     public interface IIoService : IFileProvider
     {
         #region Regions - for implementations
         
-        #region Environmental stuff
+        #region Settings
         #endregion
         #region Creating
         #endregion
@@ -51,36 +84,37 @@ namespace IoFluently
         
         #endregion
         
-        #region Environmental stuff
+        #region Settings
 
+        /// <summary>
+        /// Lists the file system roots. On Unix-like operating systems, there's only one file system root, and it is '/'.
+        /// </summary>
+        IObservableReadOnlySet<Folder> Roots { get; }
+        
+        /// <summary>
+        /// On Windows this is typically `C:`. On Linux or Mac this is `/`.
+        /// </summary>
+        Folder DefaultRoot { get; }
+        
+        /// <summary>
+        /// Updates the file system roots. On Unix-like operating systems, there's only one file system root, and it is '/'.
+        /// On Windows, there can be multiple, e.g. 'C:', 'D:', 'E:'. This method is only useful on Windows.
+        /// </summary>
+        void UpdateRoots();
+        
         Information DefaultBufferSize { get; set; }
-
-        int GetBufferSizeOrDefaultInBytes(Information? bufferSize);
-
         EmptyFolderMode EmptyFolderMode { get; }
         
+        int GetBufferSizeOrDefaultInBytes(Information? bufferSize);
+
         /// <summary>
         /// Indicates that empty directories can exist. This is true for every built-in implementation except the ZipIoService,
         /// because in zip files directories don't exist.
         /// </summary>
         bool CanEmptyDirectoriesExist { get; }
-        void SetDefaultRelativePathBase(IFolder defaultRelativePathBase);
-        void UnsetDefaultRelativePathBase();
-        Folder DefaultRelativePathBase { get; }
-        /// <summary>
-        /// Lists the file system roots. On Unix-like operating systems, there's only one file system root, and it is '/'.
-        /// </summary>
-        IObservableReadOnlySet<Folder> Roots { get; }
-
         string DefaultDirectorySeparator { get; }
         bool IsCaseSensitiveByDefault { get; }
         
-        /// <summary>
-        /// Returns the path to the user's temporary folder
-        /// </summary>
-        /// <returns>The path to the user's temporary folder</returns>
-        Folder GetTemporaryFolder();
-
         #endregion
         
         #region Creating
@@ -203,11 +237,6 @@ namespace IoFluently
 
         #region Utilities
         
-        /// <summary>
-        /// Updates the file system roots. On Unix-like operating systems, there's only one file system root, and it is '/'.
-        /// On Windows, there can be multiple, e.g. 'C:', 'D:', 'E:'. This method is only useful on Windows.
-        /// </summary>
-        void UpdateRoots();
         bool HasExtension(IFileOrFolderOrMissingPath path, string extension);
         string Name(IFileOrFolderOrMissingPath path);
         string? Extension(IFileOrFolderOrMissingPath path);
@@ -269,11 +298,6 @@ namespace IoFluently
         bool IsAbsoluteUnixPath(string path);
         StringComparison ToStringComparison(CaseSensitivityMode caseSensitivityMode);
         StringComparison ToStringComparison(CaseSensitivityMode caseSensitivityMode, CaseSensitivityMode otherCaseSensitivityMode);
-        
-        /// <summary>
-        /// Parses the path. If the path is a relative path, assumes that it is relative to <see cref="IoService.DefaultRelativePathBase"/>.
-        /// </summary>
-        AbsolutePath ParsePathRelativeToDefault(string path);
         
         bool IsRelativePath(string path);
         bool IsAbsolutePath(string path);
@@ -351,14 +375,6 @@ namespace IoFluently
         #endregion
 
         #region Path building
-
-        /// <summary>
-        /// Creates a non-existent path that is unique. The parent folder of this path is guaranteed to exist.
-        /// This does not create a file or folder for this path.
-        /// </summary>
-        /// <param name="extension">The file extension for the path. If null, the resulting path has no extension.</param>
-        /// <returns>A path that does not exist but whose parent folder exists</returns>
-        MissingPath GenerateUniqueTemporaryPath(string extension = null);
 
         /// <summary>
         /// Returns a lazily-enumerated list of child files and/or folders

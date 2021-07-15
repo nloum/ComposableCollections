@@ -20,7 +20,7 @@ using static SimpleMonads.Utility;
 
 namespace IoFluently
 {
-    public class IoService : IoServiceBase
+    public class IoService : IoServiceBase, IIoEnvironmentService
     {
         /// <summary>
         /// The default IoService. Use this for environments where dependency injection isn't necessary.
@@ -30,31 +30,115 @@ namespace IoFluently
     
         private bool? _isCaseSensitiveByDefault = null;
 
+        /// <inheritdoc />
         public override bool CanEmptyDirectoriesExist => true;
 
+        /// <inheritdoc />
         public override EmptyFolderMode EmptyFolderMode { get; }
 
+        /// <inheritdoc />
         public override IQueryable<AbsolutePath> Query()
         {
             return new Queryable<AbsolutePath>(new QueryContext());
         }
 
-        private Folder _defaultRelativePathBase;
+        private Folder _temporaryFolder;
+
+        public Folder TemporaryFolder
+        {
+            get
+            {
+                return _temporaryFolder ?? ParseAbsolutePath(Path.GetTempPath()).ExpectFolder();
+            }
+
+            set
+            {
+                _temporaryFolder = value;
+            }
+        }
+
+        public override Folder DefaultRoot
+        {
+            get
+            {
+                if (DefaultDirectorySeparator == "/")
+                {
+                    return ParseAbsolutePath("/").ExpectFolder();
+                }
+
+                return Roots.First();
+            }
+        }
+
+        /// <inheritdoc />
+        public MissingPath GenerateUniqueTemporaryPath(string extension = null)
+        {
+            var result = TemporaryFolder / Guid.NewGuid().ToString();
+            if (!string.IsNullOrEmpty(extension))
+            {
+                result = result.WithExtension(extension);
+            }
+
+            return new MissingPath(result);
+        }
+                
+        /// <inheritdoc />
+        public override void UpdateRoots()
+        {
+            if (DefaultDirectorySeparator == "/")
+            {
+                if (_storage.Count == 0)
+                {
+                    _storage.Add(ParseAbsolutePath("/").ExpectFolder());
+                }
+                return;
+            }
+            
+            var currentStorage = Directory.GetLogicalDrives();
+            foreach (var drive in currentStorage)
+            {
+                var drivePath = TryParseAbsolutePath(drive).Value.ExpectFolder();
+                if (!_storage.Contains(drivePath))
+                    _storage.Add(drivePath);
+            }
+
+            var drivesThatWereRemoved = new List<Folder>();
+
+            foreach (var drive in _storage)
+                if (!currentStorage.Contains(drive + "\\"))
+                    drivesThatWereRemoved.Add(drive);
+
+            foreach (var driveThatWasRemoved in drivesThatWereRemoved) _storage.Remove(driveThatWasRemoved);
+        }
+
+        public override IObservableReadOnlySet<Folder> Roots => _storage;
+
+        private readonly ObservableSet<Folder> _storage = new ObservableSet<Folder>();
+
+        /// <inheritdoc />
+        public Folder WorkingDirectory
+        {
+            get
+            {
+                return TryParseAbsolutePath(Environment.CurrentDirectory).Value.ExpectFolder();
+            }
+
+            set
+            {
+                Environment.CurrentDirectory = value.ToString();
+            }
+        }
         
-        public override Folder DefaultRelativePathBase => _defaultRelativePathBase ?? TryParseAbsolutePath(Environment.CurrentDirectory).Value.ExpectFolder();
+        /// <inheritdoc />
+        public virtual AbsolutePath ParsePathRelativeToWorkingDirectory(string path)
+        {
+            return TryParseAbsolutePath(path, WorkingDirectory).Value;
+        }
+        
         public TimeSpan DeleteOrCreateSpinPeriod { get; set; } = TimeSpan.FromMilliseconds(100);
+        
         public TimeSpan DeleteOrCreateTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
-        public override void SetDefaultRelativePathBase(IFolder defaultRelativePathBase)
-        {
-            _defaultRelativePathBase = defaultRelativePathBase.ExpectFolder();
-        }
-
-        public override void UnsetDefaultRelativePathBase()
-        {
-            _defaultRelativePathBase = null;
-        }
-        
         public IoService() : this(false)
         {
             UpdateRoots();
@@ -389,10 +473,6 @@ namespace IoFluently
 
             return new MissingPath(path);
         }
-        
-        public override IObservableReadOnlySet<Folder> Roots => _storage;
-
-        private readonly ObservableSet<Folder> _storage = new ObservableSet<Folder>();
 
         public override IEnumerable<IFileOrFolder> Descendants(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
@@ -426,41 +506,6 @@ namespace IoFluently
             }
 
             return ImmutableArray<IFileOrFolder>.Empty;
-        }
-
-        /// <inheritdoc />
-        public override void UpdateRoots()
-        {
-            if (DefaultDirectorySeparator == "/")
-            {
-                if (_storage.Count == 0)
-                {
-                    _storage.Add(ParseAbsolutePath("/").ExpectFolder());
-                }
-                return;
-            }
-            
-            var currentStorage = Directory.GetLogicalDrives();
-            foreach (var drive in currentStorage)
-            {
-                var drivePath = TryParseAbsolutePath(drive).Value.ExpectFolder();
-                if (!_storage.Contains(drivePath))
-                    _storage.Add(drivePath);
-            }
-
-            var drivesThatWereRemoved = new List<Folder>();
-
-            foreach (var drive in _storage)
-                if (!currentStorage.Contains(drive + "\\"))
-                    drivesThatWereRemoved.Add(drive);
-
-            foreach (var driveThatWasRemoved in drivesThatWereRemoved) _storage.Remove(driveThatWasRemoved);
-        }
-
-        /// <inheritdoc />
-        public override Folder GetTemporaryFolder()
-        {
-            return ParseAbsolutePath(Path.GetTempPath()).ExpectFolder();
         }
 
         /// <inheritdoc />

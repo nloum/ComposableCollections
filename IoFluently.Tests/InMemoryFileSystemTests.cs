@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace IoFluently.Tests
 {
     [TestClass]
-    public class InMemoryIoServiceTests
+    public class InMemoryFileSystemTests
     {
         [TestMethod]
         public void ShouldAllowLinuxStylePaths()

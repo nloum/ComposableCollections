@@ -17,7 +17,7 @@ namespace IoFluently.CodeGenerator
     {
         static void Main(string[] args)
         {
-            var fileSystem = new FileSystem();
+            var fileSystem = new LocalFileSystem();
             var repoRoot = fileSystem.CurrentDirectory.Ancestors(false).First(ancestor => fileSystem.IsFolder(ancestor / ".git"));
 
             using (var partialClassesWriter = (repoRoot / "IoFluently" / "PartialClasses.g.cs").ExpectTextFileOrMissingPath().OpenWriter())

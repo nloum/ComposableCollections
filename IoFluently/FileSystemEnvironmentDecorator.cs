@@ -2,26 +2,15 @@
 
 namespace IoFluently
 {
-    public class FileSystemEnvironmentDecorator : FileSystemDecoratorBase, IIoEnvironmentService
+    public class FileSystemEnvironmentDecorator : FileSystemDecoratorBase, IEnvironment
     {
-        private readonly IIoEnvironmentService _decorated;
-
-        public FileSystemEnvironmentDecorator(IIoEnvironmentService decorated) : base(decorated)
+        public FileSystemEnvironmentDecorator(IFileSystem decorated) : base(decorated)
         {
-            _decorated = decorated;
         }
 
-        public Folder CurrentDirectory
-        {
-            get => _decorated.CurrentDirectory;
-            set => _decorated.CurrentDirectory = value;
-        }
+        public Folder CurrentDirectory { get; set; }
 
-        public Folder TemporaryFolder
-        {
-            get => _decorated.TemporaryFolder;
-            set => _decorated.TemporaryFolder = value;
-        }
+        public Folder TemporaryFolder { get; set; }
 
         public MissingPath GenerateUniqueTemporaryPath(string extension = null)
         {

@@ -8,7 +8,7 @@ using VerifyMSTest;
 namespace IoFluently.Tests
 {
     [TestClass]
-    public class ZipIoServiceTests : VerifyBase
+    public class ZipFileSystemTests : VerifyBase
     {
         [TestMethod]
         public void ShouldZipUpSingleFile()

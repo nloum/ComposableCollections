@@ -20,13 +20,13 @@ using static SimpleMonads.Utility;
 
 namespace IoFluently
 {
-    public class FileSystem : FileSystemBase, IIoEnvironmentService
+    public class LocalFileSystem : FileSystemBase, IEnvironment
     {
         /// <summary>
         /// The default IoService. Use this for environments where dependency injection isn't necessary.
         /// E.g., Nuke.build scripts or bootstrapping a larger program.
         /// </summary>
-        public static FileSystem Default { get; set; }
+        public static LocalFileSystem Default { get; set; }
     
         private bool? _isCaseSensitiveByDefault = null;
 
@@ -139,12 +139,12 @@ namespace IoFluently
         
         public TimeSpan DeleteOrCreateTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
-        public FileSystem() : this(false)
+        public LocalFileSystem() : this(false)
         {
             UpdateRoots();
         }
         
-        public FileSystem(bool enableOpenFilesTracking) : base(new OpenFilesTrackingService(enableOpenFilesTracking), ShouldBeCaseSensitiveByDefault(), GetDefaultDirectorySeparatorForThisEnvironment())
+        public LocalFileSystem(bool enableOpenFilesTracking) : base(new OpenFilesTrackingService(enableOpenFilesTracking), ShouldBeCaseSensitiveByDefault(), GetDefaultDirectorySeparatorForThisEnvironment())
         {
             PathObservationMethod = GetDefaultPathObservationMethod();
             UpdateRoots();

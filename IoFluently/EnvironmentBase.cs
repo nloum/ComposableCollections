@@ -4,11 +4,11 @@ using LiveLinq.Set;
 namespace IoFluently
 {
     /// <summary>
-    /// Partial implementation of <see cref="IIoEnvironmentService"/>, useful for creating a new implementation
+    /// Partial implementation of <see cref="IEnvironment"/>, useful for creating a new implementation
     /// </summary>
-    public abstract class IoEnvironmentServiceBase : FileSystemBase, IIoEnvironmentService
+    public abstract class EnvironmentBase : FileSystemBase, IEnvironment
     {
-        protected IoEnvironmentServiceBase(IOpenFilesTrackingService openFilesTrackingService, bool isCaseSensitiveByDefault, string defaultDirectorySeparator) : base(openFilesTrackingService, isCaseSensitiveByDefault, defaultDirectorySeparator)
+        protected EnvironmentBase(IOpenFilesTrackingService openFilesTrackingService, bool isCaseSensitiveByDefault, string defaultDirectorySeparator) : base(openFilesTrackingService, isCaseSensitiveByDefault, defaultDirectorySeparator)
         {
         }
 

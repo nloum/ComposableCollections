@@ -80,7 +80,7 @@ namespace IoFluently.Documentation
     {
         static void Main(string[] args)
         {
-            var ioService = new FileSystem();
+            var ioService = new LocalFileSystem();
 
             var repoRoot = ioService.CurrentDirectory.Ancestors.First(ancestor => ioService.IsFolder(ancestor / ".git"));
             var markdownFileRegex = ioService.FileNamePatternToRegex("*.md");

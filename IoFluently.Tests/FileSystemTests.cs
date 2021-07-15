@@ -11,7 +11,7 @@ using VerifyMSTest;
 namespace IoFluently.Tests
 {
     [TestClass]
-    public class IoServiceTests : VerifyBase
+    public class FileSystemTests : VerifyBase
     {
         public enum IoServiceType
         {
@@ -34,11 +34,11 @@ namespace IoFluently.Tests
             unitUnderTest2 = CreateUnitUnderTest(type2, enableOpenFilesTracking2);
         }
         
-        private IIoEnvironmentService CreateUnitUnderTest(IoServiceType type, bool enableOpenFilesTracking)
+        private IEnvironment CreateUnitUnderTest(IoServiceType type, bool enableOpenFilesTracking)
         {
             if (type == IoServiceType.IoService)
             {
-                return new FileSystem(enableOpenFilesTracking);
+                return new LocalFileSystem(enableOpenFilesTracking);
             }
             else if (type == IoServiceType.InMemoryWindowsIoService)
             {

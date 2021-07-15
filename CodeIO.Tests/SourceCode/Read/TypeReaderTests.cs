@@ -12,7 +12,7 @@ namespace CodeIO.Tests.CSharp.Read
         [TestMethod]
         public void ShouldParseCodeIOProject()
         {
-            var ioService = new FileSystem();
+            var ioService = new LocalFileSystem();
 
             var repoRoot = ioService.CurrentDirectory.Ancestors
                 .First(ancestor => (ancestor / ".git").Exists);

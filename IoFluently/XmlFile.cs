@@ -43,7 +43,7 @@ namespace IoFluently
         public XmlDocument ReadXmlDocument()
         {
             var doc = new XmlDocument();
-            doc.Load(this.ToString());
+            doc.Load(FullName);
             return doc;
         }
     }

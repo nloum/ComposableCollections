@@ -33,6 +33,19 @@ namespace IoFluently
             return this.ConvertToString();
         }
 
+        /// <inheritdoc />
+        public string FullName => this.ConvertToString();
+
+        /// <summary>
+        /// Converts this FileOrMissingPathBase to a string form of the path
+        /// </summary>
+        /// <param name="path">The path to be converted to a string</param>
+        /// <returns>The string form of this path</returns>
+        public static implicit operator string(FileOrMissingPathBase path)
+        {
+            return path.FullName;
+        }
+
         protected SubTypesOf<IFileOrFolderOrMissingPath>.IEither<IFile, IFolder, IMissingPath>
             FileOrFolderOrMissingPath => this.Collapse(
             file => new SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFile, IFolder, IMissingPath>(file),

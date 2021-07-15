@@ -125,7 +125,7 @@ namespace IoFluently
 
             set
             {
-                Environment.CurrentDirectory = value.ToString();
+                Environment.CurrentDirectory = value.FullName;
             }
         }
         
@@ -295,7 +295,7 @@ namespace IoFluently
             {
                 var watcher = new FileSystemWatcher
                 {
-                    Path = root.ToString(),
+                    Path = root.FullName,
                     IncludeSubdirectories = includeSubFolders,
                     Filter = pattern,
                     NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.DirectoryName | NotifyFilters.FileName
@@ -373,7 +373,7 @@ namespace IoFluently
 
         public override async Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken, bool recursive = false)
         {
-            var pathString = path.ToString();
+            var pathString = path.FullName;
             Directory.Delete(pathString, recursive);
 
             var timeoutTimeSpan = DeleteOrCreateTimeout;
@@ -394,7 +394,7 @@ namespace IoFluently
 
         public override async Task<MissingPath> DeleteFileAsync(IFile path, CancellationToken cancellationToken)
         {
-            var pathString = path.ToString();
+            var pathString = path.FullName;
             System.IO.File.Delete(pathString);
 
             var timeoutTimeSpan = DeleteOrCreateTimeout;
@@ -421,7 +421,7 @@ namespace IoFluently
         {
             if (MayCreateFile(fileMode))
                 TryParent(path ).IfHasValue(parent => EnsureIsFolder(parent));
-            var fileStream = new FileStream(path.ToString(), fileMode, fileAccess, fileShare,
+            var fileStream = new FileStream(path.FullName, fileMode, fileAccess, fileShare,
                 GetBufferSizeOrDefaultInBytes(bufferSize), fileOptions);
             return fileStream;
         }
@@ -459,17 +459,17 @@ namespace IoFluently
 
         private FileInfo AsFileInfo(IFileOrFolderOrMissingPath path)
         {
-            return new FileInfo(path .ToString());
+            return new FileInfo(path.FullName);
         }
 
         private DirectoryInfo AsDirectoryInfo(IFileOrFolderOrMissingPath path)
         {
-            return new DirectoryInfo(path .ToString());
+            return new DirectoryInfo(path.FullName);
         }
 
         public override MissingPath DeleteFile(IFile path)
         {
-            System.IO.File.Delete(path.ToString());
+            System.IO.File.Delete(path.FullName);
 
             return new MissingPath(path);
         }
@@ -511,7 +511,7 @@ namespace IoFluently
         /// <inheritdoc />
         public override Folder CreateFolder(IMissingPath path, bool createRecursively = true)
         {
-            var pathString = path.ToString();
+            var pathString = path.FullName;
         
             if (createRecursively)
             {
@@ -532,7 +532,7 @@ namespace IoFluently
 
         public override File WriteAllBytes(IFileOrMissingPath path, byte[] bytes, bool createRecursively = true)
         {
-            var pathString = path.ToString();
+            var pathString = path.FullName;
                     
             if (createRecursively)
             {
@@ -552,14 +552,14 @@ namespace IoFluently
 
         public override MissingPath DeleteFolder(IFolder path, bool recursive = false)
         {
-            Directory.Delete(path.ToString(), recursive);
+            Directory.Delete(path.FullName, recursive);
 
             return new MissingPath(path);
         }
 
         public override PathType Type(IFileOrFolderOrMissingPath path)
         {
-            var str = path.ToString();
+            var str = path.FullName;
             if (System.IO.File.Exists(str))
                 return IoFluently.PathType.File;
             if (Directory.Exists(str))

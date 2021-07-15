@@ -100,7 +100,7 @@ namespace IoFluently {
 
                                 if (IsParentExpression(parentExpr, parentOf))
                                 {
-                                    return Directory.GetFileSystemEntries(absolutePath.ToString()).Select(fse => 
+                                    return Directory.GetFileSystemEntries(absolutePath.FullName).Select(fse => 
                                         absolutePath.IoService.TryParseAbsolutePath(fse).Value);
                                 }
                             }
@@ -123,7 +123,7 @@ namespace IoFluently {
                                     
                                     if (memberExpression.Member == ancestorsMethod)
                                     {
-                                        var root = ancestor.ToString();
+                                        var root = ancestor.FullName;
                                         return root.TraverseTree<string>(
                                             path =>
                                             {

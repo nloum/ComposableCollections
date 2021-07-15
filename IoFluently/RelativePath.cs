@@ -151,6 +151,8 @@ namespace IoFluently
 
             return sb.ToString();
         }
+
+        public string FullName => ToString();
         
         /// <summary>
         /// Converts this RelativePath to a string form of the path
@@ -159,7 +161,7 @@ namespace IoFluently
         /// <returns>The string form of this path</returns>
         public static implicit operator string(RelativePath path)  
         {  
-            return path.ToString();
+            return path.FullName;
         }
 
         /// <inheritdoc />

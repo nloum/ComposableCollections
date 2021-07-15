@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using SimpleMonads;
 
 namespace IoFluently
@@ -24,5 +25,7 @@ namespace IoFluently
         /// The IIoService that is used for this absolute path
         /// </summary>
         public IIoService IoService { get; }
+        
+        public string FullName { get; }
     }
 }

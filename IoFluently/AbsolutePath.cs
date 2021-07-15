@@ -70,6 +70,9 @@ namespace IoFluently
             return this.ConvertToString();
         }
 
+        /// <inheritdoc />
+        public string FullName => this.ConvertToString();
+
         /// <summary>
         /// Converts this AbsolutePath to a string form of the path
         /// </summary>
@@ -77,7 +80,7 @@ namespace IoFluently
         /// <returns>The string form of this path</returns>
         public static implicit operator string(AbsolutePath path)
         {
-            return path.ToString();
+            return path.FullName;
         }
 
         /// <inheritdoc />

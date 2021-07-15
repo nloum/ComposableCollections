@@ -32,13 +32,13 @@ namespace IoFluently
 
         protected override AbsolutePath Transform(IFileOrFolderOrMissingPath absolutePath)
         {
-            var absolutePathString = absolutePath.ToString();
+            var absolutePathString = absolutePath.FullName;
             var stringComparison =
                 IsCaseSensitiveByDefault ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
             foreach (var mapping in Mappings)
             {
-                if (absolutePathString.Equals(mapping.Key.ToString(), stringComparison)
-                    || absolutePathString.StartsWith(mapping.Key.ToString(), stringComparison))
+                if (absolutePathString.Equals(mapping.Key.FullName, stringComparison)
+                    || absolutePathString.StartsWith(mapping.Key.FullName, stringComparison))
                 {
                     var transformedPath = mapping.Value / absolutePath.RelativeTo(mapping.Key);
                     return new AbsolutePath(transformedPath.Components, transformedPath.IsCaseSensitive, transformedPath.DirectorySeparator, _decorated);

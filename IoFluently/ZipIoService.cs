@@ -129,7 +129,7 @@ namespace IoFluently
                 
                 return archive.Entries.Select(entry =>
                         TryParseAbsolutePath(entry.FullName, _root).Value).Where(child => child.Ancestors(true)
-                        .Any(ancestor => ancestor.ToString().Equals(path.ToString())))
+                        .Any(ancestor => ancestor.FullName.Equals(path.FullName)))
                     .Where(x => regex.IsMatch(x))
                     .Select(path => path.ExpectFileOrFolder());
             }
@@ -221,7 +221,7 @@ namespace IoFluently
                     {
                         var hasDescendants = archive.Entries.Any(entry =>
                             TryParseAbsolutePath(entry.FullName, _root).Value.Ancestors(true)
-                                .Any(ancestor => ancestor.ToString().Equals(path.ToString())));
+                                .Any(ancestor => ancestor.FullName.Equals(path.FullName)));
 
                         if (hasDescendants)
                         {
@@ -300,7 +300,7 @@ namespace IoFluently
                 if (fileMode == FileMode.Create || fileMode == FileMode.CreateNew || fileMode == FileMode.OpenOrCreate)
                 {
                     var entryName = path.Simplify();
-                    entry = archive.CreateEntry(entryName.ToString(), CompressionLevel);
+                    entry = archive.CreateEntry(entryName.FullName, CompressionLevel);
 
                     return new StreamCloseDecorator(entry.Open(), () =>
                     {

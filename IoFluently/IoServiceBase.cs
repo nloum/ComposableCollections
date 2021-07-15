@@ -460,8 +460,8 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual bool IsDescendantOf(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath possibleAncestor)
         {
-            var possibleDescendantStr = Path.GetFullPath(path.ToString()).ToLower();
-            var possibleAncestorStr = Path.GetFullPath(possibleAncestor.ToString()).ToLower();
+            var possibleDescendantStr = Path.GetFullPath(path.FullName).ToLower();
+            var possibleAncestorStr = Path.GetFullPath(possibleAncestor.FullName).ToLower();
             return possibleDescendantStr.StartsWith(possibleAncestorStr);
         }
 
@@ -472,7 +472,7 @@ namespace IoFluently
                 extension = "." + extension;
             }
 
-            var actualExtension = Path.GetExtension(path.ToString());
+            var actualExtension = Path.GetExtension(path.FullName);
             if (actualExtension == extension)
                 return true;
             if (actualExtension == null)
@@ -1671,7 +1671,7 @@ namespace IoFluently
         public virtual RelativePath RelativeTo(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath relativeTo)
         {
             var simplified = Simplify(path);
-            var pathStr = simplified.ToString();
+            var pathStr = simplified.FullName;
             var common = path.IoService.TryCommonWith(path, relativeTo);
 
             if (!common.HasValue)
@@ -1686,7 +1686,7 @@ namespace IoFluently
                 sb.Append(path.DirectorySeparator);
             }
 
-            var restOfRelativePath = pathStr.Substring(common.Value.ToString().Length);
+            var restOfRelativePath = pathStr.Substring(common.Value.FullName.Length);
             while (restOfRelativePath.StartsWith(path.DirectorySeparator))
                 restOfRelativePath = restOfRelativePath.Substring(path.DirectorySeparator.Length);
 
@@ -1706,8 +1706,8 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual IMaybe<AbsolutePath> TryCommonWith(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath that)
         {
-            var path1Str = path.ToString();
-            var path2Str = that.ToString();
+            var path1Str = path.FullName;
+            var path2Str = that.FullName;
 
             if (!path.IsCaseSensitive || !that.IsCaseSensitive)
             {
@@ -1748,13 +1748,13 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual IMaybe<AbsolutePath> TryGetCommonAncestry(IFileOrFolderOrMissingPath path1, IFileOrFolderOrMissingPath path2)
         {
-            return TryParseAbsolutePath(path1.ToString().GetCommonBeginning(path2.ToString()).Trim('\\'));
+            return TryParseAbsolutePath(path1.FullName.GetCommonBeginning(path2.FullName).Trim('\\'));
         }
 
         /// <inheritdoc />
         public virtual IMaybe<Uri> TryGetCommonDescendants(IFileOrFolderOrMissingPath path1, IFileOrFolderOrMissingPath path2)
         {
-            return MaybeCatch(() => new Uri(path1.ToString().GetCommonEnding(path2.ToString()).Trim('\\'),
+            return MaybeCatch(() => new Uri(path1.FullName.GetCommonEnding(path2.FullName).Trim('\\'),
                 UriKind.Relative));
         }
 
@@ -1763,10 +1763,10 @@ namespace IoFluently
         {
             return MaybeCatch(() =>
             {
-                var commonAncestry = path1.ToString().GetCommonBeginning(path2.ToString()).Trim('\\');
+                var commonAncestry = path1.FullName.GetCommonBeginning(path2.FullName).Trim('\\');
                 return new Tuple<Uri, Uri>(
-                    new Uri(path1.ToString().Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative),
-                    new Uri(path2.ToString().Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative));
+                    new Uri(path1.FullName.Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative),
+                    new Uri(path2.FullName.Substring(commonAncestry.Length).Trim('\\'), UriKind.Relative));
             });
         }
 
@@ -1775,19 +1775,19 @@ namespace IoFluently
         {
             return MaybeCatch(() =>
             {
-                var commonDescendants = path1.ToString().GetCommonEnding(path2.ToString()).Trim('\\');
+                var commonDescendants = path1.FullName.GetCommonEnding(path2.FullName).Trim('\\');
                 return new Tuple<Uri, Uri>(
                     new Uri(
-                        path1.ToString().Substring(0, path1.ToString().Length - commonDescendants.Length).Trim('\\')),
+                        path1.FullName.Substring(0, path1.FullName.Length - commonDescendants.Length).Trim('\\')),
                     new Uri(
-                        path2.ToString().Substring(0, path2.ToString().Length - commonDescendants.Length).Trim('\\')));
+                        path2.FullName.Substring(0, path2.FullName.Length - commonDescendants.Length).Trim('\\')));
             });
         }
 
         /// <inheritdoc />
         public virtual IMaybe<AbsolutePath> TryWithExtension(IFileOrFolderOrMissingPath path, string differentExtension)
         {
-            return TryParseAbsolutePath(Path.ChangeExtension(path.ToString(), differentExtension));
+            return TryParseAbsolutePath(Path.ChangeExtension(path.FullName, differentExtension));
         }
 
         public IEnumerable<Folder> Ancestors(IFolder path, bool includeItself)
@@ -1887,13 +1887,13 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual IMaybe<AbsolutePath> TryDescendant(IFileOrFolderOrMissingPath path, params IFileOrFolderOrMissingPath[] paths)
         {
-            return path.IoService.TryDescendant(path, paths.Select(p => p.ToString()).ToArray());
+            return path.IoService.TryDescendant(path, paths.Select(p => p.FullName).ToArray());
         }
 
         /// <inheritdoc />
         public virtual IMaybe<AbsolutePath> TryDescendant(IFileOrFolderOrMissingPath path, params string[] paths)
         {
-            var pathStr = path.ToString();
+            var pathStr = path.FullName;
             // Make sure that pathStr is treated as a directory.
             if (!pathStr.EndsWith(path.DirectorySeparator))
                 pathStr += path.DirectorySeparator;

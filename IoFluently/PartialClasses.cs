@@ -48,6 +48,21 @@ namespace IoFluently {
         public PathType Type => IoService.Type(this);
         public AbsolutePath WithoutExtension => IoService.WithoutExtension(this);
     }
+    
+    public partial class FileOrMissingPathBase {
+        public IEnumerable<AbsolutePath> Ancestors => IoService.Ancestors(this);
+        public Boolean CanBeSimplified => IoService.CanBeSimplified(this);
+        public Boolean Exists => IoService.Exists(this);
+        public string Extension => IoService.Extension(this);
+        public Boolean HasExtension => IoService.HasExtension(this);
+        public Boolean IsFile => IoService.IsFile(this);
+        public Boolean IsFolder => IoService.IsFolder(this);
+        public string Name => IoService.Name(this);
+        public Folder Root => IoService.Root(this);
+        public IMaybe<AbsolutePath> Parent => IoService.TryParent(this);
+        public PathType Type => IoService.Type(this);
+        public AbsolutePath WithoutExtension => IoService.WithoutExtension(this);
+    }
 }
 namespace IoFluently {
     public partial class Folder {

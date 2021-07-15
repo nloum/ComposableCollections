@@ -4,7 +4,7 @@ using SimpleMonads;
 
 namespace IoFluently
 {
-    public class FileOrMissingPathBase : SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFile, IMissingPath>, IFileOrMissingPath
+    public partial class FileOrMissingPathBase : SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFile, IMissingPath>, IFileOrMissingPath
     {
         public IReadOnlyList<string> Components => Value.Components;
         public bool IsCaseSensitive => Value.IsCaseSensitive;

@@ -72,19 +72,21 @@ namespace IoFluently
             {
                 return missingPath;
             }
-            
-            return path.Collapse(
-                file => throw file.AssertExpectedType(PathType.MissingPath),
-                folder => throw folder.AssertExpectedType(PathType.MissingPath),
-                missingPath =>
-                {
-                    if (missingPath is MissingPath missingPathObj)
-                    {
-                        return missingPathObj;
-                    }
-                    
-                    return new MissingPath(missingPath);
-                });
+
+            return new MissingPath(path);
+
+            // return path.Collapse(
+            //     file => throw file.AssertExpectedType(PathType.MissingPath),
+            //     folder => throw folder.AssertExpectedType(PathType.MissingPath),
+            //     missingPath =>
+            //     {
+            //         if (missingPath is MissingPath missingPathObj)
+            //         {
+            //             return missingPathObj;
+            //         }
+            //         
+            //         return new MissingPath(missingPath);
+            //     });
         }
 
         public static FileOrFolderOrMissingPath ExpectFileOrFolderOrMissingPath(this IFileOrFolderOrMissingPath path)
@@ -104,18 +106,19 @@ namespace IoFluently
                 return file;
             }
             
-            return path.Collapse(
-                file =>
-                {
-                    if (file is FilePath fileObj)
-                    {
-                        return fileObj;
-                    }
-
-                    return new FilePath(file);
-                },
-                folder => throw folder.AssertExpectedType(PathType.File),
-                missingPath => throw missingPath.AssertExpectedType(PathType.File));
+            return new FilePath(path);
+            // return path.Collapse(
+            //     file =>
+            //     {
+            //         if (file is FilePath fileObj)
+            //         {
+            //             return fileObj;
+            //         }
+            //
+            //         return new FilePath(file);
+            //     },
+            //     folder => throw folder.AssertExpectedType(PathType.File),
+            //     missingPath => throw missingPath.AssertExpectedType(PathType.File));
         }
 
         public static FolderPath ExpectFolder(this IFileOrFolderOrMissingPath path)
@@ -125,18 +128,20 @@ namespace IoFluently
                 return folder;
             }
             
-            return path.Collapse(
-                file => throw file.AssertExpectedType(PathType.Folder),
-                folder =>
-                {
-                    if (folder is FolderPath folderObj)
-                    {
-                        return folderObj;
-                    }
-
-                    return new FolderPath(folder);
-                },
-                missingPath => throw missingPath.AssertExpectedType(PathType.Folder));
+            return new FolderPath(path);
+            
+            // return path.Collapse(
+            //     file => throw file.AssertExpectedType(PathType.Folder),
+            //     folder =>
+            //     {
+            //         if (folder is FolderPath folderObj)
+            //         {
+            //             return folderObj;
+            //         }
+            //
+            //         return new FolderPath(folder);
+            //     },
+            //     missingPath => throw missingPath.AssertExpectedType(PathType.Folder));
         }
 
         public static IFileOrFolderPath ExpectFileOrFolder(this IFileOrFolderOrMissingPath path)

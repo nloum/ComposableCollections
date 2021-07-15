@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -75,6 +76,32 @@ namespace IoFluently.Tests
             }
         }
 
+        [TestMethod]
+        public void ExpectingAFileCreatedExternallyToBeAFileShouldNotFail()
+        {
+            var uut = CreateUnitUnderTest(IoServiceType.IoService, false);
+            var path = uut.GenerateUniqueTemporaryPath();
+            File.WriteAllText(path.FullName, "Hello 1 2 3");
+            Action action = () => path.ExpectFile();
+            action.Should().NotThrow();
+            File.Delete(path.FullName);
+            action = () => path.ExpectMissingPath();
+            action.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void ExpectingAFolderCreatedExternallyToBeAFolderShouldNotFail()
+        {
+            var uut = CreateUnitUnderTest(IoServiceType.IoService, false);
+            var path = uut.GenerateUniqueTemporaryPath();
+            Directory.CreateDirectory(path.FullName);
+            Action action = () => path.ExpectFolder();
+            action.Should().NotThrow();
+            Directory.Delete(path.FullName);
+            action = () => path.ExpectMissingPath();
+            action.Should().NotThrow();
+        }
+        
         [TestMethod]
         public void ExpectingAMissingPathToBeAMissingPathShouldNotFail()
         {

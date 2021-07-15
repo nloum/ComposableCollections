@@ -23,51 +23,51 @@ namespace IoFluently
     /// </summary>
     public static partial class IoExtensions
     {
-        public static IEnumerable<IFileOrFolder> EnumerateChildren(this IFolder path, string searchPattern, Boolean includeFolders = true, Boolean includeFiles = true) {
+        public static IEnumerable<IFileOrFolder> EnumerateChildren(this IFolderPath path, string searchPattern, Boolean includeFolders = true, Boolean includeFiles = true) {
             return path.FileSystem.EnumerateChildren(path, searchPattern, includeFolders, includeFiles);
         }
 
-        public static IEnumerable<FilePath> EnumerateChildFiles(this IFolder path, string searchPattern) {
+        public static IEnumerable<FilePath> EnumerateChildFiles(this IFolderPath path, string searchPattern) {
             return path.FileSystem.EnumerateChildFiles(path, searchPattern);
         }
 
-        public static IEnumerable<FolderPath> EnumerateChildFolders(this IFolder path, string searchPattern) {
+        public static IEnumerable<FolderPath> EnumerateChildFolders(this IFolderPath path, string searchPattern) {
             return path.FileSystem.EnumerateChildFolders(path, searchPattern);
         }
 
-        public static IEnumerable<IFileOrFolder> EnumerateDescendants(this IFolder path, string searchPattern, Boolean includeFolders = true, Boolean includeFiles = true) {
+        public static IEnumerable<IFileOrFolder> EnumerateDescendants(this IFolderPath path, string searchPattern, Boolean includeFolders = true, Boolean includeFiles = true) {
             return path.FileSystem.EnumerateDescendants(path, searchPattern, includeFolders, includeFiles);
         }
 
-        public static IEnumerable<FolderPath> EnumerateDescendantFolders(this IFolder path, string searchPattern) {
+        public static IEnumerable<FolderPath> EnumerateDescendantFolders(this IFolderPath path, string searchPattern) {
             return path.FileSystem.EnumerateDescendantFolders(path, searchPattern);
         }
 
-        public static IEnumerable<FilePath> EnumerateDescendantFiles(this IFolder path, string searchPattern) {
+        public static IEnumerable<FilePath> EnumerateDescendantFiles(this IFolderPath path, string searchPattern) {
             return path.FileSystem.EnumerateDescendantFiles(path, searchPattern);
         }
 
-        public static IEnumerable<IFileOrFolder> EnumerateChildren(this IFolder path) {
+        public static IEnumerable<IFileOrFolder> EnumerateChildren(this IFolderPath path) {
             return path.FileSystem.EnumerateChildren(path);
         }
 
-        public static IEnumerable<FilePath> EnumerateChildFiles(this IFolder path) {
+        public static IEnumerable<FilePath> EnumerateChildFiles(this IFolderPath path) {
             return path.FileSystem.EnumerateChildFiles(path);
         }
 
-        public static IEnumerable<FolderPath> EnumerateChildFolders(this IFolder path) {
+        public static IEnumerable<FolderPath> EnumerateChildFolders(this IFolderPath path) {
             return path.FileSystem.EnumerateChildFolders(path);
         }
 
-        public static IEnumerable<IFileOrFolder> EnumerateDescendants(this IFolder path) {
+        public static IEnumerable<IFileOrFolder> EnumerateDescendants(this IFolderPath path) {
             return path.FileSystem.EnumerateDescendants(path);
         }
 
-        public static IEnumerable<FolderPath> EnumerateDescendantFolders(this IFolder path) {
+        public static IEnumerable<FolderPath> EnumerateDescendantFolders(this IFolderPath path) {
             return path.FileSystem.EnumerateDescendantFolders(path);
         }
 
-        public static IEnumerable<FilePath> EnumerateDescendantFiles(this IFolder path) {
+        public static IEnumerable<FilePath> EnumerateDescendantFiles(this IFolderPath path) {
             return path.FileSystem.EnumerateDescendantFiles(path);
         }
 
@@ -91,19 +91,19 @@ namespace IoFluently
             return path.FileSystem.Simplify(path);
         }
 
-        public static AbsolutePath Combine(this IFolder path, String[] subsequentPathParts) {
+        public static AbsolutePath Combine(this IFolderPath path, String[] subsequentPathParts) {
             return path.FileSystem.Combine(path, subsequentPathParts);
         }
 
-        public static AbsolutePaths GlobFiles(this IFolder path, string pattern) {
+        public static AbsolutePaths GlobFiles(this IFolderPath path, string pattern) {
             return path.FileSystem.GlobFiles(path, pattern);
         }
 
-        public static IEnumerable<FolderPath> Ancestors(this IFolder path, Boolean includeItself) {
+        public static IEnumerable<FolderPath> Ancestors(this IFolderPath path, Boolean includeItself) {
             return path.FileSystem.Ancestors(path, includeItself);
         }
 
-        public static IEnumerable<IFileOrFolder> Ancestors(this IFile path, Boolean includeItself) {
+        public static IEnumerable<IFileOrFolder> Ancestors(this IFilePath path, Boolean includeItself) {
             return path.FileSystem.Ancestors(path, includeItself);
         }
 
@@ -195,7 +195,7 @@ namespace IoFluently
             return path.FileSystem.TryWithExtension(path, differentExtension).Value;
         }
 
-        public static BufferEnumerator ReadBuffers(this IFile path, FileShare fileShare = FileShare.None, Nullable<Information> bufferSize = null, int paddingAtStart = 0, int paddingAtEnd = 0) {
+        public static BufferEnumerator ReadBuffers(this IFilePath path, FileShare fileShare = FileShare.None, Nullable<Information> bufferSize = null, int paddingAtStart = 0, int paddingAtEnd = 0) {
             return path.FileSystem.ReadBuffers(path, fileShare, bufferSize, paddingAtStart, paddingAtEnd);
         }
 
@@ -207,7 +207,7 @@ namespace IoFluently
             return path.FileSystem.Open(path, fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively);
         }
 
-        public static ISetChanges<AbsolutePath> ToLiveLinq(this IFolder path, Boolean includeFileContentChanges, Boolean includeSubFolders, string pattern) {
+        public static ISetChanges<AbsolutePath> ToLiveLinq(this IFolderPath path, Boolean includeFileContentChanges, Boolean includeSubFolders, string pattern) {
             return path.FileSystem.ToLiveLinq(path, includeFileContentChanges, includeSubFolders, pattern);
         }
 
@@ -215,11 +215,11 @@ namespace IoFluently
             return path.FileSystem.CreateFolder(path, createRecursively);
         }
 
-        public static MissingPath DeleteFolder(this IFolder path, Boolean recursive = true) {
+        public static MissingPath DeleteFolder(this IFolderPath path, Boolean recursive = true) {
             return path.FileSystem.DeleteFolder(path, recursive);
         }
 
-        public static MissingPath DeleteFile(this IFile path) {
+        public static MissingPath DeleteFile(this IFilePath path) {
             return path.FileSystem.DeleteFile(path);
         }
 
@@ -227,11 +227,11 @@ namespace IoFluently
             return path.FileSystem.Delete(path, recursiveDeleteIfFolder);
         }
 
-        public static Task<MissingPath> DeleteFolderAsync(this IFolder path, CancellationToken cancellationToken, Boolean recursive = true) {
+        public static Task<MissingPath> DeleteFolderAsync(this IFolderPath path, CancellationToken cancellationToken, Boolean recursive = true) {
             return path.FileSystem.DeleteFolderAsync(path, cancellationToken, recursive);
         }
 
-        public static Task<MissingPath> DeleteFileAsync(this IFile path, CancellationToken cancellationToken) {
+        public static Task<MissingPath> DeleteFileAsync(this IFilePath path, CancellationToken cancellationToken) {
             return path.FileSystem.DeleteFileAsync(path, cancellationToken);
         }
 
@@ -379,27 +379,27 @@ namespace IoFluently
             return translation.FileSystem.MoveAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public static AbsolutePathChildren Children(this IFolder path, string searchPattern) {
+        public static AbsolutePathChildren Children(this IFolderPath path, string searchPattern) {
             return path.FileSystem.Children(path, searchPattern);
         }
 
-        public static AbsolutePathChildFiles ChildFiles(this IFolder path, string searchPattern) {
+        public static AbsolutePathChildFiles ChildFiles(this IFolderPath path, string searchPattern) {
             return path.FileSystem.ChildFiles(path, searchPattern);
         }
 
-        public static AbsolutePathChildFolders ChildFolders(this IFolder path, string searchPattern) {
+        public static AbsolutePathChildFolders ChildFolders(this IFolderPath path, string searchPattern) {
             return path.FileSystem.ChildFolders(path, searchPattern);
         }
 
-        public static AbsolutePathDescendants Descendants(this IFolder path, string searchPattern) {
+        public static AbsolutePathDescendants Descendants(this IFolderPath path, string searchPattern) {
             return path.FileSystem.Descendants(path, searchPattern);
         }
 
-        public static AbsolutePathDescendantFolders DescendantFolders(this IFolder path, string searchPattern) {
+        public static AbsolutePathDescendantFolders DescendantFolders(this IFolderPath path, string searchPattern) {
             return path.FileSystem.DescendantFolders(path, searchPattern);
         }
 
-        public static AbsolutePathDescendantFiles DescendantFiles(this IFolder path, string searchPattern) {
+        public static AbsolutePathDescendantFiles DescendantFiles(this IFolderPath path, string searchPattern) {
             return path.FileSystem.DescendantFiles(path, searchPattern);
         }
 

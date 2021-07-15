@@ -100,14 +100,14 @@ namespace IoFluently
         /// <param name="path">The folder to delete</param>
         /// <param name="recursive">Whether to delete the folder recursively.</param>
         /// <returns>The path that was deleted</returns>
-        MissingPath DeleteFolder(IFolder  path,  bool recursive = true);
+        MissingPath DeleteFolder(IFolderPath  path,  bool recursive = true);
         
         /// <summary>
         /// Deletes the specified file
         /// </summary>
         /// <param name="path">The file that should be deleted</param>
         /// <returns>The same path that was specified</returns>
-        MissingPath DeleteFile(IFile path);
+        MissingPath DeleteFile(IFilePath path);
         
         /// <summary>
         /// Deletes the specified file or folder
@@ -128,14 +128,14 @@ namespace IoFluently
         /// <param name="path">The folder to delete</param>
         /// <param name="recursive">Whether to delete the folder recursively.</param>
         /// <returns>The path that was deleted</returns>
-        Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken,  bool recursive = true);
+        Task<MissingPath> DeleteFolderAsync(IFolderPath path, CancellationToken cancellationToken,  bool recursive = true);
         
         /// <summary>
         /// Deletes the specified file
         /// </summary>
         /// <param name="path">The file that should be deleted</param>
         /// <returns>The same path that was specified</returns>
-        Task<MissingPath> DeleteFileAsync(IFile path, CancellationToken cancellationToken);
+        Task<MissingPath> DeleteFileAsync(IFilePath path, CancellationToken cancellationToken);
         
         /// <summary>
         /// Deletes the specified file or folder
@@ -270,10 +270,10 @@ namespace IoFluently
         bool IsAbsolutePath(string path);
         bool ComponentsAreAbsolute(IReadOnlyList<string> path);
         IMaybe<RelativePath> TryParseRelativePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
-        IMaybe<AbsolutePath> TryParseAbsolutePath(string path, IFolder optionallyRelativeTo, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
+        IMaybe<AbsolutePath> TryParseAbsolutePath(string path, IFolderPath optionallyRelativeTo, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         IMaybe<AbsolutePath> TryParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         RelativePath ParseRelativePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
-        AbsolutePath ParseAbsolutePath(string path, IFolder optionallyRelativeTo, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
+        AbsolutePath ParseAbsolutePath(string path, IFolderPath optionallyRelativeTo, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         AbsolutePath ParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath);
         
         #endregion
@@ -348,50 +348,50 @@ namespace IoFluently
         /// </summary>
         /// <param name="path">The parent folder</param>
         /// <returns>The children of this path</returns>
-        AbsolutePathChildren Children(IFolder path, string searchPattern);
+        AbsolutePathChildren Children(IFolderPath path, string searchPattern);
 
         /// <summary>
         /// Returns a lazily-enumerated list of child files and/or folders
         /// </summary>
         /// <param name="path">The parent folder</param>
         /// <returns>The children of this path</returns>
-        AbsolutePathChildFiles ChildFiles(IFolder path, string searchPattern);
+        AbsolutePathChildFiles ChildFiles(IFolderPath path, string searchPattern);
 
         /// <summary>
         /// Returns a lazily-enumerated list of child files and/or folders
         /// </summary>
         /// <param name="path">The parent folder</param>
         /// <returns>The children of this path</returns>
-        AbsolutePathChildFolders ChildFolders(IFolder path, string searchPattern);
+        AbsolutePathChildFolders ChildFolders(IFolderPath path, string searchPattern);
         
-        AbsolutePathDescendants Descendants(IFolder path, string searchPattern);
-        AbsolutePathDescendantFolders DescendantFolders(IFolder path, string searchPattern);
-        AbsolutePathDescendantFiles DescendantFiles(IFolder path, string searchPattern);
+        AbsolutePathDescendants Descendants(IFolderPath path, string searchPattern);
+        AbsolutePathDescendantFolders DescendantFolders(IFolderPath path, string searchPattern);
+        AbsolutePathDescendantFiles DescendantFiles(IFolderPath path, string searchPattern);
 
         /// <summary>
         /// Returns a lazily-enumerated list of child files and/or folders
         /// </summary>
         /// <param name="path">The parent folder</param>
         /// <returns>The children of this path</returns>
-        AbsolutePathChildren Children(IFolder path);
+        AbsolutePathChildren Children(IFolderPath path);
 
         /// <summary>
         /// Returns a lazily-enumerated list of child files and/or folders
         /// </summary>
         /// <param name="path">The parent folder</param>
         /// <returns>The children of this path</returns>
-        AbsolutePathChildFiles ChildFiles(IFolder path);
+        AbsolutePathChildFiles ChildFiles(IFolderPath path);
 
         /// <summary>
         /// Returns a lazily-enumerated list of child files and/or folders
         /// </summary>
         /// <param name="path">The parent folder</param>
         /// <returns>The children of this path</returns>
-        AbsolutePathChildFolders ChildFolders(IFolder path);
+        AbsolutePathChildFolders ChildFolders(IFolderPath path);
         
-        AbsolutePathDescendants Descendants(IFolder path);
-        AbsolutePathDescendantFolders DescendantFolders(IFolder path);
-        AbsolutePathDescendantFiles DescendantFiles(IFolder path);
+        AbsolutePathDescendants Descendants(IFolderPath path);
+        AbsolutePathDescendantFolders DescendantFolders(IFolderPath path);
+        AbsolutePathDescendantFiles DescendantFiles(IFolderPath path);
 
         /// <summary>
         /// Returns a lazily-enumerated list of child files and/or folders
@@ -400,7 +400,7 @@ namespace IoFluently
         /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
         /// <param name="includeFiles">Whether to include sub-files in the return value</param>
         /// <returns>The children of this path</returns>
-        IEnumerable<IFileOrFolder> EnumerateChildren(IFolder path, string searchPattern,
+        IEnumerable<IFileOrFolder> EnumerateChildren(IFolderPath path, string searchPattern,
             bool includeFolders = true, bool includeFiles = true);
 
         /// <summary>
@@ -410,7 +410,7 @@ namespace IoFluently
         /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
         /// <param name="includeFiles">Whether to include sub-files in the return value</param>
         /// <returns>The children of this path</returns>
-        IEnumerable<FilePath> EnumerateChildFiles(IFolder path, string searchPattern);
+        IEnumerable<FilePath> EnumerateChildFiles(IFolderPath path, string searchPattern);
 
         /// <summary>
         /// Returns a lazily-enumerated list of child files and/or folders
@@ -419,12 +419,12 @@ namespace IoFluently
         /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
         /// <param name="includeFiles">Whether to include sub-files in the return value</param>
         /// <returns>The children of this path</returns>
-        IEnumerable<FolderPath> EnumerateChildFolders(IFolder path, string searchPattern);
+        IEnumerable<FolderPath> EnumerateChildFolders(IFolderPath path, string searchPattern);
         
-        IEnumerable<IFileOrFolder> EnumerateDescendants(IFolder path, string searchPattern,
+        IEnumerable<IFileOrFolder> EnumerateDescendants(IFolderPath path, string searchPattern,
             bool includeFolders = true, bool includeFiles = true);
-        IEnumerable<FolderPath> EnumerateDescendantFolders(IFolder path, string searchPattern);
-        IEnumerable<FilePath> EnumerateDescendantFiles(IFolder path, string searchPattern);
+        IEnumerable<FolderPath> EnumerateDescendantFolders(IFolderPath path, string searchPattern);
+        IEnumerable<FilePath> EnumerateDescendantFiles(IFolderPath path, string searchPattern);
 
         /// <summary>
         /// Returns a lazily-enumerated list of child files and/or folders
@@ -433,7 +433,7 @@ namespace IoFluently
         /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
         /// <param name="includeFiles">Whether to include sub-files in the return value</param>
         /// <returns>The children of this path</returns>
-        IEnumerable<IFileOrFolder> EnumerateChildren(IFolder path);
+        IEnumerable<IFileOrFolder> EnumerateChildren(IFolderPath path);
 
         /// <summary>
         /// Returns a lazily-enumerated list of child files and/or folders
@@ -442,7 +442,7 @@ namespace IoFluently
         /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
         /// <param name="includeFiles">Whether to include sub-files in the return value</param>
         /// <returns>The children of this path</returns>
-        IEnumerable<FilePath> EnumerateChildFiles(IFolder path);
+        IEnumerable<FilePath> EnumerateChildFiles(IFolderPath path);
 
         /// <summary>
         /// Returns a lazily-enumerated list of child files and/or folders
@@ -451,11 +451,11 @@ namespace IoFluently
         /// <param name="includeFolders">Whether to include sub-folders in the return value</param>
         /// <param name="includeFiles">Whether to include sub-files in the return value</param>
         /// <returns>The children of this path</returns>
-        IEnumerable<FolderPath> EnumerateChildFolders(IFolder path);
+        IEnumerable<FolderPath> EnumerateChildFolders(IFolderPath path);
         
-        IEnumerable<IFileOrFolder> EnumerateDescendants(IFolder path);
-        IEnumerable<FolderPath> EnumerateDescendantFolders(IFolder path);
-        IEnumerable<FilePath> EnumerateDescendantFiles(IFolder path);
+        IEnumerable<IFileOrFolder> EnumerateDescendants(IFolderPath path);
+        IEnumerable<FolderPath> EnumerateDescendantFolders(IFolderPath path);
+        IEnumerable<FilePath> EnumerateDescendantFiles(IFolderPath path);
 
         bool CanBeSimplified(IFileOrFolderOrMissingPath path);
         FolderPath Root(IFileOrFolderOrMissingPath path);
@@ -464,17 +464,17 @@ namespace IoFluently
         AbsolutePath Simplify(IFileOrFolderOrMissingPath path);
         RelativePath Simplify(RelativePath path);
         IMaybe<AbsolutePath> TryParent(IFileOrFolderOrMissingPath path);
-        FolderPath Parent(IFile path);
-        IMaybe<FolderPath> TryParent(IFolder path);
+        FolderPath Parent(IFilePath path);
+        IMaybe<FolderPath> TryParent(IFolderPath path);
 
         /// <summary>
         /// Equivalent to Path.Combine. You can also use the / operator to build paths, like this:
         /// _ioService.CurrentDirectory / "folder1" / "folder2" / "file.txt"
         /// </summary>
-        AbsolutePath Combine(IFolder path, params string[] subsequentPathParts);
+        AbsolutePath Combine(IFolderPath path, params string[] subsequentPathParts);
         AbsolutePath WithoutExtension(IFileOrFolderOrMissingPath path);
         Uri Child(Uri parent, Uri child);
-        AbsolutePaths GlobFiles(IFolder path, string pattern);
+        AbsolutePaths GlobFiles(IFolderPath path, string pattern);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -486,7 +486,7 @@ namespace IoFluently
         /// <param name="path"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        IEnumerable<FolderPath> Ancestors(IFolder path, bool includeItself);
+        IEnumerable<FolderPath> Ancestors(IFolderPath path, bool includeItself);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -498,7 +498,7 @@ namespace IoFluently
         /// <param name="path"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        IEnumerable<IFileOrFolder> Ancestors(IFile path, bool includeItself);
+        IEnumerable<IFileOrFolder> Ancestors(IFilePath path, bool includeItself);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -522,7 +522,7 @@ namespace IoFluently
         /// <param name="path"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        IEnumerable<FolderPath> Ancestors(IFolder path);
+        IEnumerable<FolderPath> Ancestors(IFolderPath path);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -534,7 +534,7 @@ namespace IoFluently
         /// <param name="path"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        IEnumerable<FolderPath> Ancestors(IFile path);
+        IEnumerable<FolderPath> Ancestors(IFilePath path);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -594,18 +594,18 @@ namespace IoFluently
         bool HasExtension(IFileOrFolderOrMissingPath path);
         bool IsFile(IFileOrFolderOrMissingPath path);
         bool IsFolder(IFileOrFolderOrMissingPath path);
-        bool IsReadOnly(IFile path);
-        Information FileSize(IFile path);
-        FileAttributes Attributes(IFile attributes);
-        DateTimeOffset CreationTime(IFile attributes);
-        DateTimeOffset LastAccessTime(IFile attributes);
-        DateTimeOffset LastWriteTime(IFile attributes);
+        bool IsReadOnly(IFilePath path);
+        Information FileSize(IFilePath path);
+        FileAttributes Attributes(IFilePath attributes);
+        DateTimeOffset CreationTime(IFilePath attributes);
+        DateTimeOffset LastAccessTime(IFilePath attributes);
+        DateTimeOffset LastWriteTime(IFilePath attributes);
 
         #endregion
         
         #region File reading
 
-        BufferEnumerator ReadBuffers(IFile path, FileShare fileShare = FileShare.None,
+        BufferEnumerator ReadBuffers(IFilePath path, FileShare fileShare = FileShare.None,
             Information? bufferSize = default, int paddingAtStart = 0, int paddingAtEnd = 0);
         #endregion
         
@@ -628,7 +628,7 @@ namespace IoFluently
         /// </summary>
         IQueryable<AbsolutePath> Query();
 
-        ISetChanges<AbsolutePath> ToLiveLinq(IFolder path, bool includeFileContentChanges,
+        ISetChanges<AbsolutePath> ToLiveLinq(IFolderPath path, bool includeFileContentChanges,
             bool includeSubFolders, string pattern);
         
         #endregion

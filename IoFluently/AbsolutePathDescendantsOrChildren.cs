@@ -10,12 +10,12 @@ namespace IoFluently
     public abstract class AbsolutePathDescendantsOrChildren<TFileOrFolder> : IEnumerable<TFileOrFolder>
         where TFileOrFolder : IFileOrFolderOrMissingPath
     {
-        protected readonly FolderPath _path;
+        protected readonly FolderPath _folderPath;
         protected readonly string _pattern;
 
-        protected AbsolutePathDescendantsOrChildren(IFolder path, string pattern, bool includeSubFolders)
+        protected AbsolutePathDescendantsOrChildren(IFolderPath path, string pattern, bool includeSubFolders)
         {
-            _path = path.ExpectFolder();
+            _folderPath = path.ExpectFolder();
             _pattern = pattern;
             IncludeSubFolders = includeSubFolders;
             FileSystem = path.FileSystem;
@@ -27,7 +27,7 @@ namespace IoFluently
 
         public IObservableReadOnlySet<AbsolutePath> WithChangeNotifications()
         {
-            return new ObservableReadOnlySet(_path, _pattern, IncludeSubFolders, FileSystem, this);
+            return new ObservableReadOnlySet(_folderPath, _pattern, IncludeSubFolders, FileSystem, this);
         }
 
         public ISetChanges<AbsolutePath> ToLiveLinq()
@@ -36,15 +36,15 @@ namespace IoFluently
         }
         
         private class ObservableReadOnlySet : IObservableReadOnlySet<AbsolutePath> {
-            private readonly FolderPath _path;
+            private readonly FolderPath _folderPath;
             private readonly string _pattern;
             private bool _includeSubFolders;
             private IFileSystem _fileSystem;
             private readonly IEnumerable<TFileOrFolder> _enumerable;
 
-            public ObservableReadOnlySet(FolderPath path, string pattern, bool includeSubFolders, IFileSystem fileSystem, IEnumerable<TFileOrFolder> enumerable)
+            public ObservableReadOnlySet(FolderPath folderPath, string pattern, bool includeSubFolders, IFileSystem fileSystem, IEnumerable<TFileOrFolder> enumerable)
             {
-                _path = path;
+                _folderPath = folderPath;
                 _pattern = pattern;
                 _includeSubFolders = includeSubFolders;
                 _fileSystem = fileSystem;
@@ -53,7 +53,7 @@ namespace IoFluently
 
             public ISetChanges<AbsolutePath> ToLiveLinq()
             {
-                return _fileSystem.ToLiveLinq(_path, true, _includeSubFolders, _pattern);
+                return _fileSystem.ToLiveLinq(_folderPath, true, _includeSubFolders, _pattern);
             }
 
             public IEnumerator<AbsolutePath> GetEnumerator()

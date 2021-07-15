@@ -141,7 +141,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override ISetChanges<AbsolutePath> ToLiveLinq(IFolder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        public override ISetChanges<AbsolutePath> ToLiveLinq(IFolderPath path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             throw new NotImplementedException();
         }
@@ -223,7 +223,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IFileOrFolder> EnumerateChildren(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolder> EnumerateChildren(IFolderPath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             var folder = GetFolder(path );
             if (!folder.HasValue)
@@ -239,7 +239,7 @@ namespace IoFluently
                 .Select(path => path.ExpectFileOrFolder());
         }
 
-        public override IEnumerable<IFileOrFolder> EnumerateDescendants(IFolder path, string searchPattern = null, bool includeFolders = true,
+        public override IEnumerable<IFileOrFolder> EnumerateDescendants(IFolderPath path, string searchPattern = null, bool includeFolders = true,
             bool includeFiles = true)
         {
             var folder = GetFolder(path);
@@ -256,7 +256,7 @@ namespace IoFluently
                 .Select(path => path.ExpectFileOrFolder());
         }
 
-        public override MissingPath DeleteFile(IFile path)
+        public override MissingPath DeleteFile(IFilePath path)
         {
             path = Simplify(path).ExpectFile();
             var parentFolder = GetFolder(TryParent(path ).Value).Value;
@@ -265,37 +265,37 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override bool IsReadOnly(IFile path)
+        public override bool IsReadOnly(IFilePath path)
         {
             return GetFile(path).Value.IsReadOnly;
         }
 
         /// <inheritdoc />
-        public override Information FileSize(IFile path)
+        public override Information FileSize(IFilePath path)
         {
             return Information.FromBytes(GetFile(path).Value.Contents.LongLength);
          }
 
         /// <inheritdoc />
-        public override FileAttributes Attributes(IFile path)
+        public override FileAttributes Attributes(IFilePath path)
         {
             return GetFile(path).Value.Attributes;
         }
 
         /// <inheritdoc />
-        public override DateTimeOffset CreationTime(IFile path)
+        public override DateTimeOffset CreationTime(IFilePath path)
         {
             return GetFile(path).Value.CreationTime;
         }
 
         /// <inheritdoc />
-        public override DateTimeOffset LastAccessTime(IFile path)
+        public override DateTimeOffset LastAccessTime(IFilePath path)
         {
             return GetFile(path).Value.LastAccessTime;
         }
 
         /// <inheritdoc />
-        public override DateTimeOffset LastWriteTime(IFile path)
+        public override DateTimeOffset LastWriteTime(IFilePath path)
         {
             return GetFile(path).Value.LastWriteTime;
         }
@@ -321,19 +321,19 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken,  bool recursive = true)
+        public override Task<MissingPath> DeleteFolderAsync(IFolderPath path, CancellationToken cancellationToken,  bool recursive = true)
         {
             return Task.Run(() => DeleteFolder(path, recursive), cancellationToken);
         }
 
         /// <inheritdoc />
-        public override Task<MissingPath> DeleteFileAsync(IFile path, CancellationToken cancellationToken)
+        public override Task<MissingPath> DeleteFileAsync(IFilePath path, CancellationToken cancellationToken)
         {
             return Task.Run(() => DeleteFile(path), cancellationToken);
         }
 
         /// <inheritdoc />
-        public override MissingPath DeleteFolder(IFolder path,  bool recursive = true)
+        public override MissingPath DeleteFolder(IFolderPath path,  bool recursive = true)
         {
             var parentFolder = GetFolder(TryParent(path).Value);
             parentFolder.Value.Folders.Remove(Name(Simplify(path)));

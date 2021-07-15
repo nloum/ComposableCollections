@@ -5,37 +5,37 @@ namespace IoFluently
 {
     public class AbsolutePathChildren : AbsolutePathDescendantsOrChildren<IFileOrFolder>, IEnumerable<IFileOrFolder>
     {
-        public AbsolutePathChildren(IFolder path, string pattern = "*") : base(path, pattern, false)
+        public AbsolutePathChildren(IFolderPath path, string pattern = "*") : base(path, pattern, false)
         {
         }
 
         public override IEnumerator<IFileOrFolder> GetEnumerator()
         {
-            return _path.FileSystem.EnumerateChildren(_path, _pattern).GetEnumerator();
+            return _folderPath.FileSystem.EnumerateChildren(_folderPath, _pattern).GetEnumerator();
         }
     }
     
     public class AbsolutePathChildFiles : AbsolutePathDescendantsOrChildren<FilePath>, IEnumerable<FilePath>
     {
-        public AbsolutePathChildFiles(IFolder path, string pattern = "*") : base(path, pattern, false)
+        public AbsolutePathChildFiles(IFolderPath path, string pattern = "*") : base(path, pattern, false)
         {
         }
 
         public override IEnumerator<FilePath> GetEnumerator()
         {
-            return _path.FileSystem.EnumerateChildFiles(_path, _pattern).GetEnumerator();
+            return _folderPath.FileSystem.EnumerateChildFiles(_folderPath, _pattern).GetEnumerator();
         }
     }
     
     public class AbsolutePathChildFolders : AbsolutePathDescendantsOrChildren<FolderPath>, IEnumerable<FolderPath>
     {
-        public AbsolutePathChildFolders(IFolder path, string pattern = "*") : base(path, pattern, false)
+        public AbsolutePathChildFolders(IFolderPath path, string pattern = "*") : base(path, pattern, false)
         {
         }
 
         public override IEnumerator<FolderPath> GetEnumerator()
         {
-            return _path.FileSystem.EnumerateChildFolders(_path, _pattern).GetEnumerator();
+            return _folderPath.FileSystem.EnumerateChildFolders(_folderPath, _pattern).GetEnumerator();
         }
     }
 }

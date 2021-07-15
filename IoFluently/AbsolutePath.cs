@@ -8,7 +8,7 @@ using TreeLinq;
 
 namespace IoFluently
 {
-    public partial class AbsolutePath : SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFile, IFolder, IMissingPath>, IFileOrFolderOrMissingPath
+    public partial class AbsolutePath : SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFilePath, IFolderPath, IMissingPath>, IFileOrFolderOrMissingPath
     {
         private readonly AbsoluteTreePath<string> _treePath;
         public IReadOnlyList<string> Components => _treePath.Components;
@@ -29,9 +29,9 @@ namespace IoFluently
         {
         }
 
-        public override IFile? Item1 => FileSystem.Type(this) == PathType.File
+        public override IFilePath? Item1 => FileSystem.Type(this) == PathType.File
             ? new FilePath(Components, IsCaseSensitive, DirectorySeparator, FileSystem) : null;
-        public override IFolder? Item2 => FileSystem.Type(this) == PathType.Folder
+        public override IFolderPath? Item2 => FileSystem.Type(this) == PathType.Folder
             ? new FolderPath(Components, IsCaseSensitive, DirectorySeparator, FileSystem) : null;
         public override IMissingPath? Item3 => FileSystem.Type(this) == PathType.MissingPath
             ? new MissingPath(Components, IsCaseSensitive, DirectorySeparator, FileSystem) : null;

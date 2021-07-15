@@ -11,12 +11,12 @@ namespace IoFluently
 {
     public abstract class PathTransformationFileSystemBase : FileSystemBase
     {
-        protected virtual FilePath Transform(IFile absolutePath)
+        protected virtual FilePath Transform(IFilePath absolutePath)
         {
             return Transform((IFileOrFolderOrMissingPath) absolutePath).ExpectFile();
         }
 
-        protected virtual FolderPath Transform(IFolder absolutePath)
+        protected virtual FolderPath Transform(IFolderPath absolutePath)
         {
             return Transform((IFileOrFolderOrMissingPath) absolutePath).ExpectFolder();
         }
@@ -56,7 +56,7 @@ namespace IoFluently
             return path.ExpectFolder();
         }
 
-        public override MissingPath DeleteFolder(IFolder path,  bool recursive = true)
+        public override MissingPath DeleteFolder(IFolderPath path,  bool recursive = true)
         {
             var transformedPath = Transform   (path);
             var decorated = transformedPath.FileSystem;
@@ -64,7 +64,7 @@ namespace IoFluently
             return path.ExpectMissingPath();
         }
 
-        public override MissingPath DeleteFile(IFile path)
+        public override MissingPath DeleteFile(IFilePath path)
         {
             var transformedPath = Transform   (path);
             var decorated = transformedPath.FileSystem;
@@ -72,7 +72,7 @@ namespace IoFluently
             return path.ExpectMissingPath();
         }
 
-        public override async Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken,  bool recursive = true)
+        public override async Task<MissingPath> DeleteFolderAsync(IFolderPath path, CancellationToken cancellationToken,  bool recursive = true)
         {
             var transformedPath = Transform   (path);
             var decorated = transformedPath.FileSystem;
@@ -80,7 +80,7 @@ namespace IoFluently
             return path.ExpectMissingPath();
         }
 
-        public override async Task<MissingPath> DeleteFileAsync(IFile path, CancellationToken cancellationToken)
+        public override async Task<MissingPath> DeleteFileAsync(IFilePath path, CancellationToken cancellationToken)
         {
             var transformedPath = Transform   (path);
             var decorated = transformedPath.FileSystem;
@@ -88,7 +88,7 @@ namespace IoFluently
             return path.ExpectMissingPath();
         }
 
-        public override IEnumerable<IFileOrFolder> EnumerateChildren(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolder> EnumerateChildren(IFolderPath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             var transformedPath = Transform   (path);
             var decorated = transformedPath.FileSystem;
@@ -105,35 +105,35 @@ namespace IoFluently
             return decorated.Type(transformedPath);
         }
 
-        public override Information FileSize(IFile path)
+        public override Information FileSize(IFilePath path)
         {
             var transformedPath = Transform   (path);
             var decorated = transformedPath.FileSystem;
             return decorated.FileSize(transformedPath);
         }
 
-        public override FileAttributes Attributes(IFile attributes)
+        public override FileAttributes Attributes(IFilePath attributes)
         {
             var transformedPath = Transform   (attributes);
             var decorated = transformedPath.FileSystem;
             return decorated.Attributes(transformedPath);
         }
 
-        public override DateTimeOffset CreationTime(IFile attributes)
+        public override DateTimeOffset CreationTime(IFilePath attributes)
         {
             var transformedPath = Transform   (attributes);
             var decorated = transformedPath.FileSystem;
             return decorated.CreationTime(transformedPath);
         }
 
-        public override DateTimeOffset LastAccessTime(IFile attributes)
+        public override DateTimeOffset LastAccessTime(IFilePath attributes)
         {
             var transformedPath = Transform   (attributes);
             var decorated = transformedPath.FileSystem;
             return decorated.LastAccessTime(transformedPath);
         }
 
-        public override DateTimeOffset LastWriteTime(IFile attributes)
+        public override DateTimeOffset LastWriteTime(IFilePath attributes)
         {
             var transformedPath = Transform   (attributes);
             var decorated = transformedPath.FileSystem;
@@ -155,7 +155,7 @@ namespace IoFluently
             throw new NotImplementedException();
         }
 
-        public override ISetChanges<AbsolutePath> ToLiveLinq(IFolder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        public override ISetChanges<AbsolutePath> ToLiveLinq(IFolderPath path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             throw new NotImplementedException();
         }

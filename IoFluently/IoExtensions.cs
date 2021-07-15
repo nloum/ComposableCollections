@@ -10,7 +10,7 @@ namespace IoFluently
 {
     public static partial class IoExtensions
     {
-        public static FilePath CopyFrom(this IFileOrMissingPath fileOrMissingPath, IFile source)
+        public static FilePath CopyFrom(this IFileOrMissingPath fileOrMissingPath, IFilePath source)
         {
             using (var inputStream = source.Open(FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan))
             using (var outputStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None))
@@ -21,7 +21,7 @@ namespace IoFluently
             return fileOrMissingPath.ExpectFile();
         }
 
-        public static async Task<FilePath> CopyFromAsync(this IFileOrMissingPath fileOrMissingPath, IFile source)
+        public static async Task<FilePath> CopyFromAsync(this IFileOrMissingPath fileOrMissingPath, IFilePath source)
         {
             await using (var inputStream = source.Open(FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan | FileOptions.Asynchronous))
             await using (var outputStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None, FileOptions.Asynchronous))

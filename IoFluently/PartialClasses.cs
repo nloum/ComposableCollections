@@ -19,7 +19,7 @@ namespace IoFluently
     {
         IEnumerable<AbsolutePath> IFileOrFolderOrMissingPath.Ancestors => Ancestors.Select(folder => folder.ExpectFileOrFolderOrMissingPath());
 
-        FolderPath IFile.Parent => Parent.Value.ExpectFolder();
+        FolderPath IFilePath.Parent => Parent.Value.ExpectFolder();
     }
 
     public partial class FolderPath

@@ -125,7 +125,7 @@ namespace IoFluently
 }
 namespace IoFluently 
 {
-    public partial interface IFile 
+    public partial interface IFilePath 
     {
         public IEnumerable<FolderPath> Ancestors { get; }
         public FileAttributes Attributes { get; }
@@ -139,7 +139,7 @@ namespace IoFluently
 }
 namespace IoFluently 
 {
-    public partial interface IFolder 
+    public partial interface IFolderPath 
     {
         public IEnumerable<FolderPath> Ancestors { get; }
         public AbsolutePathChildFiles ChildFiles { get; }

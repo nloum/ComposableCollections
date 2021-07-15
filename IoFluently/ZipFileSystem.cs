@@ -79,7 +79,7 @@ namespace IoFluently
             Copy(ParseAbsolutePath("/"), targetDirectory );
         }
 
-        public void Unzip(IFolder targetDirectory)
+        public void Unzip(IFolderPath targetDirectory)
         {
             Copy(ParseAbsolutePath("/"), targetDirectory);
         }
@@ -100,7 +100,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override ISetChanges<AbsolutePath> ToLiveLinq(IFolder path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        public override ISetChanges<AbsolutePath> ToLiveLinq(IFolderPath path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             throw new NotImplementedException();
         }
@@ -112,7 +112,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IFileOrFolder> EnumerateChildren(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolder> EnumerateChildren(IFolderPath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             using (var archive = OpenZipArchive(false, true))
             {
@@ -126,7 +126,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IFileOrFolder> EnumerateDescendants(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolder> EnumerateDescendants(IFolderPath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             using (var archive = OpenZipArchive(false, true))
             {
@@ -148,7 +148,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override MissingPath DeleteFile(IFile path)
+        public override MissingPath DeleteFile(IFilePath path)
         {
             using (var archive = OpenZipArchive(true, true))
             {
@@ -164,7 +164,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override Information FileSize(IFile path)
+        public override Information FileSize(IFilePath path)
         {
             using (var archive = OpenZipArchive(false, true))
             {
@@ -174,7 +174,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override FileAttributes Attributes(IFile attributes)
+        public override FileAttributes Attributes(IFilePath attributes)
         {
             using (var archive = OpenZipArchive(false, true))
             {
@@ -188,19 +188,19 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override DateTimeOffset CreationTime(IFile path)
+        public override DateTimeOffset CreationTime(IFilePath path)
         {
             return ZipFilePath.FileSystem.CreationTime(ZipFilePath.ExpectFile());
         }
 
         /// <inheritdoc />
-        public override DateTimeOffset LastAccessTime(IFile path)
+        public override DateTimeOffset LastAccessTime(IFilePath path)
         {
             return ZipFilePath.FileSystem.LastAccessTime(ZipFilePath.ExpectFile());
         }
 
         /// <inheritdoc />
-        public override DateTimeOffset LastWriteTime(IFile path)
+        public override DateTimeOffset LastWriteTime(IFilePath path)
         {
             using (var archive = OpenZipArchive(false, true))
             {
@@ -246,18 +246,18 @@ namespace IoFluently
             }
         }
 
-        public override async Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken,  bool recursive = true)
+        public override async Task<MissingPath> DeleteFolderAsync(IFolderPath path, CancellationToken cancellationToken,  bool recursive = true)
         {
             return DeleteFolder(path, recursive);
         }
 
-        public override async Task<MissingPath> DeleteFileAsync(IFile path, CancellationToken cancellationToken)
+        public override async Task<MissingPath> DeleteFileAsync(IFilePath path, CancellationToken cancellationToken)
         {
             return DeleteFile(path);
         }
 
         /// <inheritdoc />
-        public override MissingPath DeleteFolder(IFolder path,  bool recursive = true)
+        public override MissingPath DeleteFolder(IFolderPath path,  bool recursive = true)
         {
             if (Type(path) != IoFluently.PathType.Folder)
             {

@@ -266,7 +266,7 @@ namespace IoFluently
 
     public class TextFileOrMissingPath : FileOrMissingPathBase
     {
-        public TextFileOrMissingPath(TextFilePath item1) : base((IFile)item1)
+        public TextFileOrMissingPath(TextFilePath item1) : base((IFilePath)item1)
         {
         }
 
@@ -276,8 +276,8 @@ namespace IoFluently
 
         public TextFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<TextFilePath, IMissingPath> other)
             : base(other.Collapse(
-                textFile => new SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFile, IMissingPath>((IFile)textFile),
-                missingPath => new SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFile, IMissingPath>((IMissingPath)missingPath)))
+                textFile => new SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFilePath, IMissingPath>((IFilePath)textFile),
+                missingPath => new SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFilePath, IMissingPath>((IMissingPath)missingPath)))
         {
         }
 

@@ -4,7 +4,7 @@ using SimpleMonads;
 
 namespace IoFluently
 {
-    public partial interface IFileOrFolderOrMissingPath : SubTypesOf<IFileOrFolderOrMissingPath>.IEither<IFile, IFolder, IMissingPath>
+    public partial interface IFileOrFolderOrMissingPath : SubTypesOf<IFileOrFolderOrMissingPath>.IEither<IFilePath, IFolderPath, IMissingPath>
     {
         /// <summary>
         /// The TreeLinq absolute path that this object represents

@@ -2,7 +2,7 @@
 
 namespace IoFluently
 {
-    public partial interface IFolderOrMissingPath : SubTypesOf<IFileOrFolderOrMissingPath>.IEither<IFolder, IMissingPath>, IFileOrFolderOrMissingPath
+    public partial interface IFolderOrMissingPath : SubTypesOf<IFileOrFolderOrMissingPath>.IEither<IFolderPath, IMissingPath>, IFileOrFolderOrMissingPath
     {
         
     }

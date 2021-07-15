@@ -22,16 +22,16 @@ namespace IoFluently.NewtonsoftJson
         {
         }
 
-        public JsonFile Write<TModel>(TModel model)
+        public JsonFilePath Write<TModel>(TModel model)
         {
             this.WriteAllText(JsonConvert.SerializeObject(model));
-            return new JsonFile(this);
+            return new JsonFilePath(this);
         }
 
-        public JsonFile WriteJObject(JObject jObject)
+        public JsonFilePath WriteJObject(JObject jObject)
         {
             this.WriteAllText(jObject.ToString());
-            return new JsonFile(this);
+            return new JsonFilePath(this);
         }
     }
 
@@ -54,10 +54,10 @@ namespace IoFluently.NewtonsoftJson
         {
         }
 
-        public JsonFile Write(TModel model)
+        public JsonFilePath Write(TModel model)
         {
             this.WriteAllText(JsonConvert.SerializeObject(model));
-            return new JsonFile(this);
+            return new JsonFilePath(this);
         }
     }
 }

@@ -127,7 +127,6 @@ namespace IoFluently
     public partial interface IFilePath 
     {
         public IEnumerable<FolderPath> Ancestors { get; }
-        public FileAttributes Attributes { get; }
         public DateTimeOffset CreationTime { get; }
         public Information FileSize { get; }
         public Boolean IsReadOnly { get; }

@@ -215,6 +215,7 @@ namespace IoFluently
                 || method.Name.Contains("Set")
                 || method.Name.Equals("Decrypt")
                 || method.Name.Equals("Encrypt")
+                || method.Name.Contains("Attributes")
                 || method.Name.Contains("Enumerate")
                 || method.Name.Equals("Renamings")
                 || method.Name.Equals("Simplify"))
@@ -253,6 +254,10 @@ namespace IoFluently
                 
                 if (method.Parameters.Count == 0)
                 {
+                    continue;
+                }
+                
+                if (method.Name.Contains("Attributes")) {
                     continue;
                 }
 

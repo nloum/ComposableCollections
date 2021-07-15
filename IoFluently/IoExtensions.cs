@@ -3,12 +3,35 @@ using System.IO;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using UtilityDisposables;
 
 namespace IoFluently
 {
     public static partial class IoExtensions
     {
+        public static File CopyFrom(this IFileOrMissingPath fileOrMissingPath, IFile source)
+        {
+            using (var inputStream = source.Open(FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan))
+            using (var outputStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                inputStream.CopyTo(outputStream);
+            }
+
+            return fileOrMissingPath.ExpectFile();
+        }
+
+        public static async Task<File> CopyFromAsync(this IFileOrMissingPath fileOrMissingPath, IFile source)
+        {
+            await using (var inputStream = source.Open(FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan | FileOptions.Asynchronous))
+            await using (var outputStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None, FileOptions.Asynchronous))
+            {
+                await inputStream.CopyToAsync(outputStream);
+            }
+
+            return fileOrMissingPath.ExpectFile();
+        }
+
         public static string ConvertToString(this IFileOrFolderOrMissingPath path)
         {
             var sb = new StringBuilder();

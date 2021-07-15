@@ -17,24 +17,24 @@ namespace IoFluently
 {
     public partial class FilePath
     {
-        IEnumerable<AbsolutePath> IFileOrFolderOrMissingPath.Ancestors => Ancestors.Select(folder => folder.ExpectFileOrFolderOrMissingPath());
+        IEnumerable<FileOrFolderOrMissingPath> IFileOrFolderOrMissingPath.Ancestors => Ancestors.Select(folder => folder.ExpectFileOrFolderOrMissingPath());
 
         FolderPath IFilePath.Parent => Parent.Value.ExpectFolder();
     }
 
     public partial class FolderPath
     {
-        IEnumerable<AbsolutePath> IFileOrFolderOrMissingPath.Ancestors => Ancestors.Select(ancestor => ancestor.ExpectFileOrFolderOrMissingPath());
+        IEnumerable<FileOrFolderOrMissingPath> IFileOrFolderOrMissingPath.Ancestors => Ancestors.Select(ancestor => ancestor.ExpectFileOrFolderOrMissingPath());
 
-        IMaybe<AbsolutePath> IFileOrFolderOrMissingPath.Parent => Parent.Select(x => x.ExpectFileOrFolderOrMissingPath());
+        IMaybe<FileOrFolderOrMissingPath> IFileOrFolderOrMissingPath.Parent => Parent.Select(x => x.ExpectFileOrFolderOrMissingPath());
     }
 
     public partial class MissingPath
     {
-        IEnumerable<AbsolutePath> IFileOrFolderOrMissingPath.Ancestors => Ancestors.Select(ancestor => ancestor.ExpectFileOrFolderOrMissingPath());
+        IEnumerable<FileOrFolderOrMissingPath> IFileOrFolderOrMissingPath.Ancestors => Ancestors.Select(ancestor => ancestor.ExpectFileOrFolderOrMissingPath());
     }
     
     public partial class FileOrMissingPathBase {
-        IEnumerable<AbsolutePath> IFileOrFolderOrMissingPath.Ancestors => Value.Ancestors.Select(ancestor => ancestor.ExpectFileOrFolderOrMissingPath());
+        IEnumerable<FileOrFolderOrMissingPath> IFileOrFolderOrMissingPath.Ancestors => Value.Ancestors.Select(ancestor => ancestor.ExpectFileOrFolderOrMissingPath());
     }
 }

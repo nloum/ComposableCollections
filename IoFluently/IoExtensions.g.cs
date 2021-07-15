@@ -23,67 +23,67 @@ namespace IoFluently
     /// </summary>
     public static partial class IoExtensions
     {
-        public static IEnumerable<IFileOrFolder> EnumerateChildren(this IFolderPath path, string searchPattern, Boolean includeFolders = true, Boolean includeFiles = true) {
-            return path.FileSystem.EnumerateChildren(path, searchPattern, includeFolders, includeFiles);
+        public static IEnumerable<IFileOrFolderPath> EnumerateChildren(this IFolderPath folderPath, string searchPattern, Boolean includeFolders = true, Boolean includeFiles = true) {
+            return folderPath.FileSystem.EnumerateChildren(folderPath, searchPattern, includeFolders, includeFiles);
         }
 
-        public static IEnumerable<FilePath> EnumerateChildFiles(this IFolderPath path, string searchPattern) {
-            return path.FileSystem.EnumerateChildFiles(path, searchPattern);
+        public static IEnumerable<FilePath> EnumerateChildFiles(this IFolderPath folderPath, string searchPattern) {
+            return folderPath.FileSystem.EnumerateChildFiles(folderPath, searchPattern);
         }
 
-        public static IEnumerable<FolderPath> EnumerateChildFolders(this IFolderPath path, string searchPattern) {
-            return path.FileSystem.EnumerateChildFolders(path, searchPattern);
+        public static IEnumerable<FolderPath> EnumerateChildFolders(this IFolderPath folderPath, string searchPattern) {
+            return folderPath.FileSystem.EnumerateChildFolders(folderPath, searchPattern);
         }
 
-        public static IEnumerable<IFileOrFolder> EnumerateDescendants(this IFolderPath path, string searchPattern, Boolean includeFolders = true, Boolean includeFiles = true) {
-            return path.FileSystem.EnumerateDescendants(path, searchPattern, includeFolders, includeFiles);
+        public static IEnumerable<IFileOrFolderPath> EnumerateDescendants(this IFolderPath folderPath, string searchPattern, Boolean includeFolders = true, Boolean includeFiles = true) {
+            return folderPath.FileSystem.EnumerateDescendants(folderPath, searchPattern, includeFolders, includeFiles);
         }
 
-        public static IEnumerable<FolderPath> EnumerateDescendantFolders(this IFolderPath path, string searchPattern) {
-            return path.FileSystem.EnumerateDescendantFolders(path, searchPattern);
+        public static IEnumerable<FolderPath> EnumerateDescendantFolders(this IFolderPath folderPath, string searchPattern) {
+            return folderPath.FileSystem.EnumerateDescendantFolders(folderPath, searchPattern);
         }
 
-        public static IEnumerable<FilePath> EnumerateDescendantFiles(this IFolderPath path, string searchPattern) {
-            return path.FileSystem.EnumerateDescendantFiles(path, searchPattern);
+        public static IEnumerable<FilePath> EnumerateDescendantFiles(this IFolderPath folderPath, string searchPattern) {
+            return folderPath.FileSystem.EnumerateDescendantFiles(folderPath, searchPattern);
         }
 
-        public static IEnumerable<IFileOrFolder> EnumerateChildren(this IFolderPath path) {
-            return path.FileSystem.EnumerateChildren(path);
+        public static IEnumerable<IFileOrFolderPath> EnumerateChildren(this IFolderPath folderPath) {
+            return folderPath.FileSystem.EnumerateChildren(folderPath);
         }
 
-        public static IEnumerable<FilePath> EnumerateChildFiles(this IFolderPath path) {
-            return path.FileSystem.EnumerateChildFiles(path);
+        public static IEnumerable<FilePath> EnumerateChildFiles(this IFolderPath folderPath) {
+            return folderPath.FileSystem.EnumerateChildFiles(folderPath);
         }
 
-        public static IEnumerable<FolderPath> EnumerateChildFolders(this IFolderPath path) {
-            return path.FileSystem.EnumerateChildFolders(path);
+        public static IEnumerable<FolderPath> EnumerateChildFolders(this IFolderPath folderPath) {
+            return folderPath.FileSystem.EnumerateChildFolders(folderPath);
         }
 
-        public static IEnumerable<IFileOrFolder> EnumerateDescendants(this IFolderPath path) {
-            return path.FileSystem.EnumerateDescendants(path);
+        public static IEnumerable<IFileOrFolderPath> EnumerateDescendants(this IFolderPath folderPath) {
+            return folderPath.FileSystem.EnumerateDescendants(folderPath);
         }
 
-        public static IEnumerable<FolderPath> EnumerateDescendantFolders(this IFolderPath path) {
-            return path.FileSystem.EnumerateDescendantFolders(path);
+        public static IEnumerable<FolderPath> EnumerateDescendantFolders(this IFolderPath folderPath) {
+            return folderPath.FileSystem.EnumerateDescendantFolders(folderPath);
         }
 
-        public static IEnumerable<FilePath> EnumerateDescendantFiles(this IFolderPath path) {
-            return path.FileSystem.EnumerateDescendantFiles(path);
+        public static IEnumerable<FilePath> EnumerateDescendantFiles(this IFolderPath folderPath) {
+            return folderPath.FileSystem.EnumerateDescendantFiles(folderPath);
         }
 
         public static RelativePath RelativeTo(this IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath relativeTo) {
             return path.FileSystem.RelativeTo(path, relativeTo);
         }
 
-        public static IMaybe<AbsolutePath> TryCommonWith(this IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath that) {
+        public static IMaybe<FileOrFolderOrMissingPath> TryCommonWith(this IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath that) {
             return path.FileSystem.TryCommonWith(path, that);
         }
 
-        public static AbsolutePath CommonWith(this IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath that) {
+        public static FileOrFolderOrMissingPath CommonWith(this IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath that) {
             return path.FileSystem.TryCommonWith(path, that).Value;
         }
 
-        public static AbsolutePath Simplify(this IFileOrFolderOrMissingPath path) {
+        public static FileOrFolderOrMissingPath Simplify(this IFileOrFolderOrMissingPath path) {
             return path.FileSystem.Simplify(path);
         }
 
@@ -91,19 +91,19 @@ namespace IoFluently
             return path.FileSystem.Simplify(path);
         }
 
-        public static AbsolutePath Combine(this IFolderPath path, String[] subsequentPathParts) {
-            return path.FileSystem.Combine(path, subsequentPathParts);
+        public static FileOrFolderOrMissingPath Combine(this IFolderPath folderPath, String[] subsequentPathParts) {
+            return folderPath.FileSystem.Combine(folderPath, subsequentPathParts);
         }
 
-        public static AbsolutePaths GlobFiles(this IFolderPath path, string pattern) {
-            return path.FileSystem.GlobFiles(path, pattern);
+        public static FilesOrFoldersOrMissingPaths GlobFiles(this IFolderPath folderPath, string pattern) {
+            return folderPath.FileSystem.GlobFiles(folderPath, pattern);
         }
 
-        public static IEnumerable<FolderPath> Ancestors(this IFolderPath path, Boolean includeItself) {
-            return path.FileSystem.Ancestors(path, includeItself);
+        public static IEnumerable<FolderPath> Ancestors(this IFolderPath folderPath, Boolean includeItself) {
+            return folderPath.FileSystem.Ancestors(folderPath, includeItself);
         }
 
-        public static IEnumerable<IFileOrFolder> Ancestors(this IFilePath path, Boolean includeItself) {
+        public static IEnumerable<IFileOrFolderPath> Ancestors(this IFilePath path, Boolean includeItself) {
             return path.FileSystem.Ancestors(path, includeItself);
         }
 
@@ -111,23 +111,23 @@ namespace IoFluently
             return path.FileSystem.Ancestors(path, includeItself);
         }
 
-        public static IEnumerable<AbsolutePath> Ancestors(this IFileOrFolderOrMissingPath path, Boolean includeItself) {
+        public static IEnumerable<FileOrFolderOrMissingPath> Ancestors(this IFileOrFolderOrMissingPath path, Boolean includeItself) {
             return path.FileSystem.Ancestors(path, includeItself);
         }
 
-        public static IMaybe<AbsolutePath> TryDescendant(this IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath[] paths) {
+        public static IMaybe<FileOrFolderOrMissingPath> TryDescendant(this IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath[] paths) {
             return path.FileSystem.TryDescendant(path, paths);
         }
 
-        public static AbsolutePath Descendant(this IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath[] paths) {
+        public static FileOrFolderOrMissingPath Descendant(this IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath[] paths) {
             return path.FileSystem.TryDescendant(path, paths).Value;
         }
 
-        public static IMaybe<AbsolutePath> TryDescendant(this IFileOrFolderOrMissingPath path, String[] paths) {
+        public static IMaybe<FileOrFolderOrMissingPath> TryDescendant(this IFileOrFolderOrMissingPath path, String[] paths) {
             return path.FileSystem.TryDescendant(path, paths);
         }
 
-        public static AbsolutePath Descendant(this IFileOrFolderOrMissingPath path, String[] paths) {
+        public static FileOrFolderOrMissingPath Descendant(this IFileOrFolderOrMissingPath path, String[] paths) {
             return path.FileSystem.TryDescendant(path, paths).Value;
         }
 
@@ -147,11 +147,11 @@ namespace IoFluently
             return path.FileSystem.IsDescendantOf(path, possibleAncestor);
         }
 
-        public static IMaybe<AbsolutePath> TryGetCommonAncestry(this IFileOrFolderOrMissingPath path1, IFileOrFolderOrMissingPath path2) {
+        public static IMaybe<FileOrFolderOrMissingPath> TryGetCommonAncestry(this IFileOrFolderOrMissingPath path1, IFileOrFolderOrMissingPath path2) {
             return path1.FileSystem.TryGetCommonAncestry(path1, path2);
         }
 
-        public static AbsolutePath GetCommonAncestry(this IFileOrFolderOrMissingPath path1, IFileOrFolderOrMissingPath path2) {
+        public static FileOrFolderOrMissingPath GetCommonAncestry(this IFileOrFolderOrMissingPath path1, IFileOrFolderOrMissingPath path2) {
             return path1.FileSystem.TryGetCommonAncestry(path1, path2).Value;
         }
 
@@ -179,19 +179,19 @@ namespace IoFluently
             return path1.FileSystem.TryGetNonCommonAncestry(path1, path2).Value;
         }
 
-        public static IMaybe<AbsolutePath> TryWithExtension(this IFileOrFolderOrMissingPath path, string differentExtension) {
+        public static IMaybe<FileOrFolderOrMissingPath> TryWithExtension(this IFileOrFolderOrMissingPath path, string differentExtension) {
             return path.FileSystem.TryWithExtension(path, differentExtension);
         }
 
-        public static AbsolutePath WithExtension(this IFileOrFolderOrMissingPath path, string differentExtension) {
+        public static FileOrFolderOrMissingPath WithExtension(this IFileOrFolderOrMissingPath path, string differentExtension) {
             return path.FileSystem.TryWithExtension(path, differentExtension).Value;
         }
 
-        public static IMaybe<AbsolutePath> TryWithExtension(this IFileOrFolderOrMissingPath path, Func<string, string> differentExtension) {
+        public static IMaybe<FileOrFolderOrMissingPath> TryWithExtension(this IFileOrFolderOrMissingPath path, Func<string, string> differentExtension) {
             return path.FileSystem.TryWithExtension(path, differentExtension);
         }
 
-        public static AbsolutePath WithExtension(this IFileOrFolderOrMissingPath path, Func<string, string> differentExtension) {
+        public static FileOrFolderOrMissingPath WithExtension(this IFileOrFolderOrMissingPath path, Func<string, string> differentExtension) {
             return path.FileSystem.TryWithExtension(path, differentExtension).Value;
         }
 
@@ -207,35 +207,35 @@ namespace IoFluently
             return path.FileSystem.Open(path, fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively);
         }
 
-        public static ISetChanges<AbsolutePath> ToLiveLinq(this IFolderPath path, Boolean includeFileContentChanges, Boolean includeSubFolders, string pattern) {
-            return path.FileSystem.ToLiveLinq(path, includeFileContentChanges, includeSubFolders, pattern);
+        public static ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq(this IFolderPath folderPath, Boolean includeFileContentChanges, Boolean includeSubFolders, string pattern) {
+            return folderPath.FileSystem.ToLiveLinq(folderPath, includeFileContentChanges, includeSubFolders, pattern);
         }
 
         public static FolderPath CreateFolder(this IMissingPath path, Boolean createRecursively = true) {
             return path.FileSystem.CreateFolder(path, createRecursively);
         }
 
-        public static MissingPath DeleteFolder(this IFolderPath path, Boolean recursive = true) {
-            return path.FileSystem.DeleteFolder(path, recursive);
+        public static MissingPath DeleteFolder(this IFolderPath folderPath, Boolean recursive = true) {
+            return folderPath.FileSystem.DeleteFolder(folderPath, recursive);
         }
 
         public static MissingPath DeleteFile(this IFilePath path) {
             return path.FileSystem.DeleteFile(path);
         }
 
-        public static MissingPath Delete(this IFileOrFolder path, Boolean recursiveDeleteIfFolder = true) {
+        public static MissingPath Delete(this IFileOrFolderPath path, Boolean recursiveDeleteIfFolder = true) {
             return path.FileSystem.Delete(path, recursiveDeleteIfFolder);
         }
 
-        public static Task<MissingPath> DeleteFolderAsync(this IFolderPath path, CancellationToken cancellationToken, Boolean recursive = true) {
-            return path.FileSystem.DeleteFolderAsync(path, cancellationToken, recursive);
+        public static Task<MissingPath> DeleteFolderAsync(this IFolderPath folderPath, CancellationToken cancellationToken, Boolean recursive = true) {
+            return folderPath.FileSystem.DeleteFolderAsync(folderPath, cancellationToken, recursive);
         }
 
         public static Task<MissingPath> DeleteFileAsync(this IFilePath path, CancellationToken cancellationToken) {
             return path.FileSystem.DeleteFileAsync(path, cancellationToken);
         }
 
-        public static Task<MissingPath> DeleteAsync(this IFileOrFolder path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = true) {
+        public static Task<MissingPath> DeleteAsync(this IFileOrFolderPath path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = true) {
             return path.FileSystem.DeleteAsync(path, cancellationToken, recursiveDeleteIfFolder);
         }
 
@@ -283,124 +283,124 @@ namespace IoFluently
             return path.FileSystem.HasExtension(path, extension);
         }
 
-        public static Task<IAbsolutePathTranslation> CopyFileAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static Task<IPathTranslation> CopyFileAsync(this IPathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.FileSystem.CopyFileAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> CopyFolderAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static Task<IPathTranslation> CopyFolderAsync(this IPathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.FileSystem.CopyFolderAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> MoveFileAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static Task<IPathTranslation> MoveFileAsync(this IPathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.FileSystem.MoveFileAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> MoveFolderAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static Task<IPathTranslation> MoveFolderAsync(this IPathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.FileSystem.MoveFolderAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation CopyFile(this IAbsolutePathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static IPathTranslation CopyFile(this IPathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.FileSystem.CopyFile(translation, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation CopyFolder(this IAbsolutePathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static IPathTranslation CopyFolder(this IPathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.FileSystem.CopyFolder(translation, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation MoveFile(this IAbsolutePathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static IPathTranslation MoveFile(this IPathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.FileSystem.MoveFile(translation, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation MoveFolder(this IAbsolutePathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static IPathTranslation MoveFolder(this IPathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.FileSystem.MoveFolder(translation, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation Translate(this IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination) {
+        public static IPathTranslation Translate(this IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination) {
             return pathToBeCopied.FileSystem.Translate(pathToBeCopied, source, destination);
         }
 
-        public static IAbsolutePathTranslation Translate(this IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination) {
+        public static IPathTranslation Translate(this IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination) {
             return source.FileSystem.Translate(source, destination);
         }
 
-        public static IAbsolutePathTranslation Copy(this IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static IPathTranslation Copy(this IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return pathToBeCopied.FileSystem.Copy(pathToBeCopied, source, destination, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation Copy(this IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static IPathTranslation Copy(this IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return source.FileSystem.Copy(source, destination, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation Move(this IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static IPathTranslation Move(this IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return pathToBeCopied.FileSystem.Move(pathToBeCopied, source, destination, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation Move(this IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static IPathTranslation Move(this IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return source.FileSystem.Move(source, destination, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation RenameTo(this IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath target, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static IPathTranslation RenameTo(this IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath target, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return source.FileSystem.RenameTo(source, target, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation Copy(this IAbsolutePathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static IPathTranslation Copy(this IPathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.FileSystem.Copy(translation, bufferSize, overwrite);
         }
 
-        public static IAbsolutePathTranslation Move(this IAbsolutePathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static IPathTranslation Move(this IPathTranslation translation, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.FileSystem.Move(translation, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> CopyAsync(this IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static Task<IPathTranslation> CopyAsync(this IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return pathToBeCopied.FileSystem.CopyAsync(pathToBeCopied, source, destination, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> CopyAsync(this IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static Task<IPathTranslation> CopyAsync(this IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return source.FileSystem.CopyAsync(source, destination, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> MoveAsync(this IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static Task<IPathTranslation> MoveAsync(this IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return pathToBeCopied.FileSystem.MoveAsync(pathToBeCopied, source, destination, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> MoveAsync(this IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static Task<IPathTranslation> MoveAsync(this IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return source.FileSystem.MoveAsync(source, destination, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> RenameToAsync(this IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath target, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static Task<IPathTranslation> RenameToAsync(this IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath target, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return source.FileSystem.RenameToAsync(source, target, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> CopyAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static Task<IPathTranslation> CopyAsync(this IPathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.FileSystem.CopyAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public static Task<IAbsolutePathTranslation> MoveAsync(this IAbsolutePathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
+        public static Task<IPathTranslation> MoveAsync(this IPathTranslation translation, CancellationToken cancellationToken, Nullable<Information> bufferSize = null, Boolean overwrite = false) {
             return translation.FileSystem.MoveAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public static AbsolutePathChildren Children(this IFolderPath path, string searchPattern) {
-            return path.FileSystem.Children(path, searchPattern);
+        public static ChildFilesOrFolders Children(this IFolderPath folderPath, string searchPattern) {
+            return folderPath.FileSystem.Children(folderPath, searchPattern);
         }
 
-        public static AbsolutePathChildFiles ChildFiles(this IFolderPath path, string searchPattern) {
-            return path.FileSystem.ChildFiles(path, searchPattern);
+        public static ChildFiles ChildFiles(this IFolderPath folderPath, string searchPattern) {
+            return folderPath.FileSystem.ChildFiles(folderPath, searchPattern);
         }
 
-        public static AbsolutePathChildFolders ChildFolders(this IFolderPath path, string searchPattern) {
-            return path.FileSystem.ChildFolders(path, searchPattern);
+        public static ChildFolders ChildFolders(this IFolderPath folderPath, string searchPattern) {
+            return folderPath.FileSystem.ChildFolders(folderPath, searchPattern);
         }
 
-        public static AbsolutePathDescendants Descendants(this IFolderPath path, string searchPattern) {
-            return path.FileSystem.Descendants(path, searchPattern);
+        public static DescendantFilesOrFolders Descendants(this IFolderPath folderPath, string searchPattern) {
+            return folderPath.FileSystem.Descendants(folderPath, searchPattern);
         }
 
-        public static AbsolutePathDescendantFolders DescendantFolders(this IFolderPath path, string searchPattern) {
-            return path.FileSystem.DescendantFolders(path, searchPattern);
+        public static DescendantFolders DescendantFolders(this IFolderPath folderPath, string searchPattern) {
+            return folderPath.FileSystem.DescendantFolders(folderPath, searchPattern);
         }
 
-        public static AbsolutePathDescendantFiles DescendantFiles(this IFolderPath path, string searchPattern) {
-            return path.FileSystem.DescendantFiles(path, searchPattern);
+        public static DescendantFiles DescendantFiles(this IFolderPath folderPath, string searchPattern) {
+            return folderPath.FileSystem.DescendantFiles(folderPath, searchPattern);
         }
 
     }

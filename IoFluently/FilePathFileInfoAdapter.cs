@@ -4,11 +4,11 @@ using Microsoft.Extensions.FileProviders;
 
 namespace IoFluently
 {
-    public class AbsolutePathFileInfoAdapter : IFileInfo {
+    public class FilePathFileInfoAdapter : IFileInfo {
         private readonly IFilePath _absolutePath;
         private readonly bool _isPhysicalPath;
 
-        public AbsolutePathFileInfoAdapter( IFilePath absolutePath, bool isPhysicalPath = false )
+        public FilePathFileInfoAdapter( IFilePath absolutePath, bool isPhysicalPath = false )
         {
             _absolutePath = absolutePath;
             _isPhysicalPath = isPhysicalPath;

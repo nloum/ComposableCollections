@@ -7,35 +7,35 @@ using LiveLinq.Set;
 
 namespace IoFluently
 {
-    public abstract class AbsolutePathDescendantsOrChildren<TFileOrFolder> : IEnumerable<TFileOrFolder>
+    public abstract class DescendantsOrChildren<TFileOrFolder> : IEnumerable<TFileOrFolder>
         where TFileOrFolder : IFileOrFolderOrMissingPath
     {
         protected readonly FolderPath _folderPath;
         protected readonly string _pattern;
 
-        protected AbsolutePathDescendantsOrChildren(IFolderPath path, string pattern, bool includeSubFolders)
+        protected DescendantsOrChildren(IFolderPath folderPath, string pattern, bool includeSubFolders)
         {
-            _folderPath = path.ExpectFolder();
+            _folderPath = folderPath.ExpectFolder();
             _pattern = pattern;
             IncludeSubFolders = includeSubFolders;
-            FileSystem = path.FileSystem;
+            FileSystem = folderPath.FileSystem;
         }
 
         public IFileSystem FileSystem { get; }
 
         protected bool IncludeSubFolders { get; }
 
-        public IObservableReadOnlySet<AbsolutePath> WithChangeNotifications()
+        public IObservableReadOnlySet<FileOrFolderOrMissingPath> WithChangeNotifications()
         {
             return new ObservableReadOnlySet(_folderPath, _pattern, IncludeSubFolders, FileSystem, this);
         }
 
-        public ISetChanges<AbsolutePath> ToLiveLinq()
+        public ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq()
         {
             return WithChangeNotifications().ToLiveLinq();
         }
         
-        private class ObservableReadOnlySet : IObservableReadOnlySet<AbsolutePath> {
+        private class ObservableReadOnlySet : IObservableReadOnlySet<FileOrFolderOrMissingPath> {
             private readonly FolderPath _folderPath;
             private readonly string _pattern;
             private bool _includeSubFolders;
@@ -51,12 +51,12 @@ namespace IoFluently
                 _enumerable = enumerable;
             }
 
-            public ISetChanges<AbsolutePath> ToLiveLinq()
+            public ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq()
             {
                 return _fileSystem.ToLiveLinq(_folderPath, true, _includeSubFolders, _pattern);
             }
 
-            public IEnumerator<AbsolutePath> GetEnumerator()
+            public IEnumerator<FileOrFolderOrMissingPath> GetEnumerator()
             {
                 return _enumerable.Select(x => x.ExpectFileOrFolderOrMissingPath()).GetEnumerator();
             }

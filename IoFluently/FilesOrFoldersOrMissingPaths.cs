@@ -7,7 +7,7 @@ using TreeLinq;
 
 namespace IoFluently
 {
-    public class AbsolutePaths : IComparable, IComparable<AbsolutePaths>, IEquatable<AbsolutePaths>, IEnumerable<AbsolutePath>
+    public class FilesOrFoldersOrMissingPaths : IComparable, IComparable<FilesOrFoldersOrMissingPaths>, IEquatable<FilesOrFoldersOrMissingPaths>, IEnumerable<FileOrFolderOrMissingPath>
     {
         /// <summary>
         /// Indicates whether or not the absolute paths are case sensitive
@@ -29,7 +29,7 @@ namespace IoFluently
         /// </summary>
         public AbsoluteTreePaths<string> Paths { get; }
 
-        internal AbsolutePaths(bool isCaseSensitive, string directorySeparator, IFileSystem fileSystem, AbsoluteTreePaths<string> paths)
+        internal FilesOrFoldersOrMissingPaths(bool isCaseSensitive, string directorySeparator, IFileSystem fileSystem, AbsoluteTreePaths<string> paths)
         {
             IsCaseSensitive = isCaseSensitive;
             IsCaseSensitive = isCaseSensitive;
@@ -41,7 +41,7 @@ namespace IoFluently
         /// <inheritdoc />
         public int CompareTo(object obj)
         {
-            if (obj is AbsolutePaths absolutePaths)
+            if (obj is FilesOrFoldersOrMissingPaths absolutePaths)
             {
                 return Paths.CompareTo(absolutePaths.Paths);
             }
@@ -50,12 +50,12 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public int CompareTo(AbsolutePaths other)
+        public int CompareTo(FilesOrFoldersOrMissingPaths other)
         {
             return Paths.CompareTo(other.Paths);
         }
 
-        public bool Equals(AbsolutePaths other)
+        public bool Equals(FilesOrFoldersOrMissingPaths other)
         {
             return CompareTo(other) == 0;
         }
@@ -65,11 +65,11 @@ namespace IoFluently
             return GetEnumerator();
         }
 
-        public IEnumerator<AbsolutePath> GetEnumerator()
+        public IEnumerator<FileOrFolderOrMissingPath> GetEnumerator()
         {
             foreach (var path in Paths)
             {
-                yield return new AbsolutePath(path, IsCaseSensitive, DirectorySeparator, FileSystem);
+                yield return new FileOrFolderOrMissingPath(path, IsCaseSensitive, DirectorySeparator, FileSystem);
             }
         }
 
@@ -79,9 +79,9 @@ namespace IoFluently
         /// <param name="relPath">The absolute paths that will have a subpath added to them</param>
         /// <param name="whatToAdd">The subpath that will be added to all the absolute paths</param>
         /// <returns>A new AbsolutePaths object where all absolute paths in it has an additional subpath appended to it</returns>
-        public static AbsolutePaths operator / (AbsolutePaths absPath, string whatToAdd)
+        public static FilesOrFoldersOrMissingPaths operator / (FilesOrFoldersOrMissingPaths absPath, string whatToAdd)
         {
-            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem, absPath.Paths / whatToAdd);
+            return new FilesOrFoldersOrMissingPaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem, absPath.Paths / whatToAdd);
         }
 
         /// <summary>
@@ -90,9 +90,9 @@ namespace IoFluently
         /// <param name="relPath">The absolute paths that will have a subpath added to them</param>
         /// <param name="whatToAdd">The subpath that will be added to all the absolute paths</param>
         /// <returns>A new AbsolutePaths object where all absolute paths in it has an additional subpath appended to it</returns>
-        public static AbsolutePaths operator / (AbsolutePaths absPath, IEnumerable<RelativePath> whatToAdd)
+        public static FilesOrFoldersOrMissingPaths operator / (FilesOrFoldersOrMissingPaths absPath, IEnumerable<RelativePath> whatToAdd)
         {
-            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem, absPath.Paths / whatToAdd.Select(x => x.Path));
+            return new FilesOrFoldersOrMissingPaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem, absPath.Paths / whatToAdd.Select(x => x.Path));
         }
 
         /// <summary>
@@ -101,9 +101,9 @@ namespace IoFluently
         /// <param name="relPath">The absolute paths that will have a subpath added to them</param>
         /// <param name="whatToAdd">The subpath that will be added to all the absolute paths</param>
         /// <returns>A new AbsolutePaths object where all absolute paths in it has an additional subpath appended to it</returns>
-        public static AbsolutePaths operator / (AbsolutePaths absPath, RelativePath whatToAdd)
+        public static FilesOrFoldersOrMissingPaths operator / (FilesOrFoldersOrMissingPaths absPath, RelativePath whatToAdd)
         {
-            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem, absPath.Paths / whatToAdd.Path);
+            return new FilesOrFoldersOrMissingPaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem, absPath.Paths / whatToAdd.Path);
         }
 
         /// <summary>
@@ -112,9 +112,9 @@ namespace IoFluently
         /// <param name="relPath">The absolute paths that will have a subpath added to them</param>
         /// <param name="whatToAdd">The subpath that will be added to all the absolute paths</param>
         /// <returns>A new AbsolutePaths object where all absolute paths in it has an additional subpath appended to it</returns>
-        public static AbsolutePaths operator / (AbsolutePaths absPath, IEnumerable<string> whatToAdd)
+        public static FilesOrFoldersOrMissingPaths operator / (FilesOrFoldersOrMissingPaths absPath, IEnumerable<string> whatToAdd)
         {
-            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem, absPath.Paths / whatToAdd);
+            return new FilesOrFoldersOrMissingPaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem, absPath.Paths / whatToAdd);
         }
 
         /// <summary>
@@ -123,10 +123,10 @@ namespace IoFluently
         /// <param name="relPath">The absolute paths that will have a subpath added to them</param>
         /// <param name="whatToAdd">The subpath that will be added to all the absolute paths</param>
         /// <returns>A new AbsolutePaths object where all absolute paths in it has an additional subpath appended to it</returns>
-        public static AbsolutePaths operator / (AbsolutePaths absPath,
-            Func<AbsolutePath, IEnumerable<RelativePath>> whatToAdd)
+        public static FilesOrFoldersOrMissingPaths operator / (FilesOrFoldersOrMissingPaths absPath,
+            Func<FileOrFolderOrMissingPath, IEnumerable<RelativePath>> whatToAdd)
         {
-            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem, absPath.Paths / (abs => whatToAdd(new AbsolutePath(abs, absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem)).Select(x => x.Path)));
+            return new FilesOrFoldersOrMissingPaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem, absPath.Paths / (abs => whatToAdd(new FileOrFolderOrMissingPath(abs, absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem)).Select(x => x.Path)));
         }
         
         /// <summary>
@@ -135,7 +135,7 @@ namespace IoFluently
         /// <param name="left">The first object to check for equality</param>
         /// <param name="right">The second object to check for equality</param>
         /// <returns>True if the two objects are equal; false otherwise</returns>
-        public static bool operator ==(AbsolutePaths left, AbsolutePaths right)
+        public static bool operator ==(FilesOrFoldersOrMissingPaths left, FilesOrFoldersOrMissingPaths right)
         {
             return Equals(left, right);
         }
@@ -146,7 +146,7 @@ namespace IoFluently
         /// <param name="left">The first object to check for inequality</param>
         /// <param name="right">The second object to check for inequality</param>
         /// <returns>False if the two objects are equal; true otherwise</returns>
-        public static bool operator !=(AbsolutePaths left, AbsolutePaths right)
+        public static bool operator !=(FilesOrFoldersOrMissingPaths left, FilesOrFoldersOrMissingPaths right)
         {
             return !Equals(left, right);
         }

@@ -87,7 +87,7 @@ namespace IoFluently
     public class InMemoryFileSystem : FileSystemBase
     {
         /// <inheritdoc />
-        public override IQueryable<AbsolutePath> Query()
+        public override IQueryable<FileOrFolderOrMissingPath> Query()
         {
             throw new NotImplementedException();
         }
@@ -141,7 +141,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override ISetChanges<AbsolutePath> ToLiveLinq(IFolderPath path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        public override ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq(IFolderPath folderPath, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             throw new NotImplementedException();
         }
@@ -223,35 +223,35 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IFileOrFolder> EnumerateChildren(IFolderPath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolderPath> EnumerateChildren(IFolderPath folderPath, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
-            var folder = GetFolder(path );
+            var folder = GetFolder(folderPath );
             if (!folder.HasValue)
             {
-                return Enumerable.Empty<IFileOrFolder>();
+                return Enumerable.Empty<IFileOrFolderPath>();
             }
 
             var regex = FileNamePatternToRegex(searchPattern);
             
-            return folder.Value.Files.Select(file => path.ExpectFolder() / file.Key)
-                .Concat(folder.Value.Folders.Select(subfolder => path.ExpectFolder() / subfolder.Key))
+            return folder.Value.Files.Select(file => folderPath.ExpectFolder() / file.Key)
+                .Concat(folder.Value.Folders.Select(subfolder => folderPath.ExpectFolder() / subfolder.Key))
                 .Where(x => regex.IsMatch(x))
                 .Select(path => path.ExpectFileOrFolder());
         }
 
-        public override IEnumerable<IFileOrFolder> EnumerateDescendants(IFolderPath path, string searchPattern = null, bool includeFolders = true,
+        public override IEnumerable<IFileOrFolderPath> EnumerateDescendants(IFolderPath folderPath, string searchPattern = null, bool includeFolders = true,
             bool includeFiles = true)
         {
-            var folder = GetFolder(path);
+            var folder = GetFolder(folderPath);
             if (!folder.HasValue)
             {
-                return Enumerable.Empty<IFileOrFolder>();
+                return Enumerable.Empty<IFileOrFolderPath>();
             }
 
             var regex = FileNamePatternToRegex(searchPattern);
 
-            return folder.Value.Files.Select(file => path.ExpectFolder() / file.Key)
-                .Concat(folder.Value.Folders.Select(subfolder => path.ExpectFolder() / subfolder.Key))
+            return folder.Value.Files.Select(file => folderPath.ExpectFolder() / file.Key)
+                .Concat(folder.Value.Folders.Select(subfolder => folderPath.ExpectFolder() / subfolder.Key))
                 .Where(x => regex.IsMatch(x))
                 .Select(path => path.ExpectFileOrFolder());
         }
@@ -321,9 +321,9 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override Task<MissingPath> DeleteFolderAsync(IFolderPath path, CancellationToken cancellationToken,  bool recursive = true)
+        public override Task<MissingPath> DeleteFolderAsync(IFolderPath folderPath, CancellationToken cancellationToken,  bool recursive = true)
         {
-            return Task.Run(() => DeleteFolder(path, recursive), cancellationToken);
+            return Task.Run(() => DeleteFolder(folderPath, recursive), cancellationToken);
         }
 
         /// <inheritdoc />
@@ -333,11 +333,11 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override MissingPath DeleteFolder(IFolderPath path,  bool recursive = true)
+        public override MissingPath DeleteFolder(IFolderPath folderPath,  bool recursive = true)
         {
-            var parentFolder = GetFolder(TryParent(path).Value);
-            parentFolder.Value.Folders.Remove(Name(Simplify(path)));
-            return new MissingPath(path );
+            var parentFolder = GetFolder(TryParent(folderPath).Value);
+            parentFolder.Value.Folders.Remove(Name(Simplify(folderPath)));
+            return new MissingPath(folderPath );
         }
 
         public override Stream Open(IFileOrMissingPath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,

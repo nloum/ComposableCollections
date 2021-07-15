@@ -29,6 +29,6 @@ namespace IoFluently
         /// <summary>
         /// Parses the path. If the path is a relative path, assumes that it is relative to <see cref="LocalFileSystem.CurrentDirectory"/>.
         /// </summary>
-        AbsolutePath ParsePathRelativeToWorkingDirectory(string path);
+        FileOrFolderOrMissingPath ParsePathRelativeToWorkingDirectory(string path);
     }
 }

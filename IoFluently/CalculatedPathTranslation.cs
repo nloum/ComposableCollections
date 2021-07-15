@@ -5,28 +5,28 @@ using System.Linq;
 
 namespace IoFluently
 {
-    public class CalculatedAbsolutePathTranslation : IAbsolutePathTranslation
+    public class CalculatedPathTranslation : IPathTranslation
     {
-        private readonly AbsolutePathTranslation _actualValues;
+        private readonly PathTranslation _actualValues;
 
-        internal CalculatedAbsolutePathTranslation(IFileOrFolderOrMissingPath absolutePath, IFileOrFolderOrMissingPath ancestorSource, IFileOrFolderOrMissingPath ancestorDestination,
+        internal CalculatedPathTranslation(IFileOrFolderOrMissingPath absolutePath, IFileOrFolderOrMissingPath ancestorSource, IFileOrFolderOrMissingPath ancestorDestination,
             IFileSystem fileSystem)
         {
-            AbsoluteAbsolutePath = absolutePath.Simplify();
+            FileOrFolderOrMissingPath = absolutePath.Simplify();
             AncestorSource = ancestorSource.Simplify();
             AncestorDestination = ancestorDestination.Simplify();
             FileSystem = fileSystem;
             _actualValues = Calculate();
         }
 
-        public IAbsolutePathTranslation Invert()
+        public IPathTranslation Invert()
         {
-            return new CalculatedAbsolutePathTranslation(AbsoluteAbsolutePath, AncestorDestination, AncestorSource, FileSystem);
+            return new CalculatedPathTranslation(FileOrFolderOrMissingPath, AncestorDestination, AncestorSource, FileSystem);
         }
 
-        public AbsolutePath AbsoluteAbsolutePath { get; }
-        public AbsolutePath AncestorSource { get; }
-        public AbsolutePath AncestorDestination { get; }
+        public FileOrFolderOrMissingPath FileOrFolderOrMissingPath { get; }
+        public FileOrFolderOrMissingPath AncestorSource { get; }
+        public FileOrFolderOrMissingPath AncestorDestination { get; }
 
         public IFileSystem FileSystem { get; }
 
@@ -37,29 +37,29 @@ namespace IoFluently
                 AncestorDestination);
         }
 
-        private AbsolutePathTranslation Calculate()
+        private PathTranslation Calculate()
         {
             if (AncestorSource.Equals(AncestorDestination) && object.ReferenceEquals(AncestorSource.FileSystem, AncestorDestination.FileSystem))
                 throw new InvalidOperationException(
                     string.Format(
                         "An attempt was made to calculate the path if a file (\"{0}\") was copied from \"{1}\" to \"{2}\". It is illegal to have the destination and source directories be the same, which is true in this case.",
-                        AbsoluteAbsolutePath, AncestorSource, AncestorDestination));
-            if (!AbsoluteAbsolutePath.FileSystem.IsDescendantOf(AbsoluteAbsolutePath, AncestorSource))
+                        FileOrFolderOrMissingPath, AncestorSource, AncestorDestination));
+            if (!FileOrFolderOrMissingPath.FileSystem.IsDescendantOf(FileOrFolderOrMissingPath, AncestorSource))
                 throw new InvalidOperationException(
                     string.Format(
                         "The path \"{2}\" cannot be copied to \"{1}\" because the path isn't under the source path: \"{0}\"",
-                        AncestorSource, AncestorDestination, AbsoluteAbsolutePath));
-            if (AncestorSource.Equals(AbsoluteAbsolutePath))
-                return new AbsolutePathTranslation(AncestorSource, AncestorDestination, FileSystem);
-            var relativePath = AbsoluteAbsolutePath.FileSystem.RelativeTo(AbsoluteAbsolutePath, AncestorSource);
+                        AncestorSource, AncestorDestination, FileOrFolderOrMissingPath));
+            if (AncestorSource.Equals(FileOrFolderOrMissingPath))
+                return new PathTranslation(AncestorSource, AncestorDestination, FileSystem);
+            var relativePath = FileOrFolderOrMissingPath.FileSystem.RelativeTo(FileOrFolderOrMissingPath, AncestorSource);
             var pathToBeCopiedDestination = AncestorDestination / relativePath;
-            return new AbsolutePathTranslation(AbsoluteAbsolutePath, pathToBeCopiedDestination, FileSystem);
+            return new PathTranslation(FileOrFolderOrMissingPath, pathToBeCopiedDestination, FileSystem);
         }
 
-        protected bool Equals(CalculatedAbsolutePathTranslation other)
+        protected bool Equals(CalculatedPathTranslation other)
         {
             return Equals(AncestorDestination, other.AncestorDestination) &&
-                   Equals(AncestorSource, other.AncestorSource) && Equals(AbsoluteAbsolutePath, other.AbsoluteAbsolutePath);
+                   Equals(AncestorSource, other.AncestorSource) && Equals(FileOrFolderOrMissingPath, other.FileOrFolderOrMissingPath);
         }
 
         public override bool Equals(object obj)
@@ -67,7 +67,7 @@ namespace IoFluently
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((CalculatedAbsolutePathTranslation) obj);
+            return Equals((CalculatedPathTranslation) obj);
         }
 
         public override int GetHashCode()
@@ -76,34 +76,34 @@ namespace IoFluently
             {
                 var hashCode = AncestorDestination != null ? AncestorDestination.GetHashCode() : 0;
                 hashCode = (hashCode * 397) ^ (AncestorSource != null ? AncestorSource.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (AbsoluteAbsolutePath != null ? AbsoluteAbsolutePath.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (FileOrFolderOrMissingPath != null ? FileOrFolderOrMissingPath.GetHashCode() : 0);
                 return hashCode;
             }
         }
 
-        public static bool operator ==(CalculatedAbsolutePathTranslation left, CalculatedAbsolutePathTranslation right)
+        public static bool operator ==(CalculatedPathTranslation left, CalculatedPathTranslation right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(CalculatedAbsolutePathTranslation left, CalculatedAbsolutePathTranslation right)
+        public static bool operator !=(CalculatedPathTranslation left, CalculatedPathTranslation right)
         {
             return !Equals(left, right);
         }
 
         #region IFileUriTranslation Members
 
-        public AbsolutePath Source => _actualValues.Source;
+        public FileOrFolderOrMissingPath Source => _actualValues.Source;
 
-        public AbsolutePath Destination => _actualValues.Destination;
+        public FileOrFolderOrMissingPath Destination => _actualValues.Destination;
 
-        public IEnumerator<CalculatedAbsolutePathTranslation> GetEnumerator()
+        public IEnumerator<CalculatedPathTranslation> GetEnumerator()
         {
             return Source.Collapse(
-                file => Enumerable.Empty<CalculatedAbsolutePathTranslation>(),
+                file => Enumerable.Empty<CalculatedPathTranslation>(),
                 folder => folder.FileSystem.EnumerateChildren(folder)
-                    .Select(fileUri => new CalculatedAbsolutePathTranslation(fileUri, Source, Destination, FileSystem)),
-                missingPath => Enumerable.Empty<CalculatedAbsolutePathTranslation>()).GetEnumerator();
+                    .Select(fileUri => new CalculatedPathTranslation(fileUri, Source, Destination, FileSystem)),
+                missingPath => Enumerable.Empty<CalculatedPathTranslation>()).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

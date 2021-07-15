@@ -22,64 +22,64 @@ namespace IoFluently
             _decorated = decorated;
         }
 
-        public AbsolutePathChildren Children(IFolderPath path, string searchPattern)
+        public ChildFilesOrFolders Children(IFolderPath folderPath, string searchPattern)
         {
-            return _decorated.Children(path, searchPattern);
+            return _decorated.Children(folderPath, searchPattern);
         }
 
-        public AbsolutePathChildFiles ChildFiles(IFolderPath path, string searchPattern)
+        public ChildFiles ChildFiles(IFolderPath folderPath, string searchPattern)
         {
-            return _decorated.ChildFiles(path, searchPattern);
+            return _decorated.ChildFiles(folderPath, searchPattern);
         }
 
-        public AbsolutePathChildFolders ChildFolders(IFolderPath path, string searchPattern)
+        public ChildFolders ChildFolders(IFolderPath folderPath, string searchPattern)
         {
-            return _decorated.ChildFolders(path, searchPattern);
+            return _decorated.ChildFolders(folderPath, searchPattern);
         }
 
-        public AbsolutePathDescendants Descendants(IFolderPath path, string searchPattern)
+        public DescendantFilesOrFolders Descendants(IFolderPath folderPath, string searchPattern)
         {
-            return _decorated.Descendants(path, searchPattern);
+            return _decorated.Descendants(folderPath, searchPattern);
         }
 
-        public AbsolutePathDescendantFolders DescendantFolders(IFolderPath path, string searchPattern)
+        public DescendantFolders DescendantFolders(IFolderPath folderPath, string searchPattern)
         {
-            return _decorated.DescendantFolders(path, searchPattern);
+            return _decorated.DescendantFolders(folderPath, searchPattern);
         }
 
-        public AbsolutePathDescendantFiles DescendantFiles(IFolderPath path, string searchPattern)
+        public DescendantFiles DescendantFiles(IFolderPath folderPath, string searchPattern)
         {
-            return _decorated.DescendantFiles(path, searchPattern);
+            return _decorated.DescendantFiles(folderPath, searchPattern);
         }
 
-        public AbsolutePathChildren Children(IFolderPath path)
+        public ChildFilesOrFolders Children(IFolderPath folderPath)
         {
-            return _decorated.Children(path);
+            return _decorated.Children(folderPath);
         }
 
-        public AbsolutePathChildFiles ChildFiles(IFolderPath path)
+        public ChildFiles ChildFiles(IFolderPath folderPath)
         {
-            return _decorated.ChildFiles(path);
+            return _decorated.ChildFiles(folderPath);
         }
 
-        public AbsolutePathChildFolders ChildFolders(IFolderPath path)
+        public ChildFolders ChildFolders(IFolderPath folderPath)
         {
-            return _decorated.ChildFolders(path);
+            return _decorated.ChildFolders(folderPath);
         }
 
-        public AbsolutePathDescendants Descendants(IFolderPath path)
+        public DescendantFilesOrFolders Descendants(IFolderPath folderPath)
         {
-            return _decorated.Descendants(path);
+            return _decorated.Descendants(folderPath);
         }
 
-        public AbsolutePathDescendantFolders DescendantFolders(IFolderPath path)
+        public DescendantFolders DescendantFolders(IFolderPath folderPath)
         {
-            return _decorated.DescendantFolders(path);
+            return _decorated.DescendantFolders(folderPath);
         }
 
-        public AbsolutePathDescendantFiles DescendantFiles(IFolderPath path)
+        public DescendantFiles DescendantFiles(IFolderPath folderPath)
         {
-            return _decorated.DescendantFiles(path);
+            return _decorated.DescendantFiles(folderPath);
         }
 
         public IObservableReadOnlySet<FolderPath> Roots => _decorated.Roots;
@@ -130,9 +130,9 @@ namespace IoFluently
             return _decorated.CreateFolder(path, createRecursively);
         }
 
-        public virtual MissingPath DeleteFolder(IFolderPath path,  bool recursive = true)
+        public virtual MissingPath DeleteFolder(IFolderPath folderPath,  bool recursive = true)
         {
-            return _decorated.DeleteFolder(path, recursive);
+            return _decorated.DeleteFolder(folderPath, recursive);
         }
 
         public virtual MissingPath DeleteFile(IFilePath path)
@@ -140,14 +140,14 @@ namespace IoFluently
             return _decorated.DeleteFile(path);
         }
 
-        public virtual MissingPath Delete(IFileOrFolder path, bool recursiveDeleteIfFolder = true)
+        public virtual MissingPath Delete(IFileOrFolderPath path, bool recursiveDeleteIfFolder = true)
         {
             return _decorated.Delete(path, recursiveDeleteIfFolder);
         }
 
-        public virtual Task<MissingPath> DeleteFolderAsync(IFolderPath path, CancellationToken cancellationToken,  bool recursive = true)
+        public virtual Task<MissingPath> DeleteFolderAsync(IFolderPath folderPath, CancellationToken cancellationToken,  bool recursive = true)
         {
-            return _decorated.DeleteFolderAsync(path, cancellationToken, recursive);
+            return _decorated.DeleteFolderAsync(folderPath, cancellationToken, recursive);
         }
 
         public virtual Task<MissingPath> DeleteFileAsync(IFilePath path, CancellationToken cancellationToken)
@@ -155,7 +155,7 @@ namespace IoFluently
             return _decorated.DeleteFileAsync(path, cancellationToken);
         }
 
-        public virtual Task<MissingPath> DeleteAsync(IFileOrFolder path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true)
+        public virtual Task<MissingPath> DeleteAsync(IFileOrFolderPath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true)
         {
             return _decorated.DeleteAsync(path, cancellationToken, recursiveDeleteIfFolder);
         }
@@ -262,7 +262,7 @@ namespace IoFluently
 
         public virtual IOpenFilesTrackingService OpenFilesTrackingService => _decorated.OpenFilesTrackingService;
 
-        public virtual IEnumerable<KeyValuePair<AbsolutePath, string>> ProposeUniqueNamesForMovingPathsToSameFolder(IEnumerable<AbsolutePath> paths)
+        public virtual IEnumerable<KeyValuePair<FileOrFolderOrMissingPath, string>> ProposeUniqueNamesForMovingPathsToSameFolder(IEnumerable<FileOrFolderOrMissingPath> paths)
         {
             return _decorated.ProposeUniqueNamesForMovingPathsToSameFolder(paths);
         }
@@ -308,13 +308,13 @@ namespace IoFluently
             return _decorated.TryParseRelativePath(path, flags);
         }
 
-        public virtual IMaybe<AbsolutePath> TryParseAbsolutePath(string path, IFolderPath optionallyRelativeTo,
+        public virtual IMaybe<FileOrFolderOrMissingPath> TryParseAbsolutePath(string path, IFolderPath optionallyRelativeTo,
             CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             return _decorated.TryParseAbsolutePath(path, optionallyRelativeTo, flags);
         }
 
-        public virtual IMaybe<AbsolutePath> TryParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
+        public virtual IMaybe<FileOrFolderOrMissingPath> TryParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             return _decorated.TryParseAbsolutePath(path, flags);
         }
@@ -324,220 +324,220 @@ namespace IoFluently
             return _decorated.ParseRelativePath(path, flags);
         }
 
-        public virtual AbsolutePath ParseAbsolutePath(string path, IFolderPath optionallyRelativeTo,
+        public virtual FileOrFolderOrMissingPath ParseAbsolutePath(string path, IFolderPath optionallyRelativeTo,
             CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             return _decorated.ParseAbsolutePath(path, optionallyRelativeTo, flags);
         }
 
-        public virtual AbsolutePath ParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
+        public virtual FileOrFolderOrMissingPath ParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             return _decorated.ParseAbsolutePath(path, flags);
         }
 
-        public virtual Task<IAbsolutePathTranslation> CopyFileAsync(IAbsolutePathTranslation translation, CancellationToken cancellationToken,
+        public virtual Task<IPathTranslation> CopyFileAsync(IPathTranslation translation, CancellationToken cancellationToken,
             Information? bufferSize = default, bool overwrite = false)
         {
             return _decorated.CopyFileAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public virtual Task<IAbsolutePathTranslation> CopyFolderAsync(IAbsolutePathTranslation translation, CancellationToken cancellationToken,
+        public virtual Task<IPathTranslation> CopyFolderAsync(IPathTranslation translation, CancellationToken cancellationToken,
             Information? bufferSize = default, bool overwrite = false)
         {
             return _decorated.CopyFolderAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public virtual Task<IAbsolutePathTranslation> MoveFileAsync(IAbsolutePathTranslation translation, CancellationToken cancellationToken,
+        public virtual Task<IPathTranslation> MoveFileAsync(IPathTranslation translation, CancellationToken cancellationToken,
             Information? bufferSize = default, bool overwrite = false)
         {
             return _decorated.MoveFileAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public virtual Task<IAbsolutePathTranslation> MoveFolderAsync(IAbsolutePathTranslation translation, CancellationToken cancellationToken,
+        public virtual Task<IPathTranslation> MoveFolderAsync(IPathTranslation translation, CancellationToken cancellationToken,
             Information? bufferSize = default, bool overwrite = false)
         {
             return _decorated.MoveFolderAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public virtual IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation, Information? bufferSize = default,
+        public virtual IPathTranslation CopyFile(IPathTranslation translation, Information? bufferSize = default,
             bool overwrite = false)
         {
             return _decorated.CopyFile(translation, bufferSize, overwrite);
         }
 
-        public virtual IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation, Information? bufferSize = default,
+        public virtual IPathTranslation CopyFolder(IPathTranslation translation, Information? bufferSize = default,
             bool overwrite = false)
         {
             return _decorated.CopyFolder(translation, bufferSize, overwrite);
         }
 
-        public virtual IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation, Information? bufferSize = default,
+        public virtual IPathTranslation MoveFile(IPathTranslation translation, Information? bufferSize = default,
             bool overwrite = false)
         {
             return _decorated.MoveFile(translation, bufferSize, overwrite);
         }
 
-        public virtual IAbsolutePathTranslation MoveFolder(IAbsolutePathTranslation translation, Information? bufferSize = default,
+        public virtual IPathTranslation MoveFolder(IPathTranslation translation, Information? bufferSize = default,
             bool overwrite = false)
         {
             return _decorated.MoveFolder(translation, bufferSize, overwrite);
         }
 
-        public virtual IAbsolutePathTranslation Translate(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source,
+        public virtual IPathTranslation Translate(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source,
             IFileOrFolderOrMissingPath destination)
         {
             return _decorated.Translate(pathToBeCopied, source, destination);
         }
 
-        public virtual IAbsolutePathTranslation Translate(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination)
+        public virtual IPathTranslation Translate(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination)
         {
             return _decorated.Translate(source, destination);
         }
 
-        public virtual IAbsolutePathTranslation Copy(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source,
+        public virtual IPathTranslation Copy(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source,
             IFileOrFolderOrMissingPath destination, Information? bufferSize = default, bool overwrite = false)
         {
             return _decorated.Copy(pathToBeCopied, source, destination, bufferSize, overwrite);
         }
 
-        public virtual IAbsolutePathTranslation Copy(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
+        public virtual IPathTranslation Copy(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             Information? bufferSize = default, bool overwrite = false)
         {
             return _decorated.Copy(source, destination, bufferSize, overwrite);
         }
 
-        public virtual IAbsolutePathTranslation Move(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source,
+        public virtual IPathTranslation Move(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source,
             IFileOrFolderOrMissingPath destination, Information? bufferSize = default, bool overwrite = false)
         {
             return _decorated.Move(pathToBeCopied, source, destination, bufferSize, overwrite);
         }
 
-        public virtual IAbsolutePathTranslation Move(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
+        public virtual IPathTranslation Move(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             Information? bufferSize = default, bool overwrite = false)
         {
             return _decorated.Move(source, destination, bufferSize, overwrite);
         }
 
-        public virtual IAbsolutePathTranslation RenameTo(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath target,
+        public virtual IPathTranslation RenameTo(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath target,
             Information? bufferSize = default, bool overwrite = false)
         {
             return _decorated.RenameTo(source, target, bufferSize, overwrite);
         }
 
-        public virtual IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation, Information? bufferSize = default,
+        public virtual IPathTranslation Copy(IPathTranslation translation, Information? bufferSize = default,
             bool overwrite = false)
         {
             return _decorated.Copy(translation, bufferSize, overwrite);
         }
 
-        public virtual IAbsolutePathTranslation Move(IAbsolutePathTranslation translation, Information? bufferSize = default,
+        public virtual IPathTranslation Move(IPathTranslation translation, Information? bufferSize = default,
             bool overwrite = false)
         {
             return _decorated.Move(translation, bufferSize, overwrite);
         }
 
-        public virtual Task<IAbsolutePathTranslation> CopyAsync(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source,
+        public virtual Task<IPathTranslation> CopyAsync(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source,
             IFileOrFolderOrMissingPath destination, CancellationToken cancellationToken, Information? bufferSize = default,
             bool overwrite = false)
         {
             return _decorated.CopyAsync(pathToBeCopied, source, destination, cancellationToken, bufferSize, overwrite);
         }
 
-        public virtual Task<IAbsolutePathTranslation> CopyAsync(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
+        public virtual Task<IPathTranslation> CopyAsync(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             return _decorated.CopyAsync(source, destination, cancellationToken, bufferSize, overwrite);
         }
 
-        public virtual Task<IAbsolutePathTranslation> MoveAsync(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source,
+        public virtual Task<IPathTranslation> MoveAsync(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source,
             IFileOrFolderOrMissingPath destination, CancellationToken cancellationToken, Information? bufferSize = default,
             bool overwrite = false)
         {
             return _decorated.MoveAsync(pathToBeCopied, source, destination, cancellationToken, bufferSize, overwrite);
         }
 
-        public virtual Task<IAbsolutePathTranslation> MoveAsync(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
+        public virtual Task<IPathTranslation> MoveAsync(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             return _decorated.MoveAsync(source, destination, cancellationToken, bufferSize, overwrite);
         }
 
-        public virtual Task<IAbsolutePathTranslation> RenameToAsync(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath target,
+        public virtual Task<IPathTranslation> RenameToAsync(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath target,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             return _decorated.RenameToAsync(source, target, cancellationToken, bufferSize, overwrite);
         }
 
-        public virtual Task<IAbsolutePathTranslation> CopyAsync(IAbsolutePathTranslation translation, CancellationToken cancellationToken,
+        public virtual Task<IPathTranslation> CopyAsync(IPathTranslation translation, CancellationToken cancellationToken,
             Information? bufferSize = default, bool overwrite = false)
         {
             return _decorated.CopyAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public virtual Task<IAbsolutePathTranslation> MoveAsync(IAbsolutePathTranslation translation, CancellationToken cancellationToken,
+        public virtual Task<IPathTranslation> MoveAsync(IPathTranslation translation, CancellationToken cancellationToken,
             Information? bufferSize = default, bool overwrite = false)
         {
             return _decorated.MoveAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public virtual IEnumerable<IFileOrFolder> EnumerateChildren(IFolderPath path, string searchPattern, bool includeFolders = true, bool includeFiles = true)
+        public virtual IEnumerable<IFileOrFolderPath> EnumerateChildren(IFolderPath folderPath, string searchPattern, bool includeFolders = true, bool includeFiles = true)
         {
-            return _decorated.EnumerateChildren(path, searchPattern, includeFolders, includeFiles);
+            return _decorated.EnumerateChildren(folderPath, searchPattern, includeFolders, includeFiles);
         }
 
-        public virtual IEnumerable<FilePath> EnumerateChildFiles(IFolderPath path, string searchPattern)
+        public virtual IEnumerable<FilePath> EnumerateChildFiles(IFolderPath folderPath, string searchPattern)
         {
-            return _decorated.EnumerateChildFiles(path, searchPattern);
+            return _decorated.EnumerateChildFiles(folderPath, searchPattern);
         }
 
-        public virtual IEnumerable<FolderPath> EnumerateChildFolders(IFolderPath path, string searchPattern)
+        public virtual IEnumerable<FolderPath> EnumerateChildFolders(IFolderPath folderPath, string searchPattern)
         {
-            return _decorated.EnumerateChildFolders(path, searchPattern);
+            return _decorated.EnumerateChildFolders(folderPath, searchPattern);
         }
 
-        public virtual IEnumerable<IFileOrFolder> EnumerateDescendants(IFolderPath path, string searchPattern, bool includeFolders = true, bool includeFiles = true)
+        public virtual IEnumerable<IFileOrFolderPath> EnumerateDescendants(IFolderPath folderPath, string searchPattern, bool includeFolders = true, bool includeFiles = true)
         {
-            return _decorated.EnumerateDescendants(path, searchPattern, includeFolders, includeFiles);
+            return _decorated.EnumerateDescendants(folderPath, searchPattern, includeFolders, includeFiles);
         }
 
-        public virtual IEnumerable<FolderPath> EnumerateDescendantFolders(IFolderPath path, string searchPattern)
+        public virtual IEnumerable<FolderPath> EnumerateDescendantFolders(IFolderPath folderPath, string searchPattern)
         {
-            return _decorated.EnumerateDescendantFolders(path, searchPattern);
+            return _decorated.EnumerateDescendantFolders(folderPath, searchPattern);
         }
 
-        public virtual IEnumerable<FilePath> EnumerateDescendantFiles(IFolderPath path, string searchPattern)
+        public virtual IEnumerable<FilePath> EnumerateDescendantFiles(IFolderPath folderPath, string searchPattern)
         {
-            return _decorated.EnumerateDescendantFiles(path, searchPattern);
+            return _decorated.EnumerateDescendantFiles(folderPath, searchPattern);
         }
 
-        public virtual IEnumerable<IFileOrFolder> EnumerateChildren(IFolderPath path)
+        public virtual IEnumerable<IFileOrFolderPath> EnumerateChildren(IFolderPath folderPath)
         {
-            return _decorated.EnumerateChildren(path);
+            return _decorated.EnumerateChildren(folderPath);
         }
 
-        public virtual IEnumerable<FilePath> EnumerateChildFiles(IFolderPath path)
+        public virtual IEnumerable<FilePath> EnumerateChildFiles(IFolderPath folderPath)
         {
-            return _decorated.EnumerateChildFiles(path);
+            return _decorated.EnumerateChildFiles(folderPath);
         }
 
-        public virtual IEnumerable<FolderPath> EnumerateChildFolders(IFolderPath path)
+        public virtual IEnumerable<FolderPath> EnumerateChildFolders(IFolderPath folderPath)
         {
-            return _decorated.EnumerateChildFolders(path);
+            return _decorated.EnumerateChildFolders(folderPath);
         }
 
-        public virtual IEnumerable<IFileOrFolder> EnumerateDescendants(IFolderPath path)
+        public virtual IEnumerable<IFileOrFolderPath> EnumerateDescendants(IFolderPath folderPath)
         {
-            return _decorated.EnumerateDescendants(path);
+            return _decorated.EnumerateDescendants(folderPath);
         }
 
-        public virtual IEnumerable<FolderPath> EnumerateDescendantFolders(IFolderPath path)
+        public virtual IEnumerable<FolderPath> EnumerateDescendantFolders(IFolderPath folderPath)
         {
-            return _decorated.EnumerateDescendantFolders(path);
+            return _decorated.EnumerateDescendantFolders(folderPath);
         }
 
-        public virtual IEnumerable<FilePath> EnumerateDescendantFiles(IFolderPath path)
+        public virtual IEnumerable<FilePath> EnumerateDescendantFiles(IFolderPath folderPath)
         {
-            return _decorated.EnumerateDescendantFiles(path);
+            return _decorated.EnumerateDescendantFiles(folderPath);
         }
 
         public virtual bool CanBeSimplified(IFileOrFolderOrMissingPath path)
@@ -555,12 +555,12 @@ namespace IoFluently
             return _decorated.RelativeTo(path, relativeTo);
         }
 
-        public virtual IMaybe<AbsolutePath> TryCommonWith(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath that)
+        public virtual IMaybe<FileOrFolderOrMissingPath> TryCommonWith(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath that)
         {
             return _decorated.TryCommonWith(path, that);
         }
 
-        public virtual AbsolutePath Simplify(IFileOrFolderOrMissingPath path)
+        public virtual FileOrFolderOrMissingPath Simplify(IFileOrFolderOrMissingPath path)
         {
             return _decorated.Simplify(path);
         }
@@ -570,7 +570,7 @@ namespace IoFluently
             return _decorated.Simplify(path);
         }
 
-        public virtual IMaybe<AbsolutePath> TryParent(IFileOrFolderOrMissingPath path)
+        public virtual IMaybe<FileOrFolderOrMissingPath> TryParent(IFileOrFolderOrMissingPath path)
         {
             return _decorated.TryParent(path);
         }
@@ -580,17 +580,17 @@ namespace IoFluently
             return _decorated.Parent(path);
         }
 
-        public virtual IMaybe<FolderPath> TryParent(IFolderPath path)
+        public virtual IMaybe<FolderPath> TryParent(IFolderPath folderPath)
         {
-            return _decorated.TryParent(path);
+            return _decorated.TryParent(folderPath);
         }
 
-        public virtual AbsolutePath Combine(IFolderPath path, params string[] subsequentPathParts)
+        public virtual FileOrFolderOrMissingPath Combine(IFolderPath folderPath, params string[] subsequentPathParts)
         {
-            return _decorated.Combine(path, subsequentPathParts);
+            return _decorated.Combine(folderPath, subsequentPathParts);
         }
 
-        public virtual AbsolutePath WithoutExtension(IFileOrFolderOrMissingPath path)
+        public virtual FileOrFolderOrMissingPath WithoutExtension(IFileOrFolderOrMissingPath path)
         {
             return _decorated.WithoutExtension(path);
         }
@@ -600,17 +600,17 @@ namespace IoFluently
             return _decorated.Child(parent, child);
         }
 
-        public virtual AbsolutePaths GlobFiles(IFolderPath path, string pattern)
+        public virtual FilesOrFoldersOrMissingPaths GlobFiles(IFolderPath folderPath, string pattern)
         {
-            return _decorated.GlobFiles(path, pattern);
+            return _decorated.GlobFiles(folderPath, pattern);
         }
 
-        public virtual IEnumerable<FolderPath> Ancestors(IFolderPath path, bool includeItself)
+        public virtual IEnumerable<FolderPath> Ancestors(IFolderPath folderPath, bool includeItself)
         {
-            return _decorated.Ancestors(path, includeItself);
+            return _decorated.Ancestors(folderPath, includeItself);
         }
 
-        public virtual IEnumerable<IFileOrFolder> Ancestors(IFilePath path, bool includeItself)
+        public virtual IEnumerable<IFileOrFolderPath> Ancestors(IFilePath path, bool includeItself)
         {
             return _decorated.Ancestors(path, includeItself);
         }
@@ -620,9 +620,9 @@ namespace IoFluently
             return _decorated.Ancestors(path, includeItself);
         }
 
-        public virtual IEnumerable<FolderPath> Ancestors(IFolderPath path)
+        public virtual IEnumerable<FolderPath> Ancestors(IFolderPath folderPath)
         {
-            return _decorated.Ancestors(path);
+            return _decorated.Ancestors(folderPath);
         }
 
         public virtual IEnumerable<FolderPath> Ancestors(IFilePath path)
@@ -635,22 +635,22 @@ namespace IoFluently
             return _decorated.Ancestors(path);
         }
 
-        public virtual IEnumerable<AbsolutePath> Ancestors(IFileOrFolderOrMissingPath path, bool includeItself)
+        public virtual IEnumerable<FileOrFolderOrMissingPath> Ancestors(IFileOrFolderOrMissingPath path, bool includeItself)
         {
             return _decorated.Ancestors(path, includeItself);
         }
 
-        public virtual IEnumerable<AbsolutePath> Ancestors(IFileOrFolderOrMissingPath path)
+        public virtual IEnumerable<FileOrFolderOrMissingPath> Ancestors(IFileOrFolderOrMissingPath path)
         {
             return _decorated.Ancestors(path);
         }
 
-        public virtual IMaybe<AbsolutePath> TryDescendant(IFileOrFolderOrMissingPath path, params IFileOrFolderOrMissingPath[] paths)
+        public virtual IMaybe<FileOrFolderOrMissingPath> TryDescendant(IFileOrFolderOrMissingPath path, params IFileOrFolderOrMissingPath[] paths)
         {
             return _decorated.TryDescendant(path, paths);
         }
 
-        public virtual IMaybe<AbsolutePath> TryDescendant(IFileOrFolderOrMissingPath path, params string[] paths)
+        public virtual IMaybe<FileOrFolderOrMissingPath> TryDescendant(IFileOrFolderOrMissingPath path, params string[] paths)
         {
             return _decorated.TryDescendant(path, paths);
         }
@@ -670,7 +670,7 @@ namespace IoFluently
             return _decorated.IsDescendantOf(path, possibleAncestor);
         }
 
-        public virtual IMaybe<AbsolutePath> TryGetCommonAncestry(IFileOrFolderOrMissingPath path1, IFileOrFolderOrMissingPath path2)
+        public virtual IMaybe<FileOrFolderOrMissingPath> TryGetCommonAncestry(IFileOrFolderOrMissingPath path1, IFileOrFolderOrMissingPath path2)
         {
             return _decorated.TryGetCommonAncestry(path1, path2);
         }
@@ -690,12 +690,12 @@ namespace IoFluently
             return _decorated.TryGetNonCommonAncestry(path1, path2);
         }
 
-        public virtual IMaybe<AbsolutePath> TryWithExtension(IFileOrFolderOrMissingPath path, string differentExtension)
+        public virtual IMaybe<FileOrFolderOrMissingPath> TryWithExtension(IFileOrFolderOrMissingPath path, string differentExtension)
         {
             return _decorated.TryWithExtension(path, differentExtension);
         }
 
-        public virtual IMaybe<AbsolutePath> TryWithExtension(IFileOrFolderOrMissingPath path, Func<string, string> differentExtension)
+        public virtual IMaybe<FileOrFolderOrMissingPath> TryWithExtension(IFileOrFolderOrMissingPath path, Func<string, string> differentExtension)
         {
             return _decorated.TryWithExtension(path, differentExtension);
         }
@@ -774,14 +774,14 @@ namespace IoFluently
             return _decorated.Open(path, fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively);
         }
 
-        public virtual IQueryable<AbsolutePath> Query()
+        public virtual IQueryable<FileOrFolderOrMissingPath> Query()
         {
             return _decorated.Query();
         }
 
-        public virtual ISetChanges<AbsolutePath> ToLiveLinq(IFolderPath path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        public virtual ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq(IFolderPath folderPath, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
-            return _decorated.ToLiveLinq(path, includeFileContentChanges, includeSubFolders, pattern);
+            return _decorated.ToLiveLinq(folderPath, includeFileContentChanges, includeSubFolders, pattern);
         }
     }
 }

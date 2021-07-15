@@ -16,12 +16,12 @@ namespace IoFluently
             return Transform((IFileOrFolderOrMissingPath) absolutePath).ExpectFile();
         }
 
-        protected virtual FolderPath Transform(IFolderPath absolutePath)
+        protected virtual FolderPath Transform(IFolderPath folderPath)
         {
-            return Transform((IFileOrFolderOrMissingPath) absolutePath).ExpectFolder();
+            return Transform((IFileOrFolderOrMissingPath) folderPath).ExpectFolder();
         }
 
-        protected virtual IFileOrFolder Transform(IFileOrFolder absolutePath)
+        protected virtual IFileOrFolderPath Transform(IFileOrFolderPath absolutePath)
         {
             return Transform((IFileOrFolderOrMissingPath) absolutePath).ExpectFileOrFolder();
         }
@@ -43,7 +43,7 @@ namespace IoFluently
             EmptyFolderMode = emptyFolderMode ?? EmptyFolderMode.FoldersOnlyExistIfTheyContainFiles;
         }
 
-        protected abstract AbsolutePath Transform(IFileOrFolderOrMissingPath absolutePath);
+        protected abstract FileOrFolderOrMissingPath Transform(IFileOrFolderOrMissingPath absolutePath);
 
         public override EmptyFolderMode EmptyFolderMode { get; }
         public override bool CanEmptyDirectoriesExist { get; }
@@ -56,12 +56,12 @@ namespace IoFluently
             return path.ExpectFolder();
         }
 
-        public override MissingPath DeleteFolder(IFolderPath path,  bool recursive = true)
+        public override MissingPath DeleteFolder(IFolderPath folderPath,  bool recursive = true)
         {
-            var transformedPath = Transform   (path);
+            var transformedPath = Transform   (folderPath);
             var decorated = transformedPath.FileSystem;
             decorated.DeleteFolder(transformedPath, recursive);
-            return path.ExpectMissingPath();
+            return folderPath.ExpectMissingPath();
         }
 
         public override MissingPath DeleteFile(IFilePath path)
@@ -72,12 +72,12 @@ namespace IoFluently
             return path.ExpectMissingPath();
         }
 
-        public override async Task<MissingPath> DeleteFolderAsync(IFolderPath path, CancellationToken cancellationToken,  bool recursive = true)
+        public override async Task<MissingPath> DeleteFolderAsync(IFolderPath folderPath, CancellationToken cancellationToken,  bool recursive = true)
         {
-            var transformedPath = Transform   (path);
+            var transformedPath = Transform   (folderPath);
             var decorated = transformedPath.FileSystem;
             await decorated.DeleteFolderAsync(transformedPath, cancellationToken, recursive);
-            return path.ExpectMissingPath();
+            return folderPath.ExpectMissingPath();
         }
 
         public override async Task<MissingPath> DeleteFileAsync(IFilePath path, CancellationToken cancellationToken)
@@ -88,14 +88,14 @@ namespace IoFluently
             return path.ExpectMissingPath();
         }
 
-        public override IEnumerable<IFileOrFolder> EnumerateChildren(IFolderPath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolderPath> EnumerateChildren(IFolderPath folderPath, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
-            var transformedPath = Transform   (path);
+            var transformedPath = Transform   (folderPath);
             var decorated = transformedPath.FileSystem;
             return decorated.EnumerateChildren(transformedPath, searchPattern, includeFolders, includeFiles)
                 .Select(x => x.Collapse(
-                    file => (IFileOrFolder)new FilePath(path.Components.Concat(new[]{file.Name}).ToList(), path.IsCaseSensitive, path.DirectorySeparator, this),
-                    folder => new FolderPath(path.Components.Concat(new[]{folder.Name}).ToList(), path.IsCaseSensitive, path.DirectorySeparator, this)));
+                    file => (IFileOrFolderPath)new FilePath(folderPath.Components.Concat(new[]{file.Name}).ToList(), folderPath.IsCaseSensitive, folderPath.DirectorySeparator, this),
+                    folder => new FolderPath(folderPath.Components.Concat(new[]{folder.Name}).ToList(), folderPath.IsCaseSensitive, folderPath.DirectorySeparator, this)));
         }
 
         public override PathType Type(IFileOrFolderOrMissingPath path)
@@ -150,12 +150,12 @@ namespace IoFluently
             return decorated.Open(transformedPath, fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively);
         }
 
-        public override IQueryable<AbsolutePath> Query()
+        public override IQueryable<FileOrFolderOrMissingPath> Query()
         {
             throw new NotImplementedException();
         }
 
-        public override ISetChanges<AbsolutePath> ToLiveLinq(IFolderPath path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        public override ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq(IFolderPath folderPath, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             throw new NotImplementedException();
         }

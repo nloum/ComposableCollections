@@ -37,9 +37,9 @@ namespace IoFluently
         public override EmptyFolderMode EmptyFolderMode { get; }
 
         /// <inheritdoc />
-        public override IQueryable<AbsolutePath> Query()
+        public override IQueryable<FileOrFolderOrMissingPath> Query()
         {
-            return new Queryable<AbsolutePath>(new QueryContext());
+            return new Queryable<FileOrFolderOrMissingPath>(new QueryContext());
         }
 
         private FolderPath _temporaryFolder;
@@ -130,7 +130,7 @@ namespace IoFluently
         }
         
         /// <inheritdoc />
-        public virtual AbsolutePath ParsePathRelativeToWorkingDirectory(string path)
+        public virtual FileOrFolderOrMissingPath ParsePathRelativeToWorkingDirectory(string path)
         {
             return TryParseAbsolutePath(path, CurrentDirectory).Value;
         }
@@ -158,18 +158,18 @@ namespace IoFluently
         public PathObservationMethod PathObservationMethod { get; set; }
 
         /// <inheritdoc />
-        public override ISetChanges<AbsolutePath> ToLiveLinq(IFolderPath path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        public override ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq(IFolderPath folderPath, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             if (PathObservationMethod == PathObservationMethod.FileSystemWatcher)
             {
-                return ToLiveLinqWithFileSystemWatcher(path, includeFileContentChanges, includeSubFolders, pattern)
+                return ToLiveLinqWithFileSystemWatcher(folderPath, includeFileContentChanges, includeSubFolders, pattern)
                     .ToDictionaryLiveLinq(x => x, x => Type(x)).KeysAsSet();
             }
 
-            return ToLiveLinqWithFsWatch(path, includeFileContentChanges, includeSubFolders, pattern);
+            return ToLiveLinqWithFsWatch(folderPath, includeFileContentChanges, includeSubFolders, pattern);
         }
 
-        private ISetChanges<AbsolutePath> ToLiveLinqWithFsWatch(IFolderPath root, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        private ISetChanges<FileOrFolderOrMissingPath> ToLiveLinqWithFsWatch(IFolderPath root, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             // TODO - add support for FSWatch events on Windows and Linux as well. Although I think I already support all the ones on Linux
             // and the FileSystemWatcher class on Windows should be sufficient, it would be nice to have this support for
@@ -213,12 +213,12 @@ namespace IoFluently
             process.Start();
 
             var initialState = includeSubFolders
-                ? root.FileSystem.EnumerateDescendants(root).Select(x => new AbsolutePath(x)).ToImmutableDictionary(x => x, x => Type(x))
-                : root.FileSystem.EnumerateChildren(root).Select(x => new AbsolutePath(x)).ToImmutableDictionary(x => x, x => Type(x));
+                ? root.FileSystem.EnumerateDescendants(root).Select(x => new FileOrFolderOrMissingPath(x)).ToImmutableDictionary(x => x, x => Type(x))
+                : root.FileSystem.EnumerateChildren(root).Select(x => new FileOrFolderOrMissingPath(x)).ToImmutableDictionary(x => x, x => Type(x));
 
             var resultObservable = process.StandardOutput
                 .Observe(new []{ (char)0 })
-                .Scan(new {State = initialState, LastEvents = (IDictionaryChangeStrict<AbsolutePath, PathType>[]) null},
+                .Scan(new {State = initialState, LastEvents = (IDictionaryChangeStrict<FileOrFolderOrMissingPath, PathType>[]) null},
                     (state, itemString) =>
                     {
                         var item = TryParseAbsolutePath(itemString).Value;
@@ -233,8 +233,8 @@ namespace IoFluently
                                         state.State,
                                         LastEvents = new []
                                         {
-                                            LiveLinq.Utility.DictionaryRemove(new KeyValue<AbsolutePath, PathType>(item, state.State[item])),
-                                            LiveLinq.Utility.DictionaryAdd(new KeyValue<AbsolutePath, PathType>(item, Type(item)))
+                                            LiveLinq.Utility.DictionaryRemove(new KeyValue<FileOrFolderOrMissingPath, PathType>(item, state.State[item])),
+                                            LiveLinq.Utility.DictionaryAdd(new KeyValue<FileOrFolderOrMissingPath, PathType>(item, Type(item)))
                                         }
                                     };
                                 }
@@ -243,7 +243,7 @@ namespace IoFluently
                                     return new
                                     {
                                         state.State,
-                                        LastEvents = new IDictionaryChangeStrict<AbsolutePath, PathType>[0]
+                                        LastEvents = new IDictionaryChangeStrict<FileOrFolderOrMissingPath, PathType>[0]
                                     };
                                 }
                             }
@@ -254,9 +254,9 @@ namespace IoFluently
                                 return new
                                 {
                                     State = state.State.Remove(item),
-                                    LastEvents = new IDictionaryChangeStrict<AbsolutePath, PathType>[]
+                                    LastEvents = new IDictionaryChangeStrict<FileOrFolderOrMissingPath, PathType>[]
                                     {
-                                        LiveLinq.Utility.DictionaryRemove(new KeyValue<AbsolutePath, PathType>(item, state.State[item])),
+                                        LiveLinq.Utility.DictionaryRemove(new KeyValue<FileOrFolderOrMissingPath, PathType>(item, state.State[item])),
                                     }
                                 };
                             }
@@ -266,9 +266,9 @@ namespace IoFluently
                             return new
                             {
                                 State = state.State.Add(item, Type(item)),
-                                LastEvents = new IDictionaryChangeStrict<AbsolutePath, PathType>[]
+                                LastEvents = new IDictionaryChangeStrict<FileOrFolderOrMissingPath, PathType>[]
                                 {
-                                    LiveLinq.Utility.DictionaryAdd(new KeyValue<AbsolutePath, PathType>(item, Type(item))),
+                                    LiveLinq.Utility.DictionaryAdd(new KeyValue<FileOrFolderOrMissingPath, PathType>(item, Type(item))),
                                 }
                             };
                         }
@@ -289,9 +289,9 @@ namespace IoFluently
             return result;
         }
 
-        private ISetChanges<AbsolutePath> ToLiveLinqWithFileSystemWatcher(IFolderPath root, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        private ISetChanges<FileOrFolderOrMissingPath> ToLiveLinqWithFileSystemWatcher(IFolderPath root, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
-            var observable = Observable.Create<ISetChange<AbsolutePath>>(observer =>
+            var observable = Observable.Create<ISetChange<FileOrFolderOrMissingPath>>(observer =>
             {
                 var watcher = new FileSystemWatcher
                 {
@@ -357,8 +357,8 @@ namespace IoFluently
                     });
 
                 var initialSetChange = LiveLinq.Utility.SetChange(CollectionChangeType.Add, includeSubFolders
-                    ? root.FileSystem.EnumerateDescendants(root).Select(x => new AbsolutePath(x))
-                    : root.FileSystem.EnumerateChildren(root).Select(x => new AbsolutePath(x)).AsEnumerable());
+                    ? root.FileSystem.EnumerateDescendants(root).Select(x => new FileOrFolderOrMissingPath(x))
+                    : root.FileSystem.EnumerateChildren(root).Select(x => new FileOrFolderOrMissingPath(x)).AsEnumerable());
 
                 observer.OnNext(initialSetChange);
 
@@ -371,9 +371,9 @@ namespace IoFluently
             return observable.ToLiveLinq();
         }
 
-        public override async Task<MissingPath> DeleteFolderAsync(IFolderPath path, CancellationToken cancellationToken,  bool recursive = true)
+        public override async Task<MissingPath> DeleteFolderAsync(IFolderPath folderPath, CancellationToken cancellationToken,  bool recursive = true)
         {
-            var pathString = path.FullName;
+            var pathString = folderPath.FullName;
             Directory.Delete(pathString, recursive);
 
             var timeoutTimeSpan = DeleteOrCreateTimeout;
@@ -383,13 +383,13 @@ namespace IoFluently
                 var processingTime = DateTimeOffset.UtcNow - start;
                 if ( processingTime > timeoutTimeSpan )
                 {
-                    throw new TimeoutException($"The delete operation on {path} timed out.");
+                    throw new TimeoutException($"The delete operation on {folderPath} timed out.");
                 }
 
                 await Task.Delay(DeleteOrCreateSpinPeriod, cancellationToken);
             }
 
-            return new MissingPath(path );
+            return new MissingPath(folderPath );
         }
 
         public override async Task<MissingPath> DeleteFileAsync(IFilePath path, CancellationToken cancellationToken)
@@ -474,21 +474,21 @@ namespace IoFluently
             return new MissingPath(path);
         }
 
-        public override IEnumerable<IFileOrFolder> EnumerateDescendants(IFolderPath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolderPath> EnumerateDescendants(IFolderPath folderPath, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
-            return EnumerateDescendantsOrChildren(path, searchPattern ?? "*", SearchOption.AllDirectories,
+            return EnumerateDescendantsOrChildren(folderPath, searchPattern ?? "*", SearchOption.AllDirectories,
                 includeFolders, includeFiles);
         }
 
-        public override IEnumerable<IFileOrFolder> EnumerateChildren(IFolderPath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolderPath> EnumerateChildren(IFolderPath folderPath, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
-            return EnumerateDescendantsOrChildren(path, searchPattern ?? "*", SearchOption.TopDirectoryOnly,
+            return EnumerateDescendantsOrChildren(folderPath, searchPattern ?? "*", SearchOption.TopDirectoryOnly,
                 includeFolders, includeFiles);
         }
 
-        private IEnumerable<IFileOrFolder> EnumerateDescendantsOrChildren(IFolderPath path, string searchPattern, SearchOption searchOption, bool includeFolders, bool includeFiles)
+        private IEnumerable<IFileOrFolderPath> EnumerateDescendantsOrChildren(IFolderPath folderPath, string searchPattern, SearchOption searchOption, bool includeFolders, bool includeFiles)
         {
-            var fullName = AsDirectoryInfo(path).FullName;
+            var fullName = AsDirectoryInfo(folderPath).FullName;
 
             if (includeFiles && includeFolders)
             {
@@ -505,7 +505,7 @@ namespace IoFluently
                 return Directory.GetDirectories(fullName, searchPattern, searchOption).Select(x => ParseAbsolutePath(x).ExpectFileOrFolder());
             }
 
-            return ImmutableArray<IFileOrFolder>.Empty;
+            return ImmutableArray<IFileOrFolderPath>.Empty;
         }
 
         /// <inheritdoc />
@@ -550,11 +550,11 @@ namespace IoFluently
             return path.ExpectFile();
         }
 
-        public override MissingPath DeleteFolder(IFolderPath path,  bool recursive = true)
+        public override MissingPath DeleteFolder(IFolderPath folderPath,  bool recursive = true)
         {
-            Directory.Delete(path.FullName, recursive);
+            Directory.Delete(folderPath.FullName, recursive);
 
-            return new MissingPath(path);
+            return new MissingPath(folderPath);
         }
 
         public override PathType Type(IFileOrFolderOrMissingPath path)

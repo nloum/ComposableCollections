@@ -6,20 +6,20 @@ using TreeLinq;
 
 namespace IoFluently
 {
-    public class AbsolutePathDescendants : AbsolutePathDescendantsOrChildren<IFileOrFolder>, IFileProvider, IEnumerable<IFileOrFolder>
+    public class DescendantFilesOrFolders : DescendantsOrChildren<IFileOrFolderPath>, IFileProvider, IEnumerable<IFileOrFolderPath>
     {
-        public AbsolutePathDescendants(IFolderPath path, string pattern = "*") : base(path, pattern, true)
+        public DescendantFilesOrFolders(IFolderPath folderPath, string pattern = "*") : base(folderPath, pattern, true)
         {
         }
 
         public IFileInfo GetFileInfo(string subpath)
         {
-            return new AbsolutePathFileInfoAdapter((_folderPath / subpath).ExpectFile());
+            return new FilePathFileInfoAdapter((_folderPath / subpath).ExpectFile());
         }
 
         public IDirectoryContents GetDirectoryContents(string subpath)
         {
-            return new AbsolutePathDirectoryContents(new FolderPath(_folderPath / subpath));
+            return new FolderContents(new FolderPath(_folderPath / subpath));
         }
 
         public IChangeToken Watch(string filter)
@@ -28,26 +28,26 @@ namespace IoFluently
             return new EmptyChangeToken();
         }
 
-        public override IEnumerator<IFileOrFolder> GetEnumerator()
+        public override IEnumerator<IFileOrFolderPath> GetEnumerator()
         {
             return _folderPath.FileSystem.EnumerateDescendants(_folderPath, _pattern).GetEnumerator();
         }
     }
     
-    public class AbsolutePathDescendantFiles : AbsolutePathDescendantsOrChildren<FilePath>, IFileProvider, IEnumerable<FilePath>
+    public class DescendantFiles : DescendantsOrChildren<FilePath>, IFileProvider, IEnumerable<FilePath>
     {
-        public AbsolutePathDescendantFiles(IFolderPath path, string pattern = "*") : base(path, pattern, true)
+        public DescendantFiles(IFolderPath folderPath, string pattern = "*") : base(folderPath, pattern, true)
         {
         }
 
         public IFileInfo GetFileInfo(string subpath)
         {
-            return new AbsolutePathFileInfoAdapter((_folderPath / subpath).ExpectFile());
+            return new FilePathFileInfoAdapter((_folderPath / subpath).ExpectFile());
         }
 
         public IDirectoryContents GetDirectoryContents(string subpath)
         {
-            return new AbsolutePathDirectoryContents(new FolderPath(_folderPath / subpath));
+            return new FolderContents(new FolderPath(_folderPath / subpath));
         }
 
         public IChangeToken Watch(string filter)
@@ -62,20 +62,20 @@ namespace IoFluently
         }
     }
     
-    public class AbsolutePathDescendantFolders : AbsolutePathDescendantsOrChildren<FolderPath>, IFileProvider, IEnumerable<FolderPath>
+    public class DescendantFolders : DescendantsOrChildren<FolderPath>, IFileProvider, IEnumerable<FolderPath>
     {
-        public AbsolutePathDescendantFolders(IFolderPath path, string pattern = "*") : base(path, pattern, true)
+        public DescendantFolders(IFolderPath folderPath, string pattern = "*") : base(folderPath, pattern, true)
         {
         }
 
         public IFileInfo GetFileInfo(string subpath)
         {
-            return new AbsolutePathFileInfoAdapter((_folderPath / subpath).ExpectFile());
+            return new FilePathFileInfoAdapter((_folderPath / subpath).ExpectFile());
         }
 
         public IDirectoryContents GetDirectoryContents(string subpath)
         {
-            return new AbsolutePathDirectoryContents(new FolderPath(_folderPath / subpath));
+            return new FolderContents(new FolderPath(_folderPath / subpath));
         }
 
         public IChangeToken Watch(string filter)

@@ -9,7 +9,7 @@ namespace IoFluently
         private readonly IFileSystem _decorated;
         private readonly ObservableSet<FolderPath> _roots = new();
         
-        public ImmutableDictionary<AbsolutePath, AbsolutePath> Mappings { get; set; } = ImmutableDictionary<AbsolutePath, AbsolutePath>.Empty;
+        public ImmutableDictionary<FileOrFolderOrMissingPath, FileOrFolderOrMissingPath> Mappings { get; set; } = ImmutableDictionary<FileOrFolderOrMissingPath, FileOrFolderOrMissingPath>.Empty;
         
         public MirrorFileSystem(IFileSystem decorated, string defaultRoot) : base(new OpenFilesTrackingService(decorated.OpenFilesTrackingService.IsEnabled),
             decorated.IsCaseSensitiveByDefault, decorated.DefaultDirectorySeparator, decorated.CanEmptyDirectoriesExist, decorated.EmptyFolderMode)
@@ -30,7 +30,7 @@ namespace IoFluently
 
         public override FolderPath DefaultRoot { get; }
 
-        protected override AbsolutePath Transform(IFileOrFolderOrMissingPath absolutePath)
+        protected override FileOrFolderOrMissingPath Transform(IFileOrFolderOrMissingPath absolutePath)
         {
             var absolutePathString = absolutePath.FullName;
             var stringComparison =
@@ -41,7 +41,7 @@ namespace IoFluently
                     || absolutePathString.StartsWith(mapping.Key.FullName, stringComparison))
                 {
                     var transformedPath = mapping.Value / absolutePath.RelativeTo(mapping.Key);
-                    return new AbsolutePath(transformedPath.Components, transformedPath.IsCaseSensitive, transformedPath.DirectorySeparator, _decorated);
+                    return new FileOrFolderOrMissingPath(transformedPath.Components, transformedPath.IsCaseSensitive, transformedPath.DirectorySeparator, _decorated);
                 }
             }
 

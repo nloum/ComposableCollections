@@ -11,7 +11,7 @@ using static SimpleMonads.Utility;
 namespace IoFluently
 {
     /// <summary>
-    /// Represents a path that has no root, e.g. './test1.txt'. For absolute paths, such as '/test1.txt', see <see cref="AbsolutePath"/>.
+    /// Represents a path that has no root, e.g. './test1.txt'. For absolute paths, such as '/test1.txt', see <see cref="FileOrFolderOrMissingPath"/>.
     /// </summary>
     public partial class RelativePath : IComparable, IComparable<RelativePath>, IEquatable<RelativePath>
     {

@@ -235,11 +235,11 @@ namespace IoFluently
                 typeof(FolderPath),
                 typeof(RelativePath),
                 typeof(IFileOrFolderOrMissingPath),
-                typeof(IAbsolutePathTranslation),
+                typeof(IPathTranslation),
                 typeof(IFilePath),
                 typeof(IFolderPath),
                 typeof(IMissingPath),
-                typeof(IFileOrFolder),
+                typeof(IFileOrFolderPath),
                 typeof(IFileOrMissingPath),
                 typeof(IFolderOrMissingPath)
             }.Select(x => typeReader.GetTypeFormat<Type>()[x].Value).ToImmutableHashSet();

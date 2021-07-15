@@ -31,7 +31,7 @@ namespace IoFluently
         }
         
         /// <inheritdoc />
-        public virtual AbsolutePath ParsePathRelativeToWorkingDirectory(string path)
+        public virtual FileOrFolderOrMissingPath ParsePathRelativeToWorkingDirectory(string path)
         {
             return TryParseAbsolutePath(path, CurrentDirectory).Value;
         }

@@ -69,7 +69,7 @@ namespace IoFluently
             }
             
             ZipFilePath = zipFilePath;
-            var path = new AbsolutePath(new[] {"/"}, true, DefaultDirectorySeparator, this);
+            var path = new FileOrFolderOrMissingPath(new[] {"/"}, true, DefaultDirectorySeparator, this);
             _root = new FolderPath(path.Components, path.IsCaseSensitive, path.DirectorySeparator, this, true);
             _roots.Add(_root);
         }
@@ -90,17 +90,17 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IQueryable<AbsolutePath> Query()
+        public override IQueryable<FileOrFolderOrMissingPath> Query()
         {
             var archive = OpenZipArchive(false, true);
             var queryable = archive.Entries
                 .Select(zipEntry => TryParseAbsolutePath(zipEntry.FullName, _root).Value)
                 .AsQueryable();
-            return new QueryableWithDisposable<AbsolutePath>(queryable, archive);
+            return new QueryableWithDisposable<FileOrFolderOrMissingPath>(queryable, archive);
         }
 
         /// <inheritdoc />
-        public override ISetChanges<AbsolutePath> ToLiveLinq(IFolderPath path, bool includeFileContentChanges, bool includeSubFolders, string pattern)
+        public override ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq(IFolderPath folderPath, bool includeFileContentChanges, bool includeSubFolders, string pattern)
         {
             throw new NotImplementedException();
         }
@@ -112,21 +112,21 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IFileOrFolder> EnumerateChildren(IFolderPath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolderPath> EnumerateChildren(IFolderPath folderPath, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             using (var archive = OpenZipArchive(false, true))
             {
                 var regex = FileNamePatternToRegex(searchPattern);
                 
                 return archive.Entries.Select(entry =>
-                    TryParseAbsolutePath(entry.FullName, _root).Value).Where(child => child.FileSystem.TryParent(child).Value == path )
+                    TryParseAbsolutePath(entry.FullName, _root).Value).Where(child => child.FileSystem.TryParent(child).Value == folderPath )
                     .Where(x => regex.IsMatch(x))
                     .Select(path => path.ExpectFileOrFolder());
             }
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IFileOrFolder> EnumerateDescendants(IFolderPath path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolderPath> EnumerateDescendants(IFolderPath folderPath, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             using (var archive = OpenZipArchive(false, true))
             {
@@ -134,7 +134,7 @@ namespace IoFluently
                 
                 return archive.Entries.Select(entry =>
                         TryParseAbsolutePath(entry.FullName, _root).Value).Where(child => child.Ancestors(true)
-                        .Any(ancestor => ancestor.FullName.Equals(path.FullName)))
+                        .Any(ancestor => ancestor.FullName.Equals(folderPath.FullName)))
                     .Where(x => regex.IsMatch(x))
                     .Select(path => path.ExpectFileOrFolder());
             }
@@ -246,9 +246,9 @@ namespace IoFluently
             }
         }
 
-        public override async Task<MissingPath> DeleteFolderAsync(IFolderPath path, CancellationToken cancellationToken,  bool recursive = true)
+        public override async Task<MissingPath> DeleteFolderAsync(IFolderPath folderPath, CancellationToken cancellationToken,  bool recursive = true)
         {
-            return DeleteFolder(path, recursive);
+            return DeleteFolder(folderPath, recursive);
         }
 
         public override async Task<MissingPath> DeleteFileAsync(IFilePath path, CancellationToken cancellationToken)
@@ -257,22 +257,22 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override MissingPath DeleteFolder(IFolderPath path,  bool recursive = true)
+        public override MissingPath DeleteFolder(IFolderPath folderPath,  bool recursive = true)
         {
-            if (Type(path) != IoFluently.PathType.Folder)
+            if (Type(folderPath) != IoFluently.PathType.Folder)
             {
-                throw new IOException($"The path {path} is not a folder");
+                throw new IOException($"The path {folderPath} is not a folder");
             }
 
             using (var zipArchive = OpenZipArchive(true, true))
             {
                 foreach (var subZipEntry in zipArchive.Entries.Where(entry =>
-                    TryParseAbsolutePath(entry.FullName, _root).Value.Ancestors(true).Any(ancestor => ancestor == path )))
+                    TryParseAbsolutePath(entry.FullName, _root).Value.Ancestors(true).Any(ancestor => ancestor == folderPath )))
                 {
                     if (!recursive)
                     {
                         throw new IOException(
-                            $"Cannot delete path {path} because it has files and/or folders inside it, and" +
+                            $"Cannot delete path {folderPath} because it has files and/or folders inside it, and" +
                             $" the recursive parameter is false");
                     }
                     
@@ -280,7 +280,7 @@ namespace IoFluently
                 }
             }
 
-            return new MissingPath(path );
+            return new MissingPath(folderPath );
         }
 
         public override Stream Open(IFileOrMissingPath fileOrMissingPath, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,

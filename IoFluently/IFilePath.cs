@@ -1,6 +1,6 @@
 ﻿namespace IoFluently
 {
-    public partial interface IFilePath : IFileOrFolder, IFileOrMissingPath
+    public partial interface IFilePath : IFileOrFolderPath, IFileOrMissingPath
     {
         
     }

@@ -17,7 +17,7 @@ namespace IoFluently
             return (TemporaryFolder / Guid.NewGuid().ToString()).ExpectMissingPath();
         }
 
-        public AbsolutePath ParsePathRelativeToWorkingDirectory(string path)
+        public FileOrFolderOrMissingPath ParsePathRelativeToWorkingDirectory(string path)
         {
             return ParseAbsolutePath(path, CurrentDirectory);
         }

@@ -84,26 +84,26 @@ namespace IoFluently
         #region Deleting
         
         /// <inheritdoc />
-        public abstract MissingPath DeleteFolder(IFolderPath path,  bool recursive = true);
+        public abstract MissingPath DeleteFolder(IFolderPath folderPath,  bool recursive = true);
 
         /// <inheritdoc />
         public abstract MissingPath DeleteFile(IFilePath path);
 
         /// <inheritdoc />
-        public virtual MissingPath Delete(IFileOrFolder path, bool recursiveDeleteIfFolder = true)
+        public virtual MissingPath Delete(IFileOrFolderPath path, bool recursiveDeleteIfFolder = true)
         {
             return path.Collapse(file => DeleteFile(file), folder => DeleteFolder(folder, recursiveDeleteIfFolder));
         }
 
         /// <inheritdoc />
-        public abstract Task<MissingPath> DeleteFolderAsync(IFolderPath path, CancellationToken cancellationToken,
+        public abstract Task<MissingPath> DeleteFolderAsync(IFolderPath folderPath, CancellationToken cancellationToken,
              bool recursive = true);
 
         /// <inheritdoc />
         public abstract Task<MissingPath> DeleteFileAsync(IFilePath path, CancellationToken cancellationToken);
 
         /// <inheritdoc />
-        public Task<MissingPath> DeleteAsync(IFileOrFolder path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true)
+        public Task<MissingPath> DeleteAsync(IFileOrFolderPath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true)
         {
             return path.Collapse(file => DeleteFileAsync(file, cancellationToken), folder => DeleteFolderAsync(folder, cancellationToken, recursiveDeleteIfFolder));
         }
@@ -635,13 +635,13 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public IMaybe<AbsolutePath> TryParseAbsolutePath(string path, IFolderPath optionallyRelativeTo,
+        public IMaybe<FileOrFolderOrMissingPath> TryParseAbsolutePath(string path, IFolderPath optionallyRelativeTo,
             CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             var relativePath = TryParseRelativePath(path, flags);
             if (relativePath.HasValue)
             {
-                return new AbsolutePath(optionallyRelativeTo.Components.Concat(relativePath.Value.Path).ToImmutableList(),
+                return new FileOrFolderOrMissingPath(optionallyRelativeTo.Components.Concat(relativePath.Value.Path).ToImmutableList(),
                     optionallyRelativeTo.IsCaseSensitive, optionallyRelativeTo.DirectorySeparator,
                     optionallyRelativeTo.FileSystem).ToMaybe();
             }
@@ -942,26 +942,26 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual AbsolutePath ParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
+        public virtual FileOrFolderOrMissingPath ParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             var error = string.Empty;
-            AbsolutePath pathSpec;
+            FileOrFolderOrMissingPath pathSpec;
             if (!TryParseAbsolutePath(path, out pathSpec, out error, flags))
                 throw new ArgumentException(error);
             return pathSpec;
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
+        public virtual IMaybe<FileOrFolderOrMissingPath> TryParseAbsolutePath(string path, CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             var error = string.Empty;
-            AbsolutePath pathSpec;
+            FileOrFolderOrMissingPath pathSpec;
             if (!TryParseAbsolutePath(path, out pathSpec, out error, flags))
-                return Nothing<AbsolutePath>();
+                return Nothing<FileOrFolderOrMissingPath>();
             return Something(pathSpec);
         }
 
-        private bool TryParseAbsolutePath(string path, out AbsolutePath pathSpec, out string error,
+        private bool TryParseAbsolutePath(string path, out FileOrFolderOrMissingPath pathSpec, out string error,
             CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             if (flags.HasFlag(CaseSensitivityMode.UseDefaultsFromEnvironment) && flags.HasFlag(CaseSensitivityMode.UseDefaultsForGivenPath))
@@ -1027,7 +1027,7 @@ namespace IoFluently
                         return false;
                     }
 
-                    pathSpec = new AbsolutePath(components, false, "\\", this);
+                    pathSpec = new FileOrFolderOrMissingPath(components, false, "\\", this);
                 }
                 else if (path.StartsWith("."))
                 {
@@ -1050,7 +1050,7 @@ namespace IoFluently
                         error = "Must be an absolute path";
                         return false;
                     }
-                    pathSpec = new AbsolutePath(components, false, "\\", this);
+                    pathSpec = new FileOrFolderOrMissingPath(components, false, "\\", this);
                 }
                 else if (path.StartsWith("\\\\"))
                 {
@@ -1073,7 +1073,7 @@ namespace IoFluently
                         error = "Must be an absolute path";
                         return false;
                     }
-                    pathSpec = new AbsolutePath(components, false, "\\", this);
+                    pathSpec = new FileOrFolderOrMissingPath(components, false, "\\", this);
                 }
                 else if (path.StartsWith("\\"))
                 {
@@ -1096,7 +1096,7 @@ namespace IoFluently
                         error = "Must be an absolute path";
                         return false;
                     }
-                    pathSpec = new AbsolutePath(components, false, "\\", this);
+                    pathSpec = new FileOrFolderOrMissingPath(components, false, "\\", this);
                 }
                 else
                 {
@@ -1119,7 +1119,7 @@ namespace IoFluently
                         error = "Must be an absolute path";
                         return false;
                     }
-                    pathSpec = new AbsolutePath(components, false, "\\", this);
+                    pathSpec = new FileOrFolderOrMissingPath(components, false, "\\", this);
                 }
 
                 return true;
@@ -1164,7 +1164,7 @@ namespace IoFluently
                         error = "Must be an absolute path";
                         return false;
                     }
-                    pathSpec = new AbsolutePath(components, true, "/", this);
+                    pathSpec = new FileOrFolderOrMissingPath(components, true, "/", this);
                 }
                 else if (path.StartsWith("."))
                 {
@@ -1187,7 +1187,7 @@ namespace IoFluently
                         error = "Must be an absolute path";
                         return false;
                     }
-                    pathSpec = new AbsolutePath(components, true, "/", this);
+                    pathSpec = new FileOrFolderOrMissingPath(components, true, "/", this);
                 }
                 else
                 {
@@ -1210,7 +1210,7 @@ namespace IoFluently
                         error = "Must be an absolute path";
                         return false;
                     }
-                    pathSpec = new AbsolutePath(components, true, "/", this);
+                    pathSpec = new FileOrFolderOrMissingPath(components, true, "/", this);
                 }
 
                 return true;
@@ -1223,7 +1223,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public AbsolutePath ParseAbsolutePath(string path, IFolderPath optionallyRelativeTo,
+        public FileOrFolderOrMissingPath ParseAbsolutePath(string path, IFolderPath optionallyRelativeTo,
             CaseSensitivityMode flags = CaseSensitivityMode.UseDefaultsForGivenPath)
         {
             return TryParseAbsolutePath(path, optionallyRelativeTo, flags).Value;
@@ -1235,7 +1235,7 @@ namespace IoFluently
         #region Stuff that must be implemented
 
         /// <inheritdoc />
-        public virtual async Task<IAbsolutePathTranslation> CopyFileAsync(IAbsolutePathTranslation translation,
+        public virtual async Task<IPathTranslation> CopyFileAsync(IPathTranslation translation,
             CancellationToken cancellationToken,
             Information? bufferSize = default, bool overwrite = false)
         {
@@ -1265,7 +1265,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual async Task<IAbsolutePathTranslation> CopyFolderAsync(IAbsolutePathTranslation translation,
+        public virtual async Task<IPathTranslation> CopyFolderAsync(IPathTranslation translation,
             CancellationToken cancellationToken,
             Information? bufferSize = default, bool overwrite = false)
         {
@@ -1289,7 +1289,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual async Task<IAbsolutePathTranslation> MoveFileAsync(IAbsolutePathTranslation translation,
+        public virtual async Task<IPathTranslation> MoveFileAsync(IPathTranslation translation,
             CancellationToken cancellationToken,
             Information? bufferSize = default, bool overwrite = false)
         {
@@ -1299,7 +1299,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual async Task<IAbsolutePathTranslation> MoveFolderAsync(IAbsolutePathTranslation translation,
+        public virtual async Task<IPathTranslation> MoveFolderAsync(IPathTranslation translation,
             CancellationToken cancellationToken,
             Information? bufferSize = default, bool overwrite = false)
         {
@@ -1309,7 +1309,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IAbsolutePathTranslation CopyFile(IAbsolutePathTranslation translation,
+        public virtual IPathTranslation CopyFile(IPathTranslation translation,
             Information? bufferSize = default, bool overwrite = false)
         {
             if (overwrite)
@@ -1333,7 +1333,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IAbsolutePathTranslation CopyFolder(IAbsolutePathTranslation translation,
+        public virtual IPathTranslation CopyFolder(IPathTranslation translation,
             Information? bufferSize = default, bool overwrite = false)
         {
             if (overwrite)
@@ -1355,7 +1355,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IAbsolutePathTranslation MoveFile(IAbsolutePathTranslation translation,
+        public virtual IPathTranslation MoveFile(IPathTranslation translation,
             Information? bufferSize = default, bool overwrite = false)
         {
             CopyFile(translation, bufferSize, overwrite);
@@ -1364,7 +1364,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IAbsolutePathTranslation MoveFolder(IAbsolutePathTranslation translation,
+        public virtual IPathTranslation MoveFolder(IPathTranslation translation,
             Information? bufferSize = default, bool overwrite = false)
         {
             CopyFolder(translation, bufferSize, overwrite);
@@ -1375,54 +1375,54 @@ namespace IoFluently
         #endregion
 
         /// <inheritdoc />
-        public IAbsolutePathTranslation Translate(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source,
+        public IPathTranslation Translate(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source,
             IFileOrFolderOrMissingPath destination)
         {
-            return new CalculatedAbsolutePathTranslation(pathToBeCopied, source, destination, this);
+            return new CalculatedPathTranslation(pathToBeCopied, source, destination, this);
         }
 
         /// <inheritdoc />
-        public IAbsolutePathTranslation Translate(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination)
+        public IPathTranslation Translate(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination)
         {
-            return new AbsolutePathTranslation(source, destination, this);
+            return new PathTranslation(source, destination, this);
         }
 
         /// <inheritdoc />
-        public IAbsolutePathTranslation Copy(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
+        public IPathTranslation Copy(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             Information? bufferSize = default, bool overwrite = false)
         {
             return Copy(Translate(pathToBeCopied, source, destination), bufferSize, overwrite);
         }
         
         /// <inheritdoc />
-        public IAbsolutePathTranslation Copy(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
+        public IPathTranslation Copy(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             Information? bufferSize = default, bool overwrite = false) {
             return Copy(Translate(source, destination), bufferSize, overwrite);
         }
 
         /// <inheritdoc />
-        public IAbsolutePathTranslation Move(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
+        public IPathTranslation Move(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             Information? bufferSize = default, bool overwrite = false)
         {
             return Move(Translate(pathToBeCopied, source, destination), bufferSize, overwrite);
         }
 
         /// <inheritdoc />
-        public IAbsolutePathTranslation Move(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
+        public IPathTranslation Move(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             Information? bufferSize = default, bool overwrite = false)
         {
             return Move(Translate(source, destination), bufferSize, overwrite);
         }
 
         /// <inheritdoc />
-        public IAbsolutePathTranslation RenameTo(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath target,
+        public IPathTranslation RenameTo(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath target,
             Information? bufferSize = default, bool overwrite = false)
         {
             return Move(Translate(source, target), bufferSize, overwrite);
         }
 
         /// <inheritdoc />
-        public IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation,
+        public IPathTranslation Copy(IPathTranslation translation,
             Information? bufferSize = default, bool overwrite = false)
         {
             switch (translation.Source.FileSystem.Type(translation.Source))
@@ -1441,7 +1441,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public IAbsolutePathTranslation Move(IAbsolutePathTranslation translation,
+        public IPathTranslation Move(IPathTranslation translation,
             Information? bufferSize = default, bool overwrite = false)
         {
             switch (translation.Source.FileSystem.Type(translation.Source))
@@ -1460,7 +1460,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public Task<IAbsolutePathTranslation> CopyAsync(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source,
+        public Task<IPathTranslation> CopyAsync(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source,
             IFileOrFolderOrMissingPath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
@@ -1468,14 +1468,14 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public Task<IAbsolutePathTranslation> CopyAsync(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
+        public Task<IPathTranslation> CopyAsync(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             return CopyAsync(Translate(source, destination), cancellationToken, bufferSize, overwrite);
         }
 
         /// <inheritdoc />
-        public Task<IAbsolutePathTranslation> MoveAsync(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source,
+        public Task<IPathTranslation> MoveAsync(IFileOrFolderOrMissingPath pathToBeCopied, IFileOrFolderOrMissingPath source,
             IFileOrFolderOrMissingPath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
@@ -1483,21 +1483,21 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public Task<IAbsolutePathTranslation> MoveAsync(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
+        public Task<IPathTranslation> MoveAsync(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             return MoveAsync(Translate(source, destination), cancellationToken, bufferSize, overwrite);
         }
 
         /// <inheritdoc />
-        public Task<IAbsolutePathTranslation> RenameToAsync(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath target,
+        public Task<IPathTranslation> RenameToAsync(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath target,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             return MoveAsync(Translate(source, target), cancellationToken, bufferSize, overwrite);
         }
 
         /// <inheritdoc />
-        public async Task<IAbsolutePathTranslation> CopyAsync(IAbsolutePathTranslation translation,
+        public async Task<IPathTranslation> CopyAsync(IPathTranslation translation,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             switch (translation.Source.FileSystem.Type(translation.Source))
@@ -1516,7 +1516,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public async Task<IAbsolutePathTranslation> MoveAsync(IAbsolutePathTranslation translation,
+        public async Task<IPathTranslation> MoveAsync(IPathTranslation translation,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
             switch (translation.Source.FileSystem.Type(translation.Source))
@@ -1538,27 +1538,27 @@ namespace IoFluently
         #region Path building
 
         /// <inheritdoc />
-        public AbsolutePaths GlobFiles(IFolderPath path, string pattern)
+        public FilesOrFoldersOrMissingPaths GlobFiles(IFolderPath folderPath, string pattern)
         {
-            Func<AbsolutePath, IEnumerable<RelativePath>> patternFunc = absPath => absPath.Collapse(
+            Func<FileOrFolderOrMissingPath, IEnumerable<RelativePath>> patternFunc = absPath => absPath.Collapse(
                 file => Enumerable.Empty<RelativePath>(),
                 folder => folder.FileSystem.EnumerateChildren(folder, pattern).Select(x => new RelativePath(new[]{Name(x)}, x.IsCaseSensitive, x.DirectorySeparator, x.FileSystem)),
                 missingPath => Enumerable.Empty<RelativePath>());
-            return path.ExpectFolder() / patternFunc;
+            return folderPath.ExpectFolder() / patternFunc;
         }
 
         /// <inheritdoc />
-        public AbsolutePath Combine(IFolderPath path, params string[] subsequentPathParts)
+        public FileOrFolderOrMissingPath Combine(IFolderPath folderPath, params string[] subsequentPathParts)
         {
-            return TryDescendant(path, subsequentPathParts).Value;
+            return TryDescendant(folderPath, subsequentPathParts).Value;
         }
 
         /// <inheritdoc />
-        public AbsolutePath WithoutExtension(IFileOrFolderOrMissingPath path)
+        public FileOrFolderOrMissingPath WithoutExtension(IFileOrFolderOrMissingPath path)
         {
             if (!HasExtension(path))
             {
-                return new AbsolutePath(path);
+                return new FileOrFolderOrMissingPath(path);
             }
 
             var newComponents = new List<string>();
@@ -1571,11 +1571,11 @@ namespace IoFluently
             var name = path.FileSystem.Name(path);
             newComponents.Add(name.Substring(0, name.LastIndexOf('.')));
             
-            return new AbsolutePath(newComponents, path.IsCaseSensitive, path.DirectorySeparator, path.FileSystem);
+            return new FileOrFolderOrMissingPath(newComponents, path.IsCaseSensitive, path.DirectorySeparator, path.FileSystem);
         }
 
         /// <inheritdoc />
-        public IMaybe<AbsolutePath> TryWithExtension(IFileOrFolderOrMissingPath path, Func<string, string> differentExtension)
+        public IMaybe<FileOrFolderOrMissingPath> TryWithExtension(IFileOrFolderOrMissingPath path, Func<string, string> differentExtension)
         {
             return path.FileSystem.TryWithExtension(path, differentExtension(Extension(path) ?? ""));
         }
@@ -1608,7 +1608,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual AbsolutePath Simplify(IFileOrFolderOrMissingPath path)
+        public virtual FileOrFolderOrMissingPath Simplify(IFileOrFolderOrMissingPath path)
         {
             var result = new List<string>();
             var numberOfComponentsToSkip = 0;
@@ -1644,16 +1644,16 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryParent(IFileOrFolderOrMissingPath path)
+        public virtual IMaybe<FileOrFolderOrMissingPath> TryParent(IFileOrFolderOrMissingPath path)
         {
             if (path .Components.Count > 1)
             {
-                return new AbsolutePath(path .Components.Take(path .Components.Count - 1).ToImmutableList(),
+                return new FileOrFolderOrMissingPath(path .Components.Take(path .Components.Count - 1).ToImmutableList(),
                     path.IsCaseSensitive, path.DirectorySeparator, path.FileSystem).ToMaybe();
             }
             else
             {
-                return Nothing<AbsolutePath>(() => throw new InvalidOperationException($"The path {path} has only one component, so there is no parent"));
+                return Nothing<FileOrFolderOrMissingPath>(() => throw new InvalidOperationException($"The path {path} has only one component, so there is no parent"));
             }
         }
 
@@ -1662,9 +1662,9 @@ namespace IoFluently
             return TryParent(path).Value.ExpectFolder();
         }
 
-        public IMaybe<FolderPath> TryParent(IFolderPath path)
+        public IMaybe<FolderPath> TryParent(IFolderPath folderPath)
         {
-            return TryParent(path).Select(x => x.ExpectFolder());
+            return TryParent(folderPath).Select(x => x.ExpectFolder());
         }
 
         /// <inheritdoc />
@@ -1704,7 +1704,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryCommonWith(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath that)
+        public virtual IMaybe<FileOrFolderOrMissingPath> TryCommonWith(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath that)
         {
             var path1Str = path.FullName;
             var path2Str = that.FullName;
@@ -1746,7 +1746,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryGetCommonAncestry(IFileOrFolderOrMissingPath path1, IFileOrFolderOrMissingPath path2)
+        public virtual IMaybe<FileOrFolderOrMissingPath> TryGetCommonAncestry(IFileOrFolderOrMissingPath path1, IFileOrFolderOrMissingPath path2)
         {
             return TryParseAbsolutePath(path1.FullName.GetCommonBeginning(path2.FullName).Trim('\\'));
         }
@@ -1785,25 +1785,25 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryWithExtension(IFileOrFolderOrMissingPath path, string differentExtension)
+        public virtual IMaybe<FileOrFolderOrMissingPath> TryWithExtension(IFileOrFolderOrMissingPath path, string differentExtension)
         {
             return TryParseAbsolutePath(Path.ChangeExtension(path.FullName, differentExtension));
         }
 
-        public IEnumerable<FolderPath> Ancestors(IFolderPath path, bool includeItself)
+        public IEnumerable<FolderPath> Ancestors(IFolderPath folderPath, bool includeItself)
         {
             if (includeItself)
             {
-                yield return path.ExpectFolder();
+                yield return folderPath.ExpectFolder();
             }
 
-            foreach (var ancestor in Ancestors(path))
+            foreach (var ancestor in Ancestors(folderPath))
             {
                 yield return ancestor;
             }
         }
 
-        public IEnumerable<IFileOrFolder> Ancestors(IFilePath path, bool includeItself)
+        public IEnumerable<IFileOrFolderPath> Ancestors(IFilePath path, bool includeItself)
         {
             if (includeItself)
             {
@@ -1816,9 +1816,9 @@ namespace IoFluently
             }
         }
 
-        public IEnumerable<FolderPath> Ancestors(IFolderPath path)
+        public IEnumerable<FolderPath> Ancestors(IFolderPath folderPath)
         {
-            foreach (var ancestor in Ancestors((IFileOrFolderOrMissingPath)path))
+            foreach (var ancestor in Ancestors((IFileOrFolderOrMissingPath)folderPath))
             {
                 yield return ancestor.ExpectFolder();
             }
@@ -1853,11 +1853,11 @@ namespace IoFluently
             }
         }
 
-        public IEnumerable<AbsolutePath> Ancestors(IFileOrFolderOrMissingPath path, bool includeItself)
+        public IEnumerable<FileOrFolderOrMissingPath> Ancestors(IFileOrFolderOrMissingPath path, bool includeItself)
         {
             if (includeItself)
             {
-                yield return new AbsolutePath(path);
+                yield return new FileOrFolderOrMissingPath(path);
             }
 
             foreach (var ancestor in Ancestors(path))
@@ -1867,7 +1867,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IEnumerable<AbsolutePath> Ancestors(IFileOrFolderOrMissingPath path)
+        public virtual IEnumerable<FileOrFolderOrMissingPath> Ancestors(IFileOrFolderOrMissingPath path)
         {
             while (true)
             {
@@ -1885,13 +1885,13 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryDescendant(IFileOrFolderOrMissingPath path, params IFileOrFolderOrMissingPath[] paths)
+        public virtual IMaybe<FileOrFolderOrMissingPath> TryDescendant(IFileOrFolderOrMissingPath path, params IFileOrFolderOrMissingPath[] paths)
         {
             return path.FileSystem.TryDescendant(path, paths.Select(p => p.FullName).ToArray());
         }
 
         /// <inheritdoc />
-        public virtual IMaybe<AbsolutePath> TryDescendant(IFileOrFolderOrMissingPath path, params string[] paths)
+        public virtual IMaybe<FileOrFolderOrMissingPath> TryDescendant(IFileOrFolderOrMissingPath path, params string[] paths)
         {
             var pathStr = path.FullName;
             // Make sure that pathStr is treated as a directory.
@@ -1919,8 +1919,8 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual IEnumerable<KeyValuePair<AbsolutePath, string>> ProposeUniqueNamesForMovingPathsToSameFolder(
-            IEnumerable<AbsolutePath> paths)
+        public virtual IEnumerable<KeyValuePair<FileOrFolderOrMissingPath, string>> ProposeUniqueNamesForMovingPathsToSameFolder(
+            IEnumerable<FileOrFolderOrMissingPath> paths)
         {
             var alreadyProposedNames = new HashSet<string>();
             foreach (var path in paths)
@@ -1930,7 +1930,7 @@ namespace IoFluently
                 while (alreadyProposedNames.Contains(enumerator.Current)) enumerator.MoveNext();
 
                 alreadyProposedNames.Add(enumerator.Current);
-                yield return new KeyValuePair<AbsolutePath, string>(path, enumerator.Current);
+                yield return new KeyValuePair<FileOrFolderOrMissingPath, string>(path, enumerator.Current);
                 enumerator.Dispose();
             }
         }
@@ -1949,104 +1949,104 @@ namespace IoFluently
             }
         }
 
-        public AbsolutePathChildren Children(IFolderPath path, string searchPattern)
+        public ChildFilesOrFolders Children(IFolderPath folderPath, string searchPattern)
         {
-            return new(path, searchPattern);
+            return new(folderPath, searchPattern);
         }
 
-        public AbsolutePathChildFiles ChildFiles(IFolderPath path, string searchPattern)
+        public ChildFiles ChildFiles(IFolderPath folderPath, string searchPattern)
         {
-            return new(path, searchPattern);
+            return new(folderPath, searchPattern);
         }
 
-        public AbsolutePathChildFolders ChildFolders(IFolderPath path, string searchPattern)
+        public ChildFolders ChildFolders(IFolderPath folderPath, string searchPattern)
         {
-            return new(path, searchPattern);
+            return new(folderPath, searchPattern);
         }
 
-        public AbsolutePathDescendants Descendants(IFolderPath path, string searchPattern)
+        public DescendantFilesOrFolders Descendants(IFolderPath folderPath, string searchPattern)
         {
-            return new(path, searchPattern);
+            return new(folderPath, searchPattern);
         }
 
-        public AbsolutePathDescendantFolders DescendantFolders(IFolderPath path, string searchPattern)
+        public DescendantFolders DescendantFolders(IFolderPath folderPath, string searchPattern)
         {
-            return new(path, searchPattern);
+            return new(folderPath, searchPattern);
         }
 
-        public AbsolutePathDescendantFiles DescendantFiles(IFolderPath path, string searchPattern)
+        public DescendantFiles DescendantFiles(IFolderPath folderPath, string searchPattern)
         {
-            return new(path, searchPattern);
+            return new(folderPath, searchPattern);
         }
 
-        public AbsolutePathChildren Children(IFolderPath path)
+        public ChildFilesOrFolders Children(IFolderPath folderPath)
         {
-            return new(path);
+            return new(folderPath);
         }
 
-        public AbsolutePathChildFiles ChildFiles(IFolderPath path)
+        public ChildFiles ChildFiles(IFolderPath folderPath)
         {
-            return new(path);
+            return new(folderPath);
         }
 
-        public AbsolutePathChildFolders ChildFolders(IFolderPath path)
+        public ChildFolders ChildFolders(IFolderPath folderPath)
         {
-            return new(path);
+            return new(folderPath);
         }
 
-        public AbsolutePathDescendants Descendants(IFolderPath path)
+        public DescendantFilesOrFolders Descendants(IFolderPath folderPath)
         {
-            return new(path);
+            return new(folderPath);
         }
 
-        public AbsolutePathDescendantFolders DescendantFolders(IFolderPath path)
+        public DescendantFolders DescendantFolders(IFolderPath folderPath)
         {
-            return new(path);
+            return new(folderPath);
         }
 
-        public AbsolutePathDescendantFiles DescendantFiles(IFolderPath path)
+        public DescendantFiles DescendantFiles(IFolderPath folderPath)
         {
             throw new NotImplementedException();
         }
 
-        public virtual IEnumerable<FilePath> EnumerateChildFiles(IFolderPath path, string searchPattern = null)
+        public virtual IEnumerable<FilePath> EnumerateChildFiles(IFolderPath folderPath, string searchPattern = null)
         {
-            return EnumerateChildren(path, searchPattern, false, true).Select(x => new FilePath(x));
+            return EnumerateChildren(folderPath, searchPattern, false, true).Select(x => new FilePath(x));
         }
 
-        public virtual IEnumerable<FolderPath> EnumerateChildFolders(IFolderPath path, string searchPattern = null)
+        public virtual IEnumerable<FolderPath> EnumerateChildFolders(IFolderPath folderPath, string searchPattern = null)
         {
-            return EnumerateChildren(path, searchPattern, true, false).Select(x => new FolderPath(x));
+            return EnumerateChildren(folderPath, searchPattern, true, false).Select(x => new FolderPath(x));
         }
 
-        public virtual IEnumerable<FolderPath> EnumerateDescendantFolders(IFolderPath path, string searchPattern = null)
+        public virtual IEnumerable<FolderPath> EnumerateDescendantFolders(IFolderPath folderPath, string searchPattern = null)
         {
-            return EnumerateDescendants(path, searchPattern, true, false).Select(x => new FolderPath(x));
+            return EnumerateDescendants(folderPath, searchPattern, true, false).Select(x => new FolderPath(x));
         }
 
-        public virtual IEnumerable<FilePath> EnumerateDescendantFiles(IFolderPath path, string searchPattern = null)
+        public virtual IEnumerable<FilePath> EnumerateDescendantFiles(IFolderPath folderPath, string searchPattern = null)
         {
-            return EnumerateDescendants(path, searchPattern, false, true).Select(x => new FilePath(x));
+            return EnumerateDescendants(folderPath, searchPattern, false, true).Select(x => new FilePath(x));
         }
 
         /// <inheritdoc />
-        public abstract IEnumerable<IFileOrFolder> EnumerateChildren(IFolderPath path, string searchPattern = null, bool includeFolders = true,
+        public abstract IEnumerable<IFileOrFolderPath> EnumerateChildren(IFolderPath folderPath, string searchPattern = null, bool includeFolders = true,
             bool includeFiles = true);
 
         /// <inheritdoc />
-        public virtual IEnumerable<IFileOrFolder> EnumerateDescendants(IFolderPath path, string searchPattern = null,
+        public virtual IEnumerable<IFileOrFolderPath> EnumerateDescendants(IFolderPath folderPath, string searchPattern = null,
             bool includeFolders = true,
             bool includeFiles = true)
         {
-            return path.TraverseTree(x =>
+            return folderPath.TraverseTree(x =>
             {
-                var children = x.Collapse(file => Enumerable.Empty<IFileOrFolder>(), folder => EnumerateChildren(folder));
+                var children = x.Collapse(file => Enumerable.Empty<IFileOrFolderPath>(), folder => EnumerateChildren(folder));
                 var childrenNames = children.Select(child => child.Components[^1]);
                 return childrenNames;
-            }, (IFileOrFolder node, string name, out IFileOrFolder child) =>
+            }, (IFileOrFolderPath node, string name, out IFileOrFolderPath child) =>
             {
                 child = (new FolderPath(node) / name)
-                    .Collapse(file => (IFileOrFolder)file, folder => (IFileOrFolder)folder, missingPath => throw missingPath.AssertExpectedType(PathType.File, PathType.Folder));
+                    .Collapse(file => (IFileOrFolderPath)file, folder => (IFileOrFolderPath)folder, missingPath => throw missingPath.AssertExpectedType(PathType.File, PathType.Folder));
                 if (CanEmptyDirectoriesExist)
                 {
                     var result = child .Exists;
@@ -2060,34 +2060,34 @@ namespace IoFluently
                 .Select(tt => tt.Value);
         }
 
-        public IEnumerable<IFileOrFolder> EnumerateChildren(IFolderPath path)
+        public IEnumerable<IFileOrFolderPath> EnumerateChildren(IFolderPath folderPath)
         {
-            return EnumerateChildren(path, "*");
+            return EnumerateChildren(folderPath, "*");
         }
 
-        public IEnumerable<FilePath> EnumerateChildFiles(IFolderPath path)
+        public IEnumerable<FilePath> EnumerateChildFiles(IFolderPath folderPath)
         {
-            return EnumerateChildFiles(path, "*");
+            return EnumerateChildFiles(folderPath, "*");
         }
 
-        public IEnumerable<FolderPath> EnumerateChildFolders(IFolderPath path)
+        public IEnumerable<FolderPath> EnumerateChildFolders(IFolderPath folderPath)
         {
-            return EnumerateChildFolders(path, "*");
+            return EnumerateChildFolders(folderPath, "*");
         }
 
-        public IEnumerable<IFileOrFolder> EnumerateDescendants(IFolderPath path)
+        public IEnumerable<IFileOrFolderPath> EnumerateDescendants(IFolderPath folderPath)
         {
-            return EnumerateDescendants(path, "*");
+            return EnumerateDescendants(folderPath, "*");
         }
 
-        public IEnumerable<FolderPath> EnumerateDescendantFolders(IFolderPath path)
+        public IEnumerable<FolderPath> EnumerateDescendantFolders(IFolderPath folderPath)
         {
-            return EnumerateDescendantFolders(path, "*");
+            return EnumerateDescendantFolders(folderPath, "*");
         }
 
-        public IEnumerable<FilePath> EnumerateDescendantFiles(IFolderPath path)
+        public IEnumerable<FilePath> EnumerateDescendantFiles(IFolderPath folderPath)
         {
-            return EnumerateDescendantFiles(path, "*");
+            return EnumerateDescendantFiles(folderPath, "*");
         }
 
         #endregion
@@ -2130,7 +2130,7 @@ namespace IoFluently
         public abstract DateTimeOffset LastWriteTime(IFilePath attributes);
 
         /// <inheritdoc />
-        public IFileInfo GetFileInfo( string subpath ) => new AbsolutePathFileInfoAdapter(new FilePath(ParseAbsolutePath( subpath )));
+        public IFileInfo GetFileInfo( string subpath ) => new FilePathFileInfoAdapter(new FilePath(ParseAbsolutePath( subpath )));
 
         #endregion
         #region File reading
@@ -2172,14 +2172,14 @@ namespace IoFluently
         #endregion
         #region LINQ-style APIs
         
-        public abstract IQueryable<AbsolutePath> Query();
+        public abstract IQueryable<FileOrFolderOrMissingPath> Query();
 
-        public abstract ISetChanges<AbsolutePath> ToLiveLinq(IFolderPath path, bool includeFileContentChanges,
+        public abstract ISetChanges<FileOrFolderOrMissingPath> ToLiveLinq(IFolderPath folderPath, bool includeFileContentChanges,
             bool includeSubFolders, string pattern);
         #endregion
         #region IFileProvider implementation
         public IDirectoryContents GetDirectoryContents( string subpath ) =>
-            new AbsolutePathDirectoryContents( new FolderPath(ParseAbsolutePath( subpath )) );
+            new FolderContents( new FolderPath(ParseAbsolutePath( subpath )) );
 
         public IChangeToken Watch( string filter )
         {

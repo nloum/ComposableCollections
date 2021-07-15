@@ -338,9 +338,9 @@ namespace IoFluently
         /// <param name="relPath">The relative path that will have a subpath added to it</param>
         /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
-        public static AbsolutePath operator /(FolderPath folderPath, string whatToAdd)
+        public static FileOrFolderOrMissingPath operator /(FolderPath folderPath, string whatToAdd)
         {
-            return new AbsolutePath(folderPath.Value) / whatToAdd;
+            return new FileOrFolderOrMissingPath(folderPath.Value) / whatToAdd;
         }
 
         /// <summary>
@@ -349,9 +349,9 @@ namespace IoFluently
         /// <param name="relPath">The relative path that will have a subpath added to it</param>
         /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
-        public static AbsolutePaths operator /(FolderPath folderPath, IEnumerable<RelativePath> whatToAdd)
+        public static FilesOrFoldersOrMissingPaths operator /(FolderPath folderPath, IEnumerable<RelativePath> whatToAdd)
         {
-            return new AbsolutePath(folderPath.Value) / whatToAdd;
+            return new FileOrFolderOrMissingPath(folderPath.Value) / whatToAdd;
         }
 
         /// <summary>
@@ -360,10 +360,10 @@ namespace IoFluently
         /// <param name="relPath">The relative path that will have a subpath added to it</param>
         /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
-        public static AbsolutePaths operator /(FolderPath folderPath,
-            Func<AbsolutePath, IEnumerable<RelativePath>> whatToAdd)
+        public static FilesOrFoldersOrMissingPaths operator /(FolderPath folderPath,
+            Func<FileOrFolderOrMissingPath, IEnumerable<RelativePath>> whatToAdd)
         {
-            return new AbsolutePath(folderPath.Value) / whatToAdd;
+            return new FileOrFolderOrMissingPath(folderPath.Value) / whatToAdd;
         }
 
         /// <summary>
@@ -372,9 +372,9 @@ namespace IoFluently
         /// <param name="relPath">The relative path that will have a subpath added to it</param>
         /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
-        public static AbsolutePath operator /(FolderPath folderPath, RelativePath whatToAdd)
+        public static FileOrFolderOrMissingPath operator /(FolderPath folderPath, RelativePath whatToAdd)
         {
-            return new AbsolutePath(folderPath.Value) / whatToAdd;
+            return new FileOrFolderOrMissingPath(folderPath.Value) / whatToAdd;
         }
 
         /// <summary>
@@ -383,9 +383,9 @@ namespace IoFluently
         /// <param name="relPath">The relative path that will have a subpath added to it</param>
         /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
-        public static AbsolutePaths operator /(FolderPath folderPath, IEnumerable<string> whatToAdd)
+        public static FilesOrFoldersOrMissingPaths operator /(FolderPath folderPath, IEnumerable<string> whatToAdd)
         {
-            return new AbsolutePath(folderPath.Value) / whatToAdd;
+            return new FileOrFolderOrMissingPath(folderPath.Value) / whatToAdd;
         }
     }
 }

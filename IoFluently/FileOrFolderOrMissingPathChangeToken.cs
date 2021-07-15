@@ -4,12 +4,12 @@ using UtilityDisposables;
 
 namespace IoFluently
 {
-    public class AbsolutePathChangeToken : IChangeToken {
-        private readonly AbsolutePath _absolutePath;
+    public class FileOrFolderOrMissingPathChangeToken : IChangeToken {
+        private readonly FileOrFolderOrMissingPath _fileOrFolderOrMissingPath;
         private int _numActiveChangeCallbacks = -1;
 
-        public AbsolutePathChangeToken( AbsolutePath absolutePath ) {
-            _absolutePath = absolutePath;
+        public FileOrFolderOrMissingPathChangeToken( FileOrFolderOrMissingPath fileOrFolderOrMissingPath ) {
+            _fileOrFolderOrMissingPath = fileOrFolderOrMissingPath;
             RegisterChangeCallback( _ => HasChanged = true, null );
         }
 

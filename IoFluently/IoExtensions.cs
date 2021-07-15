@@ -87,14 +87,14 @@ namespace IoFluently
                 });
         }
 
-        public static AbsolutePath ExpectFileOrFolderOrMissingPath(this IFileOrFolderOrMissingPath path)
+        public static FileOrFolderOrMissingPath ExpectFileOrFolderOrMissingPath(this IFileOrFolderOrMissingPath path)
         {
-            if (path is AbsolutePath absolutePath)
+            if (path is FileOrFolderOrMissingPath absolutePath)
             {
                 return absolutePath;
             }
             
-            return new AbsolutePath(path);
+            return new FileOrFolderOrMissingPath(path);
         }
 
         public static FilePath ExpectFile(this IFileOrFolderOrMissingPath path)
@@ -139,9 +139,9 @@ namespace IoFluently
                 missingPath => throw missingPath.AssertExpectedType(PathType.Folder));
         }
 
-        public static IFileOrFolder ExpectFileOrFolder(this IFileOrFolderOrMissingPath path)
+        public static IFileOrFolderPath ExpectFileOrFolder(this IFileOrFolderOrMissingPath path)
         {
-            return path.Collapse(file => (IFileOrFolder)file, folder => folder, missingPath => throw missingPath.AssertExpectedType(PathType.File, PathType.Folder));
+            return path.Collapse(file => (IFileOrFolderPath)file, folder => folder, missingPath => throw missingPath.AssertExpectedType(PathType.File, PathType.Folder));
         }
 
         public static IFileOrMissingPath ExpectFileOrMissingPath(this IFileOrFolderOrMissingPath path)
@@ -197,7 +197,7 @@ namespace IoFluently
         /// </summary>
         /// <param name="path">The path that temporary changes will be made to.</param>
         /// <returns>An object that, when disposed of, undoes any changes made to the specified path.</returns>
-        public static IDisposable TemporaryChanges(this AbsolutePath path)
+        public static IDisposable TemporaryChanges(this FileOrFolderOrMissingPath path)
         {
             var backupPath = path.FileSystem.TryWithExtension(path, x => x + ".backup").Value;
             var translation = path.Translate(backupPath);
@@ -209,7 +209,7 @@ namespace IoFluently
         /// <summary>
         /// If <see cref="mainPath"/> exists, then return <see cref="mainPath"/>. Otherwise, return <see cref="fallbackPath"/>.
         /// </summary>
-        public static AbsolutePath FallbackTo(this AbsolutePath mainPath, AbsolutePath fallbackPath)
+        public static FileOrFolderOrMissingPath FallbackTo(this FileOrFolderOrMissingPath mainPath, FileOrFolderOrMissingPath fallbackPath)
         {
             if (!mainPath.FileSystem.Exists(mainPath))
             {
@@ -222,7 +222,7 @@ namespace IoFluently
         /// <summary>
         /// If <see cref="mainPath"/> doesn't exist, then creates it by copying from <see cref="fallbackPath"/>.
         /// </summary>
-        public static AbsolutePath FallbackCopyFrom(this AbsolutePath mainPath, AbsolutePath fallbackPath)
+        public static FileOrFolderOrMissingPath FallbackCopyFrom(this FileOrFolderOrMissingPath mainPath, FileOrFolderOrMissingPath fallbackPath)
         {
             if (!mainPath.FileSystem.Exists(mainPath))
             {
@@ -237,7 +237,7 @@ namespace IoFluently
         /// idiomatic code with IoFluently.
         /// </summary>
         [Obsolete("Use the / operator on AbsolutePath objects (and related objects) to write idiomatic code with IoFluently", true)]
-        public static AbsolutePath Combine(this AbsolutePath path, string subpath)
+        public static FileOrFolderOrMissingPath Combine(this FileOrFolderOrMissingPath path, string subpath)
         {
             throw new NotImplementedException();
         }
@@ -247,7 +247,7 @@ namespace IoFluently
         /// idiomatic code with IoFluently.
         /// </summary>
         [Obsolete("Use the / operator on RelativePath objects (and related objects) to write idiomatic code with IoFluently", true)]
-        public static AbsolutePath Combine(this RelativePath path, string subpath)
+        public static FileOrFolderOrMissingPath Combine(this RelativePath path, string subpath)
         {
             throw new NotImplementedException();
         }
@@ -257,7 +257,7 @@ namespace IoFluently
         /// idiomatic code with IoFluently.
         /// </summary>
         [Obsolete("Use the / operator on AbsolutePath objects (and related objects) to write idiomatic code with IoFluently", true)]
-        public static AbsolutePath Combine(this IFileSystem path, string subpath)
+        public static FileOrFolderOrMissingPath Combine(this IFileSystem path, string subpath)
         {
             throw new NotImplementedException();
         }

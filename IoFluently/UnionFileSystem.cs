@@ -32,13 +32,13 @@ namespace IoFluently
         public override bool CanEmptyDirectoriesExist =>
             IoServices.Any(ioService => ioService.CanEmptyDirectoriesExist);
 
-        protected override AbsolutePath Transform(IFileOrFolderOrMissingPath absolutePath)
+        protected override FileOrFolderOrMissingPath Transform(IFileOrFolderOrMissingPath absolutePath)
         {
-            AbsolutePath? tmpPath = null;
+            FileOrFolderOrMissingPath? tmpPath = null;
             
             foreach (var ioService in IoServices)
             {
-                tmpPath = new AbsolutePath(absolutePath.Components, absolutePath.IsCaseSensitive,
+                tmpPath = new FileOrFolderOrMissingPath(absolutePath.Components, absolutePath.IsCaseSensitive,
                     absolutePath.DirectorySeparator, ioService);
                 if (tmpPath.Exists)
                 {

@@ -15,25 +15,25 @@ namespace IoFluently
         }
     }
     
-    public class AbsolutePathChildFiles : AbsolutePathDescendantsOrChildren<IFile>, IEnumerable<IFile>
+    public class AbsolutePathChildFiles : AbsolutePathDescendantsOrChildren<File>, IEnumerable<File>
     {
         public AbsolutePathChildFiles(IFolder path, string pattern = "*") : base(path, pattern, false)
         {
         }
 
-        public override IEnumerator<IFile> GetEnumerator()
+        public override IEnumerator<File> GetEnumerator()
         {
             return _path.IoService.EnumerateChildFiles(_path, _pattern).GetEnumerator();
         }
     }
     
-    public class AbsolutePathChildFolders : AbsolutePathDescendantsOrChildren<IFolder>, IEnumerable<IFolder>
+    public class AbsolutePathChildFolders : AbsolutePathDescendantsOrChildren<Folder>, IEnumerable<Folder>
     {
         public AbsolutePathChildFolders(IFolder path, string pattern = "*") : base(path, pattern, false)
         {
         }
 
-        public override IEnumerator<IFolder> GetEnumerator()
+        public override IEnumerator<Folder> GetEnumerator()
         {
             return _path.IoService.EnumerateChildFolders(_path, _pattern).GetEnumerator();
         }

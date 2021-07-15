@@ -34,7 +34,7 @@ namespace IoFluently
         }
     }
     
-    public class AbsolutePathDescendantFiles : AbsolutePathDescendantsOrChildren<IFile>, IFileProvider, IEnumerable<IFile>
+    public class AbsolutePathDescendantFiles : AbsolutePathDescendantsOrChildren<File>, IFileProvider, IEnumerable<File>
     {
         public AbsolutePathDescendantFiles(IFolder path, string pattern = "*") : base(path, pattern, true)
         {
@@ -56,13 +56,13 @@ namespace IoFluently
             return new EmptyChangeToken();
         }
 
-        public override IEnumerator<IFile> GetEnumerator()
+        public override IEnumerator<File> GetEnumerator()
         {
             return _path.IoService.EnumerateDescendantFiles(_path, _pattern).GetEnumerator();
         }
     }
     
-    public class AbsolutePathDescendantFolders : AbsolutePathDescendantsOrChildren<IFolder>, IFileProvider, IEnumerable<IFolder>
+    public class AbsolutePathDescendantFolders : AbsolutePathDescendantsOrChildren<Folder>, IFileProvider, IEnumerable<Folder>
     {
         public AbsolutePathDescendantFolders(IFolder path, string pattern = "*") : base(path, pattern, true)
         {
@@ -84,7 +84,7 @@ namespace IoFluently
             return new EmptyChangeToken();
         }
 
-        public override IEnumerator<IFolder> GetEnumerator()
+        public override IEnumerator<Folder> GetEnumerator()
         {
             return _path.IoService.EnumerateDescendantFolders(_path, _pattern).GetEnumerator();
         }

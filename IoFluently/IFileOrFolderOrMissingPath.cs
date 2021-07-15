@@ -24,7 +24,5 @@ namespace IoFluently
         /// The IIoService that is used for this absolute path
         /// </summary>
         public IIoService IoService { get; }
-
-        public IFileOrFolderOrMissingPath Path => this;
     }
 }

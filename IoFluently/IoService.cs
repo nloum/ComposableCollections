@@ -389,7 +389,7 @@ namespace IoFluently
                 await Task.Delay(DeleteOrCreateSpinPeriod, cancellationToken);
             }
 
-            return new MissingPath(path.Path);
+            return new MissingPath(path );
         }
 
         public override async Task<MissingPath> DeleteFileAsync(IFile path, CancellationToken cancellationToken)
@@ -410,7 +410,7 @@ namespace IoFluently
                 await Task.Delay(DeleteOrCreateSpinPeriod, cancellationToken);
             }
             
-            return new MissingPath(path.Path);
+            return new MissingPath(path );
         }
 
         /// <inheritdoc />
@@ -420,7 +420,7 @@ namespace IoFluently
             Information? bufferSize = default, bool createRecursively = false)
         {
             if (MayCreateFile(fileMode))
-                TryParent(path.Path).IfHasValue(parent => EnsureIsFolder(parent));
+                TryParent(path ).IfHasValue(parent => EnsureIsFolder(parent));
             var fileStream = new FileStream(path.ToString(), fileMode, fileAccess, fileShare,
                 GetBufferSizeOrDefaultInBytes(bufferSize), fileOptions);
             return fileStream;
@@ -459,12 +459,12 @@ namespace IoFluently
 
         private FileInfo AsFileInfo(IFileOrFolderOrMissingPath path)
         {
-            return new FileInfo(path.Path.ToString());
+            return new FileInfo(path .ToString());
         }
 
         private DirectoryInfo AsDirectoryInfo(IFileOrFolderOrMissingPath path)
         {
-            return new DirectoryInfo(path.Path.ToString());
+            return new DirectoryInfo(path .ToString());
         }
 
         public override MissingPath DeleteFile(IFile path)
@@ -536,7 +536,7 @@ namespace IoFluently
                     
             if (createRecursively)
             {
-                foreach (var ancestor in Ancestors(path.Path))
+                foreach (var ancestor in Ancestors(path ))
                 {
                     
                 }

@@ -16,7 +16,7 @@ namespace IoFluently
 
         public static TextFileOrMissingPath ExpectTextFileOrMissingPath(this IFileOrFolderOrMissingPath path)
         {
-            if (path.Path.IsFile)
+            if (path .IsFile)
             {
                 return new TextFileOrMissingPath(new TextFile(path));
             }
@@ -283,7 +283,7 @@ namespace IoFluently
         public StreamWriter OpenWriter(FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, Information? bufferSize = default,
             bool createRecursively = false)
         {
-            var stream = Value.Path.IoService.Open(Value.ExpectTextFileOrMissingPath(), FileMode.Create, FileAccess.Write, FileShare.None,
+            var stream = Value .IoService.Open(Value.ExpectTextFileOrMissingPath(), FileMode.Create, FileAccess.Write, FileShare.None,
                 fileOptions, bufferSize, createRecursively);
             if (encoding == null)
             {
@@ -299,14 +299,14 @@ namespace IoFluently
         {
             newline ??= Environment.NewLine;
             
-            var stream = Value.Path.IoService.Open(Value.ExpectTextFile(), FileMode.Create, FileAccess.ReadWrite, FileShare.Write, FileOptions.WriteThrough, bufferSize, createRecursively);
+            var stream = Value .IoService.Open(Value.ExpectTextFile(), FileMode.Create, FileAccess.ReadWrite, FileShare.Write, FileOptions.WriteThrough, bufferSize, createRecursively);
             foreach (var line in lines)
             {
                 var bytes = Encoding.Default.GetBytes(line + newline);
                 stream.Write(bytes, 0, bytes.Length);
             }
 
-            return new TextFile(Value.Path);
+            return new TextFile(Value );
         }
 
         public TextFile WriteAllText(string text, Encoding encoding = null, bool createRecursively = false)
@@ -315,7 +315,7 @@ namespace IoFluently
             using var writer = OpenWriter(FileOptions.None, encoding, Information.FromBytes(Math.Max(encoding.GetByteCount(text), 1)), createRecursively);
             writer.Write(text);
 
-            return new TextFile(Value.Path);
+            return new TextFile(Value );
         }
     }
 }

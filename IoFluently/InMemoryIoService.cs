@@ -157,8 +157,8 @@ namespace IoFluently
 
         private IMaybe<InMemoryFile> GetFile(IFileOrFolderOrMissingPath path)
         {
-            path = Simplify(path.Path);
-            var components = path.Path.Path.Components;
+            path = Simplify(path );
+            var components = path  .Components;
             if (RootFolders.ContainsKey(components[0]))
             {
                 return GetFile(RootFolders[components[0]], components.Skip(1).ToList(), path);
@@ -194,7 +194,7 @@ namespace IoFluently
         private IMaybe<InMemoryFolder> GetFolder(IFileOrFolderOrMissingPath path)
         {
             path = Simplify(path);
-            var components = path.Path.Path.Components;
+            var components = path  .Components;
             if (RootFolders.ContainsKey(components[0]))
             {
                 return GetFolder(RootFolders[components[0]], components.Skip(1).ToList(), path);
@@ -225,7 +225,7 @@ namespace IoFluently
         /// <inheritdoc />
         public override IEnumerable<IFileOrFolder> Children(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
-            var folder = GetFolder(path.Path);
+            var folder = GetFolder(path );
             if (!folder.HasValue)
             {
                 return Enumerable.Empty<IFileOrFolder>();
@@ -259,9 +259,9 @@ namespace IoFluently
         public override MissingPath DeleteFile(IFile path)
         {
             path = Simplify(path).ExpectFile();
-            var parentFolder = GetFolder(TryParent(path.Path).Value).Value;
-            parentFolder.Files.Remove(path.Path.Name);
-            return new MissingPath(path.Path);
+            var parentFolder = GetFolder(TryParent(path ).Value).Value;
+            parentFolder.Files.Remove(path .Name);
+            return new MissingPath(path );
         }
 
         /// <inheritdoc />
@@ -337,7 +337,7 @@ namespace IoFluently
         {
             var parentFolder = GetFolder(TryParent(path).Value);
             parentFolder.Value.Folders.Remove(Name(Simplify(path)));
-            return new MissingPath(path.Path);
+            return new MissingPath(path );
         }
 
         public override Stream Open(IFileOrMissingPath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,
@@ -352,7 +352,7 @@ namespace IoFluently
                 if (fileMode == FileMode.Create || fileMode == FileMode.CreateNew ||
                     fileMode == FileMode.OpenOrCreate)
                 {
-                    var pathParent = TryParent(path.Path).Value;
+                    var pathParent = TryParent(path ).Value;
                     InMemoryFolder parentFolder = null;
                     var maybeParentFolder = GetFolder(pathParent);
                     if (!maybeParentFolder.HasValue)
@@ -376,7 +376,7 @@ namespace IoFluently
                         LastWriteTime = now,
                     };
                 
-                    parentFolder.Files.Add(path.Path.Name, file);
+                    parentFolder.Files.Add(path .Name, file);
                     
                     file.Lock.AcquireReaderLock(0);
                     var memoryStream = new MemoryStream();

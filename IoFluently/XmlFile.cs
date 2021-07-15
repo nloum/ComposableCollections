@@ -15,7 +15,7 @@ namespace IoFluently
 
         public static XmlFileOrMissingPath ExpectXmlFileOrMissingPath(this IFileOrFolderOrMissingPath path)
         {
-            if (path.Path.IsFile)
+            if (path .IsFile)
             {
                 return new XmlFileOrMissingPath(new XmlFile(path));
             }

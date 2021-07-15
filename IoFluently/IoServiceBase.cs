@@ -134,7 +134,7 @@ namespace IoFluently
                 {
                     foreach (var child in Children(folder))
                     {
-                        await EnsureDoesNotExistAsync(child.Path, cancellationToken, true);
+                        await EnsureDoesNotExistAsync(child , cancellationToken, true);
                     }
 
                     return folder.ExpectFolder();
@@ -160,7 +160,7 @@ namespace IoFluently
                 {
                     foreach (var child in Children(folder))
                     {
-                        EnsureDoesNotExist(child.Path, true);
+                        EnsureDoesNotExist(child , true);
                     }
 
                     return folder.ExpectFolder();
@@ -1646,9 +1646,9 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual IMaybe<AbsolutePath> TryParent(IFileOrFolderOrMissingPath path)
         {
-            if (path.Path.Components.Count > 1)
+            if (path .Components.Count > 1)
             {
-                return new AbsolutePath(path.Path.Components.Take(path.Path.Components.Count - 1).ToImmutableList(),
+                return new AbsolutePath(path .Components.Take(path .Components.Count - 1).ToImmutableList(),
                     path.IsCaseSensitive, path.DirectorySeparator, path.IoService).ToMaybe();
             }
             else
@@ -1739,10 +1739,10 @@ namespace IoFluently
         {
             IFileOrFolderOrMissingPath ancestor = path;
             IMaybe<IFileOrFolderOrMissingPath> cachedParent;
-            while ((cachedParent = ancestor.Path.IoService.TryParent(ancestor.Path)).HasValue)
+            while ((cachedParent = ancestor .IoService.TryParent(ancestor )).HasValue)
                 ancestor = cachedParent.Value;
 
-            return ancestor.Path.ExpectFolder();
+            return ancestor .ExpectFolder();
         }
 
         /// <inheritdoc />
@@ -1989,7 +1989,7 @@ namespace IoFluently
                     .Collapse(file => (IFileOrFolder)file, folder => (IFileOrFolder)folder, missingPath => throw missingPath.AssertExpectedType(PathType.File, PathType.Folder));
                 if (CanEmptyDirectoriesExist)
                 {
-                    var result = child.Path.Exists;
+                    var result = child .Exists;
                     return result;
                 }
 

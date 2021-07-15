@@ -35,7 +35,7 @@ namespace IoFluently
         /// </summary>
         public RelativeTreePath<string> Path { get; }
 
-        internal RelativePath(bool isCaseSensitive, string directorySeparator, IIoService ioService, IEnumerable<string> path)
+        internal RelativePath(IEnumerable<string> path, bool isCaseSensitive, string directorySeparator, IIoService ioService)
         {
             IsCaseSensitive = isCaseSensitive;
             DirectorySeparator = directorySeparator;
@@ -174,8 +174,7 @@ namespace IoFluently
         public IMaybe<RelativePath> Ancestor(int generations)
         {
             if (Path.Count > generations)
-                return Something(new RelativePath(IsCaseSensitive, DirectorySeparator, IoService,
-                    Path.Subset(0, -1 - generations)));
+                return Something(new RelativePath(Path.Subset(0, -1 - generations), IsCaseSensitive, DirectorySeparator, IoService));
             return Nothing<RelativePath>();
         }
 
@@ -197,7 +196,8 @@ namespace IoFluently
                 return relPath;
             }
             
-            return new RelativePath(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, relPath.Path / new RelativeTreePath<string>(whatToAdd.Split('/', '\\')));
+            return new RelativePath(relPath.Path / new RelativeTreePath<string>(whatToAdd.Split('/', '\\')),
+                relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService);
         }
 
         /// <summary>
@@ -208,7 +208,8 @@ namespace IoFluently
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
         public static RelativePaths operator / (RelativePath relPath, IEnumerable<RelativePath> whatToAdd)
         {
-            return new RelativePaths(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, relPath.Path / whatToAdd.Select(x => x.Path));
+            return new RelativePaths(relPath.Path / whatToAdd.Select(x => x.Path),
+                relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService);
         }
 
         /// <summary>
@@ -219,7 +220,8 @@ namespace IoFluently
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
         public static RelativePaths operator / (RelativePath relPath, Func<RelativePath, IEnumerable<RelativePath>> whatToAdd)
         {
-            return new RelativePaths(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, relPath.Path / (rel => whatToAdd(new RelativePath(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, rel)).Select(x => x.Path)));
+            return new RelativePaths(relPath.Path / (rel => whatToAdd(new RelativePath(rel, relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService)).Select(x => x.Path)),
+                relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService);
         }
 
         /// <summary>
@@ -235,7 +237,7 @@ namespace IoFluently
                 return relPath;
             }
             
-            return new RelativePath(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, relPath.Path / whatToAdd.Path);
+            return new RelativePath(relPath.Path / whatToAdd.Path, relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService);
         }
 
         /// <summary>
@@ -246,7 +248,9 @@ namespace IoFluently
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
         public static RelativePaths operator / (RelativePath relPath, IEnumerable<string> whatToAdd)
         {
-            return new RelativePaths(relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService, relPath.Path / whatToAdd.Select(x => new RelativeTreePath<string>(x.Split('/', '\\'))));
+            return new RelativePaths(
+                relPath.Path / whatToAdd.Select(x => new RelativeTreePath<string>(x.Split('/', '\\'))),
+                relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService);
         }
         
         /// <summary>

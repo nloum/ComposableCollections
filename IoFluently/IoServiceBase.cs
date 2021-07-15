@@ -746,7 +746,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, "\\", this, components);
+                    relativePath = new RelativePath(components, flags == CaseSensitivityMode.CaseSensitive, "\\", this);
                 }
                 else if (path.StartsWith("."))
                 {
@@ -769,7 +769,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, "\\", this, components);
+                    relativePath = new RelativePath(components, flags == CaseSensitivityMode.CaseSensitive, "\\", this);
                 }
                 else if (path.StartsWith("\\\\"))
                 {
@@ -792,7 +792,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, "\\", this, components);
+                    relativePath = new RelativePath(components, flags == CaseSensitivityMode.CaseSensitive, "\\", this);
                 }
                 else if (path.StartsWith("\\"))
                 {
@@ -815,7 +815,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, "\\", this, components);
+                    relativePath = new RelativePath(components, flags == CaseSensitivityMode.CaseSensitive, "\\", this);
                 }
                 else
                 {
@@ -838,7 +838,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, "\\", this, components);
+                    relativePath = new RelativePath(components, flags == CaseSensitivityMode.CaseSensitive, "\\", this);
                 }
 
                 return true;
@@ -878,7 +878,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, "/", this, components);
+                    relativePath = new RelativePath(components, flags == CaseSensitivityMode.CaseSensitive, "/", this);
                 }
                 else if (path.StartsWith("."))
                 {
@@ -901,7 +901,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, "/", this, components);
+                    relativePath = new RelativePath(components, flags == CaseSensitivityMode.CaseSensitive, "/", this);
                 }
                 else
                 {
@@ -924,7 +924,7 @@ namespace IoFluently
                         error = "Must not be an absolute path";
                         return false;
                     }
-                    relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, "/", this, components);
+                    relativePath = new RelativePath(components, flags == CaseSensitivityMode.CaseSensitive, "/", this);
                 }
 
                 return true;
@@ -935,9 +935,9 @@ namespace IoFluently
             if (flags.HasFlag(CaseSensitivityMode.UseDefaultsFromEnvironment))
                 flags = IsCaseSensitiveByDefault ? CaseSensitivityMode.CaseSensitive : CaseSensitivityMode.CaseInsensitive;
             if (path == ".." || path == ".")
-                relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, GetDefaultDirectorySeparatorForThisEnvironment(), this, new[]{path});
+                relativePath = new RelativePath(new[]{path}, flags == CaseSensitivityMode.CaseSensitive, GetDefaultDirectorySeparatorForThisEnvironment(), this);
             else
-                relativePath = new RelativePath(flags == CaseSensitivityMode.CaseSensitive, GetDefaultDirectorySeparatorForThisEnvironment(), this, new[]{".", path});
+                relativePath = new RelativePath(new[]{".", path}, flags == CaseSensitivityMode.CaseSensitive, GetDefaultDirectorySeparatorForThisEnvironment(), this);
             return true;
         }
 
@@ -1542,7 +1542,7 @@ namespace IoFluently
         {
             Func<AbsolutePath, IEnumerable<RelativePath>> patternFunc = absPath => absPath.Collapse(
                 file => Enumerable.Empty<RelativePath>(),
-                folder => folder.IoService.Children(folder, pattern).Select(x => new RelativePath(x.IsCaseSensitive, x.DirectorySeparator, x.IoService, new[]{Name(x)})),
+                folder => folder.IoService.Children(folder, pattern).Select(x => new RelativePath(new[]{Name(x)}, x.IsCaseSensitive, x.DirectorySeparator, x.IoService)),
                 missingPath => Enumerable.Empty<RelativePath>());
             return path.ExpectFolder() / patternFunc;
         }
@@ -1604,7 +1604,7 @@ namespace IoFluently
                 result.Add(".");
             }
             
-            return new RelativePath(path.IsCaseSensitive, path.DirectorySeparator, path.IoService, result);
+            return new RelativePath(result, path.IsCaseSensitive, path.DirectorySeparator, path.IoService);
         }
 
         /// <inheritdoc />

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using SimpleMonads;
 
 namespace IoFluently
@@ -25,6 +26,12 @@ namespace IoFluently
             FileSystem = fileSystem;
 
             this.AssertExpectedType(PathType.File);
+        }
+        
+        public FileAttributes Attributes
+        {
+            get => FileSystem.GetAttributes(this);
+            set => FileSystem.SetAttributes(this, value);
         }
         
         /// <inheritdoc />

@@ -725,34 +725,39 @@ namespace IoFluently
             return _decorated.IsFolder(path);
         }
 
-        public virtual bool IsReadOnly(IFilePath path)
+        public virtual bool IsReadOnly(IFilePath filePath)
         {
-            return _decorated.IsReadOnly(path);
+            return _decorated.IsReadOnly(filePath);
         }
 
-        public virtual Information FileSize(IFilePath path)
+        public virtual Information FileSize(IFilePath filePath)
         {
-            return _decorated.FileSize(path);
+            return _decorated.FileSize(filePath);
         }
 
-        public virtual FileAttributes Attributes(IFilePath attributes)
+        public FileAttributes GetAttributes(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath)
         {
-            return _decorated.Attributes(attributes);
+            return _decorated.GetAttributes(fileOrFolderOrMissingPath);
         }
 
-        public virtual DateTimeOffset CreationTime(IFilePath attributes)
+        public void SetAttributes(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath, FileAttributes fileAttributes)
         {
-            return _decorated.CreationTime(attributes);
+            _decorated.SetAttributes(fileOrFolderOrMissingPath, fileAttributes);
         }
 
-        public virtual DateTimeOffset LastAccessTime(IFilePath attributes)
+        public virtual DateTimeOffset CreationTime(IFilePath filePath)
         {
-            return _decorated.LastAccessTime(attributes);
+            return _decorated.CreationTime(filePath);
         }
 
-        public virtual DateTimeOffset LastWriteTime(IFilePath attributes)
+        public virtual DateTimeOffset LastAccessTime(IFilePath filePath)
         {
-            return _decorated.LastWriteTime(attributes);
+            return _decorated.LastAccessTime(filePath);
+        }
+
+        public virtual DateTimeOffset LastWriteTime(IFilePath filePath)
+        {
+            return _decorated.LastWriteTime(filePath);
         }
 
         public virtual BufferEnumerator ReadBuffers(IFilePath path, FileShare fileShare = FileShare.None, Information? bufferSize = default,

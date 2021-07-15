@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Text;
 using SimpleMonads;
@@ -27,6 +28,12 @@ namespace IoFluently
         public FileOrFolderOrMissingPath(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath) : this(fileOrFolderOrMissingPath.Components,
             fileOrFolderOrMissingPath.IsCaseSensitive, fileOrFolderOrMissingPath.DirectorySeparator, fileOrFolderOrMissingPath.FileSystem)
         {
+        }
+
+        public FileAttributes Attributes
+        {
+            get => FileSystem.GetAttributes(this);
+            set => FileSystem.SetAttributes(this, value);
         }
 
         public override IFilePath? Item1 => FileSystem.Type(this) == PathType.File

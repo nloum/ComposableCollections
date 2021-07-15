@@ -105,37 +105,44 @@ namespace IoFluently
             return decorated.Type(transformedPath);
         }
 
-        public override Information FileSize(IFilePath path)
+        public override Information FileSize(IFilePath filePath)
         {
-            var transformedPath = Transform   (path);
+            var transformedPath = Transform   (filePath);
             var decorated = transformedPath.FileSystem;
             return decorated.FileSize(transformedPath);
         }
 
-        public override FileAttributes Attributes(IFilePath attributes)
+        public override FileAttributes GetAttributes(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath)
         {
-            var transformedPath = Transform   (attributes);
+            var transformedPath = Transform(fileOrFolderOrMissingPath);
             var decorated = transformedPath.FileSystem;
-            return decorated.Attributes(transformedPath);
+            return decorated.GetAttributes(transformedPath);
         }
 
-        public override DateTimeOffset CreationTime(IFilePath attributes)
+        public override void SetAttributes(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath, FileAttributes fileAttributes)
         {
-            var transformedPath = Transform   (attributes);
+            var transformedPath = Transform(fileOrFolderOrMissingPath);
+            var decorated = transformedPath.FileSystem;
+            decorated.SetAttributes(transformedPath, fileAttributes);
+        }
+
+        public override DateTimeOffset CreationTime(IFilePath filePath)
+        {
+            var transformedPath = Transform   (filePath);
             var decorated = transformedPath.FileSystem;
             return decorated.CreationTime(transformedPath);
         }
 
-        public override DateTimeOffset LastAccessTime(IFilePath attributes)
+        public override DateTimeOffset LastAccessTime(IFilePath filePath)
         {
-            var transformedPath = Transform   (attributes);
+            var transformedPath = Transform   (filePath);
             var decorated = transformedPath.FileSystem;
             return decorated.LastAccessTime(transformedPath);
         }
 
-        public override DateTimeOffset LastWriteTime(IFilePath attributes)
+        public override DateTimeOffset LastWriteTime(IFilePath filePath)
         {
-            var transformedPath = Transform   (attributes);
+            var transformedPath = Transform   (filePath);
             var decorated = transformedPath.FileSystem;
             return decorated.LastWriteTime(transformedPath);
         }

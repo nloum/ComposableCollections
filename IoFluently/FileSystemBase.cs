@@ -2109,25 +2109,29 @@ namespace IoFluently
         public abstract PathType Type(IFileOrFolderOrMissingPath path);
 
         /// <inheritdoc />
-        public virtual bool IsReadOnly(IFilePath path)
+        public virtual bool IsReadOnly(IFilePath filePath)
         {
-            return Attributes(path).HasFlag(FileAttributes.ReadOnly);
+            return GetAttributes(filePath).HasFlag(FileAttributes.ReadOnly);
         }
 
         /// <inheritdoc />
-        public abstract Information FileSize(IFilePath path);
+        public abstract Information FileSize(IFilePath filePath);
 
         /// <inheritdoc />
-        public abstract FileAttributes Attributes(IFilePath attributes);
+        public abstract FileAttributes GetAttributes(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath);
 
         /// <inheritdoc />
-        public abstract DateTimeOffset CreationTime(IFilePath attributes);
+        public abstract void SetAttributes(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath,
+            FileAttributes fileAttributes);
 
         /// <inheritdoc />
-        public abstract DateTimeOffset LastAccessTime(IFilePath attributes);
+        public abstract DateTimeOffset CreationTime(IFilePath filePath);
 
         /// <inheritdoc />
-        public abstract DateTimeOffset LastWriteTime(IFilePath attributes);
+        public abstract DateTimeOffset LastAccessTime(IFilePath filePath);
+
+        /// <inheritdoc />
+        public abstract DateTimeOffset LastWriteTime(IFilePath filePath);
 
         /// <inheritdoc />
         public IFileInfo GetFileInfo( string subpath ) => new FilePathFileInfoAdapter(new FilePath(ParseAbsolutePath( subpath )));

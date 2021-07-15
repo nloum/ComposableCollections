@@ -164,47 +164,45 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override Information FileSize(IFilePath path)
+        public override Information FileSize(IFilePath filePath)
         {
             using (var archive = OpenZipArchive(false, true))
             {
-                var zipEntry = GetZipArchiveEntry(archive, path);
+                var zipEntry = GetZipArchiveEntry(archive, filePath);
                 return Information.FromBytes(zipEntry.Length);
             }
         }
 
         /// <inheritdoc />
-        public override FileAttributes Attributes(IFilePath attributes)
+        public override FileAttributes GetAttributes(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath)
         {
-            using (var archive = OpenZipArchive(false, true))
-            {
-                var zipEntry = GetZipArchiveEntry(archive, attributes);
-                if (zipEntry == null)
-                {
-                    throw new InvalidOperationException($"No such file {attributes}");
-                }
-                return ZipFilePath .FileSystem.Attributes(ZipFilePath.ExpectFile());
-            }
+            return ZipFilePath.FileSystem.GetAttributes(ZipFilePath);
         }
 
         /// <inheritdoc />
-        public override DateTimeOffset CreationTime(IFilePath path)
+        public override void SetAttributes(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath, FileAttributes fileAttributes)
+        {
+            
+        }
+
+        /// <inheritdoc />
+        public override DateTimeOffset CreationTime(IFilePath filePath)
         {
             return ZipFilePath.FileSystem.CreationTime(ZipFilePath.ExpectFile());
         }
 
         /// <inheritdoc />
-        public override DateTimeOffset LastAccessTime(IFilePath path)
+        public override DateTimeOffset LastAccessTime(IFilePath filePath)
         {
             return ZipFilePath.FileSystem.LastAccessTime(ZipFilePath.ExpectFile());
         }
 
         /// <inheritdoc />
-        public override DateTimeOffset LastWriteTime(IFilePath path)
+        public override DateTimeOffset LastWriteTime(IFilePath filePath)
         {
             using (var archive = OpenZipArchive(false, true))
             {
-                var zipEntry = GetZipArchiveEntry(archive, path);
+                var zipEntry = GetZipArchiveEntry(archive, filePath);
                 return zipEntry.LastWriteTime;
             }
         }

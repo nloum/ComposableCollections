@@ -265,39 +265,44 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override bool IsReadOnly(IFilePath path)
+        public override bool IsReadOnly(IFilePath filePath)
         {
-            return GetFile(path).Value.IsReadOnly;
+            return GetFile(filePath).Value.IsReadOnly;
         }
 
         /// <inheritdoc />
-        public override Information FileSize(IFilePath path)
+        public override Information FileSize(IFilePath filePath)
         {
-            return Information.FromBytes(GetFile(path).Value.Contents.LongLength);
+            return Information.FromBytes(GetFile(filePath).Value.Contents.LongLength);
          }
 
         /// <inheritdoc />
-        public override FileAttributes Attributes(IFilePath path)
+        public override FileAttributes GetAttributes(IFileOrFolderOrMissingPath path)
         {
-            return GetFile(path).Value.Attributes;
+            return GetFile(path).Select(x => x.Attributes).Otherwise(FileAttributes.Normal);
+        }
+
+        public override void SetAttributes(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath, FileAttributes fileAttributes)
+        {
+            GetFile(fileOrFolderOrMissingPath).IfHasValue(x => x.Attributes = fileAttributes);
         }
 
         /// <inheritdoc />
-        public override DateTimeOffset CreationTime(IFilePath path)
+        public override DateTimeOffset CreationTime(IFilePath filePath)
         {
-            return GetFile(path).Value.CreationTime;
+            return GetFile(filePath).Value.CreationTime;
         }
 
         /// <inheritdoc />
-        public override DateTimeOffset LastAccessTime(IFilePath path)
+        public override DateTimeOffset LastAccessTime(IFilePath filePath)
         {
-            return GetFile(path).Value.LastAccessTime;
+            return GetFile(filePath).Value.LastAccessTime;
         }
 
         /// <inheritdoc />
-        public override DateTimeOffset LastWriteTime(IFilePath path)
+        public override DateTimeOffset LastWriteTime(IFilePath filePath)
         {
-            return GetFile(path).Value.LastWriteTime;
+            return GetFile(filePath).Value.LastWriteTime;
         }
 
         /// <inheritdoc />

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using SimpleMonads;
 
 namespace IoFluently
@@ -31,6 +32,12 @@ namespace IoFluently
         public override string ToString()
         {
             return this.ConvertToString();
+        }
+
+        public FileAttributes Attributes
+        {
+            get => FileSystem.GetAttributes(this);
+            set => FileSystem.SetAttributes(this, value);
         }
 
         /// <inheritdoc />

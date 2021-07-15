@@ -427,34 +427,40 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override FileAttributes Attributes(IFilePath attributes) 
+        public override FileAttributes GetAttributes(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath) 
         {
-            return AsFileInfo(attributes).Attributes;
+            return File.GetAttributes(fileOrFolderOrMissingPath.FullName);
+        }
+        
+        /// <inheritdoc />
+        public override void SetAttributes(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath, FileAttributes fileAttributes) 
+        {
+            File.SetAttributes(fileOrFolderOrMissingPath.FullName, fileAttributes);
         }
 
-        public override DateTimeOffset CreationTime(IFilePath attributes)
+        public override DateTimeOffset CreationTime(IFilePath filePath)
         {
-            return AsFileInfo(attributes).CreationTime;
+            return AsFileInfo(filePath).CreationTime;
         }
 
-        public override DateTimeOffset LastAccessTime(IFilePath attributes)
+        public override DateTimeOffset LastAccessTime(IFilePath filePath)
         {
-            return AsFileInfo(attributes).LastAccessTime;
+            return AsFileInfo(filePath).LastAccessTime;
         }
 
-        public override DateTimeOffset LastWriteTime(IFilePath attributes)
+        public override DateTimeOffset LastWriteTime(IFilePath filePath)
         {
-            return AsFileInfo(attributes).LastWriteTime;
+            return AsFileInfo(filePath).LastWriteTime;
         }
 
-        public override Information FileSize(IFilePath path)
+        public override Information FileSize(IFilePath filePath)
         {
-            return Information.FromBytes(AsFileInfo(path).Length);
+            return Information.FromBytes(AsFileInfo(filePath).Length);
         }
 
-        public override bool IsReadOnly(IFilePath path)
+        public override bool IsReadOnly(IFilePath filePath)
         {
-            return AsFileInfo(path).IsReadOnly;
+            return AsFileInfo(filePath).IsReadOnly;
         }
 
         private FileInfo AsFileInfo(IFileOrFolderOrMissingPath path)

@@ -90,7 +90,6 @@ namespace IoFluently
         public FolderPath Parent => FileSystem.Parent(this);
         public PathType Type => FileSystem.Type(this);
         public FileOrFolderOrMissingPath WithoutExtension => FileSystem.WithoutExtension(this);
-        public FileAttributes Attributes => FileSystem.Attributes(this);
         public DateTimeOffset CreationTime => FileSystem.CreationTime(this);
         public Information FileSize => FileSystem.FileSize(this);
         public Boolean IsReadOnly => FileSystem.IsReadOnly(this);

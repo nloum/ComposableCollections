@@ -594,12 +594,13 @@ namespace IoFluently
         bool HasExtension(IFileOrFolderOrMissingPath path);
         bool IsFile(IFileOrFolderOrMissingPath path);
         bool IsFolder(IFileOrFolderOrMissingPath path);
-        bool IsReadOnly(IFilePath path);
-        Information FileSize(IFilePath path);
-        FileAttributes Attributes(IFilePath attributes);
-        DateTimeOffset CreationTime(IFilePath attributes);
-        DateTimeOffset LastAccessTime(IFilePath attributes);
-        DateTimeOffset LastWriteTime(IFilePath attributes);
+        bool IsReadOnly(IFilePath filePath);
+        Information FileSize(IFilePath filePath);
+        FileAttributes GetAttributes(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath);
+        void SetAttributes(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath, FileAttributes fileAttributes);
+        DateTimeOffset CreationTime(IFilePath filePath);
+        DateTimeOffset LastAccessTime(IFilePath filePath);
+        DateTimeOffset LastWriteTime(IFilePath filePath);
 
         #endregion
         

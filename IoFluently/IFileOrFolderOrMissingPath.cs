@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
 using SimpleMonads;
 
@@ -27,5 +28,7 @@ namespace IoFluently
         public IFileSystem FileSystem { get; }
         
         public string FullName { get; }
+        
+        public FileAttributes Attributes { get; set; }
     }
 }

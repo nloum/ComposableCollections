@@ -165,6 +165,27 @@ namespace IoFluently
             missingPath => missingPath);
         }
 
+        public static IFileOrMissingPath ExpectMissingFile(this IFileOrFolderOrMissingPath path)
+        {
+            return path.Collapse(
+                file => throw file.AssertExpectedType(PathType.MissingPath),
+                folder => {
+                    if (!folder.IoService.CanEmptyDirectoriesExist)
+                    {
+                        switch (folder.IoService.EmptyFolderMode)
+                        {
+                            case EmptyFolderMode.EmptyFilesAreFolders:
+                                throw folder.AssertExpectedType(PathType.MissingPath);
+                            case EmptyFolderMode.AllNonExistentPathsAreFolders:
+                                return new MissingPath(folder);
+                        }
+                    }
+
+                    throw folder.AssertExpectedType(PathType.MissingPath);
+                },
+                missingPath => missingPath);
+        }
+
         public static IFolderOrMissingPath ExpectFolderOrMissingPath(this IFileOrFolderOrMissingPath path)
         {
             return path.Collapse(file => throw file.AssertExpectedType(PathType.Folder, PathType.MissingPath), folder => (IFolderOrMissingPath)folder, missingPath => missingPath);

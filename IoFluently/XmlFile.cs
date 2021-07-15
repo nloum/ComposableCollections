@@ -22,6 +22,31 @@ namespace IoFluently
             
             return new XmlFileOrMissingPath((IMissingPath)new MissingPath(path));
         }
+        
+        public static XmlFileOrMissingPath ExpectMissingXmlFile(this IFileOrFolderOrMissingPath path)
+        {
+            return new XmlFileOrMissingPath((IMissingPath)new MissingPath(path));
+        }
+        
+        public static XmlFile<TModel> ExpectXmlFile<TModel>(this IFileOrFolderOrMissingPath path)
+        {
+            return new XmlFile<TModel>(path);
+        }
+
+        public static XmlFileOrMissingPath<TModel> ExpectXmlFileOrMissingPath<TModel>(this IFileOrFolderOrMissingPath path)
+        {
+            if (path .IsFile)
+            {
+                return new XmlFileOrMissingPath<TModel>(new XmlFile<TModel>(path));
+            }
+            
+            return new XmlFileOrMissingPath<TModel>((IMissingPath)new MissingPath(path));
+        }
+        
+        public static XmlFileOrMissingPath<TModel> ExpectMissingXmlFile<TModel>(this IFileOrFolderOrMissingPath path)
+        {
+            return new XmlFileOrMissingPath<TModel>((IMissingPath)new MissingPath(path));
+        }
     }
     
     public class XmlFile : TextFile

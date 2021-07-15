@@ -23,6 +23,11 @@ namespace IoFluently
             
             return new TextFileOrMissingPath((IMissingPath)new MissingPath(path));
         }
+        
+        public static TextFileOrMissingPath ExpectMissingTextFile(this IFileOrFolderOrMissingPath path)
+        {
+            return new((IMissingPath)new MissingPath(path));
+        }
     }
     
     public class TextFile : File

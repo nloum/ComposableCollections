@@ -16,6 +16,11 @@ namespace IoFluently
         {
             return new ZipIoService(path.ExpectFileOrMissingPath(), enableOpenFilesTracking);
         }
+        
+        public static ZipIoService ExpectZipFile(this IFileOrFolderOrMissingPath path, bool enableOpenFilesTracking = false)
+        {
+            return new ZipIoService(path.ExpectFile(), enableOpenFilesTracking);
+        }
     }
     
     /// <summary>

@@ -321,7 +321,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken, bool recursive = false)
+        public override Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken,  bool recursive = true)
         {
             return Task.Run(() => DeleteFolder(path, recursive), cancellationToken);
         }
@@ -333,7 +333,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override MissingPath DeleteFolder(IFolder path, bool recursive = false)
+        public override MissingPath DeleteFolder(IFolder path,  bool recursive = true)
         {
             var parentFolder = GetFolder(TryParent(path).Value);
             parentFolder.Value.Folders.Remove(Name(Simplify(path)));
@@ -343,7 +343,7 @@ namespace IoFluently
         public override Stream Open(IFileOrMissingPath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,
             FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.None | FileOptions.SequentialScan,
-            Information? bufferSize = default, bool createRecursively = false)
+            Information? bufferSize = default,  bool createRecursively = true)
         {
             InMemoryFile file = null;
             var maybeFile = GetFile(path);
@@ -417,7 +417,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override Folder CreateFolder(IMissingPath path, bool createRecursively = false)
+        public override Folder CreateFolder(IMissingPath path,  bool createRecursively = true)
         {
             var folder = GetFolder(TryParent(path).Value).Value;
             EnsureFolderExists(folder, new[]{Name(path)});

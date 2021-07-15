@@ -281,7 +281,7 @@ namespace IoFluently
         }
 
         public StreamWriter OpenWriter(FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, Information? bufferSize = default,
-            bool createRecursively = false)
+             bool createRecursively = true)
         {
             var stream = Value .IoService.Open(Value.ExpectTextFileOrMissingPath(), FileMode.Create, FileAccess.Write, FileShare.None,
                 fileOptions, bufferSize, createRecursively);
@@ -295,7 +295,7 @@ namespace IoFluently
             }
         }
 
-        public virtual TextFile WriteAllLines(IEnumerable<string> lines, string newline = null, Encoding encoding = null, Information? bufferSize = default, bool createRecursively = false)
+        public virtual TextFile WriteAllLines(IEnumerable<string> lines, string newline = null, Encoding encoding = null, Information? bufferSize = default,  bool createRecursively = true)
         {
             newline ??= Environment.NewLine;
             
@@ -309,7 +309,7 @@ namespace IoFluently
             return new TextFile(Value );
         }
 
-        public TextFile WriteAllText(string text, Encoding encoding = null, bool createRecursively = false)
+        public TextFile WriteAllText(string text, Encoding encoding = null,  bool createRecursively = true)
         {
             encoding ??= Encoding.Default;
             using var writer = OpenWriter(FileOptions.None, encoding, Information.FromBytes(Math.Max(encoding.GetByteCount(text), 1)), createRecursively);

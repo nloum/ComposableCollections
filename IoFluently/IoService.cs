@@ -371,7 +371,7 @@ namespace IoFluently
             return observable.ToLiveLinq();
         }
 
-        public override async Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken, bool recursive = false)
+        public override async Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken,  bool recursive = true)
         {
             var pathString = path.FullName;
             Directory.Delete(pathString, recursive);
@@ -417,7 +417,7 @@ namespace IoFluently
         public override Stream Open(IFileOrMissingPath path, FileMode fileMode,
             FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.SequentialScan,
-            Information? bufferSize = default, bool createRecursively = false)
+            Information? bufferSize = default,  bool createRecursively = true)
         {
             if (MayCreateFile(fileMode))
                 TryParent(path ).IfHasValue(parent => EnsureIsFolder(parent));
@@ -550,7 +550,7 @@ namespace IoFluently
             return path.ExpectFile();
         }
 
-        public override MissingPath DeleteFolder(IFolder path, bool recursive = false)
+        public override MissingPath DeleteFolder(IFolder path,  bool recursive = true)
         {
             Directory.Delete(path.FullName, recursive);
 

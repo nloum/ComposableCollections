@@ -241,7 +241,7 @@ namespace IoFluently
             }
         }
 
-        public override async Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken, bool recursive = false)
+        public override async Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken,  bool recursive = true)
         {
             return DeleteFolder(path, recursive);
         }
@@ -252,7 +252,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override MissingPath DeleteFolder(IFolder path, bool recursive = false)
+        public override MissingPath DeleteFolder(IFolder path,  bool recursive = true)
         {
             if (Type(path) != IoFluently.PathType.Folder)
             {
@@ -281,7 +281,7 @@ namespace IoFluently
         public override Stream Open(IFileOrMissingPath fileOrMissingPath, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,
             FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.None | FileOptions.SequentialScan,
-            Information? bufferSize = default, bool createRecursively = false)
+            Information? bufferSize = default,  bool createRecursively = true)
         {
             if (!createRecursively)
             {

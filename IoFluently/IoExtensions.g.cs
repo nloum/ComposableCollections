@@ -199,11 +199,11 @@ namespace IoFluently
             return path.IoService.ReadBuffers(path, fileShare, bufferSize, paddingAtStart, paddingAtEnd);
         }
 
-        public static File WriteAllBytes(this IFileOrMissingPath path, Byte[] bytes, Boolean createRecursively = false) {
+        public static File WriteAllBytes(this IFileOrMissingPath path, Byte[] bytes, Boolean createRecursively = true) {
             return path.IoService.WriteAllBytes(path, bytes, createRecursively);
         }
 
-        public static Stream Open(this IFileOrMissingPath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None, FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.Asynchronous, Nullable<Information> bufferSize = null, Boolean createRecursively = false) {
+        public static Stream Open(this IFileOrMissingPath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None, FileOptions fileOptions = FileOptions.SequentialScan | FileOptions.Asynchronous, Nullable<Information> bufferSize = null, Boolean createRecursively = true) {
             return path.IoService.Open(path, fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively);
         }
 
@@ -211,11 +211,11 @@ namespace IoFluently
             return path.IoService.ToLiveLinq(path, includeFileContentChanges, includeSubFolders, pattern);
         }
 
-        public static Folder CreateFolder(this IMissingPath path, Boolean createRecursively = false) {
+        public static Folder CreateFolder(this IMissingPath path, Boolean createRecursively = true) {
             return path.IoService.CreateFolder(path, createRecursively);
         }
 
-        public static MissingPath DeleteFolder(this IFolder path, Boolean recursive = false) {
+        public static MissingPath DeleteFolder(this IFolder path, Boolean recursive = true) {
             return path.IoService.DeleteFolder(path, recursive);
         }
 
@@ -227,7 +227,7 @@ namespace IoFluently
             return path.IoService.Delete(path, recursiveDeleteIfFolder);
         }
 
-        public static Task<MissingPath> DeleteFolderAsync(this IFolder path, CancellationToken cancellationToken, Boolean recursive = false) {
+        public static Task<MissingPath> DeleteFolderAsync(this IFolder path, CancellationToken cancellationToken, Boolean recursive = true) {
             return path.IoService.DeleteFolderAsync(path, cancellationToken, recursive);
         }
 
@@ -239,23 +239,23 @@ namespace IoFluently
             return path.IoService.DeleteAsync(path, cancellationToken, recursiveDeleteIfFolder);
         }
 
-        public static Folder EnsureIsFolder(this IFileOrFolderOrMissingPath path, Boolean createRecursively = false) {
+        public static Folder EnsureIsFolder(this IFileOrFolderOrMissingPath path, Boolean createRecursively = true) {
             return path.IoService.EnsureIsFolder(path, createRecursively);
         }
 
-        public static Folder EnsureIsEmptyFolder(this IFileOrFolderOrMissingPath path, Boolean recursiveDeleteIfFolder = true, Boolean createRecursively = false) {
+        public static Folder EnsureIsEmptyFolder(this IFileOrFolderOrMissingPath path, Boolean recursiveDeleteIfFolder = true, Boolean createRecursively = true) {
             return path.IoService.EnsureIsEmptyFolder(path, recursiveDeleteIfFolder, createRecursively);
         }
 
-        public static Task<Folder> EnsureIsFolderAsync(this IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, Boolean createRecursively = false) {
+        public static Task<Folder> EnsureIsFolderAsync(this IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, Boolean createRecursively = true) {
             return path.IoService.EnsureIsFolderAsync(path, cancellationToken, createRecursively);
         }
 
-        public static Task<Folder> EnsureIsEmptyFolderAsync(this IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = true, Boolean createRecursively = false) {
+        public static Task<Folder> EnsureIsEmptyFolderAsync(this IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = true, Boolean createRecursively = true) {
             return path.IoService.EnsureIsEmptyFolderAsync(path, cancellationToken, recursiveDeleteIfFolder, createRecursively);
         }
 
-        public static IFileOrMissingPath EnsureIsNotFolder(this IFileOrFolderOrMissingPath path, Boolean recursive = false) {
+        public static IFileOrMissingPath EnsureIsNotFolder(this IFileOrFolderOrMissingPath path, Boolean recursive = true) {
             return path.IoService.EnsureIsNotFolder(path, recursive);
         }
 
@@ -267,7 +267,7 @@ namespace IoFluently
             return path.IoService.EnsureDoesNotExist(path, recursiveDeleteIfFolder);
         }
 
-        public static Task<IFileOrMissingPath> EnsureIsNotFolderAsync(this IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, Boolean recursive = false) {
+        public static Task<IFileOrMissingPath> EnsureIsNotFolderAsync(this IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, Boolean recursive = true) {
             return path.IoService.EnsureIsNotFolderAsync(path, cancellationToken, recursive);
         }
 

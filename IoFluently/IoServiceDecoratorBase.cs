@@ -125,12 +125,12 @@ namespace IoFluently
 
         public virtual bool IsCaseSensitiveByDefault => _decorated.IsCaseSensitiveByDefault;
 
-        public virtual Folder CreateFolder(IMissingPath path, bool createRecursively = false)
+        public virtual Folder CreateFolder(IMissingPath path,  bool createRecursively = true)
         {
             return _decorated.CreateFolder(path, createRecursively);
         }
 
-        public virtual MissingPath DeleteFolder(IFolder path, bool recursive = false)
+        public virtual MissingPath DeleteFolder(IFolder path,  bool recursive = true)
         {
             return _decorated.DeleteFolder(path, recursive);
         }
@@ -145,7 +145,7 @@ namespace IoFluently
             return _decorated.Delete(path, recursiveDeleteIfFolder);
         }
 
-        public virtual Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken, bool recursive = false)
+        public virtual Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken,  bool recursive = true)
         {
             return _decorated.DeleteFolderAsync(path, cancellationToken, recursive);
         }
@@ -160,30 +160,30 @@ namespace IoFluently
             return _decorated.DeleteAsync(path, cancellationToken, recursiveDeleteIfFolder);
         }
 
-        public virtual Folder EnsureIsFolder(IFileOrFolderOrMissingPath path, bool createRecursively = false)
+        public virtual Folder EnsureIsFolder(IFileOrFolderOrMissingPath path,  bool createRecursively = true)
         {
             return _decorated.EnsureIsFolder(path, createRecursively);
         }
 
         public virtual Folder EnsureIsEmptyFolder(IFileOrFolderOrMissingPath path, bool recursiveDeleteIfFolder = true,
-            bool createRecursively = false)
+             bool createRecursively = true)
         {
             return _decorated.EnsureIsEmptyFolder(path, recursiveDeleteIfFolder, createRecursively);
         }
 
         public virtual Task<Folder> EnsureIsFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken,
-            bool createRecursively = false)
+             bool createRecursively = true)
         {
             return _decorated.EnsureIsFolderAsync(path, cancellationToken, createRecursively);
         }
 
         public virtual Task<Folder> EnsureIsEmptyFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken,
-            bool recursiveDeleteIfFolder = true, bool createRecursively = false)
+            bool recursiveDeleteIfFolder = true,  bool createRecursively = true)
         {
             return _decorated.EnsureIsEmptyFolderAsync(path, cancellationToken, recursiveDeleteIfFolder, createRecursively);
         }
 
-        public virtual IFileOrMissingPath EnsureIsNotFolder(IFileOrFolderOrMissingPath path, bool recursive = false)
+        public virtual IFileOrMissingPath EnsureIsNotFolder(IFileOrFolderOrMissingPath path,  bool recursive = true)
         {
             return _decorated.EnsureIsNotFolder(path, recursive);
         }
@@ -199,7 +199,7 @@ namespace IoFluently
         }
 
         public virtual Task<IFileOrMissingPath> EnsureIsNotFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken,
-            bool recursive = false)
+             bool recursive = true)
         {
             return _decorated.EnsureIsNotFolderAsync(path, cancellationToken, recursive);
         }
@@ -761,7 +761,7 @@ namespace IoFluently
             return _decorated.ReadBuffers(path, fileShare, bufferSize, paddingAtStart, paddingAtEnd);
         }
 
-        public virtual File WriteAllBytes(IFileOrMissingPath path, byte[] bytes, bool createRecursively = false)
+        public virtual File WriteAllBytes(IFileOrMissingPath path, byte[] bytes,  bool createRecursively = true)
         {
             return _decorated.WriteAllBytes(path, bytes, createRecursively);
         }
@@ -769,7 +769,7 @@ namespace IoFluently
         public virtual Stream Open(IFileOrMissingPath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,
             FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.None | FileOptions.SequentialScan | FileOptions.Asynchronous,
-            Information? bufferSize = default, bool createRecursively = false)
+            Information? bufferSize = default,  bool createRecursively = true)
         {
             return _decorated.Open(path, fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively);
         }

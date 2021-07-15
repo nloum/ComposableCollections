@@ -48,7 +48,7 @@ namespace IoFluently
         public override EmptyFolderMode EmptyFolderMode { get; }
         public override bool CanEmptyDirectoriesExist { get; }
 
-        public override Folder CreateFolder(IMissingPath path, bool createRecursively = false)
+        public override Folder CreateFolder(IMissingPath path,  bool createRecursively = true)
         {
             var transformedPath = Transform   (path);
             var decorated = transformedPath.IoService;
@@ -56,7 +56,7 @@ namespace IoFluently
             return path.ExpectFolder();
         }
 
-        public override MissingPath DeleteFolder(IFolder path, bool recursive = false)
+        public override MissingPath DeleteFolder(IFolder path,  bool recursive = true)
         {
             var transformedPath = Transform   (path);
             var decorated = transformedPath.IoService;
@@ -72,7 +72,7 @@ namespace IoFluently
             return path.ExpectMissingPath();
         }
 
-        public override async Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken, bool recursive = false)
+        public override async Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken,  bool recursive = true)
         {
             var transformedPath = Transform   (path);
             var decorated = transformedPath.IoService;
@@ -143,7 +143,7 @@ namespace IoFluently
         public override Stream Open(IFileOrMissingPath path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite,
             FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.None | FileOptions.SequentialScan | FileOptions.Asynchronous,
-            Information? bufferSize = default, bool createRecursively = false)
+            Information? bufferSize = default,  bool createRecursively = true)
         {
             var transformedPath = Transform   (path);
             var decorated = transformedPath.IoService;

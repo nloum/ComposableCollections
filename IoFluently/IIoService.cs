@@ -86,7 +86,7 @@ namespace IoFluently
         
         #region Creating
         
-        Folder CreateFolder(IMissingPath path, bool createRecursively = false);
+        Folder CreateFolder(IMissingPath path,  bool createRecursively = true);
 
         #endregion
 
@@ -100,7 +100,7 @@ namespace IoFluently
         /// <param name="path">The folder to delete</param>
         /// <param name="recursive">Whether to delete the folder recursively.</param>
         /// <returns>The path that was deleted</returns>
-        MissingPath DeleteFolder(IFolder  path, bool recursive = false);
+        MissingPath DeleteFolder(IFolder  path,  bool recursive = true);
         
         /// <summary>
         /// Deletes the specified file
@@ -128,7 +128,7 @@ namespace IoFluently
         /// <param name="path">The folder to delete</param>
         /// <param name="recursive">Whether to delete the folder recursively.</param>
         /// <returns>The path that was deleted</returns>
-        Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken, bool recursive = false);
+        Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken,  bool recursive = true);
         
         /// <summary>
         /// Deletes the specified file
@@ -157,18 +157,18 @@ namespace IoFluently
         /// </summary>
         /// <param name="path">The path that should be a folder</param>
         /// <returns>The same path that was specified</returns>
-        Folder EnsureIsFolder(IFileOrFolderOrMissingPath path, bool createRecursively = false);
+        Folder EnsureIsFolder(IFileOrFolderOrMissingPath path,  bool createRecursively = true);
 
-        Folder EnsureIsEmptyFolder(IFileOrFolderOrMissingPath path, bool recursiveDeleteIfFolder = true, bool createRecursively = false);
+        Folder EnsureIsEmptyFolder(IFileOrFolderOrMissingPath path, bool recursiveDeleteIfFolder = true,  bool createRecursively = true);
 
         /// <summary>
         /// Creates the path as a folder if it isn't already. If the path is a file, throws an IOException.
         /// </summary>
         /// <param name="path">The path that should be a folder</param>
         /// <returns>The same path that was specified</returns>
-        Task<Folder> EnsureIsFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, bool createRecursively = false);
+        Task<Folder> EnsureIsFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken,  bool createRecursively = true);
 
-        Task<Folder> EnsureIsEmptyFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true, bool createRecursively = false);
+        Task<Folder> EnsureIsEmptyFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, bool recursiveDeleteIfFolder = true,  bool createRecursively = true);
 
         #endregion
         
@@ -181,7 +181,7 @@ namespace IoFluently
         /// <param name="path">The path that may be a folder</param>
         /// <param name="recursive">Whether to recursively delete the contents of the path if the path is a non-empty folder</param>
         /// <returns>The same path that was specified</returns>
-        IFileOrMissingPath EnsureIsNotFolder(IFileOrFolderOrMissingPath path, bool recursive = false);
+        IFileOrMissingPath EnsureIsNotFolder(IFileOrFolderOrMissingPath path,  bool recursive = true);
 
         IFolderOrMissingPath EnsureIsNotFile(IFileOrFolderOrMissingPath path);
 
@@ -194,7 +194,7 @@ namespace IoFluently
         /// <param name="path">The path that may be a folder</param>
         /// <param name="recursive">Whether to recursively delete the contents of the path if the path is a non-empty folder</param>
         /// <returns>The same path that was specified</returns>
-        Task<IFileOrMissingPath> EnsureIsNotFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, bool recursive = false);
+        Task<IFileOrMissingPath> EnsureIsNotFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken,  bool recursive = true);
 
         Task<IFolderOrMissingPath> EnsureIsNotFileAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken);
 
@@ -610,14 +610,14 @@ namespace IoFluently
         #endregion
         
         #region File writing
-        File WriteAllBytes(IFileOrMissingPath path, byte[] bytes, bool createRecursively = false);
+        File WriteAllBytes(IFileOrMissingPath path, byte[] bytes,  bool createRecursively = true);
         #endregion
         
         #region File open for reading or writing
         Stream Open(IFileOrMissingPath path, FileMode fileMode,
             FileAccess fileAccess = FileAccess.ReadWrite, FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.SequentialScan,
-            Information? bufferSize = default, bool createRecursively = false);
+            Information? bufferSize = default,  bool createRecursively = true);
         #endregion
         
         #region LINQ-style APIs

@@ -78,13 +78,13 @@ namespace IoFluently
         #region Creating
         
         /// <inheritdoc />
-        public abstract Folder CreateFolder(IMissingPath path, bool createRecursively = false);
+        public abstract Folder CreateFolder(IMissingPath path,  bool createRecursively = true);
 
         #endregion
         #region Deleting
         
         /// <inheritdoc />
-        public abstract MissingPath DeleteFolder(IFolder path, bool recursive = false);
+        public abstract MissingPath DeleteFolder(IFolder path,  bool recursive = true);
 
         /// <inheritdoc />
         public abstract MissingPath DeleteFile(IFile path);
@@ -97,7 +97,7 @@ namespace IoFluently
 
         /// <inheritdoc />
         public abstract Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken,
-            bool recursive = false);
+             bool recursive = true);
 
         /// <inheritdoc />
         public abstract Task<MissingPath> DeleteFileAsync(IFile path, CancellationToken cancellationToken);
@@ -112,7 +112,7 @@ namespace IoFluently
         #region Ensuring is
 
         /// <inheritdoc />
-        public async Task<Folder> EnsureIsFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, bool createRecursively = false)
+        public async Task<Folder> EnsureIsFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken,  bool createRecursively = true)
         {
             return path.Collapse(
                 file => CreateFolder(DeleteFile(file)),
@@ -122,7 +122,7 @@ namespace IoFluently
 
         /// <inheritdoc />
         public Task<Folder> EnsureIsEmptyFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken,
-            bool recursiveDeleteIfFolder = true, bool createRecursively = false)
+            bool recursiveDeleteIfFolder = true,  bool createRecursively = true)
         {
             return path.Collapse(
                 async file =>
@@ -143,7 +143,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public Folder EnsureIsFolder(IFileOrFolderOrMissingPath path, bool createRecursively = false)
+        public Folder EnsureIsFolder(IFileOrFolderOrMissingPath path,  bool createRecursively = true)
         {
             return path.Collapse(
                 file => CreateFolder(DeleteFile(file)),
@@ -152,7 +152,7 @@ namespace IoFluently
         }
         
         /// <inheritdoc />
-        public Folder EnsureIsEmptyFolder(IFileOrFolderOrMissingPath path, bool recursiveDeleteIfFolder = true, bool createRecursively = false)
+        public Folder EnsureIsEmptyFolder(IFileOrFolderOrMissingPath path, bool recursiveDeleteIfFolder = true,  bool createRecursively = true)
         {
             return path.Collapse(
                 file => CreateFolder(DeleteFile(file)),
@@ -172,7 +172,7 @@ namespace IoFluently
         #region Ensuring is not
 
         /// <inheritdoc />
-        public Task<IFileOrMissingPath> EnsureIsNotFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, bool recursive = false)
+        public Task<IFileOrMissingPath> EnsureIsNotFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken,  bool recursive = true)
         {
             return path.Collapse(
                 file => Task.FromResult((IFileOrMissingPath)file),
@@ -230,7 +230,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public IFileOrMissingPath EnsureIsNotFolder(IFileOrFolderOrMissingPath path, bool recursive = false)
+        public IFileOrMissingPath EnsureIsNotFolder(IFileOrFolderOrMissingPath path,  bool recursive = true)
         {
             return path.Collapse(
                 file => file.ExpectFileOrMissingPath(),
@@ -2150,7 +2150,7 @@ namespace IoFluently
         #region File writing
 
         /// <inheritdoc />
-        public virtual File WriteAllBytes(IFileOrMissingPath path, byte[] bytes, bool createRecursively = false)
+        public virtual File WriteAllBytes(IFileOrMissingPath path, byte[] bytes,  bool createRecursively = true)
         {
             using var stream = Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.WriteThrough,
                 Information.FromBytes(bytes.Length), createRecursively);
@@ -2167,7 +2167,7 @@ namespace IoFluently
             FileAccess fileAccess = FileAccess.ReadWrite,
             FileShare fileShare = FileShare.None,
             FileOptions fileOptions = FileOptions.Asynchronous | FileOptions.None | FileOptions.SequentialScan,
-            Information? bufferSize = default, bool createRecursively = false);
+            Information? bufferSize = default,  bool createRecursively = true);
 
         #endregion
         #region LINQ-style APIs

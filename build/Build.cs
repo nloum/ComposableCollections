@@ -71,6 +71,7 @@ class Build : NukeBuild
 	    Solution.GetProject("ComposableCollections.GraphQL"),
 	    Solution.GetProject("GenericNumbers"),
 	    Solution.GetProject("IoFluently"),
+	    Solution.GetProject("IoFluently.NewtonsoftJson"),
 	    Solution.GetProject("IoFluently.SharpCompress"),
 	    Solution.GetProject("IoFluently.SystemTextJson"),
 	    Solution.GetProject("MoreCollections"),

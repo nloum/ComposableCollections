@@ -61,6 +61,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoFluently.PathTypes.Tests"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoFluently.SharpCompress", "IoFluently.SharpCompress\IoFluently.SharpCompress.csproj", "{5FC9FDBC-FCCC-406C-9011-03CF4A2184C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoFluently.Dokan", "IoFluently.Dokan\IoFluently.Dokan.csproj", "{4F887E24-BE74-4FFA-941E-405A88AC095A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoFluently.NewtonsoftJson", "IoFluently.NewtonsoftJson\IoFluently.NewtonsoftJson.csproj", "{805A36F2-65BB-4235-AEED-A3ACC54C91DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -181,6 +185,14 @@ Global
 		{5FC9FDBC-FCCC-406C-9011-03CF4A2184C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FC9FDBC-FCCC-406C-9011-03CF4A2184C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5FC9FDBC-FCCC-406C-9011-03CF4A2184C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F887E24-BE74-4FFA-941E-405A88AC095A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F887E24-BE74-4FFA-941E-405A88AC095A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F887E24-BE74-4FFA-941E-405A88AC095A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F887E24-BE74-4FFA-941E-405A88AC095A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{805A36F2-65BB-4235-AEED-A3ACC54C91DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{805A36F2-65BB-4235-AEED-A3ACC54C91DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{805A36F2-65BB-4235-AEED-A3ACC54C91DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{805A36F2-65BB-4235-AEED-A3ACC54C91DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

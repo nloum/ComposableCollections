@@ -6,7 +6,7 @@ namespace IoFluently
     /// <summary>
     /// Partial implementation of <see cref="IIoEnvironmentService"/>, useful for creating a new implementation
     /// </summary>
-    public abstract class IoEnvironmentServiceBase : IoServiceBase, IIoEnvironmentService
+    public abstract class IoEnvironmentServiceBase : FileSystemBase, IIoEnvironmentService
     {
         protected IoEnvironmentServiceBase(IOpenFilesTrackingService openFilesTrackingService, bool isCaseSensitiveByDefault, string defaultDirectorySeparator) : base(openFilesTrackingService, isCaseSensitiveByDefault, defaultDirectorySeparator)
         {

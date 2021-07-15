@@ -20,13 +20,13 @@ using static SimpleMonads.Utility;
 
 namespace IoFluently
 {
-    public class IoService : IoServiceBase, IIoEnvironmentService
+    public class FileSystem : FileSystemBase, IIoEnvironmentService
     {
         /// <summary>
         /// The default IoService. Use this for environments where dependency injection isn't necessary.
         /// E.g., Nuke.build scripts or bootstrapping a larger program.
         /// </summary>
-        public static IoService Default { get; set; }
+        public static FileSystem Default { get; set; }
     
         private bool? _isCaseSensitiveByDefault = null;
 
@@ -139,12 +139,12 @@ namespace IoFluently
         
         public TimeSpan DeleteOrCreateTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
-        public IoService() : this(false)
+        public FileSystem() : this(false)
         {
             UpdateRoots();
         }
         
-        public IoService(bool enableOpenFilesTracking) : base(new OpenFilesTrackingService(enableOpenFilesTracking), ShouldBeCaseSensitiveByDefault(), GetDefaultDirectorySeparatorForThisEnvironment())
+        public FileSystem(bool enableOpenFilesTracking) : base(new OpenFilesTrackingService(enableOpenFilesTracking), ShouldBeCaseSensitiveByDefault(), GetDefaultDirectorySeparatorForThisEnvironment())
         {
             PathObservationMethod = GetDefaultPathObservationMethod();
             UpdateRoots();
@@ -213,8 +213,8 @@ namespace IoFluently
             process.Start();
 
             var initialState = includeSubFolders
-                ? root.IoService.EnumerateDescendants(root).Select(x => new AbsolutePath(x)).ToImmutableDictionary(x => x, x => Type(x))
-                : root.IoService.EnumerateChildren(root).Select(x => new AbsolutePath(x)).ToImmutableDictionary(x => x, x => Type(x));
+                ? root.FileSystem.EnumerateDescendants(root).Select(x => new AbsolutePath(x)).ToImmutableDictionary(x => x, x => Type(x))
+                : root.FileSystem.EnumerateChildren(root).Select(x => new AbsolutePath(x)).ToImmutableDictionary(x => x, x => Type(x));
 
             var resultObservable = process.StandardOutput
                 .Observe(new []{ (char)0 })
@@ -283,7 +283,7 @@ namespace IoFluently
             if (!string.IsNullOrWhiteSpace(pattern))
             {
                 var regex = FileNamePatternToRegex(pattern);
-                result = result.Where(path => regex.IsMatch(path.IoService.Name(path)));
+                result = result.Where(path => regex.IsMatch(path.FileSystem.Name(path)));
             }
             
             return result;
@@ -309,7 +309,7 @@ namespace IoFluently
                     .Select(x => x.EventArgs)
                     .Subscribe(args =>
                     {
-                        var path = root.IoService.TryParseAbsolutePath(args.FullPath).Value;
+                        var path = root.FileSystem.TryParseAbsolutePath(args.FullPath).Value;
                         observer.OnNext(LiveLinq.Utility.SetChange(CollectionChangeType.Add, path));
                     });
 
@@ -321,7 +321,7 @@ namespace IoFluently
                     .Select(x => x.EventArgs)
                     .Subscribe(args =>
                     {
-                        var path = root.IoService.TryParseAbsolutePath(args.FullPath).Value;
+                        var path = root.FileSystem.TryParseAbsolutePath(args.FullPath).Value;
                         observer.OnNext(LiveLinq.Utility.SetChange(CollectionChangeType.Remove, path));
                     });
 
@@ -337,7 +337,7 @@ namespace IoFluently
                     .Merge()
                     .Subscribe(args =>
                     {
-                        var path = root.IoService.TryParseAbsolutePath(args.FullPath).Value;
+                        var path = root.FileSystem.TryParseAbsolutePath(args.FullPath).Value;
                         observer.OnNext(LiveLinq.Utility.SetChange(CollectionChangeType.Remove, path));
                         observer.OnNext(LiveLinq.Utility.SetChange(CollectionChangeType.Add, path));
                     });
@@ -350,15 +350,15 @@ namespace IoFluently
                     .Select(x => x.EventArgs)
                     .Subscribe(args =>
                     {
-                        var oldPath = root.IoService.TryParseAbsolutePath(args.OldFullPath).Value;
-                        var path = root.IoService.TryParseAbsolutePath(args.FullPath).Value;
+                        var oldPath = root.FileSystem.TryParseAbsolutePath(args.OldFullPath).Value;
+                        var path = root.FileSystem.TryParseAbsolutePath(args.FullPath).Value;
                         observer.OnNext(LiveLinq.Utility.SetChange(CollectionChangeType.Remove, oldPath));
                         observer.OnNext(LiveLinq.Utility.SetChange(CollectionChangeType.Add, path));
                     });
 
                 var initialSetChange = LiveLinq.Utility.SetChange(CollectionChangeType.Add, includeSubFolders
-                    ? root.IoService.EnumerateDescendants(root).Select(x => new AbsolutePath(x))
-                    : root.IoService.EnumerateChildren(root).Select(x => new AbsolutePath(x)).AsEnumerable());
+                    ? root.FileSystem.EnumerateDescendants(root).Select(x => new AbsolutePath(x))
+                    : root.FileSystem.EnumerateChildren(root).Select(x => new AbsolutePath(x)).AsEnumerable());
 
                 observer.OnNext(initialSetChange);
 

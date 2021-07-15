@@ -9,20 +9,20 @@ namespace IoFluently
         public IReadOnlyList<string> Components { get; }
         public bool IsCaseSensitive { get; }
         public string DirectorySeparator { get; }
-        public IIoService IoService { get; }
+        public IFileSystem FileSystem { get; }
 
         public File(IFileOrFolderOrMissingPath path) : this(path.Components, path.IsCaseSensitive,
-            path.DirectorySeparator, path.IoService)
+            path.DirectorySeparator, path.FileSystem)
         {
             
         }
         
-        public File(IReadOnlyList<string> components, bool isCaseSensitive, string directorySeparator, IIoService ioService)
+        public File(IReadOnlyList<string> components, bool isCaseSensitive, string directorySeparator, IFileSystem fileSystem)
         {
             Components = components;
             IsCaseSensitive = isCaseSensitive;
             DirectorySeparator = directorySeparator;
-            IoService = ioService;
+            FileSystem = fileSystem;
 
             this.AssertExpectedType(PathType.File);
         }

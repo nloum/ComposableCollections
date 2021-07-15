@@ -17,8 +17,8 @@ namespace IoFluently.CodeGenerator
     {
         static void Main(string[] args)
         {
-            var ioService = new IoService();
-            var repoRoot = ioService.CurrentDirectory.Ancestors(false).First(ancestor => ioService.IsFolder(ancestor / ".git"));
+            var fileSystem = new FileSystem();
+            var repoRoot = fileSystem.CurrentDirectory.Ancestors(false).First(ancestor => fileSystem.IsFolder(ancestor / ".git"));
 
             using (var partialClassesWriter = (repoRoot / "IoFluently" / "PartialClasses.g.cs").ExpectTextFileOrMissingPath().OpenWriter())
             {
@@ -63,9 +63,9 @@ namespace IoFluently
 {
     /// <summary>
     /// Contains extension methods on AbsolutePath, RelativePath, and IAbsolutePathTranslation that essentially wrap
-    /// methods on the object's IoService property. That is, myAbsolutePath.RelativeTo(parameter1) is equivalent to
-    /// myAbsolutePath.IoService.RelativeTo(myAbsolutePath, parameter1). This shorthand makes the syntax be fluent
-    /// while allowing the IIoService to be dependency injectable.
+    /// methods on the object's FileSystem property. That is, myAbsolutePath.RelativeTo(parameter1) is equivalent to
+    /// myAbsolutePath.FileSystem.RelativeTo(myAbsolutePath, parameter1). This shorthand makes the syntax be fluent
+    /// while allowing the IFileSystem to be dependency injectable.
     /// </summary>
     public static partial class IoExtensions
     {");
@@ -82,11 +82,11 @@ namespace IoFluently
         {
             var typeReader = new TypeReader();
             typeReader.AddSupportForReflection();
-            var ioServiceType = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IIoService)].Value;
+            var fileSystemType = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IFileSystem)].Value;
 
             var partialTypes = new List<IPartialType>();
 
-            foreach (var groupedByPartialClass in ioServiceType.Methods.OrderBy(method => method.Name).ThenBy(method => method.Parameters.Count).ThenBy(method => method.GetHashCode())
+            foreach (var groupedByPartialClass in fileSystemType.Methods.OrderBy(method => method.Name).ThenBy(method => method.Parameters.Count).ThenBy(method => method.GetHashCode())
                 .Where(x => ShouldBeProperty(x))
                 .GroupBy(x => x.Parameters[0].Type.Identifier))
             {
@@ -114,7 +114,7 @@ namespace IoFluently
                         Implementation = new MethodToPropertyDelegateImplementation()
                         {
                             DelegatesTo = method,
-                            Body = $"IoService.{method.Name}(this);"
+                            Body = $"FileSystem.{method.Name}(this);"
                         }
                     });
                 }
@@ -163,7 +163,7 @@ namespace IoFluently
                                 Implementation = new MethodToPropertyDelegateImplementation()
                                 {
                                     DelegatesTo = method,
-                                    Body = $"IoService.{method.Name}(this);"
+                                    Body = $"FileSystem.{method.Name}(this);"
                                 }
                             });
                         }
@@ -229,7 +229,7 @@ namespace IoFluently
         {
             var typeReader = new TypeReader();
             typeReader.AddSupportForReflection();
-            var ioServiceType = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IIoService)].Value;
+            var fileSystemType = (ReflectionNonGenericInterface)typeReader.GetTypeFormat<Type>()[typeof(IFileSystem)].Value;
             var extensionMethodTypes = new[]
             {
                 typeof(Folder),
@@ -244,7 +244,7 @@ namespace IoFluently
                 typeof(IFolderOrMissingPath)
             }.Select(x => typeReader.GetTypeFormat<Type>()[x].Value).ToImmutableHashSet();
 
-            foreach (var method in ioServiceType.Methods)
+            foreach (var method in fileSystemType.Methods)
             {
                 if (ShouldBeProperty(method))
                 {
@@ -306,7 +306,7 @@ namespace IoFluently
                 {
                     textWriter.Write("return ");
                 }
-                textWriter.WriteLine($"{arguments[0]}.IoService.{method.Name}({string.Join(", ", arguments)});");
+                textWriter.WriteLine($"{arguments[0]}.FileSystem.{method.Name}({string.Join(", ", arguments)});");
                 textWriter.WriteLine("        }\n");
 
                 if (method.ReturnType is IBoundGenericInterface boundIface)
@@ -320,7 +320,7 @@ namespace IoFluently
                         {
                             textWriter.Write("return ");
                         }
-                        textWriter.WriteLine($"{arguments[0]}.IoService.{method.Name}({string.Join(", ", arguments)}).Value;");
+                        textWriter.WriteLine($"{arguments[0]}.FileSystem.{method.Name}({string.Join(", ", arguments)}).Value;");
                         textWriter.WriteLine("        }\n");
                     }
                 }

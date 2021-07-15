@@ -5,12 +5,12 @@ using LiveLinq.Set;
 
 namespace IoFluently
 {
-    public class UnionIoService : PathTransformationIoServiceBase
+    public class UnionFileSystem : PathTransformationFileSystemBase
     {
         private readonly ObservableSet<Folder> _roots = new();
-        public ImmutableList<IIoService> IoServices { get; set; } = ImmutableList<IIoService>.Empty;
+        public ImmutableList<IFileSystem> IoServices { get; set; } = ImmutableList<IFileSystem>.Empty;
 
-        public UnionIoService(IOpenFilesTrackingService openFilesTrackingService, bool isCaseSensitiveByDefault, string defaultDirectorySeparator) : base(openFilesTrackingService, isCaseSensitiveByDefault, defaultDirectorySeparator)
+        public UnionFileSystem(IOpenFilesTrackingService openFilesTrackingService, bool isCaseSensitiveByDefault, string defaultDirectorySeparator) : base(openFilesTrackingService, isCaseSensitiveByDefault, defaultDirectorySeparator)
         {
         }
 

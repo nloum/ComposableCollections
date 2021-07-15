@@ -14,13 +14,13 @@ namespace IoFluently
             _isPhysicalPath = isPhysicalPath;
         }
 
-        public Stream CreateReadStream() => _absolutePath.IoService.Open( _absolutePath, FileMode.Open, FileAccess.Read, FileShare.Read );
+        public Stream CreateReadStream() => _absolutePath.FileSystem.Open( _absolutePath, FileMode.Open, FileAccess.Read, FileShare.Read );
 
-        public bool Exists => _absolutePath.IoService.Exists(_absolutePath);
-        public long Length => (long) Math.Round(_absolutePath.IoService.FileSize(_absolutePath).Bytes);
+        public bool Exists => _absolutePath.FileSystem.Exists(_absolutePath);
+        public long Length => (long) Math.Round(_absolutePath.FileSystem.FileSize(_absolutePath).Bytes);
         public string PhysicalPath => _isPhysicalPath ? _absolutePath.FullName : null;
-        public string Name => _absolutePath.IoService.Name(_absolutePath);
-        public DateTimeOffset LastModified => _absolutePath.IoService.LastWriteTime(_absolutePath);
-        public bool IsDirectory => _absolutePath.IoService.IsFolder(_absolutePath);
+        public string Name => _absolutePath.FileSystem.Name(_absolutePath);
+        public DateTimeOffset LastModified => _absolutePath.FileSystem.LastWriteTime(_absolutePath);
+        public bool IsDirectory => _absolutePath.FileSystem.IsFolder(_absolutePath);
     }
 }

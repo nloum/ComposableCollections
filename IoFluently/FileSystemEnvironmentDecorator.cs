@@ -2,11 +2,11 @@
 
 namespace IoFluently
 {
-    public class IoServiceEnvironmentDecorator : IoServiceDecoratorBase, IIoEnvironmentService
+    public class FileSystemEnvironmentDecorator : FileSystemDecoratorBase, IIoEnvironmentService
     {
         private readonly IIoEnvironmentService _decorated;
 
-        public IoServiceEnvironmentDecorator(IIoEnvironmentService decorated) : base(decorated)
+        public FileSystemEnvironmentDecorator(IIoEnvironmentService decorated) : base(decorated)
         {
             _decorated = decorated;
         }

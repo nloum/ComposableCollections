@@ -1,11 +1,11 @@
 namespace IoFluently
 {
     /// <summary>
-    /// Environmental IO methods and properties. These are disconnected from the main <see cref="IIoService"/> because
-    /// it is quite possible to have <see cref="IIoService"/> implementations where these environmental methods and properties
+    /// Environmental IO methods and properties. These are disconnected from the main <see cref="IFileSystem"/> because
+    /// it is quite possible to have <see cref="IFileSystem"/> implementations where these environmental methods and properties
     /// don't make sense. E.g., zip files typically don't contain a temporary folder where temporary files can be written to.
     /// </summary>
-    public interface IIoEnvironmentService : IIoService
+    public interface IIoEnvironmentService : IFileSystem
     {
         /// <summary>
         /// When relative paths are auto-converted to absolute paths, they are assumed to be relative to the this folder.
@@ -27,7 +27,7 @@ namespace IoFluently
         MissingPath GenerateUniqueTemporaryPath(string extension = null);
         
         /// <summary>
-        /// Parses the path. If the path is a relative path, assumes that it is relative to <see cref="IoService.CurrentDirectory"/>.
+        /// Parses the path. If the path is a relative path, assumes that it is relative to <see cref="FileSystem.CurrentDirectory"/>.
         /// </summary>
         AbsolutePath ParsePathRelativeToWorkingDirectory(string path);
     }

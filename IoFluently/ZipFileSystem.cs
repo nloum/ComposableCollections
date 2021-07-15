@@ -12,21 +12,21 @@ namespace IoFluently
 {
     public static class ZipIoExtensions
     {
-        public static ZipIoService ExpectZipFileOrMissingPath(this IFileOrFolderOrMissingPath path, bool enableOpenFilesTracking = false)
+        public static ZipFileSystem ExpectZipFileOrMissingPath(this IFileOrFolderOrMissingPath path, bool enableOpenFilesTracking = false)
         {
-            return new ZipIoService(path.ExpectFileOrMissingPath(), enableOpenFilesTracking);
+            return new ZipFileSystem(path.ExpectFileOrMissingPath(), enableOpenFilesTracking);
         }
         
-        public static ZipIoService ExpectZipFile(this IFileOrFolderOrMissingPath path, bool enableOpenFilesTracking = false)
+        public static ZipFileSystem ExpectZipFile(this IFileOrFolderOrMissingPath path, bool enableOpenFilesTracking = false)
         {
-            return new ZipIoService(path.ExpectFile(), enableOpenFilesTracking);
+            return new ZipFileSystem(path.ExpectFile(), enableOpenFilesTracking);
         }
     }
     
     /// <summary>
     /// An IIoService implementation that is backed by a zip file
     /// </summary>
-    public class ZipIoService : IoServiceBase
+    public class ZipFileSystem : FileSystemBase
     {
         private bool _hasZipFileBeenCreatedYet = false;
         private EmptyFolderMode _emptyFolderMode = EmptyFolderMode.AllNonExistentPathsAreFolders;
@@ -61,7 +61,7 @@ namespace IoFluently
         /// <param name="zipFilePath">The path to the zip file</param>
         /// <param name="newline">The newline character(s) (e.g. '\n' or '\r\n')</param>
         /// <param name="enableOpenFilesTracking">Whether to enable the tracking of open files</param>
-        public ZipIoService(IFileOrMissingPath zipFilePath, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), true, "/")
+        public ZipFileSystem(IFileOrMissingPath zipFilePath, bool enableOpenFilesTracking = false) : base(new OpenFilesTrackingService(enableOpenFilesTracking), true, "/")
         {
             if (zipFilePath == null)
             {
@@ -119,7 +119,7 @@ namespace IoFluently
                 var regex = FileNamePatternToRegex(searchPattern);
                 
                 return archive.Entries.Select(entry =>
-                    TryParseAbsolutePath(entry.FullName, _root).Value).Where(child => child.IoService.TryParent(child).Value == path )
+                    TryParseAbsolutePath(entry.FullName, _root).Value).Where(child => child.FileSystem.TryParent(child).Value == path )
                     .Where(x => regex.IsMatch(x))
                     .Select(path => path.ExpectFileOrFolder());
             }
@@ -183,20 +183,20 @@ namespace IoFluently
                 {
                     throw new InvalidOperationException($"No such file {attributes}");
                 }
-                return ZipFilePath .IoService.Attributes(ZipFilePath.ExpectFile());
+                return ZipFilePath .FileSystem.Attributes(ZipFilePath.ExpectFile());
             }
         }
 
         /// <inheritdoc />
         public override DateTimeOffset CreationTime(IFile path)
         {
-            return ZipFilePath.IoService.CreationTime(ZipFilePath.ExpectFile());
+            return ZipFilePath.FileSystem.CreationTime(ZipFilePath.ExpectFile());
         }
 
         /// <inheritdoc />
         public override DateTimeOffset LastAccessTime(IFile path)
         {
-            return ZipFilePath.IoService.LastAccessTime(ZipFilePath.ExpectFile());
+            return ZipFilePath.FileSystem.LastAccessTime(ZipFilePath.ExpectFile());
         }
 
         /// <inheritdoc />
@@ -348,14 +348,14 @@ namespace IoFluently
             var pathType = ZipFilePath .Type;
             if (pathType == IoFluently.PathType.MissingPath)
             {
-                var stream = ZipFilePath .IoService.Open(ZipFilePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, FileOptions.None);
+                var stream = ZipFilePath .FileSystem.Open(ZipFilePath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, FileOptions.None);
                 var zipArchive = new ZipArchive(stream, ZipArchiveMode.Create, false);
                 zipArchive.Dispose();
                 
                 if (willBeReading)
                 {
                     zipArchive.Dispose();
-                    stream = ZipFilePath .IoService.Open(ZipFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None, FileOptions.None);
+                    stream = ZipFilePath .FileSystem.Open(ZipFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None, FileOptions.None);
                     zipArchive = new ZipArchive(stream, ZipArchiveMode.Update, false);
                     return zipArchive;
                 }
@@ -370,7 +370,7 @@ namespace IoFluently
             }
             else
             {
-                var stream = ZipFilePath .IoService.Open(ZipFilePath, FileMode.Open, willBeWriting ? FileAccess.ReadWrite : FileAccess.Read,
+                var stream = ZipFilePath .FileSystem.Open(ZipFilePath, FileMode.Open, willBeWriting ? FileAccess.ReadWrite : FileAccess.Read,
                     willBeWriting ? FileShare.None : FileShare.Read, FileOptions.None);
                 return new ZipArchive(stream, willBeWriting ? ZipArchiveMode.Update : ZipArchiveMode.Read, false);
             }

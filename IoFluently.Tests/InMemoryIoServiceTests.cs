@@ -11,7 +11,7 @@ namespace IoFluently.Tests
         [TestMethod]
         public void ShouldAllowLinuxStylePaths()
         {
-            var uut = new InMemoryIoService(true, "/");
+            var uut = new InMemoryFileSystem(true, "/");
             var root = uut.ParseAbsolutePath("/");
             root.IsFolder.Should().Be(true);
             root.ToString().Should().Be("/");
@@ -23,7 +23,7 @@ namespace IoFluently.Tests
         [TestMethod]
         public void ShouldBeAbleToWriteTextToAndReadTextFromFiles()
         {
-            var uut = new InMemoryIoService(true, "/");
+            var uut = new InMemoryFileSystem(true, "/");
             var testTxt = uut.ParseAbsolutePath("/test1.txt")
                 .ExpectTextFileOrMissingPath();
             testTxt
@@ -34,7 +34,7 @@ namespace IoFluently.Tests
         [TestMethod]
         public void ShouldBeAbleToWriteToAndReadFromFiles()
         {
-            var uut = new InMemoryIoService(true, "/");
+            var uut = new InMemoryFileSystem(true, "/");
             var testTxt = uut.ParseAbsolutePath("/test1.txt").ExpectTextFileOrMissingPath();
             var originalBuffer = new byte[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
             using (var writer = testTxt.Open(FileMode.CreateNew))
@@ -71,7 +71,7 @@ namespace IoFluently.Tests
 	}}
 }}";
 
-            var ioService = new InMemoryIoService( false, "\\" );
+            var ioService = new InMemoryFileSystem( false, "\\" );
             var root = ioService.ParseAbsolutePath( "C:\\" ).ExpectFolder();
             ioService.ParseAbsolutePath( "C:\\appsettings.json" )
                 .ExpectTextFileOrMissingPath()

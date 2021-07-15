@@ -16,7 +16,7 @@ using UnitsNet;
 
 namespace IoFluently
 {
-    public interface IIoService : IFileProvider
+    public interface IFileSystem : IFileProvider
     {
         #region Regions - for implementations
         

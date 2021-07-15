@@ -24,7 +24,7 @@ namespace IoFluently
         /// <summary>
         /// The IIoService that is used for this absolute path
         /// </summary>
-        public IIoService IoService { get; }
+        public IFileSystem FileSystem { get; }
         
         public string FullName { get; }
     }

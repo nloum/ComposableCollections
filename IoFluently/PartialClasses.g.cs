@@ -36,84 +36,84 @@ namespace IoFluently
 {
     public partial class Folder 
     {
-        public IEnumerable<Folder> Ancestors => IoService.Ancestors(this);
-        public Boolean CanBeSimplified => IoService.CanBeSimplified(this);
-        public Boolean Exists => IoService.Exists(this);
-        public string Extension => IoService.Extension(this);
-        public Boolean HasExtension => IoService.HasExtension(this);
-        public Boolean IsFile => IoService.IsFile(this);
-        public Boolean IsFolder => IoService.IsFolder(this);
-        public string Name => IoService.Name(this);
-        public Folder Root => IoService.Root(this);
-        public IMaybe<Folder> Parent => IoService.TryParent(this);
-        public PathType Type => IoService.Type(this);
-        public AbsolutePath WithoutExtension => IoService.WithoutExtension(this);
-        public AbsolutePathChildFiles ChildFiles => IoService.ChildFiles(this);
-        public AbsolutePathChildFolders ChildFolders => IoService.ChildFolders(this);
-        public AbsolutePathChildren Children => IoService.Children(this);
-        public AbsolutePathDescendantFiles DescendantFiles => IoService.DescendantFiles(this);
-        public AbsolutePathDescendantFolders DescendantFolders => IoService.DescendantFolders(this);
-        public AbsolutePathDescendants Descendants => IoService.Descendants(this);
+        public IEnumerable<Folder> Ancestors => FileSystem.Ancestors(this);
+        public Boolean CanBeSimplified => FileSystem.CanBeSimplified(this);
+        public Boolean Exists => FileSystem.Exists(this);
+        public string Extension => FileSystem.Extension(this);
+        public Boolean HasExtension => FileSystem.HasExtension(this);
+        public Boolean IsFile => FileSystem.IsFile(this);
+        public Boolean IsFolder => FileSystem.IsFolder(this);
+        public string Name => FileSystem.Name(this);
+        public Folder Root => FileSystem.Root(this);
+        public IMaybe<Folder> Parent => FileSystem.TryParent(this);
+        public PathType Type => FileSystem.Type(this);
+        public AbsolutePath WithoutExtension => FileSystem.WithoutExtension(this);
+        public AbsolutePathChildFiles ChildFiles => FileSystem.ChildFiles(this);
+        public AbsolutePathChildFolders ChildFolders => FileSystem.ChildFolders(this);
+        public AbsolutePathChildren Children => FileSystem.Children(this);
+        public AbsolutePathDescendantFiles DescendantFiles => FileSystem.DescendantFiles(this);
+        public AbsolutePathDescendantFolders DescendantFolders => FileSystem.DescendantFolders(this);
+        public AbsolutePathDescendants Descendants => FileSystem.Descendants(this);
     }
 }
 namespace IoFluently 
 {
     public partial class AbsolutePath 
     {
-        public IEnumerable<AbsolutePath> Ancestors => IoService.Ancestors(this);
-        public Boolean CanBeSimplified => IoService.CanBeSimplified(this);
-        public Boolean Exists => IoService.Exists(this);
-        public string Extension => IoService.Extension(this);
-        public Boolean HasExtension => IoService.HasExtension(this);
-        public Boolean IsFile => IoService.IsFile(this);
-        public Boolean IsFolder => IoService.IsFolder(this);
-        public string Name => IoService.Name(this);
-        public Folder Root => IoService.Root(this);
-        public IMaybe<AbsolutePath> Parent => IoService.TryParent(this);
-        public PathType Type => IoService.Type(this);
-        public AbsolutePath WithoutExtension => IoService.WithoutExtension(this);
+        public IEnumerable<AbsolutePath> Ancestors => FileSystem.Ancestors(this);
+        public Boolean CanBeSimplified => FileSystem.CanBeSimplified(this);
+        public Boolean Exists => FileSystem.Exists(this);
+        public string Extension => FileSystem.Extension(this);
+        public Boolean HasExtension => FileSystem.HasExtension(this);
+        public Boolean IsFile => FileSystem.IsFile(this);
+        public Boolean IsFolder => FileSystem.IsFolder(this);
+        public string Name => FileSystem.Name(this);
+        public Folder Root => FileSystem.Root(this);
+        public IMaybe<AbsolutePath> Parent => FileSystem.TryParent(this);
+        public PathType Type => FileSystem.Type(this);
+        public AbsolutePath WithoutExtension => FileSystem.WithoutExtension(this);
     }
 }
 namespace IoFluently 
 {
     public partial class File 
     {
-        public IEnumerable<Folder> Ancestors => IoService.Ancestors(this);
-        public Boolean CanBeSimplified => IoService.CanBeSimplified(this);
-        public Boolean Exists => IoService.Exists(this);
-        public string Extension => IoService.Extension(this);
-        public Boolean HasExtension => IoService.HasExtension(this);
-        public Boolean IsFile => IoService.IsFile(this);
-        public Boolean IsFolder => IoService.IsFolder(this);
-        public string Name => IoService.Name(this);
-        public Folder Root => IoService.Root(this);
-        public Folder Parent => IoService.Parent(this);
-        public PathType Type => IoService.Type(this);
-        public AbsolutePath WithoutExtension => IoService.WithoutExtension(this);
-        public FileAttributes Attributes => IoService.Attributes(this);
-        public DateTimeOffset CreationTime => IoService.CreationTime(this);
-        public Information FileSize => IoService.FileSize(this);
-        public Boolean IsReadOnly => IoService.IsReadOnly(this);
-        public DateTimeOffset LastAccessTime => IoService.LastAccessTime(this);
-        public DateTimeOffset LastWriteTime => IoService.LastWriteTime(this);
+        public IEnumerable<Folder> Ancestors => FileSystem.Ancestors(this);
+        public Boolean CanBeSimplified => FileSystem.CanBeSimplified(this);
+        public Boolean Exists => FileSystem.Exists(this);
+        public string Extension => FileSystem.Extension(this);
+        public Boolean HasExtension => FileSystem.HasExtension(this);
+        public Boolean IsFile => FileSystem.IsFile(this);
+        public Boolean IsFolder => FileSystem.IsFolder(this);
+        public string Name => FileSystem.Name(this);
+        public Folder Root => FileSystem.Root(this);
+        public Folder Parent => FileSystem.Parent(this);
+        public PathType Type => FileSystem.Type(this);
+        public AbsolutePath WithoutExtension => FileSystem.WithoutExtension(this);
+        public FileAttributes Attributes => FileSystem.Attributes(this);
+        public DateTimeOffset CreationTime => FileSystem.CreationTime(this);
+        public Information FileSize => FileSystem.FileSize(this);
+        public Boolean IsReadOnly => FileSystem.IsReadOnly(this);
+        public DateTimeOffset LastAccessTime => FileSystem.LastAccessTime(this);
+        public DateTimeOffset LastWriteTime => FileSystem.LastWriteTime(this);
     }
 }
 namespace IoFluently 
 {
     public partial class MissingPath 
     {
-        public IEnumerable<IFolderOrMissingPath> Ancestors => IoService.Ancestors(this);
-        public Boolean CanBeSimplified => IoService.CanBeSimplified(this);
-        public Boolean Exists => IoService.Exists(this);
-        public string Extension => IoService.Extension(this);
-        public Boolean HasExtension => IoService.HasExtension(this);
-        public Boolean IsFile => IoService.IsFile(this);
-        public Boolean IsFolder => IoService.IsFolder(this);
-        public string Name => IoService.Name(this);
-        public Folder Root => IoService.Root(this);
-        public IMaybe<AbsolutePath> Parent => IoService.TryParent(this);
-        public PathType Type => IoService.Type(this);
-        public AbsolutePath WithoutExtension => IoService.WithoutExtension(this);
+        public IEnumerable<IFolderOrMissingPath> Ancestors => FileSystem.Ancestors(this);
+        public Boolean CanBeSimplified => FileSystem.CanBeSimplified(this);
+        public Boolean Exists => FileSystem.Exists(this);
+        public string Extension => FileSystem.Extension(this);
+        public Boolean HasExtension => FileSystem.HasExtension(this);
+        public Boolean IsFile => FileSystem.IsFile(this);
+        public Boolean IsFolder => FileSystem.IsFolder(this);
+        public string Name => FileSystem.Name(this);
+        public Folder Root => FileSystem.Root(this);
+        public IMaybe<AbsolutePath> Parent => FileSystem.TryParent(this);
+        public PathType Type => FileSystem.Type(this);
+        public AbsolutePath WithoutExtension => FileSystem.WithoutExtension(this);
     }
 }
 namespace IoFluently 

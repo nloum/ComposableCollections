@@ -11,7 +11,7 @@ namespace IoFluently
 
         public override IEnumerator<IFileOrFolder> GetEnumerator()
         {
-            return _path.IoService.EnumerateChildren(_path, _pattern).GetEnumerator();
+            return _path.FileSystem.EnumerateChildren(_path, _pattern).GetEnumerator();
         }
     }
     
@@ -23,7 +23,7 @@ namespace IoFluently
 
         public override IEnumerator<File> GetEnumerator()
         {
-            return _path.IoService.EnumerateChildFiles(_path, _pattern).GetEnumerator();
+            return _path.FileSystem.EnumerateChildFiles(_path, _pattern).GetEnumerator();
         }
     }
     
@@ -35,7 +35,7 @@ namespace IoFluently
 
         public override IEnumerator<Folder> GetEnumerator()
         {
-            return _path.IoService.EnumerateChildFolders(_path, _pattern).GetEnumerator();
+            return _path.FileSystem.EnumerateChildFolders(_path, _pattern).GetEnumerator();
         }
     }
 }

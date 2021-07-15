@@ -9,7 +9,7 @@ namespace IoFluently
         public IReadOnlyList<string> Components => Value.Components;
         public bool IsCaseSensitive => Value.IsCaseSensitive;
         public string DirectorySeparator => Value.DirectorySeparator;
-        public IIoService IoService => Value.IoService;
+        public IFileSystem FileSystem => Value.FileSystem;
 
         public FileOrMissingPathBase(IFile item1) : base(item1)
         {

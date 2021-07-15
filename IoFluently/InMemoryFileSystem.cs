@@ -81,10 +81,10 @@ namespace IoFluently
     }
         
     /// <summary>
-    /// An implementation of <see cref="IIoService"/> that keeps the folder, the files, and the file contents in memory.
+    /// An implementation of <see cref="IFileSystem"/> that keeps the folder, the files, and the file contents in memory.
     /// Useful for unit testing code that uses IoFluently.
     /// </summary>
-    public class InMemoryIoService : IoServiceBase
+    public class InMemoryFileSystem : FileSystemBase
     {
         /// <inheritdoc />
         public override IQueryable<AbsolutePath> Query()
@@ -127,7 +127,7 @@ namespace IoFluently
         /// E.g., '/' for Unix-like environments, '\\' for Windows-like environments.</param>
         /// <param name="enableOpenFilesTracking">Whether to track which files are open (useful for debugging, but comes
         /// with a performance hit)</param>
-        public InMemoryIoService(bool? isCaseSensitiveByDefault = null, string defaultDirectorySeparatorForThisEnvironment = null, bool enableOpenFilesTracking = false)
+        public InMemoryFileSystem(bool? isCaseSensitiveByDefault = null, string defaultDirectorySeparatorForThisEnvironment = null, bool enableOpenFilesTracking = false)
             : base(new OpenFilesTrackingService(enableOpenFilesTracking), isCaseSensitiveByDefault ?? ShouldBeCaseSensitiveByDefault(), defaultDirectorySeparatorForThisEnvironment ?? GetDefaultDirectorySeparatorForThisEnvironment())
         {
             if (defaultDirectorySeparatorForThisEnvironment == "/")

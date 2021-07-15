@@ -12,9 +12,9 @@ namespace IoFluently
         {
             var fileMustBeEmpty = false;
         
-            if (!path.IoService.CanEmptyDirectoriesExist)
+            if (!path.FileSystem.CanEmptyDirectoriesExist)
             {
-                switch (path.IoService.EmptyFolderMode)
+                switch (path.FileSystem.EmptyFolderMode)
                 {
                     case EmptyFolderMode.FoldersNeverExist:
                         if (expectedTypes.Contains(PathType.Folder))
@@ -52,7 +52,7 @@ namespace IoFluently
                 }
             }
             
-            var actualType = path.IoService.Type(path);
+            var actualType = path.FileSystem.Type(path);
             if (expectedTypes.All(expectedType => expectedType != actualType))
             {
                 throw new WrongPathTypeException(path, actualType, expectedTypes);
@@ -60,7 +60,7 @@ namespace IoFluently
 
             if (fileMustBeEmpty && actualType == PathType.File)
             {
-                var fileSize = path.IoService.FileSize(new File(path));
+                var fileSize = path.FileSystem.FileSize(new File(path));
                 if (fileSize != Information.Zero)
                 {
                     throw new WrongPathTypeException(path, actualType, expectedTypes, fileMustBeEmpty);

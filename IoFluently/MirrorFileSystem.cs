@@ -4,14 +4,14 @@ using LiveLinq.Set;
 
 namespace IoFluently
 {
-    public class MirrorIoService : PathTransformationIoServiceBase
+    public class MirrorFileSystem : PathTransformationFileSystemBase
     {
-        private readonly IIoService _decorated;
+        private readonly IFileSystem _decorated;
         private readonly ObservableSet<Folder> _roots = new();
         
         public ImmutableDictionary<AbsolutePath, AbsolutePath> Mappings { get; set; } = ImmutableDictionary<AbsolutePath, AbsolutePath>.Empty;
         
-        public MirrorIoService(IIoService decorated, string defaultRoot) : base(new OpenFilesTrackingService(decorated.OpenFilesTrackingService.IsEnabled),
+        public MirrorFileSystem(IFileSystem decorated, string defaultRoot) : base(new OpenFilesTrackingService(decorated.OpenFilesTrackingService.IsEnabled),
             decorated.IsCaseSensitiveByDefault, decorated.DefaultDirectorySeparator, decorated.CanEmptyDirectoriesExist, decorated.EmptyFolderMode)
         {
             _decorated = decorated;

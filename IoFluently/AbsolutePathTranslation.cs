@@ -7,29 +7,29 @@ namespace IoFluently
 {
     public sealed class AbsolutePathTranslation : IAbsolutePathTranslation
     {
-        internal AbsolutePathTranslation(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, IIoService ioService)
+        internal AbsolutePathTranslation(IFileOrFolderOrMissingPath source, IFileOrFolderOrMissingPath destination, IFileSystem fileSystem)
         {
             Source = new AbsolutePath(source);
             Destination = new AbsolutePath(destination);
-            IoService = ioService;
+            FileSystem = fileSystem;
         }
 
-        public IIoService IoService { get; }
+        public IFileSystem FileSystem { get; }
 
         public AbsolutePath Source { get; }
         public AbsolutePath Destination { get; }
 
         public IAbsolutePathTranslation Invert()
         {
-            return new AbsolutePathTranslation(Destination, Source, IoService);
+            return new AbsolutePathTranslation(Destination, Source, FileSystem);
         }
 
         public IEnumerator<CalculatedAbsolutePathTranslation> GetEnumerator()
         {
             return Source.Collapse(
                 file => Enumerable.Empty<CalculatedAbsolutePathTranslation>(),
-                folder => folder.IoService.EnumerateChildren(folder)
-                    .Select(child => new CalculatedAbsolutePathTranslation(child, Source, Destination, IoService)),
+                folder => folder.FileSystem.EnumerateChildren(folder)
+                    .Select(child => new CalculatedAbsolutePathTranslation(child, Source, Destination, FileSystem)),
                 missingPath => Enumerable.Empty<CalculatedAbsolutePathTranslation>()).GetEnumerator();
         }
 

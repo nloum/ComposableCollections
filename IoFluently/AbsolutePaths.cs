@@ -22,19 +22,19 @@ namespace IoFluently
         /// <summary>
         /// The IIoService that is used for all these absolute paths
         /// </summary>
-        public IIoService IoService { get; }
+        public IFileSystem FileSystem { get; }
         
         /// <summary>
         /// The TreeLinq absolute paths that this object represents
         /// </summary>
         public AbsoluteTreePaths<string> Paths { get; }
 
-        internal AbsolutePaths(bool isCaseSensitive, string directorySeparator, IIoService ioService, AbsoluteTreePaths<string> paths)
+        internal AbsolutePaths(bool isCaseSensitive, string directorySeparator, IFileSystem fileSystem, AbsoluteTreePaths<string> paths)
         {
             IsCaseSensitive = isCaseSensitive;
             IsCaseSensitive = isCaseSensitive;
             DirectorySeparator = directorySeparator;
-            IoService = ioService;
+            FileSystem = fileSystem;
             Paths = paths;
         }
 
@@ -69,7 +69,7 @@ namespace IoFluently
         {
             foreach (var path in Paths)
             {
-                yield return new AbsolutePath(path, IsCaseSensitive, DirectorySeparator, IoService);
+                yield return new AbsolutePath(path, IsCaseSensitive, DirectorySeparator, FileSystem);
             }
         }
 
@@ -81,7 +81,7 @@ namespace IoFluently
         /// <returns>A new AbsolutePaths object where all absolute paths in it has an additional subpath appended to it</returns>
         public static AbsolutePaths operator / (AbsolutePaths absPath, string whatToAdd)
         {
-            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / whatToAdd);
+            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem, absPath.Paths / whatToAdd);
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace IoFluently
         /// <returns>A new AbsolutePaths object where all absolute paths in it has an additional subpath appended to it</returns>
         public static AbsolutePaths operator / (AbsolutePaths absPath, IEnumerable<RelativePath> whatToAdd)
         {
-            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / whatToAdd.Select(x => x.Path));
+            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem, absPath.Paths / whatToAdd.Select(x => x.Path));
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace IoFluently
         /// <returns>A new AbsolutePaths object where all absolute paths in it has an additional subpath appended to it</returns>
         public static AbsolutePaths operator / (AbsolutePaths absPath, RelativePath whatToAdd)
         {
-            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / whatToAdd.Path);
+            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem, absPath.Paths / whatToAdd.Path);
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace IoFluently
         /// <returns>A new AbsolutePaths object where all absolute paths in it has an additional subpath appended to it</returns>
         public static AbsolutePaths operator / (AbsolutePaths absPath, IEnumerable<string> whatToAdd)
         {
-            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / whatToAdd);
+            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem, absPath.Paths / whatToAdd);
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace IoFluently
         public static AbsolutePaths operator / (AbsolutePaths absPath,
             Func<AbsolutePath, IEnumerable<RelativePath>> whatToAdd)
         {
-            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService, absPath.Paths / (abs => whatToAdd(new AbsolutePath(abs, absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.IoService)).Select(x => x.Path)));
+            return new AbsolutePaths(absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem, absPath.Paths / (abs => whatToAdd(new AbsolutePath(abs, absPath.IsCaseSensitive, absPath.DirectorySeparator, absPath.FileSystem)).Select(x => x.Path)));
         }
         
         /// <summary>

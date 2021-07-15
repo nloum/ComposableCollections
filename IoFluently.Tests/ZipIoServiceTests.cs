@@ -13,7 +13,7 @@ namespace IoFluently.Tests
         [TestMethod]
         public void ShouldZipUpSingleFile()
         {
-            var inMemoryIoService = new InMemoryIoService(true, "/", false);
+            var inMemoryIoService = new InMemoryFileSystem(true, "/", false);
             var textFilePath = (inMemoryIoService.DefaultRoot / "test.txt")
                 .ExpectTextFileOrMissingPath()
                 .WriteAllText("Test 1 2 3");
@@ -38,7 +38,7 @@ namespace IoFluently.Tests
         [TestMethod]
         public void ShouldZipUpAndUnzipFolder()
         {
-            var inMemoryIoService = new InMemoryIoService(true, "/", false);
+            var inMemoryIoService = new InMemoryFileSystem(true, "/", false);
             var folder = inMemoryIoService.DefaultRoot / "test";
             var textFilePath = folder / "test.txt";
             textFilePath.ExpectTextFileOrMissingPath().WriteAllText("Test 1 2 3");

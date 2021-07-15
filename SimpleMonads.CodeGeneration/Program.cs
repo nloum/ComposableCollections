@@ -14,7 +14,7 @@ namespace SimpleMonads.CodeGeneration
     {
         private static void Main(string[] args)
         {
-            var ioService = new IoService();
+            var ioService = new FileSystem();
 
             var simpleMonadsSourcePath = ioService.CurrentDirectory.Ancestors.First(x => (x / ".git").IsFolder) / "SimpleMonads";
             

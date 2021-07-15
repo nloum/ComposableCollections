@@ -28,7 +28,7 @@ namespace IoFluently
         /// <summary>
         /// The IIoService that is used for all these relative paths
         /// </summary>
-        public IIoService IoService { get; }
+        public IFileSystem FileSystem { get; }
         
         /// <summary>
         /// The TreeLinq relative paths that this object represents
@@ -40,13 +40,13 @@ namespace IoFluently
         /// </summary>
         /// <param name="isCaseSensitive">Whether the relative paths are case sensitive</param>
         /// <param name="directorySeparator">What the directory separator is for the relative paths (e.g. '/' or '\')</param>
-        /// <param name="ioService">The IIoService used for these relative paths</param>
+        /// <param name="fileSystem">The IIoService used for these relative paths</param>
         /// <param name="paths">The TreeLinq paths that this object will represent</param>
-        public RelativePaths(RelativeTreePaths<string> paths, bool isCaseSensitive, string directorySeparator, IIoService ioService)
+        public RelativePaths(RelativeTreePaths<string> paths, bool isCaseSensitive, string directorySeparator, IFileSystem fileSystem)
         {
             IsCaseSensitive = isCaseSensitive;
             DirectorySeparator = directorySeparator;
-            IoService = ioService;
+            FileSystem = fileSystem;
             Paths = paths;
         }
 
@@ -60,7 +60,7 @@ namespace IoFluently
         {
             foreach (var path in Paths)
             {
-                yield return new RelativePath(path, IsCaseSensitive, DirectorySeparator, IoService);
+                yield return new RelativePath(path, IsCaseSensitive, DirectorySeparator, FileSystem);
             }
         }
 
@@ -128,7 +128,7 @@ namespace IoFluently
         /// <returns>A new RelativePaths object where all relative paths in it has an additional subpath appended to it</returns>
         public static RelativePaths operator / (RelativePaths relPath, string whatToAdd)
         {
-            return new RelativePaths(relPath.Paths / whatToAdd, relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService);
+            return new RelativePaths(relPath.Paths / whatToAdd, relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.FileSystem);
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace IoFluently
         /// <returns>A new RelativePaths object where all relative paths in it has an additional subpath appended to it</returns>
         public static RelativePaths operator / (RelativePaths relPath, IEnumerable<RelativePath> whatToAdd)
         {
-            return new RelativePaths(relPath.Paths / whatToAdd.Select(x => x.Path), relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService);
+            return new RelativePaths(relPath.Paths / whatToAdd.Select(x => x.Path), relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.FileSystem);
         }
 
         /// <summary>
@@ -150,8 +150,8 @@ namespace IoFluently
         /// <returns>A new RelativePaths object where all relative paths in it has an additional subpath appended to it</returns>
         public static RelativePaths operator / (RelativePaths relPath, Func<RelativePath, IEnumerable<RelativePath>> whatToAdd)
         {
-            return new RelativePaths(relPath.Paths / (rel => whatToAdd(new RelativePath(rel, relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService)).Select(x => x.Path)),
-                relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService);
+            return new RelativePaths(relPath.Paths / (rel => whatToAdd(new RelativePath(rel, relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.FileSystem)).Select(x => x.Path)),
+                relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.FileSystem);
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace IoFluently
         /// <returns>A new RelativePaths object where all relative paths in it has an additional subpath appended to it</returns>
         public static RelativePaths operator / (RelativePaths relPath, RelativePath whatToAdd)
         {
-            return new RelativePaths(relPath.Paths / whatToAdd.Path, relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService);
+            return new RelativePaths(relPath.Paths / whatToAdd.Path, relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.FileSystem);
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace IoFluently
         /// <returns>A new RelativePaths object where all relative paths in it has an additional subpath appended to it</returns>
         public static RelativePaths operator / (RelativePaths relPath, IEnumerable<string> whatToAdd)
         {
-            return new RelativePaths(relPath.Paths / whatToAdd, relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.IoService);
+            return new RelativePaths(relPath.Paths / whatToAdd, relPath.IsCaseSensitive, relPath.DirectorySeparator, relPath.FileSystem);
         }
         
         /// <summary>

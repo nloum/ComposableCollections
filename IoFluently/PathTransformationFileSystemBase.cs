@@ -9,7 +9,7 @@ using UnitsNet;
 
 namespace IoFluently
 {
-    public abstract class PathTransformationIoServiceBase : IoServiceBase
+    public abstract class PathTransformationFileSystemBase : FileSystemBase
     {
         protected virtual File Transform(IFile absolutePath)
         {
@@ -36,7 +36,7 @@ namespace IoFluently
             return Transform((IFileOrFolderOrMissingPath) absolutePath).ExpectMissingPath();
         }
 
-        protected PathTransformationIoServiceBase(IOpenFilesTrackingService openFilesTrackingService, bool isCaseSensitiveByDefault, string defaultDirectorySeparator,
+        protected PathTransformationFileSystemBase(IOpenFilesTrackingService openFilesTrackingService, bool isCaseSensitiveByDefault, string defaultDirectorySeparator,
             bool canEmptyDirectoriesExist = true, EmptyFolderMode? emptyFolderMode = null) : base(openFilesTrackingService, isCaseSensitiveByDefault, defaultDirectorySeparator)
         {
             CanEmptyDirectoriesExist = canEmptyDirectoriesExist;
@@ -51,7 +51,7 @@ namespace IoFluently
         public override Folder CreateFolder(IMissingPath path,  bool createRecursively = true)
         {
             var transformedPath = Transform   (path);
-            var decorated = transformedPath.IoService;
+            var decorated = transformedPath.FileSystem;
             decorated.CreateFolder(transformedPath, createRecursively);
             return path.ExpectFolder();
         }
@@ -59,7 +59,7 @@ namespace IoFluently
         public override MissingPath DeleteFolder(IFolder path,  bool recursive = true)
         {
             var transformedPath = Transform   (path);
-            var decorated = transformedPath.IoService;
+            var decorated = transformedPath.FileSystem;
             decorated.DeleteFolder(transformedPath, recursive);
             return path.ExpectMissingPath();
         }
@@ -67,7 +67,7 @@ namespace IoFluently
         public override MissingPath DeleteFile(IFile path)
         {
             var transformedPath = Transform   (path);
-            var decorated = transformedPath.IoService;
+            var decorated = transformedPath.FileSystem;
             decorated.DeleteFile(transformedPath);
             return path.ExpectMissingPath();
         }
@@ -75,7 +75,7 @@ namespace IoFluently
         public override async Task<MissingPath> DeleteFolderAsync(IFolder path, CancellationToken cancellationToken,  bool recursive = true)
         {
             var transformedPath = Transform   (path);
-            var decorated = transformedPath.IoService;
+            var decorated = transformedPath.FileSystem;
             await decorated.DeleteFolderAsync(transformedPath, cancellationToken, recursive);
             return path.ExpectMissingPath();
         }
@@ -83,7 +83,7 @@ namespace IoFluently
         public override async Task<MissingPath> DeleteFileAsync(IFile path, CancellationToken cancellationToken)
         {
             var transformedPath = Transform   (path);
-            var decorated = transformedPath.IoService;
+            var decorated = transformedPath.FileSystem;
             await decorated.DeleteFileAsync(transformedPath, cancellationToken);
             return path.ExpectMissingPath();
         }
@@ -91,7 +91,7 @@ namespace IoFluently
         public override IEnumerable<IFileOrFolder> EnumerateChildren(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             var transformedPath = Transform   (path);
-            var decorated = transformedPath.IoService;
+            var decorated = transformedPath.FileSystem;
             return decorated.EnumerateChildren(transformedPath, searchPattern, includeFolders, includeFiles)
                 .Select(x => x.Collapse(
                     file => (IFileOrFolder)new File(path.Components.Concat(new[]{file.Name}).ToList(), path.IsCaseSensitive, path.DirectorySeparator, this),
@@ -101,42 +101,42 @@ namespace IoFluently
         public override PathType Type(IFileOrFolderOrMissingPath path)
         {
             var transformedPath = Transform   (path);
-            var decorated = transformedPath.IoService;
+            var decorated = transformedPath.FileSystem;
             return decorated.Type(transformedPath);
         }
 
         public override Information FileSize(IFile path)
         {
             var transformedPath = Transform   (path);
-            var decorated = transformedPath.IoService;
+            var decorated = transformedPath.FileSystem;
             return decorated.FileSize(transformedPath);
         }
 
         public override FileAttributes Attributes(IFile attributes)
         {
             var transformedPath = Transform   (attributes);
-            var decorated = transformedPath.IoService;
+            var decorated = transformedPath.FileSystem;
             return decorated.Attributes(transformedPath);
         }
 
         public override DateTimeOffset CreationTime(IFile attributes)
         {
             var transformedPath = Transform   (attributes);
-            var decorated = transformedPath.IoService;
+            var decorated = transformedPath.FileSystem;
             return decorated.CreationTime(transformedPath);
         }
 
         public override DateTimeOffset LastAccessTime(IFile attributes)
         {
             var transformedPath = Transform   (attributes);
-            var decorated = transformedPath.IoService;
+            var decorated = transformedPath.FileSystem;
             return decorated.LastAccessTime(transformedPath);
         }
 
         public override DateTimeOffset LastWriteTime(IFile attributes)
         {
             var transformedPath = Transform   (attributes);
-            var decorated = transformedPath.IoService;
+            var decorated = transformedPath.FileSystem;
             return decorated.LastWriteTime(transformedPath);
         }
 
@@ -146,7 +146,7 @@ namespace IoFluently
             Information? bufferSize = default,  bool createRecursively = true)
         {
             var transformedPath = Transform   (path);
-            var decorated = transformedPath.IoService;
+            var decorated = transformedPath.FileSystem;
             return decorated.Open(transformedPath, fileMode, fileAccess, fileShare, fileOptions, bufferSize, createRecursively);
         }
 

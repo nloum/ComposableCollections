@@ -13,10 +13,10 @@ namespace IoFluently
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public IEnumerator<IFileInfo> GetEnumerator() => _absolutePath
-            .IoService.EnumerateChildFiles(_absolutePath)
+            .FileSystem.EnumerateChildFiles(_absolutePath)
             .Select( x => new AbsolutePathFileInfoAdapter( x ) )
             .GetEnumerator();
 
-        public bool Exists => _absolutePath.IoService.Exists(_absolutePath);
+        public bool Exists => _absolutePath.FileSystem.Exists(_absolutePath);
     }
 }

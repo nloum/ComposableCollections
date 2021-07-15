@@ -23,7 +23,7 @@ using static SimpleMonads.Utility;
 
 namespace IoFluently
 {
-    public abstract class IoServiceBase : IIoService
+    public abstract class FileSystemBase : IFileSystem
     {
         #region Environmental stuff
 
@@ -44,7 +44,7 @@ namespace IoFluently
         /// <inheritdoc />
         public bool IsCaseSensitiveByDefault { get; }
         /// <summary>
-        /// The default buffer size for this <see cref="IIoService"/>, used in calls where the buffer size is an optional
+        /// The default buffer size for this <see cref="IFileSystem"/>, used in calls where the buffer size is an optional
         /// parameter.
         /// </summary>
         public Information DefaultBufferSize { get; set; } = Information.FromBytes(4096);
@@ -256,13 +256,13 @@ namespace IoFluently
         /// <inheritdoc />
         public bool IsFile(IFileOrFolderOrMissingPath absolutePath)
         {
-            return absolutePath.IoService.Type(absolutePath) == IoFluently.PathType.File;
+            return absolutePath.FileSystem.Type(absolutePath) == IoFluently.PathType.File;
         }
 
         /// <inheritdoc />
         public bool IsFolder(IFileOrFolderOrMissingPath absolutePath)
         {
-            return absolutePath.IoService.Type(absolutePath) == IoFluently.PathType.Folder;
+            return absolutePath.FileSystem.Type(absolutePath) == IoFluently.PathType.Folder;
         }
         
         /// <inheritdoc />
@@ -643,7 +643,7 @@ namespace IoFluently
             {
                 return new AbsolutePath(optionallyRelativeTo.Components.Concat(relativePath.Value.Path).ToImmutableList(),
                     optionallyRelativeTo.IsCaseSensitive, optionallyRelativeTo.DirectorySeparator,
-                    optionallyRelativeTo.IoService).ToMaybe();
+                    optionallyRelativeTo.FileSystem).ToMaybe();
             }
 
             return TryParseAbsolutePath(path, flags);
@@ -1254,9 +1254,9 @@ namespace IoFluently
             
             var fileOptions = FileOptions.Asynchronous | FileOptions.SequentialScan;
 
-            using var sourceStream = translation.Source.IoService.Open(translation.Source.ExpectFile(), FileMode.Open, FileAccess.Read,
+            using var sourceStream = translation.Source.FileSystem.Open(translation.Source.ExpectFile(), FileMode.Open, FileAccess.Read,
                 FileShare.Read, fileOptions, bufferSize);
-            using var destinationStream = translation.Destination.IoService.Open(translation.Destination.ExpectFileOrMissingPath(), FileMode.Open,
+            using var destinationStream = translation.Destination.FileSystem.Open(translation.Destination.ExpectFileOrMissingPath(), FileMode.Open,
                 FileAccess.Write, FileShare.None, fileOptions, bufferSize);
 
             await sourceStream.CopyToAsync(destinationStream, GetBufferSizeOrDefaultInBytes(bufferSize), cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
@@ -1277,7 +1277,7 @@ namespace IoFluently
                     missingPath => Task.FromResult(missingPath.ExpectMissingPath()));
             }
             
-            translation.Destination.IoService.CreateFolder(translation.Destination.ExpectMissingPath());
+            translation.Destination.FileSystem.CreateFolder(translation.Destination.ExpectMissingPath());
 
             foreach (var child in translation)
             {
@@ -1294,7 +1294,7 @@ namespace IoFluently
             Information? bufferSize = default, bool overwrite = false)
         {
             await CopyFileAsync(translation, cancellationToken, bufferSize, overwrite);
-            await translation.Source.IoService.DeleteAsync(translation.Source.ExpectFileOrFolder(), cancellationToken, true);
+            await translation.Source.FileSystem.DeleteAsync(translation.Source.ExpectFileOrFolder(), cancellationToken, true);
             return translation;
         }
 
@@ -1304,7 +1304,7 @@ namespace IoFluently
             Information? bufferSize = default, bool overwrite = false)
         {
             await CopyFolderAsync(translation, cancellationToken, bufferSize, overwrite);
-            await translation.Source.IoService.DeleteAsync(translation.Source.ExpectFileOrFolder(), cancellationToken, true);
+            await translation.Source.FileSystem.DeleteAsync(translation.Source.ExpectFileOrFolder(), cancellationToken, true);
             return translation;
         }
 
@@ -1322,9 +1322,9 @@ namespace IoFluently
 
             var fileOptions = FileOptions.SequentialScan;
 
-            using var sourceStream = translation.Source.IoService.Open(translation.Source.ExpectFile(), FileMode.Open, FileAccess.Read,
+            using var sourceStream = translation.Source.FileSystem.Open(translation.Source.ExpectFile(), FileMode.Open, FileAccess.Read,
                 FileShare.Read, fileOptions, bufferSize);
-            using var destinationStream = translation.Destination.IoService.Open(translation.Destination.ExpectFileOrMissingPath(), overwrite ? FileMode.Create : FileMode.CreateNew,
+            using var destinationStream = translation.Destination.FileSystem.Open(translation.Destination.ExpectFileOrMissingPath(), overwrite ? FileMode.Create : FileMode.CreateNew,
                 FileAccess.Write, FileShare.None, fileOptions, bufferSize);
 
             sourceStream.CopyTo(destinationStream, GetBufferSizeOrDefaultInBytes(bufferSize));
@@ -1344,7 +1344,7 @@ namespace IoFluently
                     missingPath => missingPath);
             }
 
-            translation.Destination.IoService.EnsureIsFolder(translation.Destination);
+            translation.Destination.FileSystem.EnsureIsFolder(translation.Destination);
 
             foreach (var child in translation)
             {
@@ -1359,7 +1359,7 @@ namespace IoFluently
             Information? bufferSize = default, bool overwrite = false)
         {
             CopyFile(translation, bufferSize, overwrite);
-            translation.Source.IoService.Delete(translation.Source.ExpectFileOrFolder(), true);
+            translation.Source.FileSystem.Delete(translation.Source.ExpectFileOrFolder(), true);
             return translation;
         }
 
@@ -1368,7 +1368,7 @@ namespace IoFluently
             Information? bufferSize = default, bool overwrite = false)
         {
             CopyFolder(translation, bufferSize, overwrite);
-            translation.Source.IoService.Delete(translation.Source.ExpectFileOrFolder(), true);
+            translation.Source.FileSystem.Delete(translation.Source.ExpectFileOrFolder(), true);
             return translation;
         }
 
@@ -1425,7 +1425,7 @@ namespace IoFluently
         public IAbsolutePathTranslation Copy(IAbsolutePathTranslation translation,
             Information? bufferSize = default, bool overwrite = false)
         {
-            switch (translation.Source.IoService.Type(translation.Source))
+            switch (translation.Source.FileSystem.Type(translation.Source))
             {
                 case PathType.File:
                     CopyFile(translation, bufferSize, overwrite);
@@ -1444,7 +1444,7 @@ namespace IoFluently
         public IAbsolutePathTranslation Move(IAbsolutePathTranslation translation,
             Information? bufferSize = default, bool overwrite = false)
         {
-            switch (translation.Source.IoService.Type(translation.Source))
+            switch (translation.Source.FileSystem.Type(translation.Source))
             {
                 case PathType.File:
                     MoveFile(translation, bufferSize, overwrite);
@@ -1500,7 +1500,7 @@ namespace IoFluently
         public async Task<IAbsolutePathTranslation> CopyAsync(IAbsolutePathTranslation translation,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
-            switch (translation.Source.IoService.Type(translation.Source))
+            switch (translation.Source.FileSystem.Type(translation.Source))
             {
                 case PathType.File:
                     await CopyFileAsync(translation, cancellationToken, bufferSize, overwrite);
@@ -1519,7 +1519,7 @@ namespace IoFluently
         public async Task<IAbsolutePathTranslation> MoveAsync(IAbsolutePathTranslation translation,
             CancellationToken cancellationToken, Information? bufferSize = default, bool overwrite = false)
         {
-            switch (translation.Source.IoService.Type(translation.Source))
+            switch (translation.Source.FileSystem.Type(translation.Source))
             {
                 case PathType.File:
                     await MoveFileAsync(translation, cancellationToken, bufferSize, overwrite);
@@ -1542,7 +1542,7 @@ namespace IoFluently
         {
             Func<AbsolutePath, IEnumerable<RelativePath>> patternFunc = absPath => absPath.Collapse(
                 file => Enumerable.Empty<RelativePath>(),
-                folder => folder.IoService.EnumerateChildren(folder, pattern).Select(x => new RelativePath(new[]{Name(x)}, x.IsCaseSensitive, x.DirectorySeparator, x.IoService)),
+                folder => folder.FileSystem.EnumerateChildren(folder, pattern).Select(x => new RelativePath(new[]{Name(x)}, x.IsCaseSensitive, x.DirectorySeparator, x.FileSystem)),
                 missingPath => Enumerable.Empty<RelativePath>());
             return path.ExpectFolder() / patternFunc;
         }
@@ -1568,16 +1568,16 @@ namespace IoFluently
                 newComponents.Add(path.Components[i]);
             }
 
-            var name = path.IoService.Name(path);
+            var name = path.FileSystem.Name(path);
             newComponents.Add(name.Substring(0, name.LastIndexOf('.')));
             
-            return new AbsolutePath(newComponents, path.IsCaseSensitive, path.DirectorySeparator, path.IoService);
+            return new AbsolutePath(newComponents, path.IsCaseSensitive, path.DirectorySeparator, path.FileSystem);
         }
 
         /// <inheritdoc />
         public IMaybe<AbsolutePath> TryWithExtension(IFileOrFolderOrMissingPath path, Func<string, string> differentExtension)
         {
-            return path.IoService.TryWithExtension(path, differentExtension(Extension(path) ?? ""));
+            return path.FileSystem.TryWithExtension(path, differentExtension(Extension(path) ?? ""));
         }
 
         /// <inheritdoc />
@@ -1604,7 +1604,7 @@ namespace IoFluently
                 result.Add(".");
             }
             
-            return new RelativePath(result, path.IsCaseSensitive, path.DirectorySeparator, path.IoService);
+            return new RelativePath(result, path.IsCaseSensitive, path.DirectorySeparator, path.FileSystem);
         }
 
         /// <inheritdoc />
@@ -1649,7 +1649,7 @@ namespace IoFluently
             if (path .Components.Count > 1)
             {
                 return new AbsolutePath(path .Components.Take(path .Components.Count - 1).ToImmutableList(),
-                    path.IsCaseSensitive, path.DirectorySeparator, path.IoService).ToMaybe();
+                    path.IsCaseSensitive, path.DirectorySeparator, path.FileSystem).ToMaybe();
             }
             else
             {
@@ -1672,7 +1672,7 @@ namespace IoFluently
         {
             var simplified = Simplify(path);
             var pathStr = simplified.FullName;
-            var common = path.IoService.TryCommonWith(path, relativeTo);
+            var common = path.FileSystem.TryCommonWith(path, relativeTo);
 
             if (!common.HasValue)
                 throw new InvalidOperationException("No common ancestor");
@@ -1739,7 +1739,7 @@ namespace IoFluently
         {
             IFileOrFolderOrMissingPath ancestor = path;
             IMaybe<IFileOrFolderOrMissingPath> cachedParent;
-            while ((cachedParent = ancestor .IoService.TryParent(ancestor )).HasValue)
+            while ((cachedParent = ancestor .FileSystem.TryParent(ancestor )).HasValue)
                 ancestor = cachedParent.Value;
 
             return ancestor .ExpectFolder();
@@ -1871,7 +1871,7 @@ namespace IoFluently
         {
             while (true)
             {
-                var maybePath = path.IoService.TryParent(path);
+                var maybePath = path.FileSystem.TryParent(path);
                 if (maybePath.HasValue)
                 {
                     yield return maybePath.Value;
@@ -1887,7 +1887,7 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual IMaybe<AbsolutePath> TryDescendant(IFileOrFolderOrMissingPath path, params IFileOrFolderOrMissingPath[] paths)
         {
-            return path.IoService.TryDescendant(path, paths.Select(p => p.FullName).ToArray());
+            return path.FileSystem.TryDescendant(path, paths.Select(p => p.FullName).ToArray());
         }
 
         /// <inheritdoc />
@@ -1910,7 +1910,7 @@ namespace IoFluently
             var maybePath = path.ToMaybe();
             for (var i = 0; i < level; i++)
             {
-                maybePath = maybePath.Select(p => p.IoService.TryParent(p)).SelectMany(x => x);
+                maybePath = maybePath.Select(p => p.FileSystem.TryParent(p)).SelectMany(x => x);
                 if (!maybePath.HasValue)
                     return Nothing<Folder>(() => throw new InvalidOperationException($"The path {path} has no ancestor"));
             }
@@ -1938,7 +1938,7 @@ namespace IoFluently
         private IEnumerable<string> ProposeSuccessivelyMoreSpecificNames(IFileOrFolderOrMissingPath path)
         {
             string filename = null;
-            foreach (var parentPath in path.IoService.Ancestors(path))
+            foreach (var parentPath in path.FileSystem.Ancestors(path))
             {
                 if (filename == null)
                     filename = parentPath.Components[^1];
@@ -2096,7 +2096,7 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual bool Exists(IFileOrFolderOrMissingPath path)
         {
-            var pathType = path.IoService.Type(path);
+            var pathType = path.FileSystem.Type(path);
             if (pathType == IoFluently.PathType.Folder && !CanEmptyDirectoriesExist)
             {
                 return false;
@@ -2188,7 +2188,7 @@ namespace IoFluently
         }
         #endregion
 
-        protected IoServiceBase(IOpenFilesTrackingService openFilesTrackingService, bool isCaseSensitiveByDefault, string defaultDirectorySeparator)
+        protected FileSystemBase(IOpenFilesTrackingService openFilesTrackingService, bool isCaseSensitiveByDefault, string defaultDirectorySeparator)
         {
             IsCaseSensitiveByDefault = isCaseSensitiveByDefault;
             OpenFilesTrackingService = openFilesTrackingService ?? throw new ArgumentNullException(nameof(openFilesTrackingService));

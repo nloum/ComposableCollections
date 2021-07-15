@@ -10,50 +10,50 @@ namespace IoFluently
         private readonly AbsolutePathTranslation _actualValues;
 
         internal CalculatedAbsolutePathTranslation(IFileOrFolderOrMissingPath absolutePath, IFileOrFolderOrMissingPath ancestorSource, IFileOrFolderOrMissingPath ancestorDestination,
-            IIoService ioService)
+            IFileSystem fileSystem)
         {
             AbsoluteAbsolutePath = absolutePath.Simplify();
             AncestorSource = ancestorSource.Simplify();
             AncestorDestination = ancestorDestination.Simplify();
-            IoService = ioService;
+            FileSystem = fileSystem;
             _actualValues = Calculate();
         }
 
         public IAbsolutePathTranslation Invert()
         {
-            return new CalculatedAbsolutePathTranslation(AbsoluteAbsolutePath, AncestorDestination, AncestorSource, IoService);
+            return new CalculatedAbsolutePathTranslation(AbsoluteAbsolutePath, AncestorDestination, AncestorSource, FileSystem);
         }
 
         public AbsolutePath AbsoluteAbsolutePath { get; }
         public AbsolutePath AncestorSource { get; }
         public AbsolutePath AncestorDestination { get; }
 
-        public IIoService IoService { get; }
+        public IFileSystem FileSystem { get; }
 
         public override string ToString()
         {
             return string.Format("Translate {0} from {1} to {2}",
-                AncestorSource.IoService.TryGetNonCommonDescendants(AncestorSource, Source).Value.Item2.OriginalString, AncestorSource,
+                AncestorSource.FileSystem.TryGetNonCommonDescendants(AncestorSource, Source).Value.Item2.OriginalString, AncestorSource,
                 AncestorDestination);
         }
 
         private AbsolutePathTranslation Calculate()
         {
-            if (AncestorSource.Equals(AncestorDestination) && object.ReferenceEquals(AncestorSource.IoService, AncestorDestination.IoService))
+            if (AncestorSource.Equals(AncestorDestination) && object.ReferenceEquals(AncestorSource.FileSystem, AncestorDestination.FileSystem))
                 throw new InvalidOperationException(
                     string.Format(
                         "An attempt was made to calculate the path if a file (\"{0}\") was copied from \"{1}\" to \"{2}\". It is illegal to have the destination and source directories be the same, which is true in this case.",
                         AbsoluteAbsolutePath, AncestorSource, AncestorDestination));
-            if (!AbsoluteAbsolutePath.IoService.IsDescendantOf(AbsoluteAbsolutePath, AncestorSource))
+            if (!AbsoluteAbsolutePath.FileSystem.IsDescendantOf(AbsoluteAbsolutePath, AncestorSource))
                 throw new InvalidOperationException(
                     string.Format(
                         "The path \"{2}\" cannot be copied to \"{1}\" because the path isn't under the source path: \"{0}\"",
                         AncestorSource, AncestorDestination, AbsoluteAbsolutePath));
             if (AncestorSource.Equals(AbsoluteAbsolutePath))
-                return new AbsolutePathTranslation(AncestorSource, AncestorDestination, IoService);
-            var relativePath = AbsoluteAbsolutePath.IoService.RelativeTo(AbsoluteAbsolutePath, AncestorSource);
+                return new AbsolutePathTranslation(AncestorSource, AncestorDestination, FileSystem);
+            var relativePath = AbsoluteAbsolutePath.FileSystem.RelativeTo(AbsoluteAbsolutePath, AncestorSource);
             var pathToBeCopiedDestination = AncestorDestination / relativePath;
-            return new AbsolutePathTranslation(AbsoluteAbsolutePath, pathToBeCopiedDestination, IoService);
+            return new AbsolutePathTranslation(AbsoluteAbsolutePath, pathToBeCopiedDestination, FileSystem);
         }
 
         protected bool Equals(CalculatedAbsolutePathTranslation other)
@@ -101,8 +101,8 @@ namespace IoFluently
         {
             return Source.Collapse(
                 file => Enumerable.Empty<CalculatedAbsolutePathTranslation>(),
-                folder => folder.IoService.EnumerateChildren(folder)
-                    .Select(fileUri => new CalculatedAbsolutePathTranslation(fileUri, Source, Destination, IoService)),
+                folder => folder.FileSystem.EnumerateChildren(folder)
+                    .Select(fileUri => new CalculatedAbsolutePathTranslation(fileUri, Source, Destination, FileSystem)),
                 missingPath => Enumerable.Empty<CalculatedAbsolutePathTranslation>()).GetEnumerator();
         }
 

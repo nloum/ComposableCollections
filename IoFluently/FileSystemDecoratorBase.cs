@@ -13,11 +13,11 @@ using UnitsNet;
 
 namespace IoFluently
 {
-    public abstract class IoServiceDecoratorBase : IIoService
+    public abstract class FileSystemDecoratorBase : IFileSystem
     {
-        private readonly IIoService _decorated;
+        private readonly IFileSystem _decorated;
 
-        public IoServiceDecoratorBase(IIoService decorated)
+        public FileSystemDecoratorBase(IFileSystem decorated)
         {
             _decorated = decorated;
         }

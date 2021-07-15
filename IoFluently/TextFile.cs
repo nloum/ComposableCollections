@@ -116,7 +116,7 @@ namespace IoFluently
 
             var lastLine = new List<Line>();
             
-            foreach (var buffer in new StreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), IoService.GetBufferSizeOrDefaultInBytes(bufferSize), encoding))
+            foreach (var buffer in new StreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), FileSystem.GetBufferSizeOrDefaultInBytes(bufferSize), encoding))
             {
                 var innerEnumerator = new LineSplitEnumerator(buffer.Value,
                     buffer.ByteOffsetOfStart, buffer.CharOffsetOfStart,
@@ -191,7 +191,7 @@ namespace IoFluently
 
             var lastLine = new List<Line>();
             
-            foreach (var buffer in new ReverseStreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), IoService.GetBufferSizeOrDefaultInBytes(bufferSize), encoding))
+            foreach (var buffer in new ReverseStreamStringEnumerator(stream, startingByteOffset, (ulong) encoding.GetMaxCharCount((int)startingByteOffset), FileSystem.GetBufferSizeOrDefaultInBytes(bufferSize), encoding))
             {
                 var innerEnumerator = new ReverseLineSplitEnumerator(buffer.Value,
                     buffer.ByteOffsetOfStart, buffer.CharOffsetOfStart,
@@ -288,7 +288,7 @@ namespace IoFluently
         public StreamWriter OpenWriter(FileOptions fileOptions = FileOptions.WriteThrough, Encoding encoding = null, Information? bufferSize = default,
              bool createRecursively = true)
         {
-            var stream = Value .IoService.Open(Value.ExpectTextFileOrMissingPath(), FileMode.Create, FileAccess.Write, FileShare.None,
+            var stream = Value .FileSystem.Open(Value.ExpectTextFileOrMissingPath(), FileMode.Create, FileAccess.Write, FileShare.None,
                 fileOptions, bufferSize, createRecursively);
             if (encoding == null)
             {
@@ -304,7 +304,7 @@ namespace IoFluently
         {
             newline ??= Environment.NewLine;
             
-            var stream = Value .IoService.Open(Value.ExpectTextFile(), FileMode.Create, FileAccess.ReadWrite, FileShare.Write, FileOptions.WriteThrough, bufferSize, createRecursively);
+            var stream = Value .FileSystem.Open(Value.ExpectTextFile(), FileMode.Create, FileAccess.ReadWrite, FileShare.Write, FileOptions.WriteThrough, bufferSize, createRecursively);
             foreach (var line in lines)
             {
                 var bytes = Encoding.Default.GetBytes(line + newline);

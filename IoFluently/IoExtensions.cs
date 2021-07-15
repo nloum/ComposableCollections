@@ -149,9 +149,9 @@ namespace IoFluently
             return path.Collapse(
             file => (IFileOrMissingPath)file,
             folder => {
-                if (!folder.IoService.CanEmptyDirectoriesExist)
+                if (!folder.FileSystem.CanEmptyDirectoriesExist)
                 {
-                    switch (folder.IoService.EmptyFolderMode)
+                    switch (folder.FileSystem.EmptyFolderMode)
                     {
                         case EmptyFolderMode.EmptyFilesAreFolders:
                             return new File(folder);
@@ -170,9 +170,9 @@ namespace IoFluently
             return path.Collapse(
                 file => throw file.AssertExpectedType(PathType.MissingPath),
                 folder => {
-                    if (!folder.IoService.CanEmptyDirectoriesExist)
+                    if (!folder.FileSystem.CanEmptyDirectoriesExist)
                     {
-                        switch (folder.IoService.EmptyFolderMode)
+                        switch (folder.FileSystem.EmptyFolderMode)
                         {
                             case EmptyFolderMode.EmptyFilesAreFolders:
                                 throw folder.AssertExpectedType(PathType.MissingPath);
@@ -199,11 +199,11 @@ namespace IoFluently
         /// <returns>An object that, when disposed of, undoes any changes made to the specified path.</returns>
         public static IDisposable TemporaryChanges(this AbsolutePath path)
         {
-            var backupPath = path.IoService.TryWithExtension(path, x => x + ".backup").Value;
+            var backupPath = path.FileSystem.TryWithExtension(path, x => x + ".backup").Value;
             var translation = path.Translate(backupPath);
-            translation.IoService.Copy(translation, overwrite: true);
+            translation.FileSystem.Copy(translation, overwrite: true);
 
-            return new AnonymousDisposable(() => translation.IoService.Move(translation.Invert(), overwrite: true));
+            return new AnonymousDisposable(() => translation.FileSystem.Move(translation.Invert(), overwrite: true));
         }
 
         /// <summary>
@@ -211,7 +211,7 @@ namespace IoFluently
         /// </summary>
         public static AbsolutePath FallbackTo(this AbsolutePath mainPath, AbsolutePath fallbackPath)
         {
-            if (!mainPath.IoService.Exists(mainPath))
+            if (!mainPath.FileSystem.Exists(mainPath))
             {
                 return fallbackPath;
             }
@@ -224,7 +224,7 @@ namespace IoFluently
         /// </summary>
         public static AbsolutePath FallbackCopyFrom(this AbsolutePath mainPath, AbsolutePath fallbackPath)
         {
-            if (!mainPath.IoService.Exists(mainPath))
+            if (!mainPath.FileSystem.Exists(mainPath))
             {
                 fallbackPath.Copy(mainPath);
             }
@@ -257,7 +257,7 @@ namespace IoFluently
         /// idiomatic code with IoFluently.
         /// </summary>
         [Obsolete("Use the / operator on AbsolutePath objects (and related objects) to write idiomatic code with IoFluently", true)]
-        public static AbsolutePath Combine(this IIoService path, string subpath)
+        public static AbsolutePath Combine(this IFileSystem path, string subpath)
         {
             throw new NotImplementedException();
         }

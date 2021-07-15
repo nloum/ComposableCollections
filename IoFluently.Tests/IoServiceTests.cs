@@ -21,7 +21,7 @@ namespace IoFluently.Tests
             InMemoryZipIoService,
         }
         
-        private void CreateUnitsUnderTest(bool sameInstance, IoServiceType type1, bool enableOpenFilesTracking1, out IIoService unitUnderTest1, IoServiceType type2, bool enableOpenFilesTracking2, out IIoService unitUnderTest2)
+        private void CreateUnitsUnderTest(bool sameInstance, IoServiceType type1, bool enableOpenFilesTracking1, out IFileSystem unitUnderTest1, IoServiceType type2, bool enableOpenFilesTracking2, out IFileSystem unitUnderTest2)
         {
             unitUnderTest1 = CreateUnitUnderTest(type1, enableOpenFilesTracking1);
             
@@ -38,33 +38,33 @@ namespace IoFluently.Tests
         {
             if (type == IoServiceType.IoService)
             {
-                return new IoService(enableOpenFilesTracking);
+                return new FileSystem(enableOpenFilesTracking);
             }
             else if (type == IoServiceType.InMemoryWindowsIoService)
             {
-                var result = new InMemoryIoService(false, "/", enableOpenFilesTracking);
+                var result = new InMemoryFileSystem(false, "/", enableOpenFilesTracking);
                 result.RootFolders.Add("/", new InMemoryFolder());
-                var finalResult = new IoServiceEnvironmentDecorator(result);
+                var finalResult = new FileSystemEnvironmentDecorator(result);
                 finalResult.CurrentDirectory = result.ParseAbsolutePath("/").ExpectFolder();
                 finalResult.TemporaryFolder = result.ParseAbsolutePath("/tmp").ExpectFolder();
                 return finalResult;
             }
             else if (type == IoServiceType.InMemoryUnixIoService)
             {
-                var result = new InMemoryIoService(true, "/", enableOpenFilesTracking);
+                var result = new InMemoryFileSystem(true, "/", enableOpenFilesTracking);
                 result.RootFolders.Add("/", new InMemoryFolder());
-                var finalResult = new IoServiceEnvironmentDecorator(result);
+                var finalResult = new FileSystemEnvironmentDecorator(result);
                 finalResult.CurrentDirectory = result.ParseAbsolutePath("/").ExpectFolder();
                 finalResult.TemporaryFolder = result.ParseAbsolutePath("/tmp").ExpectFolder();
                 return finalResult;
             }
             else if (type == IoServiceType.InMemoryZipIoService)
             {
-                var inMemoryIoService = new InMemoryIoService(true, "/", enableOpenFilesTracking);
+                var inMemoryIoService = new InMemoryFileSystem(true, "/", enableOpenFilesTracking);
                 inMemoryIoService.RootFolders.Add("/", new InMemoryFolder());
                 var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip").ExpectFileOrMissingPath();
                 var result = testZipFilePath.ExpectZipFileOrMissingPath(true);
-                var finalResult = new IoServiceEnvironmentDecorator(result);
+                var finalResult = new FileSystemEnvironmentDecorator(result);
                 finalResult.CurrentDirectory = result.ParseAbsolutePath("/").ExpectFolder();
                 finalResult.TemporaryFolder = result.ParseAbsolutePath("/tmp").ExpectFolder();
                 return finalResult;

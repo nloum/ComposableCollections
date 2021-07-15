@@ -88,7 +88,8 @@ namespace IoFluently
                 .GroupBy(x => x.Parameters[0].Type.Identifier))
             {
                 textWriter.WriteLine($"namespace {groupedByPartialClass.Key.Namespace} {{");
-                if (typeReader.Types[groupedByPartialClass.Key] is IInterface)
+                var isInterface = typeReader.Types[groupedByPartialClass.Key] is IInterface;
+                if (isInterface)
                 {
                     textWriter.WriteLine($"    public partial interface {groupedByPartialClass.Key.Name} {{");
                 }
@@ -98,27 +99,27 @@ namespace IoFluently
                 }
                 foreach (var method in groupedByPartialClass)
                 {
+                    string methodName;
                     if (method.ReturnType is IBoundGenericInterface boundIface && boundIface.Identifier.Name == "IMaybe" && method.Name.StartsWith("Try"))
                     {
-                        var withoutTry = method.Name.Substring(3);
-                        if (withoutTry.StartsWith("Get"))
+                        methodName = method.Name.Substring(3);
+                        if (methodName.StartsWith("Get"))
                         {
-                            withoutTry = withoutTry.Substring(3);
+                            methodName = methodName.Substring(3);
                         }
-                        // var returnValue = (IReflectionType) boundIface.Arguments[0];
-                        // if (returnValue is IValueType)
-                        // {
-                        //     textWriter.WriteLine($"        public {ConvertToCSharpTypeName((returnValue).Type)}? {withoutTry} => IoService.{method.Name}(this).Select(x => ({ConvertToCSharpTypeName((returnValue).Type)}?)x).ValueOrDefault;");
-                        // }
-                        // else
-                        // {
-                        //     textWriter.WriteLine($"        public {ConvertToCSharpTypeName((returnValue).Type)} {withoutTry} => IoService.{method.Name}(this).ValueOrDefault;");
-                        // }
-                        textWriter.WriteLine($"        public {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {withoutTry} => IoService.{method.Name}(this);");
                     }
                     else
                     {
-                        textWriter.WriteLine($"        public {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {method.Name} => IoService.{method.Name}(this);");
+                        methodName = method.Name;
+                    }
+
+                    if (isInterface)
+                    {
+                        textWriter.WriteLine($"        public {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {methodName} {{ get; }}");
+                    }
+                    else
+                    {
+                        textWriter.WriteLine($"        public {ConvertToCSharpTypeName(((IReflectionType)method.ReturnType).Type)} {methodName} => IoService.{method.Name}(this);");
                     }
                 }
                 textWriter.WriteLine("    }");
@@ -158,6 +159,7 @@ namespace IoFluently
                 || method.Name.Contains("Set")
                 || method.Name.Equals("Decrypt")
                 || method.Name.Equals("Encrypt")
+                || method.Name.Contains("Enumerate")
                 || method.Name.Equals("Renamings")
                 || method.Name.Equals("Simplify"))
             {

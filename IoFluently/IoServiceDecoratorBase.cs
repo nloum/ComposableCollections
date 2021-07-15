@@ -420,64 +420,64 @@ namespace IoFluently
             return _decorated.MoveAsync(translation, cancellationToken, bufferSize, overwrite);
         }
 
-        public virtual IEnumerable<IFileOrFolder> Children(IFolder path, string searchPattern, bool includeFolders = true, bool includeFiles = true)
+        public virtual IEnumerable<IFileOrFolder> EnumerateChildren(IFolder path, string searchPattern, bool includeFolders = true, bool includeFiles = true)
         {
-            return _decorated.Children(path, searchPattern, includeFolders, includeFiles);
+            return _decorated.EnumerateChildren(path, searchPattern, includeFolders, includeFiles);
         }
 
-        public virtual IEnumerable<File> ChildFiles(IFolder path, string searchPattern)
+        public virtual IEnumerable<File> EnumerateChildFiles(IFolder path, string searchPattern)
         {
-            return _decorated.ChildFiles(path, searchPattern);
+            return _decorated.EnumerateChildFiles(path, searchPattern);
         }
 
-        public virtual IEnumerable<Folder> ChildFolders(IFolder path, string searchPattern)
+        public virtual IEnumerable<Folder> EnumerateChildFolders(IFolder path, string searchPattern)
         {
-            return _decorated.ChildFolders(path, searchPattern);
+            return _decorated.EnumerateChildFolders(path, searchPattern);
         }
 
-        public virtual IEnumerable<IFileOrFolder> Descendants(IFolder path, string searchPattern, bool includeFolders = true, bool includeFiles = true)
+        public virtual IEnumerable<IFileOrFolder> EnumerateDescendants(IFolder path, string searchPattern, bool includeFolders = true, bool includeFiles = true)
         {
-            return _decorated.Descendants(path, searchPattern, includeFolders, includeFiles);
+            return _decorated.EnumerateDescendants(path, searchPattern, includeFolders, includeFiles);
         }
 
-        public virtual IEnumerable<Folder> DescendantFolders(IFolder path, string searchPattern)
+        public virtual IEnumerable<Folder> EnumerateDescendantFolders(IFolder path, string searchPattern)
         {
-            return _decorated.DescendantFolders(path, searchPattern);
+            return _decorated.EnumerateDescendantFolders(path, searchPattern);
         }
 
-        public virtual IEnumerable<File> DescendantFiles(IFolder path, string searchPattern)
+        public virtual IEnumerable<File> EnumerateDescendantFiles(IFolder path, string searchPattern)
         {
-            return _decorated.DescendantFiles(path, searchPattern);
+            return _decorated.EnumerateDescendantFiles(path, searchPattern);
         }
 
-        public virtual IEnumerable<IFileOrFolder> Children(IFolder path)
+        public virtual IEnumerable<IFileOrFolder> EnumerateChildren(IFolder path)
         {
-            return _decorated.Children(path);
+            return _decorated.EnumerateChildren(path);
         }
 
-        public virtual IEnumerable<File> ChildFiles(IFolder path)
+        public virtual IEnumerable<File> EnumerateChildFiles(IFolder path)
         {
-            return _decorated.ChildFiles(path);
+            return _decorated.EnumerateChildFiles(path);
         }
 
-        public virtual IEnumerable<Folder> ChildFolders(IFolder path)
+        public virtual IEnumerable<Folder> EnumerateChildFolders(IFolder path)
         {
-            return _decorated.ChildFolders(path);
+            return _decorated.EnumerateChildFolders(path);
         }
 
-        public virtual IEnumerable<IFileOrFolder> Descendants(IFolder path)
+        public virtual IEnumerable<IFileOrFolder> EnumerateDescendants(IFolder path)
         {
-            return _decorated.Descendants(path);
+            return _decorated.EnumerateDescendants(path);
         }
 
-        public virtual IEnumerable<Folder> DescendantFolders(IFolder path)
+        public virtual IEnumerable<Folder> EnumerateDescendantFolders(IFolder path)
         {
-            return _decorated.DescendantFolders(path);
+            return _decorated.EnumerateDescendantFolders(path);
         }
 
-        public virtual IEnumerable<File> DescendantFiles(IFolder path)
+        public virtual IEnumerable<File> EnumerateDescendantFiles(IFolder path)
         {
-            return _decorated.DescendantFiles(path);
+            return _decorated.EnumerateDescendantFiles(path);
         }
 
         public virtual bool CanBeSimplified(IFileOrFolderOrMissingPath path)

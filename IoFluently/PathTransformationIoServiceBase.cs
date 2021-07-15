@@ -88,11 +88,11 @@ namespace IoFluently
             return path.ExpectMissingPath();
         }
 
-        public override IEnumerable<IFileOrFolder> Children(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolder> EnumerateChildren(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             var transformedPath = Transform   (path);
             var decorated = transformedPath.IoService;
-            return decorated.Children(transformedPath, searchPattern, includeFolders, includeFiles)
+            return decorated.EnumerateChildren(transformedPath, searchPattern, includeFolders, includeFiles)
                 .Select(x => x.Collapse(
                     file => (IFileOrFolder)new File(path.Components.Concat(new[]{file.Name}).ToList(), path.IsCaseSensitive, path.DirectorySeparator, this),
                     folder => new Folder(path.Components.Concat(new[]{folder.Name}).ToList(), path.IsCaseSensitive, path.DirectorySeparator, this)));

@@ -132,7 +132,7 @@ namespace IoFluently
                 },
                 async folder =>
                 {
-                    foreach (var child in Children(folder))
+                    foreach (var child in EnumerateChildren(folder))
                     {
                         await EnsureDoesNotExistAsync(child , cancellationToken, true);
                     }
@@ -158,7 +158,7 @@ namespace IoFluently
                 file => CreateFolder(DeleteFile(file)),
                 folder =>
                 {
-                    foreach (var child in Children(folder))
+                    foreach (var child in EnumerateChildren(folder))
                     {
                         EnsureDoesNotExist(child , true);
                     }
@@ -1542,7 +1542,7 @@ namespace IoFluently
         {
             Func<AbsolutePath, IEnumerable<RelativePath>> patternFunc = absPath => absPath.Collapse(
                 file => Enumerable.Empty<RelativePath>(),
-                folder => folder.IoService.Children(folder, pattern).Select(x => new RelativePath(new[]{Name(x)}, x.IsCaseSensitive, x.DirectorySeparator, x.IoService)),
+                folder => folder.IoService.EnumerateChildren(folder, pattern).Select(x => new RelativePath(new[]{Name(x)}, x.IsCaseSensitive, x.DirectorySeparator, x.IoService)),
                 missingPath => Enumerable.Empty<RelativePath>());
             return path.ExpectFolder() / patternFunc;
         }
@@ -1949,38 +1949,38 @@ namespace IoFluently
             }
         }
 
-        public virtual IEnumerable<File> ChildFiles(IFolder path, string searchPattern = null)
+        public virtual IEnumerable<File> EnumerateChildFiles(IFolder path, string searchPattern = null)
         {
-            return Children(path, searchPattern, false, true).Select(x => new File(x));
+            return EnumerateChildren(path, searchPattern, false, true).Select(x => new File(x));
         }
 
-        public virtual IEnumerable<Folder> ChildFolders(IFolder path, string searchPattern = null)
+        public virtual IEnumerable<Folder> EnumerateChildFolders(IFolder path, string searchPattern = null)
         {
-            return Children(path, searchPattern, true, false).Select(x => new Folder(x));
+            return EnumerateChildren(path, searchPattern, true, false).Select(x => new Folder(x));
         }
 
-        public virtual IEnumerable<Folder> DescendantFolders(IFolder path, string searchPattern = null)
+        public virtual IEnumerable<Folder> EnumerateDescendantFolders(IFolder path, string searchPattern = null)
         {
-            return Descendants(path, searchPattern, true, false).Select(x => new Folder(x));
+            return EnumerateDescendants(path, searchPattern, true, false).Select(x => new Folder(x));
         }
 
-        public virtual IEnumerable<File> DescendantFiles(IFolder path, string searchPattern = null)
+        public virtual IEnumerable<File> EnumerateDescendantFiles(IFolder path, string searchPattern = null)
         {
-            return Descendants(path, searchPattern, false, true).Select(x => new File(x));
+            return EnumerateDescendants(path, searchPattern, false, true).Select(x => new File(x));
         }
 
         /// <inheritdoc />
-        public abstract IEnumerable<IFileOrFolder> Children(IFolder path, string searchPattern = null, bool includeFolders = true,
+        public abstract IEnumerable<IFileOrFolder> EnumerateChildren(IFolder path, string searchPattern = null, bool includeFolders = true,
             bool includeFiles = true);
 
         /// <inheritdoc />
-        public virtual IEnumerable<IFileOrFolder> Descendants(IFolder path, string searchPattern = null,
+        public virtual IEnumerable<IFileOrFolder> EnumerateDescendants(IFolder path, string searchPattern = null,
             bool includeFolders = true,
             bool includeFiles = true)
         {
             return path.TraverseTree(x =>
             {
-                var children = x.Collapse(file => Enumerable.Empty<IFileOrFolder>(), folder => Children(folder));
+                var children = x.Collapse(file => Enumerable.Empty<IFileOrFolder>(), folder => EnumerateChildren(folder));
                 var childrenNames = children.Select(child => child.Components[^1]);
                 return childrenNames;
             }, (IFileOrFolder node, string name, out IFileOrFolder child) =>
@@ -2000,34 +2000,34 @@ namespace IoFluently
                 .Select(tt => tt.Value);
         }
 
-        public IEnumerable<IFileOrFolder> Children(IFolder path)
+        public IEnumerable<IFileOrFolder> EnumerateChildren(IFolder path)
         {
-            return Children(path, "*");
+            return EnumerateChildren(path, "*");
         }
 
-        public IEnumerable<File> ChildFiles(IFolder path)
+        public IEnumerable<File> EnumerateChildFiles(IFolder path)
         {
-            return ChildFiles(path, "*");
+            return EnumerateChildFiles(path, "*");
         }
 
-        public IEnumerable<Folder> ChildFolders(IFolder path)
+        public IEnumerable<Folder> EnumerateChildFolders(IFolder path)
         {
-            return ChildFolders(path, "*");
+            return EnumerateChildFolders(path, "*");
         }
 
-        public IEnumerable<IFileOrFolder> Descendants(IFolder path)
+        public IEnumerable<IFileOrFolder> EnumerateDescendants(IFolder path)
         {
-            return Descendants(path, "*");
+            return EnumerateDescendants(path, "*");
         }
 
-        public IEnumerable<Folder> DescendantFolders(IFolder path)
+        public IEnumerable<Folder> EnumerateDescendantFolders(IFolder path)
         {
-            return DescendantFolders(path, "*");
+            return EnumerateDescendantFolders(path, "*");
         }
 
-        public IEnumerable<File> DescendantFiles(IFolder path)
+        public IEnumerable<File> EnumerateDescendantFiles(IFolder path)
         {
-            return DescendantFiles(path, "*");
+            return EnumerateDescendantFiles(path, "*");
         }
 
         #endregion

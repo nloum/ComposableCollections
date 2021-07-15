@@ -223,7 +223,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IFileOrFolder> Children(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolder> EnumerateChildren(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             var folder = GetFolder(path );
             if (!folder.HasValue)
@@ -239,7 +239,7 @@ namespace IoFluently
                 .Select(path => path.ExpectFileOrFolder());
         }
 
-        public override IEnumerable<IFileOrFolder> Descendants(IFolder path, string searchPattern = null, bool includeFolders = true,
+        public override IEnumerable<IFileOrFolder> EnumerateDescendants(IFolder path, string searchPattern = null, bool includeFolders = true,
             bool includeFiles = true)
         {
             var folder = GetFolder(path);

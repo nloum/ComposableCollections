@@ -49,13 +49,6 @@ namespace IoFluently {
 }
 namespace IoFluently {
     public partial interface IFolder {
-        public IEnumerable<Folder> Ancestors => IoService.Ancestors(this);
-        public IEnumerable<File> ChildFiles => IoService.ChildFiles(this);
-        public IEnumerable<Folder> ChildFolders => IoService.ChildFolders(this);
-        public IEnumerable<IFileOrFolder> Children => IoService.Children(this);
-        public IEnumerable<File> DescendantFiles => IoService.DescendantFiles(this);
-        public IEnumerable<Folder> DescendantFolders => IoService.DescendantFolders(this);
-        public IEnumerable<IFileOrFolder> Descendants => IoService.Descendants(this);
-        public IMaybe<Folder> Parent => IoService.TryParent(this);
+        IMaybe<Folder> Parent { get; }
     }
 }

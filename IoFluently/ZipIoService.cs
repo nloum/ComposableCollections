@@ -107,7 +107,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IFileOrFolder> Children(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolder> EnumerateChildren(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             using (var archive = OpenZipArchive(false, true))
             {
@@ -121,7 +121,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IFileOrFolder> Descendants(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolder> EnumerateDescendants(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             using (var archive = OpenZipArchive(false, true))
             {

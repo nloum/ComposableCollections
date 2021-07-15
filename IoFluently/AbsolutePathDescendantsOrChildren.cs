@@ -7,14 +7,15 @@ using LiveLinq.Set;
 
 namespace IoFluently
 {
-    public abstract class AbsolutePathDescendantsOrChildren : IObservableReadOnlySet<AbsolutePath>
+    public abstract class AbsolutePathDescendantsOrChildren<TFileOrFolder> : IObservableReadOnlySet<AbsolutePath>, IEnumerable<TFileOrFolder>
+        where TFileOrFolder : IFileOrFolderOrMissingPath
     {
         protected readonly Folder _path;
         protected readonly string _pattern;
 
-        protected AbsolutePathDescendantsOrChildren(Folder path, string pattern, bool includeSubFolders)
+        protected AbsolutePathDescendantsOrChildren(IFolder path, string pattern, bool includeSubFolders)
         {
-            _path = path;
+            _path = path.ExpectFolder();
             _pattern = pattern;
             IncludeSubFolders = includeSubFolders;
             IoService = path.IoService;
@@ -29,17 +30,22 @@ namespace IoFluently
             return IoService.ToLiveLinq(_path, true, IncludeSubFolders, _pattern);
         }
 
-        public int Count => this.AsEnumerable().Count();
+        public int Count => this.AsEnumerable<TFileOrFolder>().Count();
         
         public void Dispose()
         {
         }
+
+        public abstract IEnumerator<TFileOrFolder> GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
 
-        public abstract IEnumerator<AbsolutePath> GetEnumerator();
+        IEnumerator<AbsolutePath> IEnumerable<AbsolutePath>.GetEnumerator()
+        {
+            return this.AsEnumerable<TFileOrFolder>().Select(x => x.ExpectFileOrFolderOrMissingPath()).GetEnumerator();
+        }
     }
 }

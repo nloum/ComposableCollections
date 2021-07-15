@@ -75,11 +75,11 @@ namespace IoFluently
             return path.IoService.TryDescendant(path, paths).Value;
         }
 
-        public static IMaybe<AbsolutePath> TryDescendant(this IFileOrFolderOrMissingPath path, String[] paths) {
+        public static IMaybe<AbsolutePath> TryDescendant(this IFileOrFolderOrMissingPath path, params String[] paths) {
             return path.IoService.TryDescendant(path, paths);
         }
 
-        public static AbsolutePath Descendant(this IFileOrFolderOrMissingPath path, String[] paths) {
+        public static AbsolutePath Descendant(this IFileOrFolderOrMissingPath path, params String[] paths) {
             return path.IoService.TryDescendant(path, paths).Value;
         }
 
@@ -332,27 +332,27 @@ namespace IoFluently
         }
 
         public static IEnumerable<IFileOrFolder> Children(this IFolder path, string searchPattern, Boolean includeFolders = true, Boolean includeFiles = true) {
-            return path.IoService.Children(path, searchPattern, includeFolders, includeFiles);
+            return path.IoService.EnumerateChildren(path, searchPattern, includeFolders, includeFiles);
         }
 
         public static IEnumerable<File> ChildFiles(this IFolder path, string searchPattern) {
-            return path.IoService.ChildFiles(path, searchPattern);
+            return path.IoService.EnumerateChildFiles(path, searchPattern);
         }
 
         public static IEnumerable<Folder> ChildFolders(this IFolder path, string searchPattern) {
-            return path.IoService.ChildFolders(path, searchPattern);
+            return path.IoService.EnumerateChildFolders(path, searchPattern);
         }
 
         public static IEnumerable<IFileOrFolder> Descendants(this IFolder path, string searchPattern, Boolean includeFolders = true, Boolean includeFiles = true) {
-            return path.IoService.Descendants(path, searchPattern, includeFolders, includeFiles);
+            return path.IoService.EnumerateDescendants(path, searchPattern, includeFolders, includeFiles);
         }
 
         public static IEnumerable<Folder> DescendantFolders(this IFolder path, string searchPattern) {
-            return path.IoService.DescendantFolders(path, searchPattern);
+            return path.IoService.EnumerateDescendantFolders(path, searchPattern);
         }
 
         public static IEnumerable<File> DescendantFiles(this IFolder path, string searchPattern) {
-            return path.IoService.DescendantFiles(path, searchPattern);
+            return path.IoService.EnumerateDescendantFiles(path, searchPattern);
         }
 
     }

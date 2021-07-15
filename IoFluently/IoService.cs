@@ -213,8 +213,8 @@ namespace IoFluently
             process.Start();
 
             var initialState = includeSubFolders
-                ? root.IoService.Descendants(root).Select(x => new AbsolutePath(x)).ToImmutableDictionary(x => x, x => Type(x))
-                : root.IoService.Children(root).Select(x => new AbsolutePath(x)).ToImmutableDictionary(x => x, x => Type(x));
+                ? root.IoService.EnumerateDescendants(root).Select(x => new AbsolutePath(x)).ToImmutableDictionary(x => x, x => Type(x))
+                : root.IoService.EnumerateChildren(root).Select(x => new AbsolutePath(x)).ToImmutableDictionary(x => x, x => Type(x));
 
             var resultObservable = process.StandardOutput
                 .Observe(new []{ (char)0 })
@@ -357,8 +357,8 @@ namespace IoFluently
                     });
 
                 var initialSetChange = LiveLinq.Utility.SetChange(CollectionChangeType.Add, includeSubFolders
-                    ? root.IoService.Descendants(root).Select(x => new AbsolutePath(x))
-                    : root.IoService.Children(root).Select(x => new AbsolutePath(x)).AsEnumerable());
+                    ? root.IoService.EnumerateDescendants(root).Select(x => new AbsolutePath(x))
+                    : root.IoService.EnumerateChildren(root).Select(x => new AbsolutePath(x)).AsEnumerable());
 
                 observer.OnNext(initialSetChange);
 
@@ -474,13 +474,13 @@ namespace IoFluently
             return new MissingPath(path);
         }
 
-        public override IEnumerable<IFileOrFolder> Descendants(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolder> EnumerateDescendants(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             return EnumerateDescendantsOrChildren(path, searchPattern ?? "*", SearchOption.AllDirectories,
                 includeFolders, includeFiles);
         }
 
-        public override IEnumerable<IFileOrFolder> Children(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
+        public override IEnumerable<IFileOrFolder> EnumerateChildren(IFolder path, string searchPattern = null, bool includeFolders = true, bool includeFiles = true)
         {
             return EnumerateDescendantsOrChildren(path, searchPattern ?? "*", SearchOption.TopDirectoryOnly,
                 includeFolders, includeFiles);

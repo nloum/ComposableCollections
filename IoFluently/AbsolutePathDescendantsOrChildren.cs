@@ -7,7 +7,7 @@ using LiveLinq.Set;
 
 namespace IoFluently
 {
-    public abstract class AbsolutePathDescendantsOrChildren<TFileOrFolder> : IObservableReadOnlySet<AbsolutePath>, IEnumerable<TFileOrFolder>
+    public abstract class AbsolutePathDescendantsOrChildren<TFileOrFolder> : IEnumerable<TFileOrFolder>
         where TFileOrFolder : IFileOrFolderOrMissingPath
     {
         protected readonly Folder _path;
@@ -25,15 +25,53 @@ namespace IoFluently
 
         protected bool IncludeSubFolders { get; }
 
-        public ISetChanges<AbsolutePath> ToLiveLinq()
+        public IObservableReadOnlySet<AbsolutePath> WithChangeNotifications()
         {
-            return IoService.ToLiveLinq(_path, true, IncludeSubFolders, _pattern);
+            return new ObservableReadOnlySet(_path, _pattern, IncludeSubFolders, IoService, this);
         }
 
-        public int Count => this.AsEnumerable<TFileOrFolder>().Count();
-        
-        public void Dispose()
+        public ISetChanges<AbsolutePath> ToLiveLinq()
         {
+            return WithChangeNotifications().ToLiveLinq();
+        }
+        
+        private class ObservableReadOnlySet : IObservableReadOnlySet<AbsolutePath> {
+            private readonly Folder _path;
+            private readonly string _pattern;
+            private bool _includeSubFolders;
+            private IIoService _ioService;
+            private readonly IEnumerable<TFileOrFolder> _enumerable;
+
+            public ObservableReadOnlySet(Folder path, string pattern, bool includeSubFolders, IIoService ioService, IEnumerable<TFileOrFolder> enumerable)
+            {
+                _path = path;
+                _pattern = pattern;
+                _includeSubFolders = includeSubFolders;
+                _ioService = ioService;
+                _enumerable = enumerable;
+            }
+
+            public ISetChanges<AbsolutePath> ToLiveLinq()
+            {
+                return _ioService.ToLiveLinq(_path, true, _includeSubFolders, _pattern);
+            }
+
+            public IEnumerator<AbsolutePath> GetEnumerator()
+            {
+                return _enumerable.Select(x => x.ExpectFileOrFolderOrMissingPath()).GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            public int Count => _enumerable.Count();
+            
+            public void Dispose()
+            {
+                
+            }
         }
 
         public abstract IEnumerator<TFileOrFolder> GetEnumerator();
@@ -41,11 +79,6 @@ namespace IoFluently
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }
-
-        IEnumerator<AbsolutePath> IEnumerable<AbsolutePath>.GetEnumerator()
-        {
-            return this.AsEnumerable<TFileOrFolder>().Select(x => x.ExpectFileOrFolderOrMissingPath()).GetEnumerator();
         }
     }
 }

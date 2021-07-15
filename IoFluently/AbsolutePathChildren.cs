@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace IoFluently
 {
-    public class AbsolutePathChildren : AbsolutePathDescendantsOrChildren<IFileOrFolder>
+    public class AbsolutePathChildren : AbsolutePathDescendantsOrChildren<IFileOrFolder>, IEnumerable<IFileOrFolder>
     {
         public AbsolutePathChildren(IFolder path, string pattern = "*") : base(path, pattern, false)
         {
@@ -15,7 +15,7 @@ namespace IoFluently
         }
     }
     
-    public class AbsolutePathChildFiles : AbsolutePathDescendantsOrChildren<IFile>
+    public class AbsolutePathChildFiles : AbsolutePathDescendantsOrChildren<IFile>, IEnumerable<IFile>
     {
         public AbsolutePathChildFiles(IFolder path, string pattern = "*") : base(path, pattern, false)
         {
@@ -27,7 +27,7 @@ namespace IoFluently
         }
     }
     
-    public class AbsolutePathChildFolders : AbsolutePathDescendantsOrChildren<IFolder>
+    public class AbsolutePathChildFolders : AbsolutePathDescendantsOrChildren<IFolder>, IEnumerable<IFolder>
     {
         public AbsolutePathChildFolders(IFolder path, string pattern = "*") : base(path, pattern, false)
         {

@@ -85,7 +85,7 @@ namespace IoFluently.Documentation
             var repoRoot = ioService.CurrentDirectory.Ancestors.First(ancestor => ioService.IsFolder(ancestor / ".git"));
             var markdownFileRegex = ioService.FileNamePatternToRegex("*.md");
             
-            var descendants = new AbsolutePathDescendants(repoRoot).ToLiveLinq()
+            var descendants = repoRoot.Descendants.ToLiveLinq()
                 .AsObservable()
                 .Publish()
                 .RefCount()

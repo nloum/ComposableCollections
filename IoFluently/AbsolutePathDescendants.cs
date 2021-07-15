@@ -6,7 +6,7 @@ using TreeLinq;
 
 namespace IoFluently
 {
-    public class AbsolutePathDescendants : AbsolutePathDescendantsOrChildren<IFileOrFolder>, IFileProvider
+    public class AbsolutePathDescendants : AbsolutePathDescendantsOrChildren<IFileOrFolder>, IFileProvider, IEnumerable<IFileOrFolder>
     {
         public AbsolutePathDescendants(IFolder path, string pattern = "*") : base(path, pattern, true)
         {
@@ -27,14 +27,14 @@ namespace IoFluently
             // TODO - implement this properly
             return new EmptyChangeToken();
         }
-        
+
         public override IEnumerator<IFileOrFolder> GetEnumerator()
         {
             return _path.IoService.EnumerateDescendants(_path, _pattern).GetEnumerator();
         }
     }
     
-    public class AbsolutePathDescendantFiles : AbsolutePathDescendantsOrChildren<IFile>, IFileProvider
+    public class AbsolutePathDescendantFiles : AbsolutePathDescendantsOrChildren<IFile>, IFileProvider, IEnumerable<IFile>
     {
         public AbsolutePathDescendantFiles(IFolder path, string pattern = "*") : base(path, pattern, true)
         {
@@ -55,14 +55,14 @@ namespace IoFluently
             // TODO - implement this properly
             return new EmptyChangeToken();
         }
-        
+
         public override IEnumerator<IFile> GetEnumerator()
         {
             return _path.IoService.EnumerateDescendantFiles(_path, _pattern).GetEnumerator();
         }
     }
     
-    public class AbsolutePathDescendantFolders : AbsolutePathDescendantsOrChildren<IFolder>, IFileProvider
+    public class AbsolutePathDescendantFolders : AbsolutePathDescendantsOrChildren<IFolder>, IFileProvider, IEnumerable<IFolder>
     {
         public AbsolutePathDescendantFolders(IFolder path, string pattern = "*") : base(path, pattern, true)
         {
@@ -83,7 +83,7 @@ namespace IoFluently
             // TODO - implement this properly
             return new EmptyChangeToken();
         }
-        
+
         public override IEnumerator<IFolder> GetEnumerator()
         {
             return _path.IoService.EnumerateDescendantFolders(_path, _pattern).GetEnumerator();

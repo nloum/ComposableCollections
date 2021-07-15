@@ -11,22 +11,17 @@ namespace IoFluently
     {
         public static TextFilePath ExpectTextFile(this IFileOrFolderOrMissingPath path)
         {
-            return new TextFilePath(path);
+            return new(path);
         }
 
         public static TextFileOrMissingPath ExpectTextFileOrMissingPath(this IFileOrFolderOrMissingPath path)
         {
-            if (path .IsFile)
-            {
-                return new TextFileOrMissingPath(new TextFilePath(path));
-            }
-            
-            return new TextFileOrMissingPath((IMissingPath)new MissingPath(path));
+            return new(path);
         }
         
         public static TextFileOrMissingPath ExpectMissingTextFile(this IFileOrFolderOrMissingPath path)
         {
-            return new((IMissingPath)new MissingPath(path));
+            return new(path);
         }
     }
     
@@ -266,21 +261,6 @@ namespace IoFluently
 
     public class TextFileOrMissingPath : FileOrMissingPathBase
     {
-        public TextFileOrMissingPath(TextFilePath item1) : base((IFilePath)item1)
-        {
-        }
-
-        public TextFileOrMissingPath(IMissingPath item2) : base(item2)
-        {
-        }
-
-        public TextFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<TextFilePath, IMissingPath> other)
-            : base(other.Collapse(
-                textFile => new SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFilePath, IMissingPath>((IFilePath)textFile),
-                missingPath => new SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFilePath, IMissingPath>((IMissingPath)missingPath)))
-        {
-        }
-
         public TextFileOrMissingPath(IFileOrFolderOrMissingPath item) : base(item)
         {
         }
@@ -304,7 +284,7 @@ namespace IoFluently
         {
             newline ??= Environment.NewLine;
             
-            var stream = Value .FileSystem.Open(Value.ExpectTextFile(), FileMode.Create, FileAccess.ReadWrite, FileShare.Write, FileOptions.WriteThrough, bufferSize, createRecursively);
+            var stream = Value.FileSystem.Open(Value, FileMode.Create, FileAccess.ReadWrite, FileShare.Write, FileOptions.WriteThrough, bufferSize, createRecursively);
             foreach (var line in lines)
             {
                 var bytes = Encoding.Default.GetBytes(line + newline);

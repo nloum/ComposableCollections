@@ -19,7 +19,7 @@ namespace IoFluently
 
         public IDirectoryContents GetDirectoryContents(string subpath)
         {
-            return new AbsolutePathDirectoryContents(new Folder(_path / subpath));
+            return new AbsolutePathDirectoryContents(new FolderPath(_path / subpath));
         }
 
         public IChangeToken Watch(string filter)
@@ -34,7 +34,7 @@ namespace IoFluently
         }
     }
     
-    public class AbsolutePathDescendantFiles : AbsolutePathDescendantsOrChildren<File>, IFileProvider, IEnumerable<File>
+    public class AbsolutePathDescendantFiles : AbsolutePathDescendantsOrChildren<FilePath>, IFileProvider, IEnumerable<FilePath>
     {
         public AbsolutePathDescendantFiles(IFolder path, string pattern = "*") : base(path, pattern, true)
         {
@@ -47,7 +47,7 @@ namespace IoFluently
 
         public IDirectoryContents GetDirectoryContents(string subpath)
         {
-            return new AbsolutePathDirectoryContents(new Folder(_path / subpath));
+            return new AbsolutePathDirectoryContents(new FolderPath(_path / subpath));
         }
 
         public IChangeToken Watch(string filter)
@@ -56,13 +56,13 @@ namespace IoFluently
             return new EmptyChangeToken();
         }
 
-        public override IEnumerator<File> GetEnumerator()
+        public override IEnumerator<FilePath> GetEnumerator()
         {
             return _path.FileSystem.EnumerateDescendantFiles(_path, _pattern).GetEnumerator();
         }
     }
     
-    public class AbsolutePathDescendantFolders : AbsolutePathDescendantsOrChildren<Folder>, IFileProvider, IEnumerable<Folder>
+    public class AbsolutePathDescendantFolders : AbsolutePathDescendantsOrChildren<FolderPath>, IFileProvider, IEnumerable<FolderPath>
     {
         public AbsolutePathDescendantFolders(IFolder path, string pattern = "*") : base(path, pattern, true)
         {
@@ -75,7 +75,7 @@ namespace IoFluently
 
         public IDirectoryContents GetDirectoryContents(string subpath)
         {
-            return new AbsolutePathDirectoryContents(new Folder(_path / subpath));
+            return new AbsolutePathDirectoryContents(new FolderPath(_path / subpath));
         }
 
         public IChangeToken Watch(string filter)
@@ -84,7 +84,7 @@ namespace IoFluently
             return new EmptyChangeToken();
         }
 
-        public override IEnumerator<Folder> GetEnumerator()
+        public override IEnumerator<FolderPath> GetEnumerator()
         {
             return _path.FileSystem.EnumerateDescendantFolders(_path, _pattern).GetEnumerator();
         }

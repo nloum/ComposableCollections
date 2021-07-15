@@ -7,7 +7,7 @@ namespace IoFluently
     public class MirrorFileSystem : PathTransformationFileSystemBase
     {
         private readonly IFileSystem _decorated;
-        private readonly ObservableSet<Folder> _roots = new();
+        private readonly ObservableSet<FolderPath> _roots = new();
         
         public ImmutableDictionary<AbsolutePath, AbsolutePath> Mappings { get; set; } = ImmutableDictionary<AbsolutePath, AbsolutePath>.Empty;
         
@@ -16,19 +16,19 @@ namespace IoFluently
         {
             _decorated = decorated;
             var defaultRootParsed = decorated.ParseAbsolutePath(defaultRoot);
-            var defaultRootFolder = new Folder(defaultRootParsed.Components, defaultRootParsed.IsCaseSensitive,
+            var defaultRootFolder = new FolderPath(defaultRootParsed.Components, defaultRootParsed.IsCaseSensitive,
                 defaultRootParsed.DirectorySeparator, this, false);
             DefaultRoot = defaultRootFolder;
             _roots.Add(defaultRootFolder);
         }
 
-        public override IObservableReadOnlySet<Folder> Roots => _roots;
+        public override IObservableReadOnlySet<FolderPath> Roots => _roots;
         public override void UpdateRoots()
         {
             
         }
 
-        public override Folder DefaultRoot { get; }
+        public override FolderPath DefaultRoot { get; }
 
         protected override AbsolutePath Transform(IFileOrFolderOrMissingPath absolutePath)
         {

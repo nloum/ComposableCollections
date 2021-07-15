@@ -8,9 +8,9 @@ namespace IoFluently
         {
         }
 
-        public Folder CurrentDirectory { get; set; }
+        public FolderPath CurrentDirectory { get; set; }
 
-        public Folder TemporaryFolder { get; set; }
+        public FolderPath TemporaryFolder { get; set; }
 
         public MissingPath GenerateUniqueTemporaryPath(string extension = null)
         {

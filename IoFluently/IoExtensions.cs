@@ -10,7 +10,7 @@ namespace IoFluently
 {
     public static partial class IoExtensions
     {
-        public static File CopyFrom(this IFileOrMissingPath fileOrMissingPath, IFile source)
+        public static FilePath CopyFrom(this IFileOrMissingPath fileOrMissingPath, IFile source)
         {
             using (var inputStream = source.Open(FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan))
             using (var outputStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None))
@@ -21,7 +21,7 @@ namespace IoFluently
             return fileOrMissingPath.ExpectFile();
         }
 
-        public static async Task<File> CopyFromAsync(this IFileOrMissingPath fileOrMissingPath, IFile source)
+        public static async Task<FilePath> CopyFromAsync(this IFileOrMissingPath fileOrMissingPath, IFile source)
         {
             await using (var inputStream = source.Open(FileMode.Open, FileAccess.Read, FileShare.Read, FileOptions.SequentialScan | FileOptions.Asynchronous))
             await using (var outputStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None, FileOptions.Asynchronous))
@@ -32,7 +32,7 @@ namespace IoFluently
             return fileOrMissingPath.ExpectFile();
         }
 
-        public static File CopyFrom(this IFileOrMissingPath fileOrMissingPath, Stream inputStream)
+        public static FilePath CopyFrom(this IFileOrMissingPath fileOrMissingPath, Stream inputStream)
         {
             using (var outputStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None))
             {
@@ -42,7 +42,7 @@ namespace IoFluently
             return fileOrMissingPath.ExpectFile();
         }
 
-        public static async Task<File> CopyFromAsync(this IFileOrMissingPath fileOrMissingPath, Stream inputStream)
+        public static async Task<FilePath> CopyFromAsync(this IFileOrMissingPath fileOrMissingPath, Stream inputStream)
         {
             await using (var outputStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None, FileOptions.Asynchronous))
             {
@@ -97,9 +97,9 @@ namespace IoFluently
             return new AbsolutePath(path);
         }
 
-        public static File ExpectFile(this IFileOrFolderOrMissingPath path)
+        public static FilePath ExpectFile(this IFileOrFolderOrMissingPath path)
         {
-            if (path is File file)
+            if (path is FilePath file)
             {
                 return file;
             }
@@ -107,20 +107,20 @@ namespace IoFluently
             return path.Collapse(
                 file =>
                 {
-                    if (file is File fileObj)
+                    if (file is FilePath fileObj)
                     {
                         return fileObj;
                     }
 
-                    return new File(file);
+                    return new FilePath(file);
                 },
                 folder => throw folder.AssertExpectedType(PathType.File),
                 missingPath => throw missingPath.AssertExpectedType(PathType.File));
         }
 
-        public static Folder ExpectFolder(this IFileOrFolderOrMissingPath path)
+        public static FolderPath ExpectFolder(this IFileOrFolderOrMissingPath path)
         {
-            if (path is Folder folder)
+            if (path is FolderPath folder)
             {
                 return folder;
             }
@@ -129,12 +129,12 @@ namespace IoFluently
                 file => throw file.AssertExpectedType(PathType.Folder),
                 folder =>
                 {
-                    if (folder is Folder folderObj)
+                    if (folder is FolderPath folderObj)
                     {
                         return folderObj;
                     }
 
-                    return new Folder(folder);
+                    return new FolderPath(folder);
                 },
                 missingPath => throw missingPath.AssertExpectedType(PathType.Folder));
         }
@@ -154,7 +154,7 @@ namespace IoFluently
                     switch (folder.FileSystem.EmptyFolderMode)
                     {
                         case EmptyFolderMode.EmptyFilesAreFolders:
-                            return new File(folder);
+                            return new FilePath(folder);
                         case EmptyFolderMode.AllNonExistentPathsAreFolders:
                             return new MissingPath(folder);
                     }

@@ -27,11 +27,11 @@ namespace IoFluently
             return path.FileSystem.EnumerateChildren(path, searchPattern, includeFolders, includeFiles);
         }
 
-        public static IEnumerable<File> EnumerateChildFiles(this IFolder path, string searchPattern) {
+        public static IEnumerable<FilePath> EnumerateChildFiles(this IFolder path, string searchPattern) {
             return path.FileSystem.EnumerateChildFiles(path, searchPattern);
         }
 
-        public static IEnumerable<Folder> EnumerateChildFolders(this IFolder path, string searchPattern) {
+        public static IEnumerable<FolderPath> EnumerateChildFolders(this IFolder path, string searchPattern) {
             return path.FileSystem.EnumerateChildFolders(path, searchPattern);
         }
 
@@ -39,11 +39,11 @@ namespace IoFluently
             return path.FileSystem.EnumerateDescendants(path, searchPattern, includeFolders, includeFiles);
         }
 
-        public static IEnumerable<Folder> EnumerateDescendantFolders(this IFolder path, string searchPattern) {
+        public static IEnumerable<FolderPath> EnumerateDescendantFolders(this IFolder path, string searchPattern) {
             return path.FileSystem.EnumerateDescendantFolders(path, searchPattern);
         }
 
-        public static IEnumerable<File> EnumerateDescendantFiles(this IFolder path, string searchPattern) {
+        public static IEnumerable<FilePath> EnumerateDescendantFiles(this IFolder path, string searchPattern) {
             return path.FileSystem.EnumerateDescendantFiles(path, searchPattern);
         }
 
@@ -51,11 +51,11 @@ namespace IoFluently
             return path.FileSystem.EnumerateChildren(path);
         }
 
-        public static IEnumerable<File> EnumerateChildFiles(this IFolder path) {
+        public static IEnumerable<FilePath> EnumerateChildFiles(this IFolder path) {
             return path.FileSystem.EnumerateChildFiles(path);
         }
 
-        public static IEnumerable<Folder> EnumerateChildFolders(this IFolder path) {
+        public static IEnumerable<FolderPath> EnumerateChildFolders(this IFolder path) {
             return path.FileSystem.EnumerateChildFolders(path);
         }
 
@@ -63,11 +63,11 @@ namespace IoFluently
             return path.FileSystem.EnumerateDescendants(path);
         }
 
-        public static IEnumerable<Folder> EnumerateDescendantFolders(this IFolder path) {
+        public static IEnumerable<FolderPath> EnumerateDescendantFolders(this IFolder path) {
             return path.FileSystem.EnumerateDescendantFolders(path);
         }
 
-        public static IEnumerable<File> EnumerateDescendantFiles(this IFolder path) {
+        public static IEnumerable<FilePath> EnumerateDescendantFiles(this IFolder path) {
             return path.FileSystem.EnumerateDescendantFiles(path);
         }
 
@@ -99,7 +99,7 @@ namespace IoFluently
             return path.FileSystem.GlobFiles(path, pattern);
         }
 
-        public static IEnumerable<Folder> Ancestors(this IFolder path, Boolean includeItself) {
+        public static IEnumerable<FolderPath> Ancestors(this IFolder path, Boolean includeItself) {
             return path.FileSystem.Ancestors(path, includeItself);
         }
 
@@ -131,11 +131,11 @@ namespace IoFluently
             return path.FileSystem.TryDescendant(path, paths).Value;
         }
 
-        public static IMaybe<Folder> TryAncestor(this IFileOrFolderOrMissingPath path, int level) {
+        public static IMaybe<FolderPath> TryAncestor(this IFileOrFolderOrMissingPath path, int level) {
             return path.FileSystem.TryAncestor(path, level);
         }
 
-        public static Folder Ancestor(this IFileOrFolderOrMissingPath path, int level) {
+        public static FolderPath Ancestor(this IFileOrFolderOrMissingPath path, int level) {
             return path.FileSystem.TryAncestor(path, level).Value;
         }
 
@@ -199,7 +199,7 @@ namespace IoFluently
             return path.FileSystem.ReadBuffers(path, fileShare, bufferSize, paddingAtStart, paddingAtEnd);
         }
 
-        public static File WriteAllBytes(this IFileOrMissingPath path, Byte[] bytes, Boolean createRecursively = true) {
+        public static FilePath WriteAllBytes(this IFileOrMissingPath path, Byte[] bytes, Boolean createRecursively = true) {
             return path.FileSystem.WriteAllBytes(path, bytes, createRecursively);
         }
 
@@ -211,7 +211,7 @@ namespace IoFluently
             return path.FileSystem.ToLiveLinq(path, includeFileContentChanges, includeSubFolders, pattern);
         }
 
-        public static Folder CreateFolder(this IMissingPath path, Boolean createRecursively = true) {
+        public static FolderPath CreateFolder(this IMissingPath path, Boolean createRecursively = true) {
             return path.FileSystem.CreateFolder(path, createRecursively);
         }
 
@@ -239,19 +239,19 @@ namespace IoFluently
             return path.FileSystem.DeleteAsync(path, cancellationToken, recursiveDeleteIfFolder);
         }
 
-        public static Folder EnsureIsFolder(this IFileOrFolderOrMissingPath path, Boolean createRecursively = true) {
+        public static FolderPath EnsureIsFolder(this IFileOrFolderOrMissingPath path, Boolean createRecursively = true) {
             return path.FileSystem.EnsureIsFolder(path, createRecursively);
         }
 
-        public static Folder EnsureIsEmptyFolder(this IFileOrFolderOrMissingPath path, Boolean recursiveDeleteIfFolder = true, Boolean createRecursively = true) {
+        public static FolderPath EnsureIsEmptyFolder(this IFileOrFolderOrMissingPath path, Boolean recursiveDeleteIfFolder = true, Boolean createRecursively = true) {
             return path.FileSystem.EnsureIsEmptyFolder(path, recursiveDeleteIfFolder, createRecursively);
         }
 
-        public static Task<Folder> EnsureIsFolderAsync(this IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, Boolean createRecursively = true) {
+        public static Task<FolderPath> EnsureIsFolderAsync(this IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, Boolean createRecursively = true) {
             return path.FileSystem.EnsureIsFolderAsync(path, cancellationToken, createRecursively);
         }
 
-        public static Task<Folder> EnsureIsEmptyFolderAsync(this IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = true, Boolean createRecursively = true) {
+        public static Task<FolderPath> EnsureIsEmptyFolderAsync(this IFileOrFolderOrMissingPath path, CancellationToken cancellationToken, Boolean recursiveDeleteIfFolder = true, Boolean createRecursively = true) {
             return path.FileSystem.EnsureIsEmptyFolderAsync(path, cancellationToken, recursiveDeleteIfFolder, createRecursively);
         }
 

@@ -8,11 +8,11 @@ using UnitsNet;
 
 namespace IoFluently.SharpCompress
 {
-    public class GZipFile : File
+    public class GZipFilePath : FilePath
     {
         private readonly string? _password;
 
-        public GZipFile(IFileOrFolderOrMissingPath path, string? password = null) : base(path)
+        public GZipFilePath(IFileOrFolderOrMissingPath path, string? password = null) : base(path)
         {
             _password = password;
         }

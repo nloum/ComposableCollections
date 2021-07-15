@@ -15,14 +15,14 @@ using UnitsNet;
 
 namespace IoFluently
 {
-    public partial class File
+    public partial class FilePath
     {
         IEnumerable<AbsolutePath> IFileOrFolderOrMissingPath.Ancestors => Ancestors.Select(folder => folder.ExpectFileOrFolderOrMissingPath());
 
-        Folder IFile.Parent => Parent.Value.ExpectFolder();
+        FolderPath IFile.Parent => Parent.Value.ExpectFolder();
     }
 
-    public partial class Folder
+    public partial class FolderPath
     {
         IEnumerable<AbsolutePath> IFileOrFolderOrMissingPath.Ancestors => Ancestors.Select(ancestor => ancestor.ExpectFileOrFolderOrMissingPath());
 

@@ -7,11 +7,11 @@ using UnitsNet;
 
 namespace IoFluently.SharpCompress
 {
-    public class TarFile : File
+    public class TarFilePath : FilePath
     {
         private readonly string? _password;
 
-        public TarFile(IFileOrFolderOrMissingPath path, string? password = null) : base(path)
+        public TarFilePath(IFileOrFolderOrMissingPath path, string? password = null) : base(path)
         {
             _password = password;
         }

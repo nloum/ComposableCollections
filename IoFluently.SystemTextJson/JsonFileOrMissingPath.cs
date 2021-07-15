@@ -5,7 +5,7 @@ namespace IoFluently.SystemTextJson
 {
     public class JsonFileOrMissingPath : TextFileOrMissingPath
     {
-        public JsonFileOrMissingPath(TextFile item1) : base(item1)
+        public JsonFileOrMissingPath(TextFilePath item1) : base(item1)
         {
         }
 
@@ -13,7 +13,7 @@ namespace IoFluently.SystemTextJson
         {
         }
 
-        public JsonFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<TextFile, IMissingPath> other) : base(other)
+        public JsonFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<TextFilePath, IMissingPath> other) : base(other)
         {
         }
 
@@ -21,22 +21,22 @@ namespace IoFluently.SystemTextJson
         {
         }
 
-        public JsonFile Write<TModel>(TModel model)
+        public JsonFilePath Write<TModel>(TModel model)
         {
             this.WriteAllText(JsonSerializer.Serialize(model));
-            return new JsonFile(this);
+            return new JsonFilePath(this);
         }
 
-        public JsonFile WriteJsonDocument(JsonDocument jsonDocument)
+        public JsonFilePath WriteJsonDocument(JsonDocument jsonDocument)
         {
             this.WriteAllText(jsonDocument.ToString());
-            return new JsonFile(this);
+            return new JsonFilePath(this);
         }
     }
 
     public class JsonFileOrMissingPath<TModel> : TextFileOrMissingPath
     {
-        public JsonFileOrMissingPath(TextFile item1) : base(item1)
+        public JsonFileOrMissingPath(TextFilePath item1) : base(item1)
         {
         }
 
@@ -44,7 +44,7 @@ namespace IoFluently.SystemTextJson
         {
         }
 
-        public JsonFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<TextFile, IMissingPath> other) :
+        public JsonFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<TextFilePath, IMissingPath> other) :
             base(other)
         {
         }
@@ -53,10 +53,10 @@ namespace IoFluently.SystemTextJson
         {
         }
 
-        public JsonFile Write(TModel model)
+        public JsonFilePath Write(TModel model)
         {
             this.WriteAllText(JsonSerializer.Serialize(model));
-            return new JsonFile(this);
+            return new JsonFilePath(this);
         }
     }
 }

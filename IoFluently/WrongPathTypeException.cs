@@ -60,7 +60,7 @@ namespace IoFluently
 
             if (fileMustBeEmpty && actualType == PathType.File)
             {
-                var fileSize = path.FileSystem.FileSize(new File(path));
+                var fileSize = path.FileSystem.FileSize(new FilePath(path));
                 if (fileSize != Information.Zero)
                 {
                     throw new WrongPathTypeException(path, actualType, expectedTypes, fileMustBeEmpty);

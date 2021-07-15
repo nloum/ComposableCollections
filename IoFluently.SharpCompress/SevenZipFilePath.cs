@@ -6,11 +6,11 @@ using UnitsNet;
 
 namespace IoFluently.SharpCompress
 {
-    public class SevenZipFile : File
+    public class SevenZipFilePath : FilePath
     {
         private readonly string? _password;
 
-        public SevenZipFile(IFileOrFolderOrMissingPath path, string? password = null) : base(path)
+        public SevenZipFilePath(IFileOrFolderOrMissingPath path, string? password = null) : base(path)
         {
             _password = password;
         }

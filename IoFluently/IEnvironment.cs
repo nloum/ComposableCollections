@@ -10,13 +10,13 @@ namespace IoFluently
         /// <summary>
         /// When relative paths are auto-converted to absolute paths, they are assumed to be relative to the this folder.
         /// </summary>
-        Folder CurrentDirectory { get; set; }
+        FolderPath CurrentDirectory { get; set; }
         
         /// <summary>
         /// Returns the path to the user's temporary folder
         /// </summary>
         /// <returns>The path to the user's temporary folder</returns>
-        Folder TemporaryFolder { get; set; }
+        FolderPath TemporaryFolder { get; set; }
 
         /// <summary>
         /// Creates a non-existent path that is unique. The parent folder of this path is guaranteed to exist.

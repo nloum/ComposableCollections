@@ -6,9 +6,9 @@ using Microsoft.Extensions.FileProviders;
 namespace IoFluently
 {
     public class AbsolutePathDirectoryContents : IDirectoryContents {
-        private readonly Folder _absolutePath;
+        private readonly FolderPath _absolutePath;
 
-        public AbsolutePathDirectoryContents( Folder absolutePath ) => _absolutePath = absolutePath;
+        public AbsolutePathDirectoryContents( FolderPath absolutePath ) => _absolutePath = absolutePath;
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 

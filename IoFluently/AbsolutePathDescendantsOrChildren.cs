@@ -10,7 +10,7 @@ namespace IoFluently
     public abstract class AbsolutePathDescendantsOrChildren<TFileOrFolder> : IEnumerable<TFileOrFolder>
         where TFileOrFolder : IFileOrFolderOrMissingPath
     {
-        protected readonly Folder _path;
+        protected readonly FolderPath _path;
         protected readonly string _pattern;
 
         protected AbsolutePathDescendantsOrChildren(IFolder path, string pattern, bool includeSubFolders)
@@ -36,13 +36,13 @@ namespace IoFluently
         }
         
         private class ObservableReadOnlySet : IObservableReadOnlySet<AbsolutePath> {
-            private readonly Folder _path;
+            private readonly FolderPath _path;
             private readonly string _pattern;
             private bool _includeSubFolders;
             private IFileSystem _fileSystem;
             private readonly IEnumerable<TFileOrFolder> _enumerable;
 
-            public ObservableReadOnlySet(Folder path, string pattern, bool includeSubFolders, IFileSystem fileSystem, IEnumerable<TFileOrFolder> enumerable)
+            public ObservableReadOnlySet(FolderPath path, string pattern, bool includeSubFolders, IFileSystem fileSystem, IEnumerable<TFileOrFolder> enumerable)
             {
                 _path = path;
                 _pattern = pattern;

@@ -8,16 +8,16 @@ namespace IoFluently
 {
     public static class XmlFileExtensions
     {
-        public static XmlFile ExpectXmlFile(this IFileOrFolderOrMissingPath path)
+        public static XmlFilePath ExpectXmlFile(this IFileOrFolderOrMissingPath path)
         {
-            return new XmlFile(path);
+            return new XmlFilePath(path);
         }
 
         public static XmlFileOrMissingPath ExpectXmlFileOrMissingPath(this IFileOrFolderOrMissingPath path)
         {
             if (path .IsFile)
             {
-                return new XmlFileOrMissingPath(new XmlFile(path));
+                return new XmlFileOrMissingPath(new XmlFilePath(path));
             }
             
             return new XmlFileOrMissingPath((IMissingPath)new MissingPath(path));
@@ -28,16 +28,16 @@ namespace IoFluently
             return new XmlFileOrMissingPath((IMissingPath)new MissingPath(path));
         }
         
-        public static XmlFile<TModel> ExpectXmlFile<TModel>(this IFileOrFolderOrMissingPath path)
+        public static XmlFilePath<TModel> ExpectXmlFile<TModel>(this IFileOrFolderOrMissingPath path)
         {
-            return new XmlFile<TModel>(path);
+            return new XmlFilePath<TModel>(path);
         }
 
         public static XmlFileOrMissingPath<TModel> ExpectXmlFileOrMissingPath<TModel>(this IFileOrFolderOrMissingPath path)
         {
             if (path .IsFile)
             {
-                return new XmlFileOrMissingPath<TModel>(new XmlFile<TModel>(path));
+                return new XmlFileOrMissingPath<TModel>(new XmlFilePath<TModel>(path));
             }
             
             return new XmlFileOrMissingPath<TModel>((IMissingPath)new MissingPath(path));
@@ -49,9 +49,9 @@ namespace IoFluently
         }
     }
     
-    public class XmlFile : TextFile
+    public class XmlFilePath : TextFilePath
     {
-        public XmlFile(IFileOrFolderOrMissingPath path) : base(path)
+        public XmlFilePath(IFileOrFolderOrMissingPath path) : base(path)
         {
         }
 
@@ -75,7 +75,7 @@ namespace IoFluently
 
     public class XmlFileOrMissingPath : TextFileOrMissingPath
     {
-        public XmlFileOrMissingPath(TextFile item1) : base(item1)
+        public XmlFileOrMissingPath(TextFilePath item1) : base(item1)
         {
         }
 
@@ -83,7 +83,7 @@ namespace IoFluently
         {
         }
 
-        public XmlFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<TextFile, IMissingPath> other) : base(other)
+        public XmlFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<TextFilePath, IMissingPath> other) : base(other)
         {
         }
 
@@ -91,7 +91,7 @@ namespace IoFluently
         {
         }
 
-        public XmlFile Write<TModel>(TModel model)
+        public XmlFilePath Write<TModel>(TModel model)
         {
             var serializer = new XmlSerializer(typeof(TModel));
             using (var writer = this.OpenWriter())
@@ -99,23 +99,23 @@ namespace IoFluently
                 serializer.Serialize(writer, model);
             }
 
-            return new XmlFile(this);
+            return new XmlFilePath(this);
         }
 
-        public XmlFile WriteXmlDocument(XmlDocument xmlDocument)
+        public XmlFilePath WriteXmlDocument(XmlDocument xmlDocument)
         {
             using (var stream = this.Open(FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 xmlDocument.Save(stream);
             }
 
-            return new XmlFile(this);
+            return new XmlFilePath(this);
         }
     }
     
-    public class XmlFile<TModel> : TextFile
+    public class XmlFilePath<TModel> : TextFilePath
     {
-        public XmlFile(IFileOrFolderOrMissingPath path) : base(path)
+        public XmlFilePath(IFileOrFolderOrMissingPath path) : base(path)
         {
         }
 
@@ -132,7 +132,7 @@ namespace IoFluently
 
     public class XmlFileOrMissingPath<TModel> : TextFileOrMissingPath
     {
-        public XmlFileOrMissingPath(TextFile item1) : base(item1)
+        public XmlFileOrMissingPath(TextFilePath item1) : base(item1)
         {
         }
 
@@ -140,7 +140,7 @@ namespace IoFluently
         {
         }
 
-        public XmlFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<TextFile, IMissingPath> other) : base(other)
+        public XmlFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<TextFilePath, IMissingPath> other) : base(other)
         {
         }
 
@@ -148,7 +148,7 @@ namespace IoFluently
         {
         }
 
-        public XmlFile Write(TModel model)
+        public XmlFilePath Write(TModel model)
         {
             var serializer = new XmlSerializer(typeof(TModel));
             using (var writer = OpenWriter())
@@ -156,7 +156,7 @@ namespace IoFluently
                 serializer.Serialize(writer, model);
             }
 
-            return new XmlFile(this);
+            return new XmlFilePath(this);
         }
     }
 }

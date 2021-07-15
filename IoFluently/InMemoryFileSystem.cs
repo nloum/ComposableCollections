@@ -96,7 +96,7 @@ namespace IoFluently
 
         public override EmptyFolderMode EmptyFolderMode { get; }
 
-        public override Folder DefaultRoot
+        public override FolderPath DefaultRoot
         {
             get
             {
@@ -147,7 +147,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override IObservableReadOnlySet<Folder> Roots => RootFolders.ToLiveLinq().KeysAsSet().Select(x => ParseAbsolutePath(x).ExpectFolder()).ToReadOnlyObservableSet();
+        public override IObservableReadOnlySet<FolderPath> Roots => RootFolders.ToLiveLinq().KeysAsSet().Select(x => ParseAbsolutePath(x).ExpectFolder()).ToReadOnlyObservableSet();
 
         /// <inheritdoc />
         public override void UpdateRoots()
@@ -417,11 +417,11 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override Folder CreateFolder(IMissingPath path,  bool createRecursively = true)
+        public override FolderPath CreateFolder(IMissingPath path,  bool createRecursively = true)
         {
             var folder = GetFolder(TryParent(path).Value).Value;
             EnsureFolderExists(folder, new[]{Name(path)});
-            return new Folder(path);
+            return new FolderPath(path);
         }
 
         private void EnsureFolderExists(InMemoryFolder folder, IReadOnlyList<string> components)

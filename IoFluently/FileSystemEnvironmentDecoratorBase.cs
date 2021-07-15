@@ -11,13 +11,13 @@ namespace IoFluently
             _decorated = decorated;
         }
 
-        public Folder CurrentDirectory
+        public FolderPath CurrentDirectory
         {
             get => _decorated.CurrentDirectory;
             set => _decorated.CurrentDirectory = value;
         }
 
-        public Folder TemporaryFolder
+        public FolderPath TemporaryFolder
         {
             get => _decorated.TemporaryFolder;
             set => _decorated.TemporaryFolder = value;

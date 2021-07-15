@@ -9,16 +9,16 @@ namespace IoFluently
 {
     public static class TextFileExtensions
     {
-        public static TextFile ExpectTextFile(this IFileOrFolderOrMissingPath path)
+        public static TextFilePath ExpectTextFile(this IFileOrFolderOrMissingPath path)
         {
-            return new TextFile(path);
+            return new TextFilePath(path);
         }
 
         public static TextFileOrMissingPath ExpectTextFileOrMissingPath(this IFileOrFolderOrMissingPath path)
         {
             if (path .IsFile)
             {
-                return new TextFileOrMissingPath(new TextFile(path));
+                return new TextFileOrMissingPath(new TextFilePath(path));
             }
             
             return new TextFileOrMissingPath((IMissingPath)new MissingPath(path));
@@ -30,9 +30,9 @@ namespace IoFluently
         }
     }
     
-    public class TextFile : File
+    public class TextFilePath : FilePath
     {
-        public TextFile(IFileOrFolderOrMissingPath path) : base(path)
+        public TextFilePath(IFileOrFolderOrMissingPath path) : base(path)
         {
         }
         
@@ -251,13 +251,13 @@ namespace IoFluently
                 .OpenWriter(fileOptions, encoding, bufferSize);
         }
 
-        public virtual TextFile WriteAllLines(IEnumerable<string> lines, string newline = null, Encoding encoding = null, Information? bufferSize = default)
+        public virtual TextFilePath WriteAllLines(IEnumerable<string> lines, string newline = null, Encoding encoding = null, Information? bufferSize = default)
         {
             return this.ExpectTextFileOrMissingPath()
                 .WriteAllLines(lines, newline, encoding, bufferSize);
         }
 
-        public TextFile WriteAllText(string text, Encoding encoding = null)
+        public TextFilePath WriteAllText(string text, Encoding encoding = null)
         {
             return this.ExpectTextFileOrMissingPath()
                 .WriteAllText(text, encoding);
@@ -266,7 +266,7 @@ namespace IoFluently
 
     public class TextFileOrMissingPath : FileOrMissingPathBase
     {
-        public TextFileOrMissingPath(TextFile item1) : base((IFile)item1)
+        public TextFileOrMissingPath(TextFilePath item1) : base((IFile)item1)
         {
         }
 
@@ -274,7 +274,7 @@ namespace IoFluently
         {
         }
 
-        public TextFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<TextFile, IMissingPath> other)
+        public TextFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<TextFilePath, IMissingPath> other)
             : base(other.Collapse(
                 textFile => new SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFile, IMissingPath>((IFile)textFile),
                 missingPath => new SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFile, IMissingPath>((IMissingPath)missingPath)))
@@ -300,7 +300,7 @@ namespace IoFluently
             }
         }
 
-        public virtual TextFile WriteAllLines(IEnumerable<string> lines, string newline = null, Encoding encoding = null, Information? bufferSize = default,  bool createRecursively = true)
+        public virtual TextFilePath WriteAllLines(IEnumerable<string> lines, string newline = null, Encoding encoding = null, Information? bufferSize = default,  bool createRecursively = true)
         {
             newline ??= Environment.NewLine;
             
@@ -311,16 +311,16 @@ namespace IoFluently
                 stream.Write(bytes, 0, bytes.Length);
             }
 
-            return new TextFile(Value );
+            return new TextFilePath(Value );
         }
 
-        public TextFile WriteAllText(string text, Encoding encoding = null,  bool createRecursively = true)
+        public TextFilePath WriteAllText(string text, Encoding encoding = null,  bool createRecursively = true)
         {
             encoding ??= Encoding.Default;
             using var writer = OpenWriter(FileOptions.None, encoding, Information.FromBytes(Math.Max(encoding.GetByteCount(text), 1)), createRecursively);
             writer.Write(text);
 
-            return new TextFile(Value );
+            return new TextFilePath(Value );
         }
     }
 }

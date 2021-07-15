@@ -11,12 +11,12 @@ namespace IoFluently
 {
     public abstract class PathTransformationFileSystemBase : FileSystemBase
     {
-        protected virtual File Transform(IFile absolutePath)
+        protected virtual FilePath Transform(IFile absolutePath)
         {
             return Transform((IFileOrFolderOrMissingPath) absolutePath).ExpectFile();
         }
 
-        protected virtual Folder Transform(IFolder absolutePath)
+        protected virtual FolderPath Transform(IFolder absolutePath)
         {
             return Transform((IFileOrFolderOrMissingPath) absolutePath).ExpectFolder();
         }
@@ -48,7 +48,7 @@ namespace IoFluently
         public override EmptyFolderMode EmptyFolderMode { get; }
         public override bool CanEmptyDirectoriesExist { get; }
 
-        public override Folder CreateFolder(IMissingPath path,  bool createRecursively = true)
+        public override FolderPath CreateFolder(IMissingPath path,  bool createRecursively = true)
         {
             var transformedPath = Transform   (path);
             var decorated = transformedPath.FileSystem;
@@ -94,8 +94,8 @@ namespace IoFluently
             var decorated = transformedPath.FileSystem;
             return decorated.EnumerateChildren(transformedPath, searchPattern, includeFolders, includeFiles)
                 .Select(x => x.Collapse(
-                    file => (IFileOrFolder)new File(path.Components.Concat(new[]{file.Name}).ToList(), path.IsCaseSensitive, path.DirectorySeparator, this),
-                    folder => new Folder(path.Components.Concat(new[]{folder.Name}).ToList(), path.IsCaseSensitive, path.DirectorySeparator, this)));
+                    file => (IFileOrFolder)new FilePath(path.Components.Concat(new[]{file.Name}).ToList(), path.IsCaseSensitive, path.DirectorySeparator, this),
+                    folder => new FolderPath(path.Components.Concat(new[]{folder.Name}).ToList(), path.IsCaseSensitive, path.DirectorySeparator, this)));
         }
 
         public override PathType Type(IFileOrFolderOrMissingPath path)

@@ -30,9 +30,9 @@ namespace IoFluently
         }
 
         public override IFile? Item1 => FileSystem.Type(this) == PathType.File
-            ? new File(Components, IsCaseSensitive, DirectorySeparator, FileSystem) : null;
+            ? new FilePath(Components, IsCaseSensitive, DirectorySeparator, FileSystem) : null;
         public override IFolder? Item2 => FileSystem.Type(this) == PathType.Folder
-            ? new Folder(Components, IsCaseSensitive, DirectorySeparator, FileSystem) : null;
+            ? new FolderPath(Components, IsCaseSensitive, DirectorySeparator, FileSystem) : null;
         public override IMissingPath? Item3 => FileSystem.Type(this) == PathType.MissingPath
             ? new MissingPath(Components, IsCaseSensitive, DirectorySeparator, FileSystem) : null;
         

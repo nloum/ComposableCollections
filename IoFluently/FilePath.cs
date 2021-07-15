@@ -4,20 +4,20 @@ using SimpleMonads;
 
 namespace IoFluently
 {
-    public partial class File : IFile
+    public partial class FilePath : IFile
     {
         public IReadOnlyList<string> Components { get; }
         public bool IsCaseSensitive { get; }
         public string DirectorySeparator { get; }
         public IFileSystem FileSystem { get; }
 
-        public File(IFileOrFolderOrMissingPath path) : this(path.Components, path.IsCaseSensitive,
+        public FilePath(IFileOrFolderOrMissingPath path) : this(path.Components, path.IsCaseSensitive,
             path.DirectorySeparator, path.FileSystem)
         {
             
         }
         
-        public File(IReadOnlyList<string> components, bool isCaseSensitive, string directorySeparator, IFileSystem fileSystem)
+        public FilePath(IReadOnlyList<string> components, bool isCaseSensitive, string directorySeparator, IFileSystem fileSystem)
         {
             Components = components;
             IsCaseSensitive = isCaseSensitive;
@@ -41,7 +41,7 @@ namespace IoFluently
         /// </summary>
         /// <param name="path">The path to be converted to a string</param>
         /// <returns>The string form of this path</returns>
-        public static implicit operator string(File path)
+        public static implicit operator string(FilePath path)
         {
             return path.FullName;
         }

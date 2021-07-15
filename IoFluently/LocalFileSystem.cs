@@ -42,9 +42,9 @@ namespace IoFluently
             return new Queryable<AbsolutePath>(new QueryContext());
         }
 
-        private Folder _temporaryFolder;
+        private FolderPath _temporaryFolder;
 
-        public Folder TemporaryFolder
+        public FolderPath TemporaryFolder
         {
             get
             {
@@ -57,7 +57,7 @@ namespace IoFluently
             }
         }
 
-        public override Folder DefaultRoot
+        public override FolderPath DefaultRoot
         {
             get
             {
@@ -102,7 +102,7 @@ namespace IoFluently
                     _storage.Add(drivePath);
             }
 
-            var drivesThatWereRemoved = new List<Folder>();
+            var drivesThatWereRemoved = new List<FolderPath>();
 
             foreach (var drive in _storage)
                 if (!currentStorage.Contains(drive + "\\"))
@@ -111,12 +111,12 @@ namespace IoFluently
             foreach (var driveThatWasRemoved in drivesThatWereRemoved) _storage.Remove(driveThatWasRemoved);
         }
 
-        public override IObservableReadOnlySet<Folder> Roots => _storage;
+        public override IObservableReadOnlySet<FolderPath> Roots => _storage;
 
-        private readonly ObservableSet<Folder> _storage = new ObservableSet<Folder>();
+        private readonly ObservableSet<FolderPath> _storage = new ObservableSet<FolderPath>();
 
         /// <inheritdoc />
-        public Folder CurrentDirectory
+        public FolderPath CurrentDirectory
         {
             get
             {
@@ -509,7 +509,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override Folder CreateFolder(IMissingPath path, bool createRecursively = true)
+        public override FolderPath CreateFolder(IMissingPath path, bool createRecursively = true)
         {
             var pathString = path.FullName;
         
@@ -527,10 +527,10 @@ namespace IoFluently
                 Directory.CreateDirectory(pathString);
             }
 
-            return new Folder(path);
+            return new FolderPath(path);
         }
 
-        public override File WriteAllBytes(IFileOrMissingPath path, byte[] bytes, bool createRecursively = true)
+        public override FilePath WriteAllBytes(IFileOrMissingPath path, byte[] bytes, bool createRecursively = true)
         {
             var pathString = path.FullName;
                     

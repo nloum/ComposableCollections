@@ -82,9 +82,9 @@ namespace IoFluently
             return _decorated.DescendantFiles(path);
         }
 
-        public IObservableReadOnlySet<Folder> Roots => _decorated.Roots;
+        public IObservableReadOnlySet<FolderPath> Roots => _decorated.Roots;
 
-        public Folder DefaultRoot => _decorated.DefaultRoot;
+        public FolderPath DefaultRoot => _decorated.DefaultRoot;
 
         public void UpdateRoots()
         {
@@ -125,7 +125,7 @@ namespace IoFluently
 
         public virtual bool IsCaseSensitiveByDefault => _decorated.IsCaseSensitiveByDefault;
 
-        public virtual Folder CreateFolder(IMissingPath path,  bool createRecursively = true)
+        public virtual FolderPath CreateFolder(IMissingPath path,  bool createRecursively = true)
         {
             return _decorated.CreateFolder(path, createRecursively);
         }
@@ -160,24 +160,24 @@ namespace IoFluently
             return _decorated.DeleteAsync(path, cancellationToken, recursiveDeleteIfFolder);
         }
 
-        public virtual Folder EnsureIsFolder(IFileOrFolderOrMissingPath path,  bool createRecursively = true)
+        public virtual FolderPath EnsureIsFolder(IFileOrFolderOrMissingPath path,  bool createRecursively = true)
         {
             return _decorated.EnsureIsFolder(path, createRecursively);
         }
 
-        public virtual Folder EnsureIsEmptyFolder(IFileOrFolderOrMissingPath path, bool recursiveDeleteIfFolder = true,
+        public virtual FolderPath EnsureIsEmptyFolder(IFileOrFolderOrMissingPath path, bool recursiveDeleteIfFolder = true,
              bool createRecursively = true)
         {
             return _decorated.EnsureIsEmptyFolder(path, recursiveDeleteIfFolder, createRecursively);
         }
 
-        public virtual Task<Folder> EnsureIsFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken,
+        public virtual Task<FolderPath> EnsureIsFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken,
              bool createRecursively = true)
         {
             return _decorated.EnsureIsFolderAsync(path, cancellationToken, createRecursively);
         }
 
-        public virtual Task<Folder> EnsureIsEmptyFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken,
+        public virtual Task<FolderPath> EnsureIsEmptyFolderAsync(IFileOrFolderOrMissingPath path, CancellationToken cancellationToken,
             bool recursiveDeleteIfFolder = true,  bool createRecursively = true)
         {
             return _decorated.EnsureIsEmptyFolderAsync(path, cancellationToken, recursiveDeleteIfFolder, createRecursively);
@@ -485,12 +485,12 @@ namespace IoFluently
             return _decorated.EnumerateChildren(path, searchPattern, includeFolders, includeFiles);
         }
 
-        public virtual IEnumerable<File> EnumerateChildFiles(IFolder path, string searchPattern)
+        public virtual IEnumerable<FilePath> EnumerateChildFiles(IFolder path, string searchPattern)
         {
             return _decorated.EnumerateChildFiles(path, searchPattern);
         }
 
-        public virtual IEnumerable<Folder> EnumerateChildFolders(IFolder path, string searchPattern)
+        public virtual IEnumerable<FolderPath> EnumerateChildFolders(IFolder path, string searchPattern)
         {
             return _decorated.EnumerateChildFolders(path, searchPattern);
         }
@@ -500,12 +500,12 @@ namespace IoFluently
             return _decorated.EnumerateDescendants(path, searchPattern, includeFolders, includeFiles);
         }
 
-        public virtual IEnumerable<Folder> EnumerateDescendantFolders(IFolder path, string searchPattern)
+        public virtual IEnumerable<FolderPath> EnumerateDescendantFolders(IFolder path, string searchPattern)
         {
             return _decorated.EnumerateDescendantFolders(path, searchPattern);
         }
 
-        public virtual IEnumerable<File> EnumerateDescendantFiles(IFolder path, string searchPattern)
+        public virtual IEnumerable<FilePath> EnumerateDescendantFiles(IFolder path, string searchPattern)
         {
             return _decorated.EnumerateDescendantFiles(path, searchPattern);
         }
@@ -515,12 +515,12 @@ namespace IoFluently
             return _decorated.EnumerateChildren(path);
         }
 
-        public virtual IEnumerable<File> EnumerateChildFiles(IFolder path)
+        public virtual IEnumerable<FilePath> EnumerateChildFiles(IFolder path)
         {
             return _decorated.EnumerateChildFiles(path);
         }
 
-        public virtual IEnumerable<Folder> EnumerateChildFolders(IFolder path)
+        public virtual IEnumerable<FolderPath> EnumerateChildFolders(IFolder path)
         {
             return _decorated.EnumerateChildFolders(path);
         }
@@ -530,12 +530,12 @@ namespace IoFluently
             return _decorated.EnumerateDescendants(path);
         }
 
-        public virtual IEnumerable<Folder> EnumerateDescendantFolders(IFolder path)
+        public virtual IEnumerable<FolderPath> EnumerateDescendantFolders(IFolder path)
         {
             return _decorated.EnumerateDescendantFolders(path);
         }
 
-        public virtual IEnumerable<File> EnumerateDescendantFiles(IFolder path)
+        public virtual IEnumerable<FilePath> EnumerateDescendantFiles(IFolder path)
         {
             return _decorated.EnumerateDescendantFiles(path);
         }
@@ -545,7 +545,7 @@ namespace IoFluently
             return _decorated.CanBeSimplified(path);
         }
 
-        public virtual Folder Root(IFileOrFolderOrMissingPath path)
+        public virtual FolderPath Root(IFileOrFolderOrMissingPath path)
         {
             return _decorated.Root(path);
         }
@@ -575,12 +575,12 @@ namespace IoFluently
             return _decorated.TryParent(path);
         }
 
-        public virtual Folder Parent(IFile path)
+        public virtual FolderPath Parent(IFile path)
         {
             return _decorated.Parent(path);
         }
 
-        public virtual IMaybe<Folder> TryParent(IFolder path)
+        public virtual IMaybe<FolderPath> TryParent(IFolder path)
         {
             return _decorated.TryParent(path);
         }
@@ -605,7 +605,7 @@ namespace IoFluently
             return _decorated.GlobFiles(path, pattern);
         }
 
-        public virtual IEnumerable<Folder> Ancestors(IFolder path, bool includeItself)
+        public virtual IEnumerable<FolderPath> Ancestors(IFolder path, bool includeItself)
         {
             return _decorated.Ancestors(path, includeItself);
         }
@@ -620,12 +620,12 @@ namespace IoFluently
             return _decorated.Ancestors(path, includeItself);
         }
 
-        public virtual IEnumerable<Folder> Ancestors(IFolder path)
+        public virtual IEnumerable<FolderPath> Ancestors(IFolder path)
         {
             return _decorated.Ancestors(path);
         }
 
-        public virtual IEnumerable<Folder> Ancestors(IFile path)
+        public virtual IEnumerable<FolderPath> Ancestors(IFile path)
         {
             return _decorated.Ancestors(path);
         }
@@ -655,7 +655,7 @@ namespace IoFluently
             return _decorated.TryDescendant(path, paths);
         }
 
-        public virtual IMaybe<Folder> TryAncestor(IFileOrFolderOrMissingPath path, int level)
+        public virtual IMaybe<FolderPath> TryAncestor(IFileOrFolderOrMissingPath path, int level)
         {
             return _decorated.TryAncestor(path, level);
         }
@@ -761,7 +761,7 @@ namespace IoFluently
             return _decorated.ReadBuffers(path, fileShare, bufferSize, paddingAtStart, paddingAtEnd);
         }
 
-        public virtual File WriteAllBytes(IFileOrMissingPath path, byte[] bytes,  bool createRecursively = true)
+        public virtual FilePath WriteAllBytes(IFileOrMissingPath path, byte[] bytes,  bool createRecursively = true)
         {
             return _decorated.WriteAllBytes(path, bytes, createRecursively);
         }

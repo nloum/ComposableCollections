@@ -26,7 +26,7 @@ namespace IoFluently
         public Boolean IsFile { get; }
         public Boolean IsFolder { get; }
         public string Name { get; }
-        public Folder Root { get; }
+        public FolderPath Root { get; }
         public IMaybe<AbsolutePath> Parent { get; }
         public PathType Type { get; }
         public AbsolutePath WithoutExtension { get; }
@@ -34,9 +34,9 @@ namespace IoFluently
 }
 namespace IoFluently 
 {
-    public partial class Folder 
+    public partial class FolderPath 
     {
-        public IEnumerable<Folder> Ancestors => FileSystem.Ancestors(this);
+        public IEnumerable<FolderPath> Ancestors => FileSystem.Ancestors(this);
         public Boolean CanBeSimplified => FileSystem.CanBeSimplified(this);
         public Boolean Exists => FileSystem.Exists(this);
         public string Extension => FileSystem.Extension(this);
@@ -44,8 +44,8 @@ namespace IoFluently
         public Boolean IsFile => FileSystem.IsFile(this);
         public Boolean IsFolder => FileSystem.IsFolder(this);
         public string Name => FileSystem.Name(this);
-        public Folder Root => FileSystem.Root(this);
-        public IMaybe<Folder> Parent => FileSystem.TryParent(this);
+        public FolderPath Root => FileSystem.Root(this);
+        public IMaybe<FolderPath> Parent => FileSystem.TryParent(this);
         public PathType Type => FileSystem.Type(this);
         public AbsolutePath WithoutExtension => FileSystem.WithoutExtension(this);
         public AbsolutePathChildFiles ChildFiles => FileSystem.ChildFiles(this);
@@ -68,7 +68,7 @@ namespace IoFluently
         public Boolean IsFile => FileSystem.IsFile(this);
         public Boolean IsFolder => FileSystem.IsFolder(this);
         public string Name => FileSystem.Name(this);
-        public Folder Root => FileSystem.Root(this);
+        public FolderPath Root => FileSystem.Root(this);
         public IMaybe<AbsolutePath> Parent => FileSystem.TryParent(this);
         public PathType Type => FileSystem.Type(this);
         public AbsolutePath WithoutExtension => FileSystem.WithoutExtension(this);
@@ -76,9 +76,9 @@ namespace IoFluently
 }
 namespace IoFluently 
 {
-    public partial class File 
+    public partial class FilePath 
     {
-        public IEnumerable<Folder> Ancestors => FileSystem.Ancestors(this);
+        public IEnumerable<FolderPath> Ancestors => FileSystem.Ancestors(this);
         public Boolean CanBeSimplified => FileSystem.CanBeSimplified(this);
         public Boolean Exists => FileSystem.Exists(this);
         public string Extension => FileSystem.Extension(this);
@@ -86,8 +86,8 @@ namespace IoFluently
         public Boolean IsFile => FileSystem.IsFile(this);
         public Boolean IsFolder => FileSystem.IsFolder(this);
         public string Name => FileSystem.Name(this);
-        public Folder Root => FileSystem.Root(this);
-        public Folder Parent => FileSystem.Parent(this);
+        public FolderPath Root => FileSystem.Root(this);
+        public FolderPath Parent => FileSystem.Parent(this);
         public PathType Type => FileSystem.Type(this);
         public AbsolutePath WithoutExtension => FileSystem.WithoutExtension(this);
         public FileAttributes Attributes => FileSystem.Attributes(this);
@@ -110,7 +110,7 @@ namespace IoFluently
         public Boolean IsFile => FileSystem.IsFile(this);
         public Boolean IsFolder => FileSystem.IsFolder(this);
         public string Name => FileSystem.Name(this);
-        public Folder Root => FileSystem.Root(this);
+        public FolderPath Root => FileSystem.Root(this);
         public IMaybe<AbsolutePath> Parent => FileSystem.TryParent(this);
         public PathType Type => FileSystem.Type(this);
         public AbsolutePath WithoutExtension => FileSystem.WithoutExtension(this);
@@ -127,27 +127,27 @@ namespace IoFluently
 {
     public partial interface IFile 
     {
-        public IEnumerable<Folder> Ancestors { get; }
+        public IEnumerable<FolderPath> Ancestors { get; }
         public FileAttributes Attributes { get; }
         public DateTimeOffset CreationTime { get; }
         public Information FileSize { get; }
         public Boolean IsReadOnly { get; }
         public DateTimeOffset LastAccessTime { get; }
         public DateTimeOffset LastWriteTime { get; }
-        public Folder Parent { get; }
+        public FolderPath Parent { get; }
     }
 }
 namespace IoFluently 
 {
     public partial interface IFolder 
     {
-        public IEnumerable<Folder> Ancestors { get; }
+        public IEnumerable<FolderPath> Ancestors { get; }
         public AbsolutePathChildFiles ChildFiles { get; }
         public AbsolutePathChildFolders ChildFolders { get; }
         public AbsolutePathChildren Children { get; }
         public AbsolutePathDescendantFiles DescendantFiles { get; }
         public AbsolutePathDescendantFolders DescendantFolders { get; }
         public AbsolutePathDescendants Descendants { get; }
-        public IMaybe<Folder> Parent { get; }
+        public IMaybe<FolderPath> Parent { get; }
     }
 }

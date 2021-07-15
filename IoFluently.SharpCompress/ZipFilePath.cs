@@ -19,11 +19,11 @@ using CompressionLevel = SharpCompress.Compressors.Deflate.CompressionLevel;
 
 namespace IoFluently.SharpCompress
 {
-    public class ZipFile : File
+    public class ZipFilePath : FilePath
     {
         private readonly string? _password;
     
-        public ZipFile(IFileOrFolderOrMissingPath path, string? password = null) : base(path)
+        public ZipFilePath(IFileOrFolderOrMissingPath path, string? password = null) : base(path)
         {
             _password = password;
         }

@@ -4,20 +4,20 @@ using SimpleMonads;
 
 namespace IoFluently
 {
-    public partial class Folder : IFolder
+    public partial class FolderPath : IFolder
     {
         public IReadOnlyList<string> Components { get; }
         public bool IsCaseSensitive { get; }
         public string DirectorySeparator { get; }
         public IFileSystem FileSystem { get; }
 
-        public Folder(IFileOrFolderOrMissingPath path) : this(path.Components, path.IsCaseSensitive,
+        public FolderPath(IFileOrFolderOrMissingPath path) : this(path.Components, path.IsCaseSensitive,
             path.DirectorySeparator, path.FileSystem)
         {
             
         }
         
-        public Folder(IReadOnlyList<string> components, bool isCaseSensitive, string directorySeparator, IFileSystem fileSystem)
+        public FolderPath(IReadOnlyList<string> components, bool isCaseSensitive, string directorySeparator, IFileSystem fileSystem)
         {
             Components = components;
             IsCaseSensitive = isCaseSensitive;
@@ -27,7 +27,7 @@ namespace IoFluently
             this.AssertExpectedType(PathType.Folder);
         }
 
-        public Folder(IReadOnlyList<string> components, bool isCaseSensitive, string directorySeparator, IFileSystem fileSystem, bool skipCheck)
+        public FolderPath(IReadOnlyList<string> components, bool isCaseSensitive, string directorySeparator, IFileSystem fileSystem, bool skipCheck)
         {
             Components = components;
             IsCaseSensitive = isCaseSensitive;
@@ -54,7 +54,7 @@ namespace IoFluently
         /// </summary>
         /// <param name="path">The path to be converted to a string</param>
         /// <returns>The string form of this path</returns>
-        public static implicit operator string(Folder path)
+        public static implicit operator string(FolderPath path)
         {
             return path.FullName;
         }
@@ -338,7 +338,7 @@ namespace IoFluently
         /// <param name="relPath">The relative path that will have a subpath added to it</param>
         /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
-        public static AbsolutePath operator /(Folder absPath, string whatToAdd)
+        public static AbsolutePath operator /(FolderPath absPath, string whatToAdd)
         {
             return new AbsolutePath(absPath.Value) / whatToAdd;
         }
@@ -349,7 +349,7 @@ namespace IoFluently
         /// <param name="relPath">The relative path that will have a subpath added to it</param>
         /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
-        public static AbsolutePaths operator /(Folder absPath, IEnumerable<RelativePath> whatToAdd)
+        public static AbsolutePaths operator /(FolderPath absPath, IEnumerable<RelativePath> whatToAdd)
         {
             return new AbsolutePath(absPath.Value) / whatToAdd;
         }
@@ -360,7 +360,7 @@ namespace IoFluently
         /// <param name="relPath">The relative path that will have a subpath added to it</param>
         /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
-        public static AbsolutePaths operator /(Folder absPath,
+        public static AbsolutePaths operator /(FolderPath absPath,
             Func<AbsolutePath, IEnumerable<RelativePath>> whatToAdd)
         {
             return new AbsolutePath(absPath.Value) / whatToAdd;
@@ -372,7 +372,7 @@ namespace IoFluently
         /// <param name="relPath">The relative path that will have a subpath added to it</param>
         /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
-        public static AbsolutePath operator /(Folder absPath, RelativePath whatToAdd)
+        public static AbsolutePath operator /(FolderPath absPath, RelativePath whatToAdd)
         {
             return new AbsolutePath(absPath.Value) / whatToAdd;
         }
@@ -383,7 +383,7 @@ namespace IoFluently
         /// <param name="relPath">The relative path that will have a subpath added to it</param>
         /// <param name="whatToAdd">The subpath that will be added to this the relative path</param>
         /// <returns>A new RelativePath object that will have an additional subpath appended to it</returns>
-        public static AbsolutePaths operator /(Folder absPath, IEnumerable<string> whatToAdd)
+        public static AbsolutePaths operator /(FolderPath absPath, IEnumerable<string> whatToAdd)
         {
             return new AbsolutePath(absPath.Value) / whatToAdd;
         }

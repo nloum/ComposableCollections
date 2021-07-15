@@ -6,11 +6,11 @@ using UnitsNet;
 
 namespace IoFluently.SharpCompress
 {
-    public class RarFile : File
+    public class RarFilePath : FilePath
     {
         private readonly string? _password;
 
-        public RarFile(IFileOrFolderOrMissingPath path, string? password = null) : base(path)
+        public RarFilePath(IFileOrFolderOrMissingPath path, string? password = null) : base(path)
         {
             _password = password;
         }

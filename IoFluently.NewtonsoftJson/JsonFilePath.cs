@@ -4,9 +4,9 @@ using Newtonsoft.Json.Linq;
 
 namespace IoFluently.NewtonsoftJson
 {
-    public class JsonFile : TextFile
+    public class JsonFilePath : TextFilePath
     {
-        public JsonFile(IFileOrFolderOrMissingPath path) : base(path)
+        public JsonFilePath(IFileOrFolderOrMissingPath path) : base(path)
         {
         }
 
@@ -21,9 +21,9 @@ namespace IoFluently.NewtonsoftJson
         }
     }
 
-    public class JsonFile<TModel> : TextFile
+    public class JsonFilePath<TModel> : TextFilePath
     {
-        public JsonFile(IFileOrFolderOrMissingPath path) : base(path)
+        public JsonFilePath(IFileOrFolderOrMissingPath path) : base(path)
         {
         }
 

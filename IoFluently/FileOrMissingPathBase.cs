@@ -34,7 +34,7 @@ namespace IoFluently
         public bool IsFile => Value.IsFile;
         public bool IsFolder => Value.IsFolder;
         public string Name => Value.Name;
-        public Folder Root => Value.Root;
+        public FolderPath Root => Value.Root;
         public IMaybe<AbsolutePath> Parent => Value.Parent;
         public PathType Type => Value.Type;
         public AbsolutePath WithoutExtension => Value.WithoutExtension;

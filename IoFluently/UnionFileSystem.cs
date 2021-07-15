@@ -7,14 +7,14 @@ namespace IoFluently
 {
     public class UnionFileSystem : PathTransformationFileSystemBase
     {
-        private readonly ObservableSet<Folder> _roots = new();
+        private readonly ObservableSet<FolderPath> _roots = new();
         public ImmutableList<IFileSystem> IoServices { get; set; } = ImmutableList<IFileSystem>.Empty;
 
         public UnionFileSystem(IOpenFilesTrackingService openFilesTrackingService, bool isCaseSensitiveByDefault, string defaultDirectorySeparator) : base(openFilesTrackingService, isCaseSensitiveByDefault, defaultDirectorySeparator)
         {
         }
 
-        public override IObservableReadOnlySet<Folder> Roots => _roots;
+        public override IObservableReadOnlySet<FolderPath> Roots => _roots;
         public override void UpdateRoots()
         {
             _roots.RemoveRange(_roots);
@@ -26,7 +26,7 @@ namespace IoFluently
             }
         }
 
-        public override Folder DefaultRoot => IoServices.First().DefaultRoot;
+        public override FolderPath DefaultRoot => IoServices.First().DefaultRoot;
         public override EmptyFolderMode EmptyFolderMode => IoServices.First().EmptyFolderMode;
 
         public override bool CanEmptyDirectoriesExist =>

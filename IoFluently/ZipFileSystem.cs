@@ -30,8 +30,8 @@ namespace IoFluently
     {
         private bool _hasZipFileBeenCreatedYet = false;
         private EmptyFolderMode _emptyFolderMode = EmptyFolderMode.AllNonExistentPathsAreFolders;
-        private readonly Folder _root;
-        private readonly ObservableSet<Folder> _roots = new();
+        private readonly FolderPath _root;
+        private readonly ObservableSet<FolderPath> _roots = new();
         
         /// <summary>
         /// The path to the zip file
@@ -51,9 +51,9 @@ namespace IoFluently
         public CompressionLevel CompressionLevel { get; set; } = CompressionLevel.Fastest;
 
         /// <inheritdoc />
-        public override IObservableReadOnlySet<Folder> Roots => _roots;
+        public override IObservableReadOnlySet<FolderPath> Roots => _roots;
 
-        public override Folder DefaultRoot => ParseAbsolutePath("/").ExpectFolder();
+        public override FolderPath DefaultRoot => ParseAbsolutePath("/").ExpectFolder();
 
         /// <summary>
         /// Creates a zip file IIoService
@@ -70,7 +70,7 @@ namespace IoFluently
             
             ZipFilePath = zipFilePath;
             var path = new AbsolutePath(new[] {"/"}, true, DefaultDirectorySeparator, this);
-            _root = new Folder(path.Components, path.IsCaseSensitive, path.DirectorySeparator, this, true);
+            _root = new FolderPath(path.Components, path.IsCaseSensitive, path.DirectorySeparator, this, true);
             _roots.Add(_root);
         }
 
@@ -330,7 +330,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public override Folder CreateFolder(IMissingPath path, bool createRecursively = true)
+        public override FolderPath CreateFolder(IMissingPath path, bool createRecursively = true)
         {
             if (!createRecursively)
             {
@@ -340,7 +340,7 @@ namespace IoFluently
             }
             // Zip files don't have folders, they just include a path in their name.
             // https://archive.fo/qIIIZ#24.12%
-            return new Folder(path);
+            return new FolderPath(path);
         }
 
         private ZipArchive OpenZipArchive(bool willBeWriting, bool willBeReading)

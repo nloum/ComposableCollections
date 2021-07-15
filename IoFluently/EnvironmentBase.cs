@@ -13,10 +13,10 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual Folder CurrentDirectory { get; set; }
+        public virtual FolderPath CurrentDirectory { get; set; }
 
         /// <inheritdoc />
-        public virtual Folder TemporaryFolder { get; set; }
+        public virtual FolderPath TemporaryFolder { get; set; }
 
         /// <inheritdoc />
         public MissingPath GenerateUniqueTemporaryPath(string extension = null)

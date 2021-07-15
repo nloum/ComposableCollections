@@ -13,11 +13,11 @@ namespace IoFluently.Tests
         [TestMethod]
         public void ShouldZipUpSingleFile()
         {
-            var inMemoryIoService = new InMemoryFileSystem(true, "/", false);
-            var textFilePath = (inMemoryIoService.DefaultRoot / "test.txt")
+            var inMemoryFileSystem = new InMemoryFileSystem(true, "/", false);
+            var textFilePath = (inMemoryFileSystem.DefaultRoot / "test.txt")
                 .ExpectTextFileOrMissingPath()
                 .WriteAllText("Test 1 2 3");
-            var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip").ExpectFileOrMissingPath();
+            var testZipFilePath = inMemoryFileSystem.ParseAbsolutePath("/test.zip").ExpectFileOrMissingPath();
             var result = testZipFilePath.ExpectZipFileOrMissingPath(true);
             result.Zip(textFilePath, textFilePath.Parent);
             
@@ -38,11 +38,11 @@ namespace IoFluently.Tests
         [TestMethod]
         public void ShouldZipUpAndUnzipFolder()
         {
-            var inMemoryIoService = new InMemoryFileSystem(true, "/", false);
-            var folder = inMemoryIoService.DefaultRoot / "test";
+            var inMemoryFileSystem = new InMemoryFileSystem(true, "/", false);
+            var folder = inMemoryFileSystem.DefaultRoot / "test";
             var textFilePath = folder / "test.txt";
             textFilePath.ExpectTextFileOrMissingPath().WriteAllText("Test 1 2 3");
-            var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip").ExpectFileOrMissingPath();
+            var testZipFilePath = inMemoryFileSystem.ParseAbsolutePath("/test.zip").ExpectFileOrMissingPath();
             var result = testZipFilePath.ExpectZipFileOrMissingPath(true);
             result.Zip(folder, folder.Parent.Value);
             
@@ -59,7 +59,7 @@ namespace IoFluently.Tests
                 }
             }
             
-            var unzippedTo = (inMemoryIoService.DefaultRoot / "test2").EnsureIsEmptyFolder();
+            var unzippedTo = (inMemoryFileSystem.DefaultRoot / "test2").EnsureIsEmptyFolder();
             result.Unzip(unzippedTo);
 
             Verify(unzippedTo.Descendants);

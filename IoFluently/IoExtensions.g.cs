@@ -17,9 +17,9 @@ namespace IoFluently
 {
     /// <summary>
     /// Contains extension methods on AbsolutePath, RelativePath, and IAbsolutePathTranslation that essentially wrap
-    /// methods on the object's IoService property. That is, myAbsolutePath.RelativeTo(parameter1) is equivalent to
-    /// myAbsolutePath.IoService.RelativeTo(myAbsolutePath, parameter1). This shorthand makes the syntax be fluent
-    /// while allowing the IIoService to be dependency injectable.
+    /// methods on the object's FileSystem property. That is, myAbsolutePath.RelativeTo(parameter1) is equivalent to
+    /// myAbsolutePath.FileSystem.RelativeTo(myAbsolutePath, parameter1). This shorthand makes the syntax be fluent
+    /// while allowing the IFileSystem to be dependency injectable.
     /// </summary>
     public static partial class IoExtensions
     {

@@ -11,7 +11,7 @@ namespace CodeIO.SourceCode.Write
 
         public override void WriteImplementationInClass(SourceCodeWriter sourceCodeWriter, string name)
         {
-            sourceCodeWriter.WriteLine($"public {((IReflectionType)DelegatesTo.ReturnType).Type.ConvertToCSharpTypeName()} {name} => IoService.{DelegatesTo.Name}(this);");
+            sourceCodeWriter.WriteLine($"public {((IReflectionType)DelegatesTo.ReturnType).Type.ConvertToCSharpTypeName()} {name} => {Body}");
         }
 
         public override void WriteDeclarationInInterface(SourceCodeWriter sourceCodeWriter, string name)

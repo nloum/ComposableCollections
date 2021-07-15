@@ -60,9 +60,9 @@ namespace IoFluently.Tests
             }
             else if (type == IoServiceType.InMemoryZipIoService)
             {
-                var inMemoryIoService = new InMemoryFileSystem(true, "/", enableOpenFilesTracking);
-                inMemoryIoService.RootFolders.Add("/", new InMemoryFolder());
-                var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip").ExpectFileOrMissingPath();
+                var inMemoryFileSystem = new InMemoryFileSystem(true, "/", enableOpenFilesTracking);
+                inMemoryFileSystem.RootFolders.Add("/", new InMemoryFolder());
+                var testZipFilePath = inMemoryFileSystem.ParseAbsolutePath("/test.zip").ExpectFileOrMissingPath();
                 var result = testZipFilePath.ExpectZipFileOrMissingPath(true);
                 var finalResult = new FileSystemEnvironmentDecorator(result);
                 finalResult.CurrentDirectory = result.ParseAbsolutePath("/").ExpectFolder();

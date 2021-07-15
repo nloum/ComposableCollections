@@ -193,15 +193,15 @@ namespace IoFluently
 
             var onlyParam = method.Parameters[0];
             var onlyParamTypeName = onlyParam.Type.Identifier.Name;
-            if (onlyParamTypeName != "AbsolutePath" && onlyParamTypeName != "RelativePath"
-                && onlyParamTypeName != "IAbsolutePathTranslation"
-                && onlyParamTypeName != "IFileOrFolderOrMissingPath"
-                && onlyParamTypeName != "IFile"
-                && onlyParamTypeName != "IFolder"
-                && onlyParamTypeName != "IMissingPath"
-                && onlyParamTypeName != "IFileOrMissingPath"
-                && onlyParamTypeName != "IFolderOrMissingPath"
-                && onlyParamTypeName != "IFileOrFolder")
+            if (onlyParamTypeName != nameof(FileOrFolderOrMissingPath) && onlyParamTypeName != nameof(RelativePath)
+                                                                       && onlyParamTypeName != nameof(IPathTranslation)
+                                                                       && onlyParamTypeName != nameof(IFileOrFolderOrMissingPath)
+                                                                       && onlyParamTypeName != nameof(IFilePath)
+                                                                       && onlyParamTypeName != nameof(IFolderPath)
+                                                                       && onlyParamTypeName != nameof(IMissingPath)
+                                                                       && onlyParamTypeName != nameof(IFileOrMissingPath)
+                                                                       && onlyParamTypeName != nameof(IFolderOrMissingPath)
+                                                                       && onlyParamTypeName != nameof(IFileOrFolderPath))
             {
                 return false;
             }

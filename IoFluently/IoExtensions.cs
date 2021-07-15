@@ -32,6 +32,26 @@ namespace IoFluently
             return fileOrMissingPath.ExpectFile();
         }
 
+        public static File CopyFrom(this IFileOrMissingPath fileOrMissingPath, Stream inputStream)
+        {
+            using (var outputStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                inputStream.CopyTo(outputStream);
+            }
+
+            return fileOrMissingPath.ExpectFile();
+        }
+
+        public static async Task<File> CopyFromAsync(this IFileOrMissingPath fileOrMissingPath, Stream inputStream)
+        {
+            await using (var outputStream = fileOrMissingPath.Open(FileMode.Create, FileAccess.Write, FileShare.None, FileOptions.Asynchronous))
+            {
+                await inputStream.CopyToAsync(outputStream);
+            }
+
+            return fileOrMissingPath.ExpectFile();
+        }
+
         public static string ConvertToString(this IFileOrFolderOrMissingPath path)
         {
             var sb = new StringBuilder();

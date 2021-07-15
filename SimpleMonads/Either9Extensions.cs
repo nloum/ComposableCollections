@@ -404,32 +404,41 @@ return input;
 }
 
 public static SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9> AsSubTypes<TBase, T1, T2, T3, T4, T5, T6, T7, T8, T9>(this ConvertibleTo<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9> either) where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6 : TBase where T7 : TBase where T8 : TBase where T9 : TBase {
-if (either.Item1 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(either.Item1);
+var item1 = either.Item1;
+if (item1 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(item1);
 }
-if (either.Item2 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(either.Item2);
+var item2 = either.Item2;
+if (item2 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(item2);
 }
-if (either.Item3 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(either.Item3);
+var item3 = either.Item3;
+if (item3 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(item3);
 }
-if (either.Item4 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(either.Item4);
+var item4 = either.Item4;
+if (item4 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(item4);
 }
-if (either.Item5 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(either.Item5);
+var item5 = either.Item5;
+if (item5 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(item5);
 }
-if (either.Item6 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(either.Item6);
+var item6 = either.Item6;
+if (item6 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(item6);
 }
-if (either.Item7 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(either.Item7);
+var item7 = either.Item7;
+if (item7 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(item7);
 }
-if (either.Item8 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(either.Item8);
+var item8 = either.Item8;
+if (item8 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(item8);
 }
-if (either.Item9 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(either.Item9);
+var item9 = either.Item9;
+if (item9 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9>(item9);
 }
 throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }

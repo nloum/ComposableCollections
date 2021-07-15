@@ -17,8 +17,10 @@ Item2 = other.Item2;
 public virtual T1? Item1 { get; init; } = default;
 public virtual T2? Item2 { get; init; } = default;
 public virtual TOutput Collapse<TOutput>(Func<T1, TOutput> selector1, Func<T2, TOutput> selector2) {
-if (Item1 != null) return selector1(Item1);
-if (Item2 != null) return selector2(Item2);
+var item1 = Item1;
+if (item1 != null) return selector1(item1);
+var item2 = Item2;
+if (item2 != null) return selector2(item2);
 throw new InvalidOperationException();
 }
 public IEitherBase<T1, T2, T3> Or<T3>()
@@ -180,11 +182,13 @@ return hash;
 }
 }
 public override string ToString() {
-if (Item1 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2>))}({Utility.ConvertToCSharpTypeName(typeof(T1))} Item1: {Item1})";
+var item1 = Item1;
+if (item1 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2>))}({Utility.ConvertToCSharpTypeName(typeof(T1))} Item1: {item1})";
 }
-if (Item2 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2>))}({Utility.ConvertToCSharpTypeName(typeof(T2))} Item2: {Item2})";
+var item2 = Item2;
+if (item2 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2>))}({Utility.ConvertToCSharpTypeName(typeof(T2))} Item2: {item2})";
 }
 throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }
@@ -195,11 +199,13 @@ public static implicit operator EitherBase<T1, T2>(T2 t2) {
 return new(t2);
 }
 public ConvertibleTo<TBase>.IEither<T1, T2> ConvertTo<TBase>() {
-if (Item1 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2>(Item1);
+var item1 = Item1;
+if (item1 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2>(item1);
 }
-if (Item2 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2>(Item2);
+var item2 = Item2;
+if (item2 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2>(item2);
 }
 throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }
@@ -237,7 +243,16 @@ return @base;
 }
 throw new NotImplementedException($"Cannot convert from {typeof(T2).Name} to {typeof(TBase).Name}");
 }
-public virtual TBase Value => (TBase)(Item1 != null ? Convert1(Item1) : default) ?? (TBase)(Item2 != null ? Convert2(Item2) : default);
+public virtual TBase Value {
+get {
+
+var item1 = Item1;
+if (item1 != null) return Convert1(item1);
+var item2 = Item2;
+if (item2 != null) return Convert2(item2);
+throw new InvalidOperationException($"None of the items in the Either were convertible to {typeof(TBase)}");
+}
+}
 }
 }
 public partial class SubTypesOf<TBase> {

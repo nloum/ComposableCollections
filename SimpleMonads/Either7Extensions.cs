@@ -276,26 +276,33 @@ return input;
 }
 
 public static SubTypesOf<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7> AsSubTypes<TBase, T1, T2, T3, T4, T5, T6, T7>(this ConvertibleTo<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7> either) where T1 : TBase where T2 : TBase where T3 : TBase where T4 : TBase where T5 : TBase where T6 : TBase where T7 : TBase {
-if (either.Item1 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(either.Item1);
+var item1 = either.Item1;
+if (item1 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(item1);
 }
-if (either.Item2 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(either.Item2);
+var item2 = either.Item2;
+if (item2 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(item2);
 }
-if (either.Item3 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(either.Item3);
+var item3 = either.Item3;
+if (item3 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(item3);
 }
-if (either.Item4 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(either.Item4);
+var item4 = either.Item4;
+if (item4 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(item4);
 }
-if (either.Item5 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(either.Item5);
+var item5 = either.Item5;
+if (item5 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(item5);
 }
-if (either.Item6 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(either.Item6);
+var item6 = either.Item6;
+if (item6 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(item6);
 }
-if (either.Item7 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(either.Item7);
+var item7 = either.Item7;
+if (item7 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3, T4, T5, T6, T7>(item7);
 }
 throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }

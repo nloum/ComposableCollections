@@ -22,9 +22,12 @@ public virtual T1? Item1 { get; init; } = default;
 public virtual T2? Item2 { get; init; } = default;
 public virtual T3? Item3 { get; init; } = default;
 public virtual TOutput Collapse<TOutput>(Func<T1, TOutput> selector1, Func<T2, TOutput> selector2, Func<T3, TOutput> selector3) {
-if (Item1 != null) return selector1(Item1);
-if (Item2 != null) return selector2(Item2);
-if (Item3 != null) return selector3(Item3);
+var item1 = Item1;
+if (item1 != null) return selector1(item1);
+var item2 = Item2;
+if (item2 != null) return selector2(item2);
+var item3 = Item3;
+if (item3 != null) return selector3(item3);
 throw new InvalidOperationException();
 }
 public IEitherBase<T1, T2, T3, T4> Or<T4>()
@@ -216,14 +219,17 @@ return hash;
 }
 }
 public override string ToString() {
-if (Item1 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3>))}({Utility.ConvertToCSharpTypeName(typeof(T1))} Item1: {Item1})";
+var item1 = Item1;
+if (item1 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3>))}({Utility.ConvertToCSharpTypeName(typeof(T1))} Item1: {item1})";
 }
-if (Item2 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3>))}({Utility.ConvertToCSharpTypeName(typeof(T2))} Item2: {Item2})";
+var item2 = Item2;
+if (item2 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3>))}({Utility.ConvertToCSharpTypeName(typeof(T2))} Item2: {item2})";
 }
-if (Item3 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3>))}({Utility.ConvertToCSharpTypeName(typeof(T3))} Item3: {Item3})";
+var item3 = Item3;
+if (item3 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3>))}({Utility.ConvertToCSharpTypeName(typeof(T3))} Item3: {item3})";
 }
 throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }
@@ -237,62 +243,77 @@ public static implicit operator EitherBase<T1, T2, T3>(T3 t3) {
 return new(t3);
 }
         public static implicit operator Either<T2, T1, T3>(EitherBase<T1, T2, T3> either) {
-            if (either.Item1 != null) {
-                return new Either<T2, T1, T3>(either.Item1);
+            var item1 = either.Item1;
+            if (item1 != null) {
+                return new Either<T2, T1, T3>(item1);
             }
-            if (either.Item2 != null) {
-                return new Either<T2, T1, T3>(either.Item2);
+            var item2 = either.Item2;
+            if (item2 != null) {
+                return new Either<T2, T1, T3>(item2);
             }
-            if (either.Item3 != null) {
-                return new Either<T2, T1, T3>(either.Item3);
+            var item3 = either.Item3;
+            if (item3 != null) {
+                return new Either<T2, T1, T3>(item3);
             }
             throw new InvalidOperationException("The Either has no values");
         }
         public static implicit operator Either<T2, T3, T1>(EitherBase<T1, T2, T3> either) {
-            if (either.Item1 != null) {
-                return new Either<T2, T3, T1>(either.Item1);
+            var item1 = either.Item1;
+            if (item1 != null) {
+                return new Either<T2, T3, T1>(item1);
             }
-            if (either.Item2 != null) {
-                return new Either<T2, T3, T1>(either.Item2);
+            var item2 = either.Item2;
+            if (item2 != null) {
+                return new Either<T2, T3, T1>(item2);
             }
-            if (either.Item3 != null) {
-                return new Either<T2, T3, T1>(either.Item3);
+            var item3 = either.Item3;
+            if (item3 != null) {
+                return new Either<T2, T3, T1>(item3);
             }
             throw new InvalidOperationException("The Either has no values");
         }
         public static implicit operator Either<T3, T1, T2>(EitherBase<T1, T2, T3> either) {
-            if (either.Item1 != null) {
-                return new Either<T3, T1, T2>(either.Item1);
+            var item1 = either.Item1;
+            if (item1 != null) {
+                return new Either<T3, T1, T2>(item1);
             }
-            if (either.Item2 != null) {
-                return new Either<T3, T1, T2>(either.Item2);
+            var item2 = either.Item2;
+            if (item2 != null) {
+                return new Either<T3, T1, T2>(item2);
             }
-            if (either.Item3 != null) {
-                return new Either<T3, T1, T2>(either.Item3);
+            var item3 = either.Item3;
+            if (item3 != null) {
+                return new Either<T3, T1, T2>(item3);
             }
             throw new InvalidOperationException("The Either has no values");
         }
         public static implicit operator Either<T3, T2, T1>(EitherBase<T1, T2, T3> either) {
-            if (either.Item1 != null) {
-                return new Either<T3, T2, T1>(either.Item1);
+            var item1 = either.Item1;
+            if (item1 != null) {
+                return new Either<T3, T2, T1>(item1);
             }
-            if (either.Item2 != null) {
-                return new Either<T3, T2, T1>(either.Item2);
+            var item2 = either.Item2;
+            if (item2 != null) {
+                return new Either<T3, T2, T1>(item2);
             }
-            if (either.Item3 != null) {
-                return new Either<T3, T2, T1>(either.Item3);
+            var item3 = either.Item3;
+            if (item3 != null) {
+                return new Either<T3, T2, T1>(item3);
             }
             throw new InvalidOperationException("The Either has no values");
         }
 public ConvertibleTo<TBase>.IEither<T1, T2, T3> ConvertTo<TBase>() {
-if (Item1 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3>(Item1);
+var item1 = Item1;
+if (item1 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3>(item1);
 }
-if (Item2 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3>(Item2);
+var item2 = Item2;
+if (item2 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3>(item2);
 }
-if (Item3 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3>(Item3);
+var item3 = Item3;
+if (item3 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3>(item3);
 }
 throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }
@@ -342,7 +363,18 @@ return @base;
 }
 throw new NotImplementedException($"Cannot convert from {typeof(T3).Name} to {typeof(TBase).Name}");
 }
-public virtual TBase Value => (TBase)(Item1 != null ? Convert1(Item1) : default) ?? (TBase)(Item2 != null ? Convert2(Item2) : default) ?? (TBase)(Item3 != null ? Convert3(Item3) : default);
+public virtual TBase Value {
+get {
+
+var item1 = Item1;
+if (item1 != null) return Convert1(item1);
+var item2 = Item2;
+if (item2 != null) return Convert2(item2);
+var item3 = Item3;
+if (item3 != null) return Convert3(item3);
+throw new InvalidOperationException($"None of the items in the Either were convertible to {typeof(TBase)}");
+}
+}
 }
 }
 public partial class SubTypesOf<TBase> {

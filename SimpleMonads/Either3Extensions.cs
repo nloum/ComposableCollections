@@ -92,14 +92,17 @@ return input;
 }
 
 public static SubTypesOf<TBase>.IEither<T1, T2, T3> AsSubTypes<TBase, T1, T2, T3>(this ConvertibleTo<TBase>.IEither<T1, T2, T3> either) where T1 : TBase where T2 : TBase where T3 : TBase {
-if (either.Item1 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3>(either.Item1);
+var item1 = either.Item1;
+if (item1 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3>(item1);
 }
-if (either.Item2 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3>(either.Item2);
+var item2 = either.Item2;
+if (item2 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3>(item2);
 }
-if (either.Item3 != null) {
-return new SubTypesOf<TBase>.Either<T1, T2, T3>(either.Item3);
+var item3 = either.Item3;
+if (item3 != null) {
+return new SubTypesOf<TBase>.Either<T1, T2, T3>(item3);
 }
 throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }

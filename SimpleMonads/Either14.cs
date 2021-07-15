@@ -77,20 +77,34 @@ public virtual T12? Item12 { get; init; } = default;
 public virtual T13? Item13 { get; init; } = default;
 public virtual T14? Item14 { get; init; } = default;
 public virtual TOutput Collapse<TOutput>(Func<T1, TOutput> selector1, Func<T2, TOutput> selector2, Func<T3, TOutput> selector3, Func<T4, TOutput> selector4, Func<T5, TOutput> selector5, Func<T6, TOutput> selector6, Func<T7, TOutput> selector7, Func<T8, TOutput> selector8, Func<T9, TOutput> selector9, Func<T10, TOutput> selector10, Func<T11, TOutput> selector11, Func<T12, TOutput> selector12, Func<T13, TOutput> selector13, Func<T14, TOutput> selector14) {
-if (Item1 != null) return selector1(Item1);
-if (Item2 != null) return selector2(Item2);
-if (Item3 != null) return selector3(Item3);
-if (Item4 != null) return selector4(Item4);
-if (Item5 != null) return selector5(Item5);
-if (Item6 != null) return selector6(Item6);
-if (Item7 != null) return selector7(Item7);
-if (Item8 != null) return selector8(Item8);
-if (Item9 != null) return selector9(Item9);
-if (Item10 != null) return selector10(Item10);
-if (Item11 != null) return selector11(Item11);
-if (Item12 != null) return selector12(Item12);
-if (Item13 != null) return selector13(Item13);
-if (Item14 != null) return selector14(Item14);
+var item1 = Item1;
+if (item1 != null) return selector1(item1);
+var item2 = Item2;
+if (item2 != null) return selector2(item2);
+var item3 = Item3;
+if (item3 != null) return selector3(item3);
+var item4 = Item4;
+if (item4 != null) return selector4(item4);
+var item5 = Item5;
+if (item5 != null) return selector5(item5);
+var item6 = Item6;
+if (item6 != null) return selector6(item6);
+var item7 = Item7;
+if (item7 != null) return selector7(item7);
+var item8 = Item8;
+if (item8 != null) return selector8(item8);
+var item9 = Item9;
+if (item9 != null) return selector9(item9);
+var item10 = Item10;
+if (item10 != null) return selector10(item10);
+var item11 = Item11;
+if (item11 != null) return selector11(item11);
+var item12 = Item12;
+if (item12 != null) return selector12(item12);
+var item13 = Item13;
+if (item13 != null) return selector13(item13);
+var item14 = Item14;
+if (item14 != null) return selector14(item14);
 throw new InvalidOperationException();
 }
 public IEitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Or<T15>()
@@ -216,47 +230,61 @@ return hash;
 }
 }
 public override string ToString() {
-if (Item1 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T1))} Item1: {Item1})";
+var item1 = Item1;
+if (item1 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T1))} Item1: {item1})";
 }
-if (Item2 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T2))} Item2: {Item2})";
+var item2 = Item2;
+if (item2 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T2))} Item2: {item2})";
 }
-if (Item3 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T3))} Item3: {Item3})";
+var item3 = Item3;
+if (item3 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T3))} Item3: {item3})";
 }
-if (Item4 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T4))} Item4: {Item4})";
+var item4 = Item4;
+if (item4 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T4))} Item4: {item4})";
 }
-if (Item5 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T5))} Item5: {Item5})";
+var item5 = Item5;
+if (item5 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T5))} Item5: {item5})";
 }
-if (Item6 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T6))} Item6: {Item6})";
+var item6 = Item6;
+if (item6 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T6))} Item6: {item6})";
 }
-if (Item7 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T7))} Item7: {Item7})";
+var item7 = Item7;
+if (item7 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T7))} Item7: {item7})";
 }
-if (Item8 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T8))} Item8: {Item8})";
+var item8 = Item8;
+if (item8 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T8))} Item8: {item8})";
 }
-if (Item9 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T9))} Item9: {Item9})";
+var item9 = Item9;
+if (item9 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T9))} Item9: {item9})";
 }
-if (Item10 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T10))} Item10: {Item10})";
+var item10 = Item10;
+if (item10 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T10))} Item10: {item10})";
 }
-if (Item11 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T11))} Item11: {Item11})";
+var item11 = Item11;
+if (item11 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T11))} Item11: {item11})";
 }
-if (Item12 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T12))} Item12: {Item12})";
+var item12 = Item12;
+if (item12 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T12))} Item12: {item12})";
 }
-if (Item13 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T13))} Item13: {Item13})";
+var item13 = Item13;
+if (item13 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T13))} Item13: {item13})";
 }
-if (Item14 != null) {
-return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T14))} Item14: {Item14})";
+var item14 = Item14;
+if (item14 != null) {
+return $"{Utility.ConvertToCSharpTypeName(typeof(Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>))}({Utility.ConvertToCSharpTypeName(typeof(T14))} Item14: {item14})";
 }
 throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }
@@ -303,47 +331,61 @@ public static implicit operator EitherBase<T1, T2, T3, T4, T5, T6, T7, T8, T9, T
 return new(t14);
 }
 public ConvertibleTo<TBase>.IEither<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> ConvertTo<TBase>() {
-if (Item1 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item1);
+var item1 = Item1;
+if (item1 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(item1);
 }
-if (Item2 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item2);
+var item2 = Item2;
+if (item2 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(item2);
 }
-if (Item3 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item3);
+var item3 = Item3;
+if (item3 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(item3);
 }
-if (Item4 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item4);
+var item4 = Item4;
+if (item4 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(item4);
 }
-if (Item5 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item5);
+var item5 = Item5;
+if (item5 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(item5);
 }
-if (Item6 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item6);
+var item6 = Item6;
+if (item6 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(item6);
 }
-if (Item7 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item7);
+var item7 = Item7;
+if (item7 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(item7);
 }
-if (Item8 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item8);
+var item8 = Item8;
+if (item8 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(item8);
 }
-if (Item9 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item9);
+var item9 = Item9;
+if (item9 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(item9);
 }
-if (Item10 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item10);
+var item10 = Item10;
+if (item10 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(item10);
 }
-if (Item11 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item11);
+var item11 = Item11;
+if (item11 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(item11);
 }
-if (Item12 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item12);
+var item12 = Item12;
+if (item12 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(item12);
 }
-if (Item13 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item13);
+var item13 = Item13;
+if (item13 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(item13);
 }
-if (Item14 != null) {
-return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Item14);
+var item14 = Item14;
+if (item14 != null) {
+return new ConvertibleTo<TBase>.Either<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(item14);
 }
 throw new InvalidOperationException("None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?");
 }
@@ -525,7 +567,40 @@ return @base;
 }
 throw new NotImplementedException($"Cannot convert from {typeof(T14).Name} to {typeof(TBase).Name}");
 }
-public virtual TBase Value => (TBase)(Item1 != null ? Convert1(Item1) : default) ?? (TBase)(Item2 != null ? Convert2(Item2) : default) ?? (TBase)(Item3 != null ? Convert3(Item3) : default) ?? (TBase)(Item4 != null ? Convert4(Item4) : default) ?? (TBase)(Item5 != null ? Convert5(Item5) : default) ?? (TBase)(Item6 != null ? Convert6(Item6) : default) ?? (TBase)(Item7 != null ? Convert7(Item7) : default) ?? (TBase)(Item8 != null ? Convert8(Item8) : default) ?? (TBase)(Item9 != null ? Convert9(Item9) : default) ?? (TBase)(Item10 != null ? Convert10(Item10) : default) ?? (TBase)(Item11 != null ? Convert11(Item11) : default) ?? (TBase)(Item12 != null ? Convert12(Item12) : default) ?? (TBase)(Item13 != null ? Convert13(Item13) : default) ?? (TBase)(Item14 != null ? Convert14(Item14) : default);
+public virtual TBase Value {
+get {
+
+var item1 = Item1;
+if (item1 != null) return Convert1(item1);
+var item2 = Item2;
+if (item2 != null) return Convert2(item2);
+var item3 = Item3;
+if (item3 != null) return Convert3(item3);
+var item4 = Item4;
+if (item4 != null) return Convert4(item4);
+var item5 = Item5;
+if (item5 != null) return Convert5(item5);
+var item6 = Item6;
+if (item6 != null) return Convert6(item6);
+var item7 = Item7;
+if (item7 != null) return Convert7(item7);
+var item8 = Item8;
+if (item8 != null) return Convert8(item8);
+var item9 = Item9;
+if (item9 != null) return Convert9(item9);
+var item10 = Item10;
+if (item10 != null) return Convert10(item10);
+var item11 = Item11;
+if (item11 != null) return Convert11(item11);
+var item12 = Item12;
+if (item12 != null) return Convert12(item12);
+var item13 = Item13;
+if (item13 != null) return Convert13(item13);
+var item14 = Item14;
+if (item14 != null) return Convert14(item14);
+throw new InvalidOperationException($"None of the items in the Either were convertible to {typeof(TBase)}");
+}
+}
 }
 }
 public partial class SubTypesOf<TBase> {

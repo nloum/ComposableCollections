@@ -128,7 +128,8 @@ namespace SimpleMonads.CodeGeneration
                 writer.WriteLine($"public virtual TOutput Collapse<TOutput>({collapseArgsString}) {{");
                 for (var i = 1; i <= arity; i++)
                 {
-                    writer.WriteLine($"if (Item{i} != null) return selector{i}(Item{i});");
+                    writer.WriteLine($"var item{i} = Item{i};");
+                    writer.WriteLine($"if (item{i} != null) return selector{i}(item{i});");
                 }
                 writer.WriteLine("throw new InvalidOperationException();");
                 writer.WriteLine("}");
@@ -139,8 +140,9 @@ namespace SimpleMonads.CodeGeneration
                 writer.WriteLine($"public ConvertibleTo<TBase>.IEither<{genericArgNamesString}> ConvertTo<TBase>() {{");
                 for (var i = 1; i <= arity; i++)
                 {
-                    writer.WriteLine($"if (Item{i} != null) {{");
-                    writer.WriteLine($"return new ConvertibleTo<TBase>.Either<{genericArgNamesString}>(Item{i});");
+                    writer.WriteLine($"var item{i} = Item{i};");
+                    writer.WriteLine($"if (item{i} != null) {{");
+                    writer.WriteLine($"return new ConvertibleTo<TBase>.Either<{genericArgNamesString}>(item{i});");
                     writer.WriteLine("}");
                 }
                 writer.WriteLine("throw new InvalidOperationException(\"None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?\");");
@@ -208,8 +210,9 @@ namespace SimpleMonads.CodeGeneration
             writer.WriteLine($"public static SubTypesOf<TBase>.IEither<{args}> AsSubTypes<TBase, {args}>(this ConvertibleTo<TBase>.IEither<{args}> either) {constraints} {{");
             for (var i = 1; i <= arity; i++)
             {
-                writer.WriteLine($"if (either.Item{i} != null) {{");
-                writer.WriteLine($"return new SubTypesOf<TBase>.Either<{args}>(either.Item{i});");
+                writer.WriteLine($"var item{i} = either.Item{i};");
+                writer.WriteLine($"if (item{i} != null) {{");
+                writer.WriteLine($"return new SubTypesOf<TBase>.Either<{args}>(item{i});");
                 writer.WriteLine("}");
             }
             writer.WriteLine("throw new InvalidOperationException(\"None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?\");");
@@ -252,8 +255,9 @@ namespace SimpleMonads.CodeGeneration
                     writer.WriteLine($"        public static implicit operator Either<{genericArgsString}>({className}<{string.Join(", ", genericArgNames)}> either) {{");
                     for (var i = 1; i <= arity; i++)
                     {
-                        writer.WriteLine($"            if (either.Item{i} != null) {{");
-                        writer.WriteLine($"                return new Either<{genericArgsString}>(either.Item{i});");
+                        writer.WriteLine($"            var item{i} = either.Item{i};");
+                        writer.WriteLine($"            if (item{i} != null) {{");
+                        writer.WriteLine($"                return new Either<{genericArgsString}>(item{i});");
                         writer.WriteLine("            }");
                     }
                     writer.WriteLine("            throw new InvalidOperationException(\"The Either has no values\");");
@@ -273,12 +277,19 @@ namespace SimpleMonads.CodeGeneration
                 writer.WriteLine($"throw new NotImplementedException($\"Cannot convert from {{typeof(T{i}).Name}} to {{typeof(TBase).Name}}\");");
                 writer.WriteLine("}");
             }
-            writer.Write("public virtual TBase Value => (TBase)(Item1 != null ? Convert1(Item1) : default)");
+            //writer.Write("public virtual TBase Value => (TBase)(Item1 != null ? Convert1(Item1) : default)");
+            writer.WriteLine("public virtual TBase Value {\nget {\n");
+            writer.WriteLine("var item1 = Item1;");
+            writer.WriteLine("if (item1 != null) return Convert1(item1);");
             for (var i = 2; i <= arity; i++)
             {
-                writer.Write($" ?? (TBase)(Item{i} != null ? Convert{i}(Item{i}) : default)");
+                //writer.Write($" ?? (TBase)(Item{i} != null ? Convert{i}(Item{i}) : default)");
+                writer.WriteLine($"var item{i} = Item{i};");
+                writer.WriteLine($"if (item{i} != null) return Convert{i}(item{i});");
             }
-            writer.WriteLine(";");
+            writer.WriteLine("throw new InvalidOperationException($\"None of the items in the Either were convertible to {typeof(TBase)}\");");
+            //writer.WriteLine(";");
+            writer.WriteLine("}\n}");
         }
 
         private static void GenerateValue(TextWriter writer, int arity)
@@ -331,8 +342,9 @@ namespace SimpleMonads.CodeGeneration
             var genericParameters = string.Join(", ", Enumerable.Repeat(0, arity).Select((_, i) => $"T{i + 1}"));
             for (var i = 0; i < arity; i++)
             {
-                writer.WriteLine($"if (Item{i+1} != null) {{");
-                writer.WriteLine("return $\"{Utility.ConvertToCSharpTypeName(typeof(Either<" + genericParameters + ">))}({Utility.ConvertToCSharpTypeName(typeof(T" + (i + 1) + "))} Item" + (i+1) + ": {Item" + (i+1) + "})\";");
+                writer.WriteLine($"var item{i+1} = Item{i+1};");
+                writer.WriteLine($"if (item{i+1} != null) {{");
+                writer.WriteLine("return $\"{Utility.ConvertToCSharpTypeName(typeof(Either<" + genericParameters + ">))}({Utility.ConvertToCSharpTypeName(typeof(T" + (i + 1) + "))} Item" + (i+1) + ": {item" + (i+1) + "})\";");
                 writer.WriteLine("}");
             }
             writer.WriteLine("throw new InvalidOperationException(\"None of the Either items has a value, which violates a core assumption of this class. Did you override the Either class and break this assumption?\");");

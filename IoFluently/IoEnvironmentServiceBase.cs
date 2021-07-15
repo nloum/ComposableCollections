@@ -13,7 +13,7 @@ namespace IoFluently
         }
 
         /// <inheritdoc />
-        public virtual Folder WorkingDirectory { get; set; }
+        public virtual Folder CurrentDirectory { get; set; }
 
         /// <inheritdoc />
         public virtual Folder TemporaryFolder { get; set; }
@@ -33,7 +33,7 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual AbsolutePath ParsePathRelativeToWorkingDirectory(string path)
         {
-            return TryParseAbsolutePath(path, WorkingDirectory).Value;
+            return TryParseAbsolutePath(path, CurrentDirectory).Value;
         }
     }
 }

@@ -116,7 +116,7 @@ namespace IoFluently
         private readonly ObservableSet<Folder> _storage = new ObservableSet<Folder>();
 
         /// <inheritdoc />
-        public Folder WorkingDirectory
+        public Folder CurrentDirectory
         {
             get
             {
@@ -132,7 +132,7 @@ namespace IoFluently
         /// <inheritdoc />
         public virtual AbsolutePath ParsePathRelativeToWorkingDirectory(string path)
         {
-            return TryParseAbsolutePath(path, WorkingDirectory).Value;
+            return TryParseAbsolutePath(path, CurrentDirectory).Value;
         }
         
         public TimeSpan DeleteOrCreateSpinPeriod { get; set; } = TimeSpan.FromMilliseconds(100);

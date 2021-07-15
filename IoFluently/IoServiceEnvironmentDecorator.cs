@@ -8,7 +8,7 @@ namespace IoFluently
         {
         }
 
-        public Folder WorkingDirectory { get; set; }
+        public Folder CurrentDirectory { get; set; }
         public Folder TemporaryFolder { get; set; }
         
         public MissingPath GenerateUniqueTemporaryPath(string extension = null)
@@ -18,7 +18,7 @@ namespace IoFluently
 
         public AbsolutePath ParsePathRelativeToWorkingDirectory(string path)
         {
-            return ParseAbsolutePath(path, WorkingDirectory);
+            return ParseAbsolutePath(path, CurrentDirectory);
         }
     }
 }

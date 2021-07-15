@@ -14,7 +14,7 @@ namespace CodeIO.Tests.CSharp.Read
         {
             var ioService = new IoService();
 
-            var repoRoot = ioService.WorkingDirectory.Ancestors
+            var repoRoot = ioService.CurrentDirectory.Ancestors
                 .First(ancestor => (ancestor / ".git").Exists);
 
             var solutionFilePath = repoRoot / "src" / "CodeIO.sln";

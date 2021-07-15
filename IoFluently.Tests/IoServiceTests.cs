@@ -45,7 +45,7 @@ namespace IoFluently.Tests
                 var result = new InMemoryIoService(false, "/", enableOpenFilesTracking);
                 result.RootFolders.Add("/", new InMemoryFolder());
                 var finalResult = new IoServiceEnvironmentDecorator(result);
-                finalResult.WorkingDirectory = result.ParseAbsolutePath("/").ExpectFolder();
+                finalResult.CurrentDirectory = result.ParseAbsolutePath("/").ExpectFolder();
                 finalResult.TemporaryFolder = result.ParseAbsolutePath("/tmp").ExpectFolder();
                 return finalResult;
             }
@@ -54,7 +54,7 @@ namespace IoFluently.Tests
                 var result = new InMemoryIoService(true, "/", enableOpenFilesTracking);
                 result.RootFolders.Add("/", new InMemoryFolder());
                 var finalResult = new IoServiceEnvironmentDecorator(result);
-                finalResult.WorkingDirectory = result.ParseAbsolutePath("/").ExpectFolder();
+                finalResult.CurrentDirectory = result.ParseAbsolutePath("/").ExpectFolder();
                 finalResult.TemporaryFolder = result.ParseAbsolutePath("/tmp").ExpectFolder();
                 return finalResult;
             }
@@ -65,7 +65,7 @@ namespace IoFluently.Tests
                 var testZipFilePath = inMemoryIoService.ParseAbsolutePath("/test.zip").ExpectFileOrMissingPath();
                 var result = testZipFilePath.ExpectZipFileOrMissingPath(true);
                 var finalResult = new IoServiceEnvironmentDecorator(result);
-                finalResult.WorkingDirectory = result.ParseAbsolutePath("/").ExpectFolder();
+                finalResult.CurrentDirectory = result.ParseAbsolutePath("/").ExpectFolder();
                 finalResult.TemporaryFolder = result.ParseAbsolutePath("/tmp").ExpectFolder();
                 return finalResult;
             }
@@ -169,7 +169,7 @@ namespace IoFluently.Tests
         public async Task FindChildrenWithoutPatternShouldWork()
         {
             var uut = CreateUnitUnderTest(IoServiceType.IoService, true);
-            var repoRoot = uut.WorkingDirectory.Ancestors.First(ancestor => (ancestor / ".git").Exists);
+            var repoRoot = uut.CurrentDirectory.Ancestors.First(ancestor => (ancestor / ".git").Exists);
             var testFolder = (repoRoot / "test_folder").ExpectFolder();
             var children = testFolder.Children.Select(x => x.ToJsonDto()).ToList();
             await Verify(children);
@@ -179,7 +179,7 @@ namespace IoFluently.Tests
         public async Task FindDescendantsWithoutPatternShouldWork()
         {
             var uut = CreateUnitUnderTest(IoServiceType.IoService, true);
-            var repoRoot = uut.WorkingDirectory.Ancestors.First(ancestor => (ancestor / ".git").Exists);
+            var repoRoot = uut.CurrentDirectory.Ancestors.First(ancestor => (ancestor / ".git").Exists);
             var testFolder = (repoRoot / "test_folder").ExpectFolder();
             var children = testFolder.Descendants.Select(x => x.ToJsonDto()).ToList();
             await Verify(children);
@@ -189,7 +189,7 @@ namespace IoFluently.Tests
         public async Task FindChildrenByPatternShouldWork()
         {
             var uut = CreateUnitUnderTest(IoServiceType.IoService, true);
-            var repoRoot = uut.WorkingDirectory.Ancestors.First(ancestor => (ancestor / ".git").Exists);
+            var repoRoot = uut.CurrentDirectory.Ancestors.First(ancestor => (ancestor / ".git").Exists);
             var testFolder = (repoRoot / "test_folder").ExpectFolder();
             var children = testFolder.Children("*.md").Select(x => x.ToJsonDto()).ToList();
             await Verify(children);
@@ -199,7 +199,7 @@ namespace IoFluently.Tests
         public async Task FindDescendantsByPatternShouldWork()
         {
             var uut = CreateUnitUnderTest(IoServiceType.IoService, true);
-            var repoRoot = uut.WorkingDirectory.Ancestors.First(ancestor => (ancestor / ".git").Exists);
+            var repoRoot = uut.CurrentDirectory.Ancestors.First(ancestor => (ancestor / ".git").Exists);
             var testFolder = (repoRoot / "test_folder").ExpectFolder();
             var children = testFolder.Descendants("*.md").Select(x => x.ToJsonDto()).ToList();
             await Verify(children);
@@ -218,11 +218,11 @@ namespace IoFluently.Tests
         public void ShouldCreateFullPath(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, true);
-            var testFolder = uut.WorkingDirectory / "test1" / "test2" / "test3";
+            var testFolder = uut.CurrentDirectory / "test1" / "test2" / "test3";
             testFolder.EnsureIsFolder();
             testFolder.IsFolder.Should().BeTrue();
-            (uut.WorkingDirectory / "test1").EnsureIsNotFolder(true);
-            (uut.WorkingDirectory / "test1").Exists.Should().BeFalse();
+            (uut.CurrentDirectory / "test1").EnsureIsNotFolder(true);
+            (uut.CurrentDirectory / "test1").Exists.Should().BeFalse();
         }
 
         [TestMethod]
@@ -275,8 +275,8 @@ namespace IoFluently.Tests
         public void SimplifyShouldNotChangeSimplePath(IoServiceType type)
         {
             var uut = CreateUnitUnderTest(type, true);
-            var simplified = uut.WorkingDirectory.Simplify();
-            uut.WorkingDirectory.ToString().Should().Be(simplified.ToString());
+            var simplified = uut.CurrentDirectory.Simplify();
+            uut.CurrentDirectory.ToString().Should().Be(simplified.ToString());
         }
 
         [TestMethod]
@@ -457,7 +457,7 @@ namespace IoFluently.Tests
         {
             var ioService = CreateUnitUnderTest(type, false);
 
-            var repoRoot = ioService.WorkingDirectory.Ancestors.First(ancestor => (ancestor / ".git").IsFolder);
+            var repoRoot = ioService.CurrentDirectory.Ancestors.First(ancestor => (ancestor / ".git").IsFolder);
             var testFolder = repoRoot / "test_folder";
             var results = ioService.Query().Where(path => path.Parent.Value == testFolder).AsEnumerable().ToImmutableList();
             results.Count.Should().BeGreaterThan(0);
@@ -473,7 +473,7 @@ namespace IoFluently.Tests
         {
             var ioService = CreateUnitUnderTest(type, false);
 
-            var repoRoot = ioService.WorkingDirectory.Ancestors.First(ancestor => (ancestor / ".git").IsFolder);
+            var repoRoot = ioService.CurrentDirectory.Ancestors.First(ancestor => (ancestor / ".git").IsFolder);
             var testFolder = repoRoot / "test_folder";
             var results = ioService.Query().Where(path => path.Ancestors.Contains(testFolder)).AsEnumerable().ToImmutableHashSet();
             results.Count.Should().BeGreaterThan(0);
@@ -627,7 +627,7 @@ namespace IoFluently.Tests
         {
             var ioService = CreateUnitUnderTest(type1, false);
 
-            var sourceFolder = ioService.WorkingDirectory / "test1";
+            var sourceFolder = ioService.CurrentDirectory / "test1";
 
             sourceFolder.EnsureIsEmptyFolder();
 
@@ -635,7 +635,7 @@ namespace IoFluently.Tests
 
             textFileInSourceFolder.WriteAllText("testing 1 2 3");
 
-            var targetFolder = (ioService.WorkingDirectory / "test2")
+            var targetFolder = (ioService.CurrentDirectory / "test2")
                 .EnsureIsEmptyFolder();
 
             var textFileMovePlan = textFileInSourceFolder.Translate(sourceFolder, targetFolder);

@@ -28,6 +28,18 @@ namespace CodeIO.SourceCode.Write
                 return 1;
             }
 
+            if (Method.ReturnType.Identifier.Name.Equals("IMaybe") &&
+                !other.Method.ReturnType.Identifier.Name.Equals("IMaybe"))
+            {
+                return -1;
+            }
+            
+            if (!Method.ReturnType.Identifier.Name.Equals("IMaybe") &&
+                other.Method.ReturnType.Identifier.Name.Equals("IMaybe"))
+            {
+                return 1;
+            }
+
             return 0;
         }
     }

@@ -48,6 +48,12 @@ namespace IoFluently
         public IMaybe<Folder> Parent => IoService.TryParent(this);
         public PathType Type => IoService.Type(this);
         public AbsolutePath WithoutExtension => IoService.WithoutExtension(this);
+        public AbsolutePathChildFiles ChildFiles => IoService.ChildFiles(this);
+        public AbsolutePathChildFolders ChildFolders => IoService.ChildFolders(this);
+        public AbsolutePathChildren Children => IoService.Children(this);
+        public AbsolutePathDescendantFiles DescendantFiles => IoService.DescendantFiles(this);
+        public AbsolutePathDescendantFolders DescendantFolders => IoService.DescendantFolders(this);
+        public AbsolutePathDescendants Descendants => IoService.Descendants(this);
     }
 }
 namespace IoFluently 
@@ -81,7 +87,7 @@ namespace IoFluently
         public Boolean IsFolder => IoService.IsFolder(this);
         public string Name => IoService.Name(this);
         public Folder Root => IoService.Root(this);
-        public IMaybe<AbsolutePath> Parent => IoService.TryParent(this);
+        public Folder Parent => IoService.Parent(this);
         public PathType Type => IoService.Type(this);
         public AbsolutePath WithoutExtension => IoService.WithoutExtension(this);
         public FileAttributes Attributes => IoService.Attributes(this);
@@ -112,6 +118,13 @@ namespace IoFluently
 }
 namespace IoFluently 
 {
+    public partial interface IMissingPath 
+    {
+        public IEnumerable<IFolderOrMissingPath> Ancestors { get; }
+    }
+}
+namespace IoFluently 
+{
     public partial interface IFile 
     {
         public IEnumerable<Folder> Ancestors { get; }
@@ -129,13 +142,12 @@ namespace IoFluently
     public partial interface IFolder 
     {
         public IEnumerable<Folder> Ancestors { get; }
+        public AbsolutePathChildFiles ChildFiles { get; }
+        public AbsolutePathChildFolders ChildFolders { get; }
+        public AbsolutePathChildren Children { get; }
+        public AbsolutePathDescendantFiles DescendantFiles { get; }
+        public AbsolutePathDescendantFolders DescendantFolders { get; }
+        public AbsolutePathDescendants Descendants { get; }
         public IMaybe<Folder> Parent { get; }
-    }
-}
-namespace IoFluently 
-{
-    public partial interface IMissingPath 
-    {
-        public IEnumerable<IFolderOrMissingPath> Ancestors { get; }
     }
 }

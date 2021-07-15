@@ -53,6 +53,8 @@ namespace IoFluently
         protected SubTypesOf<IFileOrFolderOrMissingPath>.IEither<IFile, IFolder, IMissingPath> FileOrFolderOrMissingPath =>
             new SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFile, IFolder, IMissingPath>((IFile)this);
 
+        IMaybe<AbsolutePath> IFileOrFolderOrMissingPath.Parent => Parent.ExpectFileOrFolderOrMissingPath().ToMaybe();
+
         public IFileOrFolderOrMissingPath Value => FileOrFolder.Value;
 
         public IFile? Item1 => FileOrFolder.Item1;

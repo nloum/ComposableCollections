@@ -284,7 +284,7 @@ namespace IoFluently
         {
             newline ??= Environment.NewLine;
             
-            var stream = Value.FileSystem.Open(Value, FileMode.Create, FileAccess.ReadWrite, FileShare.Write, FileOptions.WriteThrough, bufferSize, createRecursively);
+            var stream = Value.FileSystem.Open(this, FileMode.Create, FileAccess.ReadWrite, FileShare.Write, FileOptions.WriteThrough, bufferSize, createRecursively);
             foreach (var line in lines)
             {
                 var bytes = Encoding.Default.GetBytes(line + newline);

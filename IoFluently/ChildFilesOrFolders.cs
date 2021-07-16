@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using ComposableCollections.Dictionary.Interfaces;
 
 namespace IoFluently
 {
@@ -13,6 +14,8 @@ namespace IoFluently
         {
             return _folderPath.FileSystem.EnumerateChildren(_folderPath, _pattern).GetEnumerator();
         }
+        
+        
     }
     
     public class ChildFiles : DescendantsOrChildren<FilePath>, IEnumerable<FilePath>

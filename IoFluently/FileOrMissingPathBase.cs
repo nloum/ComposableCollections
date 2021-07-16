@@ -22,17 +22,17 @@ namespace IoFluently
             FileSystem = item.FileSystem;
         }
 
-        public bool CanBeSimplified => Value.CanBeSimplified;
-        public bool Exists => Value.Exists;
-        public string Extension => Value.Extension;
-        public bool HasExtension => Value.HasExtension;
-        public bool IsFile => Value.IsFile;
-        public bool IsFolder => Value.IsFolder;
-        public string Name => Value.Name;
-        public FolderPath Root => Value.Root;
-        public IMaybe<FileOrFolderOrMissingPath> Parent => Value.Parent;
-        public PathType Type => Value.Type;
-        public FileOrFolderOrMissingPath WithoutExtension => Value.WithoutExtension;
+        public bool CanBeSimplified => FileSystem.CanBeSimplified(this);
+        public bool Exists => FileSystem.Exists(this);
+        public string Extension => FileSystem.Extension(this);
+        public bool HasExtension => FileSystem.HasExtension(this);
+        public bool IsFile => FileSystem.IsFile(this);
+        public bool IsFolder => FileSystem.IsFolder(this);
+        public string Name => FileSystem.Name(this);
+        public FolderPath Root => Ancestors[0].ExpectFolder();
+        public IMaybe<FileOrFolderOrMissingPath> Parent => Ancestors.Count > 1 ? Ancestors[Ancestors.Count - 1].ToMaybe() : Maybe<FileOrFolderOrMissingPath>.Nothing();
+        public PathType Type => FileSystem.Type(this);
+        public FileOrFolderOrMissingPath WithoutExtension => FileSystem.WithoutExtension(this);
 
         public FileAttributes Attributes
         {

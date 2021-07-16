@@ -1657,16 +1657,6 @@ namespace IoFluently
             }
         }
 
-        public FolderPath Parent(IFilePath path)
-        {
-            return TryParent(path).Value.ExpectFolder();
-        }
-
-        public IMaybe<FolderPath> TryParent(IFolderPath folderPath)
-        {
-            return TryParent(folderPath).Select(x => x.ExpectFolder());
-        }
-
         /// <inheritdoc />
         public virtual RelativePath RelativeTo(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath relativeTo)
         {
@@ -1732,17 +1722,6 @@ namespace IoFluently
             {
                 return TryParseAbsolutePath(string.Join(path.DirectorySeparator, zippedComponents.TakeWhile(x => x.equals).Select(x => x.component)));
             }
-        }
-
-        /// <inheritdoc />
-        public virtual FolderPath Root(IFileOrFolderOrMissingPath path)
-        {
-            IFileOrFolderOrMissingPath ancestor = path;
-            IMaybe<IFileOrFolderOrMissingPath> cachedParent;
-            while ((cachedParent = ancestor .FileSystem.TryParent(ancestor )).HasValue)
-                ancestor = cachedParent.Value;
-
-            return ancestor .ExpectFolder();
         }
 
         /// <inheritdoc />
@@ -1883,20 +1862,6 @@ namespace IoFluently
             return pathResult;
         }
         
-        /// <inheritdoc />
-        public virtual IMaybe<FolderPath> TryAncestor(IFileOrFolderOrMissingPath path, int level)
-        {
-            var maybePath = path.ToMaybe();
-            for (var i = 0; i < level; i++)
-            {
-                maybePath = maybePath.Select(p => p.FileSystem.TryParent(p)).SelectMany(x => x);
-                if (!maybePath.HasValue)
-                    return Nothing<FolderPath>(() => throw new InvalidOperationException($"The path {path} has no ancestor"));
-            }
-
-            return maybePath.Select(x => new FolderPath(x));
-        }
-
         /// <inheritdoc />
         public virtual IEnumerable<KeyValuePair<FileOrFolderOrMissingPath, string>> ProposeUniqueNamesForMovingPathsToSameFolder(
             IEnumerable<FileOrFolderOrMissingPath> paths)

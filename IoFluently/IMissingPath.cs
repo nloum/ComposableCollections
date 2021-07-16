@@ -2,6 +2,6 @@
 {
     public partial interface IMissingPath : IFileOrMissingPath, IFolderOrMissingPath
     {
-        
+        public MissingPathAncestors Ancestors { get; }
     }
 }

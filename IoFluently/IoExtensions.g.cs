@@ -131,14 +131,6 @@ namespace IoFluently
             return path.FileSystem.TryDescendant(path, paths).Value;
         }
 
-        public static IMaybe<FolderPath> TryAncestor(this IFileOrFolderOrMissingPath path, int level) {
-            return path.FileSystem.TryAncestor(path, level);
-        }
-
-        public static FolderPath Ancestor(this IFileOrFolderOrMissingPath path, int level) {
-            return path.FileSystem.TryAncestor(path, level).Value;
-        }
-
         public static Boolean IsAncestorOf(this IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath possibleDescendant) {
             return path.FileSystem.IsAncestorOf(path, possibleDescendant);
         }

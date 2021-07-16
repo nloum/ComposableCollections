@@ -458,14 +458,10 @@ namespace IoFluently
         IEnumerable<FilePath> EnumerateDescendantFiles(IFolderPath folderPath);
 
         bool CanBeSimplified(IFileOrFolderOrMissingPath path);
-        FolderPath Root(IFileOrFolderOrMissingPath path);
         RelativePath RelativeTo(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath relativeTo);
         IMaybe<FileOrFolderOrMissingPath> TryCommonWith(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath that);
         FileOrFolderOrMissingPath Simplify(IFileOrFolderOrMissingPath path);
         RelativePath Simplify(RelativePath path);
-        IMaybe<FileOrFolderOrMissingPath> TryParent(IFileOrFolderOrMissingPath path);
-        FolderPath Parent(IFilePath path);
-        IMaybe<FolderPath> TryParent(IFolderPath folderPath);
 
         /// <summary>
         /// Equivalent to Path.Combine. You can also use the / operator to build paths, like this:
@@ -563,7 +559,6 @@ namespace IoFluently
 
         IMaybe<FileOrFolderOrMissingPath> TryDescendant(IFileOrFolderOrMissingPath path, params IFileOrFolderOrMissingPath[] paths);
         IMaybe<FileOrFolderOrMissingPath> TryDescendant(IFileOrFolderOrMissingPath path, params string[] paths);
-        IMaybe<FolderPath> TryAncestor(IFileOrFolderOrMissingPath path, int level);
         bool IsAncestorOf(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath possibleDescendant);
         bool IsDescendantOf(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath possibleAncestor);
         IMaybe<FileOrFolderOrMissingPath> TryGetCommonAncestry(IFileOrFolderOrMissingPath path1, IFileOrFolderOrMissingPath path2);

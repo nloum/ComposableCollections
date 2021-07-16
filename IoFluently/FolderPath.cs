@@ -7,11 +7,39 @@ namespace IoFluently
 {
     public partial class FolderPath : IFolderPath
     {
+        private FileOrFolderOrMissingPathAncestors _ancestors;
+        private IMaybe<FileOrFolderOrMissingPath> _parent;
+        private IMaybe<FolderPath> _parent1;
         public IReadOnlyList<string> Components { get; }
         public bool IsCaseSensitive { get; }
         public string DirectorySeparator { get; }
         public IFileSystem FileSystem { get; }
 
+        FileOrFolderOrMissingPathAncestors IFileOrFolderOrMissingPath.Ancestors => new(this);
+
+        public FolderPath Root => Ancestors.Count > 0 ? Ancestors[0] : this;
+
+        IMaybe<FileOrFolderOrMissingPath> IFileOrFolderOrMissingPath.Parent => Ancestors.Count > 0 ? Ancestors[Ancestors.Count - 1].ExpectFileOrFolderOrMissingPath().ToMaybe() : Maybe<FileOrFolderOrMissingPath>.Nothing();
+
+        IMaybe<FolderPath> IFolderPath.Parent => Ancestors.Count > 0 ? Ancestors[Ancestors.Count - 1].ToMaybe() : Maybe<FolderPath>.Nothing();
+
+        public FolderPathAncestors Ancestors => FileSystem.Ancestors(this);
+        public ChildFiles ChildFiles => FileSystem.ChildFiles(this);
+        public ChildFolders ChildFolders => FileSystem.ChildFolders(this);
+        public ChildFilesOrFolders Children => FileSystem.Children(this);
+        public DescendantFiles DescendantFiles => FileSystem.DescendantFiles(this);
+        public DescendantFolders DescendantFolders => FileSystem.DescendantFolders(this);
+        public DescendantFilesOrFolders Descendants => FileSystem.Descendants(this);
+        public Boolean CanBeSimplified => FileSystem.CanBeSimplified(this);
+        public Boolean Exists => FileSystem.Exists(this);
+        public string Extension => FileSystem.Extension(this);
+        public Boolean HasExtension => FileSystem.HasExtension(this);
+        public Boolean IsFile => FileSystem.IsFile(this);
+        public Boolean IsFolder => FileSystem.IsFolder(this);
+        public string Name => FileSystem.Name(this);
+        public PathType Type => FileSystem.Type(this);
+        public FileOrFolderOrMissingPath WithoutExtension => FileSystem.WithoutExtension(this);
+        
         public FolderPath(IFileOrFolderOrMissingPath path, bool skipCheck = false) : this(path.Components, path.IsCaseSensitive,
             path.DirectorySeparator, path.FileSystem, skipCheck)
         {

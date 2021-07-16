@@ -30,5 +30,18 @@ namespace IoFluently
         public string FullName { get; }
         
         public FileAttributes Attributes { get; set; }
+        
+        public FileOrFolderOrMissingPathAncestors Ancestors { get; }
+        public bool CanBeSimplified { get; }
+        public bool Exists { get; }
+        public string Extension { get; }
+        public bool HasExtension { get; }
+        public bool IsFile { get; }
+        public bool IsFolder { get; }
+        public string Name { get; }
+        public FolderPath Root { get; }
+        public IMaybe<FileOrFolderOrMissingPath> Parent { get; }
+        public PathType Type { get; }
+        public FileOrFolderOrMissingPath WithoutExtension { get; }
     }
 }

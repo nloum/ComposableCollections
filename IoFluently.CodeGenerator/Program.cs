@@ -20,27 +20,27 @@ namespace IoFluently.CodeGenerator
             var fileSystem = new LocalFileSystem();
             var repoRoot = fileSystem.CurrentDirectory.Ancestors(false).First(ancestor => fileSystem.IsFolder(ancestor / ".git"));
 
-            using (var partialClassesWriter = (repoRoot / "IoFluently" / "PartialClasses.g.cs").ExpectTextFileOrMissingPath().OpenWriter())
-            {
-                partialClassesWriter.WriteLine(@"using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Threading;
-using System.IO;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Reactive;
-using System.Text;
-using LiveLinq.Dictionary;
-using LiveLinq.Set;
-using SimpleMonads;
-using TreeLinq;
-using UnitsNet;
-
-");
-                
-                GeneratePartialClassesWithProperties(repoRoot, partialClassesWriter);
-            }
+//             using (var partialClassesWriter = (repoRoot / "IoFluently" / "PartialClasses.g.cs").ExpectTextFileOrMissingPath().OpenWriter())
+//             {
+//                 partialClassesWriter.WriteLine(@"using System;
+// using System.Collections.Generic;
+// using System.Threading.Tasks;
+// using System.Threading;
+// using System.IO;
+// using System.Linq;
+// using System.Net.Http.Headers;
+// using System.Reactive;
+// using System.Text;
+// using LiveLinq.Dictionary;
+// using LiveLinq.Set;
+// using SimpleMonads;
+// using TreeLinq;
+// using UnitsNet;
+//
+// ");
+//                 
+//                 GeneratePartialClassesWithProperties(repoRoot, partialClassesWriter);
+//             }
             
             using (var ioExtensionsWriter = (repoRoot / "IoFluently" / "IoExtensions.g.cs").ExpectTextFileOrMissingPath().OpenWriter())
             {

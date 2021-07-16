@@ -11,7 +11,24 @@ namespace IoFluently
         public bool IsCaseSensitive { get; }
         public string DirectorySeparator { get; }
         public IFileSystem FileSystem { get; }
-        
+
+        FileOrFolderOrMissingPathAncestors IFileOrFolderOrMissingPath.Ancestors => new(this);
+
+        public FolderPath Root => Ancestors[0].ExpectFolder();
+        public IMaybe<FileOrFolderOrMissingPath> Parent => Ancestors.Count > 0 ? Ancestors[Ancestors.Count - 1].ToMaybe() : Maybe<FileOrFolderOrMissingPath>.Nothing();
+
+        public MissingPathAncestors Ancestors => new(this);
+
+        public Boolean CanBeSimplified => FileSystem.CanBeSimplified(this);
+        public Boolean Exists => FileSystem.Exists(this);
+        public string Extension => FileSystem.Extension(this);
+        public Boolean HasExtension => FileSystem.HasExtension(this);
+        public Boolean IsFile => FileSystem.IsFile(this);
+        public Boolean IsFolder => FileSystem.IsFolder(this);
+        public string Name => FileSystem.Name(this);
+        public PathType Type => FileSystem.Type(this);
+        public FileOrFolderOrMissingPath WithoutExtension => FileSystem.WithoutExtension(this);
+
         public MissingPath(IFileOrFolderOrMissingPath path, bool skipCheck = false) : this(path.Components, path.IsCaseSensitive,
             path.DirectorySeparator, path.FileSystem, skipCheck)
         {

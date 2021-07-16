@@ -12,6 +12,8 @@ namespace IoFluently
         public string DirectorySeparator { get; }
         public IFileSystem FileSystem { get; }
 
+        public FileOrFolderOrMissingPathAncestors Ancestors => new(this);
+
         public FileOrMissingPathBase(IFileOrFolderOrMissingPath item) : base(item)
         {
             Components = item.Components;

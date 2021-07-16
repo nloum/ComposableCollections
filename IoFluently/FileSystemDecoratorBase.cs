@@ -545,11 +545,6 @@ namespace IoFluently
             return _decorated.CanBeSimplified(path);
         }
 
-        public virtual FolderPath Root(IFileOrFolderOrMissingPath path)
-        {
-            return _decorated.Root(path);
-        }
-
         public virtual RelativePath RelativeTo(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath relativeTo)
         {
             return _decorated.RelativeTo(path, relativeTo);
@@ -568,21 +563,6 @@ namespace IoFluently
         public virtual RelativePath Simplify(RelativePath path)
         {
             return _decorated.Simplify(path);
-        }
-
-        public virtual IMaybe<FileOrFolderOrMissingPath> TryParent(IFileOrFolderOrMissingPath path)
-        {
-            return _decorated.TryParent(path);
-        }
-
-        public virtual FolderPath Parent(IFilePath path)
-        {
-            return _decorated.Parent(path);
-        }
-
-        public virtual IMaybe<FolderPath> TryParent(IFolderPath folderPath)
-        {
-            return _decorated.TryParent(folderPath);
         }
 
         public virtual FileOrFolderOrMissingPath Combine(IFolderPath folderPath, params string[] subsequentPathParts)
@@ -653,11 +633,6 @@ namespace IoFluently
         public virtual IMaybe<FileOrFolderOrMissingPath> TryDescendant(IFileOrFolderOrMissingPath path, params string[] paths)
         {
             return _decorated.TryDescendant(path, paths);
-        }
-
-        public virtual IMaybe<FolderPath> TryAncestor(IFileOrFolderOrMissingPath path, int level)
-        {
-            return _decorated.TryAncestor(path, level);
         }
 
         public virtual bool IsAncestorOf(IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath possibleDescendant)

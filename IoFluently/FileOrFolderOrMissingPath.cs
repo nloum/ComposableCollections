@@ -17,6 +17,23 @@ namespace IoFluently
         public string DirectorySeparator { get; }
         public IFileSystem FileSystem { get; }
 
+        public FileOrFolderOrMissingPathAncestors Ancestors => new(this);
+        public FolderPath Root => Ancestors.Count > 0 ? Ancestors[0].ExpectFolder() : this.ExpectFolder();
+
+        public IMaybe<FileOrFolderOrMissingPath> Parent => Ancestors.Count > 0
+            ? Ancestors[Ancestors.Count - 1].ToMaybe()
+            : Maybe<FileOrFolderOrMissingPath>.Nothing();
+        
+        public Boolean CanBeSimplified => FileSystem.CanBeSimplified(this);
+        public Boolean Exists => FileSystem.Exists(this);
+        public string Extension => FileSystem.Extension(this);
+        public Boolean HasExtension => FileSystem.HasExtension(this);
+        public Boolean IsFile => FileSystem.IsFile(this);
+        public Boolean IsFolder => FileSystem.IsFolder(this);
+        public string Name => FileSystem.Name(this);
+        public PathType Type => FileSystem.Type(this);
+        public FileOrFolderOrMissingPath WithoutExtension => FileSystem.WithoutExtension(this);
+
         public FileOrFolderOrMissingPath(IReadOnlyList<string> components, bool isCaseSensitive, string directorySeparator, IFileSystem fileSystem)
         {
             _treePath = new AbsoluteTreePath<string>(components);

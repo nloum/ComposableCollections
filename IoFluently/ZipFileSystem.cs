@@ -119,7 +119,7 @@ namespace IoFluently
                 var regex = FileNamePatternToRegex(searchPattern);
                 
                 return archive.Entries.Select(entry =>
-                    TryParseAbsolutePath(entry.FullName, _root).Value).Where(child => child.FileSystem.TryParent(child).Value == folderPath )
+                    TryParseAbsolutePath(entry.FullName, _root).Value).Where(child => child.Parent.Value.Equals( folderPath ))
                     .Where(x => regex.IsMatch(x))
                     .Select(path => path.ExpectFileOrFolder());
             }

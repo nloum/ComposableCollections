@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using SimpleMonads;
+using UnitsNet;
 
 namespace IoFluently
 {
@@ -12,6 +13,25 @@ namespace IoFluently
         public string DirectorySeparator { get; }
         public IFileSystem FileSystem { get; }
 
+        FileOrFolderOrMissingPathAncestors IFileOrFolderOrMissingPath.Ancestors => new(this);
+        public FilePathAncestors Ancestors => new(this);
+        public FolderPath Root => Ancestors[0];
+        public Boolean CanBeSimplified => FileSystem.CanBeSimplified(this);
+        public Boolean Exists => FileSystem.Exists(this);
+        public string Extension => FileSystem.Extension(this);
+        public Boolean HasExtension => FileSystem.HasExtension(this);
+        public Boolean IsFile => FileSystem.IsFile(this);
+        public Boolean IsFolder => FileSystem.IsFolder(this);
+        public string Name => FileSystem.Name(this);
+        public PathType Type => FileSystem.Type(this);
+        public FileOrFolderOrMissingPath WithoutExtension => FileSystem.WithoutExtension(this);
+        public DateTimeOffset CreationTime => FileSystem.CreationTime(this);
+        public Information FileSize => FileSystem.FileSize(this);
+        public Boolean IsReadOnly => FileSystem.IsReadOnly(this);
+        public DateTimeOffset LastAccessTime => FileSystem.LastAccessTime(this);
+        public DateTimeOffset LastWriteTime => FileSystem.LastWriteTime(this);
+        public FolderPath Parent { get; }
+        
         public FilePath(IFileOrFolderOrMissingPath path, bool skipCheck = false) : this(path.Components, path.IsCaseSensitive,
             path.DirectorySeparator, path.FileSystem, skipCheck)
         {

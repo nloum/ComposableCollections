@@ -12,20 +12,23 @@ namespace IoFluently
         public string DirectorySeparator { get; }
         public IFileSystem FileSystem { get; }
 
-        public FilePath(IFileOrFolderOrMissingPath path) : this(path.Components, path.IsCaseSensitive,
-            path.DirectorySeparator, path.FileSystem)
+        public FilePath(IFileOrFolderOrMissingPath path, bool skipCheck = false) : this(path.Components, path.IsCaseSensitive,
+            path.DirectorySeparator, path.FileSystem, skipCheck)
         {
             
         }
         
-        public FilePath(IReadOnlyList<string> components, bool isCaseSensitive, string directorySeparator, IFileSystem fileSystem)
+        public FilePath(IReadOnlyList<string> components, bool isCaseSensitive, string directorySeparator, IFileSystem fileSystem, bool skipCheck = false)
         {
             Components = components;
             IsCaseSensitive = isCaseSensitive;
             DirectorySeparator = directorySeparator;
             FileSystem = fileSystem;
 
-            this.AssertExpectedType(PathType.File);
+            if (!skipCheck)
+            {
+                this.AssertExpectedType(PathType.File);
+            }
         }
         
         public FileAttributes Attributes
@@ -54,21 +57,21 @@ namespace IoFluently
         }
 
         protected SubTypesOf<IFileOrFolderOrMissingPath>.IEither<IFilePath, IFolderPath> FileOrFolder =>
-            new SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFilePath, IFolderPath>((IFilePath)this);
-        protected SubTypesOf<IFileOrFolderOrMissingPath>.IEither<IFilePath, IMissingPath> IFileOrMissingPath =>
-            new SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFilePath, IMissingPath>((IFilePath)this);
+            new FileOrFolderPathEither(this);
+        protected SubTypesOf<IFileOrFolderOrMissingPath>.IEither<IFilePath, IMissingPath> FileOrMissingPath =>
+            new FileOrMissingPathEither(this);
         protected SubTypesOf<IFileOrFolderOrMissingPath>.IEither<IFilePath, IFolderPath, IMissingPath> FileOrFolderOrMissingPath =>
-            new SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFilePath, IFolderPath, IMissingPath>((IFilePath)this);
+            new FileOrFolderOrMissingPathEither(this);
 
         IMaybe<FileOrFolderOrMissingPath> IFileOrFolderOrMissingPath.Parent => Parent.ExpectFileOrFolderOrMissingPath().ToMaybe();
 
-        public IFileOrFolderOrMissingPath Value => FileOrFolder.Value;
+        public IFileOrFolderOrMissingPath Value => this;
 
         public IFilePath? Item1 => FileOrFolder.Item1;
 
         public IFolderPath? Item2 => FileOrFolder.Item2;
 
-        IMissingPath? IEitherBase<IFilePath, IMissingPath>.Item2 => IFileOrMissingPath.Item2;
+        IMissingPath? IEitherBase<IFilePath, IMissingPath>.Item2 => FileOrMissingPath.Item2;
 
         IEitherBase<IFilePath, IFolderPath, T3> IEitherBase<IFilePath, IFolderPath>.Or<T3>()
         {
@@ -152,82 +155,82 @@ namespace IoFluently
         
         IEitherBase<IFilePath, IMissingPath, T3> IEitherBase<IFilePath, IMissingPath>.Or<T3>()
         {
-            return IFileOrMissingPath.Or<T3>();
+            return FileOrMissingPath.Or<T3>();
         }
 
         IEitherBase<IFilePath, IMissingPath, T3, T4> IEitherBase<IFilePath, IMissingPath>.Or<T3, T4>()
         {
-            return IFileOrMissingPath.Or<T3, T4>();
+            return FileOrMissingPath.Or<T3, T4>();
         }
 
         IEitherBase<IFilePath, IMissingPath, T3, T4, T5> IEitherBase<IFilePath, IMissingPath>.Or<T3, T4, T5>()
         {
-            return IFileOrMissingPath.Or<T3, T4, T5>();
+            return FileOrMissingPath.Or<T3, T4, T5>();
         }
 
         IEitherBase<IFilePath, IMissingPath, T3, T4, T5, T6> IEitherBase<IFilePath, IMissingPath>.Or<T3, T4, T5, T6>()
         {
-            return IFileOrMissingPath.Or<T3, T4, T5, T6>();
+            return FileOrMissingPath.Or<T3, T4, T5, T6>();
         }
 
         IEitherBase<IFilePath, IMissingPath, T3, T4, T5, T6, T7> IEitherBase<IFilePath, IMissingPath>.Or<T3, T4, T5, T6, T7>()
         {
-            return IFileOrMissingPath.Or<T3, T4, T5, T6, T7>();
+            return FileOrMissingPath.Or<T3, T4, T5, T6, T7>();
         }
 
         IEitherBase<IFilePath, IMissingPath, T3, T4, T5, T6, T7, T8> IEitherBase<IFilePath, IMissingPath>.Or<T3, T4, T5, T6, T7, T8>()
         {
-            return IFileOrMissingPath.Or<T3, T4, T5, T6, T7, T8>();
+            return FileOrMissingPath.Or<T3, T4, T5, T6, T7, T8>();
         }
 
         IEitherBase<IFilePath, IMissingPath, T3, T4, T5, T6, T7, T8, T9> IEitherBase<IFilePath, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9>()
         {
-            return IFileOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9>();
+            return FileOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9>();
         }
 
         IEitherBase<IFilePath, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10> IEitherBase<IFilePath, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10>()
         {
-            return IFileOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10>();
+            return FileOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10>();
         }
 
         IEitherBase<IFilePath, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11> IEitherBase<IFilePath, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11>()
         {
-            return IFileOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11>();
+            return FileOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11>();
         }
 
         IEitherBase<IFilePath, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> IEitherBase<IFilePath, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>()
         {
-            return IFileOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>();
+            return FileOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>();
         }
 
         IEitherBase<IFilePath, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> IEitherBase<IFilePath, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>()
         {
-            return IFileOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>();
+            return FileOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>();
         }
 
         IEitherBase<IFilePath, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> IEitherBase<IFilePath, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>()
         {
-            return IFileOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>();
+            return FileOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>();
         }
 
         IEitherBase<IFilePath, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> IEitherBase<IFilePath, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>()
         {
-            return IFileOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>();
+            return FileOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>();
         }
 
         IEitherBase<IFilePath, IMissingPath, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> IEitherBase<IFilePath, IMissingPath>.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>()
         {
-            return IFileOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>();
+            return FileOrMissingPath.Or<T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>();
         }
 
         TOutput IEitherBase<IFilePath, IMissingPath>.Collapse<TOutput>(Func<IFilePath, TOutput> selector1, Func<IMissingPath, TOutput> selector2)
         {
-            return IFileOrMissingPath.Collapse(selector1, selector2);
+            return FileOrMissingPath.Collapse(selector1, selector2);
         }
 
         ConvertibleTo<TBase>.IEither<IFilePath, IMissingPath> IEitherBase<IFilePath, IMissingPath>.ConvertTo<TBase>()
         {
-            return IFileOrMissingPath.ConvertTo<TBase>();
+            return FileOrMissingPath.ConvertTo<TBase>();
         }
 
         IFolderPath? IEitherBase<IFilePath, IFolderPath, IMissingPath>.Item2 => FileOrFolderOrMissingPath.Item2;

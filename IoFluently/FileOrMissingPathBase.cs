@@ -5,27 +5,19 @@ using SimpleMonads;
 
 namespace IoFluently
 {
-    public partial class FileOrMissingPathBase : SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFilePath, IMissingPath>, IFileOrMissingPath
+    public partial class FileOrMissingPathBase : FileOrMissingPathEither, IFileOrMissingPath
     {
-        public IReadOnlyList<string> Components => Value.Components;
-        public bool IsCaseSensitive => Value.IsCaseSensitive;
-        public string DirectorySeparator => Value.DirectorySeparator;
-        public IFileSystem FileSystem => Value.FileSystem;
-
-        public FileOrMissingPathBase(IFilePath item1) : base(item1)
-        {
-        }
-
-        public FileOrMissingPathBase(IMissingPath item2) : base(item2)
-        {
-        }
-
-        public FileOrMissingPathBase(SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFilePath, IMissingPath> other) : base(other)
-        {
-        }
+        public IReadOnlyList<string> Components { get; }
+        public bool IsCaseSensitive { get; }
+        public string DirectorySeparator { get; }
+        public IFileSystem FileSystem { get; }
 
         public FileOrMissingPathBase(IFileOrFolderOrMissingPath item) : base(item)
         {
+            Components = item.Components;
+            IsCaseSensitive = item.IsCaseSensitive;
+            DirectorySeparator = item.DirectorySeparator;
+            FileSystem = item.FileSystem;
         }
 
         public bool CanBeSimplified => Value.CanBeSimplified;
@@ -71,7 +63,7 @@ namespace IoFluently
             missingPath =>
                 new SubTypesOf<IFileOrFolderOrMissingPath>.Either<IFilePath, IFolderPath, IMissingPath>(missingPath));
 
-        public IFileOrFolderOrMissingPath Value => FileOrFolderOrMissingPath.Value;
+        public IFileOrFolderOrMissingPath Value => this;
 
         public IEitherBase<IFilePath, IFolderPath, IMissingPath, T4> Or<T4>()
         {
@@ -148,10 +140,13 @@ namespace IoFluently
             return FileOrFolderOrMissingPath.ConvertTo<TBase>();
         }
 
-        public IFilePath? Item1 => FileOrFolderOrMissingPath.Item1;
+        public override IFilePath? Item1 => FileSystem.Type(this) == PathType.File ? new FilePath(this) : null;
 
-        public IFolderPath? Item2 => FileOrFolderOrMissingPath.Item2;
+        public override IMissingPath? Item2 =>
+            FileSystem.Type(this) == PathType.MissingPath ? new MissingPath(this) : null;
 
-        public IMissingPath? Item3 => FileOrFolderOrMissingPath.Item3;
+        IFolderPath? IEitherBase<IFilePath, IFolderPath, IMissingPath>.Item2 => FileSystem.Type(this) == PathType.Folder ? new FolderPath(this) : null;
+
+        public IMissingPath? Item3 => Item2;
     }
 }

@@ -10,42 +10,32 @@ namespace IoFluently
     {
         public static XmlFilePath ExpectXmlFile(this IFileOrFolderOrMissingPath path)
         {
-            return new XmlFilePath(path);
+            return new(path);
         }
 
         public static XmlFileOrMissingPath ExpectXmlFileOrMissingPath(this IFileOrFolderOrMissingPath path)
         {
-            if (path .IsFile)
-            {
-                return new XmlFileOrMissingPath(new XmlFilePath(path));
-            }
-            
-            return new XmlFileOrMissingPath((IMissingPath)new MissingPath(path));
+            return new(path);
         }
         
         public static XmlFileOrMissingPath ExpectMissingXmlFile(this IFileOrFolderOrMissingPath path)
         {
-            return new XmlFileOrMissingPath((IMissingPath)new MissingPath(path));
+            return new(path);
         }
         
         public static XmlFilePath<TModel> ExpectXmlFile<TModel>(this IFileOrFolderOrMissingPath path)
         {
-            return new XmlFilePath<TModel>(path);
+            return new(path);
         }
 
         public static XmlFileOrMissingPath<TModel> ExpectXmlFileOrMissingPath<TModel>(this IFileOrFolderOrMissingPath path)
         {
-            if (path .IsFile)
-            {
-                return new XmlFileOrMissingPath<TModel>(new XmlFilePath<TModel>(path));
-            }
-            
-            return new XmlFileOrMissingPath<TModel>((IMissingPath)new MissingPath(path));
+            return new(path);
         }
         
         public static XmlFileOrMissingPath<TModel> ExpectMissingXmlFile<TModel>(this IFileOrFolderOrMissingPath path)
         {
-            return new XmlFileOrMissingPath<TModel>((IMissingPath)new MissingPath(path));
+            return new(path);
         }
     }
     
@@ -75,18 +65,6 @@ namespace IoFluently
 
     public class XmlFileOrMissingPath : TextFileOrMissingPath
     {
-        public XmlFileOrMissingPath(TextFilePath item1) : base(item1)
-        {
-        }
-
-        public XmlFileOrMissingPath(IMissingPath item2) : base(item2)
-        {
-        }
-
-        public XmlFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<TextFilePath, IMissingPath> other) : base(other)
-        {
-        }
-
         public XmlFileOrMissingPath(IFileOrFolderOrMissingPath item) : base(item)
         {
         }
@@ -132,18 +110,6 @@ namespace IoFluently
 
     public class XmlFileOrMissingPath<TModel> : TextFileOrMissingPath
     {
-        public XmlFileOrMissingPath(TextFilePath item1) : base(item1)
-        {
-        }
-
-        public XmlFileOrMissingPath(IMissingPath item2) : base(item2)
-        {
-        }
-
-        public XmlFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<TextFilePath, IMissingPath> other) : base(other)
-        {
-        }
-
         public XmlFileOrMissingPath(IFileOrFolderOrMissingPath item) : base(item)
         {
         }

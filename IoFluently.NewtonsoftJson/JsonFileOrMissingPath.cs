@@ -6,18 +6,6 @@ namespace IoFluently.NewtonsoftJson
 {
     public class JsonFileOrMissingPath : TextFileOrMissingPath
     {
-        public JsonFileOrMissingPath(TextFilePath item1) : base(item1)
-        {
-        }
-
-        public JsonFileOrMissingPath(IMissingPath item2) : base(item2)
-        {
-        }
-
-        public JsonFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<TextFilePath, IMissingPath> other) : base(other)
-        {
-        }
-
         public JsonFileOrMissingPath(IFileOrFolderOrMissingPath item) : base(item)
         {
         }
@@ -37,19 +25,6 @@ namespace IoFluently.NewtonsoftJson
 
     public class JsonFileOrMissingPath<TModel> : TextFileOrMissingPath
     {
-        public JsonFileOrMissingPath(TextFilePath item1) : base(item1)
-        {
-        }
-
-        public JsonFileOrMissingPath(IMissingPath item2) : base(item2)
-        {
-        }
-
-        public JsonFileOrMissingPath(SubTypesOf<IFileOrFolderOrMissingPath>.Either<TextFilePath, IMissingPath> other) :
-            base(other)
-        {
-        }
-
         public JsonFileOrMissingPath(IFileOrFolderOrMissingPath item) : base(item)
         {
         }

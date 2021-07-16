@@ -48,7 +48,7 @@ namespace IoFluently
         {
             get
             {
-                return _temporaryFolder ?? ParseAbsolutePath(Path.GetTempPath()).ExpectFolder();
+                return _temporaryFolder ?? new FolderPath(ParseAbsolutePath(Path.GetTempPath()), true);
             }
 
             set
@@ -63,7 +63,7 @@ namespace IoFluently
             {
                 if (DefaultDirectorySeparator == "/")
                 {
-                    return ParseAbsolutePath("/").ExpectFolder();
+                    return new FolderPath(ParseAbsolutePath("/"), true);
                 }
 
                 return Roots.First();
@@ -79,7 +79,7 @@ namespace IoFluently
                 result = result.WithExtension(extension);
             }
 
-            return new MissingPath(result);
+            return new MissingPath(result, true);
         }
                 
         /// <inheritdoc />
@@ -97,7 +97,7 @@ namespace IoFluently
             var currentStorage = Directory.GetLogicalDrives();
             foreach (var drive in currentStorage)
             {
-                var drivePath = TryParseAbsolutePath(drive).Value.ExpectFolder();
+                var drivePath = new FolderPath(TryParseAbsolutePath(drive).Value, true);
                 if (!_storage.Contains(drivePath))
                     _storage.Add(drivePath);
             }
@@ -120,7 +120,7 @@ namespace IoFluently
         {
             get
             {
-                return TryParseAbsolutePath(Environment.CurrentDirectory).Value.ExpectFolder();
+                return new FolderPath(TryParseAbsolutePath(Environment.CurrentDirectory).Value, true);
             }
 
             set

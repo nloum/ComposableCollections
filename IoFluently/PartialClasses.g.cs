@@ -16,9 +16,47 @@ using UnitsNet;
 
 namespace IoFluently 
 {
+    public partial interface IFolderPath 
+    {
+        public FolderPathAncestors Ancestors { get; }
+        public ChildFiles ChildFiles { get; }
+        public ChildFolders ChildFolders { get; }
+        public ChildFilesOrFolders Children { get; }
+        public DescendantFiles DescendantFiles { get; }
+        public DescendantFolders DescendantFolders { get; }
+        public DescendantFilesOrFolders Descendants { get; }
+        public IMaybe<FolderPath> Parent { get; }
+    }
+}
+namespace IoFluently 
+{
+    public partial class FolderPath 
+    {
+        public FolderPathAncestors Ancestors => FileSystem.Ancestors(this);
+        public ChildFiles ChildFiles => FileSystem.ChildFiles(this);
+        public ChildFolders ChildFolders => FileSystem.ChildFolders(this);
+        public ChildFilesOrFolders Children => FileSystem.Children(this);
+        public DescendantFiles DescendantFiles => FileSystem.DescendantFiles(this);
+        public DescendantFolders DescendantFolders => FileSystem.DescendantFolders(this);
+        public DescendantFilesOrFolders Descendants => FileSystem.Descendants(this);
+        public IMaybe<FileOrFolderOrMissingPath> Parent => FileSystem.TryParent(this);
+        public Boolean CanBeSimplified => FileSystem.CanBeSimplified(this);
+        public Boolean Exists => FileSystem.Exists(this);
+        public string Extension => FileSystem.Extension(this);
+        public Boolean HasExtension => FileSystem.HasExtension(this);
+        public Boolean IsFile => FileSystem.IsFile(this);
+        public Boolean IsFolder => FileSystem.IsFolder(this);
+        public string Name => FileSystem.Name(this);
+        public FolderPath Root => FileSystem.Root(this);
+        public PathType Type => FileSystem.Type(this);
+        public FileOrFolderOrMissingPath WithoutExtension => FileSystem.WithoutExtension(this);
+    }
+}
+namespace IoFluently 
+{
     public partial interface IFileOrFolderOrMissingPath 
     {
-        public IEnumerable<FileOrFolderOrMissingPath> Ancestors { get; }
+        public FileOrFolderOrMissingPathAncestors Ancestors { get; }
         public Boolean CanBeSimplified { get; }
         public Boolean Exists { get; }
         public string Extension { get; }
@@ -34,33 +72,9 @@ namespace IoFluently
 }
 namespace IoFluently 
 {
-    public partial class FolderPath 
-    {
-        public IEnumerable<FolderPath> Ancestors => FileSystem.Ancestors(this);
-        public Boolean CanBeSimplified => FileSystem.CanBeSimplified(this);
-        public Boolean Exists => FileSystem.Exists(this);
-        public string Extension => FileSystem.Extension(this);
-        public Boolean HasExtension => FileSystem.HasExtension(this);
-        public Boolean IsFile => FileSystem.IsFile(this);
-        public Boolean IsFolder => FileSystem.IsFolder(this);
-        public string Name => FileSystem.Name(this);
-        public FolderPath Root => FileSystem.Root(this);
-        public IMaybe<FolderPath> Parent => FileSystem.TryParent(this);
-        public PathType Type => FileSystem.Type(this);
-        public FileOrFolderOrMissingPath WithoutExtension => FileSystem.WithoutExtension(this);
-        public ChildFiles ChildFiles => FileSystem.ChildFiles(this);
-        public ChildFolders ChildFolders => FileSystem.ChildFolders(this);
-        public ChildFilesOrFolders Children => FileSystem.Children(this);
-        public DescendantFiles DescendantFiles => FileSystem.DescendantFiles(this);
-        public DescendantFolders DescendantFolders => FileSystem.DescendantFolders(this);
-        public DescendantFilesOrFolders Descendants => FileSystem.Descendants(this);
-    }
-}
-namespace IoFluently 
-{
     public partial class FileOrFolderOrMissingPath 
     {
-        public IEnumerable<FileOrFolderOrMissingPath> Ancestors => FileSystem.Ancestors(this);
+        public FileOrFolderOrMissingPathAncestors Ancestors => FileSystem.Ancestors(this);
         public Boolean CanBeSimplified => FileSystem.CanBeSimplified(this);
         public Boolean Exists => FileSystem.Exists(this);
         public string Extension => FileSystem.Extension(this);
@@ -78,7 +92,7 @@ namespace IoFluently
 {
     public partial class FilePath 
     {
-        public IEnumerable<FolderPath> Ancestors => FileSystem.Ancestors(this);
+        public FileOrFolderOrMissingPathAncestors Ancestors => FileSystem.Ancestors(this);
         public Boolean CanBeSimplified => FileSystem.CanBeSimplified(this);
         public Boolean Exists => FileSystem.Exists(this);
         public string Extension => FileSystem.Extension(this);
@@ -101,7 +115,7 @@ namespace IoFluently
 {
     public partial class MissingPath 
     {
-        public IEnumerable<IFolderOrMissingPath> Ancestors => FileSystem.Ancestors(this);
+        public FileOrFolderOrMissingPathAncestors Ancestors => FileSystem.Ancestors(this);
         public Boolean CanBeSimplified => FileSystem.CanBeSimplified(this);
         public Boolean Exists => FileSystem.Exists(this);
         public string Extension => FileSystem.Extension(this);
@@ -119,33 +133,19 @@ namespace IoFluently
 {
     public partial interface IMissingPath 
     {
-        public IEnumerable<IFolderOrMissingPath> Ancestors { get; }
+        public MissingPathAncestors Ancestors { get; }
     }
 }
 namespace IoFluently 
 {
     public partial interface IFilePath 
     {
-        public IEnumerable<FolderPath> Ancestors { get; }
+        public FilePathAncestors Ancestors { get; }
         public DateTimeOffset CreationTime { get; }
         public Information FileSize { get; }
         public Boolean IsReadOnly { get; }
         public DateTimeOffset LastAccessTime { get; }
         public DateTimeOffset LastWriteTime { get; }
         public FolderPath Parent { get; }
-    }
-}
-namespace IoFluently 
-{
-    public partial interface IFolderPath 
-    {
-        public IEnumerable<FolderPath> Ancestors { get; }
-        public ChildFiles ChildFiles { get; }
-        public ChildFolders ChildFolders { get; }
-        public ChildFilesOrFolders Children { get; }
-        public DescendantFiles DescendantFiles { get; }
-        public DescendantFolders DescendantFolders { get; }
-        public DescendantFilesOrFolders Descendants { get; }
-        public IMaybe<FolderPath> Parent { get; }
     }
 }

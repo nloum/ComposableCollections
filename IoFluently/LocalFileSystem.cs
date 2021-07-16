@@ -525,7 +525,7 @@ namespace IoFluently
                 ancestors.Reverse();
                 foreach (var ancestor in ancestors)
                 {
-                    ancestor.ForEach(folder => { }, missingPath => Directory.CreateDirectory(pathString));
+                    ancestor.ForEach(file => throw file.AssertExpectedType(PathType.Folder, PathType.MissingPath),folder => { }, missingPath => Directory.CreateDirectory(pathString));
                 }
             }
             else

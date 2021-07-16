@@ -610,39 +610,39 @@ namespace IoFluently
             return _decorated.Ancestors(folderPath, includeItself);
         }
 
-        public virtual IEnumerable<IFileOrFolderPath> Ancestors(IFilePath path, bool includeItself)
+        public virtual IEnumerable<IFileOrFolderPath> Ancestors(IFilePath filePath, bool includeItself)
         {
-            return _decorated.Ancestors(path, includeItself);
+            return _decorated.Ancestors(filePath, includeItself);
         }
 
-        public virtual IEnumerable<IFolderOrMissingPath> Ancestors(IMissingPath path, bool includeItself)
+        public IEnumerable<IFileOrFolderOrMissingPath> Ancestors(IMissingPath missingPath, bool includeItself)
         {
-            return _decorated.Ancestors(path, includeItself);
+            return _decorated.Ancestors(missingPath, includeItself);
         }
 
-        public virtual IEnumerable<FolderPath> Ancestors(IFolderPath folderPath)
+        public FolderPathAncestors Ancestors(IFolderPath folderPath)
         {
             return _decorated.Ancestors(folderPath);
         }
 
-        public virtual IEnumerable<FolderPath> Ancestors(IFilePath path)
+        public FilePathAncestors Ancestors(IFilePath filePath)
         {
-            return _decorated.Ancestors(path);
+            return _decorated.Ancestors(filePath);
         }
 
-        public virtual IEnumerable<IFolderOrMissingPath> Ancestors(IMissingPath path)
+        public MissingPathAncestors Ancestors(IMissingPath missingPath)
         {
-            return _decorated.Ancestors(path);
+            return _decorated.Ancestors(missingPath);
         }
 
-        public virtual IEnumerable<FileOrFolderOrMissingPath> Ancestors(IFileOrFolderOrMissingPath path, bool includeItself)
+        public IEnumerable<FileOrFolderOrMissingPath> Ancestors(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath, bool includeItself)
         {
-            return _decorated.Ancestors(path, includeItself);
+            return _decorated.Ancestors(fileOrFolderOrMissingPath, includeItself);
         }
 
-        public virtual IEnumerable<FileOrFolderOrMissingPath> Ancestors(IFileOrFolderOrMissingPath path)
+        public FileOrFolderOrMissingPathAncestors Ancestors(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath)
         {
-            return _decorated.Ancestors(path);
+            return _decorated.Ancestors(fileOrFolderOrMissingPath);
         }
 
         public virtual IMaybe<FileOrFolderOrMissingPath> TryDescendant(IFileOrFolderOrMissingPath path, params IFileOrFolderOrMissingPath[] paths)

@@ -103,16 +103,16 @@ namespace IoFluently
             return folderPath.FileSystem.Ancestors(folderPath, includeItself);
         }
 
-        public static IEnumerable<IFileOrFolderPath> Ancestors(this IFilePath path, Boolean includeItself) {
-            return path.FileSystem.Ancestors(path, includeItself);
+        public static IEnumerable<IFileOrFolderPath> Ancestors(this IFilePath filePath, Boolean includeItself) {
+            return filePath.FileSystem.Ancestors(filePath, includeItself);
         }
 
-        public static IEnumerable<IFolderOrMissingPath> Ancestors(this IMissingPath path, Boolean includeItself) {
-            return path.FileSystem.Ancestors(path, includeItself);
+        public static IEnumerable<IFileOrFolderOrMissingPath> Ancestors(this IMissingPath missingPath, Boolean includeItself) {
+            return missingPath.FileSystem.Ancestors(missingPath, includeItself);
         }
 
-        public static IEnumerable<FileOrFolderOrMissingPath> Ancestors(this IFileOrFolderOrMissingPath path, Boolean includeItself) {
-            return path.FileSystem.Ancestors(path, includeItself);
+        public static IEnumerable<FileOrFolderOrMissingPath> Ancestors(this IFileOrFolderOrMissingPath fileOrFolderOrMissingPath, Boolean includeItself) {
+            return fileOrFolderOrMissingPath.FileSystem.Ancestors(fileOrFolderOrMissingPath, includeItself);
         }
 
         public static IMaybe<FileOrFolderOrMissingPath> TryDescendant(this IFileOrFolderOrMissingPath path, IFileOrFolderOrMissingPath[] paths) {

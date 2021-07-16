@@ -1803,85 +1803,64 @@ namespace IoFluently
             }
         }
 
-        public IEnumerable<IFileOrFolderPath> Ancestors(IFilePath path, bool includeItself)
+        public IEnumerable<IFileOrFolderPath> Ancestors(IFilePath filePath, bool includeItself)
         {
             if (includeItself)
             {
-                yield return path.ExpectFileOrFolder();
+                yield return filePath.ExpectFileOrFolder();
             }
 
-            foreach (var ancestor in Ancestors(path))
+            foreach (var ancestor in Ancestors(filePath))
             {
                 yield return ancestor.ExpectFileOrFolder();
             }
         }
 
-        public IEnumerable<FolderPath> Ancestors(IFolderPath folderPath)
+        public FolderPathAncestors Ancestors(IFolderPath folderPath)
         {
-            foreach (var ancestor in Ancestors((IFileOrFolderOrMissingPath)folderPath))
-            {
-                yield return ancestor.ExpectFolder();
-            }
+            return new(folderPath);
         }
 
-        public IEnumerable<FolderPath> Ancestors(IFilePath path)
+        public FilePathAncestors Ancestors(IFilePath filePath)
         {
-            foreach (var ancestor in Ancestors((IFileOrFolderOrMissingPath)path))
-            {
-                yield return ancestor.ExpectFolder();
-            }
+            return new(filePath);
         }
 
-        public IEnumerable<IFolderOrMissingPath> Ancestors(IMissingPath path)
+        public MissingPathAncestors Ancestors(IMissingPath missingPath)
         {
-            foreach (var ancestor in Ancestors((IFileOrFolderOrMissingPath)path))
-            {
-                yield return ancestor.ExpectFolderOrMissingPath();
-            }
+            return new(missingPath);
         }
 
-        public IEnumerable<IFolderOrMissingPath> Ancestors(IMissingPath path, bool includeItself)
+        public IEnumerable<IFileOrFolderOrMissingPath> Ancestors(IMissingPath missingPath, bool includeItself)
         {
             if (includeItself)
             {
-                yield return path.ExpectFolderOrMissingPath();
+                yield return missingPath.ExpectFolderOrMissingPath();
             }
 
-            foreach (var ancestor in Ancestors(path))
+            foreach (var ancestor in Ancestors(missingPath))
             {
                 yield return ancestor;
             }
         }
 
-        public IEnumerable<FileOrFolderOrMissingPath> Ancestors(IFileOrFolderOrMissingPath path, bool includeItself)
+        public IEnumerable<FileOrFolderOrMissingPath> Ancestors(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath, bool includeItself)
         {
             if (includeItself)
             {
-                yield return new FileOrFolderOrMissingPath(path);
+                yield return new FileOrFolderOrMissingPath(fileOrFolderOrMissingPath);
             }
 
-            foreach (var ancestor in Ancestors(path))
+            foreach (var ancestor in Ancestors(fileOrFolderOrMissingPath))
             {
                 yield return ancestor;
             }
         }
 
         /// <inheritdoc />
-        public virtual IEnumerable<FileOrFolderOrMissingPath> Ancestors(IFileOrFolderOrMissingPath path)
+        public virtual FileOrFolderOrMissingPathAncestors Ancestors(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath)
         {
-            while (true)
-            {
-                var maybePath = path.FileSystem.TryParent(path);
-                if (maybePath.HasValue)
-                {
-                    yield return maybePath.Value;
-                    path = maybePath.Value;
-                }
-                else
-                {
-                    break;
-                }
-            }
+            return new(fileOrFolderOrMissingPath);
         }
 
         /// <inheritdoc />

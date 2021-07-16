@@ -495,10 +495,10 @@ namespace IoFluently
         ///     C:\Users
         ///     C:
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="filePath"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        IEnumerable<IFileOrFolderPath> Ancestors(IFilePath path, bool includeItself);
+        IEnumerable<IFileOrFolderPath> Ancestors(IFilePath filePath, bool includeItself);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -507,10 +507,10 @@ namespace IoFluently
         ///     C:\Users
         ///     C:
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="missingPath"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        IEnumerable<IFolderOrMissingPath> Ancestors(IMissingPath path, bool includeItself);
+        IEnumerable<IFileOrFolderOrMissingPath> Ancestors(IMissingPath missingPath, bool includeItself);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -522,7 +522,7 @@ namespace IoFluently
         /// <param name="folderPathram>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        IEnumerable<FolderPath> Ancestors(IFolderPath folderPath);
+        FolderPathAncestors Ancestors(IFolderPath folderPath);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -531,10 +531,10 @@ namespace IoFluently
         ///     C:\Users
         ///     C:
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="filePath"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        IEnumerable<FolderPath> Ancestors(IFilePath path);
+        FilePathAncestors Ancestors(IFilePath filePath);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -543,12 +543,12 @@ namespace IoFluently
         ///     C:\Users
         ///     C:
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="missingPath"></param>
         /// <param name="includeItself"></param>
         /// <returns></returns>
-        IEnumerable<IFolderOrMissingPath> Ancestors(IMissingPath path);
+        MissingPathAncestors Ancestors(IMissingPath missingPath);
 
-        IEnumerable<FileOrFolderOrMissingPath> Ancestors(IFileOrFolderOrMissingPath path, bool includeItself);
+        IEnumerable<FileOrFolderOrMissingPath> Ancestors(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath, bool includeItself);
 
         /// <summary>
         ///     Returns ancestors in the order of closest (most immediate ancestors) to furthest (most distantly descended from).
@@ -557,9 +557,9 @@ namespace IoFluently
         ///     C:\Users
         ///     C:
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="fileOrFolderOrMissingPath"></param>
         /// <returns></returns>
-        IEnumerable<FileOrFolderOrMissingPath> Ancestors(IFileOrFolderOrMissingPath path);
+        FileOrFolderOrMissingPathAncestors Ancestors(IFileOrFolderOrMissingPath fileOrFolderOrMissingPath);
 
         IMaybe<FileOrFolderOrMissingPath> TryDescendant(IFileOrFolderOrMissingPath path, params IFileOrFolderOrMissingPath[] paths);
         IMaybe<FileOrFolderOrMissingPath> TryDescendant(IFileOrFolderOrMissingPath path, params string[] paths);

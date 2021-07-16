@@ -101,7 +101,7 @@ namespace IoFluently
         {
             return Source.Collapse(
                 file => Enumerable.Empty<CalculatedPathTranslation>(),
-                folder => folder.FileSystem.EnumerateChildren(folder)
+                folder => folder.FileSystem.EnumerateDescendants(folder)
                     .Select(fileUri => new CalculatedPathTranslation(fileUri, Source, Destination, FileSystem)),
                 missingPath => Enumerable.Empty<CalculatedPathTranslation>()).GetEnumerator();
         }
